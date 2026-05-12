@@ -1,0 +1,20 @@
+folders:
+  - "data/test_docs"
+
+exclude_patterns:
+  - "*.tmp"
+  - "*.bak"
+  - "node_modules"
+  - ".git"
+
+supported_extensions:
+  - ".pdf"
+  - ".docx"
+  - ".md"
+  - ".txt"
+  - ".eml"
+  - ".msg"
+  - ".py"
+  - ".ipynb"
+  - ".json"
+  - ".html"

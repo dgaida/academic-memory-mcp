@@ -1,0 +1,19 @@
+Metadata-Version: 2.4
+Name: mcp-university
+Version: 0.1.0
+Summary: Agentic University Memory System with MCP
+Requires-Python: >=3.10
+Requires-Dist: fastmcp
+Requires-Dist: ollama
+Requires-Dist: qdrant-client
+Requires-Dist: watchdog
+Requires-Dist: pydantic
+Requires-Dist: pyyaml
+Requires-Dist: rank_bm25
+Requires-Dist: sentence-transformers
+Requires-Dist: pdfminer.six
+Requires-Dist: python-docx
+Requires-Dist: beautifulsoup4
+Requires-Dist: markdown
+Requires-Dist: rich
+Requires-Dist: typer

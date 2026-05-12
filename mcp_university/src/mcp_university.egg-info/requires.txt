@@ -1,0 +1,14 @@
+fastmcp
+ollama
+qdrant-client
+watchdog
+pydantic
+pyyaml
+rank_bm25
+sentence-transformers
+pdfminer.six
+python-docx
+beautifulsoup4
+markdown
+rich
+typer
