@@ -1,12 +1,12 @@
 """Kommandozeilen-Schnittstelle (CLI) für das MCP University System."""
 import typer
-from .crawler.crawler import Crawler
-from .config import get_config
-from .metadata.store import MetadataStore
-from .parser.factory import ParserFactory
-from .summarizer.engine import Summarizer
-from .retrieval.index import SearchIndex
-from .mcp_server.server import create_server
+from ..crawler.crawler import Crawler
+from ..config import get_config
+from ..metadata.store import MetadataStore
+from ..parser.factory import ParserFactory
+from ..summarizer.engine import Summarizer
+from ..retrieval.index import SearchIndex
+from ..mcp_server.server import create_server
 
 app = typer.Typer(help="MCP University Memory System CLI")
 
@@ -39,7 +39,7 @@ def search(query: str) -> None:
 @app.command()
 def watch() -> None:
     """Startet den Watchdog zur Echtzeit-Überwachung von Ordnern."""
-    from .crawler.watcher import Watcher
+    from ..crawler.watcher import Watcher
     cfg = get_config()
     store = MetadataStore(cfg.sqlite_path)
     parser = ParserFactory(cfg.data_dir / "cache")
