@@ -36,12 +36,12 @@ jobs:
         run: |
           mkdir -p docs/assets
           interrogate mcp_university/ --fail-under 95 --generate-badge docs/assets/interrogate.svg
-          INTERROGATE_VAL=$(interrogate mcp_university/ --fail-under 95 | grep -oP '\(\d+\.\d+%\)' | tr -d '()%')
+          INTERROGATE_VAL=$(interrogate mcp_university/ --fail-under 95 | grep -oP '\(\d+\.\d+%\)' | tr -d '()%' || true)
           echo "INTERROGATE_VAL=$INTERROGATE_VAL" >> $GITHUB_ENV
 
       - name: Lint Markdown
         run: |
-          markdownlint docs/**/*.md || echo "LINT_ERRORS=1" >> $GITHUB_ENV
+          markdownlint docs/**/*.md && echo "LINT_ERRORS=0" >> $GITHUB_ENV || echo "LINT_ERRORS=1" >> $GITHUB_ENV
 
       - name: Check broken links
         run: |
@@ -51,7 +51,7 @@ jobs:
       - name: Build MkDocs and Capture Warnings
         run: |
           mkdocs build --strict 2> build_warnings.log || true
-          WARNING_COUNT=$(grep -c "WARNING" build_warnings.log || echo 0)
+          WARNING_COUNT=$(grep -c "WARNING" build_warnings.log || true)
           echo "BUILD_WARNINGS=$WARNING_COUNT" >> $GITHUB_ENV
 
       - name: Generate metrics.json
