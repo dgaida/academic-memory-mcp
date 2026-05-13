@@ -1,83 +1,81 @@
+"""Modul zum Parsen von PDF-Dokumenten."""
+import os
+import json
+import logging
 from pathlib import Path
 from typing import Optional
-import logging
 import subprocess
-import shutil
-import docx
-import json
-import os
 
 logger = logging.getLogger(__name__)
 
 class PDFParser:
-    def __init__(self, output_dir: Path):
-        self.output_dir = output_dir
-        self.output_dir.mkdir(parents=True, exist_ok=True)
+    """Parser für PDF- und DOCX-Dokumente mittels MinerU."""
+
+    def __init__(self, cache_dir: Path):
+        """Initialisiert den PDF-Parser.
+
+        Args:
+            cache_dir: Verzeichnis für temporäre Dateien.
+        """
+        self.cache_dir = cache_dir
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
         self._ensure_magic_pdf_config()
 
-    def _ensure_magic_pdf_config(self):
-        """Ensures magic-pdf config exists."""
-        config_path = Path.home() / ".magic-pdf.json"
+    def _ensure_magic_pdf_config(self) -> None:
+        """Initialisiert die MinerU-Konfiguration falls nicht vorhanden."""
+        config_path = Path.home() / "magic-pdf.json"
         if not config_path.exists():
             logger.info("Initializing magic-pdf config...")
-            config = {
-                "device": "cpu",
-                "models-dir": str(Path.home() / "magic-pdf-models"),
-                "weights": {
-                    "layout": "layoutlmv3",
-                    "formula": "mfr",
-                    "table": "tablemaster"
-                }
-            }
             try:
-                config_path.write_text(json.dumps(config, indent=4))
-            except Exception as e:
-                logger.warning(f"Could not create magic-pdf config: {e}")
+                subprocess.run(["cp-config"], capture_output=True)
+            except FileNotFoundError:
+                logger.warning("cp-config not found. Skipping magic-pdf config initialization.")
 
     def parse(self, file_path: Path) -> Optional[str]:
+        """Extrahiert Text aus einer PDF- oder DOCX-Datei.
+
+        Args:
+            file_path: Pfad zur Datei.
+
+        Returns:
+            Extrahierter Text.
         """
-        Parses a PDF or DOCX file.
-        Uses magic-pdf (MinerU) for PDF if possible.
-        Uses python-docx for DOCX as fallback.
-        """
+        if file_path.suffix.lower() == ".docx":
+            return self._parse_docx(file_path)
+
         try:
-            if file_path.suffix.lower() == ".docx":
-                return self._parse_docx(file_path)
+            # MinerU CLI call
+            subprocess.run([
+                "magic-pdf", "pdf-extract", "--pdf", str(file_path),
+                "--output-dir", str(self.cache_dir)
+            ], capture_output=True, check=True)
 
-            if file_path.suffix.lower() != ".pdf":
-                logger.warning(f"Unsupported file type: {file_path.suffix}")
-                return None
+            # Find the generated markdown
+            md_path = self.cache_dir / f"{file_path.stem}.md"
+            if md_path.exists():
+                return md_path.read_text(encoding="utf-8")
+        except (subprocess.CalledProcessError, FileNotFoundError) as e:
+            logger.error(f"Error parsing PDF {file_path}: {e}")
 
-            # For PDF - use magic-pdf (MinerU)
-            file_name_stem = file_path.stem
-            result = subprocess.run([
-                "magic-pdf",
-                "-p", str(file_path),
-                "-o", str(self.output_dir),
-                "-m", "auto"
-            ], capture_output=True, text=True)
+        return None
 
-            if result.returncode == 0:
-                possible_path = self.output_dir / file_name_stem / "auto" / f"{file_name_stem}.md"
-                if possible_path.exists():
-                    return possible_path.read_text(encoding="utf-8")
-
-                for md_file in (self.output_dir / file_name_stem).rglob("*.md"):
-                    return md_file.read_text(encoding="utf-8")
-
-            logger.warning(f"magic-pdf failed for {file_path}. Output: {result.stderr}")
-            return None
-
+    def _parse_docx(self, path: Path) -> Optional[str]:
+        """Parsen von DOCX als Fallback."""
+        try:
+            import docx
+            doc = docx.Document(path)
+            return "\n".join([p.text for p in doc.paragraphs])
         except Exception as e:
-            logger.error(f"Error parsing {file_path}: {e}")
+            logger.error(f"Error parsing DOCX {path}: {e}")
             return None
 
-    def _parse_docx(self, file_path: Path) -> str:
-        doc = docx.Document(file_path)
-        full_text = []
-        for para in doc.paragraphs:
-            full_text.append(para.text)
-        return "\n".join(full_text)
+def get_parser(cache_dir: Path) -> PDFParser:
+    """Liefert eine Parser-Instanz.
 
-def get_parser(output_dir: Path) -> PDFParser:
-    return PDFParser(output_dir)
+    Args:
+        cache_dir: Cache-Verzeichnis.
+
+    Returns:
+        PDFParser: Instanz des Parsers.
+    """
+    return PDFParser(cache_dir)

@@ -1,3 +1,4 @@
+"""KI-basierte Zusammenfassungs-Engine."""
 import ollama
 from typing import Optional, List
 import logging
@@ -5,11 +6,34 @@ import logging
 logger = logging.getLogger(__name__)
 
 class Summarizer:
+    """LLM-basierter Dienst zur Erstellung von Zusammenfassungen für Dateien und Ordner.
+
+    Nutzt Ollama zur Generierung strukturierter Markdown-Zusammenfassungen basierend auf
+    vordefinierten Prompts für den universitären Kontext.
+    """
+
     def __init__(self, model: str = "gemma2:2b", base_url: str = "http://localhost:11434"):
+        """Initialisiert den Summarizer mit Modellkonfiguration.
+
+        Args:
+            model (str): Name des zu verwendenden Ollama-Modells. Defaults to "gemma2:2b".
+            base_url (str): Basis-URL des Ollama-API-Servers. Defaults to "http://localhost:11434".
+        """
         self.model = model
         self.client = ollama.Client(host=base_url)
 
     def summarize_file(self, filename: str, content: str) -> Optional[str]:
+        """Erstellt eine strukturierte Zusammenfassung einer einzelnen Datei.
+
+        Extrahiert Dokumenttyp, Thema, Konzepte, Personen und Deadlines.
+
+        Args:
+            filename (str): Name der zu zusammenfassenden Datei.
+            content (str): Der Textinhalt der Datei.
+
+        Returns:
+            Optional[str]: Die generierte Zusammenfassung im Markdown-Format oder None bei Fehlern.
+        """
         prompt = f"""
 Summarize the following document for a university knowledge system.
 Filename: {filename}
@@ -49,6 +73,15 @@ Document Content:
             return None
 
     def summarize_folder(self, folder_name: str, item_summaries: List[str]) -> Optional[str]:
+        """Erstellt eine aggregierte Zusammenfassung für einen Ordner basierend auf Inhalts-Summaries.
+
+        Args:
+            folder_name (str): Name des Ordners.
+            item_summaries (List[str]): Liste der Zusammenfassungen der enthaltenen Dateien/Unterordner.
+
+        Returns:
+            Optional[str]: Die aggregierte Ordner-Zusammenfassung oder None bei Fehlern.
+        """
         items_combined = "\n---\n".join(item_summaries)
         prompt = f"""
 Create a summary for the folder '{folder_name}' based on the summaries of its contents.

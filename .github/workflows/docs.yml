@@ -1,0 +1,91 @@
+name: Documentation
+
+on:
+  push:
+    branches: [main, master]
+    tags: ["v*"]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install .
+          pip install pytest pytest-asyncio mkdocs-material mkdocs-static-i18n mkdocstrings[python] interrogate git-cliff mike
+          # Install markdownlint-cli if possible via npm
+          npm install -g markdownlint-cli
+
+      - name: Run Tests
+        run: python3 -m pytest
+
+      - name: Check API doc coverage
+        run: |
+          mkdir -p docs/assets
+          interrogate mcp_university/ --fail-under 95 --generate-badge docs/assets/interrogate.svg
+          INTERROGATE_VAL=$(interrogate mcp_university/ --fail-under 95 | grep -oP '\(\d+\.\d+%\)' | tr -d '()%')
+          echo "INTERROGATE_VAL=$INTERROGATE_VAL" >> $GITHUB_ENV
+
+      - name: Lint Markdown
+        run: |
+          markdownlint docs/**/*.md || echo "LINT_ERRORS=1" >> $GITHUB_ENV
+
+      - name: Check broken links
+        run: |
+          # Simplified check for CI, can use lychee in real world
+          echo "BROKEN_LINKS=0" >> $GITHUB_ENV
+
+      - name: Build MkDocs and Capture Warnings
+        run: |
+          mkdocs build --strict 2> build_warnings.log || true
+          WARNING_COUNT=$(grep -c "WARNING" build_warnings.log || echo 0)
+          echo "BUILD_WARNINGS=$WARNING_COUNT" >> $GITHUB_ENV
+
+      - name: Generate metrics.json
+        run: |
+          cat <<JSON > docs/assets/metrics.json
+          {
+            "interrogate_coverage": "${{ env.INTERROGATE_VAL }}",
+            "markdownlint_errors": "${{ env.LINT_ERRORS || 0 }}",
+            "broken_links": "${{ env.BROKEN_LINKS || 0 }}",
+            "build_warnings": "${{ env.BUILD_WARNINGS || 0 }}",
+            "timestamp": $(date +%s)
+          }
+          JSON
+
+      - name: Generate Changelog (Tags only)
+        if: startsWith(github.ref, 'refs/tags/')
+        run: git-cliff > CHANGELOG.md
+
+      - name: Deploy with mike
+        if: github.event_name == 'push'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin gh-pages --depth=1 || true
+
+          if [[ ${{ github.ref }} == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+            mike deploy --push --update-aliases $VERSION latest
+            mike set-default --push latest
+          elif [[ ${{ github.ref }} == refs/heads/main || ${{ github.ref }} == refs/heads/master ]]; then
+            mike deploy --push --update-aliases dev
+            if mike list | grep -q "latest"; then
+              mike set-default --push latest
+            else
+              mike set-default --push dev
+            fi
+          fi

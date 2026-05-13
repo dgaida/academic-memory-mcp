@@ -1,0 +1,29 @@
+# API Referenz
+
+Diese Seite bietet eine Übersicht über die wichtigsten Module und Klassen des MCP University Memory Systems. Die Dokumentation wird automatisch aus den Docstrings im Quellcode generiert.
+
+## Crawler
+
+::: mcp_university.crawler.crawler.Crawler
+
+## Summarizer
+
+::: mcp_university.summarizer.engine.Summarizer
+
+## Metadata Store
+
+::: mcp_university.metadata.store.MetadataStore
+
+## Search Index
+
+::: mcp_university.retrieval.index.SearchIndex
+
+## Parser Factory
+
+::: mcp_university.parser.factory.ParserFactory
+
+## Konfiguration
+
+::: mcp_university.config.Config
+::: mcp_university.config.LLMConfig
+::: mcp_university.config.FolderConfig
