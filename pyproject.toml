@@ -1,0 +1,34 @@
+[project]
+name = "mcp-university"
+version = "0.1.0"
+description = "Agentic University Memory System with MCP"
+dependencies = [
+    "fastmcp",
+    "ollama",
+    "qdrant-client",
+    "watchdog",
+    "pydantic",
+    "pyyaml",
+
+    "rank_bm25",
+    "sentence-transformers",
+    "magic-pdf[full]",
+    "pdfminer.six",
+    "python-docx",
+    "beautifulsoup4",
+    "markdown",
+    "rich",
+    "typer",
+]
+requires-python = ">=3.10"
+
+[project.scripts]
+mcp-uni = "mcp_university.cli.main:app"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["mcp_university*"]
