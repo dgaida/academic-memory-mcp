@@ -20,8 +20,6 @@ class PDFParser:
         config_path = Path.home() / ".magic-pdf.json"
         if not config_path.exists():
             logger.info("Initializing magic-pdf config...")
-            # Default config for magic-pdf (MinerU)
-            # Using cpu as default device for broad compatibility
             config = {
                 "device": "cpu",
                 "models-dir": str(Path.home() / "magic-pdf-models"),
@@ -52,7 +50,6 @@ class PDFParser:
 
             # For PDF - use magic-pdf (MinerU)
             file_name_stem = file_path.stem
-            # MinerU produces a directory with the markdown file inside
             result = subprocess.run([
                 "magic-pdf",
                 "-p", str(file_path),
@@ -61,12 +58,10 @@ class PDFParser:
             ], capture_output=True, text=True)
 
             if result.returncode == 0:
-                # MinerU structure: {output_dir}/{file_name_stem}/auto/{file_name_stem}.md
                 possible_path = self.output_dir / file_name_stem / "auto" / f"{file_name_stem}.md"
                 if possible_path.exists():
                     return possible_path.read_text(encoding="utf-8")
 
-                # Fallback check for different MinerU versions/configs
                 for md_file in (self.output_dir / file_name_stem).rglob("*.md"):
                     return md_file.read_text(encoding="utf-8")
 
