@@ -1,3 +1,6 @@
+import subprocess
+import json
+import re
 from fastmcp import FastMCP
 import logging
 from typing import List, Dict, Any, Optional
@@ -116,6 +119,19 @@ Version 2 ({path2}):
 Comparison Summary:
 """
         return summarizer.summarize_file("comparison", prompt)
+
+
+    @mcp.tool
+    def run_qmd_command(command: str, args: List[str]) -> str:
+        """Run an arbitrary qmd command (e.g. status, ls, get, etc.) and return the output."""
+        try:
+            result = subprocess.run(["qmd", command] + args, capture_output=True, text=True)
+            if result.returncode == 0:
+                return result.stdout
+            else:
+                return f"Error: {result.stderr}"
+        except Exception as e:
+            return f"Exception: {str(e)}"
 
     return mcp
 
