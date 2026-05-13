@@ -37,25 +37,15 @@ theme:
 plugins:
   - search
   - i18n:
-      default_language: de
+      docs_structure: folder
       languages:
-        de:
+        - locale: de
           name: Deutsch
+          default: true
           build: true
-        en:
+        - locale: en
           name: English
           build: true
-      nav_translations:
-        en:
-          Home: Home
-          Start: Getting Started
-          Installation: Installation
-          Konfiguration: Configuration
-          Nutzung: Usage
-          API: API
-          Architektur: Architecture
-          Entwicklung: Development
-          Fehlerbehebung: Troubleshooting
   - mkdocstrings:
       handlers:
         python:
