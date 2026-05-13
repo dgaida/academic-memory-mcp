@@ -32,3 +32,11 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["mcp_university*"]
+
+[tool.interrogate]
+ignore-init-method = true
+ignore-init-module = false
+ignore-magic = true
+fail-under = 95
+verbose = 1
+exclude = ["setup.py", "docs", "build", "tests"]

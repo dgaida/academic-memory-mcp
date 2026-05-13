@@ -1,18 +1,36 @@
 import sqlite3
+import time
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 import json
 
 class MetadataStore:
+    """Verwaltet die Metadaten-Persistenz in einer SQLite-Datenbank.
+
+    Speichert Informationen über Dateien, Ordner, Studenten, Deadlines und Zusammenfassungen.
+    """
+
     def __init__(self, db_path: Path):
+        """Initialisiert den MetadataStore und erstellt die Datenbank falls nicht vorhanden.
+
+        Args:
+            db_path (Path): Pfad zur SQLite-Datenbankdatei.
+        """
         self.db_path = db_path
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._init_db()
 
-    def _get_connection(self):
+    def _get_connection(self) -> sqlite3.Connection:
+        """Erstellt eine neue SQLite-Verbindung.
+
+        Returns:
+            sqlite3.Connection: Die Datenbankverbindung.
+        """
         return sqlite3.connect(self.db_path)
 
-    def _init_db(self):
+    def _init_db(self) -> None:
+        """Initialisiert das Datenbankschema.
+        """
         with self._get_connection() as conn:
             cursor = conn.cursor()
 
@@ -101,7 +119,19 @@ class MetadataStore:
 
             conn.commit()
 
-    def upsert_file(self, path: str, file_hash: str, mtime: float, file_type: str, folder_id: Optional[int] = None):
+    def upsert_file(self, path: str, file_hash: str, mtime: float, file_type: str, folder_id: Optional[int] = None) -> int:
+        """Fügt eine Datei hinzu oder aktualisiert sie.
+
+        Args:
+            path (str): Absoluter Pfad zur Datei.
+            file_hash (str): SHA-256 Hash des Inhalts.
+            mtime (float): Letzte Änderungszeit.
+            file_type (str): Dateiendung (z.B. '.pdf').
+            folder_id (Optional[int]): ID des übergeordneten Ordners.
+
+        Returns:
+            int: Die ID des Datensatzes.
+        """
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('''
@@ -116,13 +146,30 @@ class MetadataStore:
             conn.commit()
             return cursor.lastrowid
 
-    def get_file(self, path: str):
+    def get_file(self, path: str) -> Optional[tuple]:
+        """Ruft Metadaten für eine Datei ab.
+
+        Args:
+            path (str): Pfad der Datei.
+
+        Returns:
+            Optional[tuple]: Datensatz der Datei oder None.
+        """
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('SELECT * FROM files WHERE path = ?', (path,))
             return cursor.fetchone()
 
-    def upsert_folder(self, path: str, parent_id: Optional[int] = None):
+    def upsert_folder(self, path: str, parent_id: Optional[int] = None) -> int:
+        """Fügt einen Ordner hinzu oder aktualisiert ihn.
+
+        Args:
+            path (str): Pfad zum Ordner.
+            parent_id (Optional[int]): ID des übergeordneten Ordners.
+
+        Returns:
+            int: Die ID des Ordners.
+        """
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('''
@@ -136,8 +183,14 @@ class MetadataStore:
             cursor.execute('SELECT id FROM folders WHERE path = ?', (path,))
             return cursor.fetchone()[0]
 
-    def add_summary(self, item_type: str, item_id: int, content: str):
-        import time
+    def add_summary(self, item_type: str, item_id: int, content: str) -> None:
+        """Speichert eine Zusammenfassung für eine Datei oder einen Ordner.
+
+        Args:
+            item_type (str): 'file' oder 'folder'.
+            item_id (int): Die ID des Zielobjekts.
+            content (str): Der Text der Zusammenfassung.
+        """
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('''

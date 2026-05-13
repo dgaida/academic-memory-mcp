@@ -1,0 +1,113 @@
+site_name: MCP University Memory System
+site_description: Lokales, agentisches Wissenssystem für Universitäten und Forschung.
+site_author: Senior Python Architect
+site_url: https://github.com/example/mcp-university
+
+theme:
+  name: material
+  language: de
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+    - content.tabs.link
+    - content.code.annotate
+    - content.code.copy
+
+plugins:
+  - search
+  - i18n:
+      default_language: de
+      languages:
+        de:
+          name: Deutsch
+          build: true
+        en:
+          name: English
+          build: true
+      nav_translations:
+        en:
+          Home: Home
+          Start: Getting Started
+          Installation: Installation
+          Konfiguration: Configuration
+          Nutzung: Usage
+          API: API
+          Architektur: Architecture
+          Entwicklung: Development
+          Fehlerbehebung: Troubleshooting
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+            show_source: true
+            show_root_heading: true
+            show_category_heading: true
+  - mermaid2:
+      arguments:
+        theme: 'default'
+  - mike:
+      alias_type: symlink
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:mermaid2.fence_mermaid
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+
+extra:
+  version:
+    provider: mike
+  language_tabs:
+    - python: Python
+    - bash: Bash
+
+nav:
+  - Home: index.md
+  - Start: getting-started.md
+  - Installation: installation.md
+  - Konfiguration: configuration.md
+  - Nutzung: usage/index.md
+  - API: api/index.md
+  - Architektur: architecture/index.md
+  - Entwicklung:
+      - Übersicht: development/index.md
+      - Docstring Guide: development/docstring-guide.md
+      - Changelog: development/changelog.md
+      - Versionierung: development/versioning.md
+      - Metriken: metrics.md
+  - Fehlerbehebung: troubleshooting.md

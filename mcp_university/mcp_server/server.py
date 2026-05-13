@@ -13,7 +13,14 @@ from ..summarizer.engine import Summarizer
 
 logger = logging.getLogger(__name__)
 
-def create_server():
+def create_server() -> FastMCP:
+    """Initialisiert und konfiguriert den FastMCP-Server für das University Memory System.
+
+    Definiert Tools für die Suche, Zusammenfassung und Kontextabfrage von Studentendaten.
+
+    Returns:
+        FastMCP: Die konfigurierte MCP-Serverinstanz.
+    """
     cfg = get_config()
     mcp = FastMCP("University Memory System", instructions="I am your university research and student management assistant.")
 
@@ -24,13 +31,28 @@ def create_server():
 
     @mcp.tool
     def search_documents(query: str, top_k: int = 5) -> List[Dict[str, Any]]:
-        """Search through all indexed university documents using hybrid retrieval."""
+        """Durchsucht alle indexierten Universitäts-Dokumente mittels hybrider Suche.
+
+        Args:
+            query (str): Die Suchanfrage (natürliche Sprache oder Keywords).
+            top_k (int): Maximale Anzahl der Ergebnisse. Defaults to 5.
+
+        Returns:
+            List[Dict[str, Any]]: Liste der relevantesten Dokumentabschnitte mit Metadaten.
+        """
         results = index.search(query, top_k=top_k)
         return results
 
     @mcp.tool
     def get_folder_summary(folder_path: str) -> str:
-        """Get the recursive summary of a specific folder."""
+        """Ruft die rekursive Zusammenfassung eines spezifischen Ordners ab.
+
+        Args:
+            folder_path (str): Der Pfad zum gewünschten Ordner.
+
+        Returns:
+            str: Der Text der Zusammenfassung oder eine Fehlermeldung.
+        """
         with store._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('''
@@ -46,7 +68,14 @@ def create_server():
 
     @mcp.tool
     def get_student_context(student_name: str) -> str:
-        """Get complete context for a student, including their folders, status, and latest activity."""
+        """Liefert den vollständigen Kontext für einen Studenten (Ordner, Status, Aktivitäten).
+
+        Args:
+            student_name (str): Name oder Teilname des Studenten.
+
+        Returns:
+            str: Strukturierte Kontext-Informationen.
+        """
         with store._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('''
@@ -70,7 +99,15 @@ def create_server():
 
     @mcp.tool
     def generate_mail_reply(student_name: str, incoming_mail_text: str) -> str:
-        """Generate a draft reply for a student based on their context and previous communication."""
+        """Erstellt einen Antwortentwurf für einen Studenten basierend auf seinem Kontext.
+
+        Args:
+            student_name (str): Name des Studenten.
+            incoming_mail_text (str): Inhalt der eingehenden E-Mail.
+
+        Returns:
+            str: Ein professioneller Antwortentwurf des Professors.
+        """
         context = get_student_context(student_name)
         prompt = f"""
 You are a university professor. Generate a helpful, professional reply to the following student email.
@@ -88,7 +125,11 @@ Draft Reply:
 
     @mcp.tool
     def get_open_tasks() -> str:
-        """Find all open tasks extracted from documents and emails."""
+        """Findet alle offenen Aufgaben, die aus Dokumenten und E-Mails extrahiert wurden.
+
+        Returns:
+            str: Eine Liste der gefundenen Aufgaben.
+        """
         results = index.search("offene Aufgaben open tasks TODO", top_k=20)
         tasks = []
         for res in results:
@@ -98,7 +139,15 @@ Draft Reply:
 
     @mcp.tool
     def compare_document_versions(path1: str, path2: str) -> str:
-        """Compare two versions of a document and summarize the changes."""
+        """Vergleicht zwei Versionen eines Dokuments und fasst die Änderungen zusammen.
+
+        Args:
+            path1 (str): Pfad zur ersten Version.
+            path2 (str): Pfad zur zweiten Version.
+
+        Returns:
+            str: Analyse der Unterschiede und Verbesserungen.
+        """
         from ..parser.factory import ParserFactory
         parser = ParserFactory(cfg.data_dir / "cache")
         c1 = parser.parse(Path(path1))
@@ -123,7 +172,15 @@ Comparison Summary:
 
     @mcp.tool
     def run_qmd_command(command: str, args: List[str]) -> str:
-        """Run an arbitrary qmd command (e.g. status, ls, get, etc.) and return the output."""
+        """Führt einen beliebigen qmd-Befehl aus (z.B. status, ls, get).
+
+        Args:
+            command (str): Der qmd-Befehl.
+            args (List[str]): Argumente für den Befehl.
+
+        Returns:
+            str: Die Ausgabe des Befehls.
+        """
         try:
             result = subprocess.run(["qmd", command] + args, capture_output=True, text=True)
             if result.returncode == 0:

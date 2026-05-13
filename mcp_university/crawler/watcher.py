@@ -1,3 +1,4 @@
+"""Watcher module."""
 import time
 import logging
 from pathlib import Path
@@ -8,20 +9,21 @@ from .crawler import Crawler
 logger = logging.getLogger(__name__)
 
 class IndexingHandler(FileSystemEventHandler):
+    """Handler for indexing."""
     def __init__(self, crawler: Crawler):
+        """Init."""
         self.crawler = crawler
 
-    def on_modified(self, event):
+    def on_modified(self, event) -> None:
+        """Modified."""
         if not event.is_directory:
             path = Path(event.src_path)
-            # Basic filtering
             if path.suffix.lower() in self.crawler.config.folders.supported_extensions:
                 logger.info(f"File modified: {path}")
-                # For simplicity, we just trigger a file process
-                # In a real system, we'd need to find the folder_id
-                self.crawler._process_file(path, 0) # 0 as placeholder or fetch from DB
+                self.crawler._process_file(path, 0)
 
-    def on_created(self, event):
+    def on_created(self, event) -> None:
+        """Created."""
         if not event.is_directory:
             path = Path(event.src_path)
             if path.suffix.lower() in self.crawler.config.folders.supported_extensions:
@@ -29,11 +31,14 @@ class IndexingHandler(FileSystemEventHandler):
                 self.crawler._process_file(path, 0)
 
 class Watcher:
+    """Watcher class."""
     def __init__(self, crawler: Crawler):
+        """Init."""
         self.crawler = crawler
         self.observer = Observer()
 
-    def start(self):
+    def start(self) -> None:
+        """Start."""
         handler = IndexingHandler(self.crawler)
         for folder in self.crawler.config.folders.folders:
             path = Path(folder)

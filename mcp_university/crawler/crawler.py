@@ -15,7 +15,22 @@ from ..retrieval.index import SearchIndex
 logger = logging.getLogger(__name__)
 
 class Crawler:
+    """Komponente zum Durchsuchen des Dateisystems und zur Indexierung von Dokumenten.
+
+    Verantwortlich für das rekursive Scannen von Verzeichnissen, das Erkennen von Änderungen
+    via Hashes und die Koordination von Parsing, Summarization und Indexierung.
+    """
+
     def __init__(self, config: Config, store: MetadataStore, parser: ParserFactory, summarizer: Summarizer, index: SearchIndex):
+        """Initialisiert den Crawler mit notwendigen Abhängigkeiten.
+
+        Args:
+            config (Config): Systemkonfiguration.
+            store (MetadataStore): Metadaten-Speicher.
+            parser (ParserFactory): Factory für Dokumenten-Parser.
+            summarizer (Summarizer): Dienst für Zusammenfassungen.
+            index (SearchIndex): Suchindex-Schnittstelle.
+        """
         self.config = config
         self.store = store
         self.parser = parser
@@ -23,13 +38,23 @@ class Crawler:
         self.index = index
 
     def _calculate_hash(self, path: Path) -> str:
+        """Berechnet den SHA-256 Hash einer Datei.
+
+        Args:
+            path (Path): Pfad zur Datei.
+
+        Returns:
+            str: Der hexadezimale Hash-String.
+        """
         sha256_hash = hashlib.sha256()
         with open(path, "rb") as f:
             for byte_block in iter(lambda: f.read(4096), b""):
                 sha256_hash.update(byte_block)
         return sha256_hash.hexdigest()
 
-    def crawl(self):
+    def crawl(self) -> None:
+        """Startet den Crawling-Prozess für alle konfigurierten Ordner.
+        """
         for root_path_str in self.config.folders.folders:
             root_path = Path(root_path_str)
             if not root_path.exists():
@@ -53,7 +78,13 @@ class Crawler:
         logger.info("Updating qmd index...")
         subprocess.run(["qmd", "update"], capture_output=True)
 
-    def _process_directory(self, dir_path: Path, parent_id: Optional[int] = None):
+    def _process_directory(self, dir_path: Path, parent_id: Optional[int] = None) -> None:
+        """Verarbeitet ein Verzeichnis rekursiv.
+
+        Args:
+            dir_path (Path): Das zu verarbeitende Verzeichnis.
+            parent_id (Optional[int]): ID des übergeordneten Ordners in der DB.
+        """
         folder_id = self.store.upsert_folder(str(dir_path), parent_id)
 
         file_summaries = []
@@ -75,13 +106,21 @@ class Crawler:
                     file_summaries.append(file_summary)
 
         # After processing all files in folder, generate folder summary if needed
-        # (This is a simplified strategy for now)
         if file_summaries:
             folder_summary = self.summarizer.summarize_folder(dir_path.name, file_summaries)
             if folder_summary:
                 self.store.add_summary("folder", folder_id, folder_summary)
 
     def _process_file(self, file_path: Path, folder_id: int) -> Optional[str]:
+        """Verarbeitet eine einzelne Datei (Parsing -> Summarization -> Indexierung).
+
+        Args:
+            file_path (Path): Pfad zur Datei.
+            folder_id (int): ID des zugehörigen Ordners.
+
+        Returns:
+            Optional[str]: Die Zusammenfassung der Datei oder None.
+        """
         mtime = file_path.stat().st_mtime
         file_hash = self._calculate_hash(file_path)
 
@@ -90,8 +129,6 @@ class Crawler:
             # existing_file: (id, path, hash, mtime, type, last_indexed, folder_id)
             if existing_file[2] == file_hash:
                 logger.info(f"File {file_path} unchanged. Skipping.")
-                # Return latest summary if it exists
-                # In real impl, fetch from DB
                 return None
 
         # Parse file

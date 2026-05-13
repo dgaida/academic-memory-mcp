@@ -8,14 +8,46 @@ from typing import List, Dict, Any, Optional
 logger = logging.getLogger(__name__)
 
 class SearchIndex:
+    """Schnittstelle zum qmd-basierten Suchindex.
+
+    Ermöglicht die hybride Suche (semantisch und Schlüsselwort) über die Dokumentensammlung.
+    """
+
     def __init__(self, location: str, embedding_model_name: str = "BAAI/bge-m3"):
+        """Initialisiert den SearchIndex.
+
+        Args:
+            location (str): Pfad zum Speicherort des Index.
+            embedding_model_name (str): Name des zu verwendenden Embedding-Modells. Defaults to "BAAI/bge-m3".
+        """
         self.location = location
         logger.info(f"Initializing SearchIndex with qmd backend (location: {location})")
 
-    def add_document(self, doc_id: str, content: str, metadata: Dict[str, Any]):
+    def add_document(self, doc_id: str, content: str, metadata: Dict[str, Any]) -> None:
+        """Fügt ein Dokument zum Index hinzu.
+
+        Hinweis: In der aktuellen Implementierung erfolgt die Indexierung primär über den
+        externen qmd-Prozess während des Crawlings.
+
+        Args:
+            doc_id (str): Eindeutige ID des Dokuments (Pfad).
+            content (str): Textinhalt des Dokuments.
+            metadata (Dict[str, Any]): Metadaten zum Dokument.
+        """
         pass
 
     def search(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
+        """Führt eine hybride Suche im Index aus.
+
+        Ruft das externe 'qmd'-Tool auf und parst die JSON-Ergebnisse.
+
+        Args:
+            query (str): Die Suchanfrage.
+            top_k (int): Anzahl der zurückzugebenden Ergebnisse. Defaults to 5.
+
+        Returns:
+            List[Dict[str, Any]]: Liste der Suchergebnisse mit Pfad, Inhalt und Score.
+        """
         try:
             result = subprocess.run([
                 "qmd", "query", query, "--json", "-n", str(top_k)
