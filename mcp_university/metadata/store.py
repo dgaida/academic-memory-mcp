@@ -1,3 +1,4 @@
+"""Metadaten-Speicherung und Verwaltung."""
 import sqlite3
 import time
 from pathlib import Path
@@ -29,12 +30,10 @@ class MetadataStore:
         return sqlite3.connect(self.db_path)
 
     def _init_db(self) -> None:
-        """Initialisiert das Datenbankschema.
-        """
+        """Initialisiert das Datenbankschema."""
         with self._get_connection() as conn:
             cursor = conn.cursor()
 
-            # Files table
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS files (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -48,7 +47,6 @@ class MetadataStore:
                 )
             ''')
 
-            # Folders table
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS folders (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -60,33 +58,10 @@ class MetadataStore:
                 )
             ''')
 
-            # Entities table
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS entities (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT,
-                    type TEXT,
-                    metadata_json TEXT
-                )
-            ''')
-
-            # Relationships
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS relationships (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    source_type TEXT,
-                    source_id INTEGER,
-                    target_type TEXT,
-                    target_id INTEGER,
-                    relation_type TEXT
-                )
-            ''')
-
-            # Summaries
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS summaries (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    item_type TEXT, -- 'file' or 'folder'
+                    item_type TEXT,
                     item_id INTEGER,
                     content TEXT,
                     version INTEGER,
@@ -94,7 +69,6 @@ class MetadataStore:
                 )
             ''')
 
-            # Specific tables for University context
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS students (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -126,7 +100,7 @@ class MetadataStore:
             path (str): Absoluter Pfad zur Datei.
             file_hash (str): SHA-256 Hash des Inhalts.
             mtime (float): Letzte Änderungszeit.
-            file_type (str): Dateiendung (z.B. '.pdf').
+            file_type (str): Dateiendung.
             folder_id (Optional[int]): ID des übergeordneten Ordners.
 
         Returns:
@@ -179,7 +153,6 @@ class MetadataStore:
                     parent_id=excluded.parent_id
             ''', (path, parent_id))
             conn.commit()
-            # If conflict, we need to fetch the ID manually
             cursor.execute('SELECT id FROM folders WHERE path = ?', (path,))
             return cursor.fetchone()[0]
 

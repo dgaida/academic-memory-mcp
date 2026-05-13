@@ -1,3 +1,4 @@
+"""Modul für das Crawling des Dateisystems."""
 import os
 import subprocess
 import hashlib
@@ -126,26 +127,21 @@ class Crawler:
 
         existing_file = self.store.get_file(str(file_path))
         if existing_file:
-            # existing_file: (id, path, hash, mtime, type, last_indexed, folder_id)
             if existing_file[2] == file_hash:
                 logger.info(f"File {file_path} unchanged. Skipping.")
                 return None
 
-        # Parse file
         content = self.parser.parse(file_path)
         if not content:
             return None
 
-        # Summarize
         summary = self.summarizer.summarize_file(file_path.name, content)
         if not summary:
             return None
 
-        # Store metadata
         file_id = self.store.upsert_file(str(file_path), file_hash, mtime, file_path.suffix.lower(), folder_id)
         self.store.add_summary("file", file_id, summary)
 
-        # Add to index
         self.index.add_document(str(file_path), content, {
             "path": str(file_path),
             "folder": str(file_path.parent),

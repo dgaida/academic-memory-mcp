@@ -1,3 +1,4 @@
+"""FastMCP Server-Implementierung."""
 import subprocess
 import json
 import re

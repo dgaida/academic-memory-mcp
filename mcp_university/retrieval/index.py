@@ -1,3 +1,4 @@
+"""Schnittstelle zum qmd-basierten Suchindex."""
 import logging
 import subprocess
 import json
@@ -18,7 +19,7 @@ class SearchIndex:
 
         Args:
             location (str): Pfad zum Speicherort des Index.
-            embedding_model_name (str): Name des zu verwendenden Embedding-Modells. Defaults to "BAAI/bge-m3".
+            embedding_model_name (str): Name des Embedding-Modells.
         """
         self.location = location
         logger.info(f"Initializing SearchIndex with qmd backend (location: {location})")
@@ -26,27 +27,22 @@ class SearchIndex:
     def add_document(self, doc_id: str, content: str, metadata: Dict[str, Any]) -> None:
         """Fügt ein Dokument zum Index hinzu.
 
-        Hinweis: In der aktuellen Implementierung erfolgt die Indexierung primär über den
-        externen qmd-Prozess während des Crawlings.
-
         Args:
-            doc_id (str): Eindeutige ID des Dokuments (Pfad).
-            content (str): Textinhalt des Dokuments.
-            metadata (Dict[str, Any]): Metadaten zum Dokument.
+            doc_id (str): Eindeutige ID (Pfad).
+            content (str): Textinhalt.
+            metadata (Dict[str, Any]): Metadaten.
         """
         pass
 
     def search(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
         """Führt eine hybride Suche im Index aus.
 
-        Ruft das externe 'qmd'-Tool auf und parst die JSON-Ergebnisse.
-
         Args:
             query (str): Die Suchanfrage.
-            top_k (int): Anzahl der zurückzugebenden Ergebnisse. Defaults to 5.
+            top_k (int): Anzahl der Ergebnisse.
 
         Returns:
-            List[Dict[str, Any]]: Liste der Suchergebnisse mit Pfad, Inhalt und Score.
+            List[Dict[str, Any]]: Suchergebnisse.
         """
         try:
             result = subprocess.run([
@@ -59,7 +55,6 @@ class SearchIndex:
                 ], capture_output=True, text=True)
 
             if result.returncode == 0:
-                # Extract JSON from output (might contain noise from node-llama-cpp build attempts)
                 stdout = result.stdout
                 match = re.search(r'\[\s*\{.*\}\s*\]', stdout, re.DOTALL)
                 if match:

@@ -1,3 +1,4 @@
+"""Parser-Fabrik zur Bereitstellung des passenden Parsers."""
 from pathlib import Path
 from typing import Optional
 from .pdf_parser import PDFParser
@@ -5,10 +6,7 @@ from .text_parser import TextParser
 from .mail_parser import MailParser
 
 class ParserFactory:
-    """Factory-Klasse zur Bereitstellung des passenden Parsers für verschiedene Dateitypen.
-
-    Unterstützt PDF, DOCX, Text, Markdown, Python-Skripte und E-Mails.
-    """
+    """Factory-Klasse zur Bereitstellung des passenden Parsers für verschiedene Dateitypen."""
 
     def __init__(self, cache_dir: Path):
         """Initialisiert die Factory mit den unterstützten Parsern.
@@ -27,7 +25,7 @@ class ParserFactory:
             file_path (Path): Pfad zur Datei.
 
         Returns:
-            Optional[str]: Der extrahierte Text oder None, falls der Typ nicht unterstützt wird.
+            Optional[str]: Der extrahierte Text oder None.
         """
         suffix = file_path.suffix.lower()
         if suffix in [".pdf", ".docx"]:

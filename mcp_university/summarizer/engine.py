@@ -1,3 +1,4 @@
+"""KI-basierte Zusammenfassungs-Engine."""
 import ollama
 from typing import Optional, List
 import logging
