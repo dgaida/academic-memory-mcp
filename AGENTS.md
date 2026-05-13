@@ -22,3 +22,6 @@ This file provides instructions and guidelines for AI agents working on the MCP 
 - Use `mcp-uni` CLI for testing indexing and search.
 - When adding new parsers, update `mcp_university/parser/factory.py`.
 - Keep the MCP server tools in `mcp_university/mcp_server/server.py` updated with new capabilities.
+
+## Pull Request Policy
+- Before creating a pull request, you MUST delete all temporary files and folders to keep the repository clean.
