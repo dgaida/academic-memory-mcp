@@ -1197,9 +1197,9 @@
 </code></pre></div>
 <h2 id="system-abhangigkeiten">System-Abhängigkeiten<a class="headerlink" href="#system-abhangigkeiten" title="Permanent link">&para;</a></h2>
 <h3 id="ollama-llm-backend">Ollama (LLM Backend)<a class="headerlink" href="#ollama-llm-backend" title="Permanent link">&para;</a></h3>
-<p>Das System setzt eine laufende Ollama-Instanz voraus.
-- <strong>Download:</strong> <a href="https://ollama.com">ollama.com</a>
-- <strong>Modelle:</strong> Standardmäßig wird <code>gemma2:2b</code> verwendet. Sie können dies in <code>config/models.yaml</code> ändern.</p>
+<p>Das System setzt eine laufende Ollama-Instanz voraus.<br />
+- <strong>Download:</strong> <a href="https://ollama.com">ollama.com</a><br />
+- <strong>Modelle:</strong> Standardmäßig wird <code>gemma2:2b</code> verwendet. Sie können dies in <code>config/models.yaml</code> ändern.  </p>
 <h3 id="mineru-pdf-parsing">MinerU (PDF Parsing)<a class="headerlink" href="#mineru-pdf-parsing" title="Permanent link">&para;</a></h3>
 <p>Für eine optimale PDF-Extraktion nutzt das System MinerU.
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;magic-pdf[full]&quot;</span>
@@ -1211,8 +1211,8 @@ Stellen Sie sicher, dass die notwendigen Modellgewichte für MinerU initialisier
 </code></pre></div>
 <h3 id="qmd-suchindex-backend">qmd (Suchindex-Backend)<a class="headerlink" href="#qmd-suchindex-backend" title="Permanent link">&para;</a></h3>
 <p><code>qmd</code> ist für eine hochwertige hybride Suche erforderlich. Es handelt sich um ein Node.js-basiertes Tool, das global installiert sein muss.</p>
-<p><strong>Voraussetzungen:</strong>
-- Node.js &gt;= 22 oder Bun &gt;= 1.0.0</p>
+<p><strong>Voraussetzungen:</strong><br />
+- Node.js &gt;= 22 oder Bun &gt;= 1.0.0  </p>
 <p><strong>Installation:</strong>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>npm<span class="w"> </span>install<span class="w"> </span>-g<span class="w"> </span>@tobilu/qmd
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="c1"># oder</span>

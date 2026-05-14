@@ -1076,22 +1076,22 @@
 <p>Hier finden Sie Lösungen für häufig auftretende Probleme.</p>
 <h2 id="ollama-verbindung-fehlgeschlagen">Ollama Verbindung fehlgeschlagen<a class="headerlink" href="#ollama-verbindung-fehlgeschlagen" title="Permanent link">&para;</a></h2>
 <p><strong>Symptom:</strong> Fehlermeldung beim Indexieren oder bei der Suche bezüglich der Verbindung zum LLM.
-<strong>Lösung:</strong>
-1. Prüfen Sie, ob Ollama läuft: <code>curl http://localhost:11434/api/tags</code>
-2. Stellen Sie sicher, dass das Modell geladen ist: <code>ollama pull gemma2:2b</code>
-3. Prüfen Sie die <code>base_url</code> in <code>config/models.yaml</code>.</p>
+<strong>Lösung:</strong><br />
+1. Prüfen Sie, ob Ollama läuft: <code>curl http://localhost:11434/api/tags</code><br />
+2. Stellen Sie sicher, dass das Modell geladen ist: <code>ollama pull gemma2:2b</code><br />
+3. Prüfen Sie die <code>base_url</code> in <code>config/models.yaml</code>.  </p>
 <h2 id="pdf-parsing-fehler">PDF-Parsing Fehler<a class="headerlink" href="#pdf-parsing-fehler" title="Permanent link">&para;</a></h2>
 <p><strong>Symptom:</strong> PDFs werden übersprungen oder enthalten keinen Text.
-<strong>Lösung:</strong>
-1. MinerU benötigt beim ersten Start Internetzugriff zum Laden der Modelle.
-2. Prüfen Sie, ob die PDF schreibgeschützt oder beschädigt ist.
-3. Installieren Sie MinerU neu: <code>pip install --upgrade "magic-pdf[full]"</code>.</p>
+<strong>Lösung:</strong><br />
+1. MinerU benötigt beim ersten Start Internetzugriff zum Laden der Modelle.<br />
+2. Prüfen Sie, ob die PDF schreibgeschützt oder beschädigt ist.<br />
+3. Installieren Sie MinerU neu: <code>pip install --upgrade "magic-pdf[full]"</code>.  </p>
 <h2 id="suche-liefert-keine-ergebnisse">Suche liefert keine Ergebnisse<a class="headerlink" href="#suche-liefert-keine-ergebnisse" title="Permanent link">&para;</a></h2>
 <p><strong>Symptom:</strong> Die Suche bleibt leer, obwohl Dokumente vorhanden sind.
-<strong>Lösung:</strong>
-1. Führen Sie <code>mcp-uni index</code> erneut aus.
-2. Prüfen Sie, ob <code>Suchindex</code> im Systempfad verfügbar ist.
-3. Kontrollieren Sie <code>config/folders.yaml</code> auf korrekte Pfade.</p>
+<strong>Lösung:</strong><br />
+1. Führen Sie <code>mcp-uni index</code> erneut aus.<br />
+2. Prüfen Sie, ob <code>Suchindex</code> im Systempfad verfügbar ist.<br />
+3. Kontrollieren Sie <code>config/folders.yaml</code> auf korrekte Pfade.  </p>
 <h2 id="sqlite-datenbank-gesperrt">SQLite Datenbank gesperrt<a class="headerlink" href="#sqlite-datenbank-gesperrt" title="Permanent link">&para;</a></h2>
 <p><strong>Symptom:</strong> <code>sqlite3.OperationalError: database is locked</code>
 <strong>Lösung:</strong>

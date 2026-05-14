@@ -1078,22 +1078,22 @@
 <p>Find solutions for common issues here.</p>
 <h2 id="ollama-connection-failed">Ollama Connection Failed<a class="headerlink" href="#ollama-connection-failed" title="Permanent link">&para;</a></h2>
 <p><strong>Symptom:</strong> Error message during indexing or search regarding the connection to the LLM.
-<strong>Solution:</strong>
-1. Check if Ollama is running: <code>curl http://localhost:11434/api/tags</code>
-2. Ensure the model is pulled: <code>ollama pull gemma2:2b</code>
-3. Check the <code>base_url</code> in <code>config/models.yaml</code>.</p>
+<strong>Solution:</strong><br />
+1. Check if Ollama is running: <code>curl http://localhost:11434/api/tags</code><br />
+2. Ensure the model is pulled: <code>ollama pull gemma2:2b</code><br />
+3. Check the <code>base_url</code> in <code>config/models.yaml</code>.  </p>
 <h2 id="pdf-parsing-errors">PDF Parsing Errors<a class="headerlink" href="#pdf-parsing-errors" title="Permanent link">&para;</a></h2>
 <p><strong>Symptom:</strong> PDFs are skipped or contain no text.
-<strong>Solution:</strong>
-1. MinerU needs internet access during the first start to download models.
-2. Check if the PDF is read-only or corrupted.
-3. Reinstall MinerU: <code>pip install --upgrade "magic-pdf[full]"</code>.</p>
+<strong>Solution:</strong><br />
+1. MinerU needs internet access during the first start to download models.<br />
+2. Check if the PDF is read-only or corrupted.<br />
+3. Reinstall MinerU: <code>pip install --upgrade "magic-pdf[full]"</code>.  </p>
 <h2 id="search-returns-no-results">Search Returns No Results<a class="headerlink" href="#search-returns-no-results" title="Permanent link">&para;</a></h2>
 <p><strong>Symptom:</strong> Search is empty even though documents are present.
-<strong>Solution:</strong>
-1. Run <code>mcp-uni index</code> again.
-2. Check if <code>search index</code> is available in the system path.
-3. Verify the paths in <code>config/folders.yaml</code>.</p>
+<strong>Solution:</strong><br />
+1. Run <code>mcp-uni index</code> again.<br />
+2. Check if <code>search index</code> is available in the system path.<br />
+3. Verify the paths in <code>config/folders.yaml</code>.  </p>
 <h2 id="sqlite-database-locked">SQLite Database Locked<a class="headerlink" href="#sqlite-database-locked" title="Permanent link">&para;</a></h2>
 <p><strong>Symptom:</strong> <code>sqlite3.OperationalError: database is locked</code>
 <strong>Solution:</strong>

@@ -1101,11 +1101,11 @@
 <h2 id="voraussetzungen">Voraussetzungen<a class="headerlink" href="#voraussetzungen" title="Permanent link">&para;</a></h2>
 <p>Stellen Sie sicher, dass die folgende Software installiert ist:</p>
 <ul>
-<li><strong>Python 3.10+</strong></li>
-<li><strong>Ollama:</strong> Installieren Sie Ollama und laden Sie das Standardmodell herunter:
+<li><strong>Python 3.10+</strong>  </li>
+<li><strong>Ollama:</strong> Installieren Sie Ollama und laden Sie das Standardmodell herunter:<br />
     <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>ollama<span class="w"> </span>pull<span class="w"> </span>gemma2:2b
 </code></pre></div></li>
-<li><strong>MinerU (magic-pdf):</strong> Für das PDF-Parsing (wird über pip installiert).</li>
+<li><strong>MinerU (magic-pdf):</strong> Für das PDF-Parsing (wird über pip installiert).  </li>
 </ul>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
 <p>Klonen Sie das Repository und installieren Sie die Abhängigkeiten:</p>
@@ -1126,11 +1126,11 @@
 <p>Starten Sie den Crawler, um Ihre Dokumente zu analysieren und Zusammenfassungen zu erstellen:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>mcp-uni<span class="w"> </span>index
 </code></pre></div>
-<p>Der Prozess führt folgende Schritte aus:
-1. Scannt die konfigurierten Ordner.
-2. Extrahiert Text aus PDF, DOCX, MD, etc.
-3. Generiert Zusammenfassungen mittels Ollama.
-4. Speichert Metadaten in SQLite und indiziert den Text im Suchindex.</p>
+<p>Der Prozess führt folgende Schritte aus:<br />
+1. Scannt die konfigurierten Ordner.<br />
+2. Extrahiert Text aus PDF, DOCX, MD, etc.<br />
+3. Generiert Zusammenfassungen mittels Ollama.<br />
+4. Speichert Metadaten in SQLite und indiziert den Text im Suchindex.  </p>
 <h2 id="suche-verwenden">Suche verwenden<a class="headerlink" href="#suche-verwenden" title="Permanent link">&para;</a></h2>
 <p>Testen Sie die Suche direkt über das CLI:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>mcp-uni<span class="w"> </span>search<span class="w"> </span><span class="s2">&quot;Wann ist die Abgabe für die Masterarbeit von Max Mustermann?&quot;</span>

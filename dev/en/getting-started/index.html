@@ -1103,13 +1103,13 @@
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
 <p>Ensure the following software is installed:</p>
 <ul>
-<li><strong>Python 3.10+</strong></li>
-<li><strong>Node.js &gt;= 22:</strong> Required for <code>qmd</code>.</li>
-<li><strong>qmd:</strong> <code>npm install -g @tobilu/qmd</code></li>
-<li><strong>Ollama:</strong> Install Ollama and pull the default model:
+<li><strong>Python 3.10+</strong>  </li>
+<li><strong>Node.js &gt;= 22:</strong> Required for <code>qmd</code>.  </li>
+<li><strong>qmd:</strong> <code>npm install -g @tobilu/qmd</code>  </li>
+<li><strong>Ollama:</strong> Install Ollama and pull the default model:<br />
     <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>ollama<span class="w"> </span>pull<span class="w"> </span>gemma2:2b
 </code></pre></div></li>
-<li><strong>MinerU (magic-pdf):</strong> For PDF parsing (installed via pip).</li>
+<li><strong>MinerU (magic-pdf):</strong> For PDF parsing (installed via pip).  </li>
 </ul>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
 <p>Clone the repository and install the dependencies:</p>
@@ -1130,11 +1130,11 @@
 <p>Start the crawler to analyze your documents and create summaries:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>mcp-uni<span class="w"> </span>index
 </code></pre></div>
-<p>The process performs the following steps:
-1. Scans the configured folders.
-2. Extracts text from PDF, DOCX, MD, etc.
-3. Generates summaries using Ollama.
-4. Stores metadata in SQLite and indexes the text in the search index.</p>
+<p>The process performs the following steps:<br />
+1. Scans the configured folders.<br />
+2. Extracts text from PDF, DOCX, MD, etc.<br />
+3. Generates summaries using Ollama.<br />
+4. Stores metadata in SQLite and indexes the text in the search index.  </p>
 <h2 id="using-search">Using Search<a class="headerlink" href="#using-search" title="Permanent link">&para;</a></h2>
 <p>Test the search directly via the CLI:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>mcp-uni<span class="w"> </span>search<span class="w"> </span><span class="s2">&quot;When is the deadline for Max Mustermann&#39;s master&#39;s thesis?&quot;</span>
