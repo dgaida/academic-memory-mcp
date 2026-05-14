@@ -23,7 +23,7 @@ Find solutions for common issues here.
 **Symptom:** Search is empty even though documents are present.
 **Solution:**
 1. Run `mcp-uni index` again.
-2. Check if `qmd` is available in the system path.
+2. Check if `search index` is available in the system path.
 3. Verify the paths in `config/folders.yaml`.
 
 ## SQLite Database Locked

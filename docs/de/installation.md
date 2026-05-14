@@ -39,9 +39,7 @@ Das System setzt eine laufende Ollama-Instanz voraus.
 - **Download:** [ollama.com](https://ollama.com)
 - **Modelle:** Standardmäßig wird `gemma2:2b` verwendet. Sie können dies in `config/models.yaml` ändern.
 
-### qmd (Search Backend)
 
-`qmd` ist für die hybride Suche erforderlich. Stellen Sie sicher, dass es installiert und über die Kommandozeile erreichbar ist.
 
 ### MinerU (PDF Parsing)
 

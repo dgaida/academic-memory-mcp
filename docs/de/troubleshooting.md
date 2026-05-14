@@ -23,7 +23,7 @@ Hier finden Sie Lösungen für häufig auftretende Probleme.
 **Symptom:** Die Suche bleibt leer, obwohl Dokumente vorhanden sind.
 **Lösung:**
 1. Führen Sie `mcp-uni index` erneut aus.
-2. Prüfen Sie, ob `qmd` im Systempfad verfügbar ist.
+2. Prüfen Sie, ob `Suchindex` im Systempfad verfügbar ist.
 3. Kontrollieren Sie `config/folders.yaml` auf korrekte Pfade.
 
 ## SQLite Datenbank gesperrt

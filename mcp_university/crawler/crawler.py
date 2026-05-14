@@ -62,22 +62,9 @@ class Crawler:
                 logger.warning(f"Root path {root_path} does not exist. Skipping.")
                 continue
 
-            # Ensure the folder is in a qmd collection
-            coll_name = root_path.name
-            exts = [ext.lstrip('.') for ext in self.config.folders.supported_extensions]
-            mask = f"**/*.{{{','.join(exts)}}}"
-
-            logger.info(f"Syncing qmd collection for {root_path}")
-            subprocess.run([
-                "qmd", "collection", "add", str(root_path),
-                "--name", coll_name,
-                "--mask", mask
-            ], capture_output=True)
-
             self._process_directory(root_path)
 
-        logger.info("Updating qmd index...")
-        subprocess.run(["qmd", "update"], capture_output=True)
+
 
     def _process_directory(self, dir_path: Path, parent_id: Optional[int] = None) -> None:
         """Verarbeitet ein Verzeichnis rekursiv.

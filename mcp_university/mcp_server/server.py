@@ -170,27 +170,6 @@ Comparison Summary:
 """
         return summarizer.summarize_file("comparison", prompt)
 
-
-    @mcp.tool
-    def run_qmd_command(command: str, args: List[str]) -> str:
-        """Führt einen beliebigen qmd-Befehl aus (z.B. status, ls, get).
-
-        Args:
-            command (str): Der qmd-Befehl.
-            args (List[str]): Argumente für den Befehl.
-
-        Returns:
-            str: Die Ausgabe des Befehls.
-        """
-        try:
-            result = subprocess.run(["qmd", command] + args, capture_output=True, text=True)
-            if result.returncode == 0:
-                return result.stdout
-            else:
-                return f"Error: {result.stderr}"
-        except Exception as e:
-            return f"Exception: {str(e)}"
-
     return mcp
 
 if __name__ == "__main__":
