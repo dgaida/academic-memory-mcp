@@ -100,6 +100,7 @@ class SearchIndex:
             )
 
     def _load_bm25(self) -> None:
+        """Loads the BM25 index and corpus."""
         self.corpus = []
         self.bm25 = None
         if self.corpus_path.exists():
@@ -114,6 +115,7 @@ class SearchIndex:
                 self._rebuild_bm25()
 
     def _rebuild_bm25(self) -> None:
+        """Rebuilds the BM25 index from corpus."""
         if not self.corpus:
             return
         logger.info(f"Rebuilding BM25 index for {len(self.corpus)} documents")

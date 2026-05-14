@@ -12,7 +12,7 @@ dependencies = [
 
     "rank_bm25",
     "sentence-transformers",
-    "magic-pdf[full]",
+    "docling",
     "extract-msg",
     "pdfminer.six",
     "python-docx",
