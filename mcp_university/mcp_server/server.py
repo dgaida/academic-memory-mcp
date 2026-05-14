@@ -1,7 +1,5 @@
 """FastMCP Server-Implementierung."""
 import subprocess
-import json
-import re
 import os
 from fastmcp import FastMCP
 import logging

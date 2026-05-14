@@ -7,7 +7,7 @@ import os
 import re
 import hashlib
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 import numpy as np
 
 try:
