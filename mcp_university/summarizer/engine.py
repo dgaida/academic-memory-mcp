@@ -21,6 +21,7 @@ class Summarizer:
         """
         self.model = model
         self.client = ollama.Client(host=base_url)
+        logger.debug(f"Summarizer initialized with model={model} and base_url={base_url}")
 
     def summarize_file(self, filename: str, content: str) -> Optional[str]:
         """Erstellt eine strukturierte Zusammenfassung einer einzelnen Datei.
@@ -34,6 +35,7 @@ class Summarizer:
         Returns:
             Optional[str]: Die generierte Zusammenfassung im Markdown-Format oder None bei Fehlern.
         """
+        logger.info(f"Summarizing file: {filename}")
         prompt = f"""
 Summarize the following document for a university knowledge system.
 Filename: {filename}
@@ -62,14 +64,18 @@ Document Content:
 {content[:10000]} # Limiting content to avoid context window issues
 """
         try:
+            logger.debug(f"Sending request to Ollama (model={self.model}) for file {filename}")
             response = self.client.generate(
                 model=self.model,
                 prompt=prompt,
                 options={"temperature": 0}
             )
+            logger.debug(f"Successfully received summary for file {filename}")
             return response['response']
         except Exception as e:
-            logger.error(f"Error summarizing file {filename}: {e}")
+            logger.error(f"Error summarizing file {filename} with model {self.model}: {e}")
+            if "memory" in str(e).lower():
+                logger.error("Likely Out of Memory error from Ollama. Check system resources.")
             return None
 
     def summarize_folder(self, folder_name: str, item_summaries: List[str]) -> Optional[str]:
@@ -82,6 +88,7 @@ Document Content:
         Returns:
             Optional[str]: Die aggregierte Ordner-Zusammenfassung oder None bei Fehlern.
         """
+        logger.info(f"Summarizing folder: {folder_name}")
         items_combined = "\n---\n".join(item_summaries)
         prompt = f"""
 Create a summary for the folder '{folder_name}' based on the summaries of its contents.
@@ -108,12 +115,16 @@ Contents:
 {items_combined[:15000]}
 """
         try:
+            logger.debug(f"Sending request to Ollama (model={self.model}) for folder {folder_name}")
             response = self.client.generate(
                 model=self.model,
                 prompt=prompt,
                 options={"temperature": 0}
             )
+            logger.debug(f"Successfully received summary for folder {folder_name}")
             return response['response']
         except Exception as e:
-            logger.error(f"Error summarizing folder {folder_name}: {e}")
+            logger.error(f"Error summarizing folder {folder_name} with model {self.model}: {e}")
+            if "memory" in str(e).lower():
+                logger.error("Likely Out of Memory error from Ollama. Check system resources.")
             return None

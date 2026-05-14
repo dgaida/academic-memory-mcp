@@ -41,7 +41,9 @@ class SearchIndex:
         self.use_shell = os.name == 'nt'
         self._qmd_available = self._check_qmd()
 
-        if not self._qmd_available:
+        if self._qmd_available:
+            logger.info("Using qmd CLI as primary search backend.")
+        else:
             logger.warning("qmd CLI not found. Falling back to native Python implementation. Install with: npm install -g @tobilu/qmd")
             if not NATIVE_AVAILABLE:
                 logger.error("Native search dependencies missing. Search will be unavailable.")
@@ -53,18 +55,25 @@ class SearchIndex:
     def _check_qmd(self) -> bool:
         """Prüft, ob das qmd-Tool verfügbar ist."""
         try:
-            subprocess.run(["qmd", "--version"],
+            logger.debug("Checking for qmd CLI availability...")
+            result = subprocess.run(["qmd", "--version"],
                            capture_output=True,
                            shell=self.use_shell,
-                           check=True)
+                           check=True,
+                           text=True)
+            logger.debug(f"qmd version: {result.stdout.strip()}")
             return True
-        except (subprocess.CalledProcessError, FileNotFoundError):
+        except (subprocess.CalledProcessError, FileNotFoundError) as e:
+            logger.debug(f"qmd check failed: {e}")
             return False
 
     def _init_native(self) -> None:
         """Initialisiert die native Fallback-Suche."""
+        logger.info(f"Initializing native search with model: {self.embedding_model_name}")
         self.client = QdrantClient(path=str(self.location))
         self.collection_name = "university_documents"
+
+        logger.debug(f"Loading SentenceTransformer model: {self.embedding_model_name}")
         self.model = SentenceTransformer(self.embedding_model_name)
 
         self.bm25_path = self.location / "bm25_index.pkl"
@@ -79,6 +88,7 @@ class SearchIndex:
         exists = any(c.name == self.collection_name for c in collections)
 
         if not exists:
+            logger.info(f"Creating Qdrant collection: {self.collection_name}")
             dummy_vector = self.model.encode("dummy")
             vector_size = len(dummy_vector)
             self.client.create_collection(
@@ -93,9 +103,11 @@ class SearchIndex:
         self.corpus = []
         self.bm25 = None
         if self.corpus_path.exists():
+            logger.debug(f"Loading corpus from {self.corpus_path}")
             with open(self.corpus_path, "r", encoding="utf-8") as f:
                 self.corpus = json.load(f)
             if self.bm25_path.exists():
+                logger.debug(f"Loading BM25 index from {self.bm25_path}")
                 with open(self.bm25_path, "rb") as f:
                     self.bm25 = pickle.load(f)
             else:
@@ -104,6 +116,7 @@ class SearchIndex:
     def _rebuild_bm25(self) -> None:
         if not self.corpus:
             return
+        logger.info(f"Rebuilding BM25 index for {len(self.corpus)} documents")
         tokenized_corpus = [doc["content"].lower().split() for doc in self.corpus]
         self.bm25 = BM25Okapi(tokenized_corpus)
         with open(self.bm25_path, "wb") as f:
@@ -114,6 +127,7 @@ class SearchIndex:
         if not NATIVE_AVAILABLE:
             return
 
+        logger.debug(f"Adding document to native index: {doc_id}")
         vector = self.model.encode(content).tolist()
         doc_hash = int(hashlib.md5(doc_id.encode()).hexdigest(), 16) % (2**63 - 1)
 
@@ -136,25 +150,34 @@ class SearchIndex:
 
     def search(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
         """Führt eine Suche aus, bevorzugt via qmd."""
+        logger.info(f"Searching for: '{query}' (top_k={top_k})")
+
         if self._qmd_available:
+            logger.debug("Attempting search via qmd CLI")
             qmd_results = self._search_qmd(query, top_k)
             if qmd_results:
+                logger.debug(f"qmd returned {len(qmd_results)} results")
                 return qmd_results
+            logger.debug("qmd search returned no results, falling back to native")
 
         if NATIVE_AVAILABLE:
+            logger.debug("Executing native search (Qdrant + BM25)")
             return self._search_native(query, top_k)
 
+        logger.error("No search implementation available.")
         return []
 
     def _search_qmd(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
         """Sucht mittels qmd CLI."""
         try:
             # Try 'query' (hybrid) first
+            logger.debug("Executing 'qmd query'...")
             result = subprocess.run([
                 "qmd", "query", query, "--json", "-n", str(top_k)
             ], capture_output=True, text=True, shell=self.use_shell)
 
             if result.returncode != 0:
+                logger.debug(f"'qmd query' failed (rc={result.returncode}), trying 'qmd search'...")
                 # Fallback to simple 'search'
                 result = subprocess.run([
                     "qmd", "search", query, "--json", "-n", str(top_k)
@@ -175,13 +198,20 @@ class SearchIndex:
                             "metadata": res
                         })
                     return formatted
+                else:
+                    logger.debug("No JSON array found in qmd output.")
+            else:
+                logger.debug(f"qmd CLI returned error: {result.stderr}")
         except Exception as e:
             logger.error(f"qmd search failed: {e}")
         return []
 
     def _search_native(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
         """Sucht mittels nativer Python-Implementierung."""
+        logger.debug("Encoding query vector...")
         query_vector = self.model.encode(query).tolist()
+
+        logger.debug("Querying Qdrant...")
         dense_results = self.client.query_points(
             collection_name=self.collection_name,
             query=query_vector,
@@ -200,6 +230,7 @@ class SearchIndex:
             }
 
         if self.bm25:
+            logger.debug("Executing BM25 scoring...")
             tokenized_query = query.lower().split()
             scores = self.bm25.get_scores(tokenized_query)
             top_n = np.argsort(scores)[::-1][:top_k * 2]
@@ -219,4 +250,5 @@ class SearchIndex:
                         }
 
         sorted_results = sorted(results_map.values(), key=lambda x: x["score"], reverse=True)
+        logger.debug(f"Native search found {len(sorted_results)} candidates.")
         return sorted_results[:top_k]

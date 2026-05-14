@@ -56,18 +56,20 @@ class Crawler:
     def crawl(self) -> None:
         """Startet den Crawling-Prozess für alle konfigurierten Ordner.
         """
+        logger.info("Starting crawl process...")
         for root_path_str in self.config.folders.folders:
             root_path = Path(root_path_str)
             if not root_path.exists():
                 logger.warning(f"Root path {root_path} does not exist. Skipping.")
                 continue
 
+            logger.info(f"Processing root folder: {root_path}")
             # qmd integration (with Windows fix)
             coll_name = root_path.name
             exts = [ext.lstrip('.') for ext in self.config.folders.supported_extensions]
             mask = f"**/*.{{{','.join(exts)}}}"
 
-            logger.info(f"Syncing qmd collection for {root_path}")
+            logger.debug(f"Syncing qmd collection '{coll_name}' for {root_path}")
             try:
                 subprocess.run([
                     "qmd", "collection", "add", str(root_path),
@@ -85,6 +87,8 @@ class Crawler:
         except Exception as e:
             logger.debug(f"qmd update skipped or failed: {e}")
 
+        logger.info("Crawl process completed.")
+
     def _process_directory(self, dir_path: Path, parent_id: Optional[int] = None) -> None:
         """Verarbeitet ein Verzeichnis rekursiv.
 
@@ -92,6 +96,7 @@ class Crawler:
             dir_path (Path): Das zu verarbeitende Verzeichnis.
             parent_id (Optional[int]): ID des übergeordneten Ordners in der DB.
         """
+        logger.info(f"Scanning directory: {dir_path}")
         folder_id = self.store.upsert_folder(str(dir_path), parent_id)
 
         file_summaries = []
@@ -100,6 +105,7 @@ class Crawler:
             if entry.is_dir():
                 # Skip excluded folders
                 if entry.name in self.config.folders.exclude_patterns:
+                    logger.debug(f"Skipping excluded directory: {entry.name}")
                     continue
                 self._process_directory(Path(entry.path), folder_id)
             elif entry.is_file():
@@ -114,6 +120,7 @@ class Crawler:
 
         # After processing all files in folder, generate folder summary if needed
         if file_summaries:
+            logger.info(f"Generating folder summary for: {dir_path.name}")
             folder_summary = self.summarizer.summarize_folder(dir_path.name, file_summaries)
             if folder_summary:
                 self.store.add_summary("folder", folder_id, folder_summary)
@@ -128,6 +135,7 @@ class Crawler:
         Returns:
             Optional[str]: Die Zusammenfassung der Datei oder None.
         """
+        logger.debug(f"Processing file: {file_path}")
         mtime = file_path.stat().st_mtime
         file_hash = self._calculate_hash(file_path)
 
@@ -137,12 +145,15 @@ class Crawler:
                 logger.info(f"File {file_path} unchanged. Skipping.")
                 return None
 
+        logger.info(f"Indexing new or changed file: {file_path}")
         content = self.parser.parse(file_path)
         if not content:
+            logger.warning(f"Failed to parse content for {file_path}")
             return None
 
         summary = self.summarizer.summarize_file(file_path.name, content)
         if not summary:
+            logger.warning(f"Failed to generate summary for {file_path}")
             return None
 
         file_id = self.store.upsert_file(str(file_path), file_hash, mtime, file_path.suffix.lower(), folder_id)
