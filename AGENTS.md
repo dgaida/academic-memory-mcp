@@ -26,6 +26,9 @@ This file provides instructions and guidelines for AI agents working on the MCP 
 ## Pull Request Policy
 - Before creating a pull request, you MUST delete all temporary files and folders to keep the repository clean.
 
+## CI/CD
+- **CodeQL:** Requires "Code scanning" to be enabled in the repository settings to function correctly.
+
 ## Prerequisites
 - **qmd CLI:** Required for hybrid search. Install globally via: `npm install -g @tobilu/qmd`
 - **MinerU (magic-pdf):** Required for PDF parsing. Install with: `pip install magic-pdf[full]` and initialize with `cp-config` if prompted.
