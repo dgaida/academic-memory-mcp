@@ -12,6 +12,10 @@ A locally-running, agentic knowledge and memory system for university and resear
 - MCP Server integration
 - Fully offline using local LLMs (Ollama)
 
+## Prerequisites
+- **qmd CLI:** Required for hybrid search. Install globally via: `npm install -g @tobilu/qmd`
+- **MinerU (magic-pdf):** Required for PDF parsing. Install with: `pip install magic-pdf[full]` and initialize with `cp-config` if prompted.
+
 ## Tech Stack
 - **Document Parsing:** MinerU (magic-pdf)
 - **Local LLM:** Ollama
