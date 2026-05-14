@@ -13,6 +13,7 @@ dependencies = [
     "rank_bm25",
     "sentence-transformers",
     "magic-pdf[full]",
+    "extract-msg",
     "pdfminer.six",
     "python-docx",
     "beautifulsoup4",
