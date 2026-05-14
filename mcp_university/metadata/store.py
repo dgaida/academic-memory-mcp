@@ -170,3 +170,60 @@ class MetadataStore:
                 VALUES (?, ?, ?, ?)
             ''', (item_type, item_id, content, time.time()))
             conn.commit()
+
+    def get_folder_files(self, folder_id: int) -> list:
+        """Ruft alle Dateien in einem bestimmten Ordner ab.
+
+        Args:
+            folder_id (int): ID des Ordners.
+
+        Returns:
+            list: Liste der Dateidatensätze.
+        """
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM files WHERE folder_id = ?', (folder_id,))
+            return cursor.fetchall()
+
+    def get_summary(self, item_type: str, item_id: int) -> Optional[str]:
+        """Ruft die aktuellste Zusammenfassung für ein Objekt ab.
+
+        Args:
+            item_type (str): 'file' oder 'folder'.
+            item_id (int): Die ID des Objekts.
+
+        Returns:
+            Optional[str]: Der Inhalt der Zusammenfassung oder None.
+        """
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT content FROM summaries
+                WHERE item_type = ? AND item_id = ?
+                ORDER BY created_at DESC LIMIT 1
+            ''', (item_type, item_id))
+            row = cursor.fetchone()
+            return row[0] if row else None
+
+    def delete_file(self, file_id: int) -> None:
+        """Löscht eine Datei und ihre Zusammenfassungen aus der Datenbank.
+
+        Args:
+            file_id (int): ID der Datei.
+        """
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('DELETE FROM summaries WHERE item_type = "file" AND item_id = ?', (file_id,))
+            cursor.execute('DELETE FROM files WHERE id = ?', (file_id,))
+            conn.commit()
+
+    def update_folder_summarized(self, folder_id: int) -> None:
+        """Aktualisiert den Zeitstempel der letzten Zusammenfassung für einen Ordner.
+
+        Args:
+            folder_id (int): ID des Ordners.
+        """
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('UPDATE folders SET last_summarized = ? WHERE id = ?', (time.time(), folder_id))
+            conn.commit()
