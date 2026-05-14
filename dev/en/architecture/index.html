@@ -541,7 +541,7 @@
     end
 
     subgraph "Storage &amp; Index Layer"
-        C --&gt; IDX[Search Index / qmd]
+        C --&gt; IDX[Search Index / Search Index]
         C --&gt; DB[Metadata Store / SQLite]
     end
 
@@ -557,7 +557,7 @@
 <li><strong>Crawling:</strong> The crawler scans directories and compares file hashes with the SQLite DB.</li>
 <li><strong>Parsing:</strong> New or modified files are passed through the factory to the appropriate parser.</li>
 <li><strong>Summarization:</strong> The extracted text is sent (truncated to the context window) to Ollama to obtain a structured summary.</li>
-<li><strong>Indexing:</strong> The full text is stored in the qmd index for BM25 and vector search.</li>
+<li><strong>Indexing:</strong> The full text is stored in the Search Index index for BM25 and vector search.</li>
 <li><strong>Delivery:</strong> Tools are defined via FastMCP that access the DB and index to answer queries from agents.</li>
 </ol>
 <h2 id="process-lifecycle">Process Lifecycle<a class="headerlink" href="#process-lifecycle" title="Permanent link">¶</a></h2>

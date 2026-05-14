@@ -1105,7 +1105,6 @@
 <li><strong>Ollama:</strong> Installieren Sie Ollama und laden Sie das Standardmodell herunter:
     <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>ollama<span class="w"> </span>pull<span class="w"> </span>gemma2:2b
 </code></pre></div></li>
-<li><strong>qmd:</strong> Das CLI-Tool für die hybride Suche (muss im PATH verfügbar sein).</li>
 <li><strong>MinerU (magic-pdf):</strong> Für das PDF-Parsing (wird über pip installiert).</li>
 </ul>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
@@ -1131,7 +1130,7 @@
 1. Scannt die konfigurierten Ordner.
 2. Extrahiert Text aus PDF, DOCX, MD, etc.
 3. Generiert Zusammenfassungen mittels Ollama.
-4. Speichert Metadaten in SQLite und indiziert den Text in qmd.</p>
+4. Speichert Metadaten in SQLite und indiziert den Text im Suchindex.</p>
 <h2 id="suche-verwenden">Suche verwenden<a class="headerlink" href="#suche-verwenden" title="Permanent link">&para;</a></h2>
 <p>Testen Sie die Suche direkt über das CLI:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>mcp-uni<span class="w"> </span>search<span class="w"> </span><span class="s2">&quot;Wann ist die Abgabe für die Masterarbeit von Max Mustermann?&quot;</span>

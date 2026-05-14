@@ -640,17 +640,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#qmd-search-backend" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        qmd (Search Backend)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#mineru-pdf-parsing" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -674,6 +663,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Installation verifizieren">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#qmd-suchindex-backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        qmd (Suchindex-Backend)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1110,17 +1116,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#qmd-search-backend" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        qmd (Search Backend)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#mineru-pdf-parsing" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1144,6 +1139,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Installation verifizieren">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#qmd-suchindex-backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        qmd (Suchindex-Backend)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1188,8 +1200,6 @@
 <p>Das System setzt eine laufende Ollama-Instanz voraus.
 - <strong>Download:</strong> <a href="https://ollama.com">ollama.com</a>
 - <strong>Modelle:</strong> Standardmäßig wird <code>gemma2:2b</code> verwendet. Sie können dies in <code>config/models.yaml</code> ändern.</p>
-<h3 id="qmd-search-backend">qmd (Search Backend)<a class="headerlink" href="#qmd-search-backend" title="Permanent link">&para;</a></h3>
-<p><code>qmd</code> ist für die hybride Suche erforderlich. Stellen Sie sicher, dass es installiert und über die Kommandozeile erreichbar ist.</p>
 <h3 id="mineru-pdf-parsing">MinerU (PDF Parsing)<a class="headerlink" href="#mineru-pdf-parsing" title="Permanent link">&para;</a></h3>
 <p>Für eine optimale PDF-Extraktion nutzt das System MinerU.
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;magic-pdf[full]&quot;</span>
@@ -1199,6 +1209,16 @@ Stellen Sie sicher, dass die notwendigen Modellgewichte für MinerU initialisier
 <p>Prüfen Sie, ob das CLI-Tool korrekt installiert wurde:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>mcp-uni<span class="w"> </span>--help
 </code></pre></div>
+<h3 id="qmd-suchindex-backend">qmd (Suchindex-Backend)<a class="headerlink" href="#qmd-suchindex-backend" title="Permanent link">&para;</a></h3>
+<p><code>qmd</code> ist für eine hochwertige hybride Suche erforderlich. Es handelt sich um ein Node.js-basiertes Tool, das global installiert sein muss.</p>
+<p><strong>Voraussetzungen:</strong>
+- Node.js &gt;= 22 oder Bun &gt;= 1.0.0</p>
+<p><strong>Installation:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>npm<span class="w"> </span>install<span class="w"> </span>-g<span class="w"> </span>@tobilu/qmd
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="c1"># oder</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>bun<span class="w"> </span>install<span class="w"> </span>-g<span class="w"> </span>@tobilu/qmd
+</code></pre></div></p>
+<p>Falls <code>qmd</code> nicht gefunden wird, nutzt das System automatisch eine native Python-Suche (Qdrant + BM25). Funktionen wie LLM-Re-Ranking und Query-Expansion stehen dann jedoch nicht zur Verfügung.</p>
 
 
 
