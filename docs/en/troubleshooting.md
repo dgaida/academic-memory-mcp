@@ -14,9 +14,9 @@ Find solutions for common issues here.
 
 **Symptom:** PDFs are skipped or contain no text.
 **Solution:**  
-1. Docling needs internet access during the first start to download models.
+1. Docling needs internet access during the first start to download models.  
 2. Check if the PDF is read-only or corrupted.  
-3. Reinstall Docling: `pip install --upgrade "docling"`.
+3. Reinstall Docling: `pip install --upgrade "docling"`.  
 
 ## Search Returns No Results
 

@@ -13,7 +13,7 @@ Ensure the following software is installed:
     ```bash
     ollama pull gemma2:2b
     ```
-*   **Docling:** For PDF parsing (installed via pip).
+*   **Docling:** For PDF parsing (installed via pip).  
 
 ## Installation
 

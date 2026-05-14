@@ -14,9 +14,9 @@ Hier finden Sie Lösungen für häufig auftretende Probleme.
 
 **Symptom:** PDFs werden übersprungen oder enthalten keinen Text.
 **Lösung:**  
-1. Docling benötigt beim ersten Start Internetzugriff zum Laden der Modelle.
+1. Docling benötigt beim ersten Start Internetzugriff zum Laden der Modelle.  
 2. Prüfen Sie, ob die PDF schreibgeschützt oder beschädigt ist.  
-3. Installieren Sie Docling neu: `pip install --upgrade "docling"`.
+3. Installieren Sie Docling neu: `pip install --upgrade "docling"`.  
 
 ## Suche liefert keine Ergebnisse
 

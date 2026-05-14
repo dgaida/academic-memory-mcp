@@ -31,4 +31,4 @@ This file provides instructions and guidelines for AI agents working on the MCP 
 
 ## Prerequisites  
 - **qmd CLI:** Required for hybrid search. Install globally via: `npm install -g @tobilu/qmd`  
-- **Docling:** Required for PDF parsing. Install with: `pip install docling` and initialize with `cp-config` if prompted.
+- **Docling:** Required for PDF parsing. Install with: `pip install docling` and initialize with `cp-config` if prompted.  
