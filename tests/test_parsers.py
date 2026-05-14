@@ -1,5 +1,3 @@
-import pytest
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 from mcp_university.parser.pdf_parser import PDFParser
 from mcp_university.parser.mail_parser import MailParser
