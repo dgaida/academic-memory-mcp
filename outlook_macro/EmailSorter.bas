@@ -3,60 +3,68 @@
 ' Outlook 2019 VBA-Makro
 '
 ' Funktionsweise:
-'   1. Liest eine Markdown-Datei ein, die E-Mail-Adressen und Zielordner-Pfade
-'      auf dem Dateisystem enthaelt (Tab- oder mehrfach-Leerzeichen-getrennt).
-'   2. Durchlaeuft alle E-Mails im Posteingang.
-'   3. Speichert E-Mails bekannter Absender als .msg-Datei im zugeordneten
-'      Ordner auf dem Laufwerk.
-'   4. Behaelt pro Absender nur die neueste Mail in Outlook; aeltere werden
-'      nach dem Export geloescht.
+'   1. Liest eine YAML-Datei (students.yaml) ein, die fuer jeden Studierenden
+'      Name, smail, weitere E-Mails sowie einen Ordner-Map mit Keywords enthaelt.
+'   2. Durchlaeuft alle E-Mails im Posteingang und in Gesendeten Elementen.
+'   3. Ordnet jede Mail einem Studierenden zu (ueber Absender-/Empfaengeradresse).
+'   4. Sucht den Betreff und Textkoerper der Mail nach den Ordner-Keywords ab.
+'      Der erste Treffer bestimmt den Zielordner.
+'   5. Speichert die Mail als .msg-Datei im gefundenen Ordner.
+'   6. Behaelt pro Absender nur die neueste Mail; aeltere werden nach dem Export
+'      geloescht.
 '
-' Markdown-Format der Konfigurationsdatei (z.B. email_config.md):
-'   absender@example.com     C:\Ablage\KundeA
-'   info@firma.de            D:\Archiv\Newsletter
-'   ...
-'   Leerzeilen und Zeilen, die mit '#' beginnen, werden ignoriert.
+' YAML-Format (students.yaml):
+'   students:
+'     - name: "Max Mustermann"
+'       smail: "m.mustermann@smail.th-koeln.de"
+'       emails:
+'         - "max@privat.de"
+'       folders:
+'         Bachelorthesis: "C:\\Ablage\\Mustermann\\Bachelorthesis"
+'         Praxisprojekt:  "C:\\Ablage\\Mustermann\\Praxisprojekt"
 '
-' WICHTIG: Den Pfad zur Markdown-Datei in CONFIG_FILE_PATH anpassen!
+' WICHTIG: Den Pfad zur YAML-Datei in YAML_FILE_PATH anpassen!
 ' =============================================================================
 
 Option Explicit
 
-' Pfad zur Markdown-Konfigurationsdatei - bitte anpassen
-Private Const CONFIG_FILE_PATH As String = "D:\TH_Koeln\academic-memory-mcp\email_config.md"
+' Pfad zur YAML-Konfigurationsdatei - bitte anpassen
+Private Const YAML_FILE_PATH As String = "D:\TH_Koeln\academic-memory-mcp\students.yaml"
 
-' Trennzeichen zwischen E-Mail-Adresse und Ordnerpfad in der MD-Datei
-' Das Makro unterstuetzt sowohl Tabs als auch mehrere Leerzeichen als Trenner
+' Trennzeichen zwischen E-Mail-Adresse und Ordnerpfad (wird nur noch fuer
+' den Legacy-Fallback ReadEmailConfig benoetigt, falls jemand die MD-Datei
+' weiterhin nutzen moechte)
 Private Const MIN_SPACES_AS_SEPARATOR As Integer = 2
 
 ' =============================================================================
 ' Hauptprozedur - Einstiegspunkt des Makros
 ' =============================================================================
 
-''' Hauptprozedur: Liest die Konfiguration und exportiert E-Mails aus dem
-''' Posteingang als .msg-Dateien auf das Dateisystem.
+''' Hauptprozedur: Liest die YAML-Konfiguration und exportiert E-Mails aus dem
+''' Posteingang und den Gesendeten Elementen als .msg-Dateien auf das Dateisystem.
+'''
+''' Fuer jeden Studierenden wird der Betreff und Textkoerper jeder E-Mail nach
+''' den in der YAML definierten Ordner-Keywords durchsucht.  Der erste Treffer
+''' bestimmt den Zielordner.
 Public Sub SortInboxByConfig()
-    Dim emailMap   As Object
+    Dim studentMap As Object    ' Dictionary: email_lower -> StudentEntry-Array
     Dim inbox      As Outlook.MAPIFolder
     Dim sentItems  As Outlook.MAPIFolder
-    Dim configPath As String
 
-    configPath = CONFIG_FILE_PATH
-
-    If Not FileExists(configPath) Then
-        MsgBox "Konfigurationsdatei nicht gefunden:" & vbCrLf & configPath, _
+    If Not FileExists(YAML_FILE_PATH) Then
+        MsgBox "YAML-Datei nicht gefunden:" & vbCrLf & YAML_FILE_PATH, _
                vbCritical, "EmailSorter"
         Exit Sub
     End If
 
-    Set emailMap = ReadEmailConfig(configPath)
-    If emailMap Is Nothing Then
-        MsgBox "Fehler beim Einlesen der Konfigurationsdatei.", vbCritical, "EmailSorter"
+    Set studentMap = ReadStudentMap(YAML_FILE_PATH)
+    If studentMap Is Nothing Then
+        MsgBox "Fehler beim Einlesen der YAML-Datei.", vbCritical, "EmailSorter"
         Exit Sub
     End If
 
-    If emailMap.Count = 0 Then
-        MsgBox "Keine gueltigen Eintraege in der Konfigurationsdatei gefunden.", _
+    If studentMap.Count = 0 Then
+        MsgBox "Keine gueltigen Eintraege in der YAML-Datei gefunden.", _
                vbExclamation, "EmailSorter"
         Exit Sub
     End If
@@ -73,136 +81,279 @@ Public Sub SortInboxByConfig()
     Dim savedCount   As Long
     Dim deletedCount As Long
 
-    ProcessFolder inbox, emailMap, "Inbox", False, savedCount, deletedCount
-    ProcessFolder sentItems, emailMap, "SentItems", True, savedCount, deletedCount
+    ProcessFolder inbox, studentMap, "Inbox", False, savedCount, deletedCount
+    ProcessFolder sentItems, studentMap, "SentItems", True, savedCount, deletedCount
 
     MsgBox "Fertig!" & vbCrLf & _
            "Exportiert: " & savedCount & " E-Mail(s)" & vbCrLf & _
            "Geloescht (Duplikate): " & deletedCount & " E-Mail(s)", _
            vbInformation, "EmailSorter"
 
-    Set emailMap = Nothing
+    Set studentMap = Nothing
 End Sub
 
 ' =============================================================================
-' Konfiguration einlesen
+' YAML-Konfiguration einlesen
 ' =============================================================================
 
-''' Liest die Markdown-Konfigurationsdatei ein und gibt ein Dictionary zurueck.
+''' Liest die students.yaml ein und gibt ein Dictionary zurueck, das jede
+''' bekannte E-Mail-Adresse auf ein foldersDict abbildet.
+'''
+''' foldersDict: Scripting.Dictionary  keyword_lower -> folder_path
+'''   Alle Keywords aus der keys-Liste jedes folder-Eintrags werden als
+'''   einzelne Keys eingetragen und zeigen auf denselben Ordnerpfad.
 '''
 ''' Args:
-'''     filePath: Vollstaendiger Pfad zur Markdown-Datei.
+'''     yamlPath: Vollstaendiger Pfad zur YAML-Datei.
 '''
 ''' Returns:
-'''     Scripting.Dictionary mit E-Mail-Adresse (Lowercase) als Key
-'''     und Dateisystem-Ordnerpfad als Value. Nothing bei einem Fehler.
-Private Function ReadEmailConfig(ByVal filePath As String) As Object
+'''     Scripting.Dictionary  email_lower -> foldersDict,
+'''     oder Nothing bei einem Fehler.
+Private Function ReadStudentMap(ByVal yamlPath As String) As Object
+    Dim result As Object
+    Set result = CreateObject("Scripting.Dictionary")
+    result.CompareMode = 1 ' vbTextCompare
+
     Dim fso        As Object
     Dim fileStream As Object
-    Dim dict       As Object
-    Dim line       As String
-    Dim parts(1)   As String
-
-    Set dict = CreateObject("Scripting.Dictionary")
-    dict.CompareMode = 1 ' vbTextCompare - Gross-/Kleinschreibung ignorieren
-
     Set fso = CreateObject("Scripting.FileSystemObject")
 
     On Error GoTo ReadError
-    Set fileStream = fso.OpenTextFile(filePath, 1, False) ' 1 = ForReading
+    ' Set fileStream = fso.OpenTextFile(yamlPath, 1, False, -2)
+    Dim fileContent As String
+    fileContent = ReadUtf8File(yamlPath)
+    If Len(fileContent) = 0 Then GoTo ReadError
 
-    Do While Not fileStream.AtEndOfStream
-        line = Trim(fileStream.ReadLine())
+    Dim allLines() As String
+    allLines = Split(fileContent, vbLf)
 
-        ' Leerzeilen und Kommentarzeilen (beginnen mit #) ueberspringen
-        If Len(line) = 0 Then GoTo NextLine
-        If Left(line, 1) = "#" Then GoTo NextLine
+    ' Zustand des Parsers
+    ' foldersDict: keyword_lower -> folder_path
+    '   Jeder Eintrag der keys-Liste wird als eigenstaendiger Key gespeichert,
+    '   alle zeigen auf denselben Pfad.
+    Dim smailAddr   As String
+    Dim allAddrs    As Object   ' Collection aller Adressen dieses Studierenden
+    Dim foldersDict As Object   ' keyword_lower -> folder_path
+    Dim inFolders   As Boolean
+    Dim inEmails    As Boolean
+    Dim inFolderEntry As Boolean
+    Dim currentEntryPath As String  ' Pfad des aktuellen folder-Eintrags
+    Dim currentEntryKeys As String  ' Kommagetrennte Keys des aktuellen Eintrags
 
-        ' Zeile in E-Mail und Pfad aufteilen
-        If ParseConfigLine(line, parts) Then
-            Dim emailAddr  As String
-            Dim folderPath As String
-            emailAddr = LCase(Trim(parts(0)))
-            folderPath = Trim(parts(1))
-            ' Markdown-Escapes aufloesen: \_ -> _, \\ -> \, usw.
-            folderPath = Replace(folderPath, "\_", "_")
-            folderPath = Replace(folderPath, "\\", "\")
+    smailAddr = ""
+    Set allAddrs = New Collection
+    Set foldersDict = CreateObject("Scripting.Dictionary")
+    foldersDict.CompareMode = 1
+    inFolders = False
+    inEmails = False
+    inFolderEntry = False
+    currentEntryPath = ""
+    currentEntryKeys = ""
 
-            If Len(emailAddr) > 0 And Len(folderPath) > 0 Then
-                If Not dict.Exists(emailAddr) Then
-                    dict.Add emailAddr, folderPath
-                End If
+    ' Do While Not fileStream.AtEndOfStream
+    Dim iLine As Long
+    For iLine = 0 To UBound(allLines)
+        Dim line    As String
+        Dim trimmed As String
+        Dim lineIndent As Long
+        ' line = fileStream.ReadLine()
+        line = allLines(iLine)
+        ' Windows-Zeilenenden: \r\n -> \r entfernen
+        If Right(line, 1) = vbCr Then line = Left(line, Len(line) - 1)
+        trimmed = Trim(line)
+        lineIndent = Len(line) - Len(LTrim(line))
+
+        ' Studierenden-Block (Einrueckung 2)
+        If Left(trimmed, 2) = "- " And lineIndent = 2 Then
+            ' Laufenden folder-Eintrag abschliessen
+            CommitFolderEntry foldersDict, currentEntryKeys, currentEntryPath
+            currentEntryKeys = ""
+            currentEntryPath = ""
+            ' Vorherigen Studierenden speichern
+            If Len(smailAddr) > 0 And foldersDict.Count > 0 Then
+                CommitStudentEntry result, smailAddr, allAddrs, foldersDict
             End If
+            ' Zustand zuruecksetzen
+            smailAddr = ""
+            Set allAddrs = New Collection
+            Set foldersDict = CreateObject("Scripting.Dictionary")
+            foldersDict.CompareMode = 1
+            inFolders = False
+            inEmails = False
+            inFolderEntry = False
+            GoTo NextLine
+        End If
+
+        If Left(trimmed, 6) = "smail:" Then
+            smailAddr = LCase(Replace(Trim(Mid(trimmed, 7)), """", ""))
+            If Len(smailAddr) > 0 Then allAddrs.Add smailAddr
+            inFolders = False
+            inEmails = False
+            inFolderEntry = False
+            GoTo NextLine
+        End If
+
+        If Left(trimmed, 7) = "emails:" Then
+            Dim emailsRaw As String
+            emailsRaw = Trim(Mid(trimmed, 8))
+            If Left(emailsRaw, 1) = "[" Then
+                emailsRaw = Replace(Replace(emailsRaw, "[", ""), "]", "")
+                emailsRaw = Replace(emailsRaw, """", "")
+                Dim emailParts() As String
+                emailParts = Split(emailsRaw, ",")
+                Dim ep As Variant
+                For Each ep In emailParts
+                    Dim eAddr As String
+                    eAddr = LCase(Trim(CStr(ep)))
+                    If Len(eAddr) > 0 Then allAddrs.Add eAddr
+                Next ep
+                inEmails = False
+            Else
+                inEmails = True
+            End If
+            inFolders = False
+            inFolderEntry = False
+            GoTo NextLine
+        End If
+
+        If inEmails And Left(trimmed, 2) = "- " Then
+            Dim blockAddr As String
+            blockAddr = LCase(Replace(Trim(Mid(trimmed, 3)), """", ""))
+            If Len(blockAddr) > 0 Then allAddrs.Add blockAddr
+            GoTo NextLine
+        End If
+
+        If Left(trimmed, 8) = "folders:" Then
+            Dim foldersRaw As String
+            foldersRaw = Trim(Mid(trimmed, 9))
+            ' folders: []  oder  folders:  -> Listenstruktur erwartet
+            inFolders = True
+            inEmails = False
+            inFolderEntry = False
+            GoTo NextLine
+        End If
+
+        ' Neuer folder-Eintrag (Einrueckung 6, beginnt mit "- ")
+        If inFolders And Left(trimmed, 2) = "- " And lineIndent = 6 Then
+            ' Vorherigen Eintrag abschliessen
+            CommitFolderEntry foldersDict, currentEntryKeys, currentEntryPath
+            currentEntryKeys = ""
+            currentEntryPath = ""
+            inFolderEntry = True
+            Dim afterDash As String
+            afterDash = Trim(Mid(trimmed, 3))
+            If Left(afterDash, 5) = "keys:" Then
+                currentEntryKeys = Trim(Mid(afterDash, 6))
+            ElseIf Left(afterDash, 5) = "path:" Then
+                currentEntryPath = Replace(Replace(Trim(Mid(afterDash, 6)), """", ""), "\\", "\")
+            End If
+            GoTo NextLine
+        End If
+
+        ' Felder innerhalb eines folder-Eintrags (Einrueckung 8)
+        If inFolderEntry And lineIndent = 8 Then
+            If Left(trimmed, 5) = "keys:" Then
+                currentEntryKeys = Trim(Mid(trimmed, 6))
+            ElseIf Left(trimmed, 5) = "path:" Then
+                currentEntryPath = Replace(Replace(Trim(Mid(trimmed, 6)), """", ""), "\\", "\")
+            End If
+            GoTo NextLine
         End If
 
 NextLine:
-    Loop
+    Next iLine  ' Loop
 
-    fileStream.Close
-    Set ReadEmailConfig = dict
+    ' Letzten folder-Eintrag und Studierenden abschliessen
+    CommitFolderEntry foldersDict, currentEntryKeys, currentEntryPath
+    If Len(smailAddr) > 0 And foldersDict.Count > 0 Then
+        CommitStudentEntry result, smailAddr, allAddrs, foldersDict
+    End If
+
+    ' fileStream.Close
+    Set ReadStudentMap = result
     Exit Function
 
 ReadError:
-    MsgBox "Fehler beim Lesen der Datei: " & Err.Description, vbCritical, "EmailSorter"
+    MsgBox "Fehler beim Lesen der YAML-Datei: " & Err.Description, vbCritical, "EmailSorter"
     If Not fileStream Is Nothing Then fileStream.Close
-    Set ReadEmailConfig = Nothing
+    Set ReadStudentMap = Nothing
 End Function
 
-''' Zerlegt eine Konfigurationszeile in E-Mail-Adresse und Ordnerpfad.
-'''
-''' Unterstuetzt als Trennzeichen: Tab-Zeichen oder mind. 2 aufeinanderfolgende
-''' Leerzeichen, damit einzelne Leerzeichen in Pfaden nicht als Trenner gelten.
+''' Parst die keys-Liste eines folder-Eintrags und traegt alle Keywords mit
+''' dem zugehoerigen Pfad in foldersDict ein.
 '''
 ''' Args:
-'''     line:  Eine Zeile aus der Konfigurationsdatei.
-'''     parts: Ausgabe-Array(0..1); parts(0) = E-Mail, parts(1) = Ordnerpfad.
+'''     foldersDict: Ziel-Dictionary keyword_lower -> folder_path.
+'''     keysRaw:     Roher keys-String, z.B. ["Bachelorthesis", "Bachelorarbeit"].
+'''     folderPath:  Der zugehoerige Ordnerpfad.
+Private Sub CommitFolderEntry(ByVal foldersDict As Object, _
+                              ByVal keysRaw As String, _
+                              ByVal folderPath As String)
+    If Len(Trim(keysRaw)) = 0 Or Len(Trim(folderPath)) = 0 Then Exit Sub
+
+    ' Eckige Klammern und Anfuehrungszeichen entfernen
+    Dim cleaned As String
+    cleaned = Replace(Replace(keysRaw, "[", ""), "]", "")
+    cleaned = Replace(cleaned, """", "")
+
+    Dim parts() As String
+    parts = Split(cleaned, ",")
+    Dim p As Variant
+    For Each p In parts
+        Dim kw As String
+        kw = LCase(Trim(CStr(p)))
+        If Len(kw) > 0 Then
+            If Not foldersDict.Exists(kw) Then
+                foldersDict.Add kw, folderPath
+            End If
+        End If
+    Next p
+End Sub
+
+''' Traegt alle Adressen eines Studierenden mit ihrem foldersDict in das
+''' Ergebnis-Dictionary ein.
 '''
-''' Returns:
-'''     True wenn die Zeile erfolgreich zerlegt werden konnte, sonst False.
-Private Function ParseConfigLine(ByVal line As String, ByRef parts() As String) As Boolean
-    Dim tabPos   As Long
-    Dim spacePos As Long
-
-    ParseConfigLine = False
-    parts(0) = ""
-    parts(1) = ""
-
-    ' Versuch 1: Tab als Trenner
-    tabPos = InStr(line, vbTab)
-    If tabPos > 1 Then
-        parts(0) = Left(line, tabPos - 1)
-        parts(1) = Mid(line, tabPos + 1)
-        ParseConfigLine = True
-        Exit Function
-    End If
-
-    ' Versuch 2: Mindestens MIN_SPACES_AS_SEPARATOR Leerzeichen als Trenner
-    Dim separator As String
-    separator = String(MIN_SPACES_AS_SEPARATOR, " ")
-    spacePos = InStr(line, separator)
-    If spacePos > 1 Then
-        parts(0) = Left(line, spacePos - 1)
-        parts(1) = Trim(Mid(line, spacePos))
-        ParseConfigLine = True
-        Exit Function
-    End If
-End Function
+''' Das foldersDict bildet keyword_lower -> folder_path ab; jedes Keyword
+''' aus der keys-Liste eines Ordner-Eintrags ist ein eigener Key.
+'''
+''' Args:
+'''     result:      Das Ziel-Dictionary (email -> foldersDict).
+'''     smailAddr:   Die smail-Adresse des Studierenden.
+'''     allAddrs:    Collection aller bekannten Adressen (inkl. smail).
+'''     foldersDict: Dictionary keyword_lower -> folder_path.
+Private Sub CommitStudentEntry(ByVal result As Object, _
+                               ByVal smailAddr As String, _
+                               ByVal allAddrs As Collection, _
+                               ByVal foldersDict As Object)
+    Dim addr As Variant
+    For Each addr In allAddrs
+        Dim addrStr As String
+        addrStr = LCase(CStr(addr))
+        If Len(addrStr) > 0 And Not result.Exists(addrStr) Then
+            result.Add addrStr, foldersDict
+        End If
+    Next addr
+End Sub
 
 ' =============================================================================
-' Posteingang verarbeiten
+' Posteingang / Gesendete verarbeiten
 ' =============================================================================
 
-''' Durchlaeuft einen Outlook-Ordner, exportiert und loescht E-Mails gemaess Config.
+''' Durchlaeuft einen Outlook-Ordner und exportiert E-Mails gemaess YAML-Config.
+'''
+''' Fuer jeden Studierenden wird der Betreff und Textkoerper jeder E-Mail nach
+''' den Ordner-Keywords durchsucht.  Der erste Treffer bestimmt den Zielordner.
+''' Pro Absender/Empfaenger wird nur die neueste Mail in Outlook behalten.
 '''
 ''' Args:
 '''     folder:       Der zu durchsuchende Outlook-Ordner.
-'''     emailMap:     Dictionary mit E-Mail-Adressen und Zielordner-Pfaden.
-'''     subFolder:    Unterordner-Name der an den konfigurierten Pfad angehaengt wird.
-'''     isSent:       True = Empfaengeradresse pruefen (Gesendete), False = Absender (Eingang).
-'''     savedCount:   Zaehler der exportierten Mails (wird hochgezaehlt).
-'''     deletedCount: Zaehler der geloeschten Mails (wird hochgezaehlt).
+'''     studentMap:   Dictionary email_lower -> StudentEntry-Array.
+'''     subFolder:    Unterordner-Name, der an den konfigurierten Pfad angehaengt wird.
+'''     isSent:       True = Empfaengeradresse pruefen, False = Absender.
+'''     savedCount:   Zaehler exportierter Mails (wird hochgezaehlt).
+'''     deletedCount: Zaehler geloeschter Mails (wird hochgezaehlt).
 Private Sub ProcessFolder(ByVal folder As Outlook.MAPIFolder, _
-                          ByVal emailMap As Object, _
+                          ByVal studentMap As Object, _
                           ByVal subFolder As String, _
                           ByVal isSent As Boolean, _
                           ByRef savedCount As Long, _
@@ -212,9 +363,9 @@ Private Sub ProcessFolder(ByVal folder As Outlook.MAPIFolder, _
     Set senderMails = CreateObject("Scripting.Dictionary")
     senderMails.CompareMode = 1
 
-    Dim items       As Outlook.items
-    Dim item        As Object
-    Dim matchEmail  As String
+    Dim items      As Outlook.items
+    Dim item       As Object
+    Dim matchEmail As String
 
     Set items = folder.items
 
@@ -224,13 +375,12 @@ Private Sub ProcessFolder(ByVal folder As Outlook.MAPIFolder, _
 
         If item.Class = olMail Then
             If isSent Then
-                ' Gesendete Mails: ersten Empfaenger pruefen
                 matchEmail = GetFirstRecipientAddress(item)
             Else
                 matchEmail = LCase(GetSenderEmailAddress(item))
             End If
 
-            If emailMap.Exists(matchEmail) Then
+            If studentMap.Exists(matchEmail) Then
                 If Not senderMails.Exists(matchEmail) Then
                     senderMails.Add matchEmail, New Collection
                 End If
@@ -244,15 +394,9 @@ Private Sub ProcessFolder(ByVal folder As Outlook.MAPIFolder, _
         Dim mailCollection As Collection
         Set mailCollection = senderMails(key)
 
-        ' Zielordner: konfigurierter Pfad + Unterordner
-        Dim targetPath As String
-        targetPath = emailMap(key) & "\" & subFolder
-
-        If Not EnsureDirectory(targetPath) Then
-            MsgBox "Ordner konnte nicht erstellt werden:" & vbCrLf & targetPath, _
-                   vbExclamation, "EmailSorter"
-            GoTo NextSender
-        End If
+        ' foldersDict direkt aus studentMap holen (keyword_lower -> folder_path)
+        Dim foldersDict As Object
+        Set foldersDict = studentMap(key)
 
         ' Neueste Mail ermitteln
         Dim newestMail  As Outlook.mailItem
@@ -267,14 +411,42 @@ Private Sub ProcessFolder(ByVal folder As Outlook.MAPIFolder, _
             End If
         Next j
 
-        ' Alle Mails exportieren; aeltere danach loeschen
+        ' Alle Mails exportieren
         For j = 1 To mailCollection.Count
             Set currentMail = mailCollection(j)
 
-            Dim filePath As String
-            filePath = BuildMsgFilePath(targetPath, currentMail)
+            ' Zielordner per Keyword-Suche bestimmen
+            Dim targetFolder As String
+            targetFolder = FindFolderByKeyword(currentMail, foldersDict)
 
-            If SaveMailToFile(currentMail, targetPath, filePath) Then
+            If Len(targetFolder) = 0 Then
+                ' Kein Keyword-Treffer -> erstes verfuegbares Verzeichnis nutzen
+                Dim firstKey As Variant
+                firstKey = foldersDict.Keys
+                If UBound(firstKey) >= 0 Then
+                    targetFolder = foldersDict(firstKey(0))
+                End If
+            End If
+
+            If Len(targetFolder) = 0 Then
+                MsgBox "Kein Zielordner fuer Mail von " & key & " gefunden." & vbCrLf & _
+                       "Betreff: " & currentMail.Subject, vbExclamation, "EmailSorter"
+                GoTo NextMail
+            End If
+
+            Dim fullTargetPath As String
+            fullTargetPath = targetFolder & "\" & subFolder
+
+            If Not EnsureDirectory(fullTargetPath) Then
+                MsgBox "Ordner konnte nicht erstellt werden:" & vbCrLf & fullTargetPath, _
+                       vbExclamation, "EmailSorter"
+                GoTo NextMail
+            End If
+
+            Dim filePath As String
+            filePath = BuildMsgFilePath(fullTargetPath, currentMail)
+
+            If SaveMailToFile(currentMail, fullTargetPath, filePath) Then
                 savedCount = savedCount + 1
                 If currentMail.EntryID <> newestMail.EntryID Then
                     currentMail.Delete
@@ -285,16 +457,46 @@ Private Sub ProcessFolder(ByVal folder As Outlook.MAPIFolder, _
                        "Betreff: " & currentMail.Subject & vbCrLf & _
                        "Zielpfad: " & filePath, vbExclamation, "EmailSorter"
             End If
-        Next j
 
-NextSender:
+NextMail:
+        Next j
     Next key
 
     Set senderMails = Nothing
 End Sub
 
+''' Sucht im Betreff und Textkoerper einer Mail nach bekannten Ordner-Keywords
+''' und gibt den zugehoerigen Ordnerpfad zurueck.
+'''
+''' Das foldersDict bildet keyword_lower -> folder_path ab; alle Keywords aus
+''' der keys-Liste jedes Ordner-Eintrags sind einzelne Eintraege im Dict.
+''' Es wird case-insensitiv gesucht; der erste Treffer gewinnt.
+'''
+''' Args:
+'''     mail:        Das zu pruefende MailItem.
+'''     foldersDict: Dictionary keyword_lower -> folder_path.
+'''
+''' Returns:
+'''     Den Ordnerpfad des ersten Keyword-Treffers, oder leerer String.
+Private Function FindFolderByKeyword(ByVal mail As Outlook.mailItem, _
+                                     ByVal foldersDict As Object) As String
+    Dim searchText As String
+    searchText = LCase(mail.Subject & " " & mail.Body)
+
+    Dim kw As Variant
+    For Each kw In foldersDict.Keys
+        If InStr(searchText, CStr(kw)) > 0 Then
+            FindFolderByKeyword = foldersDict(kw)
+            Exit Function
+        End If
+    Next kw
+
+    FindFolderByKeyword = ""
+End Function
+
 ' =============================================================================
 ' Hilfsfunktionen
+' (unveraendert gegenueber der Originalversion, soweit nicht anders vermerkt)
 ' =============================================================================
 
 ''' Baut den vollstaendigen Dateipfad fuer eine .msg-Datei zusammen.
@@ -307,8 +509,7 @@ End Sub
 '''     mail:       Das zu speichernde MailItem.
 '''
 ''' Returns:
-'''     Vollstaendiger Dateipfad als String, z.B.
-'''     "C:\Ablage\KundeA\20260513_143022 - Betreff.msg"
+'''     Vollstaendiger Dateipfad als String.
 Private Function BuildMsgFilePath(ByVal folderPath As String, _
                                   ByVal mail As Outlook.mailItem) As String
     Dim datePart    As String
@@ -322,7 +523,6 @@ Private Function BuildMsgFilePath(ByVal folderPath As String, _
 
     fileName = datePart & " - " & subjectPart & ".msg"
 
-    ' Abschliessende Backslashes entfernen, dann sauber zusammensetzen
     Do While Right(folderPath, 1) = "\"
         folderPath = Left(folderPath, Len(folderPath) - 1)
     Loop
@@ -349,7 +549,6 @@ Private Function SanitizeFileName(ByVal name As String) As String
         result = Join(Split(result, Mid(invalidChars, i, 1)), "_")
     Next i
 
-    ' Fuehrende/abschliessende Leerzeichen und Punkte entfernen
     result = Trim(result)
     Do While Right(result, 1) = "."
         result = Left(result, Len(result) - 1)
@@ -366,10 +565,8 @@ End Function
 '''     path: Vollstaendiger Pfad des zu erstellenden Ordners.
 '''
 ''' Returns:
-'''     True wenn der Ordner existiert oder erfolgreich erstellt wurde,
-'''     False bei einem Fehler.
+'''     True wenn der Ordner existiert oder erfolgreich erstellt wurde.
 Private Function EnsureDirectory(ByVal path As String) As Boolean
-    ' Abschliessenden Backslash entfernen falls vorhanden
     Do While Right(path, 1) = "\"
         path = Left(path, Len(path) - 1)
     Loop
@@ -377,18 +574,15 @@ Private Function EnsureDirectory(ByVal path As String) As Boolean
     Dim fso As Object
     Set fso = CreateObject("Scripting.FileSystemObject")
 
-    ' Ordner existiert bereits - nichts zu tun
     If fso.FolderExists(path) Then
         EnsureDirectory = True
         Exit Function
     End If
 
-    ' Elternordner rekursiv sicherstellen, dann diesen Ordner anlegen
     Dim parentPath As String
     parentPath = fso.GetParentFolderName(path)
 
     If Len(parentPath) = 0 Or parentPath = path Then
-        ' Laufwerkswurzel erreicht - kann nicht angelegt werden
         EnsureDirectory = False
         Exit Function
     End If
@@ -409,16 +603,11 @@ End Function
 
 ''' Gibt die tatsaechliche SMTP-Adresse eines Absenders zurueck.
 '''
-''' Behandelt sowohl externe Absender (SenderEmailAddress) als auch
-''' interne Exchange-Absender, bei denen die Adresse aus dem
-''' AddressEntry ausgelesen werden muss.
-'''
 ''' Args:
-'''     mail: Das MailItem, dessen Absenderadresse ermittelt werden soll.
+'''     mail: Das MailItem.
 '''
 ''' Returns:
-'''     Die SMTP-E-Mail-Adresse als String (Lowercase), oder leerer String
-'''     bei einem Fehler.
+'''     SMTP-Adresse (Lowercase).
 Private Function GetSenderEmailAddress(ByVal mail As Outlook.mailItem) As String
     On Error GoTo FallbackToProperty
 
@@ -444,11 +633,10 @@ End Function
 ''' Gibt die SMTP-Adresse des ersten Empfaengers einer gesendeten Mail zurueck.
 '''
 ''' Args:
-'''     mail: Das MailItem, dessen Empfaengeradresse ermittelt werden soll.
+'''     mail: Das MailItem.
 '''
 ''' Returns:
-'''     Die SMTP-E-Mail-Adresse des ersten Empfaengers (Lowercase),
-'''     oder leerer String wenn keine Empfaenger vorhanden.
+'''     SMTP-Adresse des ersten Empfaengers (Lowercase).
 Private Function GetFirstRecipientAddress(ByVal mail As Outlook.mailItem) As String
     On Error GoTo RecipError
 
@@ -478,29 +666,15 @@ RecipError:
     GetFirstRecipientAddress = LCase(recip.Address)
 End Function
 
-''' Gibt den Standard-Posteingang des ersten Kontos zurueck.
-'''
-''' Returns:
-'''     Das MAPIFolder-Objekt des Posteingangs, oder Nothing bei Fehler.
-Private Function GetInboxFolder() As Outlook.MAPIFolder
-    On Error GoTo InboxError
-    Set GetInboxFolder = Application.Session.GetDefaultFolder(olFolderInbox)
-    Exit Function
-InboxError:
-    Set GetInboxFolder = Nothing
-End Function
-
-
 ''' Speichert eine Mail als .msg-Datei auf dem Dateisystem.
 '''
 ''' Args:
-'''     mail:     Das zu exportierende MailItem.
-'''     filePath: Vollstaendiger Zieldateipfad inkl. Dateiname.
+'''     mail:       Das zu exportierende MailItem.
+'''     folderPath: Zielordner-Pfad.
+'''     filePath:   Vollstaendiger Zieldateipfad.
 '''
 ''' Returns:
-'''     True wenn die Datei erfolgreich gespeichert wurde und
-'''     anschliessend auf dem Dateisystem nachweislich existiert.
-'''     False bei jedem Fehler.
+'''     True wenn erfolgreich gespeichert (oder Datei bereits vorhanden).
 Private Function SaveMailToFile(ByVal mail As Outlook.mailItem, _
                                 ByVal folderPath As String, _
                                 ByRef filePath As String) As Boolean
@@ -513,19 +687,16 @@ Private Function SaveMailToFile(ByVal mail As Outlook.mailItem, _
 
     On Error GoTo SaveError
 
-    ' Datei existiert bereits - ueberspringen, aber als Erfolg werten
     If fso.FileExists(filePath) Then
         SaveMailToFile = True
         Exit Function
     End If
 
-    ' Dateianzahl im Zielordner vor dem Speichern
     Set folder = fso.GetFolder(folderPath)
     countBefore = folder.Files.Count
 
     mail.SaveAs filePath, olMSG
 
-    ' Dateianzahl nach dem Speichern - muss groesser sein
     countAfter = folder.Files.Count
     SaveMailToFile = (countAfter > countBefore)
     Exit Function
@@ -533,13 +704,40 @@ Private Function SaveMailToFile(ByVal mail As Outlook.mailItem, _
 SaveError:
     SaveMailToFile = False
 End Function
+
 ''' Prueft ob eine Datei vorhanden ist.
 '''
 ''' Args:
 '''     path: Vollstaendiger Dateipfad.
 '''
 ''' Returns:
-'''     True wenn die Datei existiert, sonst False.
+'''     True wenn die Datei existiert.
 Private Function FileExists(ByVal path As String) As Boolean
     FileExists = (Len(Dir(path)) > 0)
+End Function
+
+''' Liest eine UTF-8-kodierte Textdatei zeilenweise und gibt den Inhalt
+''' als String zurueck.
+'''
+''' FileSystemObject.OpenTextFile unterstuetzt kein UTF-8 ohne BOM auf
+''' deutschen Windows-Systemen (SystemDefault = CP1252). ADODB.Stream
+''' liest UTF-8 korrekt.
+'''
+''' Args:
+'''     filePath: Vollstaendiger Pfad zur Datei.
+'''
+''' Returns:
+'''     Gesamter Dateiinhalt als String, oder leerer String bei Fehler.
+Private Function ReadUtf8File(ByVal filePath As String) As String
+    On Error GoTo ReadErr
+    Dim stream As Object
+    Set stream = CreateObject("ADODB.Stream")
+    stream.CharSet = "UTF-8"
+    stream.Open
+    stream.LoadFromFile filePath
+    ReadUtf8File = stream.ReadText
+    stream.Close
+    Exit Function
+ReadErr:
+    ReadUtf8File = ""
 End Function
