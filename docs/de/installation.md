@@ -41,13 +41,13 @@ Das System setzt eine laufende Ollama-Instanz voraus.
 
 
 
-### MinerU (PDF Parsing)
+### Docling (PDF Parsing)
 
-Für eine optimale PDF-Extraktion nutzt das System MinerU.
+Für eine optimale PDF-Extraktion nutzt das System Docling.
 ```bash
-pip install "magic-pdf[full]"
+pip install "docling"
 ```
-Stellen Sie sicher, dass die notwendigen Modellgewichte für MinerU initialisiert sind (geschieht meist automatisch beim ersten Start).
+Stellen Sie sicher, dass die notwendigen Modellgewichte für Docling initialisiert sind (geschieht meist automatisch beim ersten Start).
 
 ## Installation verifizieren
 

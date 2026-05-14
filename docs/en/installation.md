@@ -40,13 +40,13 @@ The system requires a running Ollama instance.
 - **Models:** By default, `gemma2:2b` is used. You can change this in `config/models.yaml`.  
 
 
-### MinerU (PDF Parsing)
+### Docling (PDF Parsing)
 
-The system uses MinerU for optimal PDF extraction.
+The system uses Docling for optimal PDF extraction.
 ```bash
-pip install "magic-pdf[full]"
+pip install "docling"
 ```
-Ensure that the necessary model weights for MinerU are initialized (usually happens automatically on the first run).
+Ensure that the necessary model weights for Docling are initialized (usually happens automatically on the first run).
 
 ## Verify Installation
 

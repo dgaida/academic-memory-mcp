@@ -20,10 +20,10 @@ A locally-running, agentic knowledge and memory system for university and resear
 
 ## Prerequisites  
 - **qmd CLI:** Required for hybrid search. Install globally via: `npm install -g @tobilu/qmd`  
-- **MinerU (magic-pdf):** Required for PDF parsing. Install with: `pip install magic-pdf[full]` and initialize with `cp-config` if prompted.  
+- **Docling:** Required for PDF parsing. Install with: `pip install docling` and initialize with `cp-config` if prompted.
 
 ## Tech Stack  
-- **Document Parsing:** MinerU (magic-pdf)  
+- **Document Parsing:** Docling
 - **Local LLM:** Ollama  
 - **Embeddings:** bge-m3  
 - **Vector DB:** Qdrant  

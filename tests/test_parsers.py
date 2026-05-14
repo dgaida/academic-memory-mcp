@@ -2,38 +2,24 @@ from unittest.mock import MagicMock, patch
 from mcp_university.parser.pdf_parser import PDFParser
 from mcp_university.parser.mail_parser import MailParser
 
-def test_pdf_parser_modern_syntax(tmp_path):
-    """Testet den PDFParser mit der modernen magic-pdf Syntax."""
+def test_pdf_parser_docling(tmp_path):
+    """Testet den PDFParser mit docling."""
     cache_dir = tmp_path / "cache"
 
-    # Mock Path.home() to return tmp_path for this test
-    with patch("mcp_university.parser.pdf_parser.Path.home") as mock_home:
-        mock_home.return_value = tmp_path
-        config_path = tmp_path / "magic-pdf.json"
-        config_path.touch()
+    with patch("mcp_university.parser.pdf_parser.DocumentConverter") as mock_converter_class:
+        mock_converter = mock_converter_class.return_value
+        mock_result = MagicMock()
+        mock_result.status = "SUCCESS"
+        mock_result.document.export_to_markdown.return_value = "Parsed docling content"
+        mock_converter.convert.return_value = mock_result
 
         parser = PDFParser(cache_dir)
         pdf_file = tmp_path / "test.pdf"
         pdf_file.touch()
 
-        # Mock subprocess.run to simulate magic-pdf v1.x behavior
-        with patch("subprocess.run") as mock_run:
-            # Mocking the folder structure created by magic-pdf v1.x
-            output_subdir = cache_dir / "test"
-            output_subdir.mkdir(parents=True)
-            md_file = output_subdir / "test.md"
-            md_file.write_text("Parsed content")
-
-            # magic-pdf -p ...
-            mock_run.return_value = MagicMock(returncode=0)
-
-            content = parser.parse(pdf_file)
-            assert content == "Parsed content"
-
-            # Verify the call was with the new syntax
-            args, _ = mock_run.call_args_list[0]
-            assert "-p" in args[0]
-            assert "-o" in args[0]
+        content = parser.parse(pdf_file)
+        assert content == "Parsed docling content"
+        mock_converter.convert.assert_called_once_with(str(pdf_file))
 
 def test_mail_parser_msg_handling(tmp_path):
     """Testet die Verarbeitung von .msg Dateien im MailParser."""

@@ -11,7 +11,7 @@ Stellen Sie sicher, dass die folgende Software installiert ist:
     ```bash
     ollama pull gemma2:2b
     ```
-*   **MinerU (magic-pdf):** Für das PDF-Parsing (wird über pip installiert).  
+*   **Docling:** Für das PDF-Parsing (wird über pip installiert).
 
 ## Installation
 
