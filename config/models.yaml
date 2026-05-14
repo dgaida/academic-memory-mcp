@@ -1,5 +1,5 @@
 llm:
-  model: "gemma2:2b"
+  model: "gemma4:e2b"
   temperature: 0
   base_url: "http://localhost:11434"
 
