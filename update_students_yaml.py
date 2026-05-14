@@ -1,8 +1,14 @@
+"""Skript zur Synchronisation von Studierendenordnern mit der students.yaml."""
 import yaml
-import os
 from pathlib import Path
 
-def update_students(base_path, yaml_path):
+def update_students(base_path: str, yaml_path: str):
+    """Sucht nach Studierendenordnern und aktualisiert deren Pfade in der students.yaml.
+
+    Args:
+        base_path (str): Basisverzeichnis der Abschlussarbeiten.
+        yaml_path (str): Pfad zur students.yaml Datei.
+    """
     base_dir = Path(base_path)
     if not base_dir.exists():
         print(f"Directory {base_path} does not exist.")
