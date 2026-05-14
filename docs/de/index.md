@@ -10,12 +10,12 @@ Es nutzt lokale Large Language Models (LLMs) und moderne Retrieval-Technologien,
 
 ## Hauptmerkmale
 
-*   **Lokale Verarbeitung:** Alle Daten bleiben auf Ihrem System. Nutzung von Ollama für LLMs.
-*   **Intelligentes Crawling:** Automatische Indexierung lokaler Ordner und Dokumente.
-*   **Strukturierte Zusammenfassungen:** Erstellung von Datei- und Ordner-Summaries im universitären Kontext.
-*   **Hybride Suche:** Kombination aus semantischer Suche (Vektoren) und klassischer Stichwortsuche (BM25).
-*   **MCP-Integration:** Nahtlose Anbindung an KI-Agenten über das Model Context Protocol.
-*   **Studenten-Kontext:** Spezialisierte Tools zur Verwaltung von Studentendaten, Abschlussarbeitsthemen und Kommunikation.
+*   **Lokale Verarbeitung:** Alle Daten bleiben auf Ihrem System. Nutzung von Ollama für LLMs.  
+*   **Intelligentes Crawling:** Automatische Indexierung lokaler Ordner und Dokumente.  
+*   **Strukturierte Zusammenfassungen:** Erstellung von Datei- und Ordner-Summaries im universitären Kontext.  
+*   **Hybride Suche:** Kombination aus semantischer Suche (Vektoren) und klassischer Stichwortsuche (BM25).  
+*   **MCP-Integration:** Nahtlose Anbindung an KI-Agenten über das Model Context Protocol.  
+*   **Studenten-Kontext:** Spezialisierte Tools zur Verwaltung von Studentendaten, Abschlussarbeitsthemen und Kommunikation.  
 
 ## Quickstart
 

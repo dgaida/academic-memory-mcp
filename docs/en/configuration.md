@@ -49,5 +49,5 @@ embeddings:
 
 Some settings can be overridden via environment variables:
 
-*   `DEBUG`: Enables detailed logging (True/False).
-*   `CONFIG_DIR`: Path to the configuration directory (Default: `./config`).
+*   `DEBUG`: Enables detailed logging (True/False).  
+*   `CONFIG_DIR`: Path to the configuration directory (Default: `./config`).  

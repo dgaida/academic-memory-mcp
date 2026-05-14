@@ -6,12 +6,12 @@ Diese Anleitung führt Sie durch die Einrichtung und die ersten Schritte mit dem
 
 Stellen Sie sicher, dass die folgende Software installiert ist:
 
-*   **Python 3.10+**
-*   **Ollama:** Installieren Sie Ollama und laden Sie das Standardmodell herunter:
+*   **Python 3.10+**  
+*   **Ollama:** Installieren Sie Ollama und laden Sie das Standardmodell herunter:  
     ```bash
     ollama pull gemma2:2b
     ```
-*   **MinerU (magic-pdf):** Für das PDF-Parsing (wird über pip installiert).
+*   **MinerU (magic-pdf):** Für das PDF-Parsing (wird über pip installiert).  
 
 ## Installation
 
@@ -44,11 +44,11 @@ Starten Sie den Crawler, um Ihre Dokumente zu analysieren und Zusammenfassungen 
 mcp-uni index
 ```
 
-Der Prozess führt folgende Schritte aus:
-1. Scannt die konfigurierten Ordner.
-2. Extrahiert Text aus PDF, DOCX, MD, etc.
-3. Generiert Zusammenfassungen mittels Ollama.
-4. Speichert Metadaten in SQLite und indiziert den Text im Suchindex.
+Der Prozess führt folgende Schritte aus:  
+1. Scannt die konfigurierten Ordner.  
+2. Extrahiert Text aus PDF, DOCX, MD, etc.  
+3. Generiert Zusammenfassungen mittels Ollama.  
+4. Speichert Metadaten in SQLite und indiziert den Text im Suchindex.  
 
 ## Suche verwenden
 

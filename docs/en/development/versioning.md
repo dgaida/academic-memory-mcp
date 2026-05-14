@@ -4,8 +4,8 @@ Documentation is versioned with **mike** to provide different states of the proj
 
 ## Deployment Strategy
 
-1.  **Main Branch:** Every push to `main` updates the `dev` version of the documentation.
-2.  **Tags:** Every tag (`v*`) creates a new permanent version and updates the `latest` alias.
+1.  **Main Branch:** Every push to `main` updates the `dev` version of the documentation.  
+2.  **Tags:** Every tag (`v*`) creates a new permanent version and updates the `latest` alias.  
 
 ## Manual Deployment
 

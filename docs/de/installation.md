@@ -35,9 +35,9 @@ pip install pytest pytest-asyncio mkdocs-material mkdocs-static-i18n mkdocstring
 
 ### Ollama (LLM Backend)
 
-Das System setzt eine laufende Ollama-Instanz voraus.
-- **Download:** [ollama.com](https://ollama.com)
-- **Modelle:** Standardmäßig wird `gemma2:2b` verwendet. Sie können dies in `config/models.yaml` ändern.
+Das System setzt eine laufende Ollama-Instanz voraus.  
+- **Download:** [ollama.com](https://ollama.com)  
+- **Modelle:** Standardmäßig wird `gemma2:2b` verwendet. Sie können dies in `config/models.yaml` ändern.  
 
 
 
@@ -60,8 +60,8 @@ mcp-uni --help
 ### qmd (Suchindex-Backend)
 `qmd` ist für eine hochwertige hybride Suche erforderlich. Es handelt sich um ein Node.js-basiertes Tool, das global installiert sein muss.
 
-**Voraussetzungen:**
-- Node.js >= 22 oder Bun >= 1.0.0
+**Voraussetzungen:**  
+- Node.js >= 22 oder Bun >= 1.0.0  
 
 **Installation:**
 ```bash

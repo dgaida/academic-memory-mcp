@@ -35,9 +35,9 @@ pip install pytest pytest-asyncio mkdocs-material mkdocs-static-i18n mkdocstring
 
 ### Ollama (LLM Backend)
 
-The system requires a running Ollama instance.
-- **Download:** [ollama.com](https://ollama.com)
-- **Models:** By default, `gemma2:2b` is used. You can change this in `config/models.yaml`.
+The system requires a running Ollama instance.  
+- **Download:** [ollama.com](https://ollama.com)  
+- **Models:** By default, `gemma2:2b` is used. You can change this in `config/models.yaml`.  
 
 
 ### MinerU (PDF Parsing)
@@ -59,8 +59,8 @@ mcp-uni --help
 ### qmd (Search Backend)
 `qmd` is required for high-quality hybrid search. It is a Node.js-based tool that must be installed globally.
 
-**Prerequisites:**
-- Node.js >= 22 or Bun >= 1.0.0
+**Prerequisites:**  
+- Node.js >= 22 or Bun >= 1.0.0  
 
 **Installation:**
 ```bash

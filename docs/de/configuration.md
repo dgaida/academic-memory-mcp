@@ -49,5 +49,5 @@ embeddings:
 
 Einige Einstellungen können über Umgebungsvariablen überschrieben werden:
 
-*   `DEBUG`: Aktiviert detailliertes Logging (True/False).
-*   `CONFIG_DIR`: Pfad zum Konfigurationsverzeichnis (Standard: `./config`).
+*   `DEBUG`: Aktiviert detailliertes Logging (True/False).  
+*   `CONFIG_DIR`: Pfad zum Konfigurationsverzeichnis (Standard: `./config`).  

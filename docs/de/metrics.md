@@ -55,7 +55,7 @@ fetch('../assets/metrics.json')
 
 ## Erläuterung
 
-*   **Docstring Coverage:** Anteil der Klassen und Methoden mit validen Google-Style Docstrings.
-*   **Markdown Lint:** Überprüfung auf Formatierungsfehler in den Dokumentationsdateien.
-*   **Broken Links:** Automatische Prüfung aller internen und externen Links.
-*   **Build Warnings:** Warnungen des MkDocs Build-Prozesses (z.B. fehlende Dateien in der Navigation).
+*   **Docstring Coverage:** Anteil der Klassen und Methoden mit validen Google-Style Docstrings.  
+*   **Markdown Lint:** Überprüfung auf Formatierungsfehler in den Dokumentationsdateien.  
+*   **Broken Links:** Automatische Prüfung aller internen und externen Links.  
+*   **Build Warnings:** Warnungen des MkDocs Build-Prozesses (z.B. fehlende Dateien in der Navigation).  

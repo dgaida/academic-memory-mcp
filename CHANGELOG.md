@@ -5,15 +5,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [0.1.0] - 2026-05-13
-### Features
-- Initial release of MCP University Memory System
-- Hybrid search (BM25 + Vector) via qmd
-- Local LLM summarization via Ollama
-- FastMCP server implementation
-- Document parsing for PDF, DOCX, and E-Mail
+### Features  
+- Initial release of MCP University Memory System  
+- Hybrid search (BM25 + Vector) via qmd  
+- Local LLM summarization via Ollama  
+- FastMCP server implementation  
+- Document parsing for PDF, DOCX, and E-Mail  
 
-### Documentation
-- Complete bilingual MkDocs ecosystem
-- API reference with mkdocstrings
-- Architecture diagrams with Mermaid
-- Quality dashboard and CI/CD integration
+### Documentation  
+- Complete bilingual MkDocs ecosystem  
+- API reference with mkdocstrings  
+- Architecture diagrams with Mermaid  
+- Quality dashboard and CI/CD integration  

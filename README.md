@@ -1,29 +1,35 @@
 ![Tests](https://github.com/dgaida/academic-memory-mcp/actions/workflows/tests.yml/badge.svg) ![Lint](https://github.com/dgaida/academic-memory-mcp/actions/workflows/lint.yml/badge.svg) ![CodeQL](https://github.com/dgaida/academic-memory-mcp/actions/workflows/codeql.yml/badge.svg) ![Documentation](https://github.com/dgaida/academic-memory-mcp/actions/workflows/docs.yml/badge.svg) ![Auto Versioning](https://github.com/dgaida/academic-memory-mcp/actions/workflows/auto-version.yml/badge.svg)
+![Version](https://img.shields.io/badge/version-0.1.1-blue)
+[![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![codecov](https://codecov.io/gh/dgaida/academic-memory-mcp/branch/master/graph/badge.svg)](https://codecov.io/gh/dgaida/academic-memory-mcp)
+[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://dgaida.github.io/academic-memory-mcp/)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/dgaida/academic-memory-mcp/graphs/commit-activity)
+![Last commit](https://img.shields.io/github/last-commit/dgaida/academic-memory-mcp)
 
 # MCP University Memory System
 
 A locally-running, agentic knowledge and memory system for university and research work.
 
-## Features
-- Recursive analysis of local folders
-- Semantic understanding of documents and emails
-- Hierarchical summaries (File -> Folder -> Root)
-- Hybrid search (BM25 + Vector)
-- MCP Server integration
-- Fully offline using local LLMs (Ollama)
+## Features  
+- Recursive analysis of local folders  
+- Semantic understanding of documents and emails  
+- Hierarchical summaries (File -> Folder -> Root)  
+- Hybrid search (BM25 + Vector)  
+- MCP Server integration  
+- Fully offline using local LLMs (Ollama)  
 
-## Prerequisites
-- **qmd CLI:** Required for hybrid search. Install globally via: `npm install -g @tobilu/qmd`
-- **MinerU (magic-pdf):** Required for PDF parsing. Install with: `pip install magic-pdf[full]` and initialize with `cp-config` if prompted.
+## Prerequisites  
+- **qmd CLI:** Required for hybrid search. Install globally via: `npm install -g @tobilu/qmd`  
+- **MinerU (magic-pdf):** Required for PDF parsing. Install with: `pip install magic-pdf[full]` and initialize with `cp-config` if prompted.  
 
-## Tech Stack
-- **Document Parsing:** MinerU (magic-pdf)
-- **Local LLM:** Ollama
-- **Embeddings:** bge-m3
-- **Vector DB:** Qdrant
-- **MCP Framework:** FastMCP
-- **Metadata:** SQLite
-- **File Watching:** watchdog
+## Tech Stack  
+- **Document Parsing:** MinerU (magic-pdf)  
+- **Local LLM:** Ollama  
+- **Embeddings:** bge-m3  
+- **Vector DB:** Qdrant  
+- **MCP Framework:** FastMCP  
+- **Metadata:** SQLite  
+- **File Watching:** watchdog  
 
 ## Project Structure
 ```text

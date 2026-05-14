@@ -35,11 +35,11 @@ graph TD
 
 ## Data Flow
 
-1.  **Crawling:** The crawler scans directories and compares file hashes with the SQLite DB.
-2.  **Parsing:** New or modified files are passed through the factory to the appropriate parser.
-3.  **Summarization:** The extracted text is sent (truncated to the context window) to Ollama to obtain a structured summary.
-4.  **Indexing:** The full text is stored in the Search Index index for BM25 and vector search.
-5.  **Delivery:** Tools are defined via FastMCP that access the DB and index to answer queries from agents.
+1.  **Crawling:** The crawler scans directories and compares file hashes with the SQLite DB.  
+2.  **Parsing:** New or modified files are passed through the factory to the appropriate parser.  
+3.  **Summarization:** The extracted text is sent (truncated to the context window) to Ollama to obtain a structured summary.  
+4.  **Indexing:** The full text is stored in the Search Index index for BM25 and vector search.  
+5.  **Delivery:** Tools are defined via FastMCP that access the DB and index to answer queries from agents.  
 
 ## Process Lifecycle
 

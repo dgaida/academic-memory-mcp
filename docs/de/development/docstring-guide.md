@@ -33,9 +33,9 @@ def example_function(param1: int, param2: str = "default") -> bool:
 
 ## Regeln
 
-1.  **Vollständigkeit:** Jede öffentliche und private Methode/Klasse benötigt einen Docstring.
-2.  **Type Hints:** Parameter und Rückgabewerte müssen in der Funktionssignatur typisiert sein.
-3.  **Sprache:** Docstrings werden in **Deutsch** (oder Englisch, sofern konsistent im Modul) verfasst. In diesem Projekt bevorzugen wir Deutsch für die fachliche Beschreibung im universitären Kontext.
+1.  **Vollständigkeit:** Jede öffentliche und private Methode/Klasse benötigt einen Docstring.  
+2.  **Type Hints:** Parameter und Rückgabewerte müssen in der Funktionssignatur typisiert sein.  
+3.  **Sprache:** Docstrings werden in **Deutsch** (oder Englisch, sofern konsistent im Modul) verfasst. In diesem Projekt bevorzugen wir Deutsch für die fachliche Beschreibung im universitären Kontext.  
 
 ## Überprüfung
 

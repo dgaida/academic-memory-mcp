@@ -6,14 +6,14 @@ This guide will walk you through the setup and initial steps with the MCP Univer
 
 Ensure the following software is installed:
 
-*   **Python 3.10+**
-*   **Node.js >= 22:** Required for `qmd`.
-*   **qmd:** `npm install -g @tobilu/qmd`
-*   **Ollama:** Install Ollama and pull the default model:
+*   **Python 3.10+**  
+*   **Node.js >= 22:** Required for `qmd`.  
+*   **qmd:** `npm install -g @tobilu/qmd`  
+*   **Ollama:** Install Ollama and pull the default model:  
     ```bash
     ollama pull gemma2:2b
     ```
-*   **MinerU (magic-pdf):** For PDF parsing (installed via pip).
+*   **MinerU (magic-pdf):** For PDF parsing (installed via pip).  
 
 ## Installation
 
@@ -46,11 +46,11 @@ Start the crawler to analyze your documents and create summaries:
 mcp-uni index
 ```
 
-The process performs the following steps:
-1. Scans the configured folders.
-2. Extracts text from PDF, DOCX, MD, etc.
-3. Generates summaries using Ollama.
-4. Stores metadata in SQLite and indexes the text in the search index.
+The process performs the following steps:  
+1. Scans the configured folders.  
+2. Extracts text from PDF, DOCX, MD, etc.  
+3. Generates summaries using Ollama.  
+4. Stores metadata in SQLite and indexes the text in the search index.  
 
 ## Using Search
 

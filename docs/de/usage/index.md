@@ -33,12 +33,12 @@ Die leistungsstärkste Nutzung erfolgt über einen MCP-Client (wie Claude Deskto
 mcp-uni serve-mcp
 ```
 
-### Verfügbare Tools
-*   `search_documents`: Semantische Suche in Dokumenten.
-*   `get_folder_summary`: Abfrage von aggregierten Ordner-Informationen.
-*   `get_student_context`: Komplette Historie und Status eines Studenten abrufen.
-*   `generate_mail_reply`: Entwurf einer E-Mail basierend auf dem Kontext.
-*   `get_open_tasks`: Extraktion von TODOs aus allen Dokumenten.
+### Verfügbare Tools  
+*   `search_documents`: Semantische Suche in Dokumenten.  
+*   `get_folder_summary`: Abfrage von aggregierten Ordner-Informationen.  
+*   `get_student_context`: Komplette Historie und Status eines Studenten abrufen.  
+*   `generate_mail_reply`: Entwurf einer E-Mail basierend auf dem Kontext.  
+*   `get_open_tasks`: Extraktion von TODOs aus allen Dokumenten.  
 
 ## Typische Workflows
 

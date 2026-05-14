@@ -33,12 +33,12 @@ The most powerful way to use the system is via an MCP client (like Claude Deskto
 mcp-uni serve-mcp
 ```
 
-### Available Tools
-*   `search_documents`: Semantic search in documents.
-*   `get_folder_summary`: Query aggregated folder information.
-*   `get_student_context`: Retrieve complete history and status of a student.
-*   `generate_mail_reply`: Draft an email based on the context.
-*   `get_open_tasks`: Extraction of TODOs from all documents.
+### Available Tools  
+*   `search_documents`: Semantic search in documents.  
+*   `get_folder_summary`: Query aggregated folder information.  
+*   `get_student_context`: Retrieve complete history and status of a student.  
+*   `generate_mail_reply`: Draft an email based on the context.  
+*   `get_open_tasks`: Extraction of TODOs from all documents.  
 
 ## Typical Workflows
 

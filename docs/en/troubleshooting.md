@@ -5,26 +5,26 @@ Find solutions for common issues here.
 ## Ollama Connection Failed
 
 **Symptom:** Error message during indexing or search regarding the connection to the LLM.
-**Solution:**
-1. Check if Ollama is running: `curl http://localhost:11434/api/tags`
-2. Ensure the model is pulled: `ollama pull gemma2:2b`
-3. Check the `base_url` in `config/models.yaml`.
+**Solution:**  
+1. Check if Ollama is running: `curl http://localhost:11434/api/tags`  
+2. Ensure the model is pulled: `ollama pull gemma2:2b`  
+3. Check the `base_url` in `config/models.yaml`.  
 
 ## PDF Parsing Errors
 
 **Symptom:** PDFs are skipped or contain no text.
-**Solution:**
-1. MinerU needs internet access during the first start to download models.
-2. Check if the PDF is read-only or corrupted.
-3. Reinstall MinerU: `pip install --upgrade "magic-pdf[full]"`.
+**Solution:**  
+1. MinerU needs internet access during the first start to download models.  
+2. Check if the PDF is read-only or corrupted.  
+3. Reinstall MinerU: `pip install --upgrade "magic-pdf[full]"`.  
 
 ## Search Returns No Results
 
 **Symptom:** Search is empty even though documents are present.
-**Solution:**
-1. Run `mcp-uni index` again.
-2. Check if `search index` is available in the system path.
-3. Verify the paths in `config/folders.yaml`.
+**Solution:**  
+1. Run `mcp-uni index` again.  
+2. Check if `search index` is available in the system path.  
+3. Verify the paths in `config/folders.yaml`.  
 
 ## SQLite Database Locked
 
