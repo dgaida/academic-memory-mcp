@@ -2,6 +2,7 @@
 import subprocess
 import json
 import re
+import os
 from fastmcp import FastMCP
 import logging
 from typing import List, Dict, Any, Optional
@@ -29,6 +30,7 @@ def create_server() -> FastMCP:
     store = MetadataStore(cfg.sqlite_path)
     index = SearchIndex(str(cfg.qdrant_path), cfg.embeddings.model)
     summarizer = Summarizer(cfg.llm.model, cfg.llm.base_url)
+    use_shell = os.name == 'nt'
 
     @mcp.tool
     def search_documents(query: str, top_k: int = 5) -> List[Dict[str, Any]]:
@@ -169,6 +171,27 @@ Version 2 ({path2}):
 Comparison Summary:
 """
         return summarizer.summarize_file("comparison", prompt)
+
+
+    @mcp.tool
+    def run_qmd_command(command: str, args: List[str]) -> str:
+        """Führt einen beliebigen qmd-Befehl aus (z.B. status, ls, get).
+
+        Args:
+            command (str): Der qmd-Befehl.
+            args (List[str]): Argumente für den Befehl.
+
+        Returns:
+            str: Die Ausgabe des Befehls.
+        """
+        try:
+            result = subprocess.run(["qmd", command] + args, capture_output=True, text=True, shell=use_shell)
+            if result.returncode == 0:
+                return result.stdout
+            else:
+                return f"Error: {result.stderr}"
+        except Exception as e:
+            return f"Exception: {str(e)}"
 
     return mcp
 

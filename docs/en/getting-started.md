@@ -7,6 +7,8 @@ This guide will walk you through the setup and initial steps with the MCP Univer
 Ensure the following software is installed:
 
 *   **Python 3.10+**
+*   **Node.js >= 22:** Required for `qmd`.
+*   **qmd:** `npm install -g @tobilu/qmd`
 *   **Ollama:** Install Ollama and pull the default model:
     ```bash
     ollama pull gemma2:2b
