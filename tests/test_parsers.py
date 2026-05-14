@@ -19,7 +19,7 @@ def test_pdf_parser_docling(tmp_path):
 
         content = parser.parse(pdf_file)
         assert content == "Parsed docling content"
-        mock_converter.convert.assert_called_once_with(str(pdf_file))
+        mock_converter.convert.assert_called_once_with(str(pdf_file), max_num_pages=3)
 
 def test_mail_parser_msg_handling(tmp_path):
     """Testet die Verarbeitung von .msg Dateien im MailParser."""

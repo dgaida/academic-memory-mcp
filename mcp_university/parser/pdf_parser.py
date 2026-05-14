@@ -1,8 +1,12 @@
 """Modul zum Parsen von PDF-Dokumenten mittels Docling."""
 import logging
+import warnings
 from pathlib import Path
 from typing import Optional
 from docling.document_converter import DocumentConverter
+
+# Suppress torch pin_memory warnings when no accelerator is found
+warnings.filterwarnings("ignore", message=".*pin_memory.*")
 
 logger = logging.getLogger(__name__)
 
@@ -30,19 +34,15 @@ class PDFParser:
         """
         logger.info(f"Parsing document with docling: {file_path}")
         try:
-            result = self.converter.convert(str(file_path))
-            if result.status == "failed": # Assuming status might be 'failed' based on docs
-                 # Docling result object actually has a status attribute according to documentation
-                 # but let's be safe and check if it's SUCCESS.
-                 pass
+            # Limit processing to first 3 pages
+            result = self.converter.convert(str(file_path), max_num_pages=3)
 
             # Some versions might use result.document.export_to_markdown()
-            # based on my query docs it seems standard now.
             markdown = result.document.export_to_markdown()
             return markdown
         except Exception as e:
             logger.error(f"Error parsing document {file_path} with docling: {e}")
-            # Fallback for docx if docling fails? docling is usually good though.
+            # Fallback for docx if docling fails
             if file_path.suffix.lower() == ".docx":
                 return self._parse_docx_fallback(file_path)
             return None
