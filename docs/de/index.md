@@ -44,7 +44,7 @@ graph TD
     A[Dateisystem] --> B[Crawler]
     B --> C[Parser]
     C --> D[Summarizer / Ollama]
-    C --> E[Search Index / qmd]
+    C --> E[Search Index / Suchindex]
     D --> F[Metadata Store / SQLite]
     E --> F
     F --> G[MCP Server]

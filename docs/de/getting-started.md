@@ -11,7 +11,6 @@ Stellen Sie sicher, dass die folgende Software installiert ist:
     ```bash
     ollama pull gemma2:2b
     ```
-*   **qmd:** Das CLI-Tool für die hybride Suche (muss im PATH verfügbar sein).
 *   **MinerU (magic-pdf):** Für das PDF-Parsing (wird über pip installiert).
 
 ## Installation
@@ -49,7 +48,7 @@ Der Prozess führt folgende Schritte aus:
 1. Scannt die konfigurierten Ordner.
 2. Extrahiert Text aus PDF, DOCX, MD, etc.
 3. Generiert Zusammenfassungen mittels Ollama.
-4. Speichert Metadaten in SQLite und indiziert den Text in qmd.
+4. Speichert Metadaten in SQLite und indiziert den Text im Suchindex.
 
 ## Suche verwenden
 

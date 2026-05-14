@@ -21,7 +21,7 @@ graph TD
     end
 
     subgraph "Storage & Index Layer"
-        C --> IDX[Search Index / qmd]
+        C --> IDX[Search Index / Suchindex]
         C --> DB[Metadata Store / SQLite]
     end
 
@@ -38,7 +38,7 @@ graph TD
 1.  **Crawling:** Der Crawler scannt Verzeichnisse und vergleicht Dateihashes mit der SQLite-DB.
 2.  **Parsing:** Neue oder geänderte Dateien werden durch die Factory an den passenden Parser übergeben.
 3.  **Summarization:** Der extrahierte Text wird (gekürzt auf das Kontextfenster) an Ollama gesendet, um eine strukturierte Zusammenfassung zu erhalten.
-4.  **Indexierung:** Der Volltext wird im qmd-Index für die BM25- und Vektorsuche hinterlegt.
+4.  **Indexierung:** Der Volltext wird im Suchindex-Index für die BM25- und Vektorsuche hinterlegt.
 5.  **Bereitstellung:** Über FastMCP werden Tools definiert, die auf die DB und den Index zugreifen, um Anfragen von Agenten zu beantworten.
 
 ## Prozesslebenszyklus
