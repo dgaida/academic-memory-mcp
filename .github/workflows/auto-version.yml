@@ -1,7 +1,7 @@
 name: Auto Versioning
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "master" ]
 jobs:
   version:
     runs-on: ubuntu-latest
