@@ -27,7 +27,7 @@ class PDFParser:
             try:
                 subprocess.run(["cp-config"], capture_output=True)
             except FileNotFoundError:
-                logger.warning("cp-config not found. Skipping magic-pdf config initialization.")
+                logger.warning("cp-config not found. Skipping magic-pdf config initialization. Ensure magic-pdf[full] is installed: pip install magic-pdf[full]")
 
     def parse(self, file_path: Path) -> Optional[str]:
         """Extrahiert Text aus einer PDF- oder DOCX-Datei.

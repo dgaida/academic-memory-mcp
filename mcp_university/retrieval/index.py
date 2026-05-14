@@ -7,7 +7,7 @@ import os
 import re
 import hashlib
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 import numpy as np
 
 try:
@@ -42,7 +42,7 @@ class SearchIndex:
         self._qmd_available = self._check_qmd()
 
         if not self._qmd_available:
-            logger.warning("qmd CLI not found. Falling back to native Python implementation.")
+            logger.warning("qmd CLI not found. Falling back to native Python implementation. Install with: npm install -g @tobilu/qmd")
             if not NATIVE_AVAILABLE:
                 logger.error("Native search dependencies missing. Search will be unavailable.")
 

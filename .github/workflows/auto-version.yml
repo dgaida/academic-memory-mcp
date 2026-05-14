@@ -1,4 +1,6 @@
 name: Auto Versioning
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 on:
   push:
     branches: [ "master" ]
@@ -9,7 +11,9 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-      - name: Auto Version and Badges
-        uses: dgaida/auto-version-action@v1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+      - name: Auto Version and Badges
+        uses: dgaida/auto-version-action@main
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
