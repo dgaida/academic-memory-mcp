@@ -2,7 +2,6 @@
 import typer
 import logging
 from logging.handlers import RotatingFileHandler
-from pathlib import Path
 from ..crawler.crawler import Crawler
 from ..config import get_config
 from ..metadata.store import MetadataStore
