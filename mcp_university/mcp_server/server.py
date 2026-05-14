@@ -1,10 +1,8 @@
 """FastMCP Server-Implementierung."""
 import subprocess
-import json
-import re
 from fastmcp import FastMCP
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from pathlib import Path
 
 from ..config import get_config

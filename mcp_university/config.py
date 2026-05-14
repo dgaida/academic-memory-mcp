@@ -1,9 +1,8 @@
 """Modul für die Konfiguration des MCP University Systems."""
-import os
 from pathlib import Path
 from typing import List, Dict, Any, Type, TypeVar
 import yaml
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 T = TypeVar("T", bound=BaseModel)
 

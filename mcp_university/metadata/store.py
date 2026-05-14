@@ -2,8 +2,7 @@
 import sqlite3
 import time
 from pathlib import Path
-from typing import List, Dict, Any, Optional
-import json
+from typing import Optional
 
 class MetadataStore:
     """Verwaltet die Metadaten-Persistenz in einer SQLite-Datenbank.

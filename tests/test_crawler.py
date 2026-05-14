@@ -1,5 +1,3 @@
-import pytest
-from pathlib import Path
 from unittest.mock import MagicMock
 from mcp_university.crawler.crawler import Crawler
 from mcp_university.config import Config

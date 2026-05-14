@@ -4,8 +4,7 @@ import subprocess
 import hashlib
 from pathlib import Path
 import logging
-from typing import List, Optional
-import time
+from typing import Optional
 
 from ..config import Config
 from ..metadata.store import MetadataStore
