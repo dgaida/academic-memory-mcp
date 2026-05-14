@@ -39,9 +39,7 @@ Das System setzt eine laufende Ollama-Instanz voraus.
 - **Download:** [ollama.com](https://ollama.com)
 - **Modelle:** Standardmäßig wird `gemma2:2b` verwendet. Sie können dies in `config/models.yaml` ändern.
 
-### qmd (Search Backend)
 
-`qmd` ist für die hybride Suche erforderlich. Stellen Sie sicher, dass es installiert und über die Kommandozeile erreichbar ist.
 
 ### MinerU (PDF Parsing)
 
@@ -58,3 +56,18 @@ Prüfen Sie, ob das CLI-Tool korrekt installiert wurde:
 ```bash
 mcp-uni --help
 ```
+
+### qmd (Suchindex-Backend)
+`qmd` ist für eine hochwertige hybride Suche erforderlich. Es handelt sich um ein Node.js-basiertes Tool, das global installiert sein muss.
+
+**Voraussetzungen:**
+- Node.js >= 22 oder Bun >= 1.0.0
+
+**Installation:**
+```bash
+npm install -g @tobilu/qmd
+# oder
+bun install -g @tobilu/qmd
+```
+
+Falls `qmd` nicht gefunden wird, nutzt das System automatisch eine native Python-Suche (Qdrant + BM25). Funktionen wie LLM-Re-Ranking und Query-Expansion stehen dann jedoch nicht zur Verfügung.

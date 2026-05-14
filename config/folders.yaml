@@ -1,5 +1,5 @@
 folders:
-  - "data/test_docs"
+  - "D:/TH_Koeln/BachelorMasterThesen/BachelorThesen/2026_SoSe/Struckmeyer"
 
 exclude_patterns:
   - "*.tmp"

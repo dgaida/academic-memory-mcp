@@ -1,5 +1,8 @@
 """FastMCP Server-Implementierung."""
 import subprocess
+import json
+import re
+import os
 from fastmcp import FastMCP
 import logging
 from typing import List, Dict, Any
@@ -27,6 +30,7 @@ def create_server() -> FastMCP:
     store = MetadataStore(cfg.sqlite_path)
     index = SearchIndex(str(cfg.qdrant_path), cfg.embeddings.model)
     summarizer = Summarizer(cfg.llm.model, cfg.llm.base_url)
+    use_shell = os.name == 'nt'
 
     @mcp.tool
     def search_documents(query: str, top_k: int = 5) -> List[Dict[str, Any]]:
@@ -181,7 +185,7 @@ Comparison Summary:
             str: Die Ausgabe des Befehls.
         """
         try:
-            result = subprocess.run(["qmd", command] + args, capture_output=True, text=True)
+            result = subprocess.run(["qmd", command] + args, capture_output=True, text=True, shell=use_shell)
             if result.returncode == 0:
                 return result.stdout
             else:

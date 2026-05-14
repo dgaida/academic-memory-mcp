@@ -36,6 +36,7 @@ class Crawler:
         self.parser = parser
         self.summarizer = summarizer
         self.index = index
+        self.use_shell = os.name == 'nt'
 
     def _calculate_hash(self, path: Path) -> str:
         """Berechnet den SHA-256 Hash einer Datei.
@@ -61,22 +62,28 @@ class Crawler:
                 logger.warning(f"Root path {root_path} does not exist. Skipping.")
                 continue
 
-            # Ensure the folder is in a qmd collection
+            # qmd integration (with Windows fix)
             coll_name = root_path.name
             exts = [ext.lstrip('.') for ext in self.config.folders.supported_extensions]
             mask = f"**/*.{{{','.join(exts)}}}"
 
             logger.info(f"Syncing qmd collection for {root_path}")
-            subprocess.run([
-                "qmd", "collection", "add", str(root_path),
-                "--name", coll_name,
-                "--mask", mask
-            ], capture_output=True)
+            try:
+                subprocess.run([
+                    "qmd", "collection", "add", str(root_path),
+                    "--name", coll_name,
+                    "--mask", mask
+                ], capture_output=True, shell=self.use_shell)
+            except Exception as e:
+                logger.debug(f"qmd collection add skipped or failed: {e}")
 
             self._process_directory(root_path)
 
         logger.info("Updating qmd index...")
-        subprocess.run(["qmd", "update"], capture_output=True)
+        try:
+            subprocess.run(["qmd", "update"], capture_output=True, shell=self.use_shell)
+        except Exception as e:
+            logger.debug(f"qmd update skipped or failed: {e}")
 
     def _process_directory(self, dir_path: Path, parent_id: Optional[int] = None) -> None:
         """Verarbeitet ein Verzeichnis rekursiv.
@@ -141,6 +148,7 @@ class Crawler:
         file_id = self.store.upsert_file(str(file_path), file_hash, mtime, file_path.suffix.lower(), folder_id)
         self.store.add_summary("file", file_id, summary)
 
+        # Index via SearchIndex (handles qmd and native fallback)
         self.index.add_document(str(file_path), content, {
             "path": str(file_path),
             "folder": str(file_path.parent),
