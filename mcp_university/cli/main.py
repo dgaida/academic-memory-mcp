@@ -1,6 +1,7 @@
 """Kommandozeilen-Schnittstelle (CLI) für das MCP University System."""
 import typer
 import logging
+from logging.handlers import RotatingFileHandler
 from ..crawler.crawler import Crawler
 from ..config import get_config
 from ..metadata.store import MetadataStore
@@ -12,11 +13,41 @@ from ..mcp_server.server import create_server
 app = typer.Typer(help="MCP University Memory System CLI")
 
 def setup_logging(debug: bool):
-    log_level = logging.DEBUG if debug else logging.INFO
-    logging.basicConfig(
-        level=log_level,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    """Konfiguriert das Logging für Konsole und Datei."""
+    cfg = get_config()
+    log_dir = cfg.log_path
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_file = log_dir / "mcp-university.log"
+
+    # Basis-Konfiguration für das Root-Logging
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+
+    # Formatter
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+    # Console Handler
+    console_level = logging.DEBUG if debug else logging.INFO
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(console_level)
+    console_handler.setFormatter(formatter)
+
+    # File Handler (immer DEBUG)
+    file_handler = RotatingFileHandler(
+        log_file,
+        maxBytes=10*1024*1024, # 10MB
+        backupCount=5,
+        encoding='utf-8'
     )
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(formatter)
+
+    # Vorhandene Handler entfernen, um Duplikate zu vermeiden
+    if logger.hasHandlers():
+        logger.handlers.clear()
+
+    logger.addHandler(console_handler)
+    logger.addHandler(file_handler)
 
 @app.command()
 def index(debug: bool = typer.Option(False, "--debug", "-d", help="Enable debug logging")) -> None:

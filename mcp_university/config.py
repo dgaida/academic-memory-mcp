@@ -89,6 +89,15 @@ class Config:
         return self.config_dir.parent / "data"
 
     @property
+    def log_path(self) -> Path:
+        """Gibt den Pfad zum Log-Verzeichnis zurück.
+
+        Returns:
+            Path: Log-Pfad.
+        """
+        return self.data_dir / "logs"
+
+    @property
     def sqlite_path(self) -> Path:
         """Gibt den Pfad zur SQLite-Datenbank zurück.
 
