@@ -1,5 +1,5 @@
 ![Tests](https://github.com/dgaida/academic-memory-mcp/actions/workflows/tests.yml/badge.svg) ![Lint](https://github.com/dgaida/academic-memory-mcp/actions/workflows/lint.yml/badge.svg) ![CodeQL](https://github.com/dgaida/academic-memory-mcp/actions/workflows/codeql.yml/badge.svg) ![Documentation](https://github.com/dgaida/academic-memory-mcp/actions/workflows/docs.yml/badge.svg) ![Auto Versioning](https://github.com/dgaida/academic-memory-mcp/actions/workflows/auto-version.yml/badge.svg)
-![Version](https://img.shields.io/badge/version-0.1.1-blue)
+[![Version](https://img.shields.io/github/v/tag/dgaida/academic-memory-mcp?label=version)](https://github.com/dgaida/academic-memory-mcp/tags)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![codecov](https://codecov.io/gh/dgaida/academic-memory-mcp/branch/master/graph/badge.svg)](https://codecov.io/gh/dgaida/academic-memory-mcp)
 [![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://dgaida.github.io/academic-memory-mcp/)
