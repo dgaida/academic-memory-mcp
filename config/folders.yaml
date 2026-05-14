@@ -1,3 +1,20 @@
 folders:
-  - "/app/test_docs"
-supported_extensions: [".txt"]
+  - "D:/TH_Koeln/BachelorMasterThesen/BachelorThesen/2026_SoSe/Struckmeyer"
+
+exclude_patterns:
+  - "*.tmp"
+  - "*.bak"
+  - "node_modules"
+  - ".git"
+
+supported_extensions:
+  - ".pdf"
+  - ".docx"
+  - ".md"
+  - ".txt"
+  - ".eml"
+  - ".msg"
+  - ".py"
+  - ".ipynb"
+  - ".json"
+  - ".html"
