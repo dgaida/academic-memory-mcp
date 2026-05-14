@@ -36,7 +36,9 @@ class Summarizer:
             Optional[str]: Die generierte Zusammenfassung im Markdown-Format oder None bei Fehlern.
         """
         logger.info(f"Summarizing file: {filename}")
-        prompt = f"""
+
+        system_prompt = "You are a university knowledge management assistant. Summarize documents into a structured Markdown format."
+        user_prompt = f"""
 Summarize the following document for a university knowledge system.
 Filename: {filename}
 
@@ -61,17 +63,22 @@ Provide the summary in the following Markdown format:
 (Why is this important?)
 
 Document Content:
-{content[:10000]} # Limiting content to avoid context window issues
+{content[:10000]}
 """
+        messages = [
+            {'role': 'system', 'content': system_prompt},
+            {'role': 'user', 'content': user_prompt}
+        ]
+
         try:
-            logger.debug(f"Sending request to Ollama (model={self.model}) for file {filename}")
-            response = self.client.generate(
+            logger.debug(f"Sending chat request to Ollama (model={self.model}) for file {filename}")
+            response = self.client.chat(
                 model=self.model,
-                prompt=prompt,
+                messages=messages,
                 options={"temperature": 0}
             )
-            logger.debug(f"Successfully received summary for file {filename}")
-            return response['response']
+            logger.debug(f"Successfully received chat response for file {filename}")
+            return response['message']['content']
         except Exception as e:
             logger.error(f"Error summarizing file {filename} with model {self.model}: {e}")
             if "memory" in str(e).lower():
@@ -90,7 +97,9 @@ Document Content:
         """
         logger.info(f"Summarizing folder: {folder_name}")
         items_combined = "\n---\n".join(item_summaries)
-        prompt = f"""
+
+        system_prompt = "You are a university knowledge management assistant. Create aggregated summaries for folders based on their content."
+        user_prompt = f"""
 Create a summary for the folder '{folder_name}' based on the summaries of its contents.
 
 Format:
@@ -114,15 +123,20 @@ Format:
 Contents:
 {items_combined[:15000]}
 """
+        messages = [
+            {'role': 'system', 'content': system_prompt},
+            {'role': 'user', 'content': user_prompt}
+        ]
+
         try:
-            logger.debug(f"Sending request to Ollama (model={self.model}) for folder {folder_name}")
-            response = self.client.generate(
+            logger.debug(f"Sending chat request to Ollama (model={self.model}) for folder {folder_name}")
+            response = self.client.chat(
                 model=self.model,
-                prompt=prompt,
+                messages=messages,
                 options={"temperature": 0}
             )
-            logger.debug(f"Successfully received summary for folder {folder_name}")
-            return response['response']
+            logger.debug(f"Successfully received chat response for folder {folder_name}")
+            return response['message']['content']
         except Exception as e:
             logger.error(f"Error summarizing folder {folder_name} with model {self.model}: {e}")
             if "memory" in str(e).lower():
