@@ -5,7 +5,7 @@ import re
 import os
 from fastmcp import FastMCP
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from pathlib import Path
 
 from ..config import get_config

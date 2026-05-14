@@ -1,5 +1,4 @@
 import pytest
-import asyncio
 from unittest.mock import MagicMock
 import mcp_university.retrieval.index as index_mod
 import mcp_university.summarizer.engine as sum_mod
@@ -9,7 +8,7 @@ index_mod.SentenceTransformer = lambda x: MagicMock()
 index_mod.QdrantClient = MagicMock()
 sum_mod.ollama = MagicMock()
 
-from mcp_university.mcp_server.server import create_server
+from mcp_university.mcp_server.server import create_server  # noqa: E402
 
 @pytest.mark.asyncio
 async def test_server_tools():

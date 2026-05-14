@@ -1,5 +1,3 @@
-import pytest
-from pathlib import Path
 from mcp_university.config import Config
 from mcp_university.metadata.store import MetadataStore
 from mcp_university.parser.factory import ParserFactory
