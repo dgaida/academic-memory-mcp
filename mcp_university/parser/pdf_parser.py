@@ -25,6 +25,7 @@ class PDFParser:
         if not config_path.exists():
             try:
                 # Check if magic-pdf is available before trying to config
+                logger.debug("Checking for magic-pdf availability...")
                 subprocess.run(["magic-pdf", "-v"], capture_output=True, check=True)
                 logger.info("Initializing magic-pdf config...")
                 subprocess.run(["cp-config"], capture_output=True)
@@ -45,18 +46,31 @@ class PDFParser:
 
         try:
             # MinerU CLI call (using modern v1.x syntax)
-            # Try new syntax first, then fallback to old if it fails with specific error
-            result = subprocess.run([
+            cmd1 = [
                 "magic-pdf", "-p", str(file_path),
                 "-o", str(self.cache_dir)
-            ], capture_output=True, text=True)
+            ]
+            logger.info(f"Parsing PDF with magic-pdf (v1.x syntax): {file_path}")
+            logger.debug(f"Executing command: {' '.join(cmd1)}")
+
+            result = subprocess.run(cmd1, capture_output=True, text=True)
 
             if result.returncode != 0:
+                logger.debug(f"magic-pdf (v1.x) failed (returncode {result.returncode}). Stderr: {result.stderr}")
                 # Fallback to old syntax for older versions
-                subprocess.run([
+                cmd2 = [
                     "magic-pdf", "pdf-extract", "--pdf", str(file_path),
                     "--output-dir", str(self.cache_dir)
-                ], capture_output=True, check=True)
+                ]
+                logger.info(f"Retrying PDF parsing with legacy magic-pdf syntax: {file_path}")
+                logger.debug(f"Executing command: {' '.join(cmd2)}")
+
+                result = subprocess.run(cmd2, capture_output=True, text=True)
+                if result.returncode != 0:
+                    logger.error(f"Error parsing PDF {file_path}: Command returned non-zero exit status {result.returncode}")
+                    logger.error(f"Stdout: {result.stdout}")
+                    logger.error(f"Stderr: {result.stderr}")
+                    return None
 
             # MinerU v1.x creates a directory with the file stem
             # and inside it puts the .md file and assets.
@@ -65,22 +79,29 @@ class PDFParser:
             # Check direct match (old style)
             md_path = self.cache_dir / f"{file_path.stem}.md"
             if md_path.exists():
+                logger.debug(f"Found parsed markdown at: {md_path}")
                 return md_path.read_text(encoding="utf-8")
 
             # Check subdir match (new style)
             # magic-pdf usually creates a folder named after the file
             potential_dir = self.cache_dir / file_path.stem
             if potential_dir.exists() and potential_dir.is_dir():
+                logger.debug(f"Searching for markdown in directory: {potential_dir}")
                 md_files = list(potential_dir.glob("*.md"))
                 if md_files:
                     # Return the largest md file or the one named after the stem
                     for f in md_files:
                         if f.stem == file_path.stem:
+                            logger.debug(f"Found matching markdown file: {f}")
                             return f.read_text(encoding="utf-8")
+
+                    logger.debug(f"No direct stem match, using first available markdown: {md_files[0]}")
                     return md_files[0].read_text(encoding="utf-8")
 
+            logger.warning(f"Parsing successful but no output .md file found for {file_path}")
+
         except (subprocess.CalledProcessError, FileNotFoundError) as e:
-            logger.error(f"Error parsing PDF {file_path}: {e}")
+            logger.error(f"Exception during PDF parsing of {file_path}: {e}")
 
         return None
 
@@ -88,6 +109,7 @@ class PDFParser:
         """Parsen von DOCX als Fallback."""
         try:
             import docx
+            logger.info(f"Parsing DOCX: {path}")
             doc = docx.Document(path)
             return "\n".join([p.text for p in doc.paragraphs])
         except Exception as e:
