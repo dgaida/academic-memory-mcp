@@ -15,7 +15,14 @@ def update_students(base_path: str, yaml_path: str):
         return
 
     with open(yaml_path, 'r', encoding='utf-8') as f:
-        students_data = yaml.safe_load(f) or []
+        data = yaml.safe_load(f) or {}
+
+    if isinstance(data, dict) and 'students' in data:
+        students_list = data['students']
+    elif isinstance(data, list):
+        students_list = data
+    else:
+        students_list = []
 
     changed = False
     student_folders = [d for d in base_dir.iterdir() if d.is_dir()]
@@ -23,8 +30,8 @@ def update_students(base_path: str, yaml_path: str):
     for folder in student_folders:
         lastname = folder.name
         found = False
-        for student in students_data:
-            if lastname in student.get('name', ''):
+        for student in students_list:
+            if lastname.lower() in student.get('name', '').lower():
                 found = True
                 if not student.get('folders'):
                     student['folders'] = [
@@ -42,7 +49,7 @@ def update_students(base_path: str, yaml_path: str):
 
     if changed:
         with open(yaml_path, 'w', encoding='utf-8') as f:
-            yaml.dump(students_data, f, allow_unicode=True, sort_keys=False)
+            yaml.dump(data, f, allow_unicode=True, sort_keys=False)
         print("Updated students.yaml successfully.")
     else:
         print("No changes made to students.yaml.")
