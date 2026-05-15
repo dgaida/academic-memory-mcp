@@ -36,7 +36,7 @@ from __future__ import annotations
 import argparse
 import re
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
@@ -193,14 +193,17 @@ class Student:
 def load_students_yaml(yaml_path: Path) -> list[Student]:
     """Liest students.yaml und gibt eine Liste von Student-Objekten zurueck.
 
-    Der Parser versteht:
-    - name, smail als einfache String-Felder
-    - emails als Inline-Liste  ``[]``  oder Block-Liste  ``- "addr"``
-    - folders als Liste von Eintraegen mit keys + path::
+    Unterstuetztes Format (Einrueckung 0 fuer Studierenden-Eintraege)::
 
-        folders:
-          - keys: ["Bachelorthesis", "Bachelorarbeit"]
-            path: "C:\\\\Pfad"
+        students:
+        - name: Max Mustermann
+          smail: m.mustermann@smail.th-koeln.de
+          emails: []
+          folders:
+          - keys:
+            - Bachelorthesis
+            - Bachelorarbeit
+            path: C:\\Ablage\\Mustermann\\Bachelorthesis
 
     Args:
         yaml_path: Pfad zur YAML-Datei.
@@ -215,7 +218,7 @@ def load_students_yaml(yaml_path: Path) -> list[Student]:
 
     students: list[Student] = []
     current: Student | None = None
-    # Zustaende: root | in_student | in_emails | in_folders | in_folder_entry
+    # Zustaende: root | in_student | in_emails | in_folders | in_folder_entry | in_keys
     state: str = "root"
     current_entry: FolderEntry | None = None
 
@@ -231,8 +234,8 @@ def load_students_yaml(yaml_path: Path) -> list[Student]:
         stripped = raw.strip()
         indent = len(raw) - len(raw.lstrip(" "))
 
-        # Studierenden-Block (Einrueckung 2, beginnt mit "- ")
-        if stripped.startswith("- ") and indent == 2:
+        # Studierenden-Block: "- " auf Indent 0
+        if stripped.startswith("- ") and indent == 0:
             _commit_entry()
             if current is not None:
                 students.append(current)
@@ -275,26 +278,43 @@ def load_students_yaml(yaml_path: Path) -> list[Student]:
             rest = stripped[8:].strip()
             state = "in_student" if rest in ("", "[]") else "in_folders"
 
-        # Neuer folder-Eintrag (Einrueckung 6, beginnt mit "- ")
-        elif state in ("in_folders", "in_folder_entry") and stripped.startswith("- ") and indent == 6:
+        # Neuer folder-Eintrag: "- keys:" oder "- path:" auf Indent 2
+        elif state in ("in_folders", "in_folder_entry") and stripped.startswith("- ") and indent == 2:
             _commit_entry()
             current_entry = FolderEntry(keys=[], path="")
             state = "in_folder_entry"
             after_dash = stripped[2:].strip()
             if after_dash.startswith("keys:"):
-                current_entry.keys = _parse_inline_list(after_dash[5:].strip(), lowercase=False)
+                rest = after_dash[5:].strip()
+                if rest.startswith("["):
+                    # Inline: - keys: ["A", "B"]
+                    current_entry.keys = _parse_inline_list(rest, lowercase=False)
+                else:
+                    # Block: naechste Zeilen "- Keyword" auf Indent 4
+                    state = "in_keys"
             elif after_dash.startswith("path:"):
-                current_entry.path = _extract_yaml_value(after_dash, "path").replace("\\\\", "\\")
+                current_entry.path = _extract_yaml_value(after_dash, "path")
 
-        elif state == "in_folder_entry" and current_entry is not None:
+        # Block-keys: "- Keyword" auf Indent 4
+        elif state == "in_keys" and stripped.startswith("- ") and indent == 4:
+            kw = stripped[2:].strip().strip('"').strip("'")
+            if kw and current_entry is not None:
+                current_entry.keys.append(kw)
+
+        elif state in ("in_folder_entry", "in_keys") and current_entry is not None:
             if stripped.startswith("keys:"):
-                current_entry.keys = _parse_inline_list(stripped[5:].strip(), lowercase=False)
+                rest = stripped[5:].strip()
+                if rest.startswith("["):
+                    current_entry.keys = _parse_inline_list(rest, lowercase=False)
+                    state = "in_folder_entry"
+                else:
+                    state = "in_keys"
             elif stripped.startswith("path:"):
-                current_entry.path = _extract_yaml_value(stripped, "path").replace("\\\\", "\\")
-            elif stripped and not stripped.startswith("#") and indent < 6:
+                current_entry.path = _extract_yaml_value(stripped, "path")
+                state = "in_folder_entry"
+            elif stripped and not stripped.startswith("#") and indent <= 2 and not stripped.startswith("- "):
                 _commit_entry()
                 state = "in_student"
-                current.raw_extra_lines.append(raw)
 
         elif state == "in_student":
             if stripped and not stripped.startswith("#"):
@@ -414,6 +434,19 @@ def enrich_students(
 def write_students_yaml(yaml_path: Path, students: list[Student]) -> None:
     """Schreibt die Studierenden-Liste in die YAML-Datei.
 
+    Format ohne Anfuehrungszeichen, Studierenden-Eintraege auf Einrueckung 0,
+    keys als Block-Liste::
+
+        students:
+        - name: Max Mustermann
+          smail: m.mustermann@smail.th-koeln.de
+          emails: []
+          folders:
+          - keys:
+            - Bachelorthesis
+            - Bachelorarbeit
+            path: C:\\Ablage\\Mustermann\\Bachelorthesis
+
     Args:
         yaml_path: Zielpfad der YAML-Datei.
         students:  Liste von Student-Objekten.
@@ -421,28 +454,27 @@ def write_students_yaml(yaml_path: Path, students: list[Student]) -> None:
     lines: list[str] = ["students:"]
 
     for student in students:
-        name_escaped = student.name.replace('"', "'")
-        lines.append(f'  - name: "{name_escaped}"')
-        lines.append(f'    smail: "{student.smail}"')
+        lines.append(f"- name: {student.name}")
+        lines.append(f"  smail: {student.smail}")
 
         # emails
         if not student.emails:
-            lines.append("    emails: []")
+            lines.append("  emails: []")
         else:
-            lines.append("    emails:")
+            lines.append("  emails:")
             for addr in student.emails:
-                lines.append(f'      - "{addr}"')
+                lines.append(f"  - {addr}")
 
-        # folders  (Ansatz A: Liste von {keys, path}-Eintraegen)
+        # folders (Block-keys-Liste)
         if not student.folders:
-            lines.append("    folders: []")
+            lines.append("  folders: []")
         else:
-            lines.append("    folders:")
+            lines.append("  folders:")
             for entry in student.folders:
-                keys_inline = ", ".join(f'"{k}"' for k in entry.keys)
-                path_escaped = entry.path.replace("\\", "\\\\")
-                lines.append(f"      - keys: [{keys_inline}]")
-                lines.append(f'        path: "{path_escaped}"')
+                lines.append("  - keys:")
+                for k in entry.keys:
+                    lines.append(f"    - {k}")
+                lines.append(f"    path: {entry.path}")
 
         for extra in student.raw_extra_lines:
             lines.append(extra)

@@ -4,72 +4,79 @@
 '
 ' Funktionsweise:
 '   1. Durchlaeuft alle E-Mails im Posteingang.
-'   2. Identifiziert Absender mit @smail.th-koeln.de Adresse.
-'   3. Extrahiert Name und E-Mail-Adresse.
-'   4. Prueft, ob die Adresse bereits in der students.yaml bekannt ist.
-'   5. Fuegt neue Studierende am Ende der YAML-Datei hinzu.
+'   2. Sammelt alle Absenderadressen mit der Endung "@smail.th-koeln.de".
+'   3. Ermittelt den Anzeigenamen des Absenders.
+'   4. Schreibt die Ergebnisse in eine YAML-Datei (students.yaml) im Format:
 '
-' YAML-Format:
-'   students:
-'   - name: Max Mustermann
-'     smail: m.mustermann@smail.th-koeln.de
-'     emails: []
-'     folders: []
+'      students:
+'        - name: "Max Mustermann"
+'          smail: "m.mustermann@smail.th-koeln.de"
+'          emails: []
+'          folders: {}
+'
+'   Existiert die YAML-Datei bereits, werden nur neue Studierende ergaenzt
+'   (bestehende Eintraege bleiben unveraendert).
 '
 ' WICHTIG: Den Pfad zur YAML-Datei in YAML_FILE_PATH anpassen!
 ' =============================================================================
 
 Option Explicit
 
-' Pfad zur YAML-Konfigurationsdatei - bitte anpassen
+' Pfad zur YAML-Ausgabedatei - bitte anpassen
 Private Const YAML_FILE_PATH As String = "D:\TH_Koeln\academic-memory-mcp\students.yaml"
 
-''' Hauptprozedur: Sammelt neue smail-Adressen aus dem Posteingang und speichert
-''' sie in der YAML-Datei.
-Public Sub CollectSmailAddresses()
-    Dim inbox      As Outlook.MAPIFolder
-    Dim items      As Outlook.items
-    Dim item       As Object
-    Dim existing   As Object ' Dictionary: smail_lower -> True
-    Dim newStudents As Object ' Dictionary: smail_lower -> DisplayName
+' E-Mail-Domain der Studierenden
+Private Const STUDENT_DOMAIN As String = "@smail.th-koeln.de"
 
-    Set existing = LoadExistingSmailAddresses(YAML_FILE_PATH)
-    Set newStudents = CreateObject("Scripting.Dictionary")
-    newStudents.CompareMode = 1
+' =============================================================================
+' Hauptprozedur
+' =============================================================================
+
+''' Scannt den Posteingang nach Studierenden-E-Mails und schreibt die
+''' Ergebnisse in eine YAML-Datei. Bestehende Eintraege werden nicht
+''' ueberschrieben, nur neue Studierende werden ergaenzt.
+Public Sub CollectStudentEmails()
+    Dim inbox      As Outlook.MAPIFolder
+    Dim newStudents As Object   ' Dictionary: smail -> DisplayName
+    Dim existing   As Object   ' Dictionary: smail -> True (bereits in YAML)
 
     Set inbox = Application.Session.GetDefaultFolder(olFolderInbox)
+    If inbox Is Nothing Then
+        MsgBox "Posteingang konnte nicht geoeffnet werden.", vbCritical, "CollectStudentEmails"
+        Exit Sub
+    End If
+
+    ' Bereits vorhandene smail-Adressen aus YAML einlesen (um Duplikate zu vermeiden)
+    Set existing = LoadExistingSmailAddresses(YAML_FILE_PATH)
+
+    ' Neuen Studierenden aus Posteingang sammeln
+    Set newStudents = CreateObject("Scripting.Dictionary")
+    newStudents.CompareMode = 1 ' vbTextCompare
+
+    Dim items As Outlook.items
+    Dim item  As Object
+    Dim i     As Long
+
     Set items = inbox.items
 
-    Dim i As Long
-    For i = items.count To 1 Step -1
-        Set item = items.item(i)
-        
-        If TypeOf item Is Outlook.mailItem Then
-            Dim mail As Outlook.mailItem
-            Set mail = item
-            
+    For i = 1 To items.Count
+        Set item = items(i)
+        If item.Class = olMail Then
             Dim addr As String
-            addr = GetSenderEmailAddress(mail)
-            
-            ' Nur @smail.th-koeln.de Adressen sammeln
-            If InStr(addr, "@smail.th-koeln.de") > 0 Then
+            Dim displayName As String
+            addr = LCase(GetSenderEmailAddress(item))
+            displayName = GetSenderDisplayName(item)
+
+            If InStr(addr, STUDENT_DOMAIN) > 0 Then
+                ' Nur aufnehmen wenn noch nicht in YAML und noch nicht gesammelt
                 If Not existing.Exists(addr) And Not newStudents.Exists(addr) Then
-                    Dim displayName As String
-                    displayName = GetSenderDisplayName(mail)
-                    
-                    ' Wenn DisplayName nur die Adresse ist oder kryptisch, 
-                    ' versuchen aus der Adresse abzuleiten
-                    If InStr(displayName, "@") > 0 Or Len(displayName) < 3 Then
-                        displayName = NameFromSmailAddress(addr)
-                    End If
-                    
                     newStudents.Add addr, displayName
                 End If
             End If
         End If
     Next i
 
-    If newStudents.count = 0 Then
+    If newStudents.Count = 0 Then
         MsgBox "Keine neuen Studierenden-E-Mails gefunden." & vbCrLf & _
                "(Alle bekannten Adressen sind bereits in der YAML-Datei.)", _
                vbInformation, "CollectStudentEmails"
@@ -80,7 +87,7 @@ Public Sub CollectSmailAddresses()
     AppendStudentsToYaml YAML_FILE_PATH, newStudents
 
     MsgBox "Fertig!" & vbCrLf & _
-           newStudents.count & " neue Studierende in YAML geschrieben:" & vbCrLf & _
+           newStudents.Count & " neue Studierende in YAML geschrieben:" & vbCrLf & _
            YAML_FILE_PATH, vbInformation, "CollectStudentEmails"
 
     Set newStudents = Nothing
@@ -97,7 +104,8 @@ End Sub
 '''     yamlPath: Pfad zur YAML-Datei.
 '''
 ''' Returns:
-'''     Dictionary mit smail-Adressen (Lowercase) als Keys.
+'''     Dictionary mit smail-Adressen (Lowercase) als Keys, Value ist immer True.
+'''     Leeres Dictionary wenn die Datei nicht existiert oder nicht lesbar ist.
 Private Function LoadExistingSmailAddresses(ByVal yamlPath As String) As Object
     Dim dict As Object
     Set dict = CreateObject("Scripting.Dictionary")
@@ -108,43 +116,51 @@ Private Function LoadExistingSmailAddresses(ByVal yamlPath As String) As Object
         Exit Function
     End If
 
-    Dim fileContent As String
-    fileContent = ReadUtf8File(yamlPath)
-    If Len(fileContent) = 0 Then
-        Set LoadExistingSmailAddresses = dict
-        Exit Function
-    End If
+    On Error GoTo ReadError
 
-    Dim allLines() As String
-    allLines = Split(fileContent, vbLf)
-    
-    Dim iLine As Long
-    For iLine = 0 To UBound(allLines)
+    Dim stream As Object
+    Set stream = CreateObject("ADODB.Stream")
+    stream.CharSet = "UTF-8"
+    stream.Open
+    stream.LoadFromFile yamlPath
+    Dim content As String
+    content = stream.ReadText
+    stream.Close
+    If Left(content, 1) = Chr(239) Then content = Mid(content, 4) ' BOM entfernen
+
+    Dim lines() As String
+    lines = Split(content, vbLf)
+    Dim i As Long
+    For i = 0 To UBound(lines)
         Dim line As String
-        line = Trim(allLines(iLine))
-        If Right(line, 1) = vbCr Then line = Left(line, Len(line) - 1)
-
-        ' Suche nach "smail:" Zeilen
+        line = Trim(lines(i))
         If Left(line, 7) = "smail: " Then
             Dim addr As String
-            addr = Trim(Mid(line, 8))
-            ' Anfuehrungszeichen entfernen
-            addr = Replace(addr, """", "")
-            addr = LCase(addr)
+            addr = LCase(Trim(Replace(Mid(line, 8), """", "")))
             If Len(addr) > 0 And Not dict.Exists(addr) Then
                 dict.Add addr, True
             End If
         End If
-    Next iLine
+    Next i
 
+ReadError:
     Set LoadExistingSmailAddresses = dict
 End Function
 
-''' Haengt neue Studierende an die YAML-Datei an.
+''' Haengt neue Studierende an die YAML-Datei an (oder erstellt sie neu).
+'''
+''' Schreibt UTF-8-kodiert via ADODB.Stream. Format ohne Anfuehrungszeichen,
+''' Studierenden-Eintraege auf Einrueckung 0:
+'''
+'''   students:
+'''   - name: Max Mustermann
+'''     smail: m.mustermann@smail.th-koeln.de
+'''     emails: []
+'''     folders: []
 '''
 ''' Args:
 '''     yamlPath:    Pfad zur YAML-Datei.
-'''     newStudents: Dictionary smail -> DisplayName.
+'''     newStudents: Dictionary mit smail (Key) -> DisplayName (Value).
 Private Sub AppendStudentsToYaml(ByVal yamlPath As String, _
                                  ByVal newStudents As Object)
     On Error GoTo WriteError
@@ -164,7 +180,7 @@ Private Sub AppendStudentsToYaml(ByVal yamlPath As String, _
         streamIn.LoadFromFile yamlPath
         content = streamIn.ReadText
         streamIn.Close
-        ' Sicherstellen dass Datei mit Zeilenumbruch endet
+        If Left(content, 1) = Chr(239) Then content = Mid(content, 4) ' BOM entfernen
         If Right(content, 1) <> vbLf Then content = content & vbLf
     End If
 
@@ -174,7 +190,7 @@ Private Sub AppendStudentsToYaml(ByVal yamlPath As String, _
         Dim smailAddr   As String
         Dim displayName As String
         smailAddr = CStr(key)
-        displayName = Replace(CStr(newStudents(key)), """", "'")
+        displayName = CStr(newStudents(key))
 
         content = content & "- name: " & displayName & vbLf
         content = content & "  smail: " & smailAddr & vbLf
@@ -190,14 +206,14 @@ Private Sub AppendStudentsToYaml(ByVal yamlPath As String, _
     streamOut.Open
     streamOut.WriteText content
     streamOut.Position = 0
-    streamOut.Type = 1 ' adTypeBinary
-    streamOut.Position = 3 ' UTF-8 BOM ueberspringen
+    streamOut.Type = 1      ' adTypeBinary
+    streamOut.Position = 3  ' UTF-8 BOM ueberspringen
     Dim streamFinal As Object
     Set streamFinal = CreateObject("ADODB.Stream")
     streamFinal.Type = 1
     streamFinal.Open
     streamOut.CopyTo streamFinal
-    streamFinal.SaveToFile yamlPath, 2 ' 2 = adSaveCreateOverWrite
+    streamFinal.SaveToFile yamlPath, 2  ' adSaveCreateOverWrite
     streamOut.Close
     streamFinal.Close
     Exit Sub
@@ -211,13 +227,15 @@ End Sub
 ' Hilfsfunktionen
 ' =============================================================================
 
-''' Ermittelt die SMTP-E-Mail-Adresse des Absenders.
+''' Gibt die tatsaechliche SMTP-Adresse eines Absenders zurueck.
+''' (Identisch mit der gleichnamigen Funktion in EmailSorter.bas)
 '''
 ''' Args:
-'''     mail: Das MailItem.
+'''     mail: Das MailItem, dessen Absenderadresse ermittelt werden soll.
 '''
 ''' Returns:
-'''     SMTP-Adresse (Lowercase).
+'''     Die SMTP-E-Mail-Adresse als String (Lowercase), oder leerer String
+'''     bei einem Fehler.
 Private Function GetSenderEmailAddress(ByVal mail As Outlook.mailItem) As String
     On Error GoTo FallbackToProperty
 
@@ -240,13 +258,16 @@ FallbackToProperty:
     GetSenderEmailAddress = LCase(mail.SenderEmailAddress)
 End Function
 
-''' Ermittelt den Anzeigenamen des Absenders.
+''' Gibt den Anzeigenamen (DisplayName) des Absenders zurueck.
+'''
+''' Bevorzugt den Namen aus dem AddressEntry-Objekt; faellt auf
+''' mail.SenderName zurueck wenn kein AddressEntry verfuegbar ist.
 '''
 ''' Args:
-'''     mail: Das MailItem.
+'''     mail: Das MailItem, dessen Absendername ermittelt werden soll.
 '''
 ''' Returns:
-'''     Anzeigename.
+'''     Anzeigename als String, oder leerer String bei einem Fehler.
 Private Function GetSenderDisplayName(ByVal mail As Outlook.mailItem) As String
     On Error GoTo FallbackToProperty
 
@@ -254,93 +275,12 @@ Private Function GetSenderDisplayName(ByVal mail As Outlook.mailItem) As String
     Set addrEntry = mail.Sender
 
     If Not addrEntry Is Nothing Then
-        If Len(Trim(addrEntry.name)) > 0 Then
-            GetSenderDisplayName = Trim(addrEntry.name)
+        If Len(Trim(addrEntry.Name)) > 0 Then
+            GetSenderDisplayName = Trim(addrEntry.Name)
             Exit Function
         End If
     End If
 
 FallbackToProperty:
     GetSenderDisplayName = Trim(mail.SenderName)
-End Function
-
-''' Leitet einen Namen aus der smail-Adresse ab.
-'''
-''' Args:
-'''     smailAddr: Die E-Mail-Adresse.
-'''
-''' Returns:
-'''     Kapitalisierter Name.
-Private Function NameFromSmailAddress(ByVal smailAddr As String) As String
-    Dim atPos As Long
-    atPos = InStr(smailAddr, "@")
-    if atPos < 2 Then
-        NameFromSmailAddress = ""
-        Exit Function
-    End If
-    Dim localPart As String
-    localPart = Left(smailAddr, atPos - 1)
-
-    Dim dotPos As Long
-    dotPos = InStr(localPart, ".")
-    If dotPos < 2 Then
-        NameFromSmailAddress = CapitalizeWords(Replace(localPart, "_", " "))
-        Exit Function
-    End If
-
-    Dim firstPart  As String
-    Dim secondPart As String
-    firstPart = Left(localPart, dotPos - 1)
-    secondPart = Mid(localPart, dotPos + 1)
-
-    Dim fullName As String
-    fullName = Replace(firstPart, "_", " ") & " " & Replace(secondPart, "_", " ")
-    NameFromSmailAddress = CapitalizeWords(fullName)
-End Function
-
-''' Kapitalisiert jedes Wort in einem String.
-'''
-''' Args:
-'''     s: Der Eingabestring.
-'''
-''' Returns:
-'''     String mit kapitalisierten Woertern.
-Private Function CapitalizeWords(ByVal s As String) As String
-    Dim words()  As String
-    Dim i        As Long
-    Dim result   As String
-
-    s = Trim(s)
-    Do While InStr(s, "  ") > 0
-        s = Replace(s, "  ", " ")
-    Loop
-
-    words = Split(LCase(s), " ")
-    For i = 0 To UBound(words)
-        If Len(words(i)) > 0 Then
-            words(i) = UCase(Left(words(i), 1)) & Mid(words(i), 2)
-        End If
-    Next i
-    CapitalizeWords = Join(words, " ")
-End Function
-
-''' Liest eine UTF-8 Datei ein.
-'''
-''' Args:
-'''     filePath: Pfad zur Datei.
-'''
-''' Returns:
-'''     Inhalt als String.
-Private Function ReadUtf8File(ByVal filePath As String) As String
-    On Error GoTo ReadErr
-    Dim stream As Object
-    Set stream = CreateObject("ADODB.Stream")
-    stream.CharSet = "UTF-8"
-    stream.Open
-    stream.LoadFromFile filePath
-    ReadUtf8File = stream.ReadText
-    stream.Close
-    Exit Function
-ReadErr:
-    ReadUtf8File = ""
 End Function
