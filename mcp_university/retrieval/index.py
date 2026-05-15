@@ -27,14 +27,16 @@ class SearchIndex:
     Python-Implementierung als Fallback verwendet.
     """
 
-    def __init__(self, location: str, embedding_model_name: str = "BAAI/bge-m3"):
+    def __init__(self, location: str, embedding_model_name: str = "BAAI/bge-m3", store: Any = None):
         """Initialisiert den SearchIndex.
 
         Args:
             location (str): Pfad zum Speicherort des Index.
             embedding_model_name (str): Name des Embedding-Modells.
+            store (MetadataStore, optional): Metadaten-Speicher zur Anreicherung der Ergebnisse.
         """
         self.location = Path(location)
+        self.store = store
         self.location.mkdir(parents=True, exist_ok=True)
         self.embedding_model_name = embedding_model_name
 
@@ -169,6 +171,24 @@ class SearchIndex:
         logger.error("No search implementation available.")
         return []
 
+    def _enrich_with_summary(self, path: str, default_content: str) -> str:
+        """Versucht, den Inhalt durch die gespeicherte Zusammenfassung zu ersetzen."""
+        if not self.store:
+            return default_content
+
+        try:
+            file_data = self.store.get_file(path)
+            if file_data:
+                # file_data: (id, path, hash, mtime, type, last_indexed, folder_id)
+                file_id = file_data[0]
+                summary = self.store.get_summary("file", file_id)
+                if summary:
+                    return summary
+        except Exception as e:
+            logger.warning(f"Failed to fetch summary for {path}: {e}")
+
+        return default_content
+
     def _search_qmd(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
         """Sucht mittels qmd CLI."""
         try:
@@ -192,9 +212,14 @@ class SearchIndex:
                     json_results = json.loads(match.group(0))
                     formatted = []
                     for res in json_results:
+                        path = res.get("file", res.get("path", ""))
+                        content = res.get("snippet", "")
+                        # Immer die Zusammenfassung bevorzugen, falls vorhanden
+                        content = self._enrich_with_summary(path, content)
+
                         formatted.append({
-                            "path": res.get("file", res.get("path", "")),
-                            "content": res.get("snippet", ""),
+                            "path": path,
+                            "content": content,
                             "filename": res.get("title", ""),
                             "score": res.get("score", 0),
                             "metadata": res
@@ -223,9 +248,10 @@ class SearchIndex:
         results_map = {}
         for res in dense_results:
             path = res.payload["doc_id"]
+            content = self._enrich_with_summary(path, res.payload["content"])
             results_map[path] = {
                 "path": path,
-                "content": res.payload["content"],
+                "content": content,
                 "filename": res.payload.get("filename", ""),
                 "score": res.score,
                 "metadata": res.payload
@@ -243,9 +269,10 @@ class SearchIndex:
                     if path in results_map:
                         results_map[path]["score"] += float(scores[idx]) * 0.1
                     else:
+                        content = self._enrich_with_summary(path, doc["content"])
                         results_map[path] = {
                             "path": path,
-                            "content": doc["content"],
+                            "content": content,
                             "score": float(scores[idx]),
                             "metadata": doc["metadata"],
                             "filename": doc["metadata"].get("filename", "")

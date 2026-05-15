@@ -26,7 +26,7 @@ def create_server() -> FastMCP:
 
     # Lazy init components
     store = MetadataStore(cfg.sqlite_path)
-    index = SearchIndex(str(cfg.qdrant_path), cfg.embeddings.model)
+    index = SearchIndex(str(cfg.qdrant_path), cfg.embeddings.model, store=store)
     summarizer = Summarizer(cfg.llm.model, cfg.llm.base_url)
     use_shell = os.name == 'nt'
 
