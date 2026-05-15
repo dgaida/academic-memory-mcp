@@ -2,6 +2,7 @@
 import ollama
 from typing import Optional, List
 import logging
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -23,10 +24,39 @@ class Summarizer:
         self.client = ollama.Client(host=base_url)
         logger.debug(f"Summarizer initialized with model={model} and base_url={base_url}")
 
+    def _identify_document_type(self, content: str) -> str:
+        """Identifiziert den Dokumenttyp basierend auf dem Inhalt des Dokuments (erste Seite/Anfang).
+
+        Args:
+            content (str): Der Textinhalt des Dokuments.
+
+        Returns:
+            str: Der identifizierte Dokumenttyp.
+        """
+        system_prompt = "Du bist ein Assistent zur Dokumentenanalyse. Identifiziere den Typ des Dokuments basierend auf dem Textanfang."
+        user_prompt = f"""Analysiere den folgenden Textanfang und entscheide, um welche Art von Dokument es sich handelt (z.B. Abschlussarbeit, Protokoll, Formular, Prüfungsordnung, Vorlesungsskript, Übungsblatt, Sonstiges).
+Antworte NUR mit dem Typ des Dokuments.
+
+Textanfang:
+{content[:2000]}
+"""
+        messages = [
+            {'role': 'system', 'content': system_prompt},
+            {'role': 'user', 'content': user_prompt}
+        ]
+        try:
+            response = self.client.chat(model=self.model, messages=messages, options={"temperature": 0})
+            doc_type = response['message']['content'].strip()
+            logger.debug(f"Identified document type: {doc_type}")
+            return doc_type
+        except Exception as e:
+            logger.error(f"Error identifying document type: {e}")
+            return "Unbekannt"
+
     def summarize_file(self, filename: str, content: str) -> Optional[str]:
         """Erstellt eine strukturierte Zusammenfassung einer einzelnen Datei.
 
-        Extrahiert Dokumenttyp, Thema, Konzepte, Personen und Deadlines.
+        Wählt die passende Zusammenfassungsstrategie basierend auf dem Dateityp.
 
         Args:
             filename (str): Name der zu zusammenfassenden Datei.
@@ -35,153 +65,164 @@ class Summarizer:
         Returns:
             Optional[str]: Die generierte Zusammenfassung im Markdown-Format oder None bei Fehlern.
         """
-        logger.info(f"Summarizing file: {filename}")
+        suffix = Path(filename).suffix.lower()
+        if suffix in [".msg", ".eml"]:
+            return self._summarize_email(filename, content)
+        elif suffix in [".pdf", ".docx"]:
+            return self._summarize_long_doc(filename, content)
+        else:
+            return self._summarize_short_doc(filename, content)
 
-        system_prompt = "You are a university knowledge management assistant. Summarize documents into a structured Markdown format."
-        user_prompt = f"""
-Summarize the following document for a university knowledge system.
-Filename: {filename}
+    def _summarize_email(self, filename: str, content: str) -> Optional[str]:
+        """Erstellt eine Zusammenfassung für eine E-Mail."""
+        logger.info(f"Summarizing email: {filename}")
+        system_prompt = "Du bist ein Assistent für universitäres Wissensmanagement. Erstelle Zusammenfassungen von E-Mails auf Deutsch."
+        user_prompt = f"""Fasse die folgende E-Mail kurz und präzise zusammen.
+Dateiname: {filename}
 
-Provide the summary in the following Markdown format:
+Format:
+# E-Mail Zusammenfassung
+{filename}
+# Absender & Empfänger
+(Wer schreibt an wen?)
+# Betreff
+(Thema der E-Mail)
+# Kernaussage
+(Zusammenfassung des Inhalts)
+# Aufgaben/Aktionen
+- Aufgabe 1
+- ...
+# Wichtige Termine/Deadlines
+- YYYY-MM-DD: Beschreibung
+
+Inhalt:
+{content[:5000]}
+"""
+        return self._chat_request(system_prompt, user_prompt)
+
+    def _summarize_short_doc(self, filename: str, content: str) -> Optional[str]:
+        """Erstellt eine Zusammenfassung für kurze Dokumente (Markdown, Text, etc.)."""
+        logger.info(f"Summarizing short document: {filename}")
+        system_prompt = "Du bist ein Assistent für universitäres Wissensmanagement. Erstelle Zusammenfassungen von Dokumenten auf Deutsch."
+        user_prompt = f"""Erstelle eine strukturierte Zusammenfassung für das folgende Dokument.
+Dateiname: {filename}
+
+Format:
 # Datei
 {filename}
 # Dokumenttyp
-(Identify the type of document)
+(z.B. Notizen, Skript, Code)
 # Thema
-(Core topic)
+(Hauptthema)
 # Kurzfassung
-(Concise summary)
-# Wichtige Konzepte
-- concept 1
+(Prägnante Zusammenfassung)
+# Wichtige Punkte
+- Punkt 1
 - ...
-# Beteiligte Personen
-- Name 1
-- ...
-# Deadlines
-- YYYY-MM-DD: Description
-# Relevanz
-(Why is this important?)
 
-Document Content:
+Dokumentinhalt:
 {content[:10000]}
 """
+        return self._chat_request(system_prompt, user_prompt)
+
+    def _summarize_long_doc(self, filename: str, content: str) -> Optional[str]:
+        """Erstellt eine Zusammenfassung für lange Dokumente (PDF, DOCX)."""
+        logger.info(f"Summarizing long document: {filename}")
+        doc_type = self._identify_document_type(content)
+
+        system_prompt = "Du bist ein Assistent für universitäres Wissensmanagement. Erstelle detaillierte Zusammenfassungen auf Deutsch."
+        user_prompt = f"""Erstelle eine ausführliche Zusammenfassung für dieses {doc_type}.
+Dateiname: {filename}
+
+Format:
+# Dokument
+{filename}
+# Typ
+{doc_type}
+# Zusammenfassung
+(Zentrale Inhalte des Dokuments)
+# Wichtige Konzepte & Begriffe
+- Begriff 1: Erklärung
+- ...
+# Beteiligte Personen/Institutionen
+- Name 1
+- ...
+# Fristen & Termine
+- YYYY-MM-DD: Beschreibung
+# Relevanz
+(Warum ist dieses Dokument wichtig?)
+
+Inhalt:
+{content[:15000]}
+"""
+        return self._chat_request(system_prompt, user_prompt)
+
+    def _chat_request(self, system_prompt: str, user_prompt: str) -> Optional[str]:
+        """Hilfsmethode für Ollama-Chat-Anfragen."""
         messages = [
             {'role': 'system', 'content': system_prompt},
             {'role': 'user', 'content': user_prompt}
         ]
-
         try:
-            logger.debug(f"Sending chat request to Ollama (model={self.model}) for file {filename}")
             response = self.client.chat(
                 model=self.model,
                 messages=messages,
                 options={"temperature": 0}
             )
-            logger.debug(f"Successfully received chat response for file {filename}")
             return response['message']['content']
         except Exception as e:
-            logger.error(f"Error summarizing file {filename} with model {self.model}: {e}")
+            logger.error(f"Error in chat request: {e}")
             if "memory" in str(e).lower():
-                logger.error("Likely Out of Memory error from Ollama. Check system resources.")
+                logger.error("Likely Out of Memory error from Ollama.")
             return None
 
     def summarize_folder(self, folder_name: str, item_summaries: List[str]) -> Optional[str]:
-        """Erstellt eine aggregierte Zusammenfassung für einen Ordner basierend auf Inhalts-Summaries.
-
-        Args:
-            folder_name (str): Name des Ordners.
-            item_summaries (List[str]): Liste der Zusammenfassungen der enthaltenen Dateien/Unterordner.
-
-        Returns:
-            Optional[str]: Die aggregierte Ordner-Zusammenfassung oder None bei Fehlern.
-        """
+        """Erstellt eine aggregierte Zusammenfassung für einen Ordner auf Deutsch."""
         logger.info(f"Summarizing folder: {folder_name}")
         items_combined = "\n---\n".join(item_summaries)
 
-        system_prompt = "You are a university knowledge management assistant. Create aggregated summaries for folders based on their content."
+        system_prompt = "Du bist ein Assistent für universitäres Wissensmanagement. Erstelle Ordner-Zusammenfassungen auf Deutsch."
         user_prompt = f"""
-Create a summary for the folder '{folder_name}' based on the summaries of its contents.
+Erstelle eine Zusammenfassung für den Ordner '{folder_name}' basierend auf den Inhalten.
 
 Format:
 # Ordner
 {folder_name}
 # Typ
-(e.g., Student Record, Course Material, Research Project)
-# Thema
-(Overall theme)
-# Aktueller Status
-(Summary of progress if applicable)
+(z.B. Studierendenakte, Kursmaterialien, Forschungsprojekt)
+# Hauptthema
+(Übergreifendes Thema)
+# Status
+(Zusammenfassung des Fortschritts falls relevant)
 # Offene Aufgaben
-- task 1
+- Aufgabe 1
 - ...
 # Wichtige Dokumente
-- doc 1
+- Dokument 1
 - ...
-# Zusammenfassung
-(High-level overview)
+# Gesamtübersicht
+(High-level Zusammenfassung)
 
-Contents:
+Inhalte:
 {items_combined[:15000]}
 """
-        messages = [
-            {'role': 'system', 'content': system_prompt},
-            {'role': 'user', 'content': user_prompt}
-        ]
-
-        try:
-            logger.debug(f"Sending chat request to Ollama (model={self.model}) for folder {folder_name}")
-            response = self.client.chat(
-                model=self.model,
-                messages=messages,
-                options={"temperature": 0}
-            )
-            logger.debug(f"Successfully received chat response for folder {folder_name}")
-            return response['message']['content']
-        except Exception as e:
-            logger.error(f"Error summarizing folder {folder_name} with model {self.model}: {e}")
-            if "memory" in str(e).lower():
-                logger.error("Likely Out of Memory error from Ollama. Check system resources.")
-            return None
+        return self._chat_request(system_prompt, user_prompt)
 
     def answer_question(self, query: str, context: str) -> Optional[str]:
-        """Beantwortet eine Frage basierend auf dem bereitgestellten Kontext.
+        """Beantwortet eine Frage basierend auf dem Kontext auf Deutsch."""
+        logger.info(f"Answering question: {query}")
 
-        Args:
-            query (str): Die Frage des Nutzers.
-            context (str): Der Kontext (z.B. Suchergebnisse).
-
-        Returns:
-            Optional[str]: Die generierte Antwort oder None bei Fehlern.
-        """
-        logger.info(f"Answering question based on context: {query}")
-
-        system_prompt = "You are a university knowledge management assistant. Answer the user's question based ONLY on the provided context. Answer in the same language as the question."
+        system_prompt = "Du bist ein Assistent für universitäres Wissensmanagement. Beantworte die Frage des Nutzers NUR basierend auf dem bereitgestellten Kontext. Antworte in der Sprache der Frage (standardmäßig Deutsch)."
         user_prompt = f"""
-Answer the following question based on the provided context from university documents.
-If the context does not contain the answer, say that you don't know based on the documents.
+Beantworte die folgende Frage basierend auf dem bereitgestellten Kontext aus Universitätsdokumenten.
+Falls der Kontext die Antwort nicht enthält, sage dass du es basierend auf den Dokumenten nicht weißt.
 
-Context:
+Kontext:
 {context}
 
-Question:
+Frage:
 {query}
 
-Answer:
+Antwort:
 """
-        messages = [
-            {'role': 'system', 'content': system_prompt},
-            {'role': 'user', 'content': user_prompt}
-        ]
-
-        try:
-            logger.debug(f"Sending chat request to Ollama (model={self.model}) for question answering")
-            response = self.client.chat(
-                model=self.model,
-                messages=messages,
-                options={"temperature": 0}
-            )
-            logger.debug("Successfully received chat response for question answering")
-            return response['message']['content']
-        except Exception as e:
-            logger.error(f"Error answering question with model {self.model}: {e}")
-            return None
+        return self._chat_request(system_prompt, user_prompt)
