@@ -1,4 +1,3 @@
-Attribute VB_Name = "EmailSorter"
 ' =============================================================================
 ' EmailSorter.bas
 ' Outlook 2019 VBA-Makro
