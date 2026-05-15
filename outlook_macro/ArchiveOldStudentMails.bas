@@ -24,7 +24,12 @@ Private Const ARCHIVE_ROOT As String = "D:\TH_Koeln\StudentMails"
 Private Const ARCHIVE_AGE_YEARS As Integer = 3
 
 ' Zu pruefende Absender-Domains (Pipe-getrennt, Lowercase)
+' Alle Adressen, die eine dieser Endungen enthalten, werden archiviert.
 Private Const STUDENT_DOMAINS As String = "@smail.th-koeln.de|@smail.fh-koeln.de"
+
+' Zusaetzliche einzelne E-Mail-Adressen, die ebenfalls archiviert werden sollen
+' (Pipe-getrennt, Lowercase). Leer lassen wenn nicht benoetigt.
+Private Const ADDITIONAL_ADDRESSES As String = "noreply@th-koeln.de"
 
 ' =============================================================================
 ' Hauptprozedur
@@ -113,7 +118,7 @@ Private Sub ProcessArchiveFolder(ByVal folder As Outlook.MAPIFolder, _
                     studentAddr = LCase(GetSenderEmailAddress(item))
                 End If
 
-                If IsStudentAddress(studentAddr) Then
+                If ShouldArchiveAddress(studentAddr) Then
                     toArchive.Add item
                 End If
             End If
@@ -158,31 +163,48 @@ End Sub
 ' Hilfsfunktionen
 ' =============================================================================
 
-''' Prueft ob eine E-Mail-Adresse zu einer der konfigurierten Studierenden-Domains
-''' gehoert.
+''' Prueft ob eine E-Mail-Adresse archiviert werden soll.
+'''
+''' Es wird geprueft ob die Adresse:
+'''   (a) eine der konfigurierten Studierenden-Domains enthaelt, oder
+'''   (b) exakt einer der konfigurierten Zusatz-Adressen entspricht.
 '''
 ''' Args:
 '''     addr: Die zu pruefende E-Mail-Adresse (Lowercase).
 '''
 ''' Returns:
-'''     True wenn die Adresse eine der Studierenden-Domains enthaelt.
-Private Function IsStudentAddress(ByVal addr As String) As Boolean
+'''     True wenn die Adresse archiviert werden soll.
+Private Function ShouldArchiveAddress(ByVal addr As String) As Boolean
     If Len(addr) = 0 Then
-        IsStudentAddress = False
+        ShouldArchiveAddress = False
         Exit Function
     End If
 
+    ' (a) Domain-Match
     Dim domains() As String
     domains = Split(STUDENT_DOMAINS, "|")
     Dim d As Variant
     For Each d In domains
         If InStr(addr, CStr(d)) > 0 Then
-            IsStudentAddress = True
+            ShouldArchiveAddress = True
             Exit Function
         End If
     Next d
 
-    IsStudentAddress = False
+    ' (b) Exakter Adress-Match
+    If Len(Trim(ADDITIONAL_ADDRESSES)) > 0 Then
+        Dim addrs() As String
+        addrs = Split(ADDITIONAL_ADDRESSES, "|")
+        Dim a As Variant
+        For Each a In addrs
+            If LCase(Trim(CStr(a))) = addr Then
+                ShouldArchiveAddress = True
+                Exit Function
+            End If
+        Next a
+    End If
+
+    ShouldArchiveAddress = False
 End Function
 
 ''' Exportiert eine Mail als .msg-Datei und loescht sie danach aus Outlook.
