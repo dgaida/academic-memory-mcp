@@ -1,4 +1,5 @@
 """Parser für E-Mail-Formate."""
+import re
 from pathlib import Path
 from typing import Optional
 import logging
@@ -37,6 +38,14 @@ class MailParser:
         Returns:
             datetime: Das Datum der E-Mail oder datetime.min bei Fehlern.
         """
+        # Vorab-Check: Datum im Dateinamen (z.B. 20260222_201613 - ...)
+        match = re.match(r"^(\d{8})_(\d{6})", file_path.name)
+        if match:
+            try:
+                return datetime.strptime(match.group(0), "%Y%m%d_%H%M%S")
+            except ValueError:
+                logger.debug(f"Could not parse date from filename: {file_path.name}")
+
         suffix = file_path.suffix.lower()
         if suffix == ".msg":
             try:
