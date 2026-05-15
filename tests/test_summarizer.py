@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from mcp_university.summarizer.engine import Summarizer
 
 @pytest.fixture
