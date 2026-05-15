@@ -322,60 +322,64 @@ Private Sub ProcessFolder(ByVal folder As Outlook.MAPIFolder, _
                 emailAddr = GetSenderEmailAddress(mail)
             End If
 
-            If studentMap.Exists(emailAddr) Then
-                If Not senderMails.Exists(emailAddr) Then
-                    Set senderMails(emailAddr) = New Collection
+            If Len(Trim(emailAddr)) > 0 Then
+                If studentMap.Exists(emailAddr) Then
+                    If Not senderMails.Exists(emailAddr) Then
+                        Set senderMails(emailAddr) = New Collection
+                    End If
+                    senderMails(emailAddr).Add mail
                 End If
-                senderMails(emailAddr).Add mail
             End If
         End If
     Next i
 
     Dim key As Variant
     For Each key In senderMails.Keys
-        Dim mails As Collection
-        Set mails = senderMails(key)
-        
-        Dim newestMail As Outlook.mailItem
-        Set newestMail = mails(1)
-        Dim m As Variant
-        For Each m In mails
-            If m.ReceivedTime > newestMail.ReceivedTime Then Set newestMail = m
-        Next m
+        If Len(Trim(CStr(key))) > 0 Then
+            Dim mails As Collection
+            Set mails = senderMails(key)
 
-        Dim foldersDict As Object
-        Set foldersDict = studentMap(key)
+            Dim newestMail As Outlook.mailItem
+            Set newestMail = mails(1)
+            Dim m As Variant
+            For Each m In mails
+                If m.ReceivedTime > newestMail.ReceivedTime Then Set newestMail = m
+            Next m
 
-        Dim j As Long
-        For j = 1 To mails.Count
-            Dim currentMail As Outlook.mailItem
-            Set currentMail = mails(j)
-            
-            Dim targetFolder As String
-            targetFolder = FindFolderByKeyword(currentMail, foldersDict)
-            
-            If Len(targetFolder) = 0 Then
-                Dim firstKey As Variant
-                firstKey = foldersDict.Keys
-                If UBound(firstKey) >= 0 Then targetFolder = foldersDict(firstKey(0))
-            End If
+            Dim foldersDict As Object
+            Set foldersDict = studentMap(key)
 
-            If Len(targetFolder) > 0 Then
-                Dim fullPath As String
-                fullPath = targetFolder & "\" & subFolder
-                If EnsureDirectory(fullPath) Then
-                    Dim filePath As String
-                    filePath = BuildMsgFilePath(fullPath, currentMail)
-                    If SaveMailToFile(currentMail, fullPath, filePath) Then
-                        savedCount = savedCount + 1
-                        If currentMail.EntryID <> newestMail.EntryID Then
-                            currentMail.Delete
-                            deletedCount = deletedCount + 1
+            Dim j As Long
+            For j = 1 To mails.Count
+                Dim currentMail As Outlook.mailItem
+                Set currentMail = mails(j)
+
+                Dim targetFolder As String
+                targetFolder = FindFolderByKeyword(currentMail, foldersDict)
+
+                If Len(targetFolder) = 0 Then
+                    Dim firstKey As Variant
+                    firstKey = foldersDict.Keys
+                    If UBound(firstKey) >= 0 Then targetFolder = foldersDict(firstKey(0))
+                End If
+
+                If Len(targetFolder) > 0 Then
+                    Dim fullPath As String
+                    fullPath = targetFolder & "\" & subFolder
+                    If EnsureDirectory(fullPath) Then
+                        Dim filePath As String
+                        filePath = BuildMsgFilePath(fullPath, currentMail)
+                        If SaveMailToFile(currentMail, fullPath, filePath) Then
+                            savedCount = savedCount + 1
+                            If currentMail.EntryID <> newestMail.EntryID Then
+                                currentMail.Delete
+                                deletedCount = deletedCount + 1
+                            End If
                         End If
                     End If
                 End If
-            End If
-        Next j
+            Next j
+        End If
     Next key
 End Sub
 
