@@ -109,11 +109,27 @@ class Crawler:
         any_changed = False
         item_summaries = []
 
+        # Check for email conversation pattern
+        subdirs = [d.name for d in os.scandir(dir_path) if d.is_dir()]
+        conv_summary = None
+        conv_changed = False
+        if "Inbox" in subdirs and "SentItems" in subdirs:
+            logger.info(f"Detected email conversation pattern in {dir_path}")
+            conv_summary, conv_changed = self._process_email_conversation(dir_path, folder_id)
+            if conv_summary:
+                item_summaries.append(conv_summary)
+            if conv_changed:
+                any_changed = True
+
         for entry in os.scandir(dir_path):
             entry_path = Path(entry.path)
             if entry.is_dir():
                 if entry.name in self.config.folders.exclude_patterns:
                     logger.debug(f"Skipping excluded directory: {entry.name}")
+                    continue
+
+                # Skip Inbox and SentItems if they were already handled as a conversation
+                if entry.name in ["Inbox", "SentItems"] and conv_summary is not None:
                     continue
 
                 sub_summary, sub_changed = self._process_directory(entry_path, folder_id)
@@ -125,7 +141,7 @@ class Crawler:
                 suffix = entry_path.suffix.lower()
                 if suffix not in self.config.folders.supported_extensions:
                     continue
-                if entry.name.startswith(".") and entry.name.endswith("_summary.md"):
+                if entry.name.startswith(".") and (entry.name.endswith("_summary.md") or entry.name.endswith(".emails_summary.md")):
                     continue
 
                 current_files.add(str(entry_path))
@@ -161,6 +177,79 @@ class Crawler:
                 folder_summary = existing_folder_summary
 
         return folder_summary, any_changed
+
+    def _process_email_conversation(self, dir_path: Path, folder_id: int) -> Tuple[Optional[str], bool]:
+        """Verarbeitet eine E-Mail-Konversation (Inbox & SentItems)."""
+        email_files = []
+        for sub in ["Inbox", "SentItems"]:
+            sub_path = dir_path / sub
+            if sub_path.exists():
+                for entry in os.scandir(sub_path):
+                    if entry.is_file() and entry.name.lower().endswith((".eml", ".msg")):
+                        email_files.append(Path(entry.path))
+
+        if not email_files:
+            return None, False
+
+        # Calculate a combined hash of all emails to detect changes
+        email_files.sort() # Sort by path for consistent hash
+        combined_data = ""
+        for f in email_files:
+            combined_data += f"{f.name}:{f.stat().st_mtime}:{f.stat().st_size}|"
+        combined_hash = hashlib.sha256(combined_data.encode()).hexdigest()
+
+        summary_file_path = dir_path / ".emails_summary.md"
+        # Use a special item_type for conversation summaries to avoid conflict with normal folder summary
+        # Actually, the user wants it to be indexed and treated as part of the folder content.
+        # We'll use a specific key in the DB to check for changes.
+
+        db_folder = self.store._get_connection().execute("SELECT identity_json FROM folders WHERE id=?", (folder_id,)).fetchone()
+
+        if db_folder and db_folder[0] == combined_hash and summary_file_path.exists():
+            logger.info(f"Email conversation in {dir_path.name} unchanged.")
+            return summary_file_path.read_text(encoding="utf-8"), False
+
+        logger.info(f"Processing {len(email_files)} emails for conversation summary in {dir_path.name}")
+
+        # Sort emails chronologically
+        dated_emails = []
+        for f in email_files:
+            date = self.parser.mail_parser.get_email_date(f)
+            dated_emails.append((date, f))
+
+        dated_emails.sort(key=lambda x: x[0])
+
+        conversation_text = ""
+        for date, f in dated_emails:
+            parsed = self.parser.mail_parser.parse(f)
+            if parsed:
+                conversation_text += f"\n--- EMAIL VOM {date} ---\n{parsed}\n"
+
+        summary = self.summarizer.summarize_email_conversation(dir_path.name, conversation_text)
+        if summary:
+            # Store hash in identity_json
+            with self.store._get_connection() as conn:
+                conn.execute("UPDATE folders SET identity_json = ? WHERE id = ?", (combined_hash, folder_id))
+                conn.commit()
+
+            # Save to file
+            try:
+                summary_file_path.write_text(summary, encoding="utf-8")
+            except Exception as e:
+                logger.error(f"Failed to save email summary for {dir_path.name}: {e}")
+
+            # Index the summary
+            self.index.add_document(str(summary_file_path), summary, {
+                "path": str(summary_file_path),
+                "folder": str(dir_path),
+                "filename": ".emails_summary.md",
+                "type": ".md",
+                "is_conversation_summary": "true"
+            })
+
+            return summary, True
+
+        return None, False
 
     def _process_file(self, file_path: Path, folder_id: int) -> Tuple[Optional[str], bool]:
         """Verarbeitet eine einzelne Datei (Parsing -> Summarization -> Indexierung).
