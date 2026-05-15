@@ -399,6 +399,8 @@ Private Sub ProcessFolder(ByVal folder As Outlook.MAPIFolder, _
                           ByRef deletedCount As Long)
 
     Dim senderMails As Object
+    Dim fso        As Object
+    Set fso = CreateObject("Scripting.FileSystemObject")
     Set senderMails = CreateObject("Scripting.Dictionary")
     senderMails.CompareMode = 1
 
@@ -470,6 +472,14 @@ Private Sub ProcessFolder(ByVal folder As Outlook.MAPIFolder, _
             If Len(targetFolder) = 0 Then
                 MsgBox "Kein Zielordner fuer Mail von " & key & " gefunden." & vbCrLf & _
                        "Betreff: " & currentMail.Subject, vbExclamation, "EmailSorter"
+                GoTo NextMail
+            End If
+
+            ' Pruefen ob der Basis-Zielordner existiert.
+            ' Falls nicht, wird die Mail uebersprungen und keine Ordnerhierarchie erstellt.
+            ' Nur der Inbox- oder SentItems-Ordner innerhalb eines existierenden Pfads
+            ' darf durch EnsureDirectory angelegt werden.
+            If Not fso.FolderExists(targetFolder) Then
                 GoTo NextMail
             End If
 
