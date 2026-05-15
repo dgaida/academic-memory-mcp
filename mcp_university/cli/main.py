@@ -57,7 +57,7 @@ def index(debug: bool = typer.Option(False, "--debug", "-d", help="Debug-Logging
     store = MetadataStore(cfg.sqlite_path)
     parser = ParserFactory(cfg.data_dir / "cache")
     summarizer = Summarizer(cfg.llm.model, cfg.llm.base_url)
-    idx = SearchIndex(str(cfg.qdrant_path), cfg.embeddings.model)
+    idx = SearchIndex(str(cfg.qdrant_path), cfg.embeddings.model, store=store)
 
     crawler = Crawler(cfg, store, parser, summarizer, idx)
     crawler.crawl()
@@ -74,7 +74,8 @@ def search(
     """
     setup_logging(debug)
     cfg = get_config()
-    idx = SearchIndex(str(cfg.qdrant_path), cfg.embeddings.model)
+    store = MetadataStore(cfg.sqlite_path)
+    idx = SearchIndex(str(cfg.qdrant_path), cfg.embeddings.model, store=store)
     results = idx.search(query)
 
     print("\n" + "="*50)
@@ -113,7 +114,7 @@ def watch(debug: bool = typer.Option(False, "--debug", "-d", help="Debug-Logging
     store = MetadataStore(cfg.sqlite_path)
     parser = ParserFactory(cfg.data_dir / "cache")
     summarizer = Summarizer(cfg.llm.model, cfg.llm.base_url)
-    idx = SearchIndex(str(cfg.qdrant_path), cfg.embeddings.model)
+    idx = SearchIndex(str(cfg.qdrant_path), cfg.embeddings.model, store=store)
 
     crawler = Crawler(cfg, store, parser, summarizer, idx)
     watcher = Watcher(crawler)

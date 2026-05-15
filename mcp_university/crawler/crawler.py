@@ -196,7 +196,8 @@ class Crawler:
         file_id = self.store.upsert_file(str(file_path), file_hash, mtime, file_path.suffix.lower(), folder_id)
         self.store.add_summary("file", file_id, summary)
 
-        self.index.add_document(str(file_path), content, {
+        # Wir indexieren die Zusammenfassung statt des vollen Inhalts
+        self.index.add_document(str(file_path), summary, {
             "path": str(file_path),
             "folder": str(file_path.parent),
             "filename": file_path.name,
