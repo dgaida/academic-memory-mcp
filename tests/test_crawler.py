@@ -20,7 +20,7 @@ def test_crawler_file_processing(tmp_path):
     test_file = tmp_path / "test.txt"
     test_file.write_text("hello")
 
-    summary = crawler._process_file(test_file, 1)
+    summary, changed = crawler._process_file(test_file, 1)
 
     assert summary == "# Summary"
     assert store.upsert_file.called

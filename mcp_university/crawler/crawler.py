@@ -4,7 +4,7 @@ import subprocess
 import hashlib
 from pathlib import Path
 import logging
-from typing import Optional
+from typing import Optional, Tuple
 
 from ..config import Config
 from ..metadata.store import MetadataStore
@@ -90,7 +90,8 @@ class Crawler:
 
         logger.info("Crawl process completed.")
 
-    def _process_directory(self, dir_path: Path, parent_id: Optional[int] = None) -> Optional[str]:
+
+    def _process_directory(self, dir_path: Path, parent_id: Optional[int] = None) -> Tuple[Optional[str], bool]:
         """Verarbeitet ein Verzeichnis rekursiv.
 
         Args:
@@ -98,46 +99,111 @@ class Crawler:
             parent_id (Optional[int]): ID des übergeordneten Ordners in der DB.
 
         Returns:
-            Optional[str]: Die Zusammenfassung des Ordners.
+            Tuple[Optional[str], bool]: (Zusammenfassung des Ordners, Wurde etwas geändert?)
         """
         logger.info(f"Scanning directory: {dir_path}")
         folder_id = self.store.upsert_folder(str(dir_path), parent_id)
 
+        db_files = self.store.get_folder_files(folder_id)
+        current_files = set()
+        any_changed = False
         item_summaries = []
 
         for entry in os.scandir(dir_path):
+            entry_path = Path(entry.path)
             if entry.is_dir():
-                # Skip excluded folders
                 if entry.name in self.config.folders.exclude_patterns:
                     logger.debug(f"Skipping excluded directory: {entry.name}")
                     continue
-                subfolder_summary = self._process_directory(Path(entry.path), folder_id)
-                if subfolder_summary:
-                    item_summaries.append(subfolder_summary)
+
+                sub_summary, sub_changed = self._process_directory(entry_path, folder_id)
+                if sub_summary:
+                    item_summaries.append(sub_summary)
+                if sub_changed:
+                    any_changed = True
             elif entry.is_file():
-                # Skip excluded files
-                suffix = Path(entry.name).suffix.lower()
+                suffix = entry_path.suffix.lower()
                 if suffix not in self.config.folders.supported_extensions:
                     continue
-                # Skip hidden summary files themselves to avoid recursion/clutter
                 if entry.name.startswith(".") and entry.name.endswith("_summary.md"):
                     continue
 
-                file_summary = self._process_file(Path(entry.path), folder_id)
+                current_files.add(str(entry_path))
+
+                file_summary, file_changed = self._process_file(entry_path, folder_id)
                 if file_summary:
                     item_summaries.append(file_summary)
+                if file_changed:
+                    any_changed = True
 
-        # Generate folder summary
+        # Handle deleted files
+        for db_file in db_files:
+            # db_file: (id, path, hash, mtime, type, last_indexed, folder_id)
+            if db_file[1] not in current_files:
+                logger.info(f"File {db_file[1]} deleted. Removing from database.")
+                self.store.delete_file(db_file[0])
+                any_changed = True
+
+        existing_folder_summary = self.store.get_summary("folder", folder_id)
+
         folder_summary = None
         if item_summaries:
-            logger.info(f"Generating folder summary for: {dir_path.name}")
-            folder_summary = self.summarizer.summarize_folder(dir_path.name, item_summaries)
-            if folder_summary:
-                self.store.add_summary("folder", folder_id, folder_summary)
-                self._save_summary_to_file(dir_path, folder_summary)
+            if any_changed or not existing_folder_summary:
+                logger.info(f"Generating folder summary for: {dir_path.name}")
+                folder_summary = self.summarizer.summarize_folder(dir_path.name, item_summaries)
+                if folder_summary:
+                    self.store.add_summary("folder", folder_id, folder_summary)
+                    self.store.update_folder_summarized(folder_id)
+                    self._save_summary_to_file(dir_path, folder_summary)
+                    any_changed = True # Folder summary itself changed
+            else:
+                logger.info(f"Folder {dir_path.name} unchanged. Skipping re-summarization.")
+                folder_summary = existing_folder_summary
 
-        return folder_summary
+        return folder_summary, any_changed
 
+    def _process_file(self, file_path: Path, folder_id: int) -> Tuple[Optional[str], bool]:
+        """Verarbeitet eine einzelne Datei (Parsing -> Summarization -> Indexierung).
+
+        Args:
+            file_path (Path): Pfad zur Datei.
+            folder_id (int): ID des zugehörigen Ordners.
+
+        Returns:
+            Tuple[Optional[str], bool]: (Zusammenfassung der Datei, Wurde sie neu/geändert indexiert?)
+        """
+        logger.debug(f"Processing file: {file_path}")
+        mtime = file_path.stat().st_mtime
+        file_hash = self._calculate_hash(file_path)
+
+        existing_file = self.store.get_file(str(file_path))
+        if existing_file:
+            if existing_file[2] == file_hash:
+                logger.debug(f"File {file_path} unchanged. Skipping.")
+                return self.store.get_summary("file", existing_file[0]), False
+
+        logger.info(f"Indexing new or changed file: {file_path}")
+        content = self.parser.parse(file_path)
+        if not content:
+            logger.warning(f"Failed to parse content for {file_path}")
+            return None, False
+
+        summary = self.summarizer.summarize_file(file_path.name, content)
+        if not summary:
+            logger.warning(f"Failed to generate summary for {file_path}")
+            return None, False
+
+        file_id = self.store.upsert_file(str(file_path), file_hash, mtime, file_path.suffix.lower(), folder_id)
+        self.store.add_summary("file", file_id, summary)
+
+        self.index.add_document(str(file_path), content, {
+            "path": str(file_path),
+            "folder": str(file_path.parent),
+            "filename": file_path.name,
+            "type": file_path.suffix.lower()
+        })
+
+        return summary, True
     def _save_summary_to_file(self, dir_path: Path, summary: str) -> None:
         """Speichert die Ordner-Zusammenfassung als versteckte Markdown-Datei im Elternverzeichnis.
 
@@ -154,57 +220,3 @@ class Crawler:
             summary_path.write_text(summary, encoding="utf-8")
         except Exception as e:
             logger.error(f"Failed to save folder summary for {dir_path.name}: {e}")
-
-    def _process_file(self, file_path: Path, folder_id: int) -> Optional[str]:
-        """Verarbeitet eine einzelne Datei (Parsing -> Summarization -> Indexierung).
-
-        Args:
-            file_path (Path): Pfad zur Datei.
-            folder_id (int): ID des zugehörigen Ordners.
-
-        Returns:
-            Optional[str]: Die Zusammenfassung der Datei oder None.
-        """
-        logger.debug(f"Processing file: {file_path}")
-        mtime = file_path.stat().st_mtime
-        file_hash = self._calculate_hash(file_path)
-
-        existing_file = self.store.get_file(str(file_path))
-        if existing_file:
-            if existing_file[2] == file_hash:
-                logger.info(f"File {file_path} unchanged. Skipping.")
-                # We still need the summary for the folder summary aggregation.
-                # Retrieve existing summary from DB.
-                # summaries: id, item_type, item_id, content, version, created_at
-                with self.store._get_connection() as conn:
-                    cursor = conn.cursor()
-                    cursor.execute(
-                        'SELECT content FROM summaries WHERE item_type = "file" AND item_id = ? ORDER BY created_at DESC LIMIT 1',
-                        (existing_file[0],)
-                    )
-                    row = cursor.fetchone()
-                    return row[0] if row else None
-
-        logger.info(f"Indexing new or changed file: {file_path}")
-        content = self.parser.parse(file_path)
-        if not content:
-            logger.warning(f"Failed to parse content for {file_path}")
-            return None
-
-        summary = self.summarizer.summarize_file(file_path.name, content)
-        if not summary:
-            logger.warning(f"Failed to generate summary for {file_path}")
-            return None
-
-        file_id = self.store.upsert_file(str(file_path), file_hash, mtime, file_path.suffix.lower(), folder_id)
-        self.store.add_summary("file", file_id, summary)
-
-        # Index via SearchIndex (handles qmd and native fallback)
-        self.index.add_document(str(file_path), content, {
-            "path": str(file_path),
-            "folder": str(file_path.parent),
-            "filename": file_path.name,
-            "type": file_path.suffix.lower()
-        })
-
-        return summary
