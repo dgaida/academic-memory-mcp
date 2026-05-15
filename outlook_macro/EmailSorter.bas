@@ -349,6 +349,7 @@ Private Sub ProcessFolder(ByVal folder As Outlook.MAPIFolder, _
             Dim foldersDict As Object
             Set foldersDict = studentMap(key)
 
+            If foldersDict.Count > 0 Then
             Dim j As Long
             For j = 1 To mails.Count
                 Dim currentMail As Outlook.mailItem
@@ -379,6 +380,7 @@ Private Sub ProcessFolder(ByVal folder As Outlook.MAPIFolder, _
                     End If
                 End If
             Next j
+            End If
         End If
     Next key
 End Sub
