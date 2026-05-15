@@ -33,5 +33,5 @@ This file provides instructions and guidelines for AI agents working on the MCP 
 - **qmd CLI:** Required for hybrid search. Install globally via: `npm install -g @tobilu/qmd`  
 - **Docling:** Required for PDF parsing. Install with: `pip install docling` and initialize with `cp-config` if prompted.  
 
-## Outlook Macros
-- **Documentation:** All functions and subroutines in Outlook macros (`outlook_macro/*.bas`) must remain documented using the `''' Args:` and `''' Returns:` format (Google-style documentation for VBA).
+## Outlook Macros  
+- **Documentation:** All functions and subroutines in Outlook macros (`outlook_macro/*.bas`) must remain documented using the `''' Args:` and `''' Returns:` format (Google-style documentation for VBA).  
