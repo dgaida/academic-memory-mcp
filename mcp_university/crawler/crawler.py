@@ -4,7 +4,7 @@ import subprocess
 import hashlib
 from pathlib import Path
 import logging
-from typing import Optional, Tuple, List
+from typing import Optional, Tuple
 
 from ..config import Config
 from ..metadata.store import MetadataStore

@@ -1,7 +1,5 @@
 import pytest
-from pathlib import Path
-from unittest.mock import MagicMock, patch
-from datetime import datetime
+from unittest.mock import MagicMock
 from mcp_university.crawler.crawler import Crawler
 from mcp_university.config import Config, FolderConfig
 from mcp_university.metadata.store import MetadataStore
