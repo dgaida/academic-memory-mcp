@@ -67,7 +67,7 @@ def search(
     query: str,
     debug: bool = typer.Option(False, "--debug", "-d", help="Enable debug logging")
 ) -> None:
-    """Führt eine hybride Suche über die indexierten Dokumente aus.
+    """Führt eine hybride Suche über die indexierten Dokumente aus und generiert eine Antwort.
 
     Args:
         query: Der Suchbegriff oder die Frage.
@@ -76,9 +76,33 @@ def search(
     cfg = get_config()
     idx = SearchIndex(str(cfg.qdrant_path), cfg.embeddings.model)
     results = idx.search(query)
+
+    print("\n" + "="*50)
+    print("SUCHERGEBNISSE")
+    print("="*50 + "\n")
+
+    context_parts = []
     for res in results:
         print(f"[{res['score']:.2f}] {res['filename']} ({res['path']})")
-        print(f"  {res['content']}\n")
+        print(f"  {res['content'][:200]}...\n")
+        context_parts.append(f"Source: {res['filename']}\nContent: {res['content']}")
+
+    if results:
+        print("="*50)
+        print("GENERIERTE ANTWORT")
+        print("="*50 + "\n")
+
+        summarizer = Summarizer(cfg.llm.model, cfg.llm.base_url)
+        context = "\n\n---\n\n".join(context_parts)
+        answer = summarizer.answer_question(query, context)
+
+        if answer:
+            print(answer)
+        else:
+            print("Fehler beim Generieren der Antwort.")
+        print("\n" + "="*50)
+    else:
+        print("Keine relevanten Dokumente gefunden.")
 
 @app.command()
 def watch(debug: bool = typer.Option(False, "--debug", "-d", help="Enable debug logging")) -> None:

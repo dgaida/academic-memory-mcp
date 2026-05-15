@@ -142,3 +142,46 @@ Contents:
             if "memory" in str(e).lower():
                 logger.error("Likely Out of Memory error from Ollama. Check system resources.")
             return None
+
+    def answer_question(self, query: str, context: str) -> Optional[str]:
+        """Beantwortet eine Frage basierend auf dem bereitgestellten Kontext.
+
+        Args:
+            query (str): Die Frage des Nutzers.
+            context (str): Der Kontext (z.B. Suchergebnisse).
+
+        Returns:
+            Optional[str]: Die generierte Antwort oder None bei Fehlern.
+        """
+        logger.info(f"Answering question based on context: {query}")
+
+        system_prompt = "You are a university knowledge management assistant. Answer the user's question based ONLY on the provided context. Answer in the same language as the question."
+        user_prompt = f"""
+Answer the following question based on the provided context from university documents.
+If the context does not contain the answer, say that you don't know based on the documents.
+
+Context:
+{context}
+
+Question:
+{query}
+
+Answer:
+"""
+        messages = [
+            {'role': 'system', 'content': system_prompt},
+            {'role': 'user', 'content': user_prompt}
+        ]
+
+        try:
+            logger.debug(f"Sending chat request to Ollama (model={self.model}) for question answering")
+            response = self.client.chat(
+                model=self.model,
+                messages=messages,
+                options={"temperature": 0}
+            )
+            logger.debug("Successfully received chat response for question answering")
+            return response['message']['content']
+        except Exception as e:
+            logger.error(f"Error answering question with model {self.model}: {e}")
+            return None
