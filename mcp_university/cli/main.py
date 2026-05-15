@@ -10,7 +10,7 @@ from ..summarizer.engine import Summarizer
 from ..retrieval.index import SearchIndex
 from ..mcp_server.server import create_server
 
-app = typer.Typer(help="MCP University Memory System CLI")
+app = typer.Typer(help="MCP University Memory System CLI - Lokales Wissensmanagement für die Universität")
 
 def setup_logging(debug: bool):
     """Konfiguriert das Logging für Konsole und Datei."""
@@ -50,7 +50,7 @@ def setup_logging(debug: bool):
     logger.addHandler(file_handler)
 
 @app.command()
-def index(debug: bool = typer.Option(False, "--debug", "-d", help="Enable debug logging")) -> None:
+def index(debug: bool = typer.Option(False, "--debug", "-d", help="Debug-Logging aktivieren")) -> None:
     """Startet den vollständigen Indexierungsprozess aller konfigurierten Ordner."""
     setup_logging(debug)
     cfg = get_config()
@@ -65,7 +65,7 @@ def index(debug: bool = typer.Option(False, "--debug", "-d", help="Enable debug 
 @app.command()
 def search(
     query: str,
-    debug: bool = typer.Option(False, "--debug", "-d", help="Enable debug logging")
+    debug: bool = typer.Option(False, "--debug", "-d", help="Debug-Logging aktivieren")
 ) -> None:
     """Führt eine hybride Suche über die indexierten Dokumente aus und generiert eine Antwort.
 
@@ -85,7 +85,7 @@ def search(
     for res in results:
         print(f"[{res['score']:.2f}] {res['filename']} ({res['path']})")
         print(f"  {res['content'][:200]}...\n")
-        context_parts.append(f"Source: {res['filename']}\nContent: {res['content']}")
+        context_parts.append(f"Quelle: {res['filename']}\nInhalt: {res['content']}")
 
     if results:
         print("="*50)
@@ -105,7 +105,7 @@ def search(
         print("Keine relevanten Dokumente gefunden.")
 
 @app.command()
-def watch(debug: bool = typer.Option(False, "--debug", "-d", help="Enable debug logging")) -> None:
+def watch(debug: bool = typer.Option(False, "--debug", "-d", help="Debug-Logging aktivieren")) -> None:
     """Startet den Watchdog zur Echtzeit-Überwachung von Ordnern."""
     setup_logging(debug)
     from ..crawler.watcher import Watcher
@@ -120,7 +120,7 @@ def watch(debug: bool = typer.Option(False, "--debug", "-d", help="Enable debug 
     watcher.start()
 
 @app.command()
-def serve_mcp(debug: bool = typer.Option(False, "--debug", "-d", help="Enable debug logging")) -> None:
+def serve_mcp(debug: bool = typer.Option(False, "--debug", "-d", help="Debug-Logging aktivieren")) -> None:
     """Startet den FastMCP-Server zur Integration in KI-Agenten."""
     setup_logging(debug)
     server = create_server()
