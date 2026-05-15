@@ -208,6 +208,35 @@ Inhalte:
 """
         return self._chat_request(system_prompt, user_prompt)
 
+    def summarize_email_conversation(self, folder_name: str, conversation_content: str) -> Optional[str]:
+        """Erstellt eine Zusammenfassung eines E-Mail-Schriftverkehrs (Inbox & SentItems)."""
+        logger.info(f"Summarizing email conversation in folder: {folder_name}")
+
+        system_prompt = "Du bist ein Assistent für universitäres Wissensmanagement. Analysiere den E-Mail-Schriftverkehr auf Deutsch."
+        user_prompt = f"""Analysiere den folgenden chronologischen E-Mail-Schriftverkehr aus dem Ordner '{folder_name}'.
+Ermittle die wichtigsten Informationen und identifiziere noch offene Punkte.
+Beachte dabei besonders, ob offene Punkte aus eingehenden Mails (Inbox) bereits durch Antworten (SentItems) erledigt wurden.
+
+Format:
+# Zusammenfassung des Schriftverkehrs: {folder_name}
+# Beteiligte Personen
+- Name 1 (Rolle, falls ersichtlich)
+# Hauptthemen & Kontext
+(Worum geht es in diesem Austausch?)
+# Chronologischer Verlauf
+(Kurze Zusammenfassung der wichtigsten Etappen)
+# Offene Punkte & Next Steps
+- [ ] Punkt 1 (Was ist noch zu tun?)
+# Erledigte Punkte
+- [x] Punkt A (Was wurde bereits geklärt/beantwortet?)
+# Wichtige Termine & Fristen
+- YYYY-MM-DD: Beschreibung
+
+Schriftverkehr:
+{conversation_content[:20000]}
+"""
+        return self._chat_request(system_prompt, user_prompt)
+
     def answer_question(self, query: str, context: str) -> Optional[str]:
         """Beantwortet eine Frage basierend auf dem Kontext auf Deutsch."""
         logger.info(f"Answering question: {query}")

@@ -4,6 +4,8 @@ from typing import Optional
 import logging
 import email
 from email import policy
+from email.utils import parsedate_to_datetime
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +27,44 @@ class MailParser:
             return self._parse_msg(file_path)
         else:
             return self._parse_eml(file_path)
+
+    def get_email_date(self, file_path: Path) -> datetime:
+        """Extrahiert das Datum der E-Mail für die Sortierung.
+
+        Args:
+            file_path: Pfad zur E-Mail-Datei.
+
+        Returns:
+            datetime: Das Datum der E-Mail oder datetime.min bei Fehlern.
+        """
+        suffix = file_path.suffix.lower()
+        if suffix == ".msg":
+            try:
+                import extract_msg
+                with extract_msg.openMsg(str(file_path)) as msg:
+                    if msg.date:
+                        if isinstance(msg.date, datetime):
+                            return msg.date
+                        # Falls es doch ein String ist (unwahrscheinlich bei extract-msg)
+                        return parsedate_to_datetime(str(msg.date))
+            except Exception as e:
+                logger.debug(f"Could not extract date from .msg {file_path}: {e}")
+
+        # Fallback for .eml or failed .msg
+        try:
+            with open(file_path, 'rb') as f:
+                msg = email.message_from_binary_file(f, policy=policy.default)
+                date_str = msg.get('Date')
+                if date_str:
+                    return parsedate_to_datetime(date_str)
+        except Exception as e:
+            logger.debug(f"Could not extract date from .eml {file_path}: {e}")
+
+        # Final fallback: mtime
+        try:
+            return datetime.fromtimestamp(file_path.stat().st_mtime)
+        except Exception:
+            return datetime.min
 
     def _parse_msg(self, file_path: Path) -> Optional[str]:
         """Parsen einer Outlook .msg Datei mit extract-msg."""
