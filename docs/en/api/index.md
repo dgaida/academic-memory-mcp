@@ -22,6 +22,10 @@ This page provides an overview of the key modules and classes of the MCP Univers
 
 ::: mcp_university.parser.factory.ParserFactory
 
+## CLI Database Management
+
+::: mcp_university.cli.db
+
 ## Configuration
 
 ::: mcp_university.config.Config

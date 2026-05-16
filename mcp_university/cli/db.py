@@ -10,7 +10,9 @@ from ..retrieval.index import SearchIndex
 db_app = typer.Typer(help="Datenbank-Management-Befehle")
 console = Console()
 
-def get_store_and_index():
+from typing import Tuple
+
+def get_store_and_index() -> Tuple[MetadataStore, SearchIndex]:
     """Initialisiert und gibt den MetadataStore und SearchIndex zurück.
 
     Nutzt die globale Konfiguration, um die Pfade für die SQLite-Datenbank

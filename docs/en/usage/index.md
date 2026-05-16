@@ -24,6 +24,28 @@ Starts a background process that reacts to file changes and updates the index in
 mcp-uni watch
 ```
 
+## Database Management (`db`)
+
+The `db` command group allows for direct management of metadata and the search index.
+
+### Listing Content
+You can list various entities in the database:
+
+*   **Files:** `mcp-uni db list-files`
+*   **Folders:** `mcp-uni db list-folders`
+*   **Students:** `mcp-uni db list-students`
+*   **Summaries:** `mcp-uni db list-summaries`
+*   **Deadlines:** `mcp-uni db list-deadlines`
+
+### Deleting Content
+Entries can be deleted using their ID. Use the `--force` or `-f` option to skip the confirmation prompt.
+
+*   **Delete File:** `mcp-uni db delete-file <ID>` (also removes the entry from the search index)
+*   **Delete Folder:** `mcp-uni db delete-folder <ID>` (recursively removes all contained files)
+*   **Delete Student:** `mcp-uni db delete-student <ID>`
+*   **Delete Summary:** `mcp-uni db delete-summary <ID>`
+*   **Delete Deadline:** `mcp-uni db delete-deadline <ID>`
+
 ## Model Context Protocol (MCP)
 
 The most powerful way to use the system is via an MCP client (like Claude Desktop).
