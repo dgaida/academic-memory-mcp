@@ -36,5 +36,5 @@ This file provides instructions and guidelines for AI agents working on the MCP 
 ## Outlook Macros  
 - **Documentation:** All functions and subroutines in Outlook macros (`outlook_macro/*.bas`) must remain documented using the `''' Args:` and `''' Returns:` format (Google-style documentation for VBA).  
 
-## Documentation Skill
-- **MANDATORY:** Always use the [MkDocs Documentation Ecosystem Skill](https://github.com/dgaida/auto-version-action/blob/main/skills/SKILL_docs.md) when updating documentation, `README.md`, or MkDocs configurations.
+## Documentation Skill  
+- **MANDATORY:** Always use the [MkDocs Documentation Ecosystem Skill](https://github.com/dgaida/auto-version-action/blob/main/skills/SKILL_docs.md) when updating documentation, `README.md`, or MkDocs configurations.  
