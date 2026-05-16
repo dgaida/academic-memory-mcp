@@ -152,6 +152,30 @@ class SearchIndex:
             json.dump(self.corpus, f, ensure_ascii=False, indent=2)
         self._rebuild_bm25()
 
+    def delete_document(self, doc_id: str) -> None:
+        """Löscht ein Dokument aus dem Index (Native Implementierung).
+
+        Args:
+            doc_id (str): ID (Pfad) des Dokuments.
+        """
+        if not NATIVE_AVAILABLE:
+            return
+
+        logger.debug(f"Deleting document from native index: {doc_id}")
+        doc_hash = int(hashlib.md5(doc_id.encode()).hexdigest(), 16) % (2**63 - 1)
+
+        # Lösche aus Qdrant
+        self.client.delete(
+            collection_name=self.collection_name,
+            points_selector=models.PointIdsList(points=[doc_hash])
+        )
+
+        # Lösche aus Corpus und BM25
+        self.corpus = [doc for doc in self.corpus if doc["doc_id"] != doc_id]
+        with open(self.corpus_path, "w", encoding="utf-8") as f:
+            json.dump(self.corpus, f, ensure_ascii=False, indent=2)
+        self._rebuild_bm25()
+
     def search(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
         """Führt eine Suche aus, bevorzugt via qmd."""
         logger.info(f"Searching for: '{query}' (top_k={top_k})")
