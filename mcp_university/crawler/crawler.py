@@ -1,11 +1,10 @@
-"""Modul für das Crawling des Dateisystems."""
+"""Crawler zur Überwachung von Ordnern und Indexierung von Dateien."""
 import os
-import subprocess
-import hashlib
-from pathlib import Path
 import logging
-from typing import Optional, Tuple
-
+import hashlib
+import subprocess
+from pathlib import Path
+from typing import Tuple, Optional
 from ..config import Config
 from ..metadata.store import MetadataStore
 from ..parser.factory import ParserFactory
@@ -15,21 +14,17 @@ from ..retrieval.index import SearchIndex
 logger = logging.getLogger(__name__)
 
 class Crawler:
-    """Komponente zum Durchsuchen des Dateisystems und zur Indexierung von Dokumenten.
-
-    Verantwortlich für das rekursive Scannen von Verzeichnissen, das Erkennen von Änderungen
-    via Hashes und die Koordination von Parsing, Summarization und Indexierung.
-    """
+    """Überwacht konfigurierte Ordner und indexiert neue oder geänderte Dateien."""
 
     def __init__(self, config: Config, store: MetadataStore, parser: ParserFactory, summarizer: Summarizer, index: SearchIndex):
-        """Initialisiert den Crawler mit notwendigen Abhängigkeiten.
+        """Initialisiert den Crawler.
 
         Args:
             config (Config): Systemkonfiguration.
             store (MetadataStore): Metadaten-Speicher.
-            parser (ParserFactory): Factory für Dokumenten-Parser.
-            summarizer (Summarizer): Dienst für Zusammenfassungen.
-            index (SearchIndex): Suchindex-Schnittstelle.
+            parser (ParserFactory): Parser-Fabrik.
+            summarizer (Summarizer): Engine für Zusammenfassungen.
+            index (SearchIndex): Suchindex.
         """
         self.config = config
         self.store = store
@@ -38,49 +33,31 @@ class Crawler:
         self.index = index
         self.use_shell = os.name == 'nt'
 
-    def _calculate_hash(self, path: Path) -> str:
-        """Berechnet den SHA-256 Hash einer Datei.
-
-        Args:
-            path (Path): Pfad zur Datei.
-
-        Returns:
-            str: Der hexadezimale Hash-String.
-        """
-        sha256_hash = hashlib.sha256()
-        with open(path, "rb") as f:
-            for byte_block in iter(lambda: f.read(4096), b""):
-                sha256_hash.update(byte_block)
-        return sha256_hash.hexdigest()
-
     def crawl(self) -> None:
-        """Startet den Crawling-Prozess für alle konfigurierten Ordner.
-        """
-        logger.info("Starting crawl process...")
-        for root_path_str in self.config.folders.folders:
-            root_path = Path(root_path_str)
-            if not root_path.exists():
-                logger.warning(f"Root path {root_path} does not exist. Skipping.")
-                continue
+        """Startet einen vollständigen Scan aller konfigurierten Ordner."""
+        logger.info("Starting full crawl...")
+        for folder_path in self.config.folders.folders:
+            path = Path(folder_path)
+            if path.exists() and path.is_dir():
+                logger.info(f"Processing root folder: {path}")
+                # qmd integration (with Windows fix)
+                coll_name = path.name
+                exts = [ext.lstrip('.') for ext in self.config.folders.supported_extensions]
+                mask = f"**/*.{{{','.join(exts)}}}"
 
-            logger.info(f"Processing root folder: {root_path}")
-            # qmd integration (with Windows fix)
-            coll_name = root_path.name
-            exts = [ext.lstrip('.') for ext in self.config.folders.supported_extensions]
-            mask = f"**/*.{{{','.join(exts)}}}"
+                logger.debug(f"Syncing qmd collection '{coll_name}' for {path}")
+                try:
+                    subprocess.run([
+                        "qmd", "collection", "add", str(path),
+                        "--name", coll_name,
+                        "--mask", mask
+                    ], capture_output=True, shell=self.use_shell)
+                except Exception as e:
+                    logger.debug(f"qmd collection add skipped or failed: {e}")
 
-            logger.debug(f"Syncing qmd collection '{coll_name}' for {root_path}")
-            try:
-                subprocess.run([
-                    "qmd", "collection", "add", str(root_path),
-                    "--name", coll_name,
-                    "--mask", mask
-                ], capture_output=True, shell=self.use_shell)
-            except Exception as e:
-                logger.debug(f"qmd collection add skipped or failed: {e}")
-
-            # Process the directory and generate the final summary for the root
-            self._process_directory(root_path)
+                self._process_directory(path)
+            else:
+                logger.warning(f"Configured folder does not exist or is not a directory: {folder_path}")
 
         logger.info("Updating qmd index...")
         try:
@@ -88,14 +65,13 @@ class Crawler:
         except Exception as e:
             logger.debug(f"qmd update skipped or failed: {e}")
 
-        logger.info("Crawl process completed.")
-
+        logger.info("Crawl completed.")
 
     def _process_directory(self, dir_path: Path, parent_id: Optional[int] = None) -> Tuple[Optional[str], bool]:
-        """Verarbeitet ein Verzeichnis rekursiv.
+        """Verarbeitet einen Ordner rekursiv.
 
         Args:
-            dir_path (Path): Das zu verarbeitende Verzeichnis.
+            dir_path (Path): Pfad zum Ordner.
             parent_id (Optional[int]): ID des übergeordneten Ordners in der DB.
 
         Returns:
@@ -307,6 +283,22 @@ class Crawler:
         })
 
         return summary, True
+
+    def _calculate_hash(self, file_path: Path) -> str:
+        """Berechnet den SHA-256 Hash einer Datei.
+
+        Args:
+            file_path (Path): Pfad zur Datei.
+
+        Returns:
+            str: Der berechnete Hash.
+        """
+        sha256_hash = hashlib.sha256()
+        with open(file_path, "rb") as f:
+            for byte_block in iter(lambda: f.read(4096), b""):
+                sha256_hash.update(byte_block)
+        return sha256_hash.hexdigest()
+
     def _save_summary_to_file(self, dir_path: Path, summary: str) -> None:
         """Speichert die Ordner-Zusammenfassung als versteckte Markdown-Datei im Elternverzeichnis.
 

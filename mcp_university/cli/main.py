@@ -9,8 +9,10 @@ from ..parser.factory import ParserFactory
 from ..summarizer.engine import Summarizer
 from ..retrieval.index import SearchIndex
 from ..mcp_server.server import create_server
+from .db import db_app
 
 app = typer.Typer(help="MCP University Memory System CLI - Lokales Wissensmanagement für die Universität")
+app.add_typer(db_app, name="db")
 
 def setup_logging(debug: bool):
     """Konfiguriert das Logging für Konsole und Datei."""

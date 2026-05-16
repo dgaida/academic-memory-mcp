@@ -2,7 +2,7 @@
 import sqlite3
 import time
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List, Dict, Any, Tuple
 
 class MetadataStore:
     """Verwaltet die Metadaten-Persistenz in einer SQLite-Datenbank.
@@ -119,19 +119,31 @@ class MetadataStore:
             conn.commit()
             return cursor.lastrowid
 
-    def get_file(self, path: str) -> Optional[tuple]:
-        """Ruft Metadaten für eine Datei ab.
+    def get_file(self, path: str) -> Optional[Tuple]:
+        """Ruft Metadaten für eine Datei ab (Legacy-Format: Tuple).
 
         Args:
             path (str): Pfad der Datei.
 
         Returns:
-            Optional[tuple]: Datensatz der Datei oder None.
+            Optional[Tuple]: Datensatz der Datei oder None.
         """
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('SELECT * FROM files WHERE path = ?', (path,))
             return cursor.fetchone()
+
+    def get_all_files(self) -> List[Dict[str, Any]]:
+        """Ruft alle Dateien ab.
+
+        Returns:
+            List[Dict[str, Any]]: Liste aller Dateien als Dictionaries.
+        """
+        with self._get_connection() as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM files')
+            return [dict(row) for row in cursor.fetchall()]
 
     def upsert_folder(self, path: str, parent_id: Optional[int] = None) -> int:
         """Fügt einen Ordner hinzu oder aktualisiert ihn.
@@ -155,6 +167,18 @@ class MetadataStore:
             cursor.execute('SELECT id FROM folders WHERE path = ?', (path,))
             return cursor.fetchone()[0]
 
+    def get_all_folders(self) -> List[Dict[str, Any]]:
+        """Ruft alle Ordner ab.
+
+        Returns:
+            List[Dict[str, Any]]: Liste aller Ordner als Dictionaries.
+        """
+        with self._get_connection() as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM folders')
+            return [dict(row) for row in cursor.fetchall()]
+
     def add_summary(self, item_type: str, item_id: int, content: str) -> None:
         """Speichert eine Zusammenfassung für eine Datei oder einen Ordner.
 
@@ -171,14 +195,26 @@ class MetadataStore:
             ''', (item_type, item_id, content, time.time()))
             conn.commit()
 
-    def get_folder_files(self, folder_id: int) -> list:
-        """Ruft alle Dateien in einem bestimmten Ordner ab.
+    def get_all_summaries(self) -> List[Dict[str, Any]]:
+        """Ruft alle Zusammenfassungen ab.
+
+        Returns:
+            List[Dict[str, Any]]: Liste aller Zusammenfassungen als Dictionaries.
+        """
+        with self._get_connection() as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM summaries')
+            return [dict(row) for row in cursor.fetchall()]
+
+    def get_folder_files(self, folder_id: int) -> List[Tuple]:
+        """Ruft alle Dateien in einem bestimmten Ordner ab (Legacy-Format: Tuple).
 
         Args:
             folder_id (int): ID des Ordners.
 
         Returns:
-            list: Liste der Dateidatensätze.
+            List[Tuple]: Liste der Dateidatensätze.
         """
         with self._get_connection() as conn:
             cursor = conn.cursor()
@@ -205,6 +241,30 @@ class MetadataStore:
             row = cursor.fetchone()
             return row[0] if row else None
 
+    def get_all_students(self) -> List[Dict[str, Any]]:
+        """Ruft alle Studenten ab.
+
+        Returns:
+            List[Dict[str, Any]]: Liste aller Studenten als Dictionaries.
+        """
+        with self._get_connection() as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM students')
+            return [dict(row) for row in cursor.fetchall()]
+
+    def get_all_deadlines(self) -> List[Dict[str, Any]]:
+        """Ruft alle Deadlines ab.
+
+        Returns:
+            List[Dict[str, Any]]: Liste aller Deadlines als Dictionaries.
+        """
+        with self._get_connection() as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM deadlines')
+            return [dict(row) for row in cursor.fetchall()]
+
     def delete_file(self, file_id: int) -> None:
         """Löscht eine Datei und ihre Zusammenfassungen aus der Datenbank.
 
@@ -215,6 +275,63 @@ class MetadataStore:
             cursor = conn.cursor()
             cursor.execute('DELETE FROM summaries WHERE item_type = "file" AND item_id = ?', (file_id,))
             cursor.execute('DELETE FROM files WHERE id = ?', (file_id,))
+            conn.commit()
+
+    def delete_folder(self, folder_id: int) -> None:
+        """Löscht einen Ordner, alle darin enthaltenen Dateien und deren Zusammenfassungen.
+
+        Args:
+            folder_id (int): ID des Ordners.
+        """
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            # Finde alle Dateien im Ordner
+            cursor.execute('SELECT id FROM files WHERE folder_id = ?', (folder_id,))
+            file_ids = [row[0] for row in cursor.fetchall()]
+
+            # Lösche alle Dateien (und deren Zusammenfassungen)
+            for f_id in file_ids:
+                cursor.execute('DELETE FROM summaries WHERE item_type = "file" AND item_id = ?', (f_id,))
+                cursor.execute('DELETE FROM files WHERE id = ?', (f_id,))
+
+            # Lösche Zusammenfassungen des Ordners
+            cursor.execute('DELETE FROM summaries WHERE item_type = "folder" AND item_id = ?', (folder_id,))
+
+            # Lösche den Ordner selbst
+            cursor.execute('DELETE FROM folders WHERE id = ?', (folder_id,))
+            conn.commit()
+
+    def delete_student(self, student_id: int) -> None:
+        """Löscht einen Studenten aus der Datenbank.
+
+        Args:
+            student_id (int): ID des Studenten.
+        """
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('DELETE FROM students WHERE id = ?', (student_id,))
+            conn.commit()
+
+    def delete_deadline(self, deadline_id: int) -> None:
+        """Löscht eine Deadline aus der Datenbank.
+
+        Args:
+            deadline_id (int): ID der Deadline.
+        """
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('DELETE FROM deadlines WHERE id = ?', (deadline_id,))
+            conn.commit()
+
+    def delete_summary(self, summary_id: int) -> None:
+        """Löscht eine Zusammenfassung aus der Datenbank.
+
+        Args:
+            summary_id (int): ID der Zusammenfassung.
+        """
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('DELETE FROM summaries WHERE id = ?', (summary_id,))
             conn.commit()
 
     def update_folder_summarized(self, folder_id: int) -> None:
