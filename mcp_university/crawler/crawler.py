@@ -58,6 +58,13 @@ class Crawler:
                 self._process_directory(path)
             else:
                 logger.warning(f"Configured folder does not exist or is not a directory: {folder_path}")
+
+        logger.info("Updating qmd index...")
+        try:
+            subprocess.run(["qmd", "update"], capture_output=True, shell=self.use_shell)
+        except Exception as e:
+            logger.debug(f"qmd update skipped or failed: {e}")
+
         logger.info("Crawl completed.")
 
     def _process_directory(self, dir_path: Path, parent_id: Optional[int] = None) -> Tuple[Optional[str], bool]:
