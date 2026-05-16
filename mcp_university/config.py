@@ -25,6 +25,7 @@ class FolderConfig(BaseModel):
     folders: List[str] = []
     exclude_patterns: List[str] = [".git", "node_modules", "*.tmp", "*.bak"]
     supported_extensions: List[str] = [".pdf", ".docx", ".md", ".txt", ".eml", ".msg", ".py", ".ipynb", ".json", ".html"]
+    summarize_emails_individually: bool = False
 
 class Config:
     """Zentrale Konfigurationsklasse für das MCP University System.

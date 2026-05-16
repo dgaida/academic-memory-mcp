@@ -199,9 +199,6 @@ class Crawler:
         combined_hash = hashlib.sha256(combined_data.encode()).hexdigest()
 
         summary_file_path = dir_path / ".emails_summary.md"
-        # Use a special item_type for conversation summaries to avoid conflict with normal folder summary
-        # Actually, the user wants it to be indexed and treated as part of the folder content.
-        # We'll use a specific key in the DB to check for changes.
 
         db_folder = self.store._get_connection().execute("SELECT identity_json FROM folders WHERE id=?", (folder_id,)).fetchone()
 
@@ -219,13 +216,29 @@ class Crawler:
 
         dated_emails.sort(key=lambda x: x[0])
 
-        conversation_text = ""
-        for date, f in dated_emails:
-            parsed = self.parser.mail_parser.parse(f)
-            if parsed:
-                conversation_text += f"\n--- EMAIL VOM {date} ---\n{parsed}\n"
+        # Log email names in chronological order
+        logger.info("Order of emails for conversation summary:")
+        for _, f in dated_emails:
+            logger.info(f"  - {f.name}")
 
-        summary = self.summarizer.summarize_email_conversation(dir_path.name, conversation_text)
+        conversation_content = ""
+        if self.config.folders.summarize_emails_individually:
+            logger.info("Summarizing emails individually before aggregating.")
+            email_summaries = []
+            for date, f in dated_emails:
+                content = self.parser.mail_parser.parse(f)
+                if content:
+                    summary = self.summarizer.summarize_file(f.name, content)
+                    if summary:
+                        email_summaries.append(f"--- EMAIL VOM {date} ({f.name}) ---\n{summary}")
+            conversation_content = "\n\n".join(email_summaries)
+        else:
+            for date, f in dated_emails:
+                parsed = self.parser.mail_parser.parse(f)
+                if parsed:
+                    conversation_content += f"\n--- EMAIL VOM {date} ---\n{parsed}\n"
+
+        summary = self.summarizer.summarize_email_conversation(dir_path.name, conversation_content)
         if summary:
             # Store hash in identity_json
             with self.store._get_connection() as conn:
