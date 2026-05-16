@@ -1,4 +1,5 @@
 """Datenbank-Management-Befehle für die CLI."""
+from typing import Tuple
 import typer
 from rich.console import Console
 from rich.table import Table
@@ -9,8 +10,6 @@ from ..retrieval.index import SearchIndex
 
 db_app = typer.Typer(help="Datenbank-Management-Befehle")
 console = Console()
-
-from typing import Tuple
 
 def get_store_and_index() -> Tuple[MetadataStore, SearchIndex]:
     """Initialisiert und gibt den MetadataStore und SearchIndex zurück.
@@ -26,6 +25,7 @@ def get_store_and_index() -> Tuple[MetadataStore, SearchIndex]:
     store = MetadataStore(cfg.sqlite_path)
     idx = SearchIndex(str(cfg.qdrant_path), cfg.embeddings.model, store=store)
     return store, idx
+
 @db_app.command("list-files")
 def list_files():
     """Listet alle indexierten Dateien in der Datenbank auf."""
