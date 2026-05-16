@@ -18,3 +18,4 @@ supported_extensions:
   - ".ipynb"
   - ".json"
   - ".html"
+summarize_emails_individually: false
