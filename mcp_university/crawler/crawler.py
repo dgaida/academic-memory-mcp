@@ -2,6 +2,7 @@
 import os
 import logging
 import hashlib
+import subprocess
 from pathlib import Path
 from typing import Tuple, Optional
 from ..config import Config
@@ -30,6 +31,7 @@ class Crawler:
         self.parser = parser
         self.summarizer = summarizer
         self.index = index
+        self.use_shell = os.name == 'nt'
 
     def crawl(self) -> None:
         """Startet einen vollständigen Scan aller konfigurierten Ordner."""
@@ -37,6 +39,22 @@ class Crawler:
         for folder_path in self.config.folders.folders:
             path = Path(folder_path)
             if path.exists() and path.is_dir():
+                logger.info(f"Processing root folder: {path}")
+                # qmd integration (with Windows fix)
+                coll_name = path.name
+                exts = [ext.lstrip('.') for ext in self.config.folders.supported_extensions]
+                mask = f"**/*.{{{','.join(exts)}}}"
+
+                logger.debug(f"Syncing qmd collection '{coll_name}' for {path}")
+                try:
+                    subprocess.run([
+                        "qmd", "collection", "add", str(path),
+                        "--name", coll_name,
+                        "--mask", mask
+                    ], capture_output=True, shell=self.use_shell)
+                except Exception as e:
+                    logger.debug(f"qmd collection add skipped or failed: {e}")
+
                 self._process_directory(path)
             else:
                 logger.warning(f"Configured folder does not exist or is not a directory: {folder_path}")
