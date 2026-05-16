@@ -11,11 +11,19 @@ db_app = typer.Typer(help="Datenbank-Management-Befehle")
 console = Console()
 
 def get_store_and_index():
+    """Initialisiert und gibt den MetadataStore und SearchIndex zurück.
+
+    Nutzt die globale Konfiguration, um die Pfade für die SQLite-Datenbank
+    und den Qdrant-Index zu bestimmen.
+
+    Returns:
+        Tuple[MetadataStore, SearchIndex]: Ein Tupel bestehend aus dem initialisierten
+            Store und dem Suchindex.
+    """
     cfg = get_config()
     store = MetadataStore(cfg.sqlite_path)
     idx = SearchIndex(str(cfg.qdrant_path), cfg.embeddings.model, store=store)
     return store, idx
-
 @db_app.command("list-files")
 def list_files():
     """Listet alle indexierten Dateien in der Datenbank auf."""

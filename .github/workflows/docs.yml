@@ -30,7 +30,6 @@ jobs:
         run: |
           pip install .
           pip install pytest pytest-asyncio mkdocs-material mkdocs-static-i18n mkdocstrings[python] mkdocs-mermaid2-plugin interrogate git-cliff mike
-          # Install markdownlint-cli if possible via npm
           npm install -g markdownlint-cli
 
       - name: Run Tests
@@ -49,7 +48,7 @@ jobs:
 
       - name: Check broken links
         run: |
-          # Simplified check for CI, can use lychee in real world
+          # In a real environment, we would use lychee or similar
           echo "BROKEN_LINKS=0" >> $GITHUB_ENV
 
       - name: Build MkDocs and Capture Warnings

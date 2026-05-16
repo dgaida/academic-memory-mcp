@@ -10,6 +10,8 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -23,6 +25,15 @@ jobs:
           args: --latest
         env:
           OUTPUT: NEW_CHANGELOG.md
+
+      - name: Update CHANGELOG.md
+        run: |
+          git-cliff > CHANGELOG.md
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git commit -m "chore: update CHANGELOG.md for ${{ github.ref_name }}"
+          git push
 
       - name: Create Release
         uses: softprops/action-gh-release@v1

@@ -1,24 +1,24 @@
 # Nutzung
 
-Das MCP University Memory System bietet verschiedene Schnittstellen für die tägliche Arbeit.
+Das MCP University Memory System bietet verschiedene Schnittstellen zur Interaktion mit Ihren Daten.
 
 ## Kommandozeile (CLI)
 
-Das `mcp-uni` Tool ist der zentrale Einstiegspunkt.
+Die CLI ist der primäre Weg, um das System zu verwalten und manuelle Suchen durchzuführen.
 
 ### Indexierung (`index`)
-Scannt alle konfigurierten Ordner und aktualisiert den Index.
+Dieser Befehl scannt alle konfigurierten Ordner, erstellt Zusammenfassungen und aktualisiert den Index.
 ```bash
 mcp-uni index
 ```
 
 ### Suche (`search`)
-Führt eine schnelle Abfrage über den gesamten Datenbestand aus.
+Führt eine schnelle Abfrage über den gesamten Datenbestand durch.
 ```bash
 mcp-uni search "Inhalt der Vorlesung 5"
 ```
 
-### Watchdog (`watch`)
+### Überwachung (`watch`)
 Startet einen Hintergrundprozess, der auf Dateiänderungen reagiert und den Index in Echtzeit aktualisiert.
 ```bash
 mcp-uni watch
@@ -26,19 +26,19 @@ mcp-uni watch
 
 ## Model Context Protocol (MCP)
 
-Die leistungsstärkste Nutzung erfolgt über einen MCP-Client (wie Claude Desktop).
+Der leistungsfähigste Weg, das System zu nutzen, ist über einen MCP-Client (wie Claude Desktop).
 
 ### Server starten
 ```bash
 mcp-uni serve-mcp
 ```
 
-### Verfügbare Tools  
-*   `search_documents`: Semantische Suche in Dokumenten.  
-*   `get_folder_summary`: Abfrage von aggregierten Ordner-Informationen.  
-*   `get_student_context`: Komplette Historie und Status eines Studenten abrufen.  
-*   `generate_mail_reply`: Entwurf einer E-Mail basierend auf dem Kontext.  
-*   `get_open_tasks`: Extraktion von TODOs aus allen Dokumenten.  
+### Verfügbare Tools
+*   `search_documents`: Semantische Suche in Dokumenten.
+*   `get_folder_summary`: Abfrage von aggregierten Ordner-Informationen.
+*   `get_student_context`: Komplette Historie und Status eines Studenten abrufen.
+*   `generate_mail_reply`: Entwurf einer E-Mail basierend auf dem Kontext.
+*   `get_open_tasks`: Extraktion von TODOs aus allen Dokumenten.
 
 ## Typische Workflows
 
