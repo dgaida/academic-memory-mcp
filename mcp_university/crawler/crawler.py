@@ -1,10 +1,9 @@
 """Crawler zur Überwachung von Ordnern und Indexierung von Dateien."""
 import os
-import time
 import logging
 import hashlib
 from pathlib import Path
-from typing import List, Tuple, Optional, Dict, Any
+from typing import Tuple, Optional
 from ..config import Config
 from ..metadata.store import MetadataStore
 from ..parser.factory import ParserFactory
