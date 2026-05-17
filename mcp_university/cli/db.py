@@ -181,7 +181,7 @@ def delete_file(file_ids: List[int] = typer.Argument(..., help="Datei-IDs"), for
                 continue
         idx.delete_document(target['path'])
         store.delete_file(fid)
-        console.print(f"Gelöscht: {target['path']}")
+        console.print(f"[green]Datei '{target['path']}' erfolgreich gelöscht.[/green]")
 
 @db_app.command("delete-folder")
 def delete_folder(folder_id: int, force: bool = typer.Option(False, "--force", "-f", help="Ohne Bestätigung löschen")):
