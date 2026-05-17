@@ -7,6 +7,7 @@ import email
 from email import policy
 from email.utils import parsedate_to_datetime
 from datetime import datetime
+logging.getLogger("extract_msg").setLevel(logging.ERROR)
 
 logger = logging.getLogger(__name__)
 
