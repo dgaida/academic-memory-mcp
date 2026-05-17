@@ -33,7 +33,7 @@ You can list various entities in the database:
 
 *   **Files:** `mcp-uni db list-files`  
 *   **Folders:** `mcp-uni db list-folders`  
-*   **Students:** `mcp-uni db list-students` (Note: Use `sync-students` to populate)
+*   **Students:** `mcp-uni db list-students` (Note: Use `sync-students` to populate)  
 *   **Summaries:** `mcp-uni db list-summaries`  
 *   **Deadlines:** `mcp-uni db list-deadlines`  
 
@@ -46,7 +46,7 @@ mcp-uni db sync-students
 ### Deleting Content
 Entries can be deleted using their ID. Use the `--force` or `-f` option to skip the confirmation prompt.
 
-*   **Delete Files:** `mcp-uni db delete-file <ID_1> <ID_2> ...`
+*   **Delete Files:** `mcp-uni db delete-file <ID_1> <ID_2> ...`  
 *   **Delete Folder:** `mcp-uni db delete-folder <ID>` (recursively removes all contained files)  
 *   **Delete Student:** `mcp-uni db delete-student <ID>`  
 *   **Delete Summary:** `mcp-uni db delete-summary <ID>`  
