@@ -3,7 +3,6 @@ import pytest
 from pathlib import Path
 import shutil
 import tempfile
-import pickle
 from unittest.mock import MagicMock, patch
 
 from mcp_university.classifier.engine import EmailClassifier

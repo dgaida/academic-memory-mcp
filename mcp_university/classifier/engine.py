@@ -1,11 +1,9 @@
 """Engine für die Klassifizierung von E-Mails."""
-import os
 import pickle
 from pathlib import Path
 from typing import List, Tuple, Dict, Any, Optional, Union
 
 import numpy as np
-import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import LabelEncoder
