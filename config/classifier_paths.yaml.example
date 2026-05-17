@@ -1,0 +1,10 @@
+# Konfiguration für die Einsortierung von E-Mails
+# Ordnet den Klassen aus dem Klassifikator Zielpfade zu.
+
+class_paths:
+  BachelorThesis: "D:/BachelorThesis"
+  MasterThesis: "D:/MasterThesis"
+  PraxisProjekt: "D:/PraxisProjekt"
+  InformatikProjekt: "D:/InformatikProjekt"
+  WASP: "D:/WASP"
+  Other: "D:/OtherMails"
