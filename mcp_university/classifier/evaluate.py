@@ -42,7 +42,7 @@ def evaluate(model_path: Path, test_dir: Path) -> None:
     logger.info(f"{len(texts)} Test-E-Mails geladen. Starte Vorhersage...")
 
     # Merkmale extrahieren
-    X = classifier._get_features(texts, train=False)
+    X = classifier.get_features(texts, train=False)
 
     # Vorhersagen
     y_pred_idx = classifier.classifier.predict(X)
