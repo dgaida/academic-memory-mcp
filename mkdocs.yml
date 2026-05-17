@@ -1,7 +1,7 @@
 site_name: MCP University Memory System
 site_description: Lokales, agentisches Wissenssystem für Universitäten und Forschung.
 site_author: Senior Python Architect
-site_url: https://github.com/example/mcp-university
+site_url: https://dgaida.github.io/academic-memory-mcp/
 
 theme:
   name: material
@@ -101,3 +101,8 @@ nav:
       - Versionierung: development/versioning.md
       - Metriken: metrics.md
   - Fehlerbehebung: troubleshooting.md
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn

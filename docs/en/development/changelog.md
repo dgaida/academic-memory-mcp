@@ -14,15 +14,15 @@ Messages should follow this pattern:
 [optional footer]
 ```
 
-**Types:**  
-- `feat`: A new feature  
-- `fix`: A bug fix  
-- `docs`: Documentation changes  
-- `style`: Changes to format/styling (no code effect)  
-- `refactor`: Code change that neither fixes a bug nor adds a feature  
-- `perf`: Performance improvements  
-- `test`: Adding or correcting tests  
-- `chore`: Changes to the build process or utilities  
+**Types:**
+- `feat`: A new feature
+- `fix`: A bug fix
+- `docs`: Documentation changes
+- `style`: Changes to format/styling (no code effect)
+- `refactor`: Code change that neither fixes a bug nor adds a feature
+- `perf`: Performance improvements
+- `test`: Adding or correcting tests
+- `chore`: Changes to the build process or utilities
 
 ## Automation
 

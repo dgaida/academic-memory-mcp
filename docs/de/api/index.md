@@ -22,6 +22,10 @@ Diese Seite bietet eine Übersicht über die wichtigsten Module und Klassen des 
 
 ::: mcp_university.parser.factory.ParserFactory
 
+## CLI Datenbank-Management
+
+::: mcp_university.cli.db
+
 ## Konfiguration
 
 ::: mcp_university.config.Config

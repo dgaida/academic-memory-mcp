@@ -1,4 +1,5 @@
 """Datenbank-Management-Befehle für die CLI."""
+from typing import Tuple
 import typer
 from rich.console import Console
 from rich.table import Table
@@ -10,7 +11,16 @@ from ..retrieval.index import SearchIndex
 db_app = typer.Typer(help="Datenbank-Management-Befehle")
 console = Console()
 
-def get_store_and_index():
+def get_store_and_index() -> Tuple[MetadataStore, SearchIndex]:
+    """Initialisiert und gibt den MetadataStore und SearchIndex zurück.
+
+    Nutzt die globale Konfiguration, um die Pfade für die SQLite-Datenbank
+    und den Qdrant-Index zu bestimmen.
+
+    Returns:
+        Tuple[MetadataStore, SearchIndex]: Ein Tupel bestehend aus dem initialisierten
+            Store und dem Suchindex.
+    """
     cfg = get_config()
     store = MetadataStore(cfg.sqlite_path)
     idx = SearchIndex(str(cfg.qdrant_path), cfg.embeddings.model, store=store)
