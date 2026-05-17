@@ -682,6 +682,45 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#e-mail-klassifizierung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        E-Mail Klassifizierung
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="E-Mail Klassifizierung">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#modell-trainieren" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Modell trainieren
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#e-mail-klassifizieren" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        E-Mail klassifizieren
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#datenbank-management-db" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1176,6 +1215,45 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#e-mail-klassifizierung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        E-Mail Klassifizierung
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="E-Mail Klassifizierung">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#modell-trainieren" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Modell trainieren
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#e-mail-klassifizieren" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        E-Mail klassifizieren
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#datenbank-management-db" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1336,6 +1414,17 @@
 <p>Startet einen Hintergrundprozess, der auf Dateiänderungen reagiert und den Index in Echtzeit aktualisiert.
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>mcp-uni<span class="w"> </span>watch
 </code></pre></div></p>
+<h2 id="e-mail-klassifizierung">E-Mail Klassifizierung<a class="headerlink" href="#e-mail-klassifizierung" title="Permanent link">&para;</a></h2>
+<p>Das System enthält ein Subpackage zur automatisierten Klassifizierung von studentischen E-Mails (z.B. Bachelorarbeit, Praxisprojekt).</p>
+<h3 id="modell-trainieren">Modell trainieren<a class="headerlink" href="#modell-trainieren" title="Permanent link">&para;</a></h3>
+<p>Um den Klassifikator zu nutzen, muss er zuerst mit Beispieldaten trainiert werden. Erwarten wird eine Ordnerstruktur, in der jeder Unterordner eine Klasse repräsentiert und die E-Mails (.msg) enthält.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python3<span class="w"> </span>mcp_university/classifier/train.py<span class="w"> </span>/pfad/zu/trainingsdaten<span class="w"> </span>--mode<span class="w"> </span>combined
+</code></pre></div>
+<h3 id="e-mail-klassifizieren">E-Mail klassifizieren<a class="headerlink" href="#e-mail-klassifizieren" title="Permanent link">&para;</a></h3>
+<p>Nach dem Training kann eine einzelne E-Mail-Datei klassifiziert werden:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python3<span class="w"> </span>mcp_university/classifier/predict.py<span class="w"> </span>/pfad/zur/email.msg
+</code></pre></div>
+<p>Die Ausgabe enthält die wahrscheinlichste Klasse sowie die Konfidenz und eine detaillierte Wahrscheinlichkeitsverteilung.</p>
 <h2 id="datenbank-management-db">Datenbank-Management (<code>db</code>)<a class="headerlink" href="#datenbank-management-db" title="Permanent link">&para;</a></h2>
 <p>Die <code>db</code> Befehlsgruppe erlaubt die direkte Verwaltung der Metadaten und des Suchindex.</p>
 <h3 id="auflisten-von-inhalten">Auflisten von Inhalten<a class="headerlink" href="#auflisten-von-inhalten" title="Permanent link">&para;</a></h3>
@@ -1349,7 +1438,7 @@
 </ul>
 <h3 id="synchronisierung-von-studenten-sync-students">Synchronisierung von Studenten (<code>sync-students</code>)<a class="headerlink" href="#synchronisierung-von-studenten-sync-students" title="Permanent link">&para;</a></h3>
 <p>Befüllt die Datenbank aus einer <code>students.yaml</code>.
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>mcp-uni<span class="w"> </span>db<span class="w"> </span>sync-students
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>mcp-uni<span class="w"> </span>db<span class="w"> </span>sync-students
 </code></pre></div></p>
 <h3 id="loschen-von-inhalten">Löschen von Inhalten<a class="headerlink" href="#loschen-von-inhalten" title="Permanent link">&para;</a></h3>
 <p>Einträge können über ihre ID gelöscht werden. Mit der Option <code>--force</code> oder <code>-f</code> wird die Bestätigungsabfrage übersprungen.</p>
@@ -1363,7 +1452,7 @@
 <h2 id="model-context-protocol-mcp">Model Context Protocol (MCP)<a class="headerlink" href="#model-context-protocol-mcp" title="Permanent link">&para;</a></h2>
 <p>Der leistungsfähigste Weg, das System zu nutzen, ist über einen MCP-Client (wie Claude Desktop).</p>
 <h3 id="server-starten">Server starten<a class="headerlink" href="#server-starten" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>mcp-uni<span class="w"> </span>serve-mcp
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>mcp-uni<span class="w"> </span>serve-mcp
 </code></pre></div>
 <h3 id="verfugbare-tools">Verfügbare Tools<a class="headerlink" href="#verfugbare-tools" title="Permanent link">&para;</a></h3>
 <ul>

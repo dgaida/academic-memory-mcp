@@ -684,6 +684,45 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#email-classification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Email Classification
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Email Classification">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#training-the-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Training the Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#classifying-an-email" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Classifying an Email
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#database-management-db" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1178,6 +1217,45 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#email-classification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Email Classification
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Email Classification">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#training-the-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Training the Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#classifying-an-email" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Classifying an Email
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#database-management-db" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1338,6 +1416,17 @@
 <p>Starts a background process that reacts to file changes and updates the index in real-time.
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>mcp-uni<span class="w"> </span>watch
 </code></pre></div></p>
+<h2 id="email-classification">Email Classification<a class="headerlink" href="#email-classification" title="Permanent link">&para;</a></h2>
+<p>The system includes a subpackage for the automated classification of student emails (e.g., Bachelor's thesis, internship project).</p>
+<h3 id="training-the-model">Training the Model<a class="headerlink" href="#training-the-model" title="Permanent link">&para;</a></h3>
+<p>To use the classifier, it must first be trained with example data. It expects a folder structure where each subfolder represents a class and contains the emails (.msg).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python3<span class="w"> </span>mcp_university/classifier/train.py<span class="w"> </span>/path/to/training_data<span class="w"> </span>--mode<span class="w"> </span>combined
+</code></pre></div>
+<h3 id="classifying-an-email">Classifying an Email<a class="headerlink" href="#classifying-an-email" title="Permanent link">&para;</a></h3>
+<p>After training, a single email file can be classified:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python3<span class="w"> </span>mcp_university/classifier/predict.py<span class="w"> </span>/path/to/email.msg
+</code></pre></div>
+<p>The output contains the most likely class as well as the confidence and a detailed probability distribution.</p>
 <h2 id="database-management-db">Database Management (<code>db</code>)<a class="headerlink" href="#database-management-db" title="Permanent link">&para;</a></h2>
 <p>The <code>db</code> command group allows for direct management of metadata and the search index.</p>
 <h3 id="listing-content">Listing Content<a class="headerlink" href="#listing-content" title="Permanent link">&para;</a></h3>
@@ -1351,7 +1440,7 @@
 </ul>
 <h3 id="student-synchronization-sync-students">Student Synchronization (<code>sync-students</code>)<a class="headerlink" href="#student-synchronization-sync-students" title="Permanent link">&para;</a></h3>
 <p>Populates the database from a <code>students.yaml</code>.
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>mcp-uni<span class="w"> </span>db<span class="w"> </span>sync-students
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>mcp-uni<span class="w"> </span>db<span class="w"> </span>sync-students
 </code></pre></div></p>
 <h3 id="deleting-content">Deleting Content<a class="headerlink" href="#deleting-content" title="Permanent link">&para;</a></h3>
 <p>Entries can be deleted using their ID. Use the <code>--force</code> or <code>-f</code> option to skip the confirmation prompt.</p>
@@ -1365,7 +1454,7 @@
 <h2 id="model-context-protocol-mcp">Model Context Protocol (MCP)<a class="headerlink" href="#model-context-protocol-mcp" title="Permanent link">&para;</a></h2>
 <p>The most powerful way to use the system is via an MCP client (like Claude Desktop).</p>
 <h3 id="start-server">Start Server<a class="headerlink" href="#start-server" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>mcp-uni<span class="w"> </span>serve-mcp
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>mcp-uni<span class="w"> </span>serve-mcp
 </code></pre></div>
 <h3 id="available-tools">Available Tools<a class="headerlink" href="#available-tools" title="Permanent link">&para;</a></h3>
 <ul>

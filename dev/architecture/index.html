@@ -537,6 +537,7 @@
     subgraph "Intelligence Layer"
         C --&gt; S[Summarizer]
         S --&gt; LLM[Ollama / gemma2]
+        CL[Email Classifier] --&gt; P3
     end
 
     subgraph "Storage &amp; Index Layer"
@@ -555,14 +556,16 @@
 <ol>
 <li><strong>Crawling:</strong> Der Crawler scannt Verzeichnisse und vergleicht Dateihashes mit der SQLite-DB.  </li>
 <li><strong>Parsing:</strong> Neue oder geänderte Dateien werden durch die Factory an den passenden Parser übergeben.  </li>
-<li><strong>Summarization:</strong> Der extrahierte Text wird (gekürzt auf das Kontextfenster) an Ollama gesendet, um eine strukturierte Zusammenfassung zu erhalten.  </li>
-<li><strong>Indexierung:</strong> Der Volltext wird im Suchindex für die BM25- und Vektorsuche hinterlegt.  </li>
-<li><strong>Bereitstellung:</strong> Über FastMCP werden Tools definiert, die auf die DB und den Index zugreifen, um Anfragen von Agenten zu beantworten.  </li>
+<li><strong>Klassifizierung:</strong> Der <code>EmailClassifier</code> kann optional verwendet werden, um E-Mails vor oder nach der Indexierung zu kategorisieren.</li>
+<li><strong>Summarization:</strong> Der extrahierte Text wird (gekürzt auf das Kontextfenster) an Ollama gesendet, um eine strukturierte Zusammenfassung zu erhalten.</li>
+<li><strong>Indexierung:</strong> Der Volltext wird im Suchindex für die BM25- und Vektorsuche hinterlegt.</li>
+<li><strong>Bereitstellung:</strong> Über FastMCP werden Tools definiert, die auf die DB und den Index zugreifen, um Anfragen von Agenten zu beantworten.</li>
 </ol>
 <h2 id="prozesslebenszyklus">Prozesslebenszyklus<a class="headerlink" href="#prozesslebenszyklus" title="Permanent link">¶</a></h2>
 <div class="mermaid">sequenceDiagram
     participant FS as Dateisystem
     participant CR as Crawler
+    participant CL as Email Classifier
     participant SM as Summarizer
     participant DB as SQLite
     participant IX as SearchIndex
@@ -574,6 +577,10 @@
         DB--&gt;&gt;CR: Needs Update?
         alt Yes
             CR-&gt;&gt;FS: Read Content
+            opt If Email
+                CR-&gt;&gt;CL: Classify Email
+                CL--&gt;&gt;CR: Label
+            end
             CR-&gt;&gt;SM: Generate Summary
             SM--&gt;&gt;CR: Markdown Summary
             CR-&gt;&gt;IX: Add to Index
