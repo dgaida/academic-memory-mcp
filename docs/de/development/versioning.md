@@ -4,8 +4,8 @@ Die Dokumentation wird mit **mike** versioniert, um verschiedene Zustände des P
 
 ## Deployment-Strategie
 
-1.  **Main Branch:** Jeder Push auf `main` oder `master` aktualisiert die `dev`-Version der Dokumentation.
-2.  **Tags:** Jeder Tag (`v*`) erstellt eine neue permanente Version und aktualisiert den Alias `latest`.
+1.  **Main Branch:** Jeder Push auf `main` oder `master` aktualisiert die `dev`-Version der Dokumentation.  
+2.  **Tags:** Jeder Tag (`v*`) erstellt eine neue permanente Version und aktualisiert den Alias `latest`.  
 
 ## Manuelles Deployment
 

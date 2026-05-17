@@ -48,9 +48,9 @@ def get_store_and_index():
 
 ## Rules
 
-1.  **Completeness:** Every public and private method/class requires a docstring.
-2.  **Type Hints:** Parameters and return values must be typed in the function signature.
-3.  **Language:** Docstrings are written in **German**. In this project, we prefer German for technical descriptions in the university context.
+1.  **Completeness:** Every public and private method/class requires a docstring.  
+2.  **Type Hints:** Parameters and return values must be typed in the function signature.  
+3.  **Language:** Docstrings are written in **German**. In this project, we prefer German for technical descriptions in the university context.  
 
 ## Verification
 

@@ -31,20 +31,20 @@ Die `db` Befehlsgruppe erlaubt die direkte Verwaltung der Metadaten und des Such
 ### Auflisten von Inhalten
 Sie können verschiedene Entitäten in der Datenbank auflisten:
 
-*   **Dateien:** `mcp-uni db list-files`
-*   **Ordner:** `mcp-uni db list-folders`
-*   **Studenten:** `mcp-uni db list-students`
-*   **Zusammenfassungen:** `mcp-uni db list-summaries`
-*   **Deadlines:** `mcp-uni db list-deadlines`
+*   **Dateien:** `mcp-uni db list-files`  
+*   **Ordner:** `mcp-uni db list-folders`  
+*   **Studenten:** `mcp-uni db list-students`  
+*   **Zusammenfassungen:** `mcp-uni db list-summaries`  
+*   **Deadlines:** `mcp-uni db list-deadlines`  
 
 ### Löschen von Inhalten
 Einträge können über ihre ID gelöscht werden. Mit der Option `--force` oder `-f` wird die Bestätigungsabfrage übersprungen.
 
-*   **Datei löschen:** `mcp-uni db delete-file <ID>` (entfernt auch den Eintrag aus dem Suchindex)
-*   **Ordner löschen:** `mcp-uni db delete-folder <ID>` (entfernt rekursiv alle enthaltenen Dateien)
-*   **Student löschen:** `mcp-uni db delete-student <ID>`
-*   **Zusammenfassung löschen:** `mcp-uni db delete-summary <ID>`
-*   **Deadline löschen:** `mcp-uni db delete-deadline <ID>`
+*   **Datei löschen:** `mcp-uni db delete-file <ID>` (entfernt auch den Eintrag aus dem Suchindex)  
+*   **Ordner löschen:** `mcp-uni db delete-folder <ID>` (entfernt rekursiv alle enthaltenen Dateien)  
+*   **Student löschen:** `mcp-uni db delete-student <ID>`  
+*   **Zusammenfassung löschen:** `mcp-uni db delete-summary <ID>`  
+*   **Deadline löschen:** `mcp-uni db delete-deadline <ID>`  
 
 ## Model Context Protocol (MCP)
 
@@ -55,12 +55,12 @@ Der leistungsfähigste Weg, das System zu nutzen, ist über einen MCP-Client (wi
 mcp-uni serve-mcp
 ```
 
-### Verfügbare Tools
-*   `search_documents`: Semantische Suche in Dokumenten.
-*   `get_folder_summary`: Abfrage von aggregierten Ordner-Informationen.
-*   `get_student_context`: Komplette Historie und Status eines Studenten abrufen.
-*   `generate_mail_reply`: Entwurf einer E-Mail basierend auf dem Kontext.
-*   `get_open_tasks`: Extraktion von TODOs aus allen Dokumenten.
+### Verfügbare Tools  
+*   `search_documents`: Semantische Suche in Dokumenten.  
+*   `get_folder_summary`: Abfrage von aggregierten Ordner-Informationen.  
+*   `get_student_context`: Komplette Historie und Status eines Studenten abrufen.  
+*   `generate_mail_reply`: Entwurf einer E-Mail basierend auf dem Kontext.  
+*   `get_open_tasks`: Extraktion von TODOs aus allen Dokumenten.  
 
 ## Typische Workflows
 

@@ -4,15 +4,15 @@ Willkommen zur Entwicklung am MCP University Memory System.
 
 ## Architektur-Prinzipien
 
-1.  **Offline-First:** Keine Abhängigkeit von Cloud-APIs (außer optional für Modell-Downloads).
-2.  **Modularität:** Parser, Crawler und Summarizer sind entkoppelt.
-3.  **Typsicherheit:** Konsequente Nutzung von Python Type Hints und Pydantic.
+1.  **Offline-First:** Keine Abhängigkeit von Cloud-APIs (außer optional für Modell-Downloads).  
+2.  **Modularität:** Parser, Crawler und Summarizer sind entkoppelt.  
+3.  **Typsicherheit:** Konsequente Nutzung von Python Type Hints und Pydantic.  
 
 ## Lokales Setup
 
-1.  Repository klonen.
-2.  Virtuelle Umgebung erstellen und aktivieren.
-3.  Editierbare Installation: `pip install -e ".[dev]"`
+1.  Repository klonen.  
+2.  Virtuelle Umgebung erstellen und aktivieren.  
+3.  Editierbare Installation: `pip install -e ".[dev]"`  
 
 ## Coding Standards
 
@@ -26,9 +26,9 @@ python3 -m pytest
 ```
 
 ### Qualitätssicherung
-Vor jedem Commit sollten folgende Tools laufen:
-*   `interrogate`: Prüft die Docstring-Abdeckung (Ziel: >95%).
-*   `markdownlint`: Prüft die Dokumentations-Dateien.
+Vor jedem Commit sollten folgende Tools laufen:  
+*   `interrogate`: Prüft die Docstring-Abdeckung (Ziel: >95%).  
+*   `markdownlint`: Prüft die Dokumentations-Dateien.  
 
 ## Dokumentation bauen
 
