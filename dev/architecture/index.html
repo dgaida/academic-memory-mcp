@@ -553,11 +553,11 @@
 </div>
 <h2 id="datenfluss">Datenfluss<a class="headerlink" href="#datenfluss" title="Permanent link">¶</a></h2>
 <ol>
-<li><strong>Crawling:</strong> Der Crawler scannt Verzeichnisse und vergleicht Dateihashes mit der SQLite-DB.</li>
-<li><strong>Parsing:</strong> Neue oder geänderte Dateien werden durch die Factory an den passenden Parser übergeben.</li>
-<li><strong>Summarization:</strong> Der extrahierte Text wird (gekürzt auf das Kontextfenster) an Ollama gesendet, um eine strukturierte Zusammenfassung zu erhalten.</li>
-<li><strong>Indexierung:</strong> Der Volltext wird im Suchindex für die BM25- und Vektorsuche hinterlegt.</li>
-<li><strong>Bereitstellung:</strong> Über FastMCP werden Tools definiert, die auf die DB und den Index zugreifen, um Anfragen von Agenten zu beantworten.</li>
+<li><strong>Crawling:</strong> Der Crawler scannt Verzeichnisse und vergleicht Dateihashes mit der SQLite-DB.  </li>
+<li><strong>Parsing:</strong> Neue oder geänderte Dateien werden durch die Factory an den passenden Parser übergeben.  </li>
+<li><strong>Summarization:</strong> Der extrahierte Text wird (gekürzt auf das Kontextfenster) an Ollama gesendet, um eine strukturierte Zusammenfassung zu erhalten.  </li>
+<li><strong>Indexierung:</strong> Der Volltext wird im Suchindex für die BM25- und Vektorsuche hinterlegt.  </li>
+<li><strong>Bereitstellung:</strong> Über FastMCP werden Tools definiert, die auf die DB und den Index zugreifen, um Anfragen von Agenten zu beantworten.  </li>
 </ol>
 <h2 id="prozesslebenszyklus">Prozesslebenszyklus<a class="headerlink" href="#prozesslebenszyklus" title="Permanent link">¶</a></h2>
 <div class="mermaid">sequenceDiagram

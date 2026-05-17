@@ -705,6 +705,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#synchronisierung-von-studenten-sync-students" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Synchronisierung von Studenten (sync-students)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#loschen-von-inhalten" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1188,6 +1199,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#synchronisierung-von-studenten-sync-students" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Synchronisierung von Studenten (sync-students)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#loschen-von-inhalten" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1319,33 +1341,37 @@
 <h3 id="auflisten-von-inhalten">Auflisten von Inhalten<a class="headerlink" href="#auflisten-von-inhalten" title="Permanent link">&para;</a></h3>
 <p>Sie können verschiedene Entitäten in der Datenbank auflisten:</p>
 <ul>
-<li><strong>Dateien:</strong> <code>mcp-uni db list-files</code></li>
-<li><strong>Ordner:</strong> <code>mcp-uni db list-folders</code></li>
-<li><strong>Studenten:</strong> <code>mcp-uni db list-students</code></li>
-<li><strong>Zusammenfassungen:</strong> <code>mcp-uni db list-summaries</code></li>
-<li><strong>Deadlines:</strong> <code>mcp-uni db list-deadlines</code></li>
+<li><strong>Dateien:</strong> <code>mcp-uni db list-files</code>  </li>
+<li><strong>Ordner:</strong> <code>mcp-uni db list-folders</code>  </li>
+<li><strong>Studenten:</strong> <code>mcp-uni db list-students</code> (Hinweis: Nutzen Sie <code>sync-students</code> zum Befüllen)</li>
+<li><strong>Zusammenfassungen:</strong> <code>mcp-uni db list-summaries</code>  </li>
+<li><strong>Deadlines:</strong> <code>mcp-uni db list-deadlines</code>  </li>
 </ul>
+<h3 id="synchronisierung-von-studenten-sync-students">Synchronisierung von Studenten (<code>sync-students</code>)<a class="headerlink" href="#synchronisierung-von-studenten-sync-students" title="Permanent link">&para;</a></h3>
+<p>Befüllt die Datenbank aus einer <code>students.yaml</code>.
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>mcp-uni<span class="w"> </span>db<span class="w"> </span>sync-students
+</code></pre></div></p>
 <h3 id="loschen-von-inhalten">Löschen von Inhalten<a class="headerlink" href="#loschen-von-inhalten" title="Permanent link">&para;</a></h3>
 <p>Einträge können über ihre ID gelöscht werden. Mit der Option <code>--force</code> oder <code>-f</code> wird die Bestätigungsabfrage übersprungen.</p>
 <ul>
-<li><strong>Datei löschen:</strong> <code>mcp-uni db delete-file &lt;ID&gt;</code> (entfernt auch den Eintrag aus dem Suchindex)</li>
-<li><strong>Ordner löschen:</strong> <code>mcp-uni db delete-folder &lt;ID&gt;</code> (entfernt rekursiv alle enthaltenen Dateien)</li>
-<li><strong>Student löschen:</strong> <code>mcp-uni db delete-student &lt;ID&gt;</code></li>
-<li><strong>Zusammenfassung löschen:</strong> <code>mcp-uni db delete-summary &lt;ID&gt;</code></li>
-<li><strong>Deadline löschen:</strong> <code>mcp-uni db delete-deadline &lt;ID&gt;</code></li>
+<li><strong>Dateien löschen:</strong> <code>mcp-uni db delete-file &lt;ID_1&gt; &lt;ID_2&gt; ...</code></li>
+<li><strong>Ordner löschen:</strong> <code>mcp-uni db delete-folder &lt;ID&gt;</code> (entfernt rekursiv alle enthaltenen Dateien)  </li>
+<li><strong>Student löschen:</strong> <code>mcp-uni db delete-student &lt;ID&gt;</code>  </li>
+<li><strong>Zusammenfassung löschen:</strong> <code>mcp-uni db delete-summary &lt;ID&gt;</code>  </li>
+<li><strong>Deadline löschen:</strong> <code>mcp-uni db delete-deadline &lt;ID&gt;</code>  </li>
 </ul>
 <h2 id="model-context-protocol-mcp">Model Context Protocol (MCP)<a class="headerlink" href="#model-context-protocol-mcp" title="Permanent link">&para;</a></h2>
 <p>Der leistungsfähigste Weg, das System zu nutzen, ist über einen MCP-Client (wie Claude Desktop).</p>
 <h3 id="server-starten">Server starten<a class="headerlink" href="#server-starten" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>mcp-uni<span class="w"> </span>serve-mcp
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>mcp-uni<span class="w"> </span>serve-mcp
 </code></pre></div>
 <h3 id="verfugbare-tools">Verfügbare Tools<a class="headerlink" href="#verfugbare-tools" title="Permanent link">&para;</a></h3>
 <ul>
-<li><code>search_documents</code>: Semantische Suche in Dokumenten.</li>
-<li><code>get_folder_summary</code>: Abfrage von aggregierten Ordner-Informationen.</li>
-<li><code>get_student_context</code>: Komplette Historie und Status eines Studenten abrufen.</li>
-<li><code>generate_mail_reply</code>: Entwurf einer E-Mail basierend auf dem Kontext.</li>
-<li><code>get_open_tasks</code>: Extraktion von TODOs aus allen Dokumenten.</li>
+<li><code>search_documents</code>: Semantische Suche in Dokumenten.  </li>
+<li><code>get_folder_summary</code>: Abfrage von aggregierten Ordner-Informationen.  </li>
+<li><code>get_student_context</code>: Komplette Historie und Status eines Studenten abrufen.  </li>
+<li><code>generate_mail_reply</code>: Entwurf einer E-Mail basierend auf dem Kontext.  </li>
+<li><code>get_open_tasks</code>: Extraktion von TODOs aus allen Dokumenten.  </li>
 </ul>
 <h2 id="typische-workflows">Typische Workflows<a class="headerlink" href="#typische-workflows" title="Permanent link">&para;</a></h2>
 <h3 id="1-vorbereitung-einer-sprechstunde">1. Vorbereitung einer Sprechstunde<a class="headerlink" href="#1-vorbereitung-einer-sprechstunde" title="Permanent link">&para;</a></h3>
