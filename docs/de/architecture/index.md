@@ -18,6 +18,7 @@ graph TD
     subgraph "Intelligence Layer"
         C --> S[Summarizer]
         S --> LLM[Ollama / gemma2]
+        CL[Email Classifier] --> P3
     end
 
     subgraph "Storage & Index Layer"
@@ -37,9 +38,10 @@ graph TD
 
 1.  **Crawling:** Der Crawler scannt Verzeichnisse und vergleicht Dateihashes mit der SQLite-DB.  
 2.  **Parsing:** Neue oder geänderte Dateien werden durch die Factory an den passenden Parser übergeben.  
-3.  **Summarization:** Der extrahierte Text wird (gekürzt auf das Kontextfenster) an Ollama gesendet, um eine strukturierte Zusammenfassung zu erhalten.  
-4.  **Indexierung:** Der Volltext wird im Suchindex für die BM25- und Vektorsuche hinterlegt.  
-5.  **Bereitstellung:** Über FastMCP werden Tools definiert, die auf die DB und den Index zugreifen, um Anfragen von Agenten zu beantworten.  
+3.  **Klassifizierung:** Der `EmailClassifier` kann optional verwendet werden, um E-Mails vor oder nach der Indexierung zu kategorisieren.
+4.  **Summarization:** Der extrahierte Text wird (gekürzt auf das Kontextfenster) an Ollama gesendet, um eine strukturierte Zusammenfassung zu erhalten.
+5.  **Indexierung:** Der Volltext wird im Suchindex für die BM25- und Vektorsuche hinterlegt.
+6.  **Bereitstellung:** Über FastMCP werden Tools definiert, die auf die DB und den Index zugreifen, um Anfragen von Agenten zu beantworten.
 
 ## Prozesslebenszyklus
 
@@ -47,6 +49,7 @@ graph TD
 sequenceDiagram
     participant FS as Dateisystem
     participant CR as Crawler
+    participant CL as Email Classifier
     participant SM as Summarizer
     participant DB as SQLite
     participant IX as SearchIndex
@@ -58,6 +61,10 @@ sequenceDiagram
         DB-->>CR: Needs Update?
         alt Yes
             CR->>FS: Read Content
+            opt If Email
+                CR->>CL: Classify Email
+                CL-->>CR: Label
+            end
             CR->>SM: Generate Summary
             SM-->>CR: Markdown Summary
             CR->>IX: Add to Index
