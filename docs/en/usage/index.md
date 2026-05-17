@@ -24,6 +24,26 @@ Starts a background process that reacts to file changes and updates the index in
 mcp-uni watch
 ```
 
+## Email Classification
+
+The system includes a subpackage for the automated classification of student emails (e.g., Bachelor's thesis, internship project).
+
+### Training the Model
+To use the classifier, it must first be trained with example data. It expects a folder structure where each subfolder represents a class and contains the emails (.msg).
+
+```bash
+python3 mcp_university/classifier/train.py /path/to/training_data --mode combined
+```
+
+### Classifying an Email
+After training, a single email file can be classified:
+
+```bash
+python3 mcp_university/classifier/predict.py /path/to/email.msg
+```
+
+The output contains the most likely class as well as the confidence and a detailed probability distribution.
+
 ## Database Management (`db`)
 
 The `db` command group allows for direct management of metadata and the search index.

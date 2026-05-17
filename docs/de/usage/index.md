@@ -24,6 +24,26 @@ Startet einen Hintergrundprozess, der auf Dateiänderungen reagiert und den Inde
 mcp-uni watch
 ```
 
+## E-Mail Klassifizierung
+
+Das System enthält ein Subpackage zur automatisierten Klassifizierung von studentischen E-Mails (z.B. Bachelorarbeit, Praxisprojekt).
+
+### Modell trainieren
+Um den Klassifikator zu nutzen, muss er zuerst mit Beispieldaten trainiert werden. Erwarten wird eine Ordnerstruktur, in der jeder Unterordner eine Klasse repräsentiert und die E-Mails (.msg) enthält.
+
+```bash
+python3 mcp_university/classifier/train.py /pfad/zu/trainingsdaten --mode combined
+```
+
+### E-Mail klassifizieren
+Nach dem Training kann eine einzelne E-Mail-Datei klassifiziert werden:
+
+```bash
+python3 mcp_university/classifier/predict.py /pfad/zur/email.msg
+```
+
+Die Ausgabe enthält die wahrscheinlichste Klasse sowie die Konfidenz und eine detaillierte Wahrscheinlichkeitsverteilung.
+
 ## Datenbank-Management (`db`)
 
 Die `db` Befehlsgruppe erlaubt die direkte Verwaltung der Metadaten und des Suchindex.
