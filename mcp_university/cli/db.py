@@ -1,5 +1,7 @@
+from pathlib import Path
+import yaml
 """Datenbank-Management-Befehle für die CLI."""
-from typing import Tuple
+from typing import Tuple, List
 import typer
 from rich.console import Console
 from rich.table import Table
@@ -69,6 +71,32 @@ def list_folders():
 
     console.print(table)
 
+
+@db_app.command("sync-students")
+def sync_students(yaml_path: str = typer.Option("students.yaml", help="Pfad zur students.yaml")):
+    path = Path(yaml_path)
+    if not path.exists():
+        console.print(f"[red]Datei {yaml_path} nicht gefunden.[/red]")
+        return
+    with open(path, "r") as f: data = yaml.safe_load(f)
+    if not data or "students" not in data:
+        console.print("[red]Fehler: students fehlt in YAML[/red]")
+        return
+    store, _ = get_store_and_index()
+    folder_map = {f["path"]: f["id"] for f in store.get_all_folders()}
+    count = 0
+    for s in data["students"]:
+        name = s.get("name")
+        if not name: continue
+        email = s.get("smail") or s.get("email")
+        topic, status = s.get("topic"), s.get("status")
+        fid = None
+        if s.get("folders") and s["folders"][0].get("path") in folder_map:
+            fid = folder_map[s["folders"][0]["path"]]
+        store.upsert_student(name, email, topic, status, fid)
+        count += 1
+    console.print(f"[green]{count} Studenten synchronisiert.[/green]")
+
 @db_app.command("list-students")
 def list_students():
     """Listet alle Studenten in der Datenbank auf."""
@@ -137,28 +165,19 @@ def list_deadlines():
     console.print(table)
 
 @db_app.command("delete-file")
-def delete_file(file_id: int, force: bool = typer.Option(False, "--force", "-f", help="Ohne Bestätigung löschen")):
-    """Löscht eine Datei aus der Datenbank und dem Suchindex."""
+def delete_file(file_ids: List[int] = typer.Argument(..., help="Datei-IDs"), force: bool = typer.Option(False, "--force", "-f", help="Force")):
     store, idx = get_store_and_index()
-
     all_files = store.get_all_files()
-    target_file = next((f for f in all_files if f['id'] == file_id), None)
-
-    if not target_file:
-        console.print(f"[red]Datei mit ID {file_id} nicht gefunden.[/red]")
-        return
-
-    if not force:
-        confirm = typer.confirm(f"Möchten Sie die Datei '{target_file['path']}' wirklich löschen?")
-        if not confirm:
-            return
-
-    # Delete from Search Index first
-    idx.delete_document(target_file['path'])
-
-    # Delete from Database
-    store.delete_file(file_id)
-    console.print(f"[green]Datei '{target_file['path']}' erfolgreich gelöscht.[/green]")
+    for fid in file_ids:
+        target = next((f for f in all_files if f["id"] == fid), None)
+        if not target:
+            console.print(f"[red]ID {fid} nicht gefunden.[/red]")
+            continue
+        if not force:
+            if not typer.confirm(f"Lösche {target[path]}?"): continue
+        idx.delete_document(target["path"])
+        store.delete_file(fid)
+        console.print(f"Gelöscht: {target[path]}")
 
 @db_app.command("delete-folder")
 def delete_folder(folder_id: int, force: bool = typer.Option(False, "--force", "-f", help="Ohne Bestätigung löschen")):

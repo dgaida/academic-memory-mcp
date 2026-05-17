@@ -71,7 +71,7 @@ class MetadataStore:
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS students (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT,
+                    name TEXT UNIQUE,
                     email TEXT,
                     thesis_topic TEXT,
                     status TEXT,
@@ -240,6 +240,34 @@ class MetadataStore:
             ''', (item_type, item_id))
             row = cursor.fetchone()
             return row[0] if row else None
+
+    def upsert_student(self, name: str, email: str = None, topic: str = None, status: str = None, folder_id: int = None) -> int:
+        """Fügt einen Studenten hinzu oder aktualisiert ihn.
+
+        Args:
+            name (str): Name des Studenten.
+            email (str): Email-Adresse.
+            topic (str): Thema der Abschlussarbeit.
+            status (str): Aktueller Status.
+            folder_id (int): ID des zugehörigen Ordners.
+
+        Returns:
+            int: Die ID des Studenten.
+        """
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO students (name, email, thesis_topic, status, folder_id)
+                VALUES (?, ?, ?, ?, ?)
+                ON CONFLICT(name) DO UPDATE SET
+                    email=COALESCE(excluded.email, students.email),
+                    thesis_topic=COALESCE(excluded.thesis_topic, students.thesis_topic),
+                    status=COALESCE(excluded.status, students.status),
+                    folder_id=COALESCE(excluded.folder_id, students.folder_id)
+            """, (name, email, topic, status, folder_id))
+            conn.commit()
+            cursor.execute("SELECT id FROM students WHERE name = ?", (name,))
+            return cursor.fetchone()[0]
 
     def get_all_students(self) -> List[Dict[str, Any]]:
         """Ruft alle Studenten ab.
