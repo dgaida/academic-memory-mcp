@@ -5,6 +5,8 @@ import logging
 
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 from mcp_university.classifier.engine import EmailClassifier
 
@@ -63,6 +65,39 @@ def evaluate(model_path: Path, test_dir: Path) -> None:
     cm_df = pd.DataFrame(cm, index=classifier.label_encoder.classes_, columns=classifier.label_encoder.classes_)
     print(cm_df)
     print("="*30 + "\n")
+
+    # 1. Konfusionsmatrix plotten und speichern
+    output_dir = model_path.parent
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Greens',
+                xticklabels=classifier.label_encoder.classes_,
+                yticklabels=classifier.label_encoder.classes_)
+    plt.title('Konfusionsmatrix (Testdaten)')
+    plt.ylabel('Wahre Klasse')
+    plt.xlabel('Vorhergesagte Klasse')
+    plt.tight_layout()
+
+    img_path = output_dir / "test_confusion_matrix.png"
+    plt.savefig(img_path, dpi=300)
+    plt.close()
+    logger.info(f"Konfusionsmatrix gespeichert unter {img_path}")
+
+    # 2. Metriken in MD-Datei speichern
+    md_path = output_dir / "test_metrics.md"
+    with open(md_path, "w", encoding="utf-8") as f:
+        f.write("# Evaluierungsergebnisse (Testdaten)\n\n")
+        f.write(f"**Genauigkeit (Accuracy):** {accuracy:.2%}\n\n")
+        f.write("## Klassifizierungsbericht\n\n")
+        f.write("```\n")
+        f.write(report)
+        f.write("\n```\n\n")
+        f.write("## Konfusionsmatrix\n\n")
+        f.write(cm_df.to_markdown())
+        f.write("\n")
+
+    logger.info(f"Metriken gespeichert unter {md_path}")
 
 def main() -> None:
     """Main function for evaluating the classifier."""
