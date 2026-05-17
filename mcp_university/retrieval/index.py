@@ -38,7 +38,8 @@ class SearchIndex:
         self.location = Path(location)
         self.store = store
         self.location.mkdir(parents=True, exist_ok=True)
-        self.embedding_model_name = embedding_model_name\n        self._model = None
+        self.embedding_model_name = embedding_model_name
+        self._model = None
 
         self.use_shell = os.name == 'nt'
         self._qmd_available = self._check_qmd()
@@ -83,8 +84,6 @@ class SearchIndex:
         self.client = QdrantClient(path=str(self.location))
         self.collection_name = "university_documents"
 
-        logger.debug(f"Loading SentenceTransformer model: {self.embedding_model_name}")
-        self.model = SentenceTransformer(self.embedding_model_name)
 
         self.bm25_path = self.location / "bm25_index.pkl"
         self.corpus_path = self.location / "corpus.json"

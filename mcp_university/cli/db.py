@@ -1,7 +1,8 @@
-from pathlib import Path
-import yaml
 """Datenbank-Management-Befehle für die CLI."""
+
+from pathlib import Path
 from typing import Tuple, List
+import yaml
 import typer
 from rich.console import Console
 from rich.table import Table
@@ -78,7 +79,8 @@ def sync_students(yaml_path: str = typer.Option("students.yaml", help="Pfad zur 
     if not path.exists():
         console.print(f"[red]Datei {yaml_path} nicht gefunden.[/red]")
         return
-    with open(path, "r") as f: data = yaml.safe_load(f)
+    with open(path, "r") as f:
+        data = yaml.safe_load(f)
     if not data or "students" not in data:
         console.print("[red]Fehler: students fehlt in YAML[/red]")
         return
@@ -87,7 +89,8 @@ def sync_students(yaml_path: str = typer.Option("students.yaml", help="Pfad zur 
     count = 0
     for s in data["students"]:
         name = s.get("name")
-        if not name: continue
+        if not name:
+            continue
         email = s.get("smail") or s.get("email")
         topic, status = s.get("topic"), s.get("status")
         fid = None
@@ -174,10 +177,11 @@ def delete_file(file_ids: List[int] = typer.Argument(..., help="Datei-IDs"), for
             console.print(f"[red]ID {fid} nicht gefunden.[/red]")
             continue
         if not force:
-            if not typer.confirm(f"Lösche {target[path]}?"): continue
-        idx.delete_document(target["path"])
+            if not typer.confirm(f"Lösche {target['path']}?"):
+                continue
+        idx.delete_document(target['path'])
         store.delete_file(fid)
-        console.print(f"Gelöscht: {target[path]}")
+        console.print(f"Gelöscht: {target['path']}")
 
 @db_app.command("delete-folder")
 def delete_folder(folder_id: int, force: bool = typer.Option(False, "--force", "-f", help="Ohne Bestätigung löschen")):
