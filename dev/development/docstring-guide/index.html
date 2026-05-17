@@ -12,7 +12,7 @@
         <meta name="author" content="Senior Python Architect">
       
       
-        <link rel="canonical" href="https://github.com/example/mcp-university/dev/development/docstring-guide/">
+        <link rel="canonical" href="https://dgaida.github.io/academic-memory-mcp/dev/development/docstring-guide/">
       
       
         <link rel="prev" href="../">
@@ -809,6 +809,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#reales-beispiel-aus-dem-code-mcp_universityclidbpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reales Beispiel aus dem Code (mcp_university/cli/db.py)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#regeln" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -995,6 +1006,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#reales-beispiel-aus-dem-code-mcp_universityclidbpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reales Beispiel aus dem Code (mcp_university/cli/db.py)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#regeln" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1037,39 +1059,51 @@
 <p>In diesem Projekt ist eine vollständige Dokumentation des Quellcodes obligatorisch. Wir verwenden den <strong>Google-Style</strong> für Docstrings.</p>
 <h2 id="format-beispiel">Format-Beispiel<a class="headerlink" href="#format-beispiel" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">example_function</span><span class="p">(</span><span class="n">param1</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">param2</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    \<span class="s2">&quot;</span><span class="se">\&quot;\&quot;</span><span class="s2">Kurze Einzeilen-Beschreibung der Funktion.</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Kurze Einzeilen-Beschreibung der Funktion.</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">Längere</span> <span class="n">Beschreibung</span><span class="p">,</span> <span class="n">die</span> <span class="n">das</span> <span class="n">Verhalten</span> <span class="n">der</span> <span class="n">Funktion</span> <span class="n">im</span> <span class="n">Detail</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">erläutert</span><span class="o">.</span> <span class="n">Hier</span> <span class="n">können</span> <span class="n">mehrere</span> <span class="n">Absätze</span> <span class="n">stehen</span><span class="o">.</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="sd">    Längere Beschreibung, die das Verhalten der Funktion im Detail</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="sd">    erläutert. Hier können mehrere Absätze stehen.</span>
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">Args</span><span class="p">:</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>        <span class="n">param1</span> <span class="p">(</span><span class="nb">int</span><span class="p">):</span> <span class="n">Beschreibung</span> <span class="n">des</span> <span class="n">ersten</span> <span class="n">Parameters</span><span class="o">.</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>        <span class="n">param2</span> <span class="p">(</span><span class="nb">str</span><span class="p">):</span> <span class="n">Beschreibung</span> <span class="n">des</span> <span class="n">zweiten</span> <span class="n">Parameters</span><span class="o">.</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>            <span class="n">Defaults</span> <span class="n">to</span> <span class="s2">&quot;default&quot;</span><span class="o">.</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="sd">        param1 (int): Beschreibung des ersten Parameters.</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="sd">        param2 (str): Beschreibung des zweiten Parameters.</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="sd">            Defaults to &quot;default&quot;.</span>
 <a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="n">Returns</span><span class="p">:</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>        <span class="nb">bool</span><span class="p">:</span> <span class="n">Beschreibung</span> <span class="n">des</span> <span class="n">Rückgabewerts</span><span class="o">.</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="sd">        bool: Beschreibung des Rückgabewerts.</span>
 <a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    <span class="n">Raises</span><span class="p">:</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>        <span class="ne">ValueError</span><span class="p">:</span> <span class="n">Wenn</span> <span class="n">param1</span> <span class="n">negativ</span> <span class="n">ist</span><span class="o">.</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="sd">    Raises:</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="sd">        ValueError: Wenn param1 negativ ist.</span>
 <a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>
-<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>    <span class="n">Example</span><span class="p">:</span>
-<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>        <span class="o">&gt;&gt;&gt;</span> <span class="n">example_function</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
-<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>        <span class="kc">True</span>
-<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>    \<span class="s2">&quot;</span><span class="se">\&quot;\&quot;</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="sd">    Example:</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="sd">        &gt;&gt;&gt; example_function(42)</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="sd">        True</span>
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>    <span class="k">if</span> <span class="n">param1</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
 <a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;param1 muss positiv sein&quot;</span><span class="p">)</span>
 <a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>    <span class="k">return</span> <span class="kc">True</span>
 </code></pre></div>
+<h2 id="reales-beispiel-aus-dem-code-mcp_universityclidbpy">Reales Beispiel aus dem Code (<code>mcp_university/cli/db.py</code>)<a class="headerlink" href="#reales-beispiel-aus-dem-code-mcp_universityclidbpy" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_store_and_index</span><span class="p">():</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialisiert und gibt den MetadataStore und SearchIndex zurück.</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="sd">    Nutzt die globale Konfiguration, um die Pfade für die SQLite-Datenbank</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="sd">    und den Qdrant-Index zu bestimmen.</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="sd">        Tuple[MetadataStore, SearchIndex]: Ein Tupel bestehend aus dem initialisierten</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="sd">            Store und dem Suchindex.</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="sd">    &quot;&quot;&quot;</span>
+</code></pre></div>
 <h2 id="regeln">Regeln<a class="headerlink" href="#regeln" title="Permanent link">&para;</a></h2>
 <ol>
-<li><strong>Vollständigkeit:</strong> Jede öffentliche und private Methode/Klasse benötigt einen Docstring.  </li>
-<li><strong>Type Hints:</strong> Parameter und Rückgabewerte müssen in der Funktionssignatur typisiert sein.  </li>
-<li><strong>Sprache:</strong> Docstrings werden in <strong>Deutsch</strong> (oder Englisch, sofern konsistent im Modul) verfasst. In diesem Projekt bevorzugen wir Deutsch für die fachliche Beschreibung im universitären Kontext.  </li>
+<li><strong>Vollständigkeit:</strong> Jede öffentliche und private Methode/Klasse benötigt einen Docstring.</li>
+<li><strong>Type Hints:</strong> Parameter und Rückgabewerte müssen in der Funktionssignatur typisiert sein.</li>
+<li><strong>Sprache:</strong> Docstrings werden in <strong>Deutsch</strong> verfasst. In diesem Projekt bevorzugen wir Deutsch für die fachliche Beschreibung im universitären Kontext.</li>
 </ol>
 <h2 id="uberprufung">Überprüfung<a class="headerlink" href="#uberprufung" title="Permanent link">&para;</a></h2>
 <p>Die Einhaltung wird mittels <code>interrogate</code> erzwungen. Der CI-Build schlägt fehl, wenn die Abdeckung unter <strong>95%</strong> fällt.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>interrogate<span class="w"> </span>mcp_university/<span class="w"> </span>--fail-under<span class="w"> </span><span class="m">95</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>interrogate<span class="w"> </span>mcp_university/<span class="w"> </span>--fail-under<span class="w"> </span><span class="m">95</span>
 </code></pre></div>
 
 

@@ -12,7 +12,7 @@
         <meta name="author" content="Senior Python Architect">
       
       
-        <link rel="canonical" href="https://github.com/example/mcp-university/dev/en/usage/">
+        <link rel="canonical" href="https://dgaida.github.io/academic-memory-mcp/dev/en/usage/">
       
       
         <link rel="prev" href="../configuration/">
@@ -684,6 +684,45 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#database-management-db" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database Management (db)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Database Management (db)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#listing-content" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Listing Content
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deleting-content" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deleting Content
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#model-context-protocol-mcp" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1128,6 +1167,45 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#database-management-db" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database Management (db)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Database Management (db)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#listing-content" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Listing Content
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deleting-content" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deleting Content
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#model-context-protocol-mcp" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1223,11 +1301,11 @@
 
 
 <h1 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h1>
-<p>The MCP University Memory System provides various interfaces for daily work.</p>
+<p>The MCP University Memory System provides various interfaces for interacting with your data.</p>
 <h2 id="command-line-interface-cli">Command Line Interface (CLI)<a class="headerlink" href="#command-line-interface-cli" title="Permanent link">&para;</a></h2>
-<p>The <code>mcp-uni</code> tool is the central entry point.</p>
+<p>The CLI is the primary way to manage the system and perform manual searches.</p>
 <h3 id="indexing-index">Indexing (<code>index</code>)<a class="headerlink" href="#indexing-index" title="Permanent link">&para;</a></h3>
-<p>Scans all configured folders and updates the index.
+<p>This command scans all configured folders, creates summaries, and updates the index.
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>mcp-uni<span class="w"> </span>index
 </code></pre></div></p>
 <h3 id="search-search">Search (<code>search</code>)<a class="headerlink" href="#search-search" title="Permanent link">&para;</a></h3>
@@ -1238,6 +1316,26 @@
 <p>Starts a background process that reacts to file changes and updates the index in real-time.
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>mcp-uni<span class="w"> </span>watch
 </code></pre></div></p>
+<h2 id="database-management-db">Database Management (<code>db</code>)<a class="headerlink" href="#database-management-db" title="Permanent link">&para;</a></h2>
+<p>The <code>db</code> command group allows for direct management of metadata and the search index.</p>
+<h3 id="listing-content">Listing Content<a class="headerlink" href="#listing-content" title="Permanent link">&para;</a></h3>
+<p>You can list various entities in the database:</p>
+<ul>
+<li><strong>Files:</strong> <code>mcp-uni db list-files</code></li>
+<li><strong>Folders:</strong> <code>mcp-uni db list-folders</code></li>
+<li><strong>Students:</strong> <code>mcp-uni db list-students</code></li>
+<li><strong>Summaries:</strong> <code>mcp-uni db list-summaries</code></li>
+<li><strong>Deadlines:</strong> <code>mcp-uni db list-deadlines</code></li>
+</ul>
+<h3 id="deleting-content">Deleting Content<a class="headerlink" href="#deleting-content" title="Permanent link">&para;</a></h3>
+<p>Entries can be deleted using their ID. Use the <code>--force</code> or <code>-f</code> option to skip the confirmation prompt.</p>
+<ul>
+<li><strong>Delete File:</strong> <code>mcp-uni db delete-file &lt;ID&gt;</code> (also removes the entry from the search index)</li>
+<li><strong>Delete Folder:</strong> <code>mcp-uni db delete-folder &lt;ID&gt;</code> (recursively removes all contained files)</li>
+<li><strong>Delete Student:</strong> <code>mcp-uni db delete-student &lt;ID&gt;</code></li>
+<li><strong>Delete Summary:</strong> <code>mcp-uni db delete-summary &lt;ID&gt;</code></li>
+<li><strong>Delete Deadline:</strong> <code>mcp-uni db delete-deadline &lt;ID&gt;</code></li>
+</ul>
 <h2 id="model-context-protocol-mcp">Model Context Protocol (MCP)<a class="headerlink" href="#model-context-protocol-mcp" title="Permanent link">&para;</a></h2>
 <p>The most powerful way to use the system is via an MCP client (like Claude Desktop).</p>
 <h3 id="start-server">Start Server<a class="headerlink" href="#start-server" title="Permanent link">&para;</a></h3>
@@ -1245,11 +1343,11 @@
 </code></pre></div>
 <h3 id="available-tools">Available Tools<a class="headerlink" href="#available-tools" title="Permanent link">&para;</a></h3>
 <ul>
-<li><code>search_documents</code>: Semantic search in documents.  </li>
-<li><code>get_folder_summary</code>: Query aggregated folder information.  </li>
-<li><code>get_student_context</code>: Retrieve complete history and status of a student.  </li>
-<li><code>generate_mail_reply</code>: Draft an email based on the context.  </li>
-<li><code>get_open_tasks</code>: Extraction of TODOs from all documents.  </li>
+<li><code>search_documents</code>: Semantic search in documents.</li>
+<li><code>get_folder_summary</code>: Query aggregated folder information.</li>
+<li><code>get_student_context</code>: Retrieve complete history and status of a student.</li>
+<li><code>generate_mail_reply</code>: Draft an email based on the context.</li>
+<li><code>get_open_tasks</code>: Extraction of TODOs from all documents.</li>
 </ul>
 <h2 id="typical-workflows">Typical Workflows<a class="headerlink" href="#typical-workflows" title="Permanent link">&para;</a></h2>
 <h3 id="1-preparing-for-office-hours">1. Preparing for Office Hours<a class="headerlink" href="#1-preparing-for-office-hours" title="Permanent link">&para;</a></h3>

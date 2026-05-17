@@ -12,7 +12,7 @@
         <meta name="author" content="Senior Python Architect">
       
       
-        <link rel="canonical" href="https://github.com/example/mcp-university/dev/usage/">
+        <link rel="canonical" href="https://dgaida.github.io/academic-memory-mcp/dev/usage/">
       
       
         <link rel="prev" href="../configuration/">
@@ -666,10 +666,49 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#watchdog-watch" class="md-nav__link">
+  <a href="#uberwachung-watch" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Watchdog (watch)
+        Überwachung (watch)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#datenbank-management-db" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Datenbank-Management (db)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Datenbank-Management (db)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#auflisten-von-inhalten" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Auflisten von Inhalten
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loschen-von-inhalten" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Löschen von Inhalten
       
     </span>
   </a>
@@ -1110,10 +1149,49 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#watchdog-watch" class="md-nav__link">
+  <a href="#uberwachung-watch" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Watchdog (watch)
+        Überwachung (watch)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#datenbank-management-db" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Datenbank-Management (db)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Datenbank-Management (db)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#auflisten-von-inhalten" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Auflisten von Inhalten
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loschen-von-inhalten" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Löschen von Inhalten
       
     </span>
   </a>
@@ -1221,33 +1299,53 @@
 
 
 <h1 id="nutzung">Nutzung<a class="headerlink" href="#nutzung" title="Permanent link">&para;</a></h1>
-<p>Das MCP University Memory System bietet verschiedene Schnittstellen für die tägliche Arbeit.</p>
+<p>Das MCP University Memory System bietet verschiedene Schnittstellen zur Interaktion mit Ihren Daten.</p>
 <h2 id="kommandozeile-cli">Kommandozeile (CLI)<a class="headerlink" href="#kommandozeile-cli" title="Permanent link">&para;</a></h2>
-<p>Das <code>mcp-uni</code> Tool ist der zentrale Einstiegspunkt.</p>
+<p>Die CLI ist der primäre Weg, um das System zu verwalten und manuelle Suchen durchzuführen.</p>
 <h3 id="indexierung-index">Indexierung (<code>index</code>)<a class="headerlink" href="#indexierung-index" title="Permanent link">&para;</a></h3>
-<p>Scannt alle konfigurierten Ordner und aktualisiert den Index.
+<p>Dieser Befehl scannt alle konfigurierten Ordner, erstellt Zusammenfassungen und aktualisiert den Index.
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>mcp-uni<span class="w"> </span>index
 </code></pre></div></p>
 <h3 id="suche-search">Suche (<code>search</code>)<a class="headerlink" href="#suche-search" title="Permanent link">&para;</a></h3>
-<p>Führt eine schnelle Abfrage über den gesamten Datenbestand aus.
+<p>Führt eine schnelle Abfrage über den gesamten Datenbestand durch.
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>mcp-uni<span class="w"> </span>search<span class="w"> </span><span class="s2">&quot;Inhalt der Vorlesung 5&quot;</span>
 </code></pre></div></p>
-<h3 id="watchdog-watch">Watchdog (<code>watch</code>)<a class="headerlink" href="#watchdog-watch" title="Permanent link">&para;</a></h3>
+<h3 id="uberwachung-watch">Überwachung (<code>watch</code>)<a class="headerlink" href="#uberwachung-watch" title="Permanent link">&para;</a></h3>
 <p>Startet einen Hintergrundprozess, der auf Dateiänderungen reagiert und den Index in Echtzeit aktualisiert.
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>mcp-uni<span class="w"> </span>watch
 </code></pre></div></p>
+<h2 id="datenbank-management-db">Datenbank-Management (<code>db</code>)<a class="headerlink" href="#datenbank-management-db" title="Permanent link">&para;</a></h2>
+<p>Die <code>db</code> Befehlsgruppe erlaubt die direkte Verwaltung der Metadaten und des Suchindex.</p>
+<h3 id="auflisten-von-inhalten">Auflisten von Inhalten<a class="headerlink" href="#auflisten-von-inhalten" title="Permanent link">&para;</a></h3>
+<p>Sie können verschiedene Entitäten in der Datenbank auflisten:</p>
+<ul>
+<li><strong>Dateien:</strong> <code>mcp-uni db list-files</code></li>
+<li><strong>Ordner:</strong> <code>mcp-uni db list-folders</code></li>
+<li><strong>Studenten:</strong> <code>mcp-uni db list-students</code></li>
+<li><strong>Zusammenfassungen:</strong> <code>mcp-uni db list-summaries</code></li>
+<li><strong>Deadlines:</strong> <code>mcp-uni db list-deadlines</code></li>
+</ul>
+<h3 id="loschen-von-inhalten">Löschen von Inhalten<a class="headerlink" href="#loschen-von-inhalten" title="Permanent link">&para;</a></h3>
+<p>Einträge können über ihre ID gelöscht werden. Mit der Option <code>--force</code> oder <code>-f</code> wird die Bestätigungsabfrage übersprungen.</p>
+<ul>
+<li><strong>Datei löschen:</strong> <code>mcp-uni db delete-file &lt;ID&gt;</code> (entfernt auch den Eintrag aus dem Suchindex)</li>
+<li><strong>Ordner löschen:</strong> <code>mcp-uni db delete-folder &lt;ID&gt;</code> (entfernt rekursiv alle enthaltenen Dateien)</li>
+<li><strong>Student löschen:</strong> <code>mcp-uni db delete-student &lt;ID&gt;</code></li>
+<li><strong>Zusammenfassung löschen:</strong> <code>mcp-uni db delete-summary &lt;ID&gt;</code></li>
+<li><strong>Deadline löschen:</strong> <code>mcp-uni db delete-deadline &lt;ID&gt;</code></li>
+</ul>
 <h2 id="model-context-protocol-mcp">Model Context Protocol (MCP)<a class="headerlink" href="#model-context-protocol-mcp" title="Permanent link">&para;</a></h2>
-<p>Die leistungsstärkste Nutzung erfolgt über einen MCP-Client (wie Claude Desktop).</p>
+<p>Der leistungsfähigste Weg, das System zu nutzen, ist über einen MCP-Client (wie Claude Desktop).</p>
 <h3 id="server-starten">Server starten<a class="headerlink" href="#server-starten" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>mcp-uni<span class="w"> </span>serve-mcp
 </code></pre></div>
 <h3 id="verfugbare-tools">Verfügbare Tools<a class="headerlink" href="#verfugbare-tools" title="Permanent link">&para;</a></h3>
 <ul>
-<li><code>search_documents</code>: Semantische Suche in Dokumenten.  </li>
-<li><code>get_folder_summary</code>: Abfrage von aggregierten Ordner-Informationen.  </li>
-<li><code>get_student_context</code>: Komplette Historie und Status eines Studenten abrufen.  </li>
-<li><code>generate_mail_reply</code>: Entwurf einer E-Mail basierend auf dem Kontext.  </li>
-<li><code>get_open_tasks</code>: Extraktion von TODOs aus allen Dokumenten.  </li>
+<li><code>search_documents</code>: Semantische Suche in Dokumenten.</li>
+<li><code>get_folder_summary</code>: Abfrage von aggregierten Ordner-Informationen.</li>
+<li><code>get_student_context</code>: Komplette Historie und Status eines Studenten abrufen.</li>
+<li><code>generate_mail_reply</code>: Entwurf einer E-Mail basierend auf dem Kontext.</li>
+<li><code>get_open_tasks</code>: Extraktion von TODOs aus allen Dokumenten.</li>
 </ul>
 <h2 id="typische-workflows">Typische Workflows<a class="headerlink" href="#typische-workflows" title="Permanent link">&para;</a></h2>
 <h3 id="1-vorbereitung-einer-sprechstunde">1. Vorbereitung einer Sprechstunde<a class="headerlink" href="#1-vorbereitung-einer-sprechstunde" title="Permanent link">&para;</a></h3>

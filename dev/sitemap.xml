@@ -1,185 +1,185 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
     <url>
-        <loc>https://github.com/example/mcp-university/dev/</loc>
-        <lastmod>2026-05-16</lastmod>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/</loc>
+        <lastmod>2026-05-17</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="de" href="https://github.com/example/mcp-university/dev/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/example/mcp-university/deven/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/dev/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/deven/"/>
     </url>
     <url>
-        <loc>https://github.com/example/mcp-university/dev/configuration/</loc>
-        <lastmod>2026-05-16</lastmod>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/configuration/</loc>
+        <lastmod>2026-05-17</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="de" href="https://github.com/example/mcp-university/dev/configuration/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/example/mcp-university/deven/configuration/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/dev/configuration/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/deven/configuration/"/>
     </url>
     <url>
-        <loc>https://github.com/example/mcp-university/dev/getting-started/</loc>
-        <lastmod>2026-05-16</lastmod>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/getting-started/</loc>
+        <lastmod>2026-05-17</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="de" href="https://github.com/example/mcp-university/dev/getting-started/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/example/mcp-university/deven/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/dev/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/deven/getting-started/"/>
     </url>
     <url>
-        <loc>https://github.com/example/mcp-university/dev/installation/</loc>
-        <lastmod>2026-05-16</lastmod>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/installation/</loc>
+        <lastmod>2026-05-17</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="de" href="https://github.com/example/mcp-university/dev/installation/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/example/mcp-university/deven/installation/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/dev/installation/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/deven/installation/"/>
     </url>
     <url>
-        <loc>https://github.com/example/mcp-university/dev/metrics/</loc>
-        <lastmod>2026-05-16</lastmod>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/metrics/</loc>
+        <lastmod>2026-05-17</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="de" href="https://github.com/example/mcp-university/dev/metrics/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/example/mcp-university/deven/metrics/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/dev/metrics/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/deven/metrics/"/>
     </url>
     <url>
-        <loc>https://github.com/example/mcp-university/dev/troubleshooting/</loc>
-        <lastmod>2026-05-16</lastmod>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/troubleshooting/</loc>
+        <lastmod>2026-05-17</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="de" href="https://github.com/example/mcp-university/dev/troubleshooting/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/example/mcp-university/deven/troubleshooting/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/dev/troubleshooting/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/deven/troubleshooting/"/>
     </url>
     <url>
-        <loc>https://github.com/example/mcp-university/dev/api/</loc>
-        <lastmod>2026-05-16</lastmod>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/api/</loc>
+        <lastmod>2026-05-17</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="de" href="https://github.com/example/mcp-university/dev/api/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/example/mcp-university/deven/api/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/dev/api/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/deven/api/"/>
     </url>
     <url>
-        <loc>https://github.com/example/mcp-university/dev/architecture/</loc>
-        <lastmod>2026-05-16</lastmod>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/architecture/</loc>
+        <lastmod>2026-05-17</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="de" href="https://github.com/example/mcp-university/dev/architecture/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/example/mcp-university/deven/architecture/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/dev/architecture/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/deven/architecture/"/>
     </url>
     <url>
-        <loc>https://github.com/example/mcp-university/dev/development/</loc>
-        <lastmod>2026-05-16</lastmod>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/development/</loc>
+        <lastmod>2026-05-17</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="de" href="https://github.com/example/mcp-university/dev/development/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/example/mcp-university/deven/development/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/dev/development/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/deven/development/"/>
     </url>
     <url>
-        <loc>https://github.com/example/mcp-university/dev/development/changelog/</loc>
-        <lastmod>2026-05-16</lastmod>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/development/changelog/</loc>
+        <lastmod>2026-05-17</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="de" href="https://github.com/example/mcp-university/dev/development/changelog/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/example/mcp-university/deven/development/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/dev/development/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/deven/development/changelog/"/>
     </url>
     <url>
-        <loc>https://github.com/example/mcp-university/dev/development/docstring-guide/</loc>
-        <lastmod>2026-05-16</lastmod>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/development/docstring-guide/</loc>
+        <lastmod>2026-05-17</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="de" href="https://github.com/example/mcp-university/dev/development/docstring-guide/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/example/mcp-university/deven/development/docstring-guide/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/dev/development/docstring-guide/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/deven/development/docstring-guide/"/>
     </url>
     <url>
-        <loc>https://github.com/example/mcp-university/dev/development/versioning/</loc>
-        <lastmod>2026-05-16</lastmod>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/development/versioning/</loc>
+        <lastmod>2026-05-17</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="de" href="https://github.com/example/mcp-university/dev/development/versioning/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/example/mcp-university/deven/development/versioning/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/dev/development/versioning/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/deven/development/versioning/"/>
     </url>
     <url>
-        <loc>https://github.com/example/mcp-university/dev/usage/</loc>
-        <lastmod>2026-05-16</lastmod>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/usage/</loc>
+        <lastmod>2026-05-17</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="de" href="https://github.com/example/mcp-university/dev/usage/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/example/mcp-university/deven/usage/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/dev/usage/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/deven/usage/"/>
     </url>
     <url>
-        <loc>https://github.com/example/mcp-university/dev/en/</loc>
-        <lastmod>2026-05-16</lastmod>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/en/</loc>
+        <lastmod>2026-05-17</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/example/mcp-university/dev/en/"/>
-        <xhtml:link rel="alternate" hreflang="de" href="https://github.com/example/mcp-university/dev"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/dev/en/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/dev"/>
     </url>
     <url>
-        <loc>https://github.com/example/mcp-university/dev/en/configuration/</loc>
-        <lastmod>2026-05-16</lastmod>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/en/configuration/</loc>
+        <lastmod>2026-05-17</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/example/mcp-university/dev/en/configuration/"/>
-        <xhtml:link rel="alternate" hreflang="de" href="https://github.com/example/mcp-university/devconfiguration/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/dev/en/configuration/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/devconfiguration/"/>
     </url>
     <url>
-        <loc>https://github.com/example/mcp-university/dev/en/getting-started/</loc>
-        <lastmod>2026-05-16</lastmod>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/en/getting-started/</loc>
+        <lastmod>2026-05-17</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/example/mcp-university/dev/en/getting-started/"/>
-        <xhtml:link rel="alternate" hreflang="de" href="https://github.com/example/mcp-university/devgetting-started/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/dev/en/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/devgetting-started/"/>
     </url>
     <url>
-        <loc>https://github.com/example/mcp-university/dev/en/installation/</loc>
-        <lastmod>2026-05-16</lastmod>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/en/installation/</loc>
+        <lastmod>2026-05-17</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/example/mcp-university/dev/en/installation/"/>
-        <xhtml:link rel="alternate" hreflang="de" href="https://github.com/example/mcp-university/devinstallation/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/dev/en/installation/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/devinstallation/"/>
     </url>
     <url>
-        <loc>https://github.com/example/mcp-university/dev/en/metrics/</loc>
-        <lastmod>2026-05-16</lastmod>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/en/metrics/</loc>
+        <lastmod>2026-05-17</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/example/mcp-university/dev/en/metrics/"/>
-        <xhtml:link rel="alternate" hreflang="de" href="https://github.com/example/mcp-university/devmetrics/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/dev/en/metrics/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/devmetrics/"/>
     </url>
     <url>
-        <loc>https://github.com/example/mcp-university/dev/en/troubleshooting/</loc>
-        <lastmod>2026-05-16</lastmod>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/en/troubleshooting/</loc>
+        <lastmod>2026-05-17</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/example/mcp-university/dev/en/troubleshooting/"/>
-        <xhtml:link rel="alternate" hreflang="de" href="https://github.com/example/mcp-university/devtroubleshooting/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/dev/en/troubleshooting/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/devtroubleshooting/"/>
     </url>
     <url>
-        <loc>https://github.com/example/mcp-university/dev/en/api/</loc>
-        <lastmod>2026-05-16</lastmod>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/en/api/</loc>
+        <lastmod>2026-05-17</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/example/mcp-university/dev/en/api/"/>
-        <xhtml:link rel="alternate" hreflang="de" href="https://github.com/example/mcp-university/devapi/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/dev/en/api/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/devapi/"/>
     </url>
     <url>
-        <loc>https://github.com/example/mcp-university/dev/en/architecture/</loc>
-        <lastmod>2026-05-16</lastmod>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/en/architecture/</loc>
+        <lastmod>2026-05-17</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/example/mcp-university/dev/en/architecture/"/>
-        <xhtml:link rel="alternate" hreflang="de" href="https://github.com/example/mcp-university/devarchitecture/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/dev/en/architecture/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/devarchitecture/"/>
     </url>
     <url>
-        <loc>https://github.com/example/mcp-university/dev/en/development/</loc>
-        <lastmod>2026-05-16</lastmod>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/en/development/</loc>
+        <lastmod>2026-05-17</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/example/mcp-university/dev/en/development/"/>
-        <xhtml:link rel="alternate" hreflang="de" href="https://github.com/example/mcp-university/devdevelopment/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/dev/en/development/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/devdevelopment/"/>
     </url>
     <url>
-        <loc>https://github.com/example/mcp-university/dev/en/development/changelog/</loc>
-        <lastmod>2026-05-16</lastmod>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/en/development/changelog/</loc>
+        <lastmod>2026-05-17</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/example/mcp-university/dev/en/development/changelog/"/>
-        <xhtml:link rel="alternate" hreflang="de" href="https://github.com/example/mcp-university/devdevelopment/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/dev/en/development/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/devdevelopment/changelog/"/>
     </url>
     <url>
-        <loc>https://github.com/example/mcp-university/dev/en/development/docstring-guide/</loc>
-        <lastmod>2026-05-16</lastmod>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/en/development/docstring-guide/</loc>
+        <lastmod>2026-05-17</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/example/mcp-university/dev/en/development/docstring-guide/"/>
-        <xhtml:link rel="alternate" hreflang="de" href="https://github.com/example/mcp-university/devdevelopment/docstring-guide/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/dev/en/development/docstring-guide/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/devdevelopment/docstring-guide/"/>
     </url>
     <url>
-        <loc>https://github.com/example/mcp-university/dev/en/development/versioning/</loc>
-        <lastmod>2026-05-16</lastmod>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/en/development/versioning/</loc>
+        <lastmod>2026-05-17</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/example/mcp-university/dev/en/development/versioning/"/>
-        <xhtml:link rel="alternate" hreflang="de" href="https://github.com/example/mcp-university/devdevelopment/versioning/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/dev/en/development/versioning/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/devdevelopment/versioning/"/>
     </url>
     <url>
-        <loc>https://github.com/example/mcp-university/dev/en/usage/</loc>
-        <lastmod>2026-05-16</lastmod>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/en/usage/</loc>
+        <lastmod>2026-05-17</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/example/mcp-university/dev/en/usage/"/>
-        <xhtml:link rel="alternate" hreflang="de" href="https://github.com/example/mcp-university/devusage/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/dev/en/usage/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/devusage/"/>
     </url>
 </urlset>

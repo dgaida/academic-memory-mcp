@@ -7,7 +7,7 @@
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <meta content="Lokales, agentisches Wissenssystem für Universitäten und Forschung." name="description"/>
 <meta content="Senior Python Architect" name="author"/>
-<link href="https://github.com/example/mcp-university/dev/en/architecture/" rel="canonical"/>
+<link href="https://dgaida.github.io/academic-memory-mcp/dev/en/architecture/" rel="canonical"/>
 <link href="../api/" rel="prev"/>
 <link href="../development/" rel="next"/>
 <link href="../../architecture/" hreflang="de" rel="alternate"/>
@@ -541,7 +541,7 @@
     end
 
     subgraph "Storage &amp; Index Layer"
-        C --&gt; IDX[Search Index / Search Index]
+        C --&gt; IDX[Search Index]
         C --&gt; DB[Metadata Store / SQLite]
     end
 
@@ -554,11 +554,11 @@
 </div>
 <h2 id="data-flow">Data Flow<a class="headerlink" href="#data-flow" title="Permanent link">¶</a></h2>
 <ol>
-<li><strong>Crawling:</strong> The crawler scans directories and compares file hashes with the SQLite DB.  </li>
-<li><strong>Parsing:</strong> New or modified files are passed through the factory to the appropriate parser.  </li>
-<li><strong>Summarization:</strong> The extracted text is sent (truncated to the context window) to Ollama to obtain a structured summary.  </li>
-<li><strong>Indexing:</strong> The full text is stored in the Search Index index for BM25 and vector search.  </li>
-<li><strong>Delivery:</strong> Tools are defined via FastMCP that access the DB and index to answer queries from agents.  </li>
+<li><strong>Crawling:</strong> The crawler scans directories and compares file hashes with the SQLite DB.</li>
+<li><strong>Parsing:</strong> New or modified files are passed through the factory to the appropriate parser.</li>
+<li><strong>Summarization:</strong> The extracted text is sent (truncated to the context window) to Ollama to obtain a structured summary.</li>
+<li><strong>Indexing:</strong> The full text is stored in the Search Index for BM25 and vector search.</li>
+<li><strong>Delivery:</strong> Tools are defined via FastMCP that access the DB and index to answer queries from agents.</li>
 </ol>
 <h2 id="process-lifecycle">Process Lifecycle<a class="headerlink" href="#process-lifecycle" title="Permanent link">¶</a></h2>
 <div class="mermaid">sequenceDiagram
