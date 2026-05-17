@@ -39,6 +39,7 @@ class SearchIndex:
         self.store = store
         self.location.mkdir(parents=True, exist_ok=True)
         self.embedding_model_name = embedding_model_name
+        self._model = None
 
         self.use_shell = os.name == 'nt'
         self._qmd_available = self._check_qmd()
@@ -69,14 +70,20 @@ class SearchIndex:
             logger.debug(f"qmd check failed: {e}")
             return False
 
+    @property
+    def model(self):
+        """Gibt das SentenceTransformer-Modell zurück (Lazy Loading)."""
+        if self._model is None and NATIVE_AVAILABLE:
+            logger.info(f"Loading SentenceTransformer model: {self.embedding_model_name}")
+            self._model = SentenceTransformer(self.embedding_model_name)
+        return self._model
+
     def _init_native(self) -> None:
         """Initialisiert die native Fallback-Suche."""
         logger.info(f"Initializing native search with model: {self.embedding_model_name}")
         self.client = QdrantClient(path=str(self.location))
         self.collection_name = "university_documents"
 
-        logger.debug(f"Loading SentenceTransformer model: {self.embedding_model_name}")
-        self.model = SentenceTransformer(self.embedding_model_name)
 
         self.bm25_path = self.location / "bm25_index.pkl"
         self.corpus_path = self.location / "corpus.json"
@@ -91,7 +98,7 @@ class SearchIndex:
 
         if not exists:
             logger.info(f"Creating Qdrant collection: {self.collection_name}")
-            dummy_vector = self.model.encode("dummy")
+            dummy_vector = self.model.encode("dummy") if self.model else [0]*1024
             vector_size = len(dummy_vector)
             self.client.create_collection(
                 collection_name=self.collection_name,

@@ -33,14 +33,20 @@ You can list various entities in the database:
 
 *   **Files:** `mcp-uni db list-files`  
 *   **Folders:** `mcp-uni db list-folders`  
-*   **Students:** `mcp-uni db list-students`  
+*   **Students:** `mcp-uni db list-students` (Note: Use `sync-students` to populate)
 *   **Summaries:** `mcp-uni db list-summaries`  
 *   **Deadlines:** `mcp-uni db list-deadlines`  
+
+### Student Synchronization (`sync-students`)
+Populates the database from a `students.yaml`.
+```bash
+mcp-uni db sync-students
+```
 
 ### Deleting Content
 Entries can be deleted using their ID. Use the `--force` or `-f` option to skip the confirmation prompt.
 
-*   **Delete File:** `mcp-uni db delete-file <ID>` (also removes the entry from the search index)  
+*   **Delete Files:** `mcp-uni db delete-file <ID_1> <ID_2> ...`
 *   **Delete Folder:** `mcp-uni db delete-folder <ID>` (recursively removes all contained files)  
 *   **Delete Student:** `mcp-uni db delete-student <ID>`  
 *   **Delete Summary:** `mcp-uni db delete-summary <ID>`  
