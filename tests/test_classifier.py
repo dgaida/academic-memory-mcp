@@ -85,3 +85,24 @@ def test_classifier_embedding_mode(mock_st, temp_data_dir):
         test_file = temp_data_dir / "BachelorThesis" / "test1.msg"
         result = classifier.predict(test_file)
         assert result["prediction"] in ["BachelorThesis", "MasterThesis"]
+
+def test_classifier_train_predict_xgboost(temp_data_dir):
+    """Testet das Training und die Vorhersage im XGBoost Modus."""
+    classifier = EmailClassifier(mode="tfidf", method="xgboost")
+
+    # Mock MailParser.parse
+    with patch("mcp_university.classifier.engine.MailParser.parse") as mock_parse:
+        mock_parse.side_effect = lambda p: p.read_text()
+
+        classifier.train(temp_data_dir)
+        assert classifier.is_trained
+        assert classifier.method == "xgboost"
+
+        # Test Vorhersage
+        test_file = temp_data_dir / "BachelorThesis" / "test1.msg"
+        result = classifier.predict(test_file)
+
+        assert "prediction" in result
+        assert result["prediction"] in ["BachelorThesis", "MasterThesis"]
+        assert "confidence" in result
+        assert "probabilities" in result

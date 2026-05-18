@@ -30,7 +30,7 @@ def evaluate_and_save(classifier: EmailClassifier, texts: list, labels: list, ou
     # Vorhersagen
     X = classifier.get_features(texts, train=False)
     y_pred_idx = classifier.classifier.predict(X)
-    y_pred = classifier.label_encoder.inverse_transform(y_pred_idx)
+    y_pred = classifier.label_encoder.inverse_transform(y_pred_idx.astype(int))
 
     # Metriken berechnen
     accuracy = accuracy_score(labels, y_pred)
@@ -87,6 +87,8 @@ def main() -> None:
     parser.add_argument("--model-path", type=str, default="data/email_classifier.pkl", help="Pfad zum Speichern des Modells.")
     parser.add_argument("--mode", type=str, choices=["tfidf", "embedding", "combined"], default="combined",
                         help="Modus der Merkmalsextraktion (default: combined).")
+    parser.add_argument("--method", type=str, choices=["randomforest", "xgboost"], default="xgboost",
+                        help="Klassifizierungsmethode (default: xgboost).")
     parser.add_argument("--embedding-model", type=str, default="paraphrase-multilingual-MiniLM-L12-v2",
                         help="Sentence-Transformer Modell (default: paraphrase-multilingual-MiniLM-L12-v2).")
 
@@ -97,8 +99,8 @@ def main() -> None:
         logger.error(f"Datenverzeichnis {args.data_dir} existiert nicht.")
         return
 
-    logger.info(f"Starte Training im Modus '{args.mode}'...")
-    classifier = EmailClassifier(mode=args.mode, embedding_model_name=args.embedding_model)
+    logger.info(f"Starte Training im Modus '{args.mode}' mit Methode '{args.method}'...")
+    classifier = EmailClassifier(mode=args.mode, method=args.method, embedding_model_name=args.embedding_model)
 
     try:
         # Daten laden
@@ -112,14 +114,20 @@ def main() -> None:
         y = classifier.label_encoder.fit_transform(labels)
 
         # GridSearchCV Setup
-        # Wir nutzen 3 Hyperparameter mit 3, 3 und 1 Werten um auf 9 Experimente zu kommen
-        param_grid = {
-            'n_estimators': [50, 100, 200],
-            'max_depth': [None, 10, 20],
-            'criterion': ['gini']  # 3. Hyperparameter mit 1 Wert
-        }
+        if args.method == "randomforest":
+            param_grid = {
+                'n_estimators': [50, 100, 200],
+                'max_depth': [None, 10, 20],
+                'criterion': ['gini']
+            }
+        else:  # xgboost
+            param_grid = {
+                'n_estimators': [50, 100, 200],
+                'max_depth': [3, 6, 9],
+                'learning_rate': [0.1]
+            }
 
-        logger.info("Starte GridSearchCV mit 5-fold CV und 9 Experimenten...")
+        logger.info(f"Starte GridSearchCV mit 5-fold CV und 9 Experimenten für {args.method}...")
         grid_search = GridSearchCV(
             estimator=classifier.classifier,
             param_grid=param_grid,
