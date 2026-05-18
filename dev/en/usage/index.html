@@ -1420,8 +1420,9 @@
 <p>The system includes a subpackage for the automated classification of student emails (e.g., Bachelor's thesis, internship project).</p>
 <h3 id="training-the-model">Training the Model<a class="headerlink" href="#training-the-model" title="Permanent link">&para;</a></h3>
 <p>To use the classifier, it must first be trained with example data. It expects a folder structure where each subfolder represents a class and contains the emails (.msg).</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python3<span class="w"> </span>mcp_university/classifier/train.py<span class="w"> </span>/path/to/training_data<span class="w"> </span>--mode<span class="w"> </span>combined
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python3<span class="w"> </span>mcp_university/classifier/train.py<span class="w"> </span>/path/to/training_data<span class="w"> </span>--mode<span class="w"> </span>combined<span class="w"> </span>--method<span class="w"> </span>xgboost
 </code></pre></div>
+<p>You can choose between <code>randomforest</code> and <code>xgboost</code> (default).</p>
 <h3 id="classifying-an-email">Classifying an Email<a class="headerlink" href="#classifying-an-email" title="Permanent link">&para;</a></h3>
 <p>After training, a single email file can be classified:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python3<span class="w"> </span>mcp_university/classifier/predict.py<span class="w"> </span>/path/to/email.msg

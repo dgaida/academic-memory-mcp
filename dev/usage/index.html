@@ -1418,8 +1418,9 @@
 <p>Das System enthält ein Subpackage zur automatisierten Klassifizierung von studentischen E-Mails (z.B. Bachelorarbeit, Praxisprojekt).</p>
 <h3 id="modell-trainieren">Modell trainieren<a class="headerlink" href="#modell-trainieren" title="Permanent link">&para;</a></h3>
 <p>Um den Klassifikator zu nutzen, muss er zuerst mit Beispieldaten trainiert werden. Erwarten wird eine Ordnerstruktur, in der jeder Unterordner eine Klasse repräsentiert und die E-Mails (.msg) enthält.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python3<span class="w"> </span>mcp_university/classifier/train.py<span class="w"> </span>/pfad/zu/trainingsdaten<span class="w"> </span>--mode<span class="w"> </span>combined
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python3<span class="w"> </span>mcp_university/classifier/train.py<span class="w"> </span>/pfad/zu/trainingsdaten<span class="w"> </span>--mode<span class="w"> </span>combined<span class="w"> </span>--method<span class="w"> </span>xgboost
 </code></pre></div>
+<p>Dabei kann zwischen <code>randomforest</code> und <code>xgboost</code> (Standard) gewählt werden.</p>
 <h3 id="e-mail-klassifizieren">E-Mail klassifizieren<a class="headerlink" href="#e-mail-klassifizieren" title="Permanent link">&para;</a></h3>
 <p>Nach dem Training kann eine einzelne E-Mail-Datei klassifiziert werden:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python3<span class="w"> </span>mcp_university/classifier/predict.py<span class="w"> </span>/pfad/zur/email.msg
@@ -1465,7 +1466,7 @@
 <h2 id="typische-workflows">Typische Workflows<a class="headerlink" href="#typische-workflows" title="Permanent link">&para;</a></h2>
 <h3 id="1-vorbereitung-einer-sprechstunde">1. Vorbereitung einer Sprechstunde<a class="headerlink" href="#1-vorbereitung-einer-sprechstunde" title="Permanent link">&para;</a></h3>
 <p>Bitten Sie Ihren Agenten: "Gib mir den Kontext zu Student Max Mustermann und zeige mir seine letzten Abgaben."
-Der Agent nutzt <code>get_student_context</code> und <code>search_documents</code>, um Ihnen eine kompakte Übersicht zu liefern.</p>
+Der Agent nutzt <code>get_student_context</code> and <code>search_documents</code>, um Ihnen eine kompakte Übersicht zu liefern.</p>
 <h3 id="2-beantworten-von-e-mails">2. Beantworten von E-Mails<a class="headerlink" href="#2-beantworten-von-e-mails" title="Permanent link">&para;</a></h3>
 <p>Kopieren Sie die E-Mail eines Studenten in den Chat und nutzen Sie das Tool <code>generate_mail_reply</code>. Das System berücksichtigt dabei automatisch den Status der Abschlussarbeit oder offene Deadlines.</p>
 
