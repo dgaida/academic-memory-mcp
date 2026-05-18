@@ -8,6 +8,7 @@
 '   3. Filtert Mails von/an "@smail.th-koeln.de" oder "@smail.fh-koeln.de".
 '   4. Speichert diese als .msg-Dateien unter "D:\TH_Koeln\StudentMails".
 '   5. Dateiname: YYYYMMDD_HHMMSS - Betreff.msg
+'   6. Loescht die E-Mail nach erfolgreichem Export oder falls bereits vorhanden.
 '
 ' WICHTIG: Nutzt DoEvents und Sleep, um Outlook waehrend des Exports
 ' reaktionsfaehig zu halten.
@@ -127,8 +128,12 @@ Private Sub ProcessFolder(ByVal olFolder As Outlook.folder, ByVal subFolderName 
                     mail.SaveAs filePath, olMSG
                     If Err.Number = 0 Then
                         savedCount = savedCount + 1
+                        mail.Delete
                     End If
                     On Error GoTo 0
+                Else
+                    ' Falls bereits vorhanden, auch loeschen
+                    mail.Delete
                 End If
             End If
         End If
