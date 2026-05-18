@@ -38,6 +38,12 @@ def test_process_emails(mock_open_msg, mock_mail_parser, mock_classifier_class, 
     msg2 = sent / "mail2.msg"
     msg2.touch()
 
+    # Subdirectory test
+    sub_inbox = inbox / "Subfolder"
+    sub_inbox.mkdir()
+    msg3 = sub_inbox / "mail3.msg"
+    msg3.touch()
+
     # Setup target directory
     target_root = tmp_path / "target"
     target_root.mkdir()
@@ -45,27 +51,32 @@ def test_process_emails(mock_open_msg, mock_mail_parser, mock_classifier_class, 
     # Mock classifier
     mock_classifier = mock_classifier_class.return_value
     mock_classifier.predict.side_effect = [
-        {"prediction": "BachelorThesis"},
-        {"prediction": "BachelorThesis"}
+        {"prediction": "BachelorThesis"}, # mail1
+        {"prediction": "BachelorThesis"}, # mail3 (rglob finds this)
+        {"prediction": "BachelorThesis"}  # mail2
     ]
 
     # Mock parser
     mock_parser = mock_mail_parser.return_value
     mock_parser.get_email_date.side_effect = [
-        datetime(2025, 5, 10), # SoSe
-        datetime(2025, 11, 20) # WS
+        datetime(2025, 5, 10), # mail1 SoSe
+        datetime(2025, 6, 10), # mail3 SoSe
+        datetime(2025, 11, 20) # mail2 WS
     ]
 
     # Mock extract_msg
     mock_msg1 = MagicMock()
     mock_msg1.sender = "Max Mustermann"
 
+    mock_msg3 = MagicMock()
+    mock_msg3.sender = "Max Mustermann"
+
     mock_msg2 = MagicMock()
     mock_recip = MagicMock()
     mock_recip.name = "Erika Musterfrau"
     mock_msg2.recipients = [mock_recip]
 
-    mock_open_msg.return_value.__enter__.side_effect = [mock_msg1, mock_msg2]
+    mock_open_msg.return_value.__enter__.side_effect = [mock_msg1, mock_msg3, mock_msg2]
 
     config = {
         "BachelorThesis": str(target_root)
@@ -73,16 +84,19 @@ def test_process_emails(mock_open_msg, mock_mail_parser, mock_classifier_class, 
 
     moved = process_emails(source_root, Path("dummy_model"), config)
 
-    assert len(moved) == 2
+    assert len(moved) == 3
 
     # Verify first file (Inbox)
-    # Target: target/2025_SoSe/Mustermann/Inbox/mail1.msg
     expected_path1 = target_root / "2025_SoSe" / "Mustermann" / "Inbox" / "mail1.msg"
     assert expected_path1.exists()
     assert not msg1.exists()
 
+    # Verify third file (Subfolder in Inbox) -> should go to Inbox
+    expected_path3 = target_root / "2025_SoSe" / "Mustermann" / "Inbox" / "mail3.msg"
+    assert expected_path3.exists()
+    assert not msg3.exists()
+
     # Verify second file (SentItems)
-    # Target: target/2025_26_WS/Musterfrau/SentItems/mail2.msg
     expected_path2 = target_root / "2025_26_WS" / "Musterfrau" / "SentItems" / "mail2.msg"
     assert expected_path2.exists()
     assert not msg2.exists()

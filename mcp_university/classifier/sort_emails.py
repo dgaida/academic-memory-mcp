@@ -130,7 +130,7 @@ def process_emails(source_root: Path, classifier_model: Path, config: Dict[str, 
 
         logger.info(f"Verarbeite Ordner: {folder_name}")
 
-        for msg_file in folder_path.glob("*.msg"):
+        for msg_file in folder_path.rglob("*.msg"):
             try:
                 # Klassifizierung
                 prediction = classifier.predict(msg_file)
