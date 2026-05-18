@@ -1,11 +1,13 @@
 """Skript zum Sortieren von E-Mails basierend auf Klassifizierung."""
 import argparse
 import logging
+import re
 import shutil
-import yaml
-from pathlib import Path
 from datetime import datetime
-from typing import List, Dict, Any, Optional
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import yaml
 
 from mcp_university.classifier.engine import EmailClassifier
 from mcp_university.parser.mail_parser import MailParser
@@ -38,12 +40,13 @@ def get_semester(date: datetime) -> str:
             return f"{year-1}_{str(year)[2:]}_WS"
 
 def extract_lastname(name_str: str) -> str:
-    """Extrahiert den Nachnamen aus einem Namensstring.
+    """Extrahiert den Nachnamen aus einem Namensstring oder einer E-Mail-Adresse.
 
-    Z.B. 'Max Mustermann' oder 'Mustermann, Max'.
+    Unterstützt das Format vorname.nachname@smail.th-koeln.de (auch mit mehreren Teilen)
+    sowie 'Max Mustermann' oder 'Mustermann, Max'.
 
     Args:
-        name_str: Der zu parsende Name.
+        name_str: Der zu parsende Name oder die E-Mail-Adresse.
 
     Returns:
         str: Der extrahierte Nachname.
@@ -51,15 +54,29 @@ def extract_lastname(name_str: str) -> str:
     if not name_str or name_str == "(No Sender)" or name_str == "(No Receiver)":
         return "Unknown"
 
-    # Entferne E-Mail Adresse in Klammern falls vorhanden
-    name_str = name_str.split('<')[0].strip()
+    # Suche nach E-Mail-Adresse (in < > oder direkt)
+    email_match = re.search(r'[\w\.-]+@[\w\.-]+', name_str)
+    if email_match:
+        email = email_match.group(0)
+        if email.lower().endswith('@smail.th-koeln.de'):
+            local_part = email.split('@')[0]
+            if '.' in local_part:
+                # Alles nach dem ersten Punkt ist der Nachname
+                lastname_part = local_part.split('.', 1)[1]
+                # Teile nach Unterstrich und schreibe jeden Teil groß
+                parts = lastname_part.split('_')
+                return '_'.join(p[0].upper() + p[1:] for p in parts if p)
 
-    if ',' in name_str:
+    # Fallback für Namen ohne (Smail-)Adresse
+    # Entferne E-Mail Adresse in Klammern falls vorhanden
+    clean_name = name_str.split('<')[0].strip()
+
+    if ',' in clean_name:
         # Format: Lastname, Firstname
-        return name_str.split(',')[0].strip()
+        return clean_name.split(',')[0].strip()
     else:
         # Format: Firstname Lastname
-        parts = name_str.split()
+        parts = clean_name.split()
         if parts:
             return parts[-1]
     return "Unknown"
@@ -142,12 +159,15 @@ def process_emails(source_root: Path, classifier_model: Path, config: Dict[str, 
                             lastname = extract_lastname(recipients[0].name or recipients[0].email)
 
                 # Ziel-Studentenordner finden oder bestimmen
-                student_dir = find_student_folder(class_base_path, lastname)
-                if not student_dir:
-                    student_dir = class_base_path / semester / lastname
+                if email_class.startswith(("BA_", "MA_")):
+                    # Für BA/MA Klassen alle Mails gesammelt in Inbox/SentItems speichern
+                    target_dir = class_base_path / semester / folder_name
+                else:
+                    student_dir = find_student_folder(class_base_path, lastname)
+                    if not student_dir:
+                        student_dir = class_base_path / semester / lastname
+                    target_dir = student_dir / folder_name
 
-                # Endgültiger Zielordner
-                target_dir = student_dir / folder_name
                 target_dir.mkdir(parents=True, exist_ok=True)
 
                 target_path = target_dir / msg_file.name
