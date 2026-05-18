@@ -25,6 +25,7 @@ dependencies = [
     "numpy",
     "seaborn",
     "matplotlib",
+    "tabulate",
 ]
 requires-python = ">=3.10"
 

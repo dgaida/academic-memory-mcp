@@ -73,7 +73,7 @@ class EmailClassifier:
 
         return texts, labels
 
-    def _get_features(self, texts: List[str], train: bool = False) -> np.ndarray:
+    def get_features(self, texts: List[str], train: bool = False) -> np.ndarray:
         """Extrahiert Merkmale aus Texten basierend auf dem gewählten Modus."""
         features = []
 
@@ -102,7 +102,7 @@ class EmailClassifier:
         if not texts:
             raise ValueError(f"Keine Trainingsdaten in {root_dir} gefunden.")
 
-        X = self._get_features(texts, train=True)
+        X = self.get_features(texts, train=True)
         y = self.label_encoder.fit_transform(labels)
 
         self.classifier.fit(X, y)
@@ -124,7 +124,7 @@ class EmailClassifier:
         if not text:
             raise ValueError(f"Konnte Text aus {file_path} nicht extrahieren.")
 
-        X = self._get_features([text], train=False)
+        X = self.get_features([text], train=False)
         y_pred = self.classifier.predict(X)[0]
         y_prob = self.classifier.predict_proba(X)[0]
 

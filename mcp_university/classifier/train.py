@@ -6,6 +6,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.model_selection import GridSearchCV
 
 from mcp_university.classifier.engine import EmailClassifier
 
@@ -13,7 +14,7 @@ from mcp_university.classifier.engine import EmailClassifier
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
 
-def evaluate_and_save(classifier: EmailClassifier, texts: list, labels: list, output_dir: Path, prefix: str = "train") -> None:
+def evaluate_and_save(classifier: EmailClassifier, texts: list, labels: list, output_dir: Path, prefix: str = "train", cv_results: dict = None) -> None:
     """Evaluiert das Modell und speichert Metriken und Konfusionsmatrix.
 
     Args:
@@ -22,11 +23,12 @@ def evaluate_and_save(classifier: EmailClassifier, texts: list, labels: list, ou
         labels: Liste der wahren Labels.
         output_dir: Verzeichnis zum Speichern der Ergebnisse.
         prefix: Präfix für die Dateinamen.
+        cv_results: Ergebnisse der Kreuzvalidierung (optional).
     """
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Vorhersagen
-    X = classifier._get_features(texts, train=False)
+    X = classifier.get_features(texts, train=False)
     y_pred_idx = classifier.classifier.predict(X)
     y_pred = classifier.label_encoder.inverse_transform(y_pred_idx)
 
@@ -54,7 +56,19 @@ def evaluate_and_save(classifier: EmailClassifier, texts: list, labels: list, ou
     md_path = output_dir / f"{prefix}_metrics.md"
     with open(md_path, "w", encoding="utf-8") as f:
         f.write(f"# Evaluierungsergebnisse ({prefix})\n\n")
-        f.write(f"**Genauigkeit (Accuracy):** {accuracy:.2%}\n\n")
+
+        if cv_results:
+            f.write("## Kreuzvalidierung (Cross-Validation)\n\n")
+            f.write(f"**Beste Parameter:** `{cv_results['best_params']}`\n\n")
+            f.write(f"**Bester CV-Score (Accuracy):** {cv_results['best_score']:.2%}\n\n")
+            f.write("### Alle Experimente\n\n")
+            cv_df = pd.DataFrame(cv_results['results'])
+            # Nur relevante Spalten anzeigen
+            cols = [col for col in cv_df.columns if col.startswith('param_') or col in ['mean_test_score', 'std_test_score', 'rank_test_score']]
+            f.write(cv_df[cols].sort_values('rank_test_score').to_markdown(index=False))
+            f.write("\n\n")
+
+        f.write(f"**Genauigkeit auf Trainingsdaten (Accuracy):** {accuracy:.2%}\n\n")
         f.write("## Klassifizierungsbericht\n\n")
         f.write("```\n")
         f.write(report)
@@ -87,11 +101,49 @@ def main() -> None:
     classifier = EmailClassifier(mode=args.mode, embedding_model_name=args.embedding_model)
 
     try:
-        # Daten laden für spätere Evaluierung
+        # Daten laden
         texts, labels = classifier.preprocess_data(data_path)
+        if not texts:
+            logger.error(f"Keine Trainingsdaten in {args.data_dir} gefunden.")
+            return
 
-        # Training
-        classifier.train(data_path)
+        # Merkmale extrahieren
+        X = classifier.get_features(texts, train=True)
+        y = classifier.label_encoder.fit_transform(labels)
+
+        # GridSearchCV Setup
+        # Wir nutzen 3 Hyperparameter mit 3, 3 und 1 Werten um auf 9 Experimente zu kommen
+        param_grid = {
+            'n_estimators': [50, 100, 200],
+            'max_depth': [None, 10, 20],
+            'criterion': ['gini']  # 3. Hyperparameter mit 1 Wert
+        }
+
+        logger.info("Starte GridSearchCV mit 5-fold CV und 9 Experimenten...")
+        grid_search = GridSearchCV(
+            estimator=classifier.classifier,
+            param_grid=param_grid,
+            cv=5,
+            scoring='accuracy',
+            n_jobs=-1,
+            verbose=1
+        )
+
+        grid_search.fit(X, y)
+
+        logger.info(f"Beste Parameter: {grid_search.best_params_}")
+        logger.info(f"Bester Score: {grid_search.best_score_:.4f}")
+
+        # Bestes Modell in den Classifier übernehmen
+        classifier.classifier = grid_search.best_estimator_
+        classifier.is_trained = True
+
+        # CV Ergebnisse für den Bericht vorbereiten
+        cv_results = {
+            'best_params': grid_search.best_params_,
+            'best_score': grid_search.best_score_,
+            'results': grid_search.cv_results_
+        }
 
         # Sicherstellen, dass Zielverzeichnis existiert
         model_file = Path(args.model_path)
@@ -101,8 +153,8 @@ def main() -> None:
         logger.info(f"Modell erfolgreich trainiert und unter {args.model_path} gespeichert.")
 
         # Evaluierung auf Trainingsdaten
-        logger.info("Starte Evaluierung auf Trainingsdaten...")
-        evaluate_and_save(classifier, texts, labels, model_file.parent, prefix="train")
+        logger.info("Starte Evaluierung und Berichterstellung...")
+        evaluate_and_save(classifier, texts, labels, model_file.parent, prefix="train", cv_results=cv_results)
 
     except Exception as e:
         logger.error(f"Fehler beim Training: {e}")
