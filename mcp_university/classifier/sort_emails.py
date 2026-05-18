@@ -5,7 +5,7 @@ import re
 import shutil
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import yaml
 
@@ -81,27 +81,6 @@ def extract_lastname(name_str: str) -> str:
             return parts[-1]
     return "Unknown"
 
-def find_student_folder(base_path: Path, lastname: str) -> Optional[Path]:
-    """Sucht nach einem existierenden Studierendenordner in allen Semesterordnern.
-
-    Args:
-        base_path: Basisverzeichnis für die Suche.
-        lastname: Nachname des Studenten.
-
-    Returns:
-        Optional[Path]: Pfad zum Ordner falls gefunden, sonst None.
-    """
-    if not base_path.exists():
-        return None
-
-    # Suche in allen Unterordnern (Semesterordnern)
-    for semester_dir in base_path.iterdir():
-        if semester_dir.is_dir():
-            student_dir = semester_dir / lastname
-            if student_dir.exists() and student_dir.is_dir():
-                return student_dir
-    return None
-
 def process_emails(source_root: Path, classifier_model: Path, config: Dict[str, str]) -> List[Dict[str, Any]]:
     """Verarbeitet E-Mails in Inbox und Sent Items.
 
@@ -158,14 +137,13 @@ def process_emails(source_root: Path, classifier_model: Path, config: Dict[str, 
                         if recipients:
                             lastname = extract_lastname(recipients[0].name or recipients[0].email)
 
-                # Ziel-Studentenordner finden oder bestimmen
+                # Ziel-Studentenordner bestimmen basierend auf dem Semester der E-Mail
                 if email_class.startswith(("BA_", "MA_")):
                     # Für BA/MA Klassen alle Mails gesammelt in Inbox/SentItems speichern
                     target_dir = class_base_path / semester / folder_name
                 else:
-                    student_dir = find_student_folder(class_base_path, lastname)
-                    if not student_dir:
-                        student_dir = class_base_path / semester / lastname
+                    # Immer in den Ordner des passenden Semesters sortieren
+                    student_dir = class_base_path / semester / lastname
                     target_dir = student_dir / folder_name
 
                 target_dir.mkdir(parents=True, exist_ok=True)
