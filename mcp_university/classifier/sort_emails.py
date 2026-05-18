@@ -103,7 +103,7 @@ def process_emails(source_root: Path, classifier_model: Path, config: Dict[str, 
     moved_emails = []
 
     # Die beiden Ordner, die verarbeitet werden sollen
-    folders_to_process = ["Inbox", "Sent Items"]
+    folders_to_process = ["Inbox", "SentItems"]
 
     for folder_name in folders_to_process:
         folder_path = source_root / folder_name
@@ -201,7 +201,7 @@ def write_report(source_root: Path, moved_emails: List[Dict[str, Any]]) -> None:
 def main() -> None:
     """Haupteinstiegspunkt für das Skript."""
     parser = argparse.ArgumentParser(description="Sortiert E-Mails basierend auf Klassifizierung.")
-    parser.add_argument("source_dir", type=str, help="Quellordner mit Inbox und Sent Items.")
+    parser.add_argument("source_dir", type=str, help="Quellordner mit Inbox und SentItems.")
     parser.add_argument("--config", type=str, required=True, help="Pfad zur YAML-Konfiguration (Klassen-Pfade).")
     parser.add_argument("--model", type=str, default="data/email_classifier.pkl", help="Pfad zum trainierten Modell.")
 

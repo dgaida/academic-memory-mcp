@@ -452,62 +452,66 @@ Private Sub ProcessFolder(ByVal folder As Outlook.MAPIFolder, _
         Next j
 
         ' Alle Mails exportieren
-        For j = 1 To mailCollection.count
-            Set currentMail = mailCollection(j)
+        ' Wenn nur eine Mail fuer diesen Absender/Empfaenger vorliegt,
+        ' wird sie in Outlook belassen und nicht exportiert.
+        If mailCollection.count > 1 Then
+            For j = 1 To mailCollection.count
+                Set currentMail = mailCollection(j)
 
-            ' Zielordner per Keyword-Suche bestimmen
-            Dim targetFolder As String
-            targetFolder = FindFolderByKeyword(currentMail, foldersDict)
+                ' Zielordner per Keyword-Suche bestimmen
+                Dim targetFolder As String
+                targetFolder = FindFolderByKeyword(currentMail, foldersDict)
 
-            If Len(targetFolder) = 0 Then
-                ' Kein Keyword-Treffer -> erstes verfuegbares Verzeichnis nutzen
-                Dim firstKey As Variant
-                firstKey = foldersDict.Keys
-                If UBound(firstKey) >= 0 Then
-                    targetFolder = foldersDict(firstKey(0))
+                If Len(targetFolder) = 0 Then
+                    ' Kein Keyword-Treffer -> erstes verfuegbares Verzeichnis nutzen
+                    Dim firstKey As Variant
+                    firstKey = foldersDict.Keys
+                    If UBound(firstKey) >= 0 Then
+                        targetFolder = foldersDict(firstKey(0))
+                    End If
                 End If
-            End If
 
-            If Len(targetFolder) = 0 Then
-                MsgBox "Kein Zielordner fuer Mail von " & key & " gefunden." & vbCrLf & _
-                       "Betreff: " & currentMail.Subject, vbExclamation, "EmailSorter"
-                GoTo NextMail
-            End If
-
-            ' Pruefen ob der Basis-Zielordner existiert.
-            ' Falls nicht, wird die Mail uebersprungen und keine Ordnerhierarchie erstellt.
-            ' Nur der Inbox- oder SentItems-Ordner innerhalb eines existierenden Pfads
-            ' darf durch EnsureDirectory angelegt werden.
-            If Not fso.FolderExists(targetFolder) Then
-                GoTo NextMail
-            End If
-
-            Dim fullTargetPath As String
-            fullTargetPath = targetFolder & "\" & subFolder
-
-            If Not EnsureDirectory(fullTargetPath) Then
-                MsgBox "Ordner konnte nicht erstellt werden:" & vbCrLf & fullTargetPath, _
-                       vbExclamation, "EmailSorter"
-                GoTo NextMail
-            End If
-
-            Dim filePath As String
-            filePath = BuildMsgFilePath(fullTargetPath, currentMail)
-
-            If SaveMailToFile(currentMail, fullTargetPath, filePath) Then
-                savedCount = savedCount + 1
-                If currentMail.EntryID <> newestMail.EntryID Then
-                    currentMail.Delete
-                    deletedCount = deletedCount + 1
+                If Len(targetFolder) = 0 Then
+                    MsgBox "Kein Zielordner fuer Mail von " & key & " gefunden." & vbCrLf & _
+                           "Betreff: " & currentMail.Subject, vbExclamation, "EmailSorter"
+                    GoTo NextMail
                 End If
-            Else
-                MsgBox "Export fehlgeschlagen!" & vbCrLf & _
-                       "Betreff: " & currentMail.Subject & vbCrLf & _
-                       "Zielpfad: " & filePath, vbExclamation, "EmailSorter"
-            End If
+
+                ' Pruefen ob der Basis-Zielordner existiert.
+                ' Falls nicht, wird die Mail uebersprungen und keine Ordnerhierarchie erstellt.
+                ' Nur der Inbox- oder SentItems-Ordner innerhalb eines existierenden Pfads
+                ' darf durch EnsureDirectory angelegt werden.
+                If Not fso.FolderExists(targetFolder) Then
+                    GoTo NextMail
+                End If
+
+                Dim fullTargetPath As String
+                fullTargetPath = targetFolder & "\" & subFolder
+
+                If Not EnsureDirectory(fullTargetPath) Then
+                    MsgBox "Ordner konnte nicht erstellt werden:" & vbCrLf & fullTargetPath, _
+                           vbExclamation, "EmailSorter"
+                    GoTo NextMail
+                End If
+
+                Dim filePath As String
+                filePath = BuildMsgFilePath(fullTargetPath, currentMail)
+
+                If SaveMailToFile(currentMail, fullTargetPath, filePath) Then
+                    savedCount = savedCount + 1
+                    If currentMail.EntryID <> newestMail.EntryID Then
+                        currentMail.Delete
+                        deletedCount = deletedCount + 1
+                    End If
+                Else
+                    MsgBox "Export fehlgeschlagen!" & vbCrLf & _
+                           "Betreff: " & currentMail.Subject & vbCrLf & _
+                           "Zielpfad: " & filePath, vbExclamation, "EmailSorter"
+                End If
 
 NextMail:
-        Next j
+            Next j
+        End If ' mailCollection.count > 1
     Next key
 
     Set senderMails = Nothing
