@@ -78,4 +78,4 @@ Delete all temporary files before submission:
 - Keep VBA documentation in Google-style (`''' Args:`, `''' Returns:`).  
 - Verify email address and folder existence before processing to avoid runtime errors.  
 - Use `latin-1` encoding when reading/writing VBA files via Python scripts.  
-- **Performance:** Use `DoEvents` and `Sleep` in long-running loops (e.g., email processing) to ensure Outlook remains responsive and does not freeze.
+- **Performance:** Use `DoEvents` and `Sleep` in long-running loops (e.g., email processing) to ensure Outlook remains responsive and does not freeze.  
