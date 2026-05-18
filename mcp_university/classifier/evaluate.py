@@ -46,7 +46,7 @@ def evaluate(model_path: Path, test_dir: Path) -> None:
 
     # Vorhersagen
     y_pred_idx = classifier.classifier.predict(X)
-    y_pred = classifier.label_encoder.inverse_transform(y_pred_idx)
+    y_pred = classifier.label_encoder.inverse_transform(y_pred_idx.astype(int))
 
     # Metriken berechnen
     accuracy = accuracy_score(y_true, y_pred)

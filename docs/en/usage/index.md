@@ -32,8 +32,10 @@ The system includes a subpackage for the automated classification of student ema
 To use the classifier, it must first be trained with example data. It expects a folder structure where each subfolder represents a class and contains the emails (.msg).
 
 ```bash
-python3 mcp_university/classifier/train.py /path/to/training_data --mode combined
+python3 mcp_university/classifier/train.py /path/to/training_data --mode combined --method xgboost
 ```
+
+You can choose between `randomforest` and `xgboost` (default).
 
 ### Classifying an Email
 After training, a single email file can be classified:

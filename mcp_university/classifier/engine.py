@@ -17,22 +17,32 @@ class EmailClassifier:
     def __init__(
         self,
         mode: str = "combined",
+        method: str = "xgboost",
         embedding_model_name: str = "paraphrase-multilingual-MiniLM-L12-v2"
     ) -> None:
         """Initialisiert den Klassifikator.
 
         Args:
             mode: Modus der Merkmalsextraktion ('tfidf', 'embedding', 'combined').
+            method: Klassifizierungsmethode ('randomforest', 'xgboost').
             embedding_model_name: Name des Sentence-Transformer Modells.
         """
         self.mode = mode
+        self.method = method
         self.embedding_model_name = embedding_model_name
         self.parser = MailParser()
 
         self.tfidf_vectorizer = TfidfVectorizer(max_features=5000)
         self._embedding_model: Optional[SentenceTransformer] = None
-        self.classifier = RandomForestClassifier(n_estimators=100, random_state=42)
         self.label_encoder = LabelEncoder()
+
+        if method == "randomforest":
+            self.classifier = RandomForestClassifier(n_estimators=100, random_state=42)
+        elif method == "xgboost":
+            from xgboost import XGBClassifier
+            self.classifier = XGBClassifier(n_estimators=100, random_state=42, eval_metric='logloss')
+        else:
+            raise ValueError(f"Ungültige Klassifizierungsmethode: {method}")
 
         self.is_trained = False
 
@@ -128,7 +138,7 @@ class EmailClassifier:
         y_pred = self.classifier.predict(X)[0]
         y_prob = self.classifier.predict_proba(X)[0]
 
-        label = self.label_encoder.inverse_transform([y_pred])[0]
+        label = self.label_encoder.inverse_transform([int(y_pred)])[0]
 
         # Mapping von Label zu Wahrscheinlichkeit
         probs = {
@@ -150,6 +160,7 @@ class EmailClassifier:
         """
         data = {
             "mode": self.mode,
+            "method": self.method,
             "embedding_model_name": self.embedding_model_name,
             "tfidf_vectorizer": self.tfidf_vectorizer,
             "classifier": self.classifier,
@@ -169,6 +180,7 @@ class EmailClassifier:
             data = pickle.load(f)
 
         self.mode = data["mode"]
+        self.method = data.get("method", "randomforest")  # Fallback für alte Modelle
         self.embedding_model_name = data["embedding_model_name"]
         self.tfidf_vectorizer = data["tfidf_vectorizer"]
         self.classifier = data["classifier"]

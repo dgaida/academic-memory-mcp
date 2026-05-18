@@ -32,8 +32,10 @@ Das System enthält ein Subpackage zur automatisierten Klassifizierung von stude
 Um den Klassifikator zu nutzen, muss er zuerst mit Beispieldaten trainiert werden. Erwarten wird eine Ordnerstruktur, in der jeder Unterordner eine Klasse repräsentiert und die E-Mails (.msg) enthält.
 
 ```bash
-python3 mcp_university/classifier/train.py /pfad/zu/trainingsdaten --mode combined
+python3 mcp_university/classifier/train.py /pfad/zu/trainingsdaten --mode combined --method xgboost
 ```
+
+Dabei kann zwischen `randomforest` und `xgboost` (Standard) gewählt werden.
 
 ### E-Mail klassifizieren
 Nach dem Training kann eine einzelne E-Mail-Datei klassifiziert werden:
@@ -92,7 +94,7 @@ mcp-uni serve-mcp
 
 ### 1. Vorbereitung einer Sprechstunde
 Bitten Sie Ihren Agenten: "Gib mir den Kontext zu Student Max Mustermann und zeige mir seine letzten Abgaben."
-Der Agent nutzt `get_student_context` und `search_documents`, um Ihnen eine kompakte Übersicht zu liefern.
+Der Agent nutzt `get_student_context` and `search_documents`, um Ihnen eine kompakte Übersicht zu liefern.
 
 ### 2. Beantworten von E-Mails
 Kopieren Sie die E-Mail eines Studenten in den Chat und nutzen Sie das Tool `generate_mail_reply`. Das System berücksichtigt dabei automatisch den Status der Abschlussarbeit oder offene Deadlines.
