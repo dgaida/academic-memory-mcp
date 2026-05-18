@@ -29,7 +29,7 @@ def test_process_emails(mock_open_msg, mock_mail_parser, mock_classifier_class, 
     # Setup source directory
     source_root = tmp_path / "source"
     inbox = source_root / "Inbox"
-    sent = source_root / "Sent Items"
+    sent = source_root / "SentItems"
     inbox.mkdir(parents=True)
     sent.mkdir(parents=True)
 
@@ -81,9 +81,9 @@ def test_process_emails(mock_open_msg, mock_mail_parser, mock_classifier_class, 
     assert expected_path1.exists()
     assert not msg1.exists()
 
-    # Verify second file (Sent Items)
-    # Target: target/2025_26_WS/Musterfrau/Sent Items/mail2.msg
-    expected_path2 = target_root / "2025_26_WS" / "Musterfrau" / "Sent Items" / "mail2.msg"
+    # Verify second file (SentItems)
+    # Target: target/2025_26_WS/Musterfrau/SentItems/mail2.msg
+    expected_path2 = target_root / "2025_26_WS" / "Musterfrau" / "SentItems" / "mail2.msg"
     assert expected_path2.exists()
     assert not msg2.exists()
 
@@ -101,7 +101,7 @@ def test_write_report(tmp_path):
             "class": "BachelorThesis",
             "semester": "2025_26_WS",
             "lastname": "Musterfrau",
-            "folder": "Sent Items",
+            "folder": "SentItems",
             "path": "/path/to/mail2.msg"
         }
     ]
