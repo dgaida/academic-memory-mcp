@@ -13,7 +13,6 @@ MCP University is an offline-first system for managing academic data (students, 
    - Suppresses noisy `extract-msg` warnings.
 3. **Classifier (`mcp_university/classifier/`)**:
    - Classifies emails using XGBoost or RandomForest.
-   - Features: TF-IDF and/or Sentence Embeddings.
    - `sort_emails.py` sorts emails into semester and student folders.
    - **Special Logic:** Classes starting with `BA_` or `MA_` are stored directly in `Semester/Inbox` (no student subfolder).
    - **Name Extraction:** Extracts lastnames from `smail.th-koeln.de` (format: `v.n@smail.th-koeln.de` -> `N`).
@@ -27,6 +26,12 @@ MCP University is an offline-first system for managing academic data (students, 
    - SQLite database for file metadata, student info, and folder summaries.
 7. **Outlook Integration (`outlook_macro/`)**:
    - VBA macros for sorting and archiving emails based on `students.yaml`.
+
+## General Guidelines
+- Follow the project structure and naming conventions.
+- Maintain the offline-first approach (local LLMs, local databases).
+- Ensure all new features are covered by tests.
+- Respect the configurations in `config/folders.yaml` and `config/models.yaml`.
 
 ## Mandatory Rules & Guidelines
 
@@ -42,7 +47,8 @@ MCP University is an offline-first system for managing academic data (students, 
 - **Coverage:** Minimum 95% docstring coverage (enforced by `interrogate`).
 - **Tests:** Use `pytest`. Avoid global monkey-patching; use scoped patches or fixtures.
 
-### Documentation (MkDocs)
+### Documentation Skill
+- **MANDATORY:** Always use the [MkDocs Documentation Ecosystem Skill](https://github.com/dgaida/auto-version-action/blob/main/skills/SKILL_docs.md) when updating documentation, `README.md`, or MkDocs configurations.
 - **Structure:** Bilingual setup using `mkdocs-static-i18n` with `docs_structure: folder`.
 - **Paths:** Always use relative paths in Markdown (e.g., `../assets/...`).
 - **Sync:** Changes to subpackages must be reflected in `api/`, `usage/`, and `architecture/` in BOTH `de` and `en`.
@@ -54,14 +60,21 @@ Delete all temporary files before submission:
 - Build artifacts (`dist/`, `build/`, `*.egg-info`).
 
 ## Development Workflow
-1. **Environment:** `pip install -e .` and ensure `qmd` is installed if possible.
-2. **Database Sync:** Use `mcp-uni db sync-students` after updating `students.yaml`.
-3. **Classification:** Train with `mcp_university/classifier/train.py`, evaluate with `evaluate.py`.
-4. **Indexing:** Use `mcp-uni index` to refresh the search index and summaries.
-5. **Search:** Use `mcp-uni search` to test the RAG workflow.
+1. **Environment:** `pip install -e .`
+2. **CLI Usage:** Use `mcp-uni` CLI for testing indexing and search.
+3. **Database Sync:** Use `mcp-uni db sync-students` after updating `students.yaml`.
+4. **Parsers:** When adding new parsers, update `mcp_university/parser/factory.py`.
+5. **MCP Server:** Keep the MCP server tools in `mcp_university/mcp_server/server.py` updated with new capabilities.
+6. **Classification:** Train with `mcp_university/classifier/train.py`, evaluate with `evaluate.py`.
+
+## CI/CD
+- **CodeQL:** Requires "Code scanning" to be enabled in the repository settings to function correctly.
+
+## Prerequisites
+- **qmd CLI:** Required for hybrid search. Install globally via: `npm install -g @tobilu/qmd`
+- **Docling:** Required for PDF parsing. Install with: `pip install docling` and initialize with `cp-config` if prompted.
 
 ## Outlook Macro Maintenance
 - Keep VBA documentation in Google-style (`''' Args:`, `''' Returns:`).
 - Verify email address and folder existence before processing to avoid runtime errors.
 - Use `latin-1` encoding when reading/writing VBA files via Python scripts.
-
