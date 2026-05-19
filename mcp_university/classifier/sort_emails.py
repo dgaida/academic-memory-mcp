@@ -5,7 +5,7 @@ import re
 import shutil
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import yaml
 
@@ -15,6 +15,7 @@ from mcp_university.parser.mail_parser import MailParser
 # Logging konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
+
 
 def get_semester(date: datetime) -> str:
     """Bestimmt den Semester-Ordnernamen basierend auf dem Datum.
@@ -39,6 +40,7 @@ def get_semester(date: datetime) -> str:
         else:
             return f"{year-1}_{str(year)[2:]}_WS"
 
+
 def extract_lastname(name_str: str) -> str:
     """Extrahiert den Nachnamen aus einem Namensstring oder einer E-Mail-Adresse.
 
@@ -55,25 +57,25 @@ def extract_lastname(name_str: str) -> str:
         return "Unknown"
 
     # Suche nach E-Mail-Adresse (in < > oder direkt)
-    email_match = re.search(r'[\w\.-]+@[\w\.-]+', name_str)
+    email_match = re.search(r"[\w\.-]+@[\w\.-]+", name_str)
     if email_match:
         email = email_match.group(0)
-        if email.lower().endswith('@smail.th-koeln.de'):
-            local_part = email.split('@')[0]
-            if '.' in local_part:
+        if email.lower().endswith(("@smail.th-koeln.de", "@smail.fh-koeln.de")):
+            local_part = email.split("@")[0]
+            if "." in local_part:
                 # Alles nach dem ersten Punkt ist der Nachname
-                lastname_part = local_part.split('.', 1)[1]
+                lastname_part = local_part.split(".", 1)[1]
                 # Teile nach Unterstrich und schreibe jeden Teil groß
-                parts = lastname_part.split('_')
-                return '_'.join(p[0].upper() + p[1:] for p in parts if p)
+                parts = lastname_part.split("_")
+                return "_".join(p[0].upper() + p[1:] for p in parts if p)
 
     # Fallback für Namen ohne (Smail-)Adresse
     # Entferne E-Mail Adresse in Klammern falls vorhanden
-    clean_name = name_str.split('<')[0].strip()
+    clean_name = name_str.split("<")[0].strip()
 
-    if ',' in clean_name:
+    if "," in clean_name:
         # Format: Lastname, Firstname
-        return clean_name.split(',')[0].strip()
+        return clean_name.split(",")[0].strip()
     else:
         # Format: Firstname Lastname
         parts = clean_name.split()
@@ -81,29 +83,11 @@ def extract_lastname(name_str: str) -> str:
             return parts[-1]
     return "Unknown"
 
-def find_student_folder(base_path: Path, lastname: str) -> Optional[Path]:
-    """Sucht nach einem existierenden Studierendenordner in allen Semesterordnern.
 
-    Args:
-        base_path: Basisverzeichnis für die Suche.
-        lastname: Nachname des Studenten.
-
-    Returns:
-        Optional[Path]: Pfad zum Ordner falls gefunden, sonst None.
-    """
-    if not base_path.exists():
-        return None
-
-    # Suche in allen Unterordnern (Semesterordnern)
-    for semester_dir in base_path.iterdir():
-        if semester_dir.is_dir():
-            student_dir = semester_dir / lastname
-            if student_dir.exists() and student_dir.is_dir():
-                return student_dir
-    return None
-
-def process_emails(source_root: Path, classifier_model: Path, config: Dict[str, str]) -> List[Dict[str, Any]]:
-    """Verarbeitet E-Mails in Inbox und Sent Items.
+def process_emails(
+    source_root: Path, classifier_model: Path, config: Dict[str, str]
+) -> List[Dict[str, Any]]:
+    """Verarbeitet E-Mails und sortiert sie basierend auf Absender/Empfänger.
 
     Args:
         source_root: Quellverzeichnis mit den E-Mails.
@@ -119,7 +103,7 @@ def process_emails(source_root: Path, classifier_model: Path, config: Dict[str, 
 
     moved_emails = []
 
-    # Die beiden Ordner, die verarbeitet werden sollen
+    # Die Ordner, die verarbeitet werden sollen
     folders_to_process = ["Inbox", "SentItems"]
 
     for folder_name in folders_to_process:
@@ -137,7 +121,9 @@ def process_emails(source_root: Path, classifier_model: Path, config: Dict[str, 
                 email_class = prediction["prediction"]
 
                 if email_class not in config:
-                    logger.warning(f"Keine Pfad-Konfiguration für Klasse '{email_class}' gefunden. Überspringe {msg_file.name}")
+                    logger.warning(
+                        f"Keine Pfad-Konfiguration für Klasse '{email_class}' gefunden. Überspringe {msg_file.name}"
+                    )
                     continue
 
                 class_base_path = Path(config[email_class])
@@ -146,48 +132,69 @@ def process_emails(source_root: Path, classifier_model: Path, config: Dict[str, 
                 date = parser.get_email_date(msg_file)
                 semester = get_semester(date)
 
-                # Name extrahieren
+                # Sender/Receiver und Ziel-Ordner bestimmen
                 lastname = "Unknown"
+                target_folder = "Inbox"  # Default
+
                 import extract_msg
+
                 with extract_msg.openMsg(str(msg_file)) as msg:
-                    if folder_name == "Inbox":
-                        lastname = extract_lastname(msg.sender)
-                    else:
-                        # Bei Sent Items den ersten Empfänger nehmen
+                    sender = msg.sender.lower() if msg.sender else ""
+                    if "daniel.gaida@th-koeln.de" in sender:
+                        target_folder = "SentItems"
+                        # Bei Sent Items den Nachnamen des ersten Empfängers nehmen
                         recipients = msg.recipients
                         if recipients:
-                            lastname = extract_lastname(recipients[0].name or recipients[0].email)
+                            lastname = extract_lastname(
+                                recipients[0].name or recipients[0].email
+                            )
+                    elif (
+                        "@smail.th-koeln.de" in sender
+                        or "@smail.fh-koeln.de" in sender
+                    ):
+                        target_folder = "Inbox"
+                        lastname = extract_lastname(msg.sender)
+                    else:
+                        # Fallback falls weder noch (behalte ursprünglichen Ordnernamen oder Standard)
+                        target_folder = folder_name
+                        if target_folder == "Inbox":
+                            lastname = extract_lastname(msg.sender)
+                        else:
+                            recipients = msg.recipients
+                            if recipients:
+                                lastname = extract_lastname(
+                                    recipients[0].name or recipients[0].email
+                                )
 
-                # Ziel-Studentenordner finden oder bestimmen
+                # Ziel-Pfad bestimmen
                 if email_class.startswith(("BA_", "MA_")):
                     # Für BA/MA Klassen alle Mails gesammelt in Inbox/SentItems speichern
-                    target_dir = class_base_path / semester / folder_name
+                    target_dir = class_base_path / semester / target_folder
                 else:
-                    student_dir = find_student_folder(class_base_path, lastname)
-                    if not student_dir:
-                        student_dir = class_base_path / semester / lastname
-                    target_dir = student_dir / folder_name
+                    target_dir = class_base_path / semester / lastname / target_folder
 
                 target_dir.mkdir(parents=True, exist_ok=True)
-
                 target_path = target_dir / msg_file.name
 
                 # Datei verschieben
                 shutil.move(str(msg_file), str(target_path))
                 logger.info(f"Verschoben: {msg_file.name} -> {target_path}")
 
-                moved_emails.append({
-                    "class": email_class,
-                    "semester": semester,
-                    "lastname": lastname,
-                    "folder": folder_name,
-                    "path": str(target_path)
-                })
+                moved_emails.append(
+                    {
+                        "class": email_class,
+                        "semester": semester,
+                        "lastname": lastname,
+                        "folder": target_folder,
+                        "path": str(target_path),
+                    }
+                )
 
             except Exception as e:
                 logger.error(f"Fehler beim Verarbeiten von {msg_file}: {e}")
 
     return moved_emails
+
 
 def write_report(source_root: Path, moved_emails: List[Dict[str, Any]]) -> None:
     """Erstellt den Markdown-Report.
@@ -201,7 +208,9 @@ def write_report(source_root: Path, moved_emails: List[Dict[str, Any]]) -> None:
         return
 
     # Sortierung: Klasse, Semester, Nachname, Folder
-    moved_emails.sort(key=lambda x: (x["class"], x["semester"], x["lastname"], x["folder"]))
+    moved_emails.sort(
+        key=lambda x: (x["class"], x["semester"], x["lastname"], x["folder"])
+    )
 
     report_path = source_root / "sorted_emails.md"
 
@@ -214,16 +223,33 @@ def write_report(source_root: Path, moved_emails: List[Dict[str, Any]]) -> None:
                 current_class = email["class"]
                 f.write(f"\n## {current_class}\n")
 
-            f.write(f"- **{email['semester']}** | {email['lastname']} | {email['folder']}: `{email['path']}`\n")
+            f.write(
+                f"- **{email['semester']}** | {email['lastname']} | {email['folder']}: `{email['path']}`\n"
+            )
 
     logger.info(f"Report erstellt: {report_path}")
 
+
 def main() -> None:
     """Haupteinstiegspunkt für das Skript."""
-    parser = argparse.ArgumentParser(description="Sortiert E-Mails basierend auf Klassifizierung.")
-    parser.add_argument("source_dir", type=str, help="Quellordner mit Inbox und SentItems.")
-    parser.add_argument("--config", type=str, required=True, help="Pfad zur YAML-Konfiguration (Klassen-Pfade).")
-    parser.add_argument("--model", type=str, default="data/email_classifier.pkl", help="Pfad zum trainierten Modell.")
+    parser = argparse.ArgumentParser(
+        description="Sortiert E-Mails basierend auf Klassifizierung."
+    )
+    parser.add_argument(
+        "source_dir", type=str, help="Quellordner mit Inbox und SentItems."
+    )
+    parser.add_argument(
+        "--config",
+        type=str,
+        required=True,
+        help="Pfad zur YAML-Konfiguration (Klassen-Pfade).",
+    )
+    parser.add_argument(
+        "--model",
+        type=str,
+        default="data/email_classifier.pkl",
+        help="Pfad zum trainierten Modell.",
+    )
 
     args = parser.parse_args()
 
@@ -246,6 +272,7 @@ def main() -> None:
 
     moved_emails = process_emails(source_root, Path(args.model), config)
     write_report(source_root, moved_emails)
+
 
 if __name__ == "__main__":
     main()
