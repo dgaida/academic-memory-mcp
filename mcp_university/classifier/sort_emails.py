@@ -75,12 +75,16 @@ def extract_lastname(name_str: str) -> str:
 
     if "," in clean_name:
         # Format: Lastname, Firstname
-        return clean_name.split(",")[0].strip()
+        res = clean_name.split(",")[0].strip()
+        return res[:-1] if res.endswith("'") else res
     else:
         # Format: Firstname Lastname
         parts = clean_name.split()
         if parts:
-            return parts[-1]
+            res = parts[-1]
+            if res.endswith("'"):
+                res = res[:-1]
+            return res
     return "Unknown"
 
 

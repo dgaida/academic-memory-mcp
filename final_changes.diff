@@ -1,0 +1,4585 @@
+diff --git a/README.md b/README.md
+index cdf3356..c828840 100644
+--- a/README.md
++++ b/README.md
+@@ -17,6 +17,8 @@ A locally-running, agentic knowledge and memory system for university and resear
+ - Hybrid search (BM25 + Vector)
+ - MCP Server integration
+ - Fully offline using local LLMs (Ollama)
++- Automated E-Mail classification (Bachelor thesis, projects, etc.)
++- Database management for students, deadlines, and metadata
+
+ ## Prerequisites
+ - **qmd CLI:** Required for hybrid search. Install globally via: `npm install -g @tobilu/qmd`
+diff --git a/changes.diff b/changes.diff
+new file mode 100644
+index 0000000..c65d8b5
+--- /dev/null
++++ b/changes.diff
+@@ -0,0 +1,2290 @@
++diff --git a/README.md b/README.md
++index cdf3356..c828840 100644
++--- a/README.md
+++++ b/README.md
++@@ -17,6 +17,8 @@ A locally-running, agentic knowledge and memory system for university and resear
++ - Hybrid search (BM25 + Vector)
++ - MCP Server integration
++ - Fully offline using local LLMs (Ollama)
+++- Automated E-Mail classification (Bachelor thesis, projects, etc.)
+++- Database management for students, deadlines, and metadata
++
++ ## Prerequisites
++ - **qmd CLI:** Required for hybrid search. Install globally via: `npm install -g @tobilu/qmd`
++diff --git a/changes_summary.txt b/changes_summary.txt
++new file mode 100644
++index 0000000..76757a9
++--- /dev/null
+++++ b/changes_summary.txt
++@@ -0,0 +1,959 @@
+++"""Skript zum Sortieren von E-Mails basierend auf Klassifizierung."""
+++import argparse
+++import logging
+++import re
+++import shutil
+++from datetime import datetime
+++from pathlib import Path
+++from typing import Any, Dict, List, Optional
+++
+++import yaml
+++
+++from mcp_university.classifier.engine import EmailClassifier
+++from mcp_university.parser.mail_parser import MailParser
+++
+++# Logging konfigurieren
+++logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+++logger = logging.getLogger(__name__)
+++
+++
+++def get_semester(date: datetime) -> str:
+++    """Bestimmt den Semester-Ordnernamen basierend auf dem Datum.
+++
+++    SoSe: 01.04. - 30.09. -> YYYY_SoSe
+++    WS: 01.10. - 31.03. -> YYYY_YY+1_WS
+++
+++    Args:
+++        date: Das Datum der E-Mail.
+++
+++    Returns:
+++        str: Der Name des Semester-Ordners.
+++    """
+++    year = date.year
+++    month = date.month
+++
+++    if 4 <= month <= 9:
+++        return f"{year}_SoSe"
+++    else:
+++        if month >= 10:
+++            return f"{year}_{str(year + 1)[2:]}_WS"
+++        else:
+++            return f"{year-1}_{str(year)[2:]}_WS"
+++
+++
+++def extract_lastname(name_str: str) -> str:
+++    """Extrahiert den Nachnamen aus einem Namensstring oder einer E-Mail-Adresse.
+++
+++    Unterstützt das Format vorname.nachname@smail.th-koeln.de (auch mit mehreren Teilen)
+++    sowie 'Max Mustermann' oder 'Mustermann, Max'.
+++
+++    Args:
+++        name_str: Der zu parsende Name oder die E-Mail-Adresse.
+++
+++    Returns:
+++        str: Der extrahierte Nachname.
+++    """
+++    if not name_str or name_str == "(No Sender)" or name_str == "(No Receiver)":
+++        return "Unknown"
+++
+++    # Suche nach E-Mail-Adresse (in < > oder direkt)
+++    email_match = re.search(r"[\w\.-]+@[\w\.-]+", name_str)
+++    if email_match:
+++        email = email_match.group(0)
+++        if email.lower().endswith(("@smail.th-koeln.de", "@smail.fh-koeln.de")):
+++            local_part = email.split("@")[0]
+++            if "." in local_part:
+++                # Alles nach dem ersten Punkt ist der Nachname
+++                lastname_part = local_part.split(".", 1)[1]
+++                # Teile nach Unterstrich und schreibe jeden Teil groß
+++                parts = lastname_part.split("_")
+++                return "_".join(p[0].upper() + p[1:] for p in parts if p)
+++
+++    # Fallback für Namen ohne (Smail-)Adresse
+++    # Entferne E-Mail Adresse in Klammern falls vorhanden
+++    clean_name = name_str.split("<")[0].strip()
+++
+++    if "," in clean_name:
+++        # Format: Lastname, Firstname
+++        res = clean_name.split(",")[0].strip()
+++        return res[:-1] if res.endswith("'") else res
+++    else:
+++        # Format: Firstname Lastname
+++        parts = clean_name.split()
+++        if parts:
+++            res = parts[-1]
+++            if res.endswith("'"):
+++                res = res[:-1]
+++            return res
+++    return "Unknown"
+++
+++
+++def find_student_folder(base_path: Path, lastname: str) -> Optional[Path]:
+++    """Sucht nach einem existierenden Studierendenordner in allen Semesterordnern.
+++
+++    Args:
+++        base_path: Basisverzeichnis für die Suche.
+++        lastname: Nachname des Studenten.
+++
+++    Returns:
+++        Optional[Path]: Pfad zum Ordner falls gefunden, sonst None.
+++    """
+++    if not base_path.exists():
+++        return None
+++
+++    # Suche in allen Unterordnern (Semesterordnern)
+++    for semester_dir in base_path.iterdir():
+++        if semester_dir.is_dir():
+++            student_dir = semester_dir / lastname
+++            if student_dir.exists() and student_dir.is_dir():
+++                return student_dir
+++    return None
+++
+++
+++def process_emails(
+++    source_root: Path, classifier_model: Path, config: Dict[str, str]
+++) -> List[Dict[str, Any]]:
+++    """Verarbeitet E-Mails und sortiert sie basierend auf Absender/Empfänger.
+++
+++    Args:
+++        source_root: Quellverzeichnis mit den E-Mails.
+++        classifier_model: Pfad zum trainierten Modell.
+++        config: Konfiguration der Zielpfade.
+++
+++    Returns:
+++        List[Dict[str, Any]]: Liste der verschobenen E-Mails.
+++    """
+++    classifier = EmailClassifier()
+++    classifier.load(classifier_model)
+++    parser = MailParser()
+++
+++    moved_emails = []
+++
+++    # Die Ordner, die verarbeitet werden sollen
+++    folders_to_process = ["Inbox", "SentItems"]
+++
+++    for folder_name in folders_to_process:
+++        folder_path = source_root / folder_name
+++        if not folder_path.exists():
+++            logger.warning(f"Ordner {folder_path} existiert nicht. Überspringe.")
+++            continue
+++
+++        logger.info(f"Verarbeite Ordner: {folder_name}")
+++
+++        for msg_file in folder_path.rglob("*.msg"):
+++            try:
+++                # Klassifizierung
+++                prediction = classifier.predict(msg_file)
+++                email_class = prediction["prediction"]
+++
+++                if email_class not in config:
+++                    logger.warning(
+++                        f"Keine Pfad-Konfiguration für Klasse '{email_class}' gefunden. Überspringe {msg_file.name}"
+++                    )
+++                    continue
+++
+++                class_base_path = Path(config[email_class])
+++
+++                # Datum und Semester
+++                date = parser.get_email_date(msg_file)
+++                semester = get_semester(date)
+++
+++                # Sender/Receiver und Ziel-Ordner bestimmen
+++                lastname = "Unknown"
+++                target_folder = "Inbox"  # Default
+++
+++                import extract_msg
+++
+++                with extract_msg.openMsg(str(msg_file)) as msg:
+++                    sender = msg.sender.lower() if msg.sender else ""
+++                    if "daniel.gaida@th-koeln.de" in sender:
+++                        target_folder = "SentItems"
+++                        # Bei Sent Items den Nachnamen des ersten Empfängers nehmen
+++                        recipients = msg.recipients
+++                        if recipients:
+++                            lastname = extract_lastname(
+++                                recipients[0].name or recipients[0].email
+++                            )
+++                    elif (
+++                        "@smail.th-koeln.de" in sender
+++                        or "@smail.fh-koeln.de" in sender
+++                    ):
+++                        target_folder = "Inbox"
+++                        lastname = extract_lastname(msg.sender)
+++                    else:
+++                        # Fallback falls weder noch (behalte ursprünglichen Ordnernamen oder Standard)
+++                        target_folder = folder_name
+++                        if target_folder == "Inbox":
+++                            lastname = extract_lastname(msg.sender)
+++                        else:
+++                            recipients = msg.recipients
+++                            if recipients:
+++                                lastname = extract_lastname(
+++                                    recipients[0].name or recipients[0].email
+++                                )
+++
+++                # Ziel-Pfad bestimmen
+++                if email_class.startswith(("BA_", "MA_")):
+++                    # Für BA/MA Klassen alle Mails gesammelt in Inbox/SentItems speichern
+++                    target_dir = class_base_path / semester / target_folder
+++                else:
+++                    student_dir = find_student_folder(class_base_path, lastname)
+++                    if not student_dir:
+++                        student_dir = class_base_path / semester / lastname
+++                    target_dir = student_dir / target_folder
+++
+++                target_dir.mkdir(parents=True, exist_ok=True)
+++                target_path = target_dir / msg_file.name
+++
+++                # Datei verschieben
+++                shutil.move(str(msg_file), str(target_path))
+++                logger.info(f"Verschoben: {msg_file.name} -> {target_path}")
+++
+++                moved_emails.append(
+++                    {
+++                        "class": email_class,
+++                        "semester": semester,
+++                        "lastname": lastname,
+++                        "folder": target_folder,
+++                        "path": str(target_path),
+++                    }
+++                )
+++
+++            except Exception as e:
+++                logger.error(f"Fehler beim Verarbeiten von {msg_file}: {e}")
+++
+++    return moved_emails
+++
+++
+++def write_report(source_root: Path, moved_emails: List[Dict[str, Any]]) -> None:
+++    """Erstellt den Markdown-Report.
+++
+++    Args:
+++        source_root: Quellverzeichnis für den Report.
+++        moved_emails: Liste der verschobenen E-Mails.
+++    """
+++    if not moved_emails:
+++        logger.info("Keine E-Mails verschoben. Erstelle keinen Report.")
+++        return
+++
+++    # Sortierung: Klasse, Semester, Nachname, Folder
+++    moved_emails.sort(
+++        key=lambda x: (x["class"], x["semester"], x["lastname"], x["folder"])
+++    )
+++
+++    report_path = source_root / "sorted_emails.md"
+++
+++    with open(report_path, "w", encoding="utf-8") as f:
+++        f.write("# Sortierte E-Mails\n\n")
+++
+++        current_class = None
+++        for email in moved_emails:
+++            if email["class"] != current_class:
+++                current_class = email["class"]
+++                f.write(f"\n## {current_class}\n")
+++
+++            f.write(
+++                f"- **{email['semester']}** | {email['lastname']} | {email['folder']}: `{email['path']}`\n"
+++            )
+++
+++    logger.info(f"Report erstellt: {report_path}")
+++
+++
+++def main() -> None:
+++    """Haupteinstiegspunkt für das Skript."""
+++    parser = argparse.ArgumentParser(
+++        description="Sortiert E-Mails basierend auf Klassifizierung."
+++    )
+++    parser.add_argument(
+++        "source_dir", type=str, help="Quellordner mit Inbox und SentItems."
+++    )
+++    parser.add_argument(
+++        "--config",
+++        type=str,
+++        required=True,
+++        help="Pfad zur YAML-Konfiguration (Klassen-Pfade).",
+++    )
+++    parser.add_argument(
+++        "--model",
+++        type=str,
+++        default="data/email_classifier.pkl",
+++        help="Pfad zum trainierten Modell.",
+++    )
+++
+++    args = parser.parse_args()
+++
+++    source_root = Path(args.source_dir)
+++    if not source_root.exists():
+++        logger.error(f"Quellverzeichnis {args.source_dir} existiert nicht.")
+++        return
+++
+++    config_path = Path(args.config)
+++    if not config_path.exists():
+++        logger.error(f"Konfiguration {args.config} existiert nicht.")
+++        return
+++
+++    with open(config_path, "r", encoding="utf-8") as f:
+++        config = yaml.safe_load(f)
+++
+++    # Falls die Konfiguration geschachtelt ist (z.B. unter einem 'class_paths' Key)
+++    if config and "class_paths" in config:
+++        config = config["class_paths"]
+++
+++    moved_emails = process_emails(source_root, Path(args.model), config)
+++    write_report(source_root, moved_emails)
+++
+++
+++if __name__ == "__main__":
+++    main()
+++"""Engine für die Klassifizierung von E-Mails."""
+++import pickle
+++from pathlib import Path
+++from typing import List, Tuple, Dict, Any, Optional, Union
+++
+++import numpy as np
+++from sklearn.ensemble import RandomForestClassifier
+++from sklearn.feature_extraction.text import TfidfVectorizer
+++from sklearn.preprocessing import LabelEncoder
+++
+++
+++from mcp_university.parser.mail_parser import MailParser
+++
+++class EmailClassifier:
+++    """Klassifiziert E-Mails basierend auf TF-IDF und/oder Embeddings."""
+++
+++    def __init__(
+++        self,
+++        mode: str = "combined",
+++        method: str = "xgboost",
+++        embedding_model_name: str = "paraphrase-multilingual-MiniLM-L12-v2"
+++    ) -> None:
+++        """Initialisiert den Klassifikator.
+++
+++        Args:
+++            mode: Modus der Merkmalsextraktion ('tfidf', 'embedding', 'combined').
+++            method: Klassifizierungsmethode ('randomforest', 'xgboost').
+++            embedding_model_name: Name des Sentence-Transformer Modells.
+++        """
+++        self.mode = mode
+++        self.method = method
+++        self.embedding_model_name = embedding_model_name
+++        self.parser = MailParser()
+++
+++        self.tfidf_vectorizer = TfidfVectorizer(max_features=5000)
+++        self._embedding_model = None
+++        self.label_encoder = LabelEncoder()
+++
+++        if method == "randomforest":
+++            self.classifier = RandomForestClassifier(n_estimators=100, random_state=42)
+++        elif method == "xgboost":
+++            from xgboost import XGBClassifier
+++            self.classifier = XGBClassifier(n_estimators=100, random_state=42, eval_metric='logloss')
+++        else:
+++            raise ValueError(f"Ungültige Klassifizierungsmethode: {method}")
+++
+++        self.is_trained = False
+++
+++    @property
+++    def embedding_model(self):
+++        """Lädt das Embedding-Modell verzögert (Lazy Loading)."""
+++        if self._embedding_model is None:
+++            from sentence_transformers import SentenceTransformer
+++            self._embedding_model = SentenceTransformer(self.embedding_model_name)
+++        return self._embedding_model
+++
+++    def _extract_text(self, file_path: Path) -> Optional[str]:
+++        """Extrahiert Text aus einer E-Mail-Datei."""
+++        return self.parser.parse(file_path)
+++
+++    def preprocess_data(self, root_dir: Union[str, Path]) -> Tuple[List[str], List[str]]:
+++        """Liest E-Mails aus Ordnerstrukturen ein.
+++
+++        Die Ordnernamen werden als Klassenlabels verwendet.
+++
+++        Args:
+++            root_dir: Wurzelverzeichnis mit Unterordnern für jede Klasse.
+++
+++        Returns:
+++            Tuple aus Texten und Labels.
+++        """
+++        root_path = Path(root_dir)
+++        texts = []
+++        labels = []
+++
+++        for class_dir in root_path.iterdir():
+++            if class_dir.is_dir():
+++                label = class_dir.name
+++                for file_path in class_dir.glob("*.msg"):
+++                    text = self._extract_text(file_path)
+++                    if text:
+++                        texts.append(text)
+++                        labels.append(label)
+++
+++        return texts, labels
+++
+++    def get_features(self, texts: List[str], train: bool = False) -> np.ndarray:
+++        """Extrahiert Merkmale aus Texten basierend auf dem gewählten Modus."""
+++        features = []
+++
+++        if self.mode in ["tfidf", "combined"]:
+++            if train:
+++                tfidf_feats = self.tfidf_vectorizer.fit_transform(texts).toarray()
+++            else:
+++                tfidf_feats = self.tfidf_vectorizer.transform(texts).toarray()
+++            features.append(tfidf_feats)
+++
+++        if self.mode in ["embedding", "combined"]:
+++            emb_feats = self.embedding_model.encode(texts)
+++            features.append(emb_feats)
+++
+++        if len(features) > 1:
+++            return np.hstack(features)
+++        return features[0]
+++
+++    def train(self, root_dir: Union[str, Path]) -> None:
+++        """Trainiert den Klassifikator auf Daten aus einem Verzeichnis.
+++
+++        Args:
+++            root_dir: Verzeichnis mit den Trainingsdaten.
+++        """
+++        texts, labels = self.preprocess_data(root_dir)
+++        if not texts:
+++            raise ValueError(f"Keine Trainingsdaten in {root_dir} gefunden.")
+++
+++        X = self.get_features(texts, train=True)
+++        y = self.label_encoder.fit_transform(labels)
+++
+++        self.classifier.fit(X, y)
+++        self.is_trained = True
+++
+++    def predict(self, file_path: Union[str, Path]) -> Dict[str, Any]:
+++        """Klassifiziert eine einzelne E-Mail.
+++
+++        Args:
+++            file_path: Pfad zur .msg Datei.
+++
+++        Returns:
+++            Dictionary mit der vorhergesagten Klasse und Wahrscheinlichkeiten.
+++        """
+++        if not self.is_trained:
+++            raise RuntimeError("Modell muss zuerst trainiert oder geladen werden.")
+++
+++        text = self._extract_text(Path(file_path))
+++        if not text:
+++            raise ValueError(f"Konnte Text aus {file_path} nicht extrahieren.")
+++
+++        X = self.get_features([text], train=False)
+++        y_pred = self.classifier.predict(X)[0]
+++        y_prob = self.classifier.predict_proba(X)[0]
+++
+++        label = self.label_encoder.inverse_transform([int(y_pred)])[0]
+++
+++        # Mapping von Label zu Wahrscheinlichkeit
+++        probs = {
+++            self.label_encoder.inverse_transform([i])[0]: float(prob)
+++            for i, prob in enumerate(y_prob)
+++        }
+++
+++        return {
+++            "prediction": label,
+++            "probabilities": probs,
+++            "confidence": float(np.max(y_prob))
+++        }
+++
+++    def save(self, model_path: Union[str, Path]) -> None:
+++        """Speichert das Modell in einer Datei.
+++
+++        Args:
+++            model_path: Pfad zur Speicherdatei.
+++        """
+++        data = {
+++            "mode": self.mode,
+++            "method": self.method,
+++            "embedding_model_name": self.embedding_model_name,
+++            "tfidf_vectorizer": self.tfidf_vectorizer,
+++            "classifier": self.classifier,
+++            "label_encoder": self.label_encoder,
+++            "is_trained": self.is_trained
+++        }
+++        with open(model_path, "wb") as f:
+++            pickle.dump(data, f)
+++
+++    def load(self, model_path: Union[str, Path]) -> None:
+++        """Lädt das Modell aus einer Datei.
+++
+++        Args:
+++            model_path: Pfad zur Modelldatei.
+++        """
+++        with open(model_path, "rb") as f:
+++            data = pickle.load(f)
+++
+++        self.mode = data["mode"]
+++        self.method = data.get("method", "randomforest")  # Fallback für alte Modelle
+++        self.embedding_model_name = data["embedding_model_name"]
+++        self.tfidf_vectorizer = data["tfidf_vectorizer"]
+++        self.classifier = data["classifier"]
+++        self.label_encoder = data["label_encoder"]
+++        self.is_trained = data["is_trained"]
+++        # embedding_model wird bei Bedarf geladen (Lazy Loading)
+++![Tests](https://github.com/dgaida/academic-memory-mcp/actions/workflows/tests.yml/badge.svg) ![Lint](https://github.com/dgaida/academic-memory-mcp/actions/workflows/lint.yml/badge.svg) ![CodeQL](https://github.com/dgaida/academic-memory-mcp/actions/workflows/codeql.yml/badge.svg) ![Documentation](https://github.com/dgaida/academic-memory-mcp/actions/workflows/docs.yml/badge.svg) ![Auto Versioning](https://github.com/dgaida/academic-memory-mcp/actions/workflows/auto-version.yml/badge.svg)
+++[![Version](https://img.shields.io/github/v/tag/dgaida/academic-memory-mcp?label=version)](https://github.com/dgaida/academic-memory-mcp/tags)
+++[![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+++[![codecov](https://codecov.io/gh/dgaida/academic-memory-mcp/branch/master/graph/badge.svg)](https://codecov.io/gh/dgaida/academic-memory-mcp)
+++[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://dgaida.github.io/academic-memory-mcp/)
+++[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/dgaida/academic-memory-mcp/graphs/commit-activity)
+++![Last commit](https://img.shields.io/github/last-commit/dgaida/academic-memory-mcp)
+++
+++# MCP University Memory System
+++
+++A locally-running, agentic knowledge and memory system for university and research work.
+++
+++## Features
+++- Recursive analysis of local folders
+++- Semantic understanding of documents and emails
+++- Hierarchical summaries (File -> Folder -> Root)
+++- Hybrid search (BM25 + Vector)
+++- MCP Server integration
+++- Fully offline using local LLMs (Ollama)
+++- Automated E-Mail classification (Bachelor thesis, projects, etc.)
+++- Database management for students, deadlines, and metadata
+++
+++## Prerequisites
+++- **qmd CLI:** Required for hybrid search. Install globally via: `npm install -g @tobilu/qmd`
+++- **Docling:** Required for PDF parsing. Install with: `pip install docling` and initialize with `cp-config` if prompted.
+++
+++## Tech Stack
+++- **Document Parsing:** Docling
+++- **Local LLM:** Ollama
+++- **Embeddings:** bge-m3
+++- **Vector DB:** Qdrant
+++- **MCP Framework:** FastMCP
+++- **Metadata:** SQLite
+++- **File Watching:** watchdog
+++
+++## Project Structure
+++```text
+++mcp_university/
+++├── config/             # YAML configurations and prompts
+++├── data/               # Persistent data (SQLite, Indexes, Cache)
+++├── src/mcp_university/ # Core package
+++│   ├── crawler/        # File system crawling and watching
+++│   ├── parser/         # Document and email parsing
+++│   ├── summarizer/     # LLM summary generation
+++│   ├── retrieval/      # Hybrid search index
+++│   ├── metadata/       # SQLite storage
+++│   ├── mcp_server/     # FastMCP server
+++│   ├── agent/          # Agentic workflows
+++│   ├── cli/            # Typer-based CLI
+++│   └── config.py       # Config loader
+++└── tests/              # Unit and integration tests
+++```
+++
+++## Installation
+++```bash
+++pip install -e .
+++```
+++
+++## Usage
+++```bash
+++mcp-uni index
+++mcp-uni search "your query"
+++mcp-uni serve-mcp
+++```
+++# Nutzung
+++
+++Das MCP University Memory System bietet verschiedene Schnittstellen zur Interaktion mit Ihren Daten.
+++
+++## Kommandozeile (CLI)
+++
+++Die CLI ist der primäre Weg, um das System zu verwalten und manuelle Suchen durchzuführen.
+++
+++### Indexierung (`index`)
+++Dieser Befehl scannt alle konfigurierten Ordner, erstellt Zusammenfassungen und aktualisiert den Index.
+++```bash
+++mcp-uni index
+++```
+++
+++### Suche (`search`)
+++Führt eine schnelle Abfrage über den gesamten Datenbestand durch.
+++```bash
+++mcp-uni search "Inhalt der Vorlesung 5"
+++```
+++
+++### Überwachung (`watch`)
+++Startet einen Hintergrundprozess, der auf Dateiänderungen reagiert und den Index in Echtzeit aktualisiert.
+++```bash
+++mcp-uni watch
+++```
+++
+++## E-Mail Klassifizierung
+++
+++Das System enthält ein Subpackage zur automatisierten Klassifizierung von studentischen E-Mails (z.B. Bachelorarbeit, Praxisprojekt).
+++
+++### Modell trainieren
+++Um den Klassifikator zu nutzen, muss er zuerst mit Beispieldaten trainiert werden. Erwarten wird eine Ordnerstruktur, in der jeder Unterordner eine Klasse repräsentiert und die E-Mails (.msg) enthält.
+++
+++```bash
+++python3 mcp_university/classifier/train.py /pfad/zu/trainingsdaten --mode combined --method xgboost
+++```
+++
+++Dabei kann zwischen `randomforest` und `xgboost` (Standard) gewählt werden.
+++
+++### E-Mail klassifizieren
+++Nach dem Training kann eine einzelne E-Mail-Datei klassifiziert werden:
+++
+++```bash
+++python3 mcp_university/classifier/predict.py /pfad/zur/email.msg
+++```
+++
+++Die Ausgabe enthält die wahrscheinlichste Klasse sowie die Konfidenz und eine detaillierte Wahrscheinlichkeitsverteilung.
+++### Batch-Klassifizierung
+++Um einen ganzen Ordner mit E-Mails automatisch zu sortieren:
+++```bash
+++
+++### E-Mail Sortierung (Studenten-Ordner)
+++Das leistungsfähigste Skript sortiert E-Mails nicht nur nach Klasse, sondern auch nach Semester und Student (Nachname):
+++
+++```bash
+++python3 mcp_university/classifier/sort_emails.py /quell/ordner --config config/class_paths.yaml --model data/email_classifier.pkl
+++```
+++
+++Es erkennt automatisch:
+++- **Semester:** Basierend auf dem E-Mail-Datum (SoSe/WS).
+++- **Student:** Extrahiert den Nachnamen aus `smail.th-koeln.de` Adressen oder Anzeigenamen.
+++- **Richtung:** Sortiert in `Inbox` oder `SentItems` Unterordner.
+++- **Bericht:** Erstellt eine `sorted_emails.md` mit einer Übersicht aller verschobenen Mails.
+++python3 mcp_university/classifier/classify_folder.py /quell/ordner --model data/email_classifier.pkl
+++```
+++Dies verschiebt die E-Mails in Unterordner, die nach den vorhergesagten Klassen benannt sind.
+++
+++
+++## Datenbank-Management (`db`)
+++
+++Die `db` Befehlsgruppe erlaubt die direkte Verwaltung der Metadaten und des Suchindex.
+++
+++### Auflisten von Inhalten
+++Sie können verschiedene Entitäten in der Datenbank auflisten:
+++
+++*   **Dateien:** `mcp-uni db list-files`
+++*   **Ordner:** `mcp-uni db list-folders`
+++*   **Studenten:** `mcp-uni db list-students` (Hinweis: Nutzen Sie `sync-students` zum Befüllen)
+++*   **Zusammenfassungen:** `mcp-uni db list-summaries`
+++*   **Deadlines:** `mcp-uni db list-deadlines`
+++
+++### Synchronisierung von Studenten (`sync-students`)
+++Befüllt die Datenbank aus einer `students.yaml`.
+++```bash
+++mcp-uni db sync-students
+++```
+++
+++### Löschen von Inhalten
+++Einträge können über ihre ID gelöscht werden. Mit der Option `--force` oder `-f` wird die Bestätigungsabfrage übersprungen.
+++
+++*   **Dateien löschen:** `mcp-uni db delete-file <ID_1> <ID_2> ...`
+++*   **Ordner löschen:** `mcp-uni db delete-folder <ID>` (entfernt rekursiv alle enthaltenen Dateien)
+++*   **Student löschen:** `mcp-uni db delete-student <ID>`
+++*   **Zusammenfassung löschen:** `mcp-uni db delete-summary <ID>`
+++*   **Deadline löschen:** `mcp-uni db delete-deadline <ID>`
+++
+++## Model Context Protocol (MCP)
+++
+++Der leistungsfähigste Weg, das System zu nutzen, ist über einen MCP-Client (wie Claude Desktop).
+++
+++### Server starten
+++```bash
+++mcp-uni serve-mcp
+++```
+++
+++### Verfügbare Tools
+++*   `search_documents`: Semantische Suche in Dokumenten.
+++*   `get_folder_summary`: Abfrage von aggregierten Ordner-Informationen.
+++*   `get_student_context`: Komplette Historie und Status eines Studenten abrufen.
+++*   `generate_mail_reply`: Entwurf einer E-Mail basierend auf dem Kontext.
+++*   `get_open_tasks`: Extraktion von TODOs aus allen Dokumenten.
+++
+++## Typische Workflows
+++
+++### 1. Vorbereitung einer Sprechstunde
+++Bitten Sie Ihren Agenten: "Gib mir den Kontext zu Student Max Mustermann und zeige mir seine letzten Abgaben."
+++Der Agent nutzt `get_student_context` and `search_documents`, um Ihnen eine kompakte Übersicht zu liefern.
+++
+++### 2. Beantworten von E-Mails
+++Kopieren Sie die E-Mail eines Studenten in den Chat und nutzen Sie das Tool `generate_mail_reply`. Das System berücksichtigt dabei automatisch den Status der Abschlussarbeit oder offene Deadlines.
+++
+++## Konfiguration
+++
+++### Zweistufige Zusammenfassung
+++In der `config/folders.yaml` kann die Option `summarize_emails_individually` (Standard: `false`) aktiviert werden. Wenn diese auf `true` gesetzt ist, werden E-Mail-Threads in zwei Stufen zusammengefasst: erst jede E-Mail einzeln, dann die gesamte Konversation.
+++
+++## Hilfsskripte
+++
+++Das System enthält nützliche Skripte im Ordner `scripts/`:
+++
+++- **`remove_empty_folders.py`**: Löscht rekursiv alle leeren Ordner in einem Verzeichnis.
+++- **`flatten_directory.py`**: Flacht eine Ordnerstruktur ab, indem alle Dateien in das Wurzelverzeichnis verschoben werden (inkl. Namenskollisionsprüfung).
+++# Usage
+++
+++The MCP University Memory System provides various interfaces for interacting with your data.
+++
+++## Command Line Interface (CLI)
+++
+++The CLI is the primary way to manage the system and perform manual searches.
+++
+++### Indexing (`index`)
+++This command scans all configured folders, creates summaries, and updates the index.
+++```bash
+++mcp-uni index
+++```
+++
+++### Search (`search`)
+++Performs a quick query across the entire dataset.
+++```bash
+++mcp-uni search "Content of lecture 5"
+++```
+++
+++### Watchdog (`watch`)
+++Starts a background process that reacts to file changes and updates the index in real-time.
+++```bash
+++mcp-uni watch
+++```
+++
+++## Email Classification
+++
+++The system includes a subpackage for the automated classification of student emails (e.g., Bachelor's thesis, internship project).
+++
+++### Training the Model
+++To use the classifier, it must first be trained with example data. It expects a folder structure where each subfolder represents a class and contains the emails (.msg).
+++
+++```bash
+++python3 mcp_university/classifier/train.py /path/to/training_data --mode combined --method xgboost
+++```
+++
+++You can choose between `randomforest` and `xgboost` (default).
+++
+++### Classifying an Email
+++After training, a single email file can be classified:
+++
+++```bash
+++python3 mcp_university/classifier/predict.py /path/to/email.msg
+++```
+++
+++The output contains the most likely class as well as the confidence and a detailed probability distribution.
+++### Batch Classification
+++To automatically sort an entire folder of emails (classification only):
+++```bash
+++
+++### Email Sorting (Student Folders)
+++The most powerful script sorts emails not only by class, but also by semester and student (last name):
+++
+++```bash
+++python3 mcp_university/classifier/sort_emails.py /source/folder --config config/class_paths.yaml --model data/email_classifier.pkl
+++```
+++
+++It automatically detects:
+++- **Semester:** Based on the email date (Summer/Winter semester).
+++- **Student:** Extracts the last name from `smail.th-koeln.de` addresses or display names.
+++- **Direction:** Sorts into `Inbox` or `SentItems` subfolders.
+++- **Report:** Creates a `sorted_emails.md` with an overview of all moved emails.
+++python3 mcp_university/classifier/classify_folder.py /source/folder --model data/email_classifier.pkl
+++```
+++This moves the emails into subfolders named after their predicted classes.
+++
+++
+++## Database Management (`db`)
+++
+++The `db` command group allows for direct management of metadata and the search index.
+++
+++### Listing Content
+++You can list various entities in the database:
+++
+++*   **Files:** `mcp-uni db list-files`
+++*   **Folders:** `mcp-uni db list-folders`
+++*   **Students:** `mcp-uni db list-students` (Note: Use `sync-students` to populate)
+++*   **Summaries:** `mcp-uni db list-summaries`
+++*   **Deadlines:** `mcp-uni db list-deadlines`
+++
+++### Student Synchronization (`sync-students`)
+++Populates the database from a `students.yaml`.
+++```bash
+++mcp-uni db sync-students
+++```
+++
+++### Deleting Content
+++Entries can be deleted using their ID. Use the `--force` or `-f` option to skip the confirmation prompt.
+++
+++*   **Delete Files:** `mcp-uni db delete-file <ID_1> <ID_2> ...`
+++*   **Delete Folder:** `mcp-uni db delete-folder <ID>` (recursively removes all contained files)
+++*   **Delete Student:** `mcp-uni db delete-student <ID>`
+++*   **Delete Summary:** `mcp-uni db delete-summary <ID>`
+++*   **Delete Deadline:** `mcp-uni db delete-deadline <ID>`
+++
+++## Model Context Protocol (MCP)
+++
+++The most powerful way to use the system is via an MCP client (like Claude Desktop).
+++
+++### Start Server
+++```bash
+++mcp-uni serve-mcp
+++```
+++
+++### Available Tools
+++*   `search_documents`: Semantic search in documents.
+++*   `get_folder_summary`: Query aggregated folder information.
+++*   `get_student_context`: Retrieve complete history and status of a student.
+++*   `generate_mail_reply`: Draft an email based on the context.
+++*   `get_open_tasks`: Extraction of TODOs from all documents.
+++
+++## Typical Workflows
+++
+++### 1. Preparing for Office Hours
+++Ask your agent: "Give me the context for student Max Mustermann and show me his latest submissions."
+++The agent uses `get_student_context` and `search_documents` to provide you with a compact overview.
+++
+++### 2. Answering Emails
+++Copy a student's email into the chat and use the `generate_mail_reply` tool. The system automatically takes the status of the thesis or open deadlines into account.
+++
+++## Configuration
+++
+++### Two-Stage Summarization
+++In `config/folders.yaml`, the `summarize_emails_individually` option (default: `false`) can be enabled. When set to `true`, email threads are summarized in two stages: first each email individually, then the entire conversation.
+++
+++## Utility Scripts
+++
+++The system includes useful scripts in the `scripts/` folder:
+++
+++- **`remove_empty_folders.py`**: Recursively deletes all empty folders in a directory.
+++- **`flatten_directory.py`**: Flattens a directory structure by moving all files to the root directory (includes name collision checks).
+++from pathlib import Path
+++from datetime import datetime
+++from unittest.mock import MagicMock, patch
+++
+++from mcp_university.classifier.sort_emails import get_semester, extract_lastname, process_emails, write_report
+++
+++def test_get_semester():
+++    # SoSe: 01.04. - 30.09.
+++    assert get_semester(datetime(2025, 4, 1)) == "2025_SoSe"
+++    assert get_semester(datetime(2025, 9, 30)) == "2025_SoSe"
+++
+++    # WS: 01.10. - 31.03.
+++    assert get_semester(datetime(2025, 10, 1)) == "2025_26_WS"
+++    assert get_semester(datetime(2026, 3, 31)) == "2025_26_WS"
+++    assert get_semester(datetime(2025, 1, 15)) == "2024_25_WS"
+++
+++def test_extract_lastname():
+++    assert extract_lastname("Max Mustermann") == "Mustermann"
+++    assert extract_lastname("Mustermann, Max") == "Mustermann"
+++    assert extract_lastname("Max Mustermann <max@example.com>") == "Mustermann"
+++    assert extract_lastname("Mustermann, Max <max@example.com>") == "Mustermann"
+++    assert extract_lastname("'Hans Müller'") == "Müller"
+++    assert extract_lastname("'Müller, Hans'") == "'Müller"
+++    assert extract_lastname("(No Sender)") == "Unknown"
+++    assert extract_lastname("") == "Unknown"
+++
+++@patch('mcp_university.classifier.sort_emails.EmailClassifier')
+++@patch('mcp_university.classifier.sort_emails.MailParser')
+++@patch('extract_msg.openMsg')
+++def test_process_emails(mock_open_msg, mock_mail_parser, mock_classifier_class, tmp_path):
+++    # Setup source directory
+++    source_root = tmp_path / "source"
+++    inbox = source_root / "Inbox"
+++    sent = source_root / "SentItems"
+++    inbox.mkdir(parents=True)
+++    sent.mkdir(parents=True)
+++
+++    msg1 = inbox / "mail1.msg"
+++    msg1.touch()
+++    msg2 = sent / "mail2.msg"
+++    msg2.touch()
+++
+++    # Subdirectory test
+++    sub_inbox = inbox / "Subfolder"
+++    sub_inbox.mkdir()
+++    msg3 = sub_inbox / "mail3.msg"
+++    msg3.touch()
+++
+++    # Setup target directory
+++    target_root = tmp_path / "target"
+++    target_root.mkdir()
+++
+++    # Mock classifier
+++    mock_classifier = mock_classifier_class.return_value
+++    mock_classifier.predict.side_effect = [
+++        {"prediction": "BachelorThesis"}, # mail1
+++        {"prediction": "BachelorThesis"}, # mail3 (rglob finds this)
+++        {"prediction": "BachelorThesis"}  # mail2
+++    ]
+++
+++    # Mock parser
+++    mock_parser = mock_mail_parser.return_value
+++    mock_parser.get_email_date.side_effect = [
+++        datetime(2025, 5, 10), # mail1 SoSe
+++        datetime(2025, 6, 10), # mail3 SoSe
+++        datetime(2025, 11, 20) # mail2 WS
+++    ]
+++
+++    # Mock extract_msg
+++    mock_msg1 = MagicMock()
+++    mock_msg1.sender = "Max Mustermann"
+++
+++    mock_msg3 = MagicMock()
+++    mock_msg3.sender = "Max Mustermann"
+++
+++    mock_msg2 = MagicMock()
+++    mock_recip = MagicMock()
+++    mock_recip.name = "Erika Musterfrau"
+++    mock_msg2.recipients = [mock_recip]
+++
+++    mock_open_msg.return_value.__enter__.side_effect = [mock_msg1, mock_msg3, mock_msg2]
+++
+++    config = {
+++        "BachelorThesis": str(target_root)
+++    }
+++
+++    moved = process_emails(source_root, Path("dummy_model"), config)
+++
+++    assert len(moved) == 3
+++
+++    # Verify first file (Inbox)
+++    expected_path1 = target_root / "2025_SoSe" / "Mustermann" / "Inbox" / "mail1.msg"
+++    assert expected_path1.exists()
+++    assert not msg1.exists()
+++
+++    # Verify third file (Subfolder in Inbox) -> should go to Inbox
+++    expected_path3 = target_root / "2025_SoSe" / "Mustermann" / "Inbox" / "mail3.msg"
+++    assert expected_path3.exists()
+++    assert not msg3.exists()
+++
+++    # Verify second file (SentItems)
+++    expected_path2 = target_root / "2025_26_WS" / "Musterfrau" / "SentItems" / "mail2.msg"
+++    assert expected_path2.exists()
+++    assert not msg2.exists()
+++
+++def test_write_report(tmp_path):
+++    source_root = tmp_path
+++    moved_emails = [
+++        {
+++            "class": "BachelorThesis",
+++            "semester": "2025_SoSe",
+++            "lastname": "Mustermann",
+++            "folder": "Inbox",
+++            "path": "/path/to/mail1.msg"
+++        },
+++        {
+++            "class": "BachelorThesis",
+++            "semester": "2025_26_WS",
+++            "lastname": "Musterfrau",
+++            "folder": "SentItems",
+++            "path": "/path/to/mail2.msg"
+++        }
+++    ]
+++
+++    write_report(source_root, moved_emails)
+++
+++    report_path = source_root / "sorted_emails.md"
+++    assert report_path.exists()
+++
+++    content = report_path.read_text(encoding="utf-8")
+++    assert "# Sortierte E-Mails" in content
+++    assert "## BachelorThesis" in content
+++    assert "Mustermann" in content
+++    assert "Musterfrau" in content
++diff --git a/docs/de/usage/index.md b/docs/de/usage/index.md
++index feaeeb7..c840c64 100644
++--- a/docs/de/usage/index.md
+++++ b/docs/de/usage/index.md
++@@ -45,6 +45,26 @@ python3 mcp_university/classifier/predict.py /pfad/zur/email.msg
++ ```
++
++ Die Ausgabe enthält die wahrscheinlichste Klasse sowie die Konfidenz und eine detaillierte Wahrscheinlichkeitsverteilung.
+++### Batch-Klassifizierung
+++Um einen ganzen Ordner mit E-Mails automatisch zu sortieren:
+++```bash
+++
+++### E-Mail Sortierung (Studenten-Ordner)
+++Das leistungsfähigste Skript sortiert E-Mails nicht nur nach Klasse, sondern auch nach Semester und Student (Nachname):
+++
+++```bash
+++python3 mcp_university/classifier/sort_emails.py /quell/ordner --config config/class_paths.yaml --model data/email_classifier.pkl
+++```
+++
+++Es erkennt automatisch:
+++- **Semester:** Basierend auf dem E-Mail-Datum (SoSe/WS).
+++- **Student:** Extrahiert den Nachnamen aus `smail.th-koeln.de` Adressen oder Anzeigenamen.
+++- **Richtung:** Sortiert in `Inbox` oder `SentItems` Unterordner.
+++- **Bericht:** Erstellt eine `sorted_emails.md` mit einer Übersicht aller verschobenen Mails.
+++python3 mcp_university/classifier/classify_folder.py /quell/ordner --model data/email_classifier.pkl
+++```
+++Dies verschiebt die E-Mails in Unterordner, die nach den vorhergesagten Klassen benannt sind.
+++
++
++ ## Datenbank-Management (`db`)
++
++@@ -98,3 +118,15 @@ Der Agent nutzt `get_student_context` and `search_documents`, um Ihnen eine komp
++
++ ### 2. Beantworten von E-Mails
++ Kopieren Sie die E-Mail eines Studenten in den Chat und nutzen Sie das Tool `generate_mail_reply`. Das System berücksichtigt dabei automatisch den Status der Abschlussarbeit oder offene Deadlines.
+++
+++## Konfiguration
+++
+++### Zweistufige Zusammenfassung
+++In der `config/folders.yaml` kann die Option `summarize_emails_individually` (Standard: `false`) aktiviert werden. Wenn diese auf `true` gesetzt ist, werden E-Mail-Threads in zwei Stufen zusammengefasst: erst jede E-Mail einzeln, dann die gesamte Konversation.
+++
+++## Hilfsskripte
+++
+++Das System enthält nützliche Skripte im Ordner `scripts/`:
+++
+++- **`remove_empty_folders.py`**: Löscht rekursiv alle leeren Ordner in einem Verzeichnis.
+++- **`flatten_directory.py`**: Flacht eine Ordnerstruktur ab, indem alle Dateien in das Wurzelverzeichnis verschoben werden (inkl. Namenskollisionsprüfung).
++diff --git a/docs/en/usage/index.md b/docs/en/usage/index.md
++index 6a759fa..abf8608 100644
++--- a/docs/en/usage/index.md
+++++ b/docs/en/usage/index.md
++@@ -45,6 +45,26 @@ python3 mcp_university/classifier/predict.py /path/to/email.msg
++ ```
++
++ The output contains the most likely class as well as the confidence and a detailed probability distribution.
+++### Batch Classification
+++To automatically sort an entire folder of emails (classification only):
+++```bash
+++
+++### Email Sorting (Student Folders)
+++The most powerful script sorts emails not only by class, but also by semester and student (last name):
+++
+++```bash
+++python3 mcp_university/classifier/sort_emails.py /source/folder --config config/class_paths.yaml --model data/email_classifier.pkl
+++```
+++
+++It automatically detects:
+++- **Semester:** Based on the email date (Summer/Winter semester).
+++- **Student:** Extracts the last name from `smail.th-koeln.de` addresses or display names.
+++- **Direction:** Sorts into `Inbox` or `SentItems` subfolders.
+++- **Report:** Creates a `sorted_emails.md` with an overview of all moved emails.
+++python3 mcp_university/classifier/classify_folder.py /source/folder --model data/email_classifier.pkl
+++```
+++This moves the emails into subfolders named after their predicted classes.
+++
++
++ ## Database Management (`db`)
++
++@@ -98,3 +118,15 @@ The agent uses `get_student_context` and `search_documents` to provide you with
++
++ ### 2. Answering Emails
++ Copy a student's email into the chat and use the `generate_mail_reply` tool. The system automatically takes the status of the thesis or open deadlines into account.
+++
+++## Configuration
+++
+++### Two-Stage Summarization
+++In `config/folders.yaml`, the `summarize_emails_individually` option (default: `false`) can be enabled. When set to `true`, email threads are summarized in two stages: first each email individually, then the entire conversation.
+++
+++## Utility Scripts
+++
+++The system includes useful scripts in the `scripts/` folder:
+++
+++- **`remove_empty_folders.py`**: Recursively deletes all empty folders in a directory.
+++- **`flatten_directory.py`**: Flattens a directory structure by moving all files to the root directory (includes name collision checks).
++diff --git a/mcp_university/classifier/engine.py b/mcp_university/classifier/engine.py
++index edffe5f..145a30c 100644
++--- a/mcp_university/classifier/engine.py
+++++ b/mcp_university/classifier/engine.py
++@@ -7,7 +7,7 @@ import numpy as np
++ from sklearn.ensemble import RandomForestClassifier
++ from sklearn.feature_extraction.text import TfidfVectorizer
++ from sklearn.preprocessing import LabelEncoder
++-from sentence_transformers import SentenceTransformer
+++
++
++ from mcp_university.parser.mail_parser import MailParser
++
++@@ -33,7 +33,7 @@ class EmailClassifier:
++         self.parser = MailParser()
++
++         self.tfidf_vectorizer = TfidfVectorizer(max_features=5000)
++-        self._embedding_model: Optional[SentenceTransformer] = None
+++        self._embedding_model = None
++         self.label_encoder = LabelEncoder()
++
++         if method == "randomforest":
++@@ -47,9 +47,10 @@ class EmailClassifier:
++         self.is_trained = False
++
++     @property
++-    def embedding_model(self) -> SentenceTransformer:
+++    def embedding_model(self):
++         """Lädt das Embedding-Modell verzögert (Lazy Loading)."""
++         if self._embedding_model is None:
+++            from sentence_transformers import SentenceTransformer
++             self._embedding_model = SentenceTransformer(self.embedding_model_name)
++         return self._embedding_model
++
++diff --git a/mcp_university/classifier/sort_emails.py b/mcp_university/classifier/sort_emails.py
++index a25c769..d47e793 100644
++--- a/mcp_university/classifier/sort_emails.py
+++++ b/mcp_university/classifier/sort_emails.py
++@@ -75,12 +75,16 @@ def extract_lastname(name_str: str) -> str:
++
++     if "," in clean_name:
++         # Format: Lastname, Firstname
++-        return clean_name.split(",")[0].strip()
+++        res = clean_name.split(",")[0].strip()
+++        return res[:-1] if res.endswith("'") else res
++     else:
++         # Format: Firstname Lastname
++         parts = clean_name.split()
++         if parts:
++-            return parts[-1]
+++            res = parts[-1]
+++            if res.endswith("'"):
+++                res = res[:-1]
+++            return res
++     return "Unknown"
++
++
++diff --git a/my_changes.diff b/my_changes.diff
++new file mode 100644
++index 0000000..04da171
++--- /dev/null
+++++ b/my_changes.diff
++@@ -0,0 +1,1142 @@
+++diff --git a/README.md b/README.md
+++index cdf3356..c828840 100644
+++--- a/README.md
++++++ b/README.md
+++@@ -17,6 +17,8 @@ A locally-running, agentic knowledge and memory system for university and resear
+++ - Hybrid search (BM25 + Vector)
+++ - MCP Server integration
+++ - Fully offline using local LLMs (Ollama)
++++- Automated E-Mail classification (Bachelor thesis, projects, etc.)
++++- Database management for students, deadlines, and metadata
+++
+++ ## Prerequisites
+++ - **qmd CLI:** Required for hybrid search. Install globally via: `npm install -g @tobilu/qmd`
+++diff --git a/changes_summary.txt b/changes_summary.txt
+++new file mode 100644
+++index 0000000..76757a9
+++--- /dev/null
++++++ b/changes_summary.txt
+++@@ -0,0 +1,959 @@
++++"""Skript zum Sortieren von E-Mails basierend auf Klassifizierung."""
++++import argparse
++++import logging
++++import re
++++import shutil
++++from datetime import datetime
++++from pathlib import Path
++++from typing import Any, Dict, List, Optional
++++
++++import yaml
++++
++++from mcp_university.classifier.engine import EmailClassifier
++++from mcp_university.parser.mail_parser import MailParser
++++
++++# Logging konfigurieren
++++logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
++++logger = logging.getLogger(__name__)
++++
++++
++++def get_semester(date: datetime) -> str:
++++    """Bestimmt den Semester-Ordnernamen basierend auf dem Datum.
++++
++++    SoSe: 01.04. - 30.09. -> YYYY_SoSe
++++    WS: 01.10. - 31.03. -> YYYY_YY+1_WS
++++
++++    Args:
++++        date: Das Datum der E-Mail.
++++
++++    Returns:
++++        str: Der Name des Semester-Ordners.
++++    """
++++    year = date.year
++++    month = date.month
++++
++++    if 4 <= month <= 9:
++++        return f"{year}_SoSe"
++++    else:
++++        if month >= 10:
++++            return f"{year}_{str(year + 1)[2:]}_WS"
++++        else:
++++            return f"{year-1}_{str(year)[2:]}_WS"
++++
++++
++++def extract_lastname(name_str: str) -> str:
++++    """Extrahiert den Nachnamen aus einem Namensstring oder einer E-Mail-Adresse.
++++
++++    Unterstützt das Format vorname.nachname@smail.th-koeln.de (auch mit mehreren Teilen)
++++    sowie 'Max Mustermann' oder 'Mustermann, Max'.
++++
++++    Args:
++++        name_str: Der zu parsende Name oder die E-Mail-Adresse.
++++
++++    Returns:
++++        str: Der extrahierte Nachname.
++++    """
++++    if not name_str or name_str == "(No Sender)" or name_str == "(No Receiver)":
++++        return "Unknown"
++++
++++    # Suche nach E-Mail-Adresse (in < > oder direkt)
++++    email_match = re.search(r"[\w\.-]+@[\w\.-]+", name_str)
++++    if email_match:
++++        email = email_match.group(0)
++++        if email.lower().endswith(("@smail.th-koeln.de", "@smail.fh-koeln.de")):
++++            local_part = email.split("@")[0]
++++            if "." in local_part:
++++                # Alles nach dem ersten Punkt ist der Nachname
++++                lastname_part = local_part.split(".", 1)[1]
++++                # Teile nach Unterstrich und schreibe jeden Teil groß
++++                parts = lastname_part.split("_")
++++                return "_".join(p[0].upper() + p[1:] for p in parts if p)
++++
++++    # Fallback für Namen ohne (Smail-)Adresse
++++    # Entferne E-Mail Adresse in Klammern falls vorhanden
++++    clean_name = name_str.split("<")[0].strip()
++++
++++    if "," in clean_name:
++++        # Format: Lastname, Firstname
++++        res = clean_name.split(",")[0].strip()
++++        return res[:-1] if res.endswith("'") else res
++++    else:
++++        # Format: Firstname Lastname
++++        parts = clean_name.split()
++++        if parts:
++++            res = parts[-1]
++++            if res.endswith("'"):
++++                res = res[:-1]
++++            return res
++++    return "Unknown"
++++
++++
++++def find_student_folder(base_path: Path, lastname: str) -> Optional[Path]:
++++    """Sucht nach einem existierenden Studierendenordner in allen Semesterordnern.
++++
++++    Args:
++++        base_path: Basisverzeichnis für die Suche.
++++        lastname: Nachname des Studenten.
++++
++++    Returns:
++++        Optional[Path]: Pfad zum Ordner falls gefunden, sonst None.
++++    """
++++    if not base_path.exists():
++++        return None
++++
++++    # Suche in allen Unterordnern (Semesterordnern)
++++    for semester_dir in base_path.iterdir():
++++        if semester_dir.is_dir():
++++            student_dir = semester_dir / lastname
++++            if student_dir.exists() and student_dir.is_dir():
++++                return student_dir
++++    return None
++++
++++
++++def process_emails(
++++    source_root: Path, classifier_model: Path, config: Dict[str, str]
++++) -> List[Dict[str, Any]]:
++++    """Verarbeitet E-Mails und sortiert sie basierend auf Absender/Empfänger.
++++
++++    Args:
++++        source_root: Quellverzeichnis mit den E-Mails.
++++        classifier_model: Pfad zum trainierten Modell.
++++        config: Konfiguration der Zielpfade.
++++
++++    Returns:
++++        List[Dict[str, Any]]: Liste der verschobenen E-Mails.
++++    """
++++    classifier = EmailClassifier()
++++    classifier.load(classifier_model)
++++    parser = MailParser()
++++
++++    moved_emails = []
++++
++++    # Die Ordner, die verarbeitet werden sollen
++++    folders_to_process = ["Inbox", "SentItems"]
++++
++++    for folder_name in folders_to_process:
++++        folder_path = source_root / folder_name
++++        if not folder_path.exists():
++++            logger.warning(f"Ordner {folder_path} existiert nicht. Überspringe.")
++++            continue
++++
++++        logger.info(f"Verarbeite Ordner: {folder_name}")
++++
++++        for msg_file in folder_path.rglob("*.msg"):
++++            try:
++++                # Klassifizierung
++++                prediction = classifier.predict(msg_file)
++++                email_class = prediction["prediction"]
++++
++++                if email_class not in config:
++++                    logger.warning(
++++                        f"Keine Pfad-Konfiguration für Klasse '{email_class}' gefunden. Überspringe {msg_file.name}"
++++                    )
++++                    continue
++++
++++                class_base_path = Path(config[email_class])
++++
++++                # Datum und Semester
++++                date = parser.get_email_date(msg_file)
++++                semester = get_semester(date)
++++
++++                # Sender/Receiver und Ziel-Ordner bestimmen
++++                lastname = "Unknown"
++++                target_folder = "Inbox"  # Default
++++
++++                import extract_msg
++++
++++                with extract_msg.openMsg(str(msg_file)) as msg:
++++                    sender = msg.sender.lower() if msg.sender else ""
++++                    if "daniel.gaida@th-koeln.de" in sender:
++++                        target_folder = "SentItems"
++++                        # Bei Sent Items den Nachnamen des ersten Empfängers nehmen
++++                        recipients = msg.recipients
++++                        if recipients:
++++                            lastname = extract_lastname(
++++                                recipients[0].name or recipients[0].email
++++                            )
++++                    elif (
++++                        "@smail.th-koeln.de" in sender
++++                        or "@smail.fh-koeln.de" in sender
++++                    ):
++++                        target_folder = "Inbox"
++++                        lastname = extract_lastname(msg.sender)
++++                    else:
++++                        # Fallback falls weder noch (behalte ursprünglichen Ordnernamen oder Standard)
++++                        target_folder = folder_name
++++                        if target_folder == "Inbox":
++++                            lastname = extract_lastname(msg.sender)
++++                        else:
++++                            recipients = msg.recipients
++++                            if recipients:
++++                                lastname = extract_lastname(
++++                                    recipients[0].name or recipients[0].email
++++                                )
++++
++++                # Ziel-Pfad bestimmen
++++                if email_class.startswith(("BA_", "MA_")):
++++                    # Für BA/MA Klassen alle Mails gesammelt in Inbox/SentItems speichern
++++                    target_dir = class_base_path / semester / target_folder
++++                else:
++++                    student_dir = find_student_folder(class_base_path, lastname)
++++                    if not student_dir:
++++                        student_dir = class_base_path / semester / lastname
++++                    target_dir = student_dir / target_folder
++++
++++                target_dir.mkdir(parents=True, exist_ok=True)
++++                target_path = target_dir / msg_file.name
++++
++++                # Datei verschieben
++++                shutil.move(str(msg_file), str(target_path))
++++                logger.info(f"Verschoben: {msg_file.name} -> {target_path}")
++++
++++                moved_emails.append(
++++                    {
++++                        "class": email_class,
++++                        "semester": semester,
++++                        "lastname": lastname,
++++                        "folder": target_folder,
++++                        "path": str(target_path),
++++                    }
++++                )
++++
++++            except Exception as e:
++++                logger.error(f"Fehler beim Verarbeiten von {msg_file}: {e}")
++++
++++    return moved_emails
++++
++++
++++def write_report(source_root: Path, moved_emails: List[Dict[str, Any]]) -> None:
++++    """Erstellt den Markdown-Report.
++++
++++    Args:
++++        source_root: Quellverzeichnis für den Report.
++++        moved_emails: Liste der verschobenen E-Mails.
++++    """
++++    if not moved_emails:
++++        logger.info("Keine E-Mails verschoben. Erstelle keinen Report.")
++++        return
++++
++++    # Sortierung: Klasse, Semester, Nachname, Folder
++++    moved_emails.sort(
++++        key=lambda x: (x["class"], x["semester"], x["lastname"], x["folder"])
++++    )
++++
++++    report_path = source_root / "sorted_emails.md"
++++
++++    with open(report_path, "w", encoding="utf-8") as f:
++++        f.write("# Sortierte E-Mails\n\n")
++++
++++        current_class = None
++++        for email in moved_emails:
++++            if email["class"] != current_class:
++++                current_class = email["class"]
++++                f.write(f"\n## {current_class}\n")
++++
++++            f.write(
++++                f"- **{email['semester']}** | {email['lastname']} | {email['folder']}: `{email['path']}`\n"
++++            )
++++
++++    logger.info(f"Report erstellt: {report_path}")
++++
++++
++++def main() -> None:
++++    """Haupteinstiegspunkt für das Skript."""
++++    parser = argparse.ArgumentParser(
++++        description="Sortiert E-Mails basierend auf Klassifizierung."
++++    )
++++    parser.add_argument(
++++        "source_dir", type=str, help="Quellordner mit Inbox und SentItems."
++++    )
++++    parser.add_argument(
++++        "--config",
++++        type=str,
++++        required=True,
++++        help="Pfad zur YAML-Konfiguration (Klassen-Pfade).",
++++    )
++++    parser.add_argument(
++++        "--model",
++++        type=str,
++++        default="data/email_classifier.pkl",
++++        help="Pfad zum trainierten Modell.",
++++    )
++++
++++    args = parser.parse_args()
++++
++++    source_root = Path(args.source_dir)
++++    if not source_root.exists():
++++        logger.error(f"Quellverzeichnis {args.source_dir} existiert nicht.")
++++        return
++++
++++    config_path = Path(args.config)
++++    if not config_path.exists():
++++        logger.error(f"Konfiguration {args.config} existiert nicht.")
++++        return
++++
++++    with open(config_path, "r", encoding="utf-8") as f:
++++        config = yaml.safe_load(f)
++++
++++    # Falls die Konfiguration geschachtelt ist (z.B. unter einem 'class_paths' Key)
++++    if config and "class_paths" in config:
++++        config = config["class_paths"]
++++
++++    moved_emails = process_emails(source_root, Path(args.model), config)
++++    write_report(source_root, moved_emails)
++++
++++
++++if __name__ == "__main__":
++++    main()
++++"""Engine für die Klassifizierung von E-Mails."""
++++import pickle
++++from pathlib import Path
++++from typing import List, Tuple, Dict, Any, Optional, Union
++++
++++import numpy as np
++++from sklearn.ensemble import RandomForestClassifier
++++from sklearn.feature_extraction.text import TfidfVectorizer
++++from sklearn.preprocessing import LabelEncoder
++++
++++
++++from mcp_university.parser.mail_parser import MailParser
++++
++++class EmailClassifier:
++++    """Klassifiziert E-Mails basierend auf TF-IDF und/oder Embeddings."""
++++
++++    def __init__(
++++        self,
++++        mode: str = "combined",
++++        method: str = "xgboost",
++++        embedding_model_name: str = "paraphrase-multilingual-MiniLM-L12-v2"
++++    ) -> None:
++++        """Initialisiert den Klassifikator.
++++
++++        Args:
++++            mode: Modus der Merkmalsextraktion ('tfidf', 'embedding', 'combined').
++++            method: Klassifizierungsmethode ('randomforest', 'xgboost').
++++            embedding_model_name: Name des Sentence-Transformer Modells.
++++        """
++++        self.mode = mode
++++        self.method = method
++++        self.embedding_model_name = embedding_model_name
++++        self.parser = MailParser()
++++
++++        self.tfidf_vectorizer = TfidfVectorizer(max_features=5000)
++++        self._embedding_model = None
++++        self.label_encoder = LabelEncoder()
++++
++++        if method == "randomforest":
++++            self.classifier = RandomForestClassifier(n_estimators=100, random_state=42)
++++        elif method == "xgboost":
++++            from xgboost import XGBClassifier
++++            self.classifier = XGBClassifier(n_estimators=100, random_state=42, eval_metric='logloss')
++++        else:
++++            raise ValueError(f"Ungültige Klassifizierungsmethode: {method}")
++++
++++        self.is_trained = False
++++
++++    @property
++++    def embedding_model(self):
++++        """Lädt das Embedding-Modell verzögert (Lazy Loading)."""
++++        if self._embedding_model is None:
++++            from sentence_transformers import SentenceTransformer
++++            self._embedding_model = SentenceTransformer(self.embedding_model_name)
++++        return self._embedding_model
++++
++++    def _extract_text(self, file_path: Path) -> Optional[str]:
++++        """Extrahiert Text aus einer E-Mail-Datei."""
++++        return self.parser.parse(file_path)
++++
++++    def preprocess_data(self, root_dir: Union[str, Path]) -> Tuple[List[str], List[str]]:
++++        """Liest E-Mails aus Ordnerstrukturen ein.
++++
++++        Die Ordnernamen werden als Klassenlabels verwendet.
++++
++++        Args:
++++            root_dir: Wurzelverzeichnis mit Unterordnern für jede Klasse.
++++
++++        Returns:
++++            Tuple aus Texten und Labels.
++++        """
++++        root_path = Path(root_dir)
++++        texts = []
++++        labels = []
++++
++++        for class_dir in root_path.iterdir():
++++            if class_dir.is_dir():
++++                label = class_dir.name
++++                for file_path in class_dir.glob("*.msg"):
++++                    text = self._extract_text(file_path)
++++                    if text:
++++                        texts.append(text)
++++                        labels.append(label)
++++
++++        return texts, labels
++++
++++    def get_features(self, texts: List[str], train: bool = False) -> np.ndarray:
++++        """Extrahiert Merkmale aus Texten basierend auf dem gewählten Modus."""
++++        features = []
++++
++++        if self.mode in ["tfidf", "combined"]:
++++            if train:
++++                tfidf_feats = self.tfidf_vectorizer.fit_transform(texts).toarray()
++++            else:
++++                tfidf_feats = self.tfidf_vectorizer.transform(texts).toarray()
++++            features.append(tfidf_feats)
++++
++++        if self.mode in ["embedding", "combined"]:
++++            emb_feats = self.embedding_model.encode(texts)
++++            features.append(emb_feats)
++++
++++        if len(features) > 1:
++++            return np.hstack(features)
++++        return features[0]
++++
++++    def train(self, root_dir: Union[str, Path]) -> None:
++++        """Trainiert den Klassifikator auf Daten aus einem Verzeichnis.
++++
++++        Args:
++++            root_dir: Verzeichnis mit den Trainingsdaten.
++++        """
++++        texts, labels = self.preprocess_data(root_dir)
++++        if not texts:
++++            raise ValueError(f"Keine Trainingsdaten in {root_dir} gefunden.")
++++
++++        X = self.get_features(texts, train=True)
++++        y = self.label_encoder.fit_transform(labels)
++++
++++        self.classifier.fit(X, y)
++++        self.is_trained = True
++++
++++    def predict(self, file_path: Union[str, Path]) -> Dict[str, Any]:
++++        """Klassifiziert eine einzelne E-Mail.
++++
++++        Args:
++++            file_path: Pfad zur .msg Datei.
++++
++++        Returns:
++++            Dictionary mit der vorhergesagten Klasse und Wahrscheinlichkeiten.
++++        """
++++        if not self.is_trained:
++++            raise RuntimeError("Modell muss zuerst trainiert oder geladen werden.")
++++
++++        text = self._extract_text(Path(file_path))
++++        if not text:
++++            raise ValueError(f"Konnte Text aus {file_path} nicht extrahieren.")
++++
++++        X = self.get_features([text], train=False)
++++        y_pred = self.classifier.predict(X)[0]
++++        y_prob = self.classifier.predict_proba(X)[0]
++++
++++        label = self.label_encoder.inverse_transform([int(y_pred)])[0]
++++
++++        # Mapping von Label zu Wahrscheinlichkeit
++++        probs = {
++++            self.label_encoder.inverse_transform([i])[0]: float(prob)
++++            for i, prob in enumerate(y_prob)
++++        }
++++
++++        return {
++++            "prediction": label,
++++            "probabilities": probs,
++++            "confidence": float(np.max(y_prob))
++++        }
++++
++++    def save(self, model_path: Union[str, Path]) -> None:
++++        """Speichert das Modell in einer Datei.
++++
++++        Args:
++++            model_path: Pfad zur Speicherdatei.
++++        """
++++        data = {
++++            "mode": self.mode,
++++            "method": self.method,
++++            "embedding_model_name": self.embedding_model_name,
++++            "tfidf_vectorizer": self.tfidf_vectorizer,
++++            "classifier": self.classifier,
++++            "label_encoder": self.label_encoder,
++++            "is_trained": self.is_trained
++++        }
++++        with open(model_path, "wb") as f:
++++            pickle.dump(data, f)
++++
++++    def load(self, model_path: Union[str, Path]) -> None:
++++        """Lädt das Modell aus einer Datei.
++++
++++        Args:
++++            model_path: Pfad zur Modelldatei.
++++        """
++++        with open(model_path, "rb") as f:
++++            data = pickle.load(f)
++++
++++        self.mode = data["mode"]
++++        self.method = data.get("method", "randomforest")  # Fallback für alte Modelle
++++        self.embedding_model_name = data["embedding_model_name"]
++++        self.tfidf_vectorizer = data["tfidf_vectorizer"]
++++        self.classifier = data["classifier"]
++++        self.label_encoder = data["label_encoder"]
++++        self.is_trained = data["is_trained"]
++++        # embedding_model wird bei Bedarf geladen (Lazy Loading)
++++![Tests](https://github.com/dgaida/academic-memory-mcp/actions/workflows/tests.yml/badge.svg) ![Lint](https://github.com/dgaida/academic-memory-mcp/actions/workflows/lint.yml/badge.svg) ![CodeQL](https://github.com/dgaida/academic-memory-mcp/actions/workflows/codeql.yml/badge.svg) ![Documentation](https://github.com/dgaida/academic-memory-mcp/actions/workflows/docs.yml/badge.svg) ![Auto Versioning](https://github.com/dgaida/academic-memory-mcp/actions/workflows/auto-version.yml/badge.svg)
++++[![Version](https://img.shields.io/github/v/tag/dgaida/academic-memory-mcp?label=version)](https://github.com/dgaida/academic-memory-mcp/tags)
++++[![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
++++[![codecov](https://codecov.io/gh/dgaida/academic-memory-mcp/branch/master/graph/badge.svg)](https://codecov.io/gh/dgaida/academic-memory-mcp)
++++[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://dgaida.github.io/academic-memory-mcp/)
++++[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/dgaida/academic-memory-mcp/graphs/commit-activity)
++++![Last commit](https://img.shields.io/github/last-commit/dgaida/academic-memory-mcp)
++++
++++# MCP University Memory System
++++
++++A locally-running, agentic knowledge and memory system for university and research work.
++++
++++## Features
++++- Recursive analysis of local folders
++++- Semantic understanding of documents and emails
++++- Hierarchical summaries (File -> Folder -> Root)
++++- Hybrid search (BM25 + Vector)
++++- MCP Server integration
++++- Fully offline using local LLMs (Ollama)
++++- Automated E-Mail classification (Bachelor thesis, projects, etc.)
++++- Database management for students, deadlines, and metadata
++++
++++## Prerequisites
++++- **qmd CLI:** Required for hybrid search. Install globally via: `npm install -g @tobilu/qmd`
++++- **Docling:** Required for PDF parsing. Install with: `pip install docling` and initialize with `cp-config` if prompted.
++++
++++## Tech Stack
++++- **Document Parsing:** Docling
++++- **Local LLM:** Ollama
++++- **Embeddings:** bge-m3
++++- **Vector DB:** Qdrant
++++- **MCP Framework:** FastMCP
++++- **Metadata:** SQLite
++++- **File Watching:** watchdog
++++
++++## Project Structure
++++```text
++++mcp_university/
++++├── config/             # YAML configurations and prompts
++++├── data/               # Persistent data (SQLite, Indexes, Cache)
++++├── src/mcp_university/ # Core package
++++│   ├── crawler/        # File system crawling and watching
++++│   ├── parser/         # Document and email parsing
++++│   ├── summarizer/     # LLM summary generation
++++│   ├── retrieval/      # Hybrid search index
++++│   ├── metadata/       # SQLite storage
++++│   ├── mcp_server/     # FastMCP server
++++│   ├── agent/          # Agentic workflows
++++│   ├── cli/            # Typer-based CLI
++++│   └── config.py       # Config loader
++++└── tests/              # Unit and integration tests
++++```
++++
++++## Installation
++++```bash
++++pip install -e .
++++```
++++
++++## Usage
++++```bash
++++mcp-uni index
++++mcp-uni search "your query"
++++mcp-uni serve-mcp
++++```
++++# Nutzung
++++
++++Das MCP University Memory System bietet verschiedene Schnittstellen zur Interaktion mit Ihren Daten.
++++
++++## Kommandozeile (CLI)
++++
++++Die CLI ist der primäre Weg, um das System zu verwalten und manuelle Suchen durchzuführen.
++++
++++### Indexierung (`index`)
++++Dieser Befehl scannt alle konfigurierten Ordner, erstellt Zusammenfassungen und aktualisiert den Index.
++++```bash
++++mcp-uni index
++++```
++++
++++### Suche (`search`)
++++Führt eine schnelle Abfrage über den gesamten Datenbestand durch.
++++```bash
++++mcp-uni search "Inhalt der Vorlesung 5"
++++```
++++
++++### Überwachung (`watch`)
++++Startet einen Hintergrundprozess, der auf Dateiänderungen reagiert und den Index in Echtzeit aktualisiert.
++++```bash
++++mcp-uni watch
++++```
++++
++++## E-Mail Klassifizierung
++++
++++Das System enthält ein Subpackage zur automatisierten Klassifizierung von studentischen E-Mails (z.B. Bachelorarbeit, Praxisprojekt).
++++
++++### Modell trainieren
++++Um den Klassifikator zu nutzen, muss er zuerst mit Beispieldaten trainiert werden. Erwarten wird eine Ordnerstruktur, in der jeder Unterordner eine Klasse repräsentiert und die E-Mails (.msg) enthält.
++++
++++```bash
++++python3 mcp_university/classifier/train.py /pfad/zu/trainingsdaten --mode combined --method xgboost
++++```
++++
++++Dabei kann zwischen `randomforest` und `xgboost` (Standard) gewählt werden.
++++
++++### E-Mail klassifizieren
++++Nach dem Training kann eine einzelne E-Mail-Datei klassifiziert werden:
++++
++++```bash
++++python3 mcp_university/classifier/predict.py /pfad/zur/email.msg
++++```
++++
++++Die Ausgabe enthält die wahrscheinlichste Klasse sowie die Konfidenz und eine detaillierte Wahrscheinlichkeitsverteilung.
++++### Batch-Klassifizierung
++++Um einen ganzen Ordner mit E-Mails automatisch zu sortieren:
++++```bash
++++
++++### E-Mail Sortierung (Studenten-Ordner)
++++Das leistungsfähigste Skript sortiert E-Mails nicht nur nach Klasse, sondern auch nach Semester und Student (Nachname):
++++
++++```bash
++++python3 mcp_university/classifier/sort_emails.py /quell/ordner --config config/class_paths.yaml --model data/email_classifier.pkl
++++```
++++
++++Es erkennt automatisch:
++++- **Semester:** Basierend auf dem E-Mail-Datum (SoSe/WS).
++++- **Student:** Extrahiert den Nachnamen aus `smail.th-koeln.de` Adressen oder Anzeigenamen.
++++- **Richtung:** Sortiert in `Inbox` oder `SentItems` Unterordner.
++++- **Bericht:** Erstellt eine `sorted_emails.md` mit einer Übersicht aller verschobenen Mails.
++++python3 mcp_university/classifier/classify_folder.py /quell/ordner --model data/email_classifier.pkl
++++```
++++Dies verschiebt die E-Mails in Unterordner, die nach den vorhergesagten Klassen benannt sind.
++++
++++
++++## Datenbank-Management (`db`)
++++
++++Die `db` Befehlsgruppe erlaubt die direkte Verwaltung der Metadaten und des Suchindex.
++++
++++### Auflisten von Inhalten
++++Sie können verschiedene Entitäten in der Datenbank auflisten:
++++
++++*   **Dateien:** `mcp-uni db list-files`
++++*   **Ordner:** `mcp-uni db list-folders`
++++*   **Studenten:** `mcp-uni db list-students` (Hinweis: Nutzen Sie `sync-students` zum Befüllen)
++++*   **Zusammenfassungen:** `mcp-uni db list-summaries`
++++*   **Deadlines:** `mcp-uni db list-deadlines`
++++
++++### Synchronisierung von Studenten (`sync-students`)
++++Befüllt die Datenbank aus einer `students.yaml`.
++++```bash
++++mcp-uni db sync-students
++++```
++++
++++### Löschen von Inhalten
++++Einträge können über ihre ID gelöscht werden. Mit der Option `--force` oder `-f` wird die Bestätigungsabfrage übersprungen.
++++
++++*   **Dateien löschen:** `mcp-uni db delete-file <ID_1> <ID_2> ...`
++++*   **Ordner löschen:** `mcp-uni db delete-folder <ID>` (entfernt rekursiv alle enthaltenen Dateien)
++++*   **Student löschen:** `mcp-uni db delete-student <ID>`
++++*   **Zusammenfassung löschen:** `mcp-uni db delete-summary <ID>`
++++*   **Deadline löschen:** `mcp-uni db delete-deadline <ID>`
++++
++++## Model Context Protocol (MCP)
++++
++++Der leistungsfähigste Weg, das System zu nutzen, ist über einen MCP-Client (wie Claude Desktop).
++++
++++### Server starten
++++```bash
++++mcp-uni serve-mcp
++++```
++++
++++### Verfügbare Tools
++++*   `search_documents`: Semantische Suche in Dokumenten.
++++*   `get_folder_summary`: Abfrage von aggregierten Ordner-Informationen.
++++*   `get_student_context`: Komplette Historie und Status eines Studenten abrufen.
++++*   `generate_mail_reply`: Entwurf einer E-Mail basierend auf dem Kontext.
++++*   `get_open_tasks`: Extraktion von TODOs aus allen Dokumenten.
++++
++++## Typische Workflows
++++
++++### 1. Vorbereitung einer Sprechstunde
++++Bitten Sie Ihren Agenten: "Gib mir den Kontext zu Student Max Mustermann und zeige mir seine letzten Abgaben."
++++Der Agent nutzt `get_student_context` and `search_documents`, um Ihnen eine kompakte Übersicht zu liefern.
++++
++++### 2. Beantworten von E-Mails
++++Kopieren Sie die E-Mail eines Studenten in den Chat und nutzen Sie das Tool `generate_mail_reply`. Das System berücksichtigt dabei automatisch den Status der Abschlussarbeit oder offene Deadlines.
++++
++++## Konfiguration
++++
++++### Zweistufige Zusammenfassung
++++In der `config/folders.yaml` kann die Option `summarize_emails_individually` (Standard: `false`) aktiviert werden. Wenn diese auf `true` gesetzt ist, werden E-Mail-Threads in zwei Stufen zusammengefasst: erst jede E-Mail einzeln, dann die gesamte Konversation.
++++
++++## Hilfsskripte
++++
++++Das System enthält nützliche Skripte im Ordner `scripts/`:
++++
++++- **`remove_empty_folders.py`**: Löscht rekursiv alle leeren Ordner in einem Verzeichnis.
++++- **`flatten_directory.py`**: Flacht eine Ordnerstruktur ab, indem alle Dateien in das Wurzelverzeichnis verschoben werden (inkl. Namenskollisionsprüfung).
++++# Usage
++++
++++The MCP University Memory System provides various interfaces for interacting with your data.
++++
++++## Command Line Interface (CLI)
++++
++++The CLI is the primary way to manage the system and perform manual searches.
++++
++++### Indexing (`index`)
++++This command scans all configured folders, creates summaries, and updates the index.
++++```bash
++++mcp-uni index
++++```
++++
++++### Search (`search`)
++++Performs a quick query across the entire dataset.
++++```bash
++++mcp-uni search "Content of lecture 5"
++++```
++++
++++### Watchdog (`watch`)
++++Starts a background process that reacts to file changes and updates the index in real-time.
++++```bash
++++mcp-uni watch
++++```
++++
++++## Email Classification
++++
++++The system includes a subpackage for the automated classification of student emails (e.g., Bachelor's thesis, internship project).
++++
++++### Training the Model
++++To use the classifier, it must first be trained with example data. It expects a folder structure where each subfolder represents a class and contains the emails (.msg).
++++
++++```bash
++++python3 mcp_university/classifier/train.py /path/to/training_data --mode combined --method xgboost
++++```
++++
++++You can choose between `randomforest` and `xgboost` (default).
++++
++++### Classifying an Email
++++After training, a single email file can be classified:
++++
++++```bash
++++python3 mcp_university/classifier/predict.py /path/to/email.msg
++++```
++++
++++The output contains the most likely class as well as the confidence and a detailed probability distribution.
++++### Batch Classification
++++To automatically sort an entire folder of emails (classification only):
++++```bash
++++
++++### Email Sorting (Student Folders)
++++The most powerful script sorts emails not only by class, but also by semester and student (last name):
++++
++++```bash
++++python3 mcp_university/classifier/sort_emails.py /source/folder --config config/class_paths.yaml --model data/email_classifier.pkl
++++```
++++
++++It automatically detects:
++++- **Semester:** Based on the email date (Summer/Winter semester).
++++- **Student:** Extracts the last name from `smail.th-koeln.de` addresses or display names.
++++- **Direction:** Sorts into `Inbox` or `SentItems` subfolders.
++++- **Report:** Creates a `sorted_emails.md` with an overview of all moved emails.
++++python3 mcp_university/classifier/classify_folder.py /source/folder --model data/email_classifier.pkl
++++```
++++This moves the emails into subfolders named after their predicted classes.
++++
++++
++++## Database Management (`db`)
++++
++++The `db` command group allows for direct management of metadata and the search index.
++++
++++### Listing Content
++++You can list various entities in the database:
++++
++++*   **Files:** `mcp-uni db list-files`
++++*   **Folders:** `mcp-uni db list-folders`
++++*   **Students:** `mcp-uni db list-students` (Note: Use `sync-students` to populate)
++++*   **Summaries:** `mcp-uni db list-summaries`
++++*   **Deadlines:** `mcp-uni db list-deadlines`
++++
++++### Student Synchronization (`sync-students`)
++++Populates the database from a `students.yaml`.
++++```bash
++++mcp-uni db sync-students
++++```
++++
++++### Deleting Content
++++Entries can be deleted using their ID. Use the `--force` or `-f` option to skip the confirmation prompt.
++++
++++*   **Delete Files:** `mcp-uni db delete-file <ID_1> <ID_2> ...`
++++*   **Delete Folder:** `mcp-uni db delete-folder <ID>` (recursively removes all contained files)
++++*   **Delete Student:** `mcp-uni db delete-student <ID>`
++++*   **Delete Summary:** `mcp-uni db delete-summary <ID>`
++++*   **Delete Deadline:** `mcp-uni db delete-deadline <ID>`
++++
++++## Model Context Protocol (MCP)
++++
++++The most powerful way to use the system is via an MCP client (like Claude Desktop).
++++
++++### Start Server
++++```bash
++++mcp-uni serve-mcp
++++```
++++
++++### Available Tools
++++*   `search_documents`: Semantic search in documents.
++++*   `get_folder_summary`: Query aggregated folder information.
++++*   `get_student_context`: Retrieve complete history and status of a student.
++++*   `generate_mail_reply`: Draft an email based on the context.
++++*   `get_open_tasks`: Extraction of TODOs from all documents.
++++
++++## Typical Workflows
++++
++++### 1. Preparing for Office Hours
++++Ask your agent: "Give me the context for student Max Mustermann and show me his latest submissions."
++++The agent uses `get_student_context` and `search_documents` to provide you with a compact overview.
++++
++++### 2. Answering Emails
++++Copy a student's email into the chat and use the `generate_mail_reply` tool. The system automatically takes the status of the thesis or open deadlines into account.
++++
++++## Configuration
++++
++++### Two-Stage Summarization
++++In `config/folders.yaml`, the `summarize_emails_individually` option (default: `false`) can be enabled. When set to `true`, email threads are summarized in two stages: first each email individually, then the entire conversation.
++++
++++## Utility Scripts
++++
++++The system includes useful scripts in the `scripts/` folder:
++++
++++- **`remove_empty_folders.py`**: Recursively deletes all empty folders in a directory.
++++- **`flatten_directory.py`**: Flattens a directory structure by moving all files to the root directory (includes name collision checks).
++++from pathlib import Path
++++from datetime import datetime
++++from unittest.mock import MagicMock, patch
++++
++++from mcp_university.classifier.sort_emails import get_semester, extract_lastname, process_emails, write_report
++++
++++def test_get_semester():
++++    # SoSe: 01.04. - 30.09.
++++    assert get_semester(datetime(2025, 4, 1)) == "2025_SoSe"
++++    assert get_semester(datetime(2025, 9, 30)) == "2025_SoSe"
++++
++++    # WS: 01.10. - 31.03.
++++    assert get_semester(datetime(2025, 10, 1)) == "2025_26_WS"
++++    assert get_semester(datetime(2026, 3, 31)) == "2025_26_WS"
++++    assert get_semester(datetime(2025, 1, 15)) == "2024_25_WS"
++++
++++def test_extract_lastname():
++++    assert extract_lastname("Max Mustermann") == "Mustermann"
++++    assert extract_lastname("Mustermann, Max") == "Mustermann"
++++    assert extract_lastname("Max Mustermann <max@example.com>") == "Mustermann"
++++    assert extract_lastname("Mustermann, Max <max@example.com>") == "Mustermann"
++++    assert extract_lastname("'Hans Müller'") == "Müller"
++++    assert extract_lastname("'Müller, Hans'") == "'Müller"
++++    assert extract_lastname("(No Sender)") == "Unknown"
++++    assert extract_lastname("") == "Unknown"
++++
++++@patch('mcp_university.classifier.sort_emails.EmailClassifier')
++++@patch('mcp_university.classifier.sort_emails.MailParser')
++++@patch('extract_msg.openMsg')
++++def test_process_emails(mock_open_msg, mock_mail_parser, mock_classifier_class, tmp_path):
++++    # Setup source directory
++++    source_root = tmp_path / "source"
++++    inbox = source_root / "Inbox"
++++    sent = source_root / "SentItems"
++++    inbox.mkdir(parents=True)
++++    sent.mkdir(parents=True)
++++
++++    msg1 = inbox / "mail1.msg"
++++    msg1.touch()
++++    msg2 = sent / "mail2.msg"
++++    msg2.touch()
++++
++++    # Subdirectory test
++++    sub_inbox = inbox / "Subfolder"
++++    sub_inbox.mkdir()
++++    msg3 = sub_inbox / "mail3.msg"
++++    msg3.touch()
++++
++++    # Setup target directory
++++    target_root = tmp_path / "target"
++++    target_root.mkdir()
++++
++++    # Mock classifier
++++    mock_classifier = mock_classifier_class.return_value
++++    mock_classifier.predict.side_effect = [
++++        {"prediction": "BachelorThesis"}, # mail1
++++        {"prediction": "BachelorThesis"}, # mail3 (rglob finds this)
++++        {"prediction": "BachelorThesis"}  # mail2
++++    ]
++++
++++    # Mock parser
++++    mock_parser = mock_mail_parser.return_value
++++    mock_parser.get_email_date.side_effect = [
++++        datetime(2025, 5, 10), # mail1 SoSe
++++        datetime(2025, 6, 10), # mail3 SoSe
++++        datetime(2025, 11, 20) # mail2 WS
++++    ]
++++
++++    # Mock extract_msg
++++    mock_msg1 = MagicMock()
++++    mock_msg1.sender = "Max Mustermann"
++++
++++    mock_msg3 = MagicMock()
++++    mock_msg3.sender = "Max Mustermann"
++++
++++    mock_msg2 = MagicMock()
++++    mock_recip = MagicMock()
++++    mock_recip.name = "Erika Musterfrau"
++++    mock_msg2.recipients = [mock_recip]
++++
++++    mock_open_msg.return_value.__enter__.side_effect = [mock_msg1, mock_msg3, mock_msg2]
++++
++++    config = {
++++        "BachelorThesis": str(target_root)
++++    }
++++
++++    moved = process_emails(source_root, Path("dummy_model"), config)
++++
++++    assert len(moved) == 3
++++
++++    # Verify first file (Inbox)
++++    expected_path1 = target_root / "2025_SoSe" / "Mustermann" / "Inbox" / "mail1.msg"
++++    assert expected_path1.exists()
++++    assert not msg1.exists()
++++
++++    # Verify third file (Subfolder in Inbox) -> should go to Inbox
++++    expected_path3 = target_root / "2025_SoSe" / "Mustermann" / "Inbox" / "mail3.msg"
++++    assert expected_path3.exists()
++++    assert not msg3.exists()
++++
++++    # Verify second file (SentItems)
++++    expected_path2 = target_root / "2025_26_WS" / "Musterfrau" / "SentItems" / "mail2.msg"
++++    assert expected_path2.exists()
++++    assert not msg2.exists()
++++
++++def test_write_report(tmp_path):
++++    source_root = tmp_path
++++    moved_emails = [
++++        {
++++            "class": "BachelorThesis",
++++            "semester": "2025_SoSe",
++++            "lastname": "Mustermann",
++++            "folder": "Inbox",
++++            "path": "/path/to/mail1.msg"
++++        },
++++        {
++++            "class": "BachelorThesis",
++++            "semester": "2025_26_WS",
++++            "lastname": "Musterfrau",
++++            "folder": "SentItems",
++++            "path": "/path/to/mail2.msg"
++++        }
++++    ]
++++
++++    write_report(source_root, moved_emails)
++++
++++    report_path = source_root / "sorted_emails.md"
++++    assert report_path.exists()
++++
++++    content = report_path.read_text(encoding="utf-8")
++++    assert "# Sortierte E-Mails" in content
++++    assert "## BachelorThesis" in content
++++    assert "Mustermann" in content
++++    assert "Musterfrau" in content
+++diff --git a/docs/de/usage/index.md b/docs/de/usage/index.md
+++index feaeeb7..c840c64 100644
+++--- a/docs/de/usage/index.md
++++++ b/docs/de/usage/index.md
+++@@ -45,6 +45,26 @@ python3 mcp_university/classifier/predict.py /pfad/zur/email.msg
+++ ```
+++
+++ Die Ausgabe enthält die wahrscheinlichste Klasse sowie die Konfidenz und eine detaillierte Wahrscheinlichkeitsverteilung.
++++### Batch-Klassifizierung
++++Um einen ganzen Ordner mit E-Mails automatisch zu sortieren:
++++```bash
++++
++++### E-Mail Sortierung (Studenten-Ordner)
++++Das leistungsfähigste Skript sortiert E-Mails nicht nur nach Klasse, sondern auch nach Semester und Student (Nachname):
++++
++++```bash
++++python3 mcp_university/classifier/sort_emails.py /quell/ordner --config config/class_paths.yaml --model data/email_classifier.pkl
++++```
++++
++++Es erkennt automatisch:
++++- **Semester:** Basierend auf dem E-Mail-Datum (SoSe/WS).
++++- **Student:** Extrahiert den Nachnamen aus `smail.th-koeln.de` Adressen oder Anzeigenamen.
++++- **Richtung:** Sortiert in `Inbox` oder `SentItems` Unterordner.
++++- **Bericht:** Erstellt eine `sorted_emails.md` mit einer Übersicht aller verschobenen Mails.
++++python3 mcp_university/classifier/classify_folder.py /quell/ordner --model data/email_classifier.pkl
++++```
++++Dies verschiebt die E-Mails in Unterordner, die nach den vorhergesagten Klassen benannt sind.
++++
+++
+++ ## Datenbank-Management (`db`)
+++
+++@@ -98,3 +118,15 @@ Der Agent nutzt `get_student_context` and `search_documents`, um Ihnen eine komp
+++
+++ ### 2. Beantworten von E-Mails
+++ Kopieren Sie die E-Mail eines Studenten in den Chat und nutzen Sie das Tool `generate_mail_reply`. Das System berücksichtigt dabei automatisch den Status der Abschlussarbeit oder offene Deadlines.
++++
++++## Konfiguration
++++
++++### Zweistufige Zusammenfassung
++++In der `config/folders.yaml` kann die Option `summarize_emails_individually` (Standard: `false`) aktiviert werden. Wenn diese auf `true` gesetzt ist, werden E-Mail-Threads in zwei Stufen zusammengefasst: erst jede E-Mail einzeln, dann die gesamte Konversation.
++++
++++## Hilfsskripte
++++
++++Das System enthält nützliche Skripte im Ordner `scripts/`:
++++
++++- **`remove_empty_folders.py`**: Löscht rekursiv alle leeren Ordner in einem Verzeichnis.
++++- **`flatten_directory.py`**: Flacht eine Ordnerstruktur ab, indem alle Dateien in das Wurzelverzeichnis verschoben werden (inkl. Namenskollisionsprüfung).
+++diff --git a/docs/en/usage/index.md b/docs/en/usage/index.md
+++index 6a759fa..abf8608 100644
+++--- a/docs/en/usage/index.md
++++++ b/docs/en/usage/index.md
+++@@ -45,6 +45,26 @@ python3 mcp_university/classifier/predict.py /path/to/email.msg
+++ ```
+++
+++ The output contains the most likely class as well as the confidence and a detailed probability distribution.
++++### Batch Classification
++++To automatically sort an entire folder of emails (classification only):
++++```bash
++++
++++### Email Sorting (Student Folders)
++++The most powerful script sorts emails not only by class, but also by semester and student (last name):
++++
++++```bash
++++python3 mcp_university/classifier/sort_emails.py /source/folder --config config/class_paths.yaml --model data/email_classifier.pkl
++++```
++++
++++It automatically detects:
++++- **Semester:** Based on the email date (Summer/Winter semester).
++++- **Student:** Extracts the last name from `smail.th-koeln.de` addresses or display names.
++++- **Direction:** Sorts into `Inbox` or `SentItems` subfolders.
++++- **Report:** Creates a `sorted_emails.md` with an overview of all moved emails.
++++python3 mcp_university/classifier/classify_folder.py /source/folder --model data/email_classifier.pkl
++++```
++++This moves the emails into subfolders named after their predicted classes.
++++
+++
+++ ## Database Management (`db`)
+++
+++@@ -98,3 +118,15 @@ The agent uses `get_student_context` and `search_documents` to provide you with
+++
+++ ### 2. Answering Emails
+++ Copy a student's email into the chat and use the `generate_mail_reply` tool. The system automatically takes the status of the thesis or open deadlines into account.
++++
++++## Configuration
++++
++++### Two-Stage Summarization
++++In `config/folders.yaml`, the `summarize_emails_individually` option (default: `false`) can be enabled. When set to `true`, email threads are summarized in two stages: first each email individually, then the entire conversation.
++++
++++## Utility Scripts
++++
++++The system includes useful scripts in the `scripts/` folder:
++++
++++- **`remove_empty_folders.py`**: Recursively deletes all empty folders in a directory.
++++- **`flatten_directory.py`**: Flattens a directory structure by moving all files to the root directory (includes name collision checks).
+++diff --git a/mcp_university/classifier/engine.py b/mcp_university/classifier/engine.py
+++index edffe5f..145a30c 100644
+++--- a/mcp_university/classifier/engine.py
++++++ b/mcp_university/classifier/engine.py
+++@@ -7,7 +7,7 @@ import numpy as np
+++ from sklearn.ensemble import RandomForestClassifier
+++ from sklearn.feature_extraction.text import TfidfVectorizer
+++ from sklearn.preprocessing import LabelEncoder
+++-from sentence_transformers import SentenceTransformer
++++
+++
+++ from mcp_university.parser.mail_parser import MailParser
+++
+++@@ -33,7 +33,7 @@ class EmailClassifier:
+++         self.parser = MailParser()
+++
+++         self.tfidf_vectorizer = TfidfVectorizer(max_features=5000)
+++-        self._embedding_model: Optional[SentenceTransformer] = None
++++        self._embedding_model = None
+++         self.label_encoder = LabelEncoder()
+++
+++         if method == "randomforest":
+++@@ -47,9 +47,10 @@ class EmailClassifier:
+++         self.is_trained = False
+++
+++     @property
+++-    def embedding_model(self) -> SentenceTransformer:
++++    def embedding_model(self):
+++         """Lädt das Embedding-Modell verzögert (Lazy Loading)."""
+++         if self._embedding_model is None:
++++            from sentence_transformers import SentenceTransformer
+++             self._embedding_model = SentenceTransformer(self.embedding_model_name)
+++         return self._embedding_model
+++
+++diff --git a/mcp_university/classifier/sort_emails.py b/mcp_university/classifier/sort_emails.py
+++index a25c769..d47e793 100644
+++--- a/mcp_university/classifier/sort_emails.py
++++++ b/mcp_university/classifier/sort_emails.py
+++@@ -75,12 +75,16 @@ def extract_lastname(name_str: str) -> str:
+++
+++     if "," in clean_name:
+++         # Format: Lastname, Firstname
+++-        return clean_name.split(",")[0].strip()
++++        res = clean_name.split(",")[0].strip()
++++        return res[:-1] if res.endswith("'") else res
+++     else:
+++         # Format: Firstname Lastname
+++         parts = clean_name.split()
+++         if parts:
+++-            return parts[-1]
++++            res = parts[-1]
++++            if res.endswith("'"):
++++                res = res[:-1]
++++            return res
+++     return "Unknown"
+++
+++
+++diff --git a/tests/test_sort_emails.py b/tests/test_sort_emails.py
+++index 80f3085..7e74b2f 100644
+++--- a/tests/test_sort_emails.py
++++++ b/tests/test_sort_emails.py
+++@@ -19,6 +19,8 @@ def test_extract_lastname():
+++     assert extract_lastname("Mustermann, Max") == "Mustermann"
+++     assert extract_lastname("Max Mustermann <max@example.com>") == "Mustermann"
+++     assert extract_lastname("Mustermann, Max <max@example.com>") == "Mustermann"
++++    assert extract_lastname("'Hans Müller'") == "Müller"
++++    assert extract_lastname("'Müller, Hans'") == "'Müller"
+++     assert extract_lastname("(No Sender)") == "Unknown"
+++     assert extract_lastname("") == "Unknown"
+++
++diff --git a/tests/test_sort_emails.py b/tests/test_sort_emails.py
++index 80f3085..7e74b2f 100644
++--- a/tests/test_sort_emails.py
+++++ b/tests/test_sort_emails.py
++@@ -19,6 +19,8 @@ def test_extract_lastname():
++     assert extract_lastname("Mustermann, Max") == "Mustermann"
++     assert extract_lastname("Max Mustermann <max@example.com>") == "Mustermann"
++     assert extract_lastname("Mustermann, Max <max@example.com>") == "Mustermann"
+++    assert extract_lastname("'Hans Müller'") == "Müller"
+++    assert extract_lastname("'Müller, Hans'") == "'Müller"
++     assert extract_lastname("(No Sender)") == "Unknown"
++     assert extract_lastname("") == "Unknown"
++
+diff --git a/changes_summary.txt b/changes_summary.txt
+new file mode 100644
+index 0000000..76757a9
+--- /dev/null
++++ b/changes_summary.txt
+@@ -0,0 +1,959 @@
++"""Skript zum Sortieren von E-Mails basierend auf Klassifizierung."""
++import argparse
++import logging
++import re
++import shutil
++from datetime import datetime
++from pathlib import Path
++from typing import Any, Dict, List, Optional
++
++import yaml
++
++from mcp_university.classifier.engine import EmailClassifier
++from mcp_university.parser.mail_parser import MailParser
++
++# Logging konfigurieren
++logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
++logger = logging.getLogger(__name__)
++
++
++def get_semester(date: datetime) -> str:
++    """Bestimmt den Semester-Ordnernamen basierend auf dem Datum.
++
++    SoSe: 01.04. - 30.09. -> YYYY_SoSe
++    WS: 01.10. - 31.03. -> YYYY_YY+1_WS
++
++    Args:
++        date: Das Datum der E-Mail.
++
++    Returns:
++        str: Der Name des Semester-Ordners.
++    """
++    year = date.year
++    month = date.month
++
++    if 4 <= month <= 9:
++        return f"{year}_SoSe"
++    else:
++        if month >= 10:
++            return f"{year}_{str(year + 1)[2:]}_WS"
++        else:
++            return f"{year-1}_{str(year)[2:]}_WS"
++
++
++def extract_lastname(name_str: str) -> str:
++    """Extrahiert den Nachnamen aus einem Namensstring oder einer E-Mail-Adresse.
++
++    Unterstützt das Format vorname.nachname@smail.th-koeln.de (auch mit mehreren Teilen)
++    sowie 'Max Mustermann' oder 'Mustermann, Max'.
++
++    Args:
++        name_str: Der zu parsende Name oder die E-Mail-Adresse.
++
++    Returns:
++        str: Der extrahierte Nachname.
++    """
++    if not name_str or name_str == "(No Sender)" or name_str == "(No Receiver)":
++        return "Unknown"
++
++    # Suche nach E-Mail-Adresse (in < > oder direkt)
++    email_match = re.search(r"[\w\.-]+@[\w\.-]+", name_str)
++    if email_match:
++        email = email_match.group(0)
++        if email.lower().endswith(("@smail.th-koeln.de", "@smail.fh-koeln.de")):
++            local_part = email.split("@")[0]
++            if "." in local_part:
++                # Alles nach dem ersten Punkt ist der Nachname
++                lastname_part = local_part.split(".", 1)[1]
++                # Teile nach Unterstrich und schreibe jeden Teil groß
++                parts = lastname_part.split("_")
++                return "_".join(p[0].upper() + p[1:] for p in parts if p)
++
++    # Fallback für Namen ohne (Smail-)Adresse
++    # Entferne E-Mail Adresse in Klammern falls vorhanden
++    clean_name = name_str.split("<")[0].strip()
++
++    if "," in clean_name:
++        # Format: Lastname, Firstname
++        res = clean_name.split(",")[0].strip()
++        return res[:-1] if res.endswith("'") else res
++    else:
++        # Format: Firstname Lastname
++        parts = clean_name.split()
++        if parts:
++            res = parts[-1]
++            if res.endswith("'"):
++                res = res[:-1]
++            return res
++    return "Unknown"
++
++
++def find_student_folder(base_path: Path, lastname: str) -> Optional[Path]:
++    """Sucht nach einem existierenden Studierendenordner in allen Semesterordnern.
++
++    Args:
++        base_path: Basisverzeichnis für die Suche.
++        lastname: Nachname des Studenten.
++
++    Returns:
++        Optional[Path]: Pfad zum Ordner falls gefunden, sonst None.
++    """
++    if not base_path.exists():
++        return None
++
++    # Suche in allen Unterordnern (Semesterordnern)
++    for semester_dir in base_path.iterdir():
++        if semester_dir.is_dir():
++            student_dir = semester_dir / lastname
++            if student_dir.exists() and student_dir.is_dir():
++                return student_dir
++    return None
++
++
++def process_emails(
++    source_root: Path, classifier_model: Path, config: Dict[str, str]
++) -> List[Dict[str, Any]]:
++    """Verarbeitet E-Mails und sortiert sie basierend auf Absender/Empfänger.
++
++    Args:
++        source_root: Quellverzeichnis mit den E-Mails.
++        classifier_model: Pfad zum trainierten Modell.
++        config: Konfiguration der Zielpfade.
++
++    Returns:
++        List[Dict[str, Any]]: Liste der verschobenen E-Mails.
++    """
++    classifier = EmailClassifier()
++    classifier.load(classifier_model)
++    parser = MailParser()
++
++    moved_emails = []
++
++    # Die Ordner, die verarbeitet werden sollen
++    folders_to_process = ["Inbox", "SentItems"]
++
++    for folder_name in folders_to_process:
++        folder_path = source_root / folder_name
++        if not folder_path.exists():
++            logger.warning(f"Ordner {folder_path} existiert nicht. Überspringe.")
++            continue
++
++        logger.info(f"Verarbeite Ordner: {folder_name}")
++
++        for msg_file in folder_path.rglob("*.msg"):
++            try:
++                # Klassifizierung
++                prediction = classifier.predict(msg_file)
++                email_class = prediction["prediction"]
++
++                if email_class not in config:
++                    logger.warning(
++                        f"Keine Pfad-Konfiguration für Klasse '{email_class}' gefunden. Überspringe {msg_file.name}"
++                    )
++                    continue
++
++                class_base_path = Path(config[email_class])
++
++                # Datum und Semester
++                date = parser.get_email_date(msg_file)
++                semester = get_semester(date)
++
++                # Sender/Receiver und Ziel-Ordner bestimmen
++                lastname = "Unknown"
++                target_folder = "Inbox"  # Default
++
++                import extract_msg
++
++                with extract_msg.openMsg(str(msg_file)) as msg:
++                    sender = msg.sender.lower() if msg.sender else ""
++                    if "daniel.gaida@th-koeln.de" in sender:
++                        target_folder = "SentItems"
++                        # Bei Sent Items den Nachnamen des ersten Empfängers nehmen
++                        recipients = msg.recipients
++                        if recipients:
++                            lastname = extract_lastname(
++                                recipients[0].name or recipients[0].email
++                            )
++                    elif (
++                        "@smail.th-koeln.de" in sender
++                        or "@smail.fh-koeln.de" in sender
++                    ):
++                        target_folder = "Inbox"
++                        lastname = extract_lastname(msg.sender)
++                    else:
++                        # Fallback falls weder noch (behalte ursprünglichen Ordnernamen oder Standard)
++                        target_folder = folder_name
++                        if target_folder == "Inbox":
++                            lastname = extract_lastname(msg.sender)
++                        else:
++                            recipients = msg.recipients
++                            if recipients:
++                                lastname = extract_lastname(
++                                    recipients[0].name or recipients[0].email
++                                )
++
++                # Ziel-Pfad bestimmen
++                if email_class.startswith(("BA_", "MA_")):
++                    # Für BA/MA Klassen alle Mails gesammelt in Inbox/SentItems speichern
++                    target_dir = class_base_path / semester / target_folder
++                else:
++                    student_dir = find_student_folder(class_base_path, lastname)
++                    if not student_dir:
++                        student_dir = class_base_path / semester / lastname
++                    target_dir = student_dir / target_folder
++
++                target_dir.mkdir(parents=True, exist_ok=True)
++                target_path = target_dir / msg_file.name
++
++                # Datei verschieben
++                shutil.move(str(msg_file), str(target_path))
++                logger.info(f"Verschoben: {msg_file.name} -> {target_path}")
++
++                moved_emails.append(
++                    {
++                        "class": email_class,
++                        "semester": semester,
++                        "lastname": lastname,
++                        "folder": target_folder,
++                        "path": str(target_path),
++                    }
++                )
++
++            except Exception as e:
++                logger.error(f"Fehler beim Verarbeiten von {msg_file}: {e}")
++
++    return moved_emails
++
++
++def write_report(source_root: Path, moved_emails: List[Dict[str, Any]]) -> None:
++    """Erstellt den Markdown-Report.
++
++    Args:
++        source_root: Quellverzeichnis für den Report.
++        moved_emails: Liste der verschobenen E-Mails.
++    """
++    if not moved_emails:
++        logger.info("Keine E-Mails verschoben. Erstelle keinen Report.")
++        return
++
++    # Sortierung: Klasse, Semester, Nachname, Folder
++    moved_emails.sort(
++        key=lambda x: (x["class"], x["semester"], x["lastname"], x["folder"])
++    )
++
++    report_path = source_root / "sorted_emails.md"
++
++    with open(report_path, "w", encoding="utf-8") as f:
++        f.write("# Sortierte E-Mails\n\n")
++
++        current_class = None
++        for email in moved_emails:
++            if email["class"] != current_class:
++                current_class = email["class"]
++                f.write(f"\n## {current_class}\n")
++
++            f.write(
++                f"- **{email['semester']}** | {email['lastname']} | {email['folder']}: `{email['path']}`\n"
++            )
++
++    logger.info(f"Report erstellt: {report_path}")
++
++
++def main() -> None:
++    """Haupteinstiegspunkt für das Skript."""
++    parser = argparse.ArgumentParser(
++        description="Sortiert E-Mails basierend auf Klassifizierung."
++    )
++    parser.add_argument(
++        "source_dir", type=str, help="Quellordner mit Inbox und SentItems."
++    )
++    parser.add_argument(
++        "--config",
++        type=str,
++        required=True,
++        help="Pfad zur YAML-Konfiguration (Klassen-Pfade).",
++    )
++    parser.add_argument(
++        "--model",
++        type=str,
++        default="data/email_classifier.pkl",
++        help="Pfad zum trainierten Modell.",
++    )
++
++    args = parser.parse_args()
++
++    source_root = Path(args.source_dir)
++    if not source_root.exists():
++        logger.error(f"Quellverzeichnis {args.source_dir} existiert nicht.")
++        return
++
++    config_path = Path(args.config)
++    if not config_path.exists():
++        logger.error(f"Konfiguration {args.config} existiert nicht.")
++        return
++
++    with open(config_path, "r", encoding="utf-8") as f:
++        config = yaml.safe_load(f)
++
++    # Falls die Konfiguration geschachtelt ist (z.B. unter einem 'class_paths' Key)
++    if config and "class_paths" in config:
++        config = config["class_paths"]
++
++    moved_emails = process_emails(source_root, Path(args.model), config)
++    write_report(source_root, moved_emails)
++
++
++if __name__ == "__main__":
++    main()
++"""Engine für die Klassifizierung von E-Mails."""
++import pickle
++from pathlib import Path
++from typing import List, Tuple, Dict, Any, Optional, Union
++
++import numpy as np
++from sklearn.ensemble import RandomForestClassifier
++from sklearn.feature_extraction.text import TfidfVectorizer
++from sklearn.preprocessing import LabelEncoder
++
++
++from mcp_university.parser.mail_parser import MailParser
++
++class EmailClassifier:
++    """Klassifiziert E-Mails basierend auf TF-IDF und/oder Embeddings."""
++
++    def __init__(
++        self,
++        mode: str = "combined",
++        method: str = "xgboost",
++        embedding_model_name: str = "paraphrase-multilingual-MiniLM-L12-v2"
++    ) -> None:
++        """Initialisiert den Klassifikator.
++
++        Args:
++            mode: Modus der Merkmalsextraktion ('tfidf', 'embedding', 'combined').
++            method: Klassifizierungsmethode ('randomforest', 'xgboost').
++            embedding_model_name: Name des Sentence-Transformer Modells.
++        """
++        self.mode = mode
++        self.method = method
++        self.embedding_model_name = embedding_model_name
++        self.parser = MailParser()
++
++        self.tfidf_vectorizer = TfidfVectorizer(max_features=5000)
++        self._embedding_model = None
++        self.label_encoder = LabelEncoder()
++
++        if method == "randomforest":
++            self.classifier = RandomForestClassifier(n_estimators=100, random_state=42)
++        elif method == "xgboost":
++            from xgboost import XGBClassifier
++            self.classifier = XGBClassifier(n_estimators=100, random_state=42, eval_metric='logloss')
++        else:
++            raise ValueError(f"Ungültige Klassifizierungsmethode: {method}")
++
++        self.is_trained = False
++
++    @property
++    def embedding_model(self):
++        """Lädt das Embedding-Modell verzögert (Lazy Loading)."""
++        if self._embedding_model is None:
++            from sentence_transformers import SentenceTransformer
++            self._embedding_model = SentenceTransformer(self.embedding_model_name)
++        return self._embedding_model
++
++    def _extract_text(self, file_path: Path) -> Optional[str]:
++        """Extrahiert Text aus einer E-Mail-Datei."""
++        return self.parser.parse(file_path)
++
++    def preprocess_data(self, root_dir: Union[str, Path]) -> Tuple[List[str], List[str]]:
++        """Liest E-Mails aus Ordnerstrukturen ein.
++
++        Die Ordnernamen werden als Klassenlabels verwendet.
++
++        Args:
++            root_dir: Wurzelverzeichnis mit Unterordnern für jede Klasse.
++
++        Returns:
++            Tuple aus Texten und Labels.
++        """
++        root_path = Path(root_dir)
++        texts = []
++        labels = []
++
++        for class_dir in root_path.iterdir():
++            if class_dir.is_dir():
++                label = class_dir.name
++                for file_path in class_dir.glob("*.msg"):
++                    text = self._extract_text(file_path)
++                    if text:
++                        texts.append(text)
++                        labels.append(label)
++
++        return texts, labels
++
++    def get_features(self, texts: List[str], train: bool = False) -> np.ndarray:
++        """Extrahiert Merkmale aus Texten basierend auf dem gewählten Modus."""
++        features = []
++
++        if self.mode in ["tfidf", "combined"]:
++            if train:
++                tfidf_feats = self.tfidf_vectorizer.fit_transform(texts).toarray()
++            else:
++                tfidf_feats = self.tfidf_vectorizer.transform(texts).toarray()
++            features.append(tfidf_feats)
++
++        if self.mode in ["embedding", "combined"]:
++            emb_feats = self.embedding_model.encode(texts)
++            features.append(emb_feats)
++
++        if len(features) > 1:
++            return np.hstack(features)
++        return features[0]
++
++    def train(self, root_dir: Union[str, Path]) -> None:
++        """Trainiert den Klassifikator auf Daten aus einem Verzeichnis.
++
++        Args:
++            root_dir: Verzeichnis mit den Trainingsdaten.
++        """
++        texts, labels = self.preprocess_data(root_dir)
++        if not texts:
++            raise ValueError(f"Keine Trainingsdaten in {root_dir} gefunden.")
++
++        X = self.get_features(texts, train=True)
++        y = self.label_encoder.fit_transform(labels)
++
++        self.classifier.fit(X, y)
++        self.is_trained = True
++
++    def predict(self, file_path: Union[str, Path]) -> Dict[str, Any]:
++        """Klassifiziert eine einzelne E-Mail.
++
++        Args:
++            file_path: Pfad zur .msg Datei.
++
++        Returns:
++            Dictionary mit der vorhergesagten Klasse und Wahrscheinlichkeiten.
++        """
++        if not self.is_trained:
++            raise RuntimeError("Modell muss zuerst trainiert oder geladen werden.")
++
++        text = self._extract_text(Path(file_path))
++        if not text:
++            raise ValueError(f"Konnte Text aus {file_path} nicht extrahieren.")
++
++        X = self.get_features([text], train=False)
++        y_pred = self.classifier.predict(X)[0]
++        y_prob = self.classifier.predict_proba(X)[0]
++
++        label = self.label_encoder.inverse_transform([int(y_pred)])[0]
++
++        # Mapping von Label zu Wahrscheinlichkeit
++        probs = {
++            self.label_encoder.inverse_transform([i])[0]: float(prob)
++            for i, prob in enumerate(y_prob)
++        }
++
++        return {
++            "prediction": label,
++            "probabilities": probs,
++            "confidence": float(np.max(y_prob))
++        }
++
++    def save(self, model_path: Union[str, Path]) -> None:
++        """Speichert das Modell in einer Datei.
++
++        Args:
++            model_path: Pfad zur Speicherdatei.
++        """
++        data = {
++            "mode": self.mode,
++            "method": self.method,
++            "embedding_model_name": self.embedding_model_name,
++            "tfidf_vectorizer": self.tfidf_vectorizer,
++            "classifier": self.classifier,
++            "label_encoder": self.label_encoder,
++            "is_trained": self.is_trained
++        }
++        with open(model_path, "wb") as f:
++            pickle.dump(data, f)
++
++    def load(self, model_path: Union[str, Path]) -> None:
++        """Lädt das Modell aus einer Datei.
++
++        Args:
++            model_path: Pfad zur Modelldatei.
++        """
++        with open(model_path, "rb") as f:
++            data = pickle.load(f)
++
++        self.mode = data["mode"]
++        self.method = data.get("method", "randomforest")  # Fallback für alte Modelle
++        self.embedding_model_name = data["embedding_model_name"]
++        self.tfidf_vectorizer = data["tfidf_vectorizer"]
++        self.classifier = data["classifier"]
++        self.label_encoder = data["label_encoder"]
++        self.is_trained = data["is_trained"]
++        # embedding_model wird bei Bedarf geladen (Lazy Loading)
++![Tests](https://github.com/dgaida/academic-memory-mcp/actions/workflows/tests.yml/badge.svg) ![Lint](https://github.com/dgaida/academic-memory-mcp/actions/workflows/lint.yml/badge.svg) ![CodeQL](https://github.com/dgaida/academic-memory-mcp/actions/workflows/codeql.yml/badge.svg) ![Documentation](https://github.com/dgaida/academic-memory-mcp/actions/workflows/docs.yml/badge.svg) ![Auto Versioning](https://github.com/dgaida/academic-memory-mcp/actions/workflows/auto-version.yml/badge.svg)
++[![Version](https://img.shields.io/github/v/tag/dgaida/academic-memory-mcp?label=version)](https://github.com/dgaida/academic-memory-mcp/tags)
++[![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
++[![codecov](https://codecov.io/gh/dgaida/academic-memory-mcp/branch/master/graph/badge.svg)](https://codecov.io/gh/dgaida/academic-memory-mcp)
++[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://dgaida.github.io/academic-memory-mcp/)
++[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/dgaida/academic-memory-mcp/graphs/commit-activity)
++![Last commit](https://img.shields.io/github/last-commit/dgaida/academic-memory-mcp)
++
++# MCP University Memory System
++
++A locally-running, agentic knowledge and memory system for university and research work.
++
++## Features
++- Recursive analysis of local folders
++- Semantic understanding of documents and emails
++- Hierarchical summaries (File -> Folder -> Root)
++- Hybrid search (BM25 + Vector)
++- MCP Server integration
++- Fully offline using local LLMs (Ollama)
++- Automated E-Mail classification (Bachelor thesis, projects, etc.)
++- Database management for students, deadlines, and metadata
++
++## Prerequisites
++- **qmd CLI:** Required for hybrid search. Install globally via: `npm install -g @tobilu/qmd`
++- **Docling:** Required for PDF parsing. Install with: `pip install docling` and initialize with `cp-config` if prompted.
++
++## Tech Stack
++- **Document Parsing:** Docling
++- **Local LLM:** Ollama
++- **Embeddings:** bge-m3
++- **Vector DB:** Qdrant
++- **MCP Framework:** FastMCP
++- **Metadata:** SQLite
++- **File Watching:** watchdog
++
++## Project Structure
++```text
++mcp_university/
++├── config/             # YAML configurations and prompts
++├── data/               # Persistent data (SQLite, Indexes, Cache)
++├── src/mcp_university/ # Core package
++│   ├── crawler/        # File system crawling and watching
++│   ├── parser/         # Document and email parsing
++│   ├── summarizer/     # LLM summary generation
++│   ├── retrieval/      # Hybrid search index
++│   ├── metadata/       # SQLite storage
++│   ├── mcp_server/     # FastMCP server
++│   ├── agent/          # Agentic workflows
++│   ├── cli/            # Typer-based CLI
++│   └── config.py       # Config loader
++└── tests/              # Unit and integration tests
++```
++
++## Installation
++```bash
++pip install -e .
++```
++
++## Usage
++```bash
++mcp-uni index
++mcp-uni search "your query"
++mcp-uni serve-mcp
++```
++# Nutzung
++
++Das MCP University Memory System bietet verschiedene Schnittstellen zur Interaktion mit Ihren Daten.
++
++## Kommandozeile (CLI)
++
++Die CLI ist der primäre Weg, um das System zu verwalten und manuelle Suchen durchzuführen.
++
++### Indexierung (`index`)
++Dieser Befehl scannt alle konfigurierten Ordner, erstellt Zusammenfassungen und aktualisiert den Index.
++```bash
++mcp-uni index
++```
++
++### Suche (`search`)
++Führt eine schnelle Abfrage über den gesamten Datenbestand durch.
++```bash
++mcp-uni search "Inhalt der Vorlesung 5"
++```
++
++### Überwachung (`watch`)
++Startet einen Hintergrundprozess, der auf Dateiänderungen reagiert und den Index in Echtzeit aktualisiert.
++```bash
++mcp-uni watch
++```
++
++## E-Mail Klassifizierung
++
++Das System enthält ein Subpackage zur automatisierten Klassifizierung von studentischen E-Mails (z.B. Bachelorarbeit, Praxisprojekt).
++
++### Modell trainieren
++Um den Klassifikator zu nutzen, muss er zuerst mit Beispieldaten trainiert werden. Erwarten wird eine Ordnerstruktur, in der jeder Unterordner eine Klasse repräsentiert und die E-Mails (.msg) enthält.
++
++```bash
++python3 mcp_university/classifier/train.py /pfad/zu/trainingsdaten --mode combined --method xgboost
++```
++
++Dabei kann zwischen `randomforest` und `xgboost` (Standard) gewählt werden.
++
++### E-Mail klassifizieren
++Nach dem Training kann eine einzelne E-Mail-Datei klassifiziert werden:
++
++```bash
++python3 mcp_university/classifier/predict.py /pfad/zur/email.msg
++```
++
++Die Ausgabe enthält die wahrscheinlichste Klasse sowie die Konfidenz und eine detaillierte Wahrscheinlichkeitsverteilung.
++### Batch-Klassifizierung
++Um einen ganzen Ordner mit E-Mails automatisch zu sortieren:
++```bash
++
++### E-Mail Sortierung (Studenten-Ordner)
++Das leistungsfähigste Skript sortiert E-Mails nicht nur nach Klasse, sondern auch nach Semester und Student (Nachname):
++
++```bash
++python3 mcp_university/classifier/sort_emails.py /quell/ordner --config config/class_paths.yaml --model data/email_classifier.pkl
++```
++
++Es erkennt automatisch:
++- **Semester:** Basierend auf dem E-Mail-Datum (SoSe/WS).
++- **Student:** Extrahiert den Nachnamen aus `smail.th-koeln.de` Adressen oder Anzeigenamen.
++- **Richtung:** Sortiert in `Inbox` oder `SentItems` Unterordner.
++- **Bericht:** Erstellt eine `sorted_emails.md` mit einer Übersicht aller verschobenen Mails.
++python3 mcp_university/classifier/classify_folder.py /quell/ordner --model data/email_classifier.pkl
++```
++Dies verschiebt die E-Mails in Unterordner, die nach den vorhergesagten Klassen benannt sind.
++
++
++## Datenbank-Management (`db`)
++
++Die `db` Befehlsgruppe erlaubt die direkte Verwaltung der Metadaten und des Suchindex.
++
++### Auflisten von Inhalten
++Sie können verschiedene Entitäten in der Datenbank auflisten:
++
++*   **Dateien:** `mcp-uni db list-files`
++*   **Ordner:** `mcp-uni db list-folders`
++*   **Studenten:** `mcp-uni db list-students` (Hinweis: Nutzen Sie `sync-students` zum Befüllen)
++*   **Zusammenfassungen:** `mcp-uni db list-summaries`
++*   **Deadlines:** `mcp-uni db list-deadlines`
++
++### Synchronisierung von Studenten (`sync-students`)
++Befüllt die Datenbank aus einer `students.yaml`.
++```bash
++mcp-uni db sync-students
++```
++
++### Löschen von Inhalten
++Einträge können über ihre ID gelöscht werden. Mit der Option `--force` oder `-f` wird die Bestätigungsabfrage übersprungen.
++
++*   **Dateien löschen:** `mcp-uni db delete-file <ID_1> <ID_2> ...`
++*   **Ordner löschen:** `mcp-uni db delete-folder <ID>` (entfernt rekursiv alle enthaltenen Dateien)
++*   **Student löschen:** `mcp-uni db delete-student <ID>`
++*   **Zusammenfassung löschen:** `mcp-uni db delete-summary <ID>`
++*   **Deadline löschen:** `mcp-uni db delete-deadline <ID>`
++
++## Model Context Protocol (MCP)
++
++Der leistungsfähigste Weg, das System zu nutzen, ist über einen MCP-Client (wie Claude Desktop).
++
++### Server starten
++```bash
++mcp-uni serve-mcp
++```
++
++### Verfügbare Tools
++*   `search_documents`: Semantische Suche in Dokumenten.
++*   `get_folder_summary`: Abfrage von aggregierten Ordner-Informationen.
++*   `get_student_context`: Komplette Historie und Status eines Studenten abrufen.
++*   `generate_mail_reply`: Entwurf einer E-Mail basierend auf dem Kontext.
++*   `get_open_tasks`: Extraktion von TODOs aus allen Dokumenten.
++
++## Typische Workflows
++
++### 1. Vorbereitung einer Sprechstunde
++Bitten Sie Ihren Agenten: "Gib mir den Kontext zu Student Max Mustermann und zeige mir seine letzten Abgaben."
++Der Agent nutzt `get_student_context` and `search_documents`, um Ihnen eine kompakte Übersicht zu liefern.
++
++### 2. Beantworten von E-Mails
++Kopieren Sie die E-Mail eines Studenten in den Chat und nutzen Sie das Tool `generate_mail_reply`. Das System berücksichtigt dabei automatisch den Status der Abschlussarbeit oder offene Deadlines.
++
++## Konfiguration
++
++### Zweistufige Zusammenfassung
++In der `config/folders.yaml` kann die Option `summarize_emails_individually` (Standard: `false`) aktiviert werden. Wenn diese auf `true` gesetzt ist, werden E-Mail-Threads in zwei Stufen zusammengefasst: erst jede E-Mail einzeln, dann die gesamte Konversation.
++
++## Hilfsskripte
++
++Das System enthält nützliche Skripte im Ordner `scripts/`:
++
++- **`remove_empty_folders.py`**: Löscht rekursiv alle leeren Ordner in einem Verzeichnis.
++- **`flatten_directory.py`**: Flacht eine Ordnerstruktur ab, indem alle Dateien in das Wurzelverzeichnis verschoben werden (inkl. Namenskollisionsprüfung).
++# Usage
++
++The MCP University Memory System provides various interfaces for interacting with your data.
++
++## Command Line Interface (CLI)
++
++The CLI is the primary way to manage the system and perform manual searches.
++
++### Indexing (`index`)
++This command scans all configured folders, creates summaries, and updates the index.
++```bash
++mcp-uni index
++```
++
++### Search (`search`)
++Performs a quick query across the entire dataset.
++```bash
++mcp-uni search "Content of lecture 5"
++```
++
++### Watchdog (`watch`)
++Starts a background process that reacts to file changes and updates the index in real-time.
++```bash
++mcp-uni watch
++```
++
++## Email Classification
++
++The system includes a subpackage for the automated classification of student emails (e.g., Bachelor's thesis, internship project).
++
++### Training the Model
++To use the classifier, it must first be trained with example data. It expects a folder structure where each subfolder represents a class and contains the emails (.msg).
++
++```bash
++python3 mcp_university/classifier/train.py /path/to/training_data --mode combined --method xgboost
++```
++
++You can choose between `randomforest` and `xgboost` (default).
++
++### Classifying an Email
++After training, a single email file can be classified:
++
++```bash
++python3 mcp_university/classifier/predict.py /path/to/email.msg
++```
++
++The output contains the most likely class as well as the confidence and a detailed probability distribution.
++### Batch Classification
++To automatically sort an entire folder of emails (classification only):
++```bash
++
++### Email Sorting (Student Folders)
++The most powerful script sorts emails not only by class, but also by semester and student (last name):
++
++```bash
++python3 mcp_university/classifier/sort_emails.py /source/folder --config config/class_paths.yaml --model data/email_classifier.pkl
++```
++
++It automatically detects:
++- **Semester:** Based on the email date (Summer/Winter semester).
++- **Student:** Extracts the last name from `smail.th-koeln.de` addresses or display names.
++- **Direction:** Sorts into `Inbox` or `SentItems` subfolders.
++- **Report:** Creates a `sorted_emails.md` with an overview of all moved emails.
++python3 mcp_university/classifier/classify_folder.py /source/folder --model data/email_classifier.pkl
++```
++This moves the emails into subfolders named after their predicted classes.
++
++
++## Database Management (`db`)
++
++The `db` command group allows for direct management of metadata and the search index.
++
++### Listing Content
++You can list various entities in the database:
++
++*   **Files:** `mcp-uni db list-files`
++*   **Folders:** `mcp-uni db list-folders`
++*   **Students:** `mcp-uni db list-students` (Note: Use `sync-students` to populate)
++*   **Summaries:** `mcp-uni db list-summaries`
++*   **Deadlines:** `mcp-uni db list-deadlines`
++
++### Student Synchronization (`sync-students`)
++Populates the database from a `students.yaml`.
++```bash
++mcp-uni db sync-students
++```
++
++### Deleting Content
++Entries can be deleted using their ID. Use the `--force` or `-f` option to skip the confirmation prompt.
++
++*   **Delete Files:** `mcp-uni db delete-file <ID_1> <ID_2> ...`
++*   **Delete Folder:** `mcp-uni db delete-folder <ID>` (recursively removes all contained files)
++*   **Delete Student:** `mcp-uni db delete-student <ID>`
++*   **Delete Summary:** `mcp-uni db delete-summary <ID>`
++*   **Delete Deadline:** `mcp-uni db delete-deadline <ID>`
++
++## Model Context Protocol (MCP)
++
++The most powerful way to use the system is via an MCP client (like Claude Desktop).
++
++### Start Server
++```bash
++mcp-uni serve-mcp
++```
++
++### Available Tools
++*   `search_documents`: Semantic search in documents.
++*   `get_folder_summary`: Query aggregated folder information.
++*   `get_student_context`: Retrieve complete history and status of a student.
++*   `generate_mail_reply`: Draft an email based on the context.
++*   `get_open_tasks`: Extraction of TODOs from all documents.
++
++## Typical Workflows
++
++### 1. Preparing for Office Hours
++Ask your agent: "Give me the context for student Max Mustermann and show me his latest submissions."
++The agent uses `get_student_context` and `search_documents` to provide you with a compact overview.
++
++### 2. Answering Emails
++Copy a student's email into the chat and use the `generate_mail_reply` tool. The system automatically takes the status of the thesis or open deadlines into account.
++
++## Configuration
++
++### Two-Stage Summarization
++In `config/folders.yaml`, the `summarize_emails_individually` option (default: `false`) can be enabled. When set to `true`, email threads are summarized in two stages: first each email individually, then the entire conversation.
++
++## Utility Scripts
++
++The system includes useful scripts in the `scripts/` folder:
++
++- **`remove_empty_folders.py`**: Recursively deletes all empty folders in a directory.
++- **`flatten_directory.py`**: Flattens a directory structure by moving all files to the root directory (includes name collision checks).
++from pathlib import Path
++from datetime import datetime
++from unittest.mock import MagicMock, patch
++
++from mcp_university.classifier.sort_emails import get_semester, extract_lastname, process_emails, write_report
++
++def test_get_semester():
++    # SoSe: 01.04. - 30.09.
++    assert get_semester(datetime(2025, 4, 1)) == "2025_SoSe"
++    assert get_semester(datetime(2025, 9, 30)) == "2025_SoSe"
++
++    # WS: 01.10. - 31.03.
++    assert get_semester(datetime(2025, 10, 1)) == "2025_26_WS"
++    assert get_semester(datetime(2026, 3, 31)) == "2025_26_WS"
++    assert get_semester(datetime(2025, 1, 15)) == "2024_25_WS"
++
++def test_extract_lastname():
++    assert extract_lastname("Max Mustermann") == "Mustermann"
++    assert extract_lastname("Mustermann, Max") == "Mustermann"
++    assert extract_lastname("Max Mustermann <max@example.com>") == "Mustermann"
++    assert extract_lastname("Mustermann, Max <max@example.com>") == "Mustermann"
++    assert extract_lastname("'Hans Müller'") == "Müller"
++    assert extract_lastname("'Müller, Hans'") == "'Müller"
++    assert extract_lastname("(No Sender)") == "Unknown"
++    assert extract_lastname("") == "Unknown"
++
++@patch('mcp_university.classifier.sort_emails.EmailClassifier')
++@patch('mcp_university.classifier.sort_emails.MailParser')
++@patch('extract_msg.openMsg')
++def test_process_emails(mock_open_msg, mock_mail_parser, mock_classifier_class, tmp_path):
++    # Setup source directory
++    source_root = tmp_path / "source"
++    inbox = source_root / "Inbox"
++    sent = source_root / "SentItems"
++    inbox.mkdir(parents=True)
++    sent.mkdir(parents=True)
++
++    msg1 = inbox / "mail1.msg"
++    msg1.touch()
++    msg2 = sent / "mail2.msg"
++    msg2.touch()
++
++    # Subdirectory test
++    sub_inbox = inbox / "Subfolder"
++    sub_inbox.mkdir()
++    msg3 = sub_inbox / "mail3.msg"
++    msg3.touch()
++
++    # Setup target directory
++    target_root = tmp_path / "target"
++    target_root.mkdir()
++
++    # Mock classifier
++    mock_classifier = mock_classifier_class.return_value
++    mock_classifier.predict.side_effect = [
++        {"prediction": "BachelorThesis"}, # mail1
++        {"prediction": "BachelorThesis"}, # mail3 (rglob finds this)
++        {"prediction": "BachelorThesis"}  # mail2
++    ]
++
++    # Mock parser
++    mock_parser = mock_mail_parser.return_value
++    mock_parser.get_email_date.side_effect = [
++        datetime(2025, 5, 10), # mail1 SoSe
++        datetime(2025, 6, 10), # mail3 SoSe
++        datetime(2025, 11, 20) # mail2 WS
++    ]
++
++    # Mock extract_msg
++    mock_msg1 = MagicMock()
++    mock_msg1.sender = "Max Mustermann"
++
++    mock_msg3 = MagicMock()
++    mock_msg3.sender = "Max Mustermann"
++
++    mock_msg2 = MagicMock()
++    mock_recip = MagicMock()
++    mock_recip.name = "Erika Musterfrau"
++    mock_msg2.recipients = [mock_recip]
++
++    mock_open_msg.return_value.__enter__.side_effect = [mock_msg1, mock_msg3, mock_msg2]
++
++    config = {
++        "BachelorThesis": str(target_root)
++    }
++
++    moved = process_emails(source_root, Path("dummy_model"), config)
++
++    assert len(moved) == 3
++
++    # Verify first file (Inbox)
++    expected_path1 = target_root / "2025_SoSe" / "Mustermann" / "Inbox" / "mail1.msg"
++    assert expected_path1.exists()
++    assert not msg1.exists()
++
++    # Verify third file (Subfolder in Inbox) -> should go to Inbox
++    expected_path3 = target_root / "2025_SoSe" / "Mustermann" / "Inbox" / "mail3.msg"
++    assert expected_path3.exists()
++    assert not msg3.exists()
++
++    # Verify second file (SentItems)
++    expected_path2 = target_root / "2025_26_WS" / "Musterfrau" / "SentItems" / "mail2.msg"
++    assert expected_path2.exists()
++    assert not msg2.exists()
++
++def test_write_report(tmp_path):
++    source_root = tmp_path
++    moved_emails = [
++        {
++            "class": "BachelorThesis",
++            "semester": "2025_SoSe",
++            "lastname": "Mustermann",
++            "folder": "Inbox",
++            "path": "/path/to/mail1.msg"
++        },
++        {
++            "class": "BachelorThesis",
++            "semester": "2025_26_WS",
++            "lastname": "Musterfrau",
++            "folder": "SentItems",
++            "path": "/path/to/mail2.msg"
++        }
++    ]
++
++    write_report(source_root, moved_emails)
++
++    report_path = source_root / "sorted_emails.md"
++    assert report_path.exists()
++
++    content = report_path.read_text(encoding="utf-8")
++    assert "# Sortierte E-Mails" in content
++    assert "## BachelorThesis" in content
++    assert "Mustermann" in content
++    assert "Musterfrau" in content
+diff --git a/docs/de/usage/index.md b/docs/de/usage/index.md
+index feaeeb7..e967107 100644
+--- a/docs/de/usage/index.md
++++ b/docs/de/usage/index.md
+@@ -45,6 +45,26 @@ python3 mcp_university/classifier/predict.py /pfad/zur/email.msg
+ ```
+
+ Die Ausgabe enthält die wahrscheinlichste Klasse sowie die Konfidenz und eine detaillierte Wahrscheinlichkeitsverteilung.
++### E-Mail Sortierung (Studenten-Ordner)
++Das leistungsfähigste Skript sortiert E-Mails nicht nur nach Klasse, sondern auch nach Semester und Student (Nachname):
++
++```bash
++python3 mcp_university/classifier/sort_emails.py /quell/ordner --config config/class_paths.yaml --model data/email_classifier.pkl
++```
++
++Es erkennt automatisch:
++- **Semester:** Basierend auf dem E-Mail-Datum (SoSe/WS).
++- **Student:** Extrahiert den Nachnamen aus `smail.th-koeln.de` Adressen oder Anzeigenamen.
++- **Richtung:** Sortiert in `Inbox` oder `SentItems` Unterordner.
++- **Bericht:** Erstellt eine `sorted_emails.md` mit einer Übersicht aller verschobenen Mails.
++
++### Batch-Klassifizierung
++Um einen ganzen Ordner mit E-Mails automatisch zu sortieren (nur Klassifizierung):
++```bash
++python3 mcp_university/classifier/classify_folder.py /quell/ordner --model data/email_classifier.pkl
++```
++Dies verschiebt die E-Mails in Unterordner, die nach den vorhergesagten Klassen benannt sind.
++
+
+ ## Datenbank-Management (`db`)
+
+@@ -98,3 +118,15 @@ Der Agent nutzt `get_student_context` and `search_documents`, um Ihnen eine komp
+
+ ### 2. Beantworten von E-Mails
+ Kopieren Sie die E-Mail eines Studenten in den Chat und nutzen Sie das Tool `generate_mail_reply`. Das System berücksichtigt dabei automatisch den Status der Abschlussarbeit oder offene Deadlines.
++
++## Konfiguration
++
++### Zweistufige Zusammenfassung
++In der `config/folders.yaml` kann die Option `summarize_emails_individually` (Standard: `false`) aktiviert werden. Wenn diese auf `true` gesetzt ist, werden E-Mail-Threads in zwei Stufen zusammengefasst: erst jede E-Mail einzeln, dann die gesamte Konversation.
++
++## Hilfsskripte
++
++Das System enthält nützliche Skripte im Ordner `scripts/`:
++
++- **`remove_empty_folders.py`**: Löscht rekursiv alle leeren Ordner in einem Verzeichnis.
++- **`flatten_directory.py`**: Flacht eine Ordnerstruktur ab, indem alle Dateien in das Wurzelverzeichnis verschoben werden (inkl. Namenskollisionsprüfung).
+diff --git a/docs/en/usage/index.md b/docs/en/usage/index.md
+index 6a759fa..c08bbb3 100644
+--- a/docs/en/usage/index.md
++++ b/docs/en/usage/index.md
+@@ -45,6 +45,26 @@ python3 mcp_university/classifier/predict.py /path/to/email.msg
+ ```
+
+ The output contains the most likely class as well as the confidence and a detailed probability distribution.
++### Email Sorting (Student Folders)
++The most powerful script sorts emails not only by class, but also by semester and student (last name):
++
++```bash
++python3 mcp_university/classifier/sort_emails.py /source/folder --config config/class_paths.yaml --model data/email_classifier.pkl
++```
++
++It automatically detects:
++- **Semester:** Based on the email date (Summer/Winter semester).
++- **Student:** Extracts the last name from `smail.th-koeln.de` addresses or display names.
++- **Direction:** Sorts into `Inbox` or `SentItems` subfolders.
++- **Report:** Creates a `sorted_emails.md` with an overview of all moved emails.
++
++### Batch Classification
++To automatically sort an entire folder of emails (classification only):
++```bash
++python3 mcp_university/classifier/classify_folder.py /source/folder --model data/email_classifier.pkl
++```
++This moves the emails into subfolders named after their predicted classes.
++
+
+ ## Database Management (`db`)
+
+@@ -98,3 +118,15 @@ The agent uses `get_student_context` and `search_documents` to provide you with
+
+ ### 2. Answering Emails
+ Copy a student's email into the chat and use the `generate_mail_reply` tool. The system automatically takes the status of the thesis or open deadlines into account.
++
++## Configuration
++
++### Two-Stage Summarization
++In `config/folders.yaml`, the `summarize_emails_individually` option (default: `false`) can be enabled. When set to `true`, email threads are summarized in two stages: first each email individually, then the entire conversation.
++
++## Utility Scripts
++
++The system includes useful scripts in the `scripts/` folder:
++
++- **`remove_empty_folders.py`**: Recursively deletes all empty folders in a directory.
++- **`flatten_directory.py`**: Flattens a directory structure by moving all files to the root directory (includes name collision checks).
+diff --git a/mcp_university/classifier/engine.py b/mcp_university/classifier/engine.py
+index edffe5f..145a30c 100644
+--- a/mcp_university/classifier/engine.py
++++ b/mcp_university/classifier/engine.py
+@@ -7,7 +7,7 @@ import numpy as np
+ from sklearn.ensemble import RandomForestClassifier
+ from sklearn.feature_extraction.text import TfidfVectorizer
+ from sklearn.preprocessing import LabelEncoder
+-from sentence_transformers import SentenceTransformer
++
+
+ from mcp_university.parser.mail_parser import MailParser
+
+@@ -33,7 +33,7 @@ class EmailClassifier:
+         self.parser = MailParser()
+
+         self.tfidf_vectorizer = TfidfVectorizer(max_features=5000)
+-        self._embedding_model: Optional[SentenceTransformer] = None
++        self._embedding_model = None
+         self.label_encoder = LabelEncoder()
+
+         if method == "randomforest":
+@@ -47,9 +47,10 @@ class EmailClassifier:
+         self.is_trained = False
+
+     @property
+-    def embedding_model(self) -> SentenceTransformer:
++    def embedding_model(self):
+         """Lädt das Embedding-Modell verzögert (Lazy Loading)."""
+         if self._embedding_model is None:
++            from sentence_transformers import SentenceTransformer
+             self._embedding_model = SentenceTransformer(self.embedding_model_name)
+         return self._embedding_model
+
+diff --git a/mcp_university/classifier/sort_emails.py b/mcp_university/classifier/sort_emails.py
+index a25c769..d47e793 100644
+--- a/mcp_university/classifier/sort_emails.py
++++ b/mcp_university/classifier/sort_emails.py
+@@ -75,12 +75,16 @@ def extract_lastname(name_str: str) -> str:
+
+     if "," in clean_name:
+         # Format: Lastname, Firstname
+-        return clean_name.split(",")[0].strip()
++        res = clean_name.split(",")[0].strip()
++        return res[:-1] if res.endswith("'") else res
+     else:
+         # Format: Firstname Lastname
+         parts = clean_name.split()
+         if parts:
+-            return parts[-1]
++            res = parts[-1]
++            if res.endswith("'"):
++                res = res[:-1]
++            return res
+     return "Unknown"
+
+
+diff --git a/my_changes.diff b/my_changes.diff
+new file mode 100644
+index 0000000..04da171
+--- /dev/null
++++ b/my_changes.diff
+@@ -0,0 +1,1142 @@
++diff --git a/README.md b/README.md
++index cdf3356..c828840 100644
++--- a/README.md
+++++ b/README.md
++@@ -17,6 +17,8 @@ A locally-running, agentic knowledge and memory system for university and resear
++ - Hybrid search (BM25 + Vector)
++ - MCP Server integration
++ - Fully offline using local LLMs (Ollama)
+++- Automated E-Mail classification (Bachelor thesis, projects, etc.)
+++- Database management for students, deadlines, and metadata
++
++ ## Prerequisites
++ - **qmd CLI:** Required for hybrid search. Install globally via: `npm install -g @tobilu/qmd`
++diff --git a/changes_summary.txt b/changes_summary.txt
++new file mode 100644
++index 0000000..76757a9
++--- /dev/null
+++++ b/changes_summary.txt
++@@ -0,0 +1,959 @@
+++"""Skript zum Sortieren von E-Mails basierend auf Klassifizierung."""
+++import argparse
+++import logging
+++import re
+++import shutil
+++from datetime import datetime
+++from pathlib import Path
+++from typing import Any, Dict, List, Optional
+++
+++import yaml
+++
+++from mcp_university.classifier.engine import EmailClassifier
+++from mcp_university.parser.mail_parser import MailParser
+++
+++# Logging konfigurieren
+++logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+++logger = logging.getLogger(__name__)
+++
+++
+++def get_semester(date: datetime) -> str:
+++    """Bestimmt den Semester-Ordnernamen basierend auf dem Datum.
+++
+++    SoSe: 01.04. - 30.09. -> YYYY_SoSe
+++    WS: 01.10. - 31.03. -> YYYY_YY+1_WS
+++
+++    Args:
+++        date: Das Datum der E-Mail.
+++
+++    Returns:
+++        str: Der Name des Semester-Ordners.
+++    """
+++    year = date.year
+++    month = date.month
+++
+++    if 4 <= month <= 9:
+++        return f"{year}_SoSe"
+++    else:
+++        if month >= 10:
+++            return f"{year}_{str(year + 1)[2:]}_WS"
+++        else:
+++            return f"{year-1}_{str(year)[2:]}_WS"
+++
+++
+++def extract_lastname(name_str: str) -> str:
+++    """Extrahiert den Nachnamen aus einem Namensstring oder einer E-Mail-Adresse.
+++
+++    Unterstützt das Format vorname.nachname@smail.th-koeln.de (auch mit mehreren Teilen)
+++    sowie 'Max Mustermann' oder 'Mustermann, Max'.
+++
+++    Args:
+++        name_str: Der zu parsende Name oder die E-Mail-Adresse.
+++
+++    Returns:
+++        str: Der extrahierte Nachname.
+++    """
+++    if not name_str or name_str == "(No Sender)" or name_str == "(No Receiver)":
+++        return "Unknown"
+++
+++    # Suche nach E-Mail-Adresse (in < > oder direkt)
+++    email_match = re.search(r"[\w\.-]+@[\w\.-]+", name_str)
+++    if email_match:
+++        email = email_match.group(0)
+++        if email.lower().endswith(("@smail.th-koeln.de", "@smail.fh-koeln.de")):
+++            local_part = email.split("@")[0]
+++            if "." in local_part:
+++                # Alles nach dem ersten Punkt ist der Nachname
+++                lastname_part = local_part.split(".", 1)[1]
+++                # Teile nach Unterstrich und schreibe jeden Teil groß
+++                parts = lastname_part.split("_")
+++                return "_".join(p[0].upper() + p[1:] for p in parts if p)
+++
+++    # Fallback für Namen ohne (Smail-)Adresse
+++    # Entferne E-Mail Adresse in Klammern falls vorhanden
+++    clean_name = name_str.split("<")[0].strip()
+++
+++    if "," in clean_name:
+++        # Format: Lastname, Firstname
+++        res = clean_name.split(",")[0].strip()
+++        return res[:-1] if res.endswith("'") else res
+++    else:
+++        # Format: Firstname Lastname
+++        parts = clean_name.split()
+++        if parts:
+++            res = parts[-1]
+++            if res.endswith("'"):
+++                res = res[:-1]
+++            return res
+++    return "Unknown"
+++
+++
+++def find_student_folder(base_path: Path, lastname: str) -> Optional[Path]:
+++    """Sucht nach einem existierenden Studierendenordner in allen Semesterordnern.
+++
+++    Args:
+++        base_path: Basisverzeichnis für die Suche.
+++        lastname: Nachname des Studenten.
+++
+++    Returns:
+++        Optional[Path]: Pfad zum Ordner falls gefunden, sonst None.
+++    """
+++    if not base_path.exists():
+++        return None
+++
+++    # Suche in allen Unterordnern (Semesterordnern)
+++    for semester_dir in base_path.iterdir():
+++        if semester_dir.is_dir():
+++            student_dir = semester_dir / lastname
+++            if student_dir.exists() and student_dir.is_dir():
+++                return student_dir
+++    return None
+++
+++
+++def process_emails(
+++    source_root: Path, classifier_model: Path, config: Dict[str, str]
+++) -> List[Dict[str, Any]]:
+++    """Verarbeitet E-Mails und sortiert sie basierend auf Absender/Empfänger.
+++
+++    Args:
+++        source_root: Quellverzeichnis mit den E-Mails.
+++        classifier_model: Pfad zum trainierten Modell.
+++        config: Konfiguration der Zielpfade.
+++
+++    Returns:
+++        List[Dict[str, Any]]: Liste der verschobenen E-Mails.
+++    """
+++    classifier = EmailClassifier()
+++    classifier.load(classifier_model)
+++    parser = MailParser()
+++
+++    moved_emails = []
+++
+++    # Die Ordner, die verarbeitet werden sollen
+++    folders_to_process = ["Inbox", "SentItems"]
+++
+++    for folder_name in folders_to_process:
+++        folder_path = source_root / folder_name
+++        if not folder_path.exists():
+++            logger.warning(f"Ordner {folder_path} existiert nicht. Überspringe.")
+++            continue
+++
+++        logger.info(f"Verarbeite Ordner: {folder_name}")
+++
+++        for msg_file in folder_path.rglob("*.msg"):
+++            try:
+++                # Klassifizierung
+++                prediction = classifier.predict(msg_file)
+++                email_class = prediction["prediction"]
+++
+++                if email_class not in config:
+++                    logger.warning(
+++                        f"Keine Pfad-Konfiguration für Klasse '{email_class}' gefunden. Überspringe {msg_file.name}"
+++                    )
+++                    continue
+++
+++                class_base_path = Path(config[email_class])
+++
+++                # Datum und Semester
+++                date = parser.get_email_date(msg_file)
+++                semester = get_semester(date)
+++
+++                # Sender/Receiver und Ziel-Ordner bestimmen
+++                lastname = "Unknown"
+++                target_folder = "Inbox"  # Default
+++
+++                import extract_msg
+++
+++                with extract_msg.openMsg(str(msg_file)) as msg:
+++                    sender = msg.sender.lower() if msg.sender else ""
+++                    if "daniel.gaida@th-koeln.de" in sender:
+++                        target_folder = "SentItems"
+++                        # Bei Sent Items den Nachnamen des ersten Empfängers nehmen
+++                        recipients = msg.recipients
+++                        if recipients:
+++                            lastname = extract_lastname(
+++                                recipients[0].name or recipients[0].email
+++                            )
+++                    elif (
+++                        "@smail.th-koeln.de" in sender
+++                        or "@smail.fh-koeln.de" in sender
+++                    ):
+++                        target_folder = "Inbox"
+++                        lastname = extract_lastname(msg.sender)
+++                    else:
+++                        # Fallback falls weder noch (behalte ursprünglichen Ordnernamen oder Standard)
+++                        target_folder = folder_name
+++                        if target_folder == "Inbox":
+++                            lastname = extract_lastname(msg.sender)
+++                        else:
+++                            recipients = msg.recipients
+++                            if recipients:
+++                                lastname = extract_lastname(
+++                                    recipients[0].name or recipients[0].email
+++                                )
+++
+++                # Ziel-Pfad bestimmen
+++                if email_class.startswith(("BA_", "MA_")):
+++                    # Für BA/MA Klassen alle Mails gesammelt in Inbox/SentItems speichern
+++                    target_dir = class_base_path / semester / target_folder
+++                else:
+++                    student_dir = find_student_folder(class_base_path, lastname)
+++                    if not student_dir:
+++                        student_dir = class_base_path / semester / lastname
+++                    target_dir = student_dir / target_folder
+++
+++                target_dir.mkdir(parents=True, exist_ok=True)
+++                target_path = target_dir / msg_file.name
+++
+++                # Datei verschieben
+++                shutil.move(str(msg_file), str(target_path))
+++                logger.info(f"Verschoben: {msg_file.name} -> {target_path}")
+++
+++                moved_emails.append(
+++                    {
+++                        "class": email_class,
+++                        "semester": semester,
+++                        "lastname": lastname,
+++                        "folder": target_folder,
+++                        "path": str(target_path),
+++                    }
+++                )
+++
+++            except Exception as e:
+++                logger.error(f"Fehler beim Verarbeiten von {msg_file}: {e}")
+++
+++    return moved_emails
+++
+++
+++def write_report(source_root: Path, moved_emails: List[Dict[str, Any]]) -> None:
+++    """Erstellt den Markdown-Report.
+++
+++    Args:
+++        source_root: Quellverzeichnis für den Report.
+++        moved_emails: Liste der verschobenen E-Mails.
+++    """
+++    if not moved_emails:
+++        logger.info("Keine E-Mails verschoben. Erstelle keinen Report.")
+++        return
+++
+++    # Sortierung: Klasse, Semester, Nachname, Folder
+++    moved_emails.sort(
+++        key=lambda x: (x["class"], x["semester"], x["lastname"], x["folder"])
+++    )
+++
+++    report_path = source_root / "sorted_emails.md"
+++
+++    with open(report_path, "w", encoding="utf-8") as f:
+++        f.write("# Sortierte E-Mails\n\n")
+++
+++        current_class = None
+++        for email in moved_emails:
+++            if email["class"] != current_class:
+++                current_class = email["class"]
+++                f.write(f"\n## {current_class}\n")
+++
+++            f.write(
+++                f"- **{email['semester']}** | {email['lastname']} | {email['folder']}: `{email['path']}`\n"
+++            )
+++
+++    logger.info(f"Report erstellt: {report_path}")
+++
+++
+++def main() -> None:
+++    """Haupteinstiegspunkt für das Skript."""
+++    parser = argparse.ArgumentParser(
+++        description="Sortiert E-Mails basierend auf Klassifizierung."
+++    )
+++    parser.add_argument(
+++        "source_dir", type=str, help="Quellordner mit Inbox und SentItems."
+++    )
+++    parser.add_argument(
+++        "--config",
+++        type=str,
+++        required=True,
+++        help="Pfad zur YAML-Konfiguration (Klassen-Pfade).",
+++    )
+++    parser.add_argument(
+++        "--model",
+++        type=str,
+++        default="data/email_classifier.pkl",
+++        help="Pfad zum trainierten Modell.",
+++    )
+++
+++    args = parser.parse_args()
+++
+++    source_root = Path(args.source_dir)
+++    if not source_root.exists():
+++        logger.error(f"Quellverzeichnis {args.source_dir} existiert nicht.")
+++        return
+++
+++    config_path = Path(args.config)
+++    if not config_path.exists():
+++        logger.error(f"Konfiguration {args.config} existiert nicht.")
+++        return
+++
+++    with open(config_path, "r", encoding="utf-8") as f:
+++        config = yaml.safe_load(f)
+++
+++    # Falls die Konfiguration geschachtelt ist (z.B. unter einem 'class_paths' Key)
+++    if config and "class_paths" in config:
+++        config = config["class_paths"]
+++
+++    moved_emails = process_emails(source_root, Path(args.model), config)
+++    write_report(source_root, moved_emails)
+++
+++
+++if __name__ == "__main__":
+++    main()
+++"""Engine für die Klassifizierung von E-Mails."""
+++import pickle
+++from pathlib import Path
+++from typing import List, Tuple, Dict, Any, Optional, Union
+++
+++import numpy as np
+++from sklearn.ensemble import RandomForestClassifier
+++from sklearn.feature_extraction.text import TfidfVectorizer
+++from sklearn.preprocessing import LabelEncoder
+++
+++
+++from mcp_university.parser.mail_parser import MailParser
+++
+++class EmailClassifier:
+++    """Klassifiziert E-Mails basierend auf TF-IDF und/oder Embeddings."""
+++
+++    def __init__(
+++        self,
+++        mode: str = "combined",
+++        method: str = "xgboost",
+++        embedding_model_name: str = "paraphrase-multilingual-MiniLM-L12-v2"
+++    ) -> None:
+++        """Initialisiert den Klassifikator.
+++
+++        Args:
+++            mode: Modus der Merkmalsextraktion ('tfidf', 'embedding', 'combined').
+++            method: Klassifizierungsmethode ('randomforest', 'xgboost').
+++            embedding_model_name: Name des Sentence-Transformer Modells.
+++        """
+++        self.mode = mode
+++        self.method = method
+++        self.embedding_model_name = embedding_model_name
+++        self.parser = MailParser()
+++
+++        self.tfidf_vectorizer = TfidfVectorizer(max_features=5000)
+++        self._embedding_model = None
+++        self.label_encoder = LabelEncoder()
+++
+++        if method == "randomforest":
+++            self.classifier = RandomForestClassifier(n_estimators=100, random_state=42)
+++        elif method == "xgboost":
+++            from xgboost import XGBClassifier
+++            self.classifier = XGBClassifier(n_estimators=100, random_state=42, eval_metric='logloss')
+++        else:
+++            raise ValueError(f"Ungültige Klassifizierungsmethode: {method}")
+++
+++        self.is_trained = False
+++
+++    @property
+++    def embedding_model(self):
+++        """Lädt das Embedding-Modell verzögert (Lazy Loading)."""
+++        if self._embedding_model is None:
+++            from sentence_transformers import SentenceTransformer
+++            self._embedding_model = SentenceTransformer(self.embedding_model_name)
+++        return self._embedding_model
+++
+++    def _extract_text(self, file_path: Path) -> Optional[str]:
+++        """Extrahiert Text aus einer E-Mail-Datei."""
+++        return self.parser.parse(file_path)
+++
+++    def preprocess_data(self, root_dir: Union[str, Path]) -> Tuple[List[str], List[str]]:
+++        """Liest E-Mails aus Ordnerstrukturen ein.
+++
+++        Die Ordnernamen werden als Klassenlabels verwendet.
+++
+++        Args:
+++            root_dir: Wurzelverzeichnis mit Unterordnern für jede Klasse.
+++
+++        Returns:
+++            Tuple aus Texten und Labels.
+++        """
+++        root_path = Path(root_dir)
+++        texts = []
+++        labels = []
+++
+++        for class_dir in root_path.iterdir():
+++            if class_dir.is_dir():
+++                label = class_dir.name
+++                for file_path in class_dir.glob("*.msg"):
+++                    text = self._extract_text(file_path)
+++                    if text:
+++                        texts.append(text)
+++                        labels.append(label)
+++
+++        return texts, labels
+++
+++    def get_features(self, texts: List[str], train: bool = False) -> np.ndarray:
+++        """Extrahiert Merkmale aus Texten basierend auf dem gewählten Modus."""
+++        features = []
+++
+++        if self.mode in ["tfidf", "combined"]:
+++            if train:
+++                tfidf_feats = self.tfidf_vectorizer.fit_transform(texts).toarray()
+++            else:
+++                tfidf_feats = self.tfidf_vectorizer.transform(texts).toarray()
+++            features.append(tfidf_feats)
+++
+++        if self.mode in ["embedding", "combined"]:
+++            emb_feats = self.embedding_model.encode(texts)
+++            features.append(emb_feats)
+++
+++        if len(features) > 1:
+++            return np.hstack(features)
+++        return features[0]
+++
+++    def train(self, root_dir: Union[str, Path]) -> None:
+++        """Trainiert den Klassifikator auf Daten aus einem Verzeichnis.
+++
+++        Args:
+++            root_dir: Verzeichnis mit den Trainingsdaten.
+++        """
+++        texts, labels = self.preprocess_data(root_dir)
+++        if not texts:
+++            raise ValueError(f"Keine Trainingsdaten in {root_dir} gefunden.")
+++
+++        X = self.get_features(texts, train=True)
+++        y = self.label_encoder.fit_transform(labels)
+++
+++        self.classifier.fit(X, y)
+++        self.is_trained = True
+++
+++    def predict(self, file_path: Union[str, Path]) -> Dict[str, Any]:
+++        """Klassifiziert eine einzelne E-Mail.
+++
+++        Args:
+++            file_path: Pfad zur .msg Datei.
+++
+++        Returns:
+++            Dictionary mit der vorhergesagten Klasse und Wahrscheinlichkeiten.
+++        """
+++        if not self.is_trained:
+++            raise RuntimeError("Modell muss zuerst trainiert oder geladen werden.")
+++
+++        text = self._extract_text(Path(file_path))
+++        if not text:
+++            raise ValueError(f"Konnte Text aus {file_path} nicht extrahieren.")
+++
+++        X = self.get_features([text], train=False)
+++        y_pred = self.classifier.predict(X)[0]
+++        y_prob = self.classifier.predict_proba(X)[0]
+++
+++        label = self.label_encoder.inverse_transform([int(y_pred)])[0]
+++
+++        # Mapping von Label zu Wahrscheinlichkeit
+++        probs = {
+++            self.label_encoder.inverse_transform([i])[0]: float(prob)
+++            for i, prob in enumerate(y_prob)
+++        }
+++
+++        return {
+++            "prediction": label,
+++            "probabilities": probs,
+++            "confidence": float(np.max(y_prob))
+++        }
+++
+++    def save(self, model_path: Union[str, Path]) -> None:
+++        """Speichert das Modell in einer Datei.
+++
+++        Args:
+++            model_path: Pfad zur Speicherdatei.
+++        """
+++        data = {
+++            "mode": self.mode,
+++            "method": self.method,
+++            "embedding_model_name": self.embedding_model_name,
+++            "tfidf_vectorizer": self.tfidf_vectorizer,
+++            "classifier": self.classifier,
+++            "label_encoder": self.label_encoder,
+++            "is_trained": self.is_trained
+++        }
+++        with open(model_path, "wb") as f:
+++            pickle.dump(data, f)
+++
+++    def load(self, model_path: Union[str, Path]) -> None:
+++        """Lädt das Modell aus einer Datei.
+++
+++        Args:
+++            model_path: Pfad zur Modelldatei.
+++        """
+++        with open(model_path, "rb") as f:
+++            data = pickle.load(f)
+++
+++        self.mode = data["mode"]
+++        self.method = data.get("method", "randomforest")  # Fallback für alte Modelle
+++        self.embedding_model_name = data["embedding_model_name"]
+++        self.tfidf_vectorizer = data["tfidf_vectorizer"]
+++        self.classifier = data["classifier"]
+++        self.label_encoder = data["label_encoder"]
+++        self.is_trained = data["is_trained"]
+++        # embedding_model wird bei Bedarf geladen (Lazy Loading)
+++![Tests](https://github.com/dgaida/academic-memory-mcp/actions/workflows/tests.yml/badge.svg) ![Lint](https://github.com/dgaida/academic-memory-mcp/actions/workflows/lint.yml/badge.svg) ![CodeQL](https://github.com/dgaida/academic-memory-mcp/actions/workflows/codeql.yml/badge.svg) ![Documentation](https://github.com/dgaida/academic-memory-mcp/actions/workflows/docs.yml/badge.svg) ![Auto Versioning](https://github.com/dgaida/academic-memory-mcp/actions/workflows/auto-version.yml/badge.svg)
+++[![Version](https://img.shields.io/github/v/tag/dgaida/academic-memory-mcp?label=version)](https://github.com/dgaida/academic-memory-mcp/tags)
+++[![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+++[![codecov](https://codecov.io/gh/dgaida/academic-memory-mcp/branch/master/graph/badge.svg)](https://codecov.io/gh/dgaida/academic-memory-mcp)
+++[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://dgaida.github.io/academic-memory-mcp/)
+++[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/dgaida/academic-memory-mcp/graphs/commit-activity)
+++![Last commit](https://img.shields.io/github/last-commit/dgaida/academic-memory-mcp)
+++
+++# MCP University Memory System
+++
+++A locally-running, agentic knowledge and memory system for university and research work.
+++
+++## Features
+++- Recursive analysis of local folders
+++- Semantic understanding of documents and emails
+++- Hierarchical summaries (File -> Folder -> Root)
+++- Hybrid search (BM25 + Vector)
+++- MCP Server integration
+++- Fully offline using local LLMs (Ollama)
+++- Automated E-Mail classification (Bachelor thesis, projects, etc.)
+++- Database management for students, deadlines, and metadata
+++
+++## Prerequisites
+++- **qmd CLI:** Required for hybrid search. Install globally via: `npm install -g @tobilu/qmd`
+++- **Docling:** Required for PDF parsing. Install with: `pip install docling` and initialize with `cp-config` if prompted.
+++
+++## Tech Stack
+++- **Document Parsing:** Docling
+++- **Local LLM:** Ollama
+++- **Embeddings:** bge-m3
+++- **Vector DB:** Qdrant
+++- **MCP Framework:** FastMCP
+++- **Metadata:** SQLite
+++- **File Watching:** watchdog
+++
+++## Project Structure
+++```text
+++mcp_university/
+++├── config/             # YAML configurations and prompts
+++├── data/               # Persistent data (SQLite, Indexes, Cache)
+++├── src/mcp_university/ # Core package
+++│   ├── crawler/        # File system crawling and watching
+++│   ├── parser/         # Document and email parsing
+++│   ├── summarizer/     # LLM summary generation
+++│   ├── retrieval/      # Hybrid search index
+++│   ├── metadata/       # SQLite storage
+++│   ├── mcp_server/     # FastMCP server
+++│   ├── agent/          # Agentic workflows
+++│   ├── cli/            # Typer-based CLI
+++│   └── config.py       # Config loader
+++└── tests/              # Unit and integration tests
+++```
+++
+++## Installation
+++```bash
+++pip install -e .
+++```
+++
+++## Usage
+++```bash
+++mcp-uni index
+++mcp-uni search "your query"
+++mcp-uni serve-mcp
+++```
+++# Nutzung
+++
+++Das MCP University Memory System bietet verschiedene Schnittstellen zur Interaktion mit Ihren Daten.
+++
+++## Kommandozeile (CLI)
+++
+++Die CLI ist der primäre Weg, um das System zu verwalten und manuelle Suchen durchzuführen.
+++
+++### Indexierung (`index`)
+++Dieser Befehl scannt alle konfigurierten Ordner, erstellt Zusammenfassungen und aktualisiert den Index.
+++```bash
+++mcp-uni index
+++```
+++
+++### Suche (`search`)
+++Führt eine schnelle Abfrage über den gesamten Datenbestand durch.
+++```bash
+++mcp-uni search "Inhalt der Vorlesung 5"
+++```
+++
+++### Überwachung (`watch`)
+++Startet einen Hintergrundprozess, der auf Dateiänderungen reagiert und den Index in Echtzeit aktualisiert.
+++```bash
+++mcp-uni watch
+++```
+++
+++## E-Mail Klassifizierung
+++
+++Das System enthält ein Subpackage zur automatisierten Klassifizierung von studentischen E-Mails (z.B. Bachelorarbeit, Praxisprojekt).
+++
+++### Modell trainieren
+++Um den Klassifikator zu nutzen, muss er zuerst mit Beispieldaten trainiert werden. Erwarten wird eine Ordnerstruktur, in der jeder Unterordner eine Klasse repräsentiert und die E-Mails (.msg) enthält.
+++
+++```bash
+++python3 mcp_university/classifier/train.py /pfad/zu/trainingsdaten --mode combined --method xgboost
+++```
+++
+++Dabei kann zwischen `randomforest` und `xgboost` (Standard) gewählt werden.
+++
+++### E-Mail klassifizieren
+++Nach dem Training kann eine einzelne E-Mail-Datei klassifiziert werden:
+++
+++```bash
+++python3 mcp_university/classifier/predict.py /pfad/zur/email.msg
+++```
+++
+++Die Ausgabe enthält die wahrscheinlichste Klasse sowie die Konfidenz und eine detaillierte Wahrscheinlichkeitsverteilung.
+++### Batch-Klassifizierung
+++Um einen ganzen Ordner mit E-Mails automatisch zu sortieren:
+++```bash
+++
+++### E-Mail Sortierung (Studenten-Ordner)
+++Das leistungsfähigste Skript sortiert E-Mails nicht nur nach Klasse, sondern auch nach Semester und Student (Nachname):
+++
+++```bash
+++python3 mcp_university/classifier/sort_emails.py /quell/ordner --config config/class_paths.yaml --model data/email_classifier.pkl
+++```
+++
+++Es erkennt automatisch:
+++- **Semester:** Basierend auf dem E-Mail-Datum (SoSe/WS).
+++- **Student:** Extrahiert den Nachnamen aus `smail.th-koeln.de` Adressen oder Anzeigenamen.
+++- **Richtung:** Sortiert in `Inbox` oder `SentItems` Unterordner.
+++- **Bericht:** Erstellt eine `sorted_emails.md` mit einer Übersicht aller verschobenen Mails.
+++python3 mcp_university/classifier/classify_folder.py /quell/ordner --model data/email_classifier.pkl
+++```
+++Dies verschiebt die E-Mails in Unterordner, die nach den vorhergesagten Klassen benannt sind.
+++
+++
+++## Datenbank-Management (`db`)
+++
+++Die `db` Befehlsgruppe erlaubt die direkte Verwaltung der Metadaten und des Suchindex.
+++
+++### Auflisten von Inhalten
+++Sie können verschiedene Entitäten in der Datenbank auflisten:
+++
+++*   **Dateien:** `mcp-uni db list-files`
+++*   **Ordner:** `mcp-uni db list-folders`
+++*   **Studenten:** `mcp-uni db list-students` (Hinweis: Nutzen Sie `sync-students` zum Befüllen)
+++*   **Zusammenfassungen:** `mcp-uni db list-summaries`
+++*   **Deadlines:** `mcp-uni db list-deadlines`
+++
+++### Synchronisierung von Studenten (`sync-students`)
+++Befüllt die Datenbank aus einer `students.yaml`.
+++```bash
+++mcp-uni db sync-students
+++```
+++
+++### Löschen von Inhalten
+++Einträge können über ihre ID gelöscht werden. Mit der Option `--force` oder `-f` wird die Bestätigungsabfrage übersprungen.
+++
+++*   **Dateien löschen:** `mcp-uni db delete-file <ID_1> <ID_2> ...`
+++*   **Ordner löschen:** `mcp-uni db delete-folder <ID>` (entfernt rekursiv alle enthaltenen Dateien)
+++*   **Student löschen:** `mcp-uni db delete-student <ID>`
+++*   **Zusammenfassung löschen:** `mcp-uni db delete-summary <ID>`
+++*   **Deadline löschen:** `mcp-uni db delete-deadline <ID>`
+++
+++## Model Context Protocol (MCP)
+++
+++Der leistungsfähigste Weg, das System zu nutzen, ist über einen MCP-Client (wie Claude Desktop).
+++
+++### Server starten
+++```bash
+++mcp-uni serve-mcp
+++```
+++
+++### Verfügbare Tools
+++*   `search_documents`: Semantische Suche in Dokumenten.
+++*   `get_folder_summary`: Abfrage von aggregierten Ordner-Informationen.
+++*   `get_student_context`: Komplette Historie und Status eines Studenten abrufen.
+++*   `generate_mail_reply`: Entwurf einer E-Mail basierend auf dem Kontext.
+++*   `get_open_tasks`: Extraktion von TODOs aus allen Dokumenten.
+++
+++## Typische Workflows
+++
+++### 1. Vorbereitung einer Sprechstunde
+++Bitten Sie Ihren Agenten: "Gib mir den Kontext zu Student Max Mustermann und zeige mir seine letzten Abgaben."
+++Der Agent nutzt `get_student_context` and `search_documents`, um Ihnen eine kompakte Übersicht zu liefern.
+++
+++### 2. Beantworten von E-Mails
+++Kopieren Sie die E-Mail eines Studenten in den Chat und nutzen Sie das Tool `generate_mail_reply`. Das System berücksichtigt dabei automatisch den Status der Abschlussarbeit oder offene Deadlines.
+++
+++## Konfiguration
+++
+++### Zweistufige Zusammenfassung
+++In der `config/folders.yaml` kann die Option `summarize_emails_individually` (Standard: `false`) aktiviert werden. Wenn diese auf `true` gesetzt ist, werden E-Mail-Threads in zwei Stufen zusammengefasst: erst jede E-Mail einzeln, dann die gesamte Konversation.
+++
+++## Hilfsskripte
+++
+++Das System enthält nützliche Skripte im Ordner `scripts/`:
+++
+++- **`remove_empty_folders.py`**: Löscht rekursiv alle leeren Ordner in einem Verzeichnis.
+++- **`flatten_directory.py`**: Flacht eine Ordnerstruktur ab, indem alle Dateien in das Wurzelverzeichnis verschoben werden (inkl. Namenskollisionsprüfung).
+++# Usage
+++
+++The MCP University Memory System provides various interfaces for interacting with your data.
+++
+++## Command Line Interface (CLI)
+++
+++The CLI is the primary way to manage the system and perform manual searches.
+++
+++### Indexing (`index`)
+++This command scans all configured folders, creates summaries, and updates the index.
+++```bash
+++mcp-uni index
+++```
+++
+++### Search (`search`)
+++Performs a quick query across the entire dataset.
+++```bash
+++mcp-uni search "Content of lecture 5"
+++```
+++
+++### Watchdog (`watch`)
+++Starts a background process that reacts to file changes and updates the index in real-time.
+++```bash
+++mcp-uni watch
+++```
+++
+++## Email Classification
+++
+++The system includes a subpackage for the automated classification of student emails (e.g., Bachelor's thesis, internship project).
+++
+++### Training the Model
+++To use the classifier, it must first be trained with example data. It expects a folder structure where each subfolder represents a class and contains the emails (.msg).
+++
+++```bash
+++python3 mcp_university/classifier/train.py /path/to/training_data --mode combined --method xgboost
+++```
+++
+++You can choose between `randomforest` and `xgboost` (default).
+++
+++### Classifying an Email
+++After training, a single email file can be classified:
+++
+++```bash
+++python3 mcp_university/classifier/predict.py /path/to/email.msg
+++```
+++
+++The output contains the most likely class as well as the confidence and a detailed probability distribution.
+++### Batch Classification
+++To automatically sort an entire folder of emails (classification only):
+++```bash
+++
+++### Email Sorting (Student Folders)
+++The most powerful script sorts emails not only by class, but also by semester and student (last name):
+++
+++```bash
+++python3 mcp_university/classifier/sort_emails.py /source/folder --config config/class_paths.yaml --model data/email_classifier.pkl
+++```
+++
+++It automatically detects:
+++- **Semester:** Based on the email date (Summer/Winter semester).
+++- **Student:** Extracts the last name from `smail.th-koeln.de` addresses or display names.
+++- **Direction:** Sorts into `Inbox` or `SentItems` subfolders.
+++- **Report:** Creates a `sorted_emails.md` with an overview of all moved emails.
+++python3 mcp_university/classifier/classify_folder.py /source/folder --model data/email_classifier.pkl
+++```
+++This moves the emails into subfolders named after their predicted classes.
+++
+++
+++## Database Management (`db`)
+++
+++The `db` command group allows for direct management of metadata and the search index.
+++
+++### Listing Content
+++You can list various entities in the database:
+++
+++*   **Files:** `mcp-uni db list-files`
+++*   **Folders:** `mcp-uni db list-folders`
+++*   **Students:** `mcp-uni db list-students` (Note: Use `sync-students` to populate)
+++*   **Summaries:** `mcp-uni db list-summaries`
+++*   **Deadlines:** `mcp-uni db list-deadlines`
+++
+++### Student Synchronization (`sync-students`)
+++Populates the database from a `students.yaml`.
+++```bash
+++mcp-uni db sync-students
+++```
+++
+++### Deleting Content
+++Entries can be deleted using their ID. Use the `--force` or `-f` option to skip the confirmation prompt.
+++
+++*   **Delete Files:** `mcp-uni db delete-file <ID_1> <ID_2> ...`
+++*   **Delete Folder:** `mcp-uni db delete-folder <ID>` (recursively removes all contained files)
+++*   **Delete Student:** `mcp-uni db delete-student <ID>`
+++*   **Delete Summary:** `mcp-uni db delete-summary <ID>`
+++*   **Delete Deadline:** `mcp-uni db delete-deadline <ID>`
+++
+++## Model Context Protocol (MCP)
+++
+++The most powerful way to use the system is via an MCP client (like Claude Desktop).
+++
+++### Start Server
+++```bash
+++mcp-uni serve-mcp
+++```
+++
+++### Available Tools
+++*   `search_documents`: Semantic search in documents.
+++*   `get_folder_summary`: Query aggregated folder information.
+++*   `get_student_context`: Retrieve complete history and status of a student.
+++*   `generate_mail_reply`: Draft an email based on the context.
+++*   `get_open_tasks`: Extraction of TODOs from all documents.
+++
+++## Typical Workflows
+++
+++### 1. Preparing for Office Hours
+++Ask your agent: "Give me the context for student Max Mustermann and show me his latest submissions."
+++The agent uses `get_student_context` and `search_documents` to provide you with a compact overview.
+++
+++### 2. Answering Emails
+++Copy a student's email into the chat and use the `generate_mail_reply` tool. The system automatically takes the status of the thesis or open deadlines into account.
+++
+++## Configuration
+++
+++### Two-Stage Summarization
+++In `config/folders.yaml`, the `summarize_emails_individually` option (default: `false`) can be enabled. When set to `true`, email threads are summarized in two stages: first each email individually, then the entire conversation.
+++
+++## Utility Scripts
+++
+++The system includes useful scripts in the `scripts/` folder:
+++
+++- **`remove_empty_folders.py`**: Recursively deletes all empty folders in a directory.
+++- **`flatten_directory.py`**: Flattens a directory structure by moving all files to the root directory (includes name collision checks).
+++from pathlib import Path
+++from datetime import datetime
+++from unittest.mock import MagicMock, patch
+++
+++from mcp_university.classifier.sort_emails import get_semester, extract_lastname, process_emails, write_report
+++
+++def test_get_semester():
+++    # SoSe: 01.04. - 30.09.
+++    assert get_semester(datetime(2025, 4, 1)) == "2025_SoSe"
+++    assert get_semester(datetime(2025, 9, 30)) == "2025_SoSe"
+++
+++    # WS: 01.10. - 31.03.
+++    assert get_semester(datetime(2025, 10, 1)) == "2025_26_WS"
+++    assert get_semester(datetime(2026, 3, 31)) == "2025_26_WS"
+++    assert get_semester(datetime(2025, 1, 15)) == "2024_25_WS"
+++
+++def test_extract_lastname():
+++    assert extract_lastname("Max Mustermann") == "Mustermann"
+++    assert extract_lastname("Mustermann, Max") == "Mustermann"
+++    assert extract_lastname("Max Mustermann <max@example.com>") == "Mustermann"
+++    assert extract_lastname("Mustermann, Max <max@example.com>") == "Mustermann"
+++    assert extract_lastname("'Hans Müller'") == "Müller"
+++    assert extract_lastname("'Müller, Hans'") == "'Müller"
+++    assert extract_lastname("(No Sender)") == "Unknown"
+++    assert extract_lastname("") == "Unknown"
+++
+++@patch('mcp_university.classifier.sort_emails.EmailClassifier')
+++@patch('mcp_university.classifier.sort_emails.MailParser')
+++@patch('extract_msg.openMsg')
+++def test_process_emails(mock_open_msg, mock_mail_parser, mock_classifier_class, tmp_path):
+++    # Setup source directory
+++    source_root = tmp_path / "source"
+++    inbox = source_root / "Inbox"
+++    sent = source_root / "SentItems"
+++    inbox.mkdir(parents=True)
+++    sent.mkdir(parents=True)
+++
+++    msg1 = inbox / "mail1.msg"
+++    msg1.touch()
+++    msg2 = sent / "mail2.msg"
+++    msg2.touch()
+++
+++    # Subdirectory test
+++    sub_inbox = inbox / "Subfolder"
+++    sub_inbox.mkdir()
+++    msg3 = sub_inbox / "mail3.msg"
+++    msg3.touch()
+++
+++    # Setup target directory
+++    target_root = tmp_path / "target"
+++    target_root.mkdir()
+++
+++    # Mock classifier
+++    mock_classifier = mock_classifier_class.return_value
+++    mock_classifier.predict.side_effect = [
+++        {"prediction": "BachelorThesis"}, # mail1
+++        {"prediction": "BachelorThesis"}, # mail3 (rglob finds this)
+++        {"prediction": "BachelorThesis"}  # mail2
+++    ]
+++
+++    # Mock parser
+++    mock_parser = mock_mail_parser.return_value
+++    mock_parser.get_email_date.side_effect = [
+++        datetime(2025, 5, 10), # mail1 SoSe
+++        datetime(2025, 6, 10), # mail3 SoSe
+++        datetime(2025, 11, 20) # mail2 WS
+++    ]
+++
+++    # Mock extract_msg
+++    mock_msg1 = MagicMock()
+++    mock_msg1.sender = "Max Mustermann"
+++
+++    mock_msg3 = MagicMock()
+++    mock_msg3.sender = "Max Mustermann"
+++
+++    mock_msg2 = MagicMock()
+++    mock_recip = MagicMock()
+++    mock_recip.name = "Erika Musterfrau"
+++    mock_msg2.recipients = [mock_recip]
+++
+++    mock_open_msg.return_value.__enter__.side_effect = [mock_msg1, mock_msg3, mock_msg2]
+++
+++    config = {
+++        "BachelorThesis": str(target_root)
+++    }
+++
+++    moved = process_emails(source_root, Path("dummy_model"), config)
+++
+++    assert len(moved) == 3
+++
+++    # Verify first file (Inbox)
+++    expected_path1 = target_root / "2025_SoSe" / "Mustermann" / "Inbox" / "mail1.msg"
+++    assert expected_path1.exists()
+++    assert not msg1.exists()
+++
+++    # Verify third file (Subfolder in Inbox) -> should go to Inbox
+++    expected_path3 = target_root / "2025_SoSe" / "Mustermann" / "Inbox" / "mail3.msg"
+++    assert expected_path3.exists()
+++    assert not msg3.exists()
+++
+++    # Verify second file (SentItems)
+++    expected_path2 = target_root / "2025_26_WS" / "Musterfrau" / "SentItems" / "mail2.msg"
+++    assert expected_path2.exists()
+++    assert not msg2.exists()
+++
+++def test_write_report(tmp_path):
+++    source_root = tmp_path
+++    moved_emails = [
+++        {
+++            "class": "BachelorThesis",
+++            "semester": "2025_SoSe",
+++            "lastname": "Mustermann",
+++            "folder": "Inbox",
+++            "path": "/path/to/mail1.msg"
+++        },
+++        {
+++            "class": "BachelorThesis",
+++            "semester": "2025_26_WS",
+++            "lastname": "Musterfrau",
+++            "folder": "SentItems",
+++            "path": "/path/to/mail2.msg"
+++        }
+++    ]
+++
+++    write_report(source_root, moved_emails)
+++
+++    report_path = source_root / "sorted_emails.md"
+++    assert report_path.exists()
+++
+++    content = report_path.read_text(encoding="utf-8")
+++    assert "# Sortierte E-Mails" in content
+++    assert "## BachelorThesis" in content
+++    assert "Mustermann" in content
+++    assert "Musterfrau" in content
++diff --git a/docs/de/usage/index.md b/docs/de/usage/index.md
++index feaeeb7..c840c64 100644
++--- a/docs/de/usage/index.md
+++++ b/docs/de/usage/index.md
++@@ -45,6 +45,26 @@ python3 mcp_university/classifier/predict.py /pfad/zur/email.msg
++ ```
++
++ Die Ausgabe enthält die wahrscheinlichste Klasse sowie die Konfidenz und eine detaillierte Wahrscheinlichkeitsverteilung.
+++### Batch-Klassifizierung
+++Um einen ganzen Ordner mit E-Mails automatisch zu sortieren:
+++```bash
+++
+++### E-Mail Sortierung (Studenten-Ordner)
+++Das leistungsfähigste Skript sortiert E-Mails nicht nur nach Klasse, sondern auch nach Semester und Student (Nachname):
+++
+++```bash
+++python3 mcp_university/classifier/sort_emails.py /quell/ordner --config config/class_paths.yaml --model data/email_classifier.pkl
+++```
+++
+++Es erkennt automatisch:
+++- **Semester:** Basierend auf dem E-Mail-Datum (SoSe/WS).
+++- **Student:** Extrahiert den Nachnamen aus `smail.th-koeln.de` Adressen oder Anzeigenamen.
+++- **Richtung:** Sortiert in `Inbox` oder `SentItems` Unterordner.
+++- **Bericht:** Erstellt eine `sorted_emails.md` mit einer Übersicht aller verschobenen Mails.
+++python3 mcp_university/classifier/classify_folder.py /quell/ordner --model data/email_classifier.pkl
+++```
+++Dies verschiebt die E-Mails in Unterordner, die nach den vorhergesagten Klassen benannt sind.
+++
++
++ ## Datenbank-Management (`db`)
++
++@@ -98,3 +118,15 @@ Der Agent nutzt `get_student_context` and `search_documents`, um Ihnen eine komp
++
++ ### 2. Beantworten von E-Mails
++ Kopieren Sie die E-Mail eines Studenten in den Chat und nutzen Sie das Tool `generate_mail_reply`. Das System berücksichtigt dabei automatisch den Status der Abschlussarbeit oder offene Deadlines.
+++
+++## Konfiguration
+++
+++### Zweistufige Zusammenfassung
+++In der `config/folders.yaml` kann die Option `summarize_emails_individually` (Standard: `false`) aktiviert werden. Wenn diese auf `true` gesetzt ist, werden E-Mail-Threads in zwei Stufen zusammengefasst: erst jede E-Mail einzeln, dann die gesamte Konversation.
+++
+++## Hilfsskripte
+++
+++Das System enthält nützliche Skripte im Ordner `scripts/`:
+++
+++- **`remove_empty_folders.py`**: Löscht rekursiv alle leeren Ordner in einem Verzeichnis.
+++- **`flatten_directory.py`**: Flacht eine Ordnerstruktur ab, indem alle Dateien in das Wurzelverzeichnis verschoben werden (inkl. Namenskollisionsprüfung).
++diff --git a/docs/en/usage/index.md b/docs/en/usage/index.md
++index 6a759fa..abf8608 100644
++--- a/docs/en/usage/index.md
+++++ b/docs/en/usage/index.md
++@@ -45,6 +45,26 @@ python3 mcp_university/classifier/predict.py /path/to/email.msg
++ ```
++
++ The output contains the most likely class as well as the confidence and a detailed probability distribution.
+++### Batch Classification
+++To automatically sort an entire folder of emails (classification only):
+++```bash
+++
+++### Email Sorting (Student Folders)
+++The most powerful script sorts emails not only by class, but also by semester and student (last name):
+++
+++```bash
+++python3 mcp_university/classifier/sort_emails.py /source/folder --config config/class_paths.yaml --model data/email_classifier.pkl
+++```
+++
+++It automatically detects:
+++- **Semester:** Based on the email date (Summer/Winter semester).
+++- **Student:** Extracts the last name from `smail.th-koeln.de` addresses or display names.
+++- **Direction:** Sorts into `Inbox` or `SentItems` subfolders.
+++- **Report:** Creates a `sorted_emails.md` with an overview of all moved emails.
+++python3 mcp_university/classifier/classify_folder.py /source/folder --model data/email_classifier.pkl
+++```
+++This moves the emails into subfolders named after their predicted classes.
+++
++
++ ## Database Management (`db`)
++
++@@ -98,3 +118,15 @@ The agent uses `get_student_context` and `search_documents` to provide you with
++
++ ### 2. Answering Emails
++ Copy a student's email into the chat and use the `generate_mail_reply` tool. The system automatically takes the status of the thesis or open deadlines into account.
+++
+++## Configuration
+++
+++### Two-Stage Summarization
+++In `config/folders.yaml`, the `summarize_emails_individually` option (default: `false`) can be enabled. When set to `true`, email threads are summarized in two stages: first each email individually, then the entire conversation.
+++
+++## Utility Scripts
+++
+++The system includes useful scripts in the `scripts/` folder:
+++
+++- **`remove_empty_folders.py`**: Recursively deletes all empty folders in a directory.
+++- **`flatten_directory.py`**: Flattens a directory structure by moving all files to the root directory (includes name collision checks).
++diff --git a/mcp_university/classifier/engine.py b/mcp_university/classifier/engine.py
++index edffe5f..145a30c 100644
++--- a/mcp_university/classifier/engine.py
+++++ b/mcp_university/classifier/engine.py
++@@ -7,7 +7,7 @@ import numpy as np
++ from sklearn.ensemble import RandomForestClassifier
++ from sklearn.feature_extraction.text import TfidfVectorizer
++ from sklearn.preprocessing import LabelEncoder
++-from sentence_transformers import SentenceTransformer
+++
++
++ from mcp_university.parser.mail_parser import MailParser
++
++@@ -33,7 +33,7 @@ class EmailClassifier:
++         self.parser = MailParser()
++
++         self.tfidf_vectorizer = TfidfVectorizer(max_features=5000)
++-        self._embedding_model: Optional[SentenceTransformer] = None
+++        self._embedding_model = None
++         self.label_encoder = LabelEncoder()
++
++         if method == "randomforest":
++@@ -47,9 +47,10 @@ class EmailClassifier:
++         self.is_trained = False
++
++     @property
++-    def embedding_model(self) -> SentenceTransformer:
+++    def embedding_model(self):
++         """Lädt das Embedding-Modell verzögert (Lazy Loading)."""
++         if self._embedding_model is None:
+++            from sentence_transformers import SentenceTransformer
++             self._embedding_model = SentenceTransformer(self.embedding_model_name)
++         return self._embedding_model
++
++diff --git a/mcp_university/classifier/sort_emails.py b/mcp_university/classifier/sort_emails.py
++index a25c769..d47e793 100644
++--- a/mcp_university/classifier/sort_emails.py
+++++ b/mcp_university/classifier/sort_emails.py
++@@ -75,12 +75,16 @@ def extract_lastname(name_str: str) -> str:
++
++     if "," in clean_name:
++         # Format: Lastname, Firstname
++-        return clean_name.split(",")[0].strip()
+++        res = clean_name.split(",")[0].strip()
+++        return res[:-1] if res.endswith("'") else res
++     else:
++         # Format: Firstname Lastname
++         parts = clean_name.split()
++         if parts:
++-            return parts[-1]
+++            res = parts[-1]
+++            if res.endswith("'"):
+++                res = res[:-1]
+++            return res
++     return "Unknown"
++
++
++diff --git a/tests/test_sort_emails.py b/tests/test_sort_emails.py
++index 80f3085..7e74b2f 100644
++--- a/tests/test_sort_emails.py
+++++ b/tests/test_sort_emails.py
++@@ -19,6 +19,8 @@ def test_extract_lastname():
++     assert extract_lastname("Mustermann, Max") == "Mustermann"
++     assert extract_lastname("Max Mustermann <max@example.com>") == "Mustermann"
++     assert extract_lastname("Mustermann, Max <max@example.com>") == "Mustermann"
+++    assert extract_lastname("'Hans Müller'") == "Müller"
+++    assert extract_lastname("'Müller, Hans'") == "'Müller"
++     assert extract_lastname("(No Sender)") == "Unknown"
++     assert extract_lastname("") == "Unknown"
++
+diff --git a/tests/test_sort_emails.py b/tests/test_sort_emails.py
+index 80f3085..7e74b2f 100644
+--- a/tests/test_sort_emails.py
++++ b/tests/test_sort_emails.py
+@@ -19,6 +19,8 @@ def test_extract_lastname():
+     assert extract_lastname("Mustermann, Max") == "Mustermann"
+     assert extract_lastname("Max Mustermann <max@example.com>") == "Mustermann"
+     assert extract_lastname("Mustermann, Max <max@example.com>") == "Mustermann"
++    assert extract_lastname("'Hans Müller'") == "Müller"
++    assert extract_lastname("'Müller, Hans'") == "'Müller"
+     assert extract_lastname("(No Sender)") == "Unknown"
+     assert extract_lastname("") == "Unknown"
