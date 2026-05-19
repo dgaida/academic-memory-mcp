@@ -64,7 +64,7 @@ def test_classifier_save_load(temp_data_dir, tmp_path):
         assert new_classifier.mode == "tfidf"
         assert len(new_classifier.label_encoder.classes_) == 2
 
-@patch("mcp_university.classifier.engine.SentenceTransformer")
+@patch("sentence_transformers.SentenceTransformer")
 def test_classifier_embedding_mode(mock_st, temp_data_dir):
     """Testet den Embedding-Modus mit Mocks."""
     # Mock SentenceTransformer encode
