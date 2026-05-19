@@ -5,7 +5,7 @@ import re
 import shutil
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import yaml
 
@@ -82,6 +82,28 @@ def extract_lastname(name_str: str) -> str:
         if parts:
             return parts[-1]
     return "Unknown"
+
+
+def find_student_folder(base_path: Path, lastname: str) -> Optional[Path]:
+    """Sucht nach einem existierenden Studierendenordner in allen Semesterordnern.
+
+    Args:
+        base_path: Basisverzeichnis für die Suche.
+        lastname: Nachname des Studenten.
+
+    Returns:
+        Optional[Path]: Pfad zum Ordner falls gefunden, sonst None.
+    """
+    if not base_path.exists():
+        return None
+
+    # Suche in allen Unterordnern (Semesterordnern)
+    for semester_dir in base_path.iterdir():
+        if semester_dir.is_dir():
+            student_dir = semester_dir / lastname
+            if student_dir.exists() and student_dir.is_dir():
+                return student_dir
+    return None
 
 
 def process_emails(
@@ -171,7 +193,10 @@ def process_emails(
                     # Für BA/MA Klassen alle Mails gesammelt in Inbox/SentItems speichern
                     target_dir = class_base_path / semester / target_folder
                 else:
-                    target_dir = class_base_path / semester / lastname / target_folder
+                    student_dir = find_student_folder(class_base_path, lastname)
+                    if not student_dir:
+                        student_dir = class_base_path / semester / lastname
+                    target_dir = student_dir / target_folder
 
                 target_dir.mkdir(parents=True, exist_ok=True)
                 target_path = target_dir / msg_file.name
