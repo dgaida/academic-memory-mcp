@@ -1,8 +1,10 @@
 """Skript zur Verarbeitung sortierter E-Mails und Generierung von Antworten."""
 import argparse
 import logging
+import extract_msg
+import yaml
+from mcp_university.classifier.sort_emails import process_emails, write_report, extract_lastname
 import re
-import subprocess
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
@@ -22,15 +24,24 @@ logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
 
 def run_sort_emails(source_dir: str, config_path: str) -> None:
-    """Führt das sort_emails.py Skript aus.
+    """Sortiert E-Mails basierend auf Klassifizierung.
 
     Args:
         source_dir: Quellordner mit den E-Mails.
         config_path: Pfad zur Konfigurationsdatei.
     """
-    logger.info(f"Führe sort_emails.py für {source_dir} aus...")
-    cmd = ["python3", "-m", "mcp_university.classifier.sort_emails", source_dir, "--config", config_path]
-    subprocess.run(cmd, check=True)
+    logger.info(f"Sortiere E-Mails in {source_dir}...")
+
+    with open(config_path, "r", encoding="utf-8") as f:
+        config = yaml.safe_load(f)
+    if config and "class_paths" in config:
+        config = config["class_paths"]
+
+    source_root = Path(source_dir)
+    model_path = Path("data/email_classifier.pkl")
+
+    moved_emails = process_emails(source_root, model_path, config)
+    write_report(source_root, moved_emails)
 
 def parse_sorted_report(report_path: Path) -> List[Dict]:
     """Parst die sorted_emails.md Datei.
@@ -99,7 +110,7 @@ def create_outlook_draft(subject: str, body: str, recipient: str = "") -> bool:
         logger.error(f"Fehler beim Erstellen des Outlook-Entwurfs: {e}")
         return False
 
-def generate_reply(summarizer: Summarizer, mail_path: Path, summary_content: str, skill_path: Path) -> str:
+def generate_reply(summarizer: Summarizer, mail_path: Path, summary_content: str = "", skill_path: Path = None, conversation_content: str = "") -> str:
     """Generiert eine Antwortmail mit dem LLM.
 
     Args:
@@ -107,6 +118,7 @@ def generate_reply(summarizer: Summarizer, mail_path: Path, summary_content: str
         mail_path: Pfad zur aktuellen E-Mail.
         summary_content: Inhalt der bisherigen Zusammenfassung.
         skill_path: Pfad zur SKILL-Datei.
+        conversation_content: Optionaler Verlauf des Schriftverkehrs (statt Zusammenfassung).
 
     Returns:
         str: Der generierte Antwort-Text.
@@ -115,17 +127,20 @@ def generate_reply(summarizer: Summarizer, mail_path: Path, summary_content: str
     mail_content = parser.parse(mail_path)
 
     skill_content = "Keine spezifischen Anweisungen vorhanden."
-    if skill_path.exists():
+    if skill_path and skill_path.exists():
         skill_content = skill_path.read_text(encoding="utf-8")
 
+    context_label = "SCHRIFTVERKEHR DER LETZTEN 2 WOCHEN" if conversation_content else "ZUSAMMENFASSUNG DES SCHRIFTVERKEHRS"
+    context_body = conversation_content if conversation_content else summary_content
+
     system_prompt = "Du bist ein hilfreicher Assistent an der TH Köln. Verfasse eine Antwort-E-Mail auf Deutsch."
-    user_prompt = f"""Basierend auf der folgenden E-Mail, der bisherigen Zusammenfassung des Schriftverkehrs und den Skill-Anweisungen, verfasse eine professionelle Antwort.
+    user_prompt = f"""Basierend auf der folgenden E-Mail, dem Kontext des bisherigen Schriftverkehrs und den Skill-Anweisungen, verfasse eine professionelle Antwort.
 
 SKILL ANWEISUNGEN:
 {skill_content}
 
-ZUSAMMENFASSUNG DES SCHRIFTVERKEHRS:
-{summary_content}
+{context_label}:
+{context_body}
 
 AKTUELLE E-MAIL:
 {mail_content}
@@ -171,73 +186,151 @@ def main() -> None:
     # Wir tracken verarbeitete student_folders, um Mehrfachverarbeitung zu vermeiden
     processed_folders = set()
 
+    from datetime import timedelta
+
     for email in emails:
         mail_path = Path(email["path"])
-        # Pfadstruktur: .../Klasse/Semester/Nachname/Inbox/mail.msg
-        student_folder = mail_path.parent.parent
+        is_ba_ma = email["class"].startswith(("BA_", "MA_"))
 
-        if student_folder in processed_folders:
-            continue
-        processed_folders.add(student_folder)
-
-        summary_file = student_folder / ".emails_summary.md"
-
-        # 1. Update/Create Summary
-        email_files = list(student_folder.rglob("*.msg")) + list(student_folder.rglob("*.eml"))
-        if not email_files:
-            continue
-
-        # Sortiere chronologisch
-        dated_emails = []
-        for f in email_files:
-            try:
-                date = mail_parser.get_email_date(f)
-                dated_emails.append((date, f))
-            except Exception:
-                dated_emails.append((datetime.min, f))
-        dated_emails.sort(key=lambda x: x[0])
-
-        latest_date, latest_mail = dated_emails[-1]
-
-        should_update = False
-        if not summary_file.exists():
-            should_update = True
+        if is_ba_ma:
+            # Bei BA/MA tracken wir (class, semester, lastname)
+            identifier = (email["class"], email["semester"], email["lastname"])
         else:
-            summary_mtime = datetime.fromtimestamp(summary_file.stat().st_mtime)
-            if latest_date > summary_mtime:
-                should_update = True
+            # Pfadstruktur: .../Klasse/Semester/Nachname/Inbox/mail.msg
+            student_folder = mail_path.parent.parent
+            identifier = student_folder
 
-        summary_content = ""
-        if should_update:
-            logger.info(f"Erstelle/Aktualisiere Zusammenfassung für {student_folder.name}")
-            conv_content = ""
-            for date, f in dated_emails:
+        if identifier in processed_folders:
+            continue
+        processed_folders.add(identifier)
+
+        if is_ba_ma:
+            # Speziallogik für BA/MA: Sammle alle Mails des Studenten in diesem Semester
+            # Diese liegen in .../Klasse/Semester/Inbox oder .../Klasse/Semester/SentItems
+            semester_folder = mail_path.parent.parent
+            inbox_folder = semester_folder / "Inbox"
+            sent_folder = semester_folder / "SentItems"
+
+            all_files = []
+            if inbox_folder.exists():
+                all_files.extend(list(inbox_folder.glob("*.msg")) + list(inbox_folder.glob("*.eml")))
+            if sent_folder.exists():
+                all_files.extend(list(sent_folder.glob("*.msg")) + list(sent_folder.glob("*.eml")))
+
+            student_emails = []
+            for f in all_files:
+                try:
+                    with extract_msg.openMsg(str(f)) as msg:
+                        # Prüfe ob der Student Sender oder Receiver ist
+                        sender_lastname = extract_lastname(msg.sender)
+                        recipient_lastname = "None"
+                        if msg.recipients:
+                            recipient_lastname = extract_lastname(msg.recipients[0].name or msg.recipients[0].email)
+
+                        if sender_lastname == email["lastname"] or recipient_lastname == email["lastname"]:
+                            date = mail_parser.get_email_date(f)
+                            student_emails.append((date, f))
+                except Exception:
+                    continue
+
+            if not student_emails:
+                continue
+
+            student_emails.sort(key=lambda x: x[0])
+            latest_date, latest_mail = student_emails[-1]
+
+            # Nur fortfahren wenn die neueste Mail in Inbox liegt
+            if "Inbox" not in latest_mail.parts:
+                continue
+
+            logger.info(f"Verarbeite BA/MA E-Mails für {email['lastname']} in {email['class']}")
+
+            # Filter: Maximal 2 Wochen alt (relativ zur neuesten Mail)
+            threshold_date = latest_date - timedelta(days=14)
+            recent_emails = [e for e in student_emails if e[0] >= threshold_date]
+
+            # Konstruiere conversation_content (alle außer der neuesten Mail)
+            conversation_content = ""
+            for date, f in recent_emails:
+                if f == latest_mail:
+                    continue
                 p = mail_parser.parse(f)
                 if p:
-                    conv_content += f"\n--- EMAIL VOM {date} ---\n{p}\n"
-
-            summary_content = summarizer.summarize_email_conversation(student_folder.name, conv_content)
-            if summary_content:
-                summary_file.write_text(summary_content, encoding="utf-8")
-        else:
-            summary_content = summary_file.read_text(encoding="utf-8")
-
-        # 2. Generate Reply if newest mail is in Inbox
-        if "Inbox" in latest_mail.parts and "SentItems" not in latest_mail.parts:
-            logger.info(f"Generiere Antwort für neueste Mail in {student_folder.name}: {latest_mail.name}")
+                    conversation_content += f"\n--- EMAIL VOM {date} ---\n{p}\n"
 
             skill_path = Path(f"skills/SKILL_{email['class']}.md")
-            reply = generate_reply(summarizer, latest_mail, summary_content or "", skill_path)
+            reply = generate_reply(summarizer, latest_mail, skill_path=skill_path, conversation_content=conversation_content)
 
-            # Outlook Draft or Markdown
+            # Speichere Antwort (Draft oder File im Semester Ordner mit Name des Studenten)
             subject = latest_mail.stem
             success = create_outlook_draft(subject, reply)
             if success:
                 logger.info(f"Outlook-Entwurf für {latest_mail.name} erstellt.")
             else:
-                reply_path = student_folder / f"{latest_mail.stem}_reply.md"
+                reply_path = semester_folder / f"{latest_mail.stem}_{email['lastname']}_reply.md"
                 reply_path.write_text(reply, encoding="utf-8")
                 logger.info(f"Antwort als Markdown gespeichert: {reply_path}")
+
+        else:
+            # Standardverhalten für andere Klassen
+            summary_file = identifier / ".emails_summary.md"
+
+            # 1. Update/Create Summary
+            email_files = list(identifier.rglob("*.msg")) + list(identifier.rglob("*.eml"))
+            if not email_files:
+                continue
+
+            # Sortiere chronologisch
+            dated_emails = []
+            for f in email_files:
+                try:
+                    date = mail_parser.get_email_date(f)
+                    dated_emails.append((date, f))
+                except Exception:
+                    dated_emails.append((datetime.min, f))
+            dated_emails.sort(key=lambda x: x[0])
+
+            latest_date, latest_mail = dated_emails[-1]
+
+            should_update = False
+            if not summary_file.exists():
+                should_update = True
+            else:
+                summary_mtime = datetime.fromtimestamp(summary_file.stat().st_mtime)
+                if latest_date > summary_mtime:
+                    should_update = True
+
+            summary_content = ""
+            if should_update:
+                logger.info(f"Erstelle/Aktualisiere Zusammenfassung für {identifier.name}")
+                conv_content = ""
+                for date, f in dated_emails:
+                    p = mail_parser.parse(f)
+                    if p:
+                        conv_content += f"\n--- EMAIL VOM {date} ---\n{p}\n"
+
+                summary_content = summarizer.summarize_email_conversation(identifier.name, conv_content)
+                if summary_content:
+                    summary_file.write_text(summary_content, encoding="utf-8")
+            else:
+                summary_content = summary_file.read_text(encoding="utf-8")
+
+            # 2. Generate Reply if newest mail is in Inbox
+            if "Inbox" in latest_mail.parts and "SentItems" not in latest_mail.parts:
+                logger.info(f"Generiere Antwort für neueste Mail in {identifier.name}: {latest_mail.name}")
+
+                skill_path = Path(f"skills/SKILL_{email['class']}.md")
+                reply = generate_reply(summarizer, latest_mail, summary_content or "", skill_path)
+
+                # Outlook Draft or Markdown
+                subject = latest_mail.stem
+                success = create_outlook_draft(subject, reply)
+                if success:
+                    logger.info(f"Outlook-Entwurf für {latest_mail.name} erstellt.")
+                else:
+                    reply_path = identifier / f"{latest_mail.stem}_reply.md"
+                    reply_path.write_text(reply, encoding="utf-8")
+                    logger.info(f"Antwort als Markdown gespeichert: {reply_path}")
 
 if __name__ == "__main__":
     main()
