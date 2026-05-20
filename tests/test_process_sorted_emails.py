@@ -8,21 +8,10 @@ from datetime import datetime
 # Add project root to sys.path to make process_sorted_emails importable
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-# Mock win32com BEFORE importing process_sorted_emails
+# Mock win32com BEFORE importing process_sorted_emails (essential for non-Windows)
 mock_win32 = MagicMock()
 sys.modules["win32com"] = mock_win32
 sys.modules["win32com.client"] = mock_win32.client
-
-# Mock platform and subprocess for is_outlook_open
-mock_platform = MagicMock()
-mock_platform.system.return_value = "Windows"
-sys.modules["platform"] = mock_platform
-
-mock_subprocess = MagicMock()
-sys.modules["subprocess"] = mock_subprocess
-
-# Mock ollama to avoid import errors
-sys.modules["ollama"] = MagicMock()
 
 from process_sorted_emails import parse_sorted_report, generate_reply, create_outlook_draft, main # noqa: E402
 
