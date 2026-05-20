@@ -1554,11 +1554,11 @@
 <p>The most powerful script sorts emails not only by class, but also by semester and student (last name):</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>python3<span class="w"> </span>mcp_university/classifier/sort_emails.py<span class="w"> </span>/source/folder<span class="w"> </span>--config<span class="w"> </span>config/class_paths.yaml<span class="w"> </span>--model<span class="w"> </span>data/email_classifier.pkl
 </code></pre></div>
-<p>It automatically detects:
-- <strong>Semester:</strong> Based on the email date (Summer/Winter semester).
-- <strong>Student:</strong> Extracts the last name from <code>smail.th-koeln.de</code> addresses or display names.
-- <strong>Direction:</strong> Sorts into <code>Inbox</code> or <code>SentItems</code> subfolders.
-- <strong>Report:</strong> Creates a <code>sorted_emails.md</code> with an overview of all moved emails.</p>
+<p>It automatically detects:<br />
+- <strong>Semester:</strong> Based on the email date (Summer/Winter semester).<br />
+- <strong>Student:</strong> Extracts the last name from <code>smail.th-koeln.de</code> addresses or display names.<br />
+- <strong>Direction:</strong> Sorts into <code>Inbox</code> or <code>SentItems</code> subfolders.<br />
+- <strong>Report:</strong> Creates a <code>sorted_emails.md</code> with an overview of all moved emails.  </p>
 <h3 id="batch-classification">Batch Classification<a class="headerlink" href="#batch-classification" title="Permanent link">&para;</a></h3>
 <p>To automatically sort an entire folder of emails (classification only):
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>python3<span class="w"> </span>mcp_university/classifier/classify_folder.py<span class="w"> </span>/source/folder<span class="w"> </span>--model<span class="w"> </span>data/email_classifier.pkl
@@ -1613,8 +1613,8 @@ The agent uses <code>get_student_context</code> and <code>search_documents</code
 <h2 id="utility-scripts">Utility Scripts<a class="headerlink" href="#utility-scripts" title="Permanent link">&para;</a></h2>
 <p>The system includes useful scripts in the <code>scripts/</code> folder:</p>
 <ul>
-<li><strong><code>remove_empty_folders.py</code></strong>: Recursively deletes all empty folders in a directory.</li>
-<li><strong><code>flatten_directory.py</code></strong>: Flattens a directory structure by moving all files to the root directory (includes name collision checks).</li>
+<li><strong><code>remove_empty_folders.py</code></strong>: Recursively deletes all empty folders in a directory.  </li>
+<li><strong><code>flatten_directory.py</code></strong>: Flattens a directory structure by moving all files to the root directory (includes name collision checks).  </li>
 </ul>
 
 

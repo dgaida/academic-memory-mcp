@@ -1552,11 +1552,11 @@
 <p>Das leistungsfähigste Skript sortiert E-Mails nicht nur nach Klasse, sondern auch nach Semester und Student (Nachname):</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>python3<span class="w"> </span>mcp_university/classifier/sort_emails.py<span class="w"> </span>/quell/ordner<span class="w"> </span>--config<span class="w"> </span>config/class_paths.yaml<span class="w"> </span>--model<span class="w"> </span>data/email_classifier.pkl
 </code></pre></div>
-<p>Es erkennt automatisch:
-- <strong>Semester:</strong> Basierend auf dem E-Mail-Datum (SoSe/WS).
-- <strong>Student:</strong> Extrahiert den Nachnamen aus <code>smail.th-koeln.de</code> Adressen oder Anzeigenamen.
-- <strong>Richtung:</strong> Sortiert in <code>Inbox</code> oder <code>SentItems</code> Unterordner.
-- <strong>Bericht:</strong> Erstellt eine <code>sorted_emails.md</code> mit einer Übersicht aller verschobenen Mails.</p>
+<p>Es erkennt automatisch:<br />
+- <strong>Semester:</strong> Basierend auf dem E-Mail-Datum (SoSe/WS).<br />
+- <strong>Student:</strong> Extrahiert den Nachnamen aus <code>smail.th-koeln.de</code> Adressen oder Anzeigenamen.<br />
+- <strong>Richtung:</strong> Sortiert in <code>Inbox</code> oder <code>SentItems</code> Unterordner.<br />
+- <strong>Bericht:</strong> Erstellt eine <code>sorted_emails.md</code> mit einer Übersicht aller verschobenen Mails.  </p>
 <h3 id="batch-klassifizierung">Batch-Klassifizierung<a class="headerlink" href="#batch-klassifizierung" title="Permanent link">&para;</a></h3>
 <p>Um einen ganzen Ordner mit E-Mails automatisch zu sortieren (nur Klassifizierung):
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>python3<span class="w"> </span>mcp_university/classifier/classify_folder.py<span class="w"> </span>/quell/ordner<span class="w"> </span>--model<span class="w"> </span>data/email_classifier.pkl
@@ -1611,8 +1611,8 @@ Der Agent nutzt <code>get_student_context</code> and <code>search_documents</cod
 <h2 id="hilfsskripte">Hilfsskripte<a class="headerlink" href="#hilfsskripte" title="Permanent link">&para;</a></h2>
 <p>Das System enthält nützliche Skripte im Ordner <code>scripts/</code>:</p>
 <ul>
-<li><strong><code>remove_empty_folders.py</code></strong>: Löscht rekursiv alle leeren Ordner in einem Verzeichnis.</li>
-<li><strong><code>flatten_directory.py</code></strong>: Flacht eine Ordnerstruktur ab, indem alle Dateien in das Wurzelverzeichnis verschoben werden (inkl. Namenskollisionsprüfung).</li>
+<li><strong><code>remove_empty_folders.py</code></strong>: Löscht rekursiv alle leeren Ordner in einem Verzeichnis.  </li>
+<li><strong><code>flatten_directory.py</code></strong>: Flacht eine Ordnerstruktur ab, indem alle Dateien in das Wurzelverzeichnis verschoben werden (inkl. Namenskollisionsprüfung).  </li>
 </ul>
 
 
