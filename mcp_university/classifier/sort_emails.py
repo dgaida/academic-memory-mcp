@@ -129,98 +129,104 @@ def process_emails(
 
     moved_emails = []
 
-    # Die Ordner, die verarbeitet werden sollen
-    folders_to_process = ["Inbox", "SentItems"]
+    logger.info(f"Verarbeite Quellverzeichnis: {source_root}")
 
-    for folder_name in folders_to_process:
-        folder_path = source_root / folder_name
-        if not folder_path.exists():
-            logger.warning(f"Ordner {folder_path} existiert nicht. Überspringe.")
-            continue
+    for msg_file in source_root.rglob("*.msg"):
+        try:
+            # Klassifizierung
+            prediction = classifier.predict(msg_file)
+            email_class = prediction["prediction"]
 
-        logger.info(f"Verarbeite Ordner: {folder_name}")
-
-        for msg_file in folder_path.rglob("*.msg"):
-            try:
-                # Klassifizierung
-                prediction = classifier.predict(msg_file)
-                email_class = prediction["prediction"]
-
-                if email_class not in config:
-                    logger.warning(
-                        f"Keine Pfad-Konfiguration für Klasse '{email_class}' gefunden. Überspringe {msg_file.name}"
-                    )
-                    continue
-
-                class_base_path = Path(config[email_class])
-
-                # Datum und Semester
-                date = parser.get_email_date(msg_file)
-                semester = get_semester(date)
-
-                # Sender/Receiver und Ziel-Ordner bestimmen
-                lastname = "Unknown"
-                target_folder = "Inbox"  # Default
-
-                import extract_msg
-
-                with extract_msg.openMsg(str(msg_file)) as msg:
-                    sender = msg.sender.lower() if msg.sender else ""
-                    if "daniel.gaida@th-koeln.de" in sender:
-                        target_folder = "SentItems"
-                        # Bei Sent Items den Nachnamen des ersten Empfängers nehmen
-                        recipients = msg.recipients
-                        if recipients:
-                            lastname = extract_lastname(
-                                recipients[0].name or recipients[0].email
-                            )
-                    elif (
-                        "@smail.th-koeln.de" in sender
-                        or "@smail.fh-koeln.de" in sender
-                    ):
-                        target_folder = "Inbox"
-                        lastname = extract_lastname(msg.sender)
-                    else:
-                        # Fallback falls weder noch (behalte ursprünglichen Ordnernamen oder Standard)
-                        target_folder = folder_name
-                        if target_folder == "Inbox":
-                            lastname = extract_lastname(msg.sender)
-                        else:
-                            recipients = msg.recipients
-                            if recipients:
-                                lastname = extract_lastname(
-                                    recipients[0].name or recipients[0].email
-                                )
-
-                # Ziel-Pfad bestimmen
-                if email_class.startswith(("BA_", "MA_")):
-                    # Für BA/MA Klassen alle Mails gesammelt in Inbox/SentItems speichern
-                    target_dir = class_base_path / semester / target_folder
-                else:
-                    student_dir = find_student_folder(class_base_path, lastname)
-                    if not student_dir:
-                        student_dir = class_base_path / semester / lastname
-                    target_dir = student_dir / target_folder
-
-                target_dir.mkdir(parents=True, exist_ok=True)
-                target_path = target_dir / msg_file.name
-
-                # Datei verschieben
-                shutil.move(str(msg_file), str(target_path))
-                logger.info(f"Verschoben: {msg_file.name} -> {target_path}")
-
-                moved_emails.append(
-                    {
-                        "class": email_class,
-                        "semester": semester,
-                        "lastname": lastname,
-                        "folder": target_folder,
-                        "path": str(target_path),
-                    }
+            if email_class not in config:
+                logger.warning(
+                    f"Keine Pfad-Konfiguration für Klasse '{email_class}' gefunden. Überspringe {msg_file.name}"
                 )
+                continue
 
-            except Exception as e:
-                logger.error(f"Fehler beim Verarbeiten von {msg_file}: {e}")
+            class_base_path = Path(config[email_class])
+
+            # Datum und Semester
+            date = parser.get_email_date(msg_file)
+            semester = get_semester(date)
+
+            # Sender/Receiver und Ziel-Ordner bestimmen
+            lastname = "Unknown"
+            target_folder = "Inbox"  # Default
+
+            import extract_msg
+
+            with extract_msg.openMsg(str(msg_file)) as msg:
+                sender = (msg.sender.lower() if msg.sender else "").strip()
+
+                if "daniel.gaida@th-koeln.de" in sender:
+                    target_folder = "SentItems"
+                    # Suche in Empfängern nach Student
+                    recipients = msg.recipients
+                    if recipients:
+                        found_student = False
+                        for rec in recipients:
+                            rec_email = (rec.email or "").lower()
+                            if "@smail.th-koeln.de" in rec_email or "@smail.fh-koeln.de" in rec_email:
+                                lastname = extract_lastname(rec.name or rec.email)
+                                found_student = True
+                                break
+                        if not found_student:
+                            # Fallback falls kein Student in Empfängern
+                            lastname = extract_lastname(recipients[0].name or recipients[0].email)
+                elif (
+                    "@smail.th-koeln.de" in sender
+                    or "@smail.fh-koeln.de" in sender
+                ):
+                    target_folder = "Inbox"
+                    lastname = extract_lastname(msg.sender)
+                else:
+                    # Fallback falls weder noch
+                    # Versuche Student in Sender oder Empfängern zu finden
+                    recipients = msg.recipients
+                    found_student = False
+                    if recipients:
+                        for rec in recipients:
+                            rec_email = (rec.email or "").lower()
+                            if "@smail.th-koeln.de" in rec_email or "@smail.fh-koeln.de" in rec_email:
+                                target_folder = "SentItems"
+                                lastname = extract_lastname(rec.name or rec.email)
+                                found_student = True
+                                break
+
+                    if not found_student:
+                         # Wenn immer noch nichts, bleibe bei Inbox und versuche Sender
+                         target_folder = "Inbox"
+                         lastname = extract_lastname(msg.sender)
+
+            # Ziel-Pfad bestimmen
+            if email_class.startswith(("BA_", "MA_")):
+                # Für BA/MA Klassen alle Mails gesammelt in Inbox/SentItems speichern
+                target_dir = class_base_path / semester / target_folder
+            else:
+                student_dir = find_student_folder(class_base_path, lastname)
+                if not student_dir:
+                    student_dir = class_base_path / semester / lastname
+                target_dir = student_dir / target_folder
+
+            target_dir.mkdir(parents=True, exist_ok=True)
+            target_path = target_dir / msg_file.name
+
+            # Datei verschieben
+            shutil.move(str(msg_file), str(target_path))
+            logger.info(f"Verschoben: {msg_file.name} -> {target_path}")
+
+            moved_emails.append(
+                {
+                    "class": email_class,
+                    "semester": semester,
+                    "lastname": lastname,
+                    "folder": target_folder,
+                    "path": str(target_path),
+                }
+            )
+
+        except Exception as e:
+            logger.error(f"Fehler beim Verarbeiten von {msg_file}: {e}")
 
     return moved_emails
 
@@ -265,7 +271,7 @@ def main() -> None:
         description="Sortiert E-Mails basierend auf Klassifizierung."
     )
     parser.add_argument(
-        "source_dir", type=str, help="Quellordner mit Inbox und SentItems."
+        "source_dir", type=str, help="Quellordner mit E-Mails."
     )
     parser.add_argument(
         "--config",

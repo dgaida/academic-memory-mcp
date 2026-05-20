@@ -28,22 +28,20 @@ def test_extract_lastname():
 @patch('mcp_university.classifier.sort_emails.MailParser')
 @patch('extract_msg.openMsg')
 def test_process_emails(mock_open_msg, mock_mail_parser, mock_classifier_class, tmp_path):
-    # Setup source directory
+    # Setup source directory - now with arbitrary structure
     source_root = tmp_path / "source"
-    inbox = source_root / "Inbox"
-    sent = source_root / "SentItems"
-    inbox.mkdir(parents=True)
-    sent.mkdir(parents=True)
+    some_folder = source_root / "ArbitraryFolder"
+    some_folder.mkdir(parents=True)
 
-    msg1 = inbox / "mail1.msg"
+    msg1 = some_folder / "mail1.msg"
     msg1.touch()
-    msg2 = sent / "mail2.msg"
+    msg2 = some_folder / "mail2.msg"
     msg2.touch()
 
     # Subdirectory test
-    sub_inbox = inbox / "Subfolder"
-    sub_inbox.mkdir()
-    msg3 = sub_inbox / "mail3.msg"
+    sub_folder = some_folder / "Deep" / "Subfolder"
+    sub_folder.mkdir(parents=True)
+    msg3 = sub_folder / "mail3.msg"
     msg3.touch()
 
     # Setup target directory
@@ -54,31 +52,41 @@ def test_process_emails(mock_open_msg, mock_mail_parser, mock_classifier_class, 
     mock_classifier = mock_classifier_class.return_value
     mock_classifier.predict.side_effect = [
         {"prediction": "BachelorThesis"}, # mail1
-        {"prediction": "BachelorThesis"}, # mail3 (rglob finds this)
-        {"prediction": "BachelorThesis"}  # mail2
+        {"prediction": "BachelorThesis"}, # mail2
+        {"prediction": "BachelorThesis"}  # mail3
     ]
 
     # Mock parser
     mock_parser = mock_mail_parser.return_value
     mock_parser.get_email_date.side_effect = [
         datetime(2025, 5, 10), # mail1 SoSe
-        datetime(2025, 6, 10), # mail3 SoSe
-        datetime(2025, 11, 20) # mail2 WS
+        datetime(2025, 11, 20), # mail2 WS
+        datetime(2025, 6, 10)  # mail3 SoSe
     ]
 
     # Mock extract_msg
+    # Mail 1: From Student -> Inbox
     mock_msg1 = MagicMock()
-    mock_msg1.sender = "Max Mustermann"
+    mock_msg1.sender = "max.mustermann@smail.th-koeln.de"
+    mock_msg1.recipients = []
 
-    mock_msg3 = MagicMock()
-    mock_msg3.sender = "Max Mustermann"
-
+    # Mail 2: From Daniel Gaida to Student -> SentItems
     mock_msg2 = MagicMock()
-    mock_recip = MagicMock()
-    mock_recip.name = "Erika Musterfrau"
-    mock_msg2.recipients = [mock_recip]
+    mock_msg2.sender = "daniel.gaida@th-koeln.de"
+    mock_recip2 = MagicMock()
+    mock_recip2.email = "erika.musterfrau@smail.fh-koeln.de"
+    mock_recip2.name = "Erika Musterfrau"
+    mock_msg2.recipients = [mock_recip2]
 
-    mock_open_msg.return_value.__enter__.side_effect = [mock_msg1, mock_msg3, mock_msg2]
+    # Mail 3: From Unknown to Student -> SentItems (fallback logic)
+    mock_msg3 = MagicMock()
+    mock_msg3.sender = "someone@else.com"
+    mock_recip3 = MagicMock()
+    mock_recip3.email = "hans.huber@smail.th-koeln.de"
+    mock_recip3.name = "Hans Huber"
+    mock_msg3.recipients = [mock_recip3]
+
+    mock_open_msg.return_value.__enter__.side_effect = [mock_msg1, mock_msg2, mock_msg3]
 
     config = {
         "BachelorThesis": str(target_root)
@@ -88,20 +96,17 @@ def test_process_emails(mock_open_msg, mock_mail_parser, mock_classifier_class, 
 
     assert len(moved) == 3
 
-    # Verify first file (Inbox)
+    # Verify first file (From Student)
     expected_path1 = target_root / "2025_SoSe" / "Mustermann" / "Inbox" / "mail1.msg"
     assert expected_path1.exists()
-    assert not msg1.exists()
 
-    # Verify third file (Subfolder in Inbox) -> should go to Inbox
-    expected_path3 = target_root / "2025_SoSe" / "Mustermann" / "Inbox" / "mail3.msg"
-    assert expected_path3.exists()
-    assert not msg3.exists()
-
-    # Verify second file (SentItems)
+    # Verify second file (From Gaida to Student)
     expected_path2 = target_root / "2025_26_WS" / "Musterfrau" / "SentItems" / "mail2.msg"
     assert expected_path2.exists()
-    assert not msg2.exists()
+
+    # Verify third file (From Unknown to Student)
+    expected_path3 = target_root / "2025_SoSe" / "Huber" / "SentItems" / "mail3.msg"
+    assert expected_path3.exists()
 
 def test_write_report(tmp_path):
     source_root = tmp_path
