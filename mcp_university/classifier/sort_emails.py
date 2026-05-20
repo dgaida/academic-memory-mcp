@@ -41,6 +41,47 @@ def get_semester(date: datetime) -> str:
             return f"{year-1}_{str(year)[2:]}_WS"
 
 
+def extract_firstname(name_str: str) -> str:
+    """Extrahiert den Vornamen aus einem Namensstring oder einer E-Mail-Adresse.
+
+    Unterstützt das Format vorname.nachname@smail.th-koeln.de
+    sowie 'Max Mustermann' oder 'Mustermann, Max'.
+
+    Args:
+        name_str: Der zu parsende Name oder die E-Mail-Adresse.
+
+    Returns:
+        str: Der extrahierte Vorname.
+    """
+    if not name_str or name_str == "(No Sender)" or name_str == "(No Receiver)":
+        return "Unknown"
+
+    # Suche nach E-Mail-Adresse
+    email_match = re.search(r"[\w\.-]+@[\w\.-]+", name_str)
+    if email_match:
+        email = email_match.group(0)
+        if email.lower().endswith(("@smail.th-koeln.de", "@smail.fh-koeln.de")):
+            local_part = email.split("@")[0]
+            if "." in local_part:
+                return local_part.split(".")[0].capitalize()
+
+    # Fallback für Namen ohne (Smail-)Adresse
+    clean_name = name_str.split("<")[0].strip()
+
+    if "," in clean_name:
+        # Format: Lastname, Firstname
+        parts = clean_name.split(",")
+        if len(parts) > 1:
+            return parts[1].strip().split()[0]
+    else:
+        # Format: Firstname Lastname
+        parts = clean_name.split()
+        if parts:
+            return parts[0]
+
+    return "Unknown"
+
+
 def extract_lastname(name_str: str) -> str:
     """Extrahiert den Nachnamen aus einem Namensstring oder einer E-Mail-Adresse.
 

@@ -51,9 +51,10 @@ def test_generate_reply(mock_parser_cls, tmp_path):
     skill_path = tmp_path / "SKILL_Test.md"
     skill_path.write_text("Use formal language.", encoding="utf-8")
 
-    reply = generate_reply(mock_summarizer, mail_path, "Summary Content", skill_path)
+    reply, should_attach = generate_reply(mock_summarizer, mail_path, "Summary Content", skill_path)
 
     assert reply == "This is the generated reply"
+    assert should_attach is False
     mock_summarizer.client.chat.assert_called_once()
 
 @patch("process_sorted_emails.OUTLOOK_AVAILABLE", True)
