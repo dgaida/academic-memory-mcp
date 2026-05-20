@@ -17,7 +17,6 @@ try:
 except ImportError:
     OUTLOOK_AVAILABLE = False
 
-from mcp_university.classifier.sort_emails import process_emails, write_report, extract_lastname
 from mcp_university.config import get_config
 from mcp_university.summarizer.engine import Summarizer
 from mcp_university.parser.mail_parser import MailParser
@@ -26,6 +25,8 @@ from mcp_university.parser.factory import ParserFactory
 # Logging konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
+
+DEBUG = True
 
 def is_outlook_open() -> bool:
     """Prüft, ob Outlook aktuell geöffnet ist.
@@ -108,13 +109,14 @@ def parse_sorted_report(report_path: Path) -> List[Dict]:
                 })
     return emails
 
-def create_outlook_draft(subject: str, body: str, recipient: str = "", attachments: List[Path] = None) -> bool:
+def create_outlook_draft(subject: str, body: str, recipient: str = "", cc: List[str] = None, attachments: List[Path] = None) -> bool:
     """Erstellt einen E-Mail-Entwurf in Outlook.
 
     Args:
         subject: Betreff der E-Mail.
         body: Inhalt der E-Mail.
         recipient: Empfänger-Adresse.
+        cc: Liste der CC-Adressen.
         attachments: Liste der Dateipfade für Anhänge.
 
     Returns:
@@ -151,7 +153,7 @@ def create_outlook_draft(subject: str, body: str, recipient: str = "", attachmen
             logger.warning(f"Fehler beim Suchen des Zielordners: {e}")
 
         mail = outlook.CreateItem(0)  # 0 = olMailItem
-        mail.Subject = f"Re: {subject}"
+        mail.Subject = subject
         mail.Body = body
         if attachments:
             for attachment_path in attachments:
@@ -159,6 +161,9 @@ def create_outlook_draft(subject: str, body: str, recipient: str = "", attachmen
                     mail.Attachments.Add(str(attachment_path))
         if recipient:
             mail.To = recipient
+        if cc:
+            mail.CC = "; ".join(cc)
+
 
         if target_folder:
             mail.Save()  # Erst in Standard-Drafts speichern
@@ -175,7 +180,7 @@ def create_outlook_draft(subject: str, body: str, recipient: str = "", attachmen
         logger.error(f"Fehler beim Erstellen des Outlook-Entwurfs: {e}")
         return False
 
-def generate_reply(summarizer: Summarizer, mail_path: Path, summary_content: str = "", skill_path: Path = None, conversation_content: str = "", persona_path: Path = None, additional_context: str = "") -> Tuple[str, bool]:
+def generate_reply(summarizer: Summarizer, mail_path: Path, summary_content: str = "", skill_path: Path = None, conversation_content: str = "", persona_path: Path = None, additional_context: str = "", debug: bool = False) -> Tuple[str, str, bool]:
     """Generiert eine Antwortmail mit dem LLM.
 
     Args:
@@ -186,9 +191,10 @@ def generate_reply(summarizer: Summarizer, mail_path: Path, summary_content: str
         conversation_content: Optionaler Verlauf des Schriftverkehrs (statt Zusammenfassung).
         persona_path: Pfad zur Persona-Datei.
         additional_context: Zusätzlicher Kontext (z.B. aus einem PDF).
+        debug: Ob Debug-Informationen gespeichert werden sollen.
 
     Returns:
-        Tuple[str, bool]: (Antwort-Text, Soll ein Anhang angehängt werden?).
+        Tuple[str, str, bool]: (Betreff, Antwort-Text, Soll ein Anhang angehängt werden?).
     """
     parser = MailParser()
     mail_content = parser.parse(mail_path)
@@ -224,11 +230,18 @@ AKTUELLE E-MAIL:
 
 Gib die Antwort in folgendem Format zurück:
 ANHANG: [JA/NEIN]
+BETREFF: [Der Betreff]
 TEXT:
 [Der Antwort-Text]
 
 Antworte NUR in diesem Format.
 """
+    if debug:
+        prompt_file = mail_path.parent / f"{mail_path.stem}_prompt.md"
+        prompt_content = f"# System Prompt\n{system_prompt}\n\n# User Prompt\n{user_prompt}"
+        prompt_file.write_text(prompt_content, encoding="utf-8")
+        logger.info(f"Debug-Prompt gespeichert: {prompt_file}")
+
     try:
         response = summarizer.client.chat(
             model=summarizer.model,
@@ -239,24 +252,28 @@ Antworte NUR in diesem Format.
         )
         content = response['message']['content']
 
-        should_attach = False
-        if "ANHANG: JA" in content:
-            should_attach = True
+        should_attach = "ANHANG: JA" in content
+
+        reply_subject = ""
+        if "BETREFF:" in content:
+            reply_subject = content.split("BETREFF:", 1)[1].split("TEXT:", 1)[0].strip()
 
         reply_text = content
         if "TEXT:" in content:
             reply_text = content.split("TEXT:", 1)[1].strip()
 
-        return reply_text, should_attach
+        return reply_subject, reply_text, should_attach
     except Exception as e:
         logger.error(f"Fehler bei LLM-Generierung: {e}")
-        return "Fehler bei der Generierung der Antwort.", False
+        return "", "Fehler bei der Generierung der Antwort.", False
 
 def main() -> None:
     """Haupteinstiegspunkt des Skripts."""
     parser = argparse.ArgumentParser(description="Verarbeitet sortierte E-Mails und generiert Antworten.")
     parser.add_argument("source_dir", help="Quellordner der E-Mails")
     parser.add_argument("--config", required=True, help="Pfad zur classifier_paths.yaml")
+    parser.add_argument("--debug", action="store_true", default=DEBUG, help="Speichert LLM Prompts als Markdown (Default: True)")
+    parser.add_argument("--no-debug", action="store_false", dest="debug", help="Deaktiviert das Speichern von Prompts")
     args = parser.parse_args()
 
     source_dir = Path(args.source_dir)
@@ -350,6 +367,21 @@ def main() -> None:
                 if p:
                     conversation_content += f"\n--- EMAIL VOM {date} ---\n{p}\n"
 
+            # Extraktion von Empfänger und CC
+            student_email = ""
+            cc_list = []
+            try:
+                with extract_msg.openMsg(str(latest_mail)) as msg:
+                    student_email = msg.sender
+                    if msg.recipients:
+                        for rec in msg.recipients:
+                            rec_email = rec.email or rec.name
+                            if rec_email and "daniel.gaida@th-koeln.de" not in rec_email.lower():
+                                if rec_email.lower() != student_email.lower():
+                                    cc_list.append(rec_email)
+            except Exception:
+                pass
+
             # Gender Determination und Salutation
             first_name = "Unknown"
             try:
@@ -372,7 +404,7 @@ def main() -> None:
                     if pdf_content:
                         additional_context += f"\nINHALT INFOS PDF:\n{pdf_content}\n"
 
-            reply, should_attach = generate_reply(summarizer, latest_mail, skill_path=skill_path, conversation_content=conversation_content, persona_path=persona_path, additional_context=additional_context)
+            reply_subject, reply, should_attach = generate_reply(summarizer, latest_mail, skill_path=skill_path, conversation_content=conversation_content, persona_path=persona_path, additional_context=additional_context, debug=args.debug)
 
             if should_attach and email["class"] == "PO-Wechsel":
                 pdf_path = Path(r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf")
@@ -381,7 +413,7 @@ def main() -> None:
 
             # Speichere Antwort
             subject = latest_mail.stem
-            success = create_outlook_draft(subject, reply, attachments=attachments)
+            success = create_outlook_draft(reply_subject or subject, reply, recipient=student_email, cc=cc_list, attachments=attachments)
             if success:
                 logger.info(f"Outlook-Entwurf für {latest_mail.name} erstellt.")
                 result_status = "Outlook Entwurf (Work in Progress)"
@@ -436,6 +468,21 @@ def main() -> None:
             if "Inbox" in latest_mail.parts and "SentItems" not in latest_mail.parts:
                 logger.info(f"Generiere Antwort für neueste Mail in {identifier.name}: {latest_mail.name}")
 
+                # Extraktion von Empfänger und CC
+                student_email = ""
+                cc_list = []
+                try:
+                    with extract_msg.openMsg(str(latest_mail)) as msg:
+                        student_email = msg.sender
+                        if msg.recipients:
+                            for rec in msg.recipients:
+                                rec_email = rec.email or rec.name
+                                if rec_email and "daniel.gaida@th-koeln.de" not in rec_email.lower():
+                                    if rec_email.lower() != student_email.lower():
+                                        cc_list.append(rec_email)
+                except Exception:
+                    pass
+
                 # Gender Determination und Salutation
                 first_name = "Unknown"
                 try:
@@ -457,7 +504,7 @@ def main() -> None:
                         if pdf_content:
                             additional_context += f"\nINHALT INFOS PDF:\n{pdf_content}\n"
 
-                reply, should_attach = generate_reply(summarizer, latest_mail, summary_content or "", skill_path, persona_path=persona_path, additional_context=additional_context)
+                reply_subject, reply, should_attach = generate_reply(summarizer, latest_mail, summary_content or "", skill_path, persona_path=persona_path, additional_context=additional_context, debug=args.debug)
 
                 if should_attach and email["class"] == "PO-Wechsel":
                     pdf_path = Path(r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf")
@@ -465,7 +512,7 @@ def main() -> None:
                         attachments.append(pdf_path)
 
                 subject = latest_mail.stem
-                success = create_outlook_draft(subject, reply, attachments=attachments)
+                success = create_outlook_draft(reply_subject or subject, reply, recipient=student_email, cc=cc_list, attachments=attachments)
                 if success:
                     logger.info(f"Outlook-Entwurf für {latest_mail.name} erstellt.")
                     result_status = "Outlook Entwurf (Work in Progress)"
