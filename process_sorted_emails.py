@@ -1,11 +1,13 @@
 """Skript zur Verarbeitung sortierter E-Mails und Generierung von Antworten."""
 import argparse
 import logging
+import platform
+import subprocess
 import extract_msg
 import yaml
 from mcp_university.classifier.sort_emails import process_emails, write_report, extract_lastname, extract_firstname
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -15,6 +17,7 @@ try:
 except ImportError:
     OUTLOOK_AVAILABLE = False
 
+from mcp_university.classifier.sort_emails import process_emails, write_report, extract_lastname
 from mcp_university.config import get_config
 from mcp_university.summarizer.engine import Summarizer
 from mcp_university.parser.mail_parser import MailParser
@@ -23,6 +26,34 @@ from mcp_university.parser.factory import ParserFactory
 # Logging konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
+
+def is_outlook_open() -> bool:
+    """Prüft, ob Outlook aktuell geöffnet ist.
+
+    Returns:
+        bool: True wenn Outlook läuft, sonst False.
+    """
+    system = platform.system()
+    try:
+        if system == "Windows":
+            # Prüfe mit tasklist unter Windows
+            output = subprocess.check_output(
+                'tasklist /FI "IMAGENAME eq outlook.exe"',
+                shell=True,
+                stderr=subprocess.STDOUT,
+            )
+            return b"outlook.exe" in output.lower()
+        elif system == "Darwin":  # macOS
+            # Prüfe mit pgrep unter macOS
+            try:
+                subprocess.check_call(["pgrep", "-x", "Microsoft Outlook"])
+                return True
+            except subprocess.CalledProcessError:
+                return False
+        else:
+            return False
+    except Exception:
+        return False
 
 def run_sort_emails(source_dir: str, config_path: str) -> None:
     """Sortiert E-Mails basierend auf Klassifizierung.
@@ -93,13 +124,31 @@ def create_outlook_draft(subject: str, body: str, recipient: str = "", attachmen
         logger.info("pywin32 nicht installiert. Outlook-Draft nicht möglich.")
         return False
 
+    if not is_outlook_open():
+        logger.info("Outlook ist nicht geöffnet.")
+        return False
+
     try:
-        # Check if Outlook is running
+        outlook = win32com.client.Dispatch("Outlook.Application")
+        namespace = outlook.GetNamespace("MAPI")
+
+        target_account = "daniel.gaida@th-koeln.de"
+        target_folder_name = "Work in Progress"
+
+        # Versuche den spezifischen Ordner zu finden
+        target_folder = None
         try:
-            outlook = win32com.client.GetActiveObject("Outlook.Application")
-        except Exception:
-            logger.info("Outlook ist nicht geöffnet.")
-            return False
+            for store in namespace.Stores:
+                if store.DisplayName == target_account:
+                    root = store.GetRootFolder()
+                    for folder in root.Folders:
+                        if folder.Name == target_folder_name:
+                            target_folder = folder
+                            break
+                    if target_folder:
+                        break
+        except Exception as e:
+            logger.warning(f"Fehler beim Suchen des Zielordners: {e}")
 
         mail = outlook.CreateItem(0)  # 0 = olMailItem
         mail.Subject = f"Re: {subject}"
@@ -110,7 +159,17 @@ def create_outlook_draft(subject: str, body: str, recipient: str = "", attachmen
                     mail.Attachments.Add(str(attachment_path))
         if recipient:
             mail.To = recipient
-        mail.Save()
+
+        if target_folder:
+            mail.Save()  # Erst in Standard-Drafts speichern
+            moved_mail = mail.Move(target_folder)
+            logger.info(f"Entwurf in {target_account} -> {target_folder_name} gespeichert.")
+            moved_mail.Display(False)
+        else:
+            mail.Save()
+            logger.warning(f"Zielordner {target_folder_name} nicht gefunden. In Standard-Entwürfen gespeichert.")
+            mail.Display(False)
+
         return True
     except Exception as e:
         logger.error(f"Fehler beim Erstellen des Outlook-Entwurfs: {e}")
@@ -219,8 +278,7 @@ def main() -> None:
 
     # Wir tracken verarbeitete student_folders, um Mehrfachverarbeitung zu vermeiden
     processed_folders = set()
-
-    from datetime import timedelta
+    processed_results = []
 
     persona_path = Path("skills/SKILL_persona.md")
 
@@ -240,6 +298,9 @@ def main() -> None:
             continue
         processed_folders.add(identifier)
 
+        subject = mail_path.stem
+        result_status = "Übersprungen"
+
         if is_ba_ma:
             # Speziallogik für BA/MA: Sammle alle Mails des Studenten in diesem Semester
             semester_folder = mail_path.parent.parent
@@ -256,7 +317,6 @@ def main() -> None:
             for f in all_files:
                 try:
                     with extract_msg.openMsg(str(f)) as msg:
-                        # Prüfe ob der Student Sender oder Receiver ist
                         sender_lastname = extract_lastname(msg.sender)
                         recipient_lastname = "None"
                         if msg.recipients:
@@ -274,17 +334,14 @@ def main() -> None:
             student_emails.sort(key=lambda x: x[0])
             latest_date, latest_mail = student_emails[-1]
 
-            # Nur fortfahren wenn die neueste Mail in Inbox liegt
             if "Inbox" not in latest_mail.parts:
                 continue
 
             logger.info(f"Verarbeite BA/MA E-Mails für {email['lastname']} in {email['class']}")
 
-            # Filter: Maximal 2 Wochen alt (relativ zur neuesten Mail)
             threshold_date = latest_date - timedelta(days=14)
             recent_emails = [e for e in student_emails if e[0] >= threshold_date]
 
-            # Konstruiere conversation_content (alle außer der neuesten Mail)
             conversation_content = ""
             for date, f in recent_emails:
                 if f == latest_mail:
@@ -327,21 +384,21 @@ def main() -> None:
             success = create_outlook_draft(subject, reply, attachments=attachments)
             if success:
                 logger.info(f"Outlook-Entwurf für {latest_mail.name} erstellt.")
+                result_status = "Outlook Entwurf (Work in Progress)"
             else:
                 reply_path = semester_folder / f"{latest_mail.stem}_{email['lastname']}_reply.md"
                 reply_path.write_text(reply, encoding="utf-8")
                 logger.info(f"Antwort als Markdown gespeichert: {reply_path}")
+                result_status = f"Datei: {reply_path}"
+
+            processed_results.append({"lastname": email["lastname"], "subject": subject, "status": result_status})
 
         else:
-            # Standardverhalten für andere Klassen
             summary_file = identifier / ".emails_summary.md"
-
-            # 1. Update/Create Summary
             email_files = list(identifier.rglob("*.msg")) + list(identifier.rglob("*.eml"))
             if not email_files:
                 continue
 
-            # Sortiere chronologisch
             dated_emails = []
             for f in email_files:
                 try:
@@ -376,7 +433,6 @@ def main() -> None:
             else:
                 summary_content = summary_file.read_text(encoding="utf-8")
 
-            # 2. Generate Reply if newest mail is in Inbox
             if "Inbox" in latest_mail.parts and "SentItems" not in latest_mail.parts:
                 logger.info(f"Generiere Antwort für neueste Mail in {identifier.name}: {latest_mail.name}")
 
@@ -408,15 +464,33 @@ def main() -> None:
                     if pdf_path.exists():
                         attachments.append(pdf_path)
 
-                # Outlook Draft or Markdown
                 subject = latest_mail.stem
                 success = create_outlook_draft(subject, reply, attachments=attachments)
                 if success:
                     logger.info(f"Outlook-Entwurf für {latest_mail.name} erstellt.")
+                    result_status = "Outlook Entwurf (Work in Progress)"
                 else:
                     reply_path = identifier / f"{latest_mail.stem}_reply.md"
                     reply_path.write_text(reply, encoding="utf-8")
                     logger.info(f"Antwort als Markdown gespeichert: {reply_path}")
+                    result_status = f"Datei: {reply_path}"
+
+                processed_results.append({"lastname": email["lastname"], "subject": subject, "status": result_status})
+
+    # 3. Abschluss-Bericht erstellen und aufräumen
+    if processed_results:
+        processed_report_path = source_dir / "processed_emails.md"
+        with open(processed_report_path, "w", encoding="utf-8") as f:
+            f.write("# Verarbeitete E-Mails\n\n")
+            f.write("| Student | Betreff | Status |\n")
+            f.write("| :--- | :--- | :--- |\n")
+            for res in processed_results:
+                f.write(f"| {res['lastname']} | {res['subject']} | {res['status']} |\n")
+        logger.info(f"Abschlussbericht erstellt: {processed_report_path}")
+
+    if report_path.exists():
+        report_path.unlink()
+        logger.info(f"Temporärer Report gelöscht: {report_path}")
 
 if __name__ == "__main__":
     main()
