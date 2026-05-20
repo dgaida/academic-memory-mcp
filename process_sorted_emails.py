@@ -23,7 +23,15 @@ from mcp_university.parser.mail_parser import MailParser
 from mcp_university.parser.factory import ParserFactory
 
 # Logging konfigurieren
-logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+log_format = '%(asctime)s - %(levelname)s - %(message)s'
+logging.basicConfig(
+    level=logging.INFO,
+    format=log_format,
+    handlers=[
+        logging.FileHandler("process_emails.log", encoding="utf-8"),
+        logging.StreamHandler()
+    ]
+)
 logger = logging.getLogger(__name__)
 
 DEBUG = True
@@ -143,8 +151,10 @@ def create_outlook_draft(subject: str, body: str, recipient: str = "", cc: List[
             for store in namespace.Stores:
                 if store.DisplayName == target_account:
                     root = store.GetRootFolder()
+                    logger.info(f"Verfügbare Ordner in {target_account}:")
                     for folder in root.Folders:
-                        if folder.Name == target_folder_name:
+                        logger.info(f" - {folder.Name}")
+                        if folder.Name.lower() == target_folder_name.lower():
                             target_folder = folder
                             break
                     if target_folder:
@@ -200,8 +210,13 @@ def generate_reply(summarizer: Summarizer, mail_path: Path, summary_content: str
     mail_content = parser.parse(mail_path)
 
     skill_content = "Keine spezifischen Anweisungen vorhanden."
-    if skill_path and skill_path.exists():
-        skill_content = skill_path.read_text(encoding="utf-8")
+    if skill_path:
+        logger.info(f"Prüfe Skill-Pfad: {skill_path.absolute()}")
+        if skill_path.exists():
+            skill_content = skill_path.read_text(encoding="utf-8")
+            logger.info(f"Skill-Datei erfolgreich geladen: {skill_path.name}")
+        else:
+            logger.warning(f"Skill-Datei nicht gefunden: {skill_path.absolute()}")
 
     persona_content = ""
     if persona_path and persona_path.exists():
