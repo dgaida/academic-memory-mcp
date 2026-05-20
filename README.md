@@ -17,8 +17,8 @@ A locally-running, agentic knowledge and memory system for university and resear
 - Hybrid search (BM25 + Vector)  
 - MCP Server integration  
 - Fully offline using local LLMs (Ollama)  
-- Automated E-Mail classification (Bachelor thesis, projects, etc.)
-- Database management for students, deadlines, and metadata
+- Automated E-Mail classification (Bachelor thesis, projects, etc.)  
+- Database management for students, deadlines, and metadata  
 
 ## Prerequisites  
 - **qmd CLI:** Required for hybrid search. Install globally via: `npm install -g @tobilu/qmd`  

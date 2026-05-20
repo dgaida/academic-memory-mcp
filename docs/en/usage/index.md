@@ -52,11 +52,11 @@ The most powerful script sorts emails not only by class, but also by semester an
 python3 mcp_university/classifier/sort_emails.py /source/folder --config config/class_paths.yaml --model data/email_classifier.pkl
 ```
 
-It automatically detects:
-- **Semester:** Based on the email date (Summer/Winter semester).
-- **Student:** Extracts the last name from `smail.th-koeln.de` addresses or display names.
-- **Direction:** Sorts into `Inbox` or `SentItems` subfolders.
-- **Report:** Creates a `sorted_emails.md` with an overview of all moved emails.
+It automatically detects:  
+- **Semester:** Based on the email date (Summer/Winter semester).  
+- **Student:** Extracts the last name from `smail.th-koeln.de` addresses or display names.  
+- **Direction:** Sorts into `Inbox` or `SentItems` subfolders.  
+- **Report:** Creates a `sorted_emails.md` with an overview of all moved emails.  
 
 ### Batch Classification
 To automatically sort an entire folder of emails (classification only):
@@ -128,5 +128,5 @@ In `config/folders.yaml`, the `summarize_emails_individually` option (default: `
 
 The system includes useful scripts in the `scripts/` folder:
 
-- **`remove_empty_folders.py`**: Recursively deletes all empty folders in a directory.
-- **`flatten_directory.py`**: Flattens a directory structure by moving all files to the root directory (includes name collision checks).
+- **`remove_empty_folders.py`**: Recursively deletes all empty folders in a directory.  
+- **`flatten_directory.py`**: Flattens a directory structure by moving all files to the root directory (includes name collision checks).  

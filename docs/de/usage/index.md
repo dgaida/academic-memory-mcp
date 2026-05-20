@@ -52,11 +52,11 @@ Das leistungsfähigste Skript sortiert E-Mails nicht nur nach Klasse, sondern au
 python3 mcp_university/classifier/sort_emails.py /quell/ordner --config config/class_paths.yaml --model data/email_classifier.pkl
 ```
 
-Es erkennt automatisch:
-- **Semester:** Basierend auf dem E-Mail-Datum (SoSe/WS).
-- **Student:** Extrahiert den Nachnamen aus `smail.th-koeln.de` Adressen oder Anzeigenamen.
-- **Richtung:** Sortiert in `Inbox` oder `SentItems` Unterordner.
-- **Bericht:** Erstellt eine `sorted_emails.md` mit einer Übersicht aller verschobenen Mails.
+Es erkennt automatisch:  
+- **Semester:** Basierend auf dem E-Mail-Datum (SoSe/WS).  
+- **Student:** Extrahiert den Nachnamen aus `smail.th-koeln.de` Adressen oder Anzeigenamen.  
+- **Richtung:** Sortiert in `Inbox` oder `SentItems` Unterordner.  
+- **Bericht:** Erstellt eine `sorted_emails.md` mit einer Übersicht aller verschobenen Mails.  
 
 ### Batch-Klassifizierung
 Um einen ganzen Ordner mit E-Mails automatisch zu sortieren (nur Klassifizierung):
@@ -128,5 +128,5 @@ In der `config/folders.yaml` kann die Option `summarize_emails_individually` (St
 
 Das System enthält nützliche Skripte im Ordner `scripts/`:
 
-- **`remove_empty_folders.py`**: Löscht rekursiv alle leeren Ordner in einem Verzeichnis.
-- **`flatten_directory.py`**: Flacht eine Ordnerstruktur ab, indem alle Dateien in das Wurzelverzeichnis verschoben werden (inkl. Namenskollisionsprüfung).
+- **`remove_empty_folders.py`**: Löscht rekursiv alle leeren Ordner in einem Verzeichnis.  
+- **`flatten_directory.py`**: Flacht eine Ordnerstruktur ab, indem alle Dateien in das Wurzelverzeichnis verschoben werden (inkl. Namenskollisionsprüfung).  
