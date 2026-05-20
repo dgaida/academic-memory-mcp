@@ -44,15 +44,16 @@ def test_generate_reply(mock_parser_cls, tmp_path):
     mock_summarizer = MagicMock()
     mock_summarizer.model = "test-model"
     mock_summarizer.client.chat.return_value = {
-        "message": {"content": "This is the generated reply"}
+        "message": {"content": "ANHANG: NEIN\nBETREFF: Test Betreff\nTEXT:\nThis is the generated reply"}
     }
 
     mail_path = tmp_path / "test.msg"
     skill_path = tmp_path / "SKILL_Test.md"
     skill_path.write_text("Use formal language.", encoding="utf-8")
 
-    reply, should_attach = generate_reply(mock_summarizer, mail_path, "Summary Content", skill_path)
+    subject, reply, should_attach = generate_reply(mock_summarizer, mail_path, "Summary Content", skill_path)
 
+    assert subject == "Test Betreff"
     assert reply == "This is the generated reply"
     assert should_attach is False
     mock_summarizer.client.chat.assert_called_once()
@@ -82,7 +83,7 @@ def test_create_outlook_draft_success(mock_open):
     mock_mail.Save.assert_called_once()
     mock_mail.Move.assert_called_with(mock_folder)
     mock_mail.Display.assert_called_with(False)
-    assert mock_mail.Subject == "Re: Test Subject"
+    assert mock_mail.Subject == "Test Subject"
 
 @patch("process_sorted_emails.OUTLOOK_AVAILABLE", True)
 @patch("process_sorted_emails.is_outlook_open", return_value=False)
