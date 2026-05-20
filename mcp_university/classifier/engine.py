@@ -7,7 +7,7 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import LabelEncoder
-from sentence_transformers import SentenceTransformer
+
 
 from mcp_university.parser.mail_parser import MailParser
 
@@ -33,7 +33,7 @@ class EmailClassifier:
         self.parser = MailParser()
 
         self.tfidf_vectorizer = TfidfVectorizer(max_features=5000)
-        self._embedding_model: Optional[SentenceTransformer] = None
+        self._embedding_model = None
         self.label_encoder = LabelEncoder()
 
         if method == "randomforest":
@@ -47,9 +47,10 @@ class EmailClassifier:
         self.is_trained = False
 
     @property
-    def embedding_model(self) -> SentenceTransformer:
+    def embedding_model(self):
         """Lädt das Embedding-Modell verzögert (Lazy Loading)."""
         if self._embedding_model is None:
+            from sentence_transformers import SentenceTransformer
             self._embedding_model = SentenceTransformer(self.embedding_model_name)
         return self._embedding_model
 

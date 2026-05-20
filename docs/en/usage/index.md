@@ -45,6 +45,26 @@ python3 mcp_university/classifier/predict.py /path/to/email.msg
 ```
 
 The output contains the most likely class as well as the confidence and a detailed probability distribution.
+### Email Sorting (Student Folders)
+The most powerful script sorts emails not only by class, but also by semester and student (last name):
+
+```bash
+python3 mcp_university/classifier/sort_emails.py /source/folder --config config/class_paths.yaml --model data/email_classifier.pkl
+```
+
+It automatically detects:
+- **Semester:** Based on the email date (Summer/Winter semester).
+- **Student:** Extracts the last name from `smail.th-koeln.de` addresses or display names.
+- **Direction:** Sorts into `Inbox` or `SentItems` subfolders.
+- **Report:** Creates a `sorted_emails.md` with an overview of all moved emails.
+
+### Batch Classification
+To automatically sort an entire folder of emails (classification only):
+```bash
+python3 mcp_university/classifier/classify_folder.py /source/folder --model data/email_classifier.pkl
+```
+This moves the emails into subfolders named after their predicted classes.
+
 
 ## Database Management (`db`)
 
@@ -98,3 +118,15 @@ The agent uses `get_student_context` and `search_documents` to provide you with 
 
 ### 2. Answering Emails
 Copy a student's email into the chat and use the `generate_mail_reply` tool. The system automatically takes the status of the thesis or open deadlines into account.
+
+## Configuration
+
+### Two-Stage Summarization
+In `config/folders.yaml`, the `summarize_emails_individually` option (default: `false`) can be enabled. When set to `true`, email threads are summarized in two stages: first each email individually, then the entire conversation.
+
+## Utility Scripts
+
+The system includes useful scripts in the `scripts/` folder:
+
+- **`remove_empty_folders.py`**: Recursively deletes all empty folders in a directory.
+- **`flatten_directory.py`**: Flattens a directory structure by moving all files to the root directory (includes name collision checks).

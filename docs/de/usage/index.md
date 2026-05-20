@@ -45,6 +45,26 @@ python3 mcp_university/classifier/predict.py /pfad/zur/email.msg
 ```
 
 Die Ausgabe enthält die wahrscheinlichste Klasse sowie die Konfidenz und eine detaillierte Wahrscheinlichkeitsverteilung.
+### E-Mail Sortierung (Studenten-Ordner)
+Das leistungsfähigste Skript sortiert E-Mails nicht nur nach Klasse, sondern auch nach Semester und Student (Nachname):
+
+```bash
+python3 mcp_university/classifier/sort_emails.py /quell/ordner --config config/class_paths.yaml --model data/email_classifier.pkl
+```
+
+Es erkennt automatisch:
+- **Semester:** Basierend auf dem E-Mail-Datum (SoSe/WS).
+- **Student:** Extrahiert den Nachnamen aus `smail.th-koeln.de` Adressen oder Anzeigenamen.
+- **Richtung:** Sortiert in `Inbox` oder `SentItems` Unterordner.
+- **Bericht:** Erstellt eine `sorted_emails.md` mit einer Übersicht aller verschobenen Mails.
+
+### Batch-Klassifizierung
+Um einen ganzen Ordner mit E-Mails automatisch zu sortieren (nur Klassifizierung):
+```bash
+python3 mcp_university/classifier/classify_folder.py /quell/ordner --model data/email_classifier.pkl
+```
+Dies verschiebt die E-Mails in Unterordner, die nach den vorhergesagten Klassen benannt sind.
+
 
 ## Datenbank-Management (`db`)
 
@@ -98,3 +118,15 @@ Der Agent nutzt `get_student_context` and `search_documents`, um Ihnen eine komp
 
 ### 2. Beantworten von E-Mails
 Kopieren Sie die E-Mail eines Studenten in den Chat und nutzen Sie das Tool `generate_mail_reply`. Das System berücksichtigt dabei automatisch den Status der Abschlussarbeit oder offene Deadlines.
+
+## Konfiguration
+
+### Zweistufige Zusammenfassung
+In der `config/folders.yaml` kann die Option `summarize_emails_individually` (Standard: `false`) aktiviert werden. Wenn diese auf `true` gesetzt ist, werden E-Mail-Threads in zwei Stufen zusammengefasst: erst jede E-Mail einzeln, dann die gesamte Konversation.
+
+## Hilfsskripte
+
+Das System enthält nützliche Skripte im Ordner `scripts/`:
+
+- **`remove_empty_folders.py`**: Löscht rekursiv alle leeren Ordner in einem Verzeichnis.
+- **`flatten_directory.py`**: Flacht eine Ordnerstruktur ab, indem alle Dateien in das Wurzelverzeichnis verschoben werden (inkl. Namenskollisionsprüfung).
