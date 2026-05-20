@@ -785,6 +785,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#mcp_university.summarizer.engine.Summarizer.determine_gender" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        determine_gender
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#mcp_university.summarizer.engine.Summarizer.summarize_email_conversation" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2127,6 +2138,17 @@
     <span class="md-ellipsis">
       
         answer_question
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcp_university.summarizer.engine.Summarizer.determine_gender" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        determine_gender
       
     </span>
   </a>
@@ -4256,7 +4278,33 @@ vordefinierten Prompts für den universitären Kontext.</p>
 <span class="normal"><a href="#__codelineno-0-254">254</a></span>
 <span class="normal"><a href="#__codelineno-0-255">255</a></span>
 <span class="normal"><a href="#__codelineno-0-256">256</a></span>
-<span class="normal"><a href="#__codelineno-0-257">257</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-9" name="__codelineno-0-9"></a><span class="k">class</span><span class="w"> </span><span class="nc">Summarizer</span><span class="p">:</span>
+<span class="normal"><a href="#__codelineno-0-257">257</a></span>
+<span class="normal"><a href="#__codelineno-0-258">258</a></span>
+<span class="normal"><a href="#__codelineno-0-259">259</a></span>
+<span class="normal"><a href="#__codelineno-0-260">260</a></span>
+<span class="normal"><a href="#__codelineno-0-261">261</a></span>
+<span class="normal"><a href="#__codelineno-0-262">262</a></span>
+<span class="normal"><a href="#__codelineno-0-263">263</a></span>
+<span class="normal"><a href="#__codelineno-0-264">264</a></span>
+<span class="normal"><a href="#__codelineno-0-265">265</a></span>
+<span class="normal"><a href="#__codelineno-0-266">266</a></span>
+<span class="normal"><a href="#__codelineno-0-267">267</a></span>
+<span class="normal"><a href="#__codelineno-0-268">268</a></span>
+<span class="normal"><a href="#__codelineno-0-269">269</a></span>
+<span class="normal"><a href="#__codelineno-0-270">270</a></span>
+<span class="normal"><a href="#__codelineno-0-271">271</a></span>
+<span class="normal"><a href="#__codelineno-0-272">272</a></span>
+<span class="normal"><a href="#__codelineno-0-273">273</a></span>
+<span class="normal"><a href="#__codelineno-0-274">274</a></span>
+<span class="normal"><a href="#__codelineno-0-275">275</a></span>
+<span class="normal"><a href="#__codelineno-0-276">276</a></span>
+<span class="normal"><a href="#__codelineno-0-277">277</a></span>
+<span class="normal"><a href="#__codelineno-0-278">278</a></span>
+<span class="normal"><a href="#__codelineno-0-279">279</a></span>
+<span class="normal"><a href="#__codelineno-0-280">280</a></span>
+<span class="normal"><a href="#__codelineno-0-281">281</a></span>
+<span class="normal"><a href="#__codelineno-0-282">282</a></span>
+<span class="normal"><a href="#__codelineno-0-283">283</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-9" name="__codelineno-0-9"></a><span class="k">class</span><span class="w"> </span><span class="nc">Summarizer</span><span class="p">:</span>
 <a id="__codelineno-0-10" name="__codelineno-0-10"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;LLM-basierter Dienst zur Erstellung von Zusammenfassungen für Dateien und Ordner.</span>
 <a id="__codelineno-0-11" name="__codelineno-0-11"></a>
 <a id="__codelineno-0-12" name="__codelineno-0-12"></a><span class="sd">    Nutzt Ollama zur Generierung strukturierter Markdown-Zusammenfassungen basierend auf</span>
@@ -4487,24 +4535,50 @@ vordefinierten Prompts für den universitären Kontext.</p>
 <a id="__codelineno-0-237" name="__codelineno-0-237"></a><span class="s2">&quot;&quot;&quot;</span>
 <a id="__codelineno-0-238" name="__codelineno-0-238"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chat_request</span><span class="p">(</span><span class="n">system_prompt</span><span class="p">,</span> <span class="n">user_prompt</span><span class="p">)</span>
 <a id="__codelineno-0-239" name="__codelineno-0-239"></a>
-<a id="__codelineno-0-240" name="__codelineno-0-240"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">answer_question</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<a id="__codelineno-0-241" name="__codelineno-0-241"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Beantwortet eine Frage basierend auf dem Kontext auf Deutsch.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-242" name="__codelineno-0-242"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Answering question: </span><span class="si">{</span><span class="n">query</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-243" name="__codelineno-0-243"></a>
-<a id="__codelineno-0-244" name="__codelineno-0-244"></a>        <span class="n">system_prompt</span> <span class="o">=</span> <span class="s2">&quot;Du bist ein Assistent für universitäres Wissensmanagement. Beantworte die Frage des Nutzers NUR basierend auf dem bereitgestellten Kontext. Antworte in der Sprache der Frage (standardmäßig Deutsch).&quot;</span>
-<a id="__codelineno-0-245" name="__codelineno-0-245"></a>        <span class="n">user_prompt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-246" name="__codelineno-0-246"></a><span class="s2">Beantworte die folgende Frage basierend auf dem bereitgestellten Kontext aus Universitätsdokumenten.</span>
-<a id="__codelineno-0-247" name="__codelineno-0-247"></a><span class="s2">Falls der Kontext die Antwort nicht enthält, sage dass du es basierend auf den Dokumenten nicht weißt.</span>
-<a id="__codelineno-0-248" name="__codelineno-0-248"></a>
-<a id="__codelineno-0-249" name="__codelineno-0-249"></a><span class="s2">Kontext:</span>
-<a id="__codelineno-0-250" name="__codelineno-0-250"></a><span class="si">{</span><span class="n">context</span><span class="si">}</span>
-<a id="__codelineno-0-251" name="__codelineno-0-251"></a>
-<a id="__codelineno-0-252" name="__codelineno-0-252"></a><span class="s2">Frage:</span>
-<a id="__codelineno-0-253" name="__codelineno-0-253"></a><span class="si">{</span><span class="n">query</span><span class="si">}</span>
-<a id="__codelineno-0-254" name="__codelineno-0-254"></a>
-<a id="__codelineno-0-255" name="__codelineno-0-255"></a><span class="s2">Antwort:</span>
-<a id="__codelineno-0-256" name="__codelineno-0-256"></a><span class="s2">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-257" name="__codelineno-0-257"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chat_request</span><span class="p">(</span><span class="n">system_prompt</span><span class="p">,</span> <span class="n">user_prompt</span><span class="p">)</span>
+<a id="__codelineno-0-240" name="__codelineno-0-240"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">determine_gender</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">first_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<a id="__codelineno-0-241" name="__codelineno-0-241"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Bestimmt die formale deutsche Anrede (Herr/Frau) basierend auf dem Vornamen mittels LLM.</span>
+<a id="__codelineno-0-242" name="__codelineno-0-242"></a>
+<a id="__codelineno-0-243" name="__codelineno-0-243"></a><span class="sd">        Args:</span>
+<a id="__codelineno-0-244" name="__codelineno-0-244"></a><span class="sd">            first_name (str): Der Vorname der Person.</span>
+<a id="__codelineno-0-245" name="__codelineno-0-245"></a>
+<a id="__codelineno-0-246" name="__codelineno-0-246"></a><span class="sd">        Returns:</span>
+<a id="__codelineno-0-247" name="__codelineno-0-247"></a><span class="sd">            str: &quot;Herr&quot;, &quot;Frau&quot; oder &quot;Herr/Frau&quot;.</span>
+<a id="__codelineno-0-248" name="__codelineno-0-248"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-249" name="__codelineno-0-249"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Determining gender for name: </span><span class="si">{</span><span class="n">first_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-250" name="__codelineno-0-250"></a>        <span class="n">system_prompt</span> <span class="o">=</span> <span class="s2">&quot;Du bist ein Assistent zur Namensanalyse. Bestimme die formale deutsche Anrede (Herr oder Frau) für den gegebenen Vornamen.&quot;</span>
+<a id="__codelineno-0-251" name="__codelineno-0-251"></a>        <span class="n">user_prompt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Bestimme die Anrede für den Vornamen &#39;</span><span class="si">{</span><span class="n">first_name</span><span class="si">}</span><span class="s2">&#39;. Antworte NUR mit &#39;Herr&#39;, &#39;Frau&#39; oder &#39;Herr/Frau&#39;, wenn es nicht eindeutig ist.&quot;</span>
+<a id="__codelineno-0-252" name="__codelineno-0-252"></a>
+<a id="__codelineno-0-253" name="__codelineno-0-253"></a>        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chat_request</span><span class="p">(</span><span class="n">system_prompt</span><span class="p">,</span> <span class="n">user_prompt</span><span class="p">)</span>
+<a id="__codelineno-0-254" name="__codelineno-0-254"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
+<a id="__codelineno-0-255" name="__codelineno-0-255"></a>            <span class="k">return</span> <span class="s2">&quot;Herr/Frau&quot;</span>
+<a id="__codelineno-0-256" name="__codelineno-0-256"></a>
+<a id="__codelineno-0-257" name="__codelineno-0-257"></a>        <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-258" name="__codelineno-0-258"></a>        <span class="k">if</span> <span class="s2">&quot;Frau&quot;</span> <span class="ow">in</span> <span class="n">result</span> <span class="ow">and</span> <span class="s2">&quot;Herr&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+<a id="__codelineno-0-259" name="__codelineno-0-259"></a>            <span class="k">return</span> <span class="s2">&quot;Herr/Frau&quot;</span>
+<a id="__codelineno-0-260" name="__codelineno-0-260"></a>        <span class="k">elif</span> <span class="s2">&quot;Frau&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+<a id="__codelineno-0-261" name="__codelineno-0-261"></a>            <span class="k">return</span> <span class="s2">&quot;Frau&quot;</span>
+<a id="__codelineno-0-262" name="__codelineno-0-262"></a>        <span class="k">elif</span> <span class="s2">&quot;Herr&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+<a id="__codelineno-0-263" name="__codelineno-0-263"></a>            <span class="k">return</span> <span class="s2">&quot;Herr&quot;</span>
+<a id="__codelineno-0-264" name="__codelineno-0-264"></a>        <span class="k">return</span> <span class="s2">&quot;Herr/Frau&quot;</span>
+<a id="__codelineno-0-265" name="__codelineno-0-265"></a>
+<a id="__codelineno-0-266" name="__codelineno-0-266"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">answer_question</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<a id="__codelineno-0-267" name="__codelineno-0-267"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Beantwortet eine Frage basierend auf dem Kontext auf Deutsch.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-268" name="__codelineno-0-268"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Answering question: </span><span class="si">{</span><span class="n">query</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-269" name="__codelineno-0-269"></a>
+<a id="__codelineno-0-270" name="__codelineno-0-270"></a>        <span class="n">system_prompt</span> <span class="o">=</span> <span class="s2">&quot;Du bist ein Assistent für universitäres Wissensmanagement. Beantworte die Frage des Nutzers NUR basierend auf dem bereitgestellten Kontext. Antworte in der Sprache der Frage (standardmäßig Deutsch).&quot;</span>
+<a id="__codelineno-0-271" name="__codelineno-0-271"></a>        <span class="n">user_prompt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-272" name="__codelineno-0-272"></a><span class="s2">Beantworte die folgende Frage basierend auf dem bereitgestellten Kontext aus Universitätsdokumenten.</span>
+<a id="__codelineno-0-273" name="__codelineno-0-273"></a><span class="s2">Falls der Kontext die Antwort nicht enthält, sage dass du es basierend auf den Dokumenten nicht weißt.</span>
+<a id="__codelineno-0-274" name="__codelineno-0-274"></a>
+<a id="__codelineno-0-275" name="__codelineno-0-275"></a><span class="s2">Kontext:</span>
+<a id="__codelineno-0-276" name="__codelineno-0-276"></a><span class="si">{</span><span class="n">context</span><span class="si">}</span>
+<a id="__codelineno-0-277" name="__codelineno-0-277"></a>
+<a id="__codelineno-0-278" name="__codelineno-0-278"></a><span class="s2">Frage:</span>
+<a id="__codelineno-0-279" name="__codelineno-0-279"></a><span class="si">{</span><span class="n">query</span><span class="si">}</span>
+<a id="__codelineno-0-280" name="__codelineno-0-280"></a>
+<a id="__codelineno-0-281" name="__codelineno-0-281"></a><span class="s2">Antwort:</span>
+<a id="__codelineno-0-282" name="__codelineno-0-282"></a><span class="s2">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-283" name="__codelineno-0-283"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chat_request</span><span class="p">(</span><span class="n">system_prompt</span><span class="p">,</span> <span class="n">user_prompt</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -4625,6 +4699,117 @@ vordefinierten Prompts für den universitären Kontext.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mcp_university/summarizer/engine.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-266">266</a></span>
+<span class="normal"><a href="#__codelineno-0-267">267</a></span>
+<span class="normal"><a href="#__codelineno-0-268">268</a></span>
+<span class="normal"><a href="#__codelineno-0-269">269</a></span>
+<span class="normal"><a href="#__codelineno-0-270">270</a></span>
+<span class="normal"><a href="#__codelineno-0-271">271</a></span>
+<span class="normal"><a href="#__codelineno-0-272">272</a></span>
+<span class="normal"><a href="#__codelineno-0-273">273</a></span>
+<span class="normal"><a href="#__codelineno-0-274">274</a></span>
+<span class="normal"><a href="#__codelineno-0-275">275</a></span>
+<span class="normal"><a href="#__codelineno-0-276">276</a></span>
+<span class="normal"><a href="#__codelineno-0-277">277</a></span>
+<span class="normal"><a href="#__codelineno-0-278">278</a></span>
+<span class="normal"><a href="#__codelineno-0-279">279</a></span>
+<span class="normal"><a href="#__codelineno-0-280">280</a></span>
+<span class="normal"><a href="#__codelineno-0-281">281</a></span>
+<span class="normal"><a href="#__codelineno-0-282">282</a></span>
+<span class="normal"><a href="#__codelineno-0-283">283</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-266" name="__codelineno-0-266"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">answer_question</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<a id="__codelineno-0-267" name="__codelineno-0-267"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Beantwortet eine Frage basierend auf dem Kontext auf Deutsch.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-268" name="__codelineno-0-268"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Answering question: </span><span class="si">{</span><span class="n">query</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-269" name="__codelineno-0-269"></a>
+<a id="__codelineno-0-270" name="__codelineno-0-270"></a>        <span class="n">system_prompt</span> <span class="o">=</span> <span class="s2">&quot;Du bist ein Assistent für universitäres Wissensmanagement. Beantworte die Frage des Nutzers NUR basierend auf dem bereitgestellten Kontext. Antworte in der Sprache der Frage (standardmäßig Deutsch).&quot;</span>
+<a id="__codelineno-0-271" name="__codelineno-0-271"></a>        <span class="n">user_prompt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-272" name="__codelineno-0-272"></a><span class="s2">Beantworte die folgende Frage basierend auf dem bereitgestellten Kontext aus Universitätsdokumenten.</span>
+<a id="__codelineno-0-273" name="__codelineno-0-273"></a><span class="s2">Falls der Kontext die Antwort nicht enthält, sage dass du es basierend auf den Dokumenten nicht weißt.</span>
+<a id="__codelineno-0-274" name="__codelineno-0-274"></a>
+<a id="__codelineno-0-275" name="__codelineno-0-275"></a><span class="s2">Kontext:</span>
+<a id="__codelineno-0-276" name="__codelineno-0-276"></a><span class="si">{</span><span class="n">context</span><span class="si">}</span>
+<a id="__codelineno-0-277" name="__codelineno-0-277"></a>
+<a id="__codelineno-0-278" name="__codelineno-0-278"></a><span class="s2">Frage:</span>
+<a id="__codelineno-0-279" name="__codelineno-0-279"></a><span class="si">{</span><span class="n">query</span><span class="si">}</span>
+<a id="__codelineno-0-280" name="__codelineno-0-280"></a>
+<a id="__codelineno-0-281" name="__codelineno-0-281"></a><span class="s2">Antwort:</span>
+<a id="__codelineno-0-282" name="__codelineno-0-282"></a><span class="s2">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-283" name="__codelineno-0-283"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chat_request</span><span class="p">(</span><span class="n">system_prompt</span><span class="p">,</span> <span class="n">user_prompt</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="mcp_university.summarizer.engine.Summarizer.determine_gender" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">determine_gender</span><span class="p">(</span><span class="n">first_name</span><span class="p">)</span></code>
+
+<a href="#mcp_university.summarizer.engine.Summarizer.determine_gender" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Bestimmt die formale deutsche Anrede (Herr/Frau) basierend auf dem Vornamen mittels LLM.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>first_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Der Vorname der Person.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>str</code></td>            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>"Herr", "Frau" oder "Herr/Frau".</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>mcp_university/summarizer/engine.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-240">240</a></span>
 <span class="normal"><a href="#__codelineno-0-241">241</a></span>
 <span class="normal"><a href="#__codelineno-0-242">242</a></span>
@@ -4642,24 +4827,38 @@ vordefinierten Prompts für den universitären Kontext.</p>
 <span class="normal"><a href="#__codelineno-0-254">254</a></span>
 <span class="normal"><a href="#__codelineno-0-255">255</a></span>
 <span class="normal"><a href="#__codelineno-0-256">256</a></span>
-<span class="normal"><a href="#__codelineno-0-257">257</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-240" name="__codelineno-0-240"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">answer_question</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<a id="__codelineno-0-241" name="__codelineno-0-241"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Beantwortet eine Frage basierend auf dem Kontext auf Deutsch.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-242" name="__codelineno-0-242"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Answering question: </span><span class="si">{</span><span class="n">query</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-243" name="__codelineno-0-243"></a>
-<a id="__codelineno-0-244" name="__codelineno-0-244"></a>        <span class="n">system_prompt</span> <span class="o">=</span> <span class="s2">&quot;Du bist ein Assistent für universitäres Wissensmanagement. Beantworte die Frage des Nutzers NUR basierend auf dem bereitgestellten Kontext. Antworte in der Sprache der Frage (standardmäßig Deutsch).&quot;</span>
-<a id="__codelineno-0-245" name="__codelineno-0-245"></a>        <span class="n">user_prompt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-246" name="__codelineno-0-246"></a><span class="s2">Beantworte die folgende Frage basierend auf dem bereitgestellten Kontext aus Universitätsdokumenten.</span>
-<a id="__codelineno-0-247" name="__codelineno-0-247"></a><span class="s2">Falls der Kontext die Antwort nicht enthält, sage dass du es basierend auf den Dokumenten nicht weißt.</span>
-<a id="__codelineno-0-248" name="__codelineno-0-248"></a>
-<a id="__codelineno-0-249" name="__codelineno-0-249"></a><span class="s2">Kontext:</span>
-<a id="__codelineno-0-250" name="__codelineno-0-250"></a><span class="si">{</span><span class="n">context</span><span class="si">}</span>
-<a id="__codelineno-0-251" name="__codelineno-0-251"></a>
-<a id="__codelineno-0-252" name="__codelineno-0-252"></a><span class="s2">Frage:</span>
-<a id="__codelineno-0-253" name="__codelineno-0-253"></a><span class="si">{</span><span class="n">query</span><span class="si">}</span>
-<a id="__codelineno-0-254" name="__codelineno-0-254"></a>
-<a id="__codelineno-0-255" name="__codelineno-0-255"></a><span class="s2">Antwort:</span>
-<a id="__codelineno-0-256" name="__codelineno-0-256"></a><span class="s2">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-257" name="__codelineno-0-257"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chat_request</span><span class="p">(</span><span class="n">system_prompt</span><span class="p">,</span> <span class="n">user_prompt</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-257">257</a></span>
+<span class="normal"><a href="#__codelineno-0-258">258</a></span>
+<span class="normal"><a href="#__codelineno-0-259">259</a></span>
+<span class="normal"><a href="#__codelineno-0-260">260</a></span>
+<span class="normal"><a href="#__codelineno-0-261">261</a></span>
+<span class="normal"><a href="#__codelineno-0-262">262</a></span>
+<span class="normal"><a href="#__codelineno-0-263">263</a></span>
+<span class="normal"><a href="#__codelineno-0-264">264</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-240" name="__codelineno-0-240"></a><span class="k">def</span><span class="w"> </span><span class="nf">determine_gender</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">first_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<a id="__codelineno-0-241" name="__codelineno-0-241"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Bestimmt die formale deutsche Anrede (Herr/Frau) basierend auf dem Vornamen mittels LLM.</span>
+<a id="__codelineno-0-242" name="__codelineno-0-242"></a>
+<a id="__codelineno-0-243" name="__codelineno-0-243"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-244" name="__codelineno-0-244"></a><span class="sd">        first_name (str): Der Vorname der Person.</span>
+<a id="__codelineno-0-245" name="__codelineno-0-245"></a>
+<a id="__codelineno-0-246" name="__codelineno-0-246"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-247" name="__codelineno-0-247"></a><span class="sd">        str: &quot;Herr&quot;, &quot;Frau&quot; oder &quot;Herr/Frau&quot;.</span>
+<a id="__codelineno-0-248" name="__codelineno-0-248"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-249" name="__codelineno-0-249"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Determining gender for name: </span><span class="si">{</span><span class="n">first_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-250" name="__codelineno-0-250"></a>    <span class="n">system_prompt</span> <span class="o">=</span> <span class="s2">&quot;Du bist ein Assistent zur Namensanalyse. Bestimme die formale deutsche Anrede (Herr oder Frau) für den gegebenen Vornamen.&quot;</span>
+<a id="__codelineno-0-251" name="__codelineno-0-251"></a>    <span class="n">user_prompt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Bestimme die Anrede für den Vornamen &#39;</span><span class="si">{</span><span class="n">first_name</span><span class="si">}</span><span class="s2">&#39;. Antworte NUR mit &#39;Herr&#39;, &#39;Frau&#39; oder &#39;Herr/Frau&#39;, wenn es nicht eindeutig ist.&quot;</span>
+<a id="__codelineno-0-252" name="__codelineno-0-252"></a>
+<a id="__codelineno-0-253" name="__codelineno-0-253"></a>    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chat_request</span><span class="p">(</span><span class="n">system_prompt</span><span class="p">,</span> <span class="n">user_prompt</span><span class="p">)</span>
+<a id="__codelineno-0-254" name="__codelineno-0-254"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
+<a id="__codelineno-0-255" name="__codelineno-0-255"></a>        <span class="k">return</span> <span class="s2">&quot;Herr/Frau&quot;</span>
+<a id="__codelineno-0-256" name="__codelineno-0-256"></a>
+<a id="__codelineno-0-257" name="__codelineno-0-257"></a>    <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-258" name="__codelineno-0-258"></a>    <span class="k">if</span> <span class="s2">&quot;Frau&quot;</span> <span class="ow">in</span> <span class="n">result</span> <span class="ow">and</span> <span class="s2">&quot;Herr&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+<a id="__codelineno-0-259" name="__codelineno-0-259"></a>        <span class="k">return</span> <span class="s2">&quot;Herr/Frau&quot;</span>
+<a id="__codelineno-0-260" name="__codelineno-0-260"></a>    <span class="k">elif</span> <span class="s2">&quot;Frau&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+<a id="__codelineno-0-261" name="__codelineno-0-261"></a>        <span class="k">return</span> <span class="s2">&quot;Frau&quot;</span>
+<a id="__codelineno-0-262" name="__codelineno-0-262"></a>    <span class="k">elif</span> <span class="s2">&quot;Herr&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+<a id="__codelineno-0-263" name="__codelineno-0-263"></a>        <span class="k">return</span> <span class="s2">&quot;Herr&quot;</span>
+<a id="__codelineno-0-264" name="__codelineno-0-264"></a>    <span class="k">return</span> <span class="s2">&quot;Herr/Frau&quot;</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
