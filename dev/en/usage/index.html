@@ -717,6 +717,28 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#email-sorting-student-folders" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Email Sorting (Student Folders)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#batch-classification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Batch Classification
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -847,6 +869,45 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#two-stage-summarization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Two-Stage Summarization
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#utility-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Utility Scripts
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1250,6 +1311,28 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#email-sorting-student-folders" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Email Sorting (Student Folders)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#batch-classification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Batch Classification
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1383,6 +1466,45 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#two-stage-summarization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Two-Stage Summarization
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#utility-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Utility Scripts
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1428,6 +1550,20 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python3<span class="w"> </span>mcp_university/classifier/predict.py<span class="w"> </span>/path/to/email.msg
 </code></pre></div>
 <p>The output contains the most likely class as well as the confidence and a detailed probability distribution.</p>
+<h3 id="email-sorting-student-folders">Email Sorting (Student Folders)<a class="headerlink" href="#email-sorting-student-folders" title="Permanent link">&para;</a></h3>
+<p>The most powerful script sorts emails not only by class, but also by semester and student (last name):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>python3<span class="w"> </span>mcp_university/classifier/sort_emails.py<span class="w"> </span>/source/folder<span class="w"> </span>--config<span class="w"> </span>config/class_paths.yaml<span class="w"> </span>--model<span class="w"> </span>data/email_classifier.pkl
+</code></pre></div>
+<p>It automatically detects:
+- <strong>Semester:</strong> Based on the email date (Summer/Winter semester).
+- <strong>Student:</strong> Extracts the last name from <code>smail.th-koeln.de</code> addresses or display names.
+- <strong>Direction:</strong> Sorts into <code>Inbox</code> or <code>SentItems</code> subfolders.
+- <strong>Report:</strong> Creates a <code>sorted_emails.md</code> with an overview of all moved emails.</p>
+<h3 id="batch-classification">Batch Classification<a class="headerlink" href="#batch-classification" title="Permanent link">&para;</a></h3>
+<p>To automatically sort an entire folder of emails (classification only):
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>python3<span class="w"> </span>mcp_university/classifier/classify_folder.py<span class="w"> </span>/source/folder<span class="w"> </span>--model<span class="w"> </span>data/email_classifier.pkl
+</code></pre></div>
+This moves the emails into subfolders named after their predicted classes.</p>
 <h2 id="database-management-db">Database Management (<code>db</code>)<a class="headerlink" href="#database-management-db" title="Permanent link">&para;</a></h2>
 <p>The <code>db</code> command group allows for direct management of metadata and the search index.</p>
 <h3 id="listing-content">Listing Content<a class="headerlink" href="#listing-content" title="Permanent link">&para;</a></h3>
@@ -1441,7 +1577,7 @@
 </ul>
 <h3 id="student-synchronization-sync-students">Student Synchronization (<code>sync-students</code>)<a class="headerlink" href="#student-synchronization-sync-students" title="Permanent link">&para;</a></h3>
 <p>Populates the database from a <code>students.yaml</code>.
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>mcp-uni<span class="w"> </span>db<span class="w"> </span>sync-students
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>mcp-uni<span class="w"> </span>db<span class="w"> </span>sync-students
 </code></pre></div></p>
 <h3 id="deleting-content">Deleting Content<a class="headerlink" href="#deleting-content" title="Permanent link">&para;</a></h3>
 <p>Entries can be deleted using their ID. Use the <code>--force</code> or <code>-f</code> option to skip the confirmation prompt.</p>
@@ -1455,7 +1591,7 @@
 <h2 id="model-context-protocol-mcp">Model Context Protocol (MCP)<a class="headerlink" href="#model-context-protocol-mcp" title="Permanent link">&para;</a></h2>
 <p>The most powerful way to use the system is via an MCP client (like Claude Desktop).</p>
 <h3 id="start-server">Start Server<a class="headerlink" href="#start-server" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>mcp-uni<span class="w"> </span>serve-mcp
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>mcp-uni<span class="w"> </span>serve-mcp
 </code></pre></div>
 <h3 id="available-tools">Available Tools<a class="headerlink" href="#available-tools" title="Permanent link">&para;</a></h3>
 <ul>
@@ -1471,6 +1607,15 @@
 The agent uses <code>get_student_context</code> and <code>search_documents</code> to provide you with a compact overview.</p>
 <h3 id="2-answering-emails">2. Answering Emails<a class="headerlink" href="#2-answering-emails" title="Permanent link">&para;</a></h3>
 <p>Copy a student's email into the chat and use the <code>generate_mail_reply</code> tool. The system automatically takes the status of the thesis or open deadlines into account.</p>
+<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
+<h3 id="two-stage-summarization">Two-Stage Summarization<a class="headerlink" href="#two-stage-summarization" title="Permanent link">&para;</a></h3>
+<p>In <code>config/folders.yaml</code>, the <code>summarize_emails_individually</code> option (default: <code>false</code>) can be enabled. When set to <code>true</code>, email threads are summarized in two stages: first each email individually, then the entire conversation.</p>
+<h2 id="utility-scripts">Utility Scripts<a class="headerlink" href="#utility-scripts" title="Permanent link">&para;</a></h2>
+<p>The system includes useful scripts in the <code>scripts/</code> folder:</p>
+<ul>
+<li><strong><code>remove_empty_folders.py</code></strong>: Recursively deletes all empty folders in a directory.</li>
+<li><strong><code>flatten_directory.py</code></strong>: Flattens a directory structure by moving all files to the root directory (includes name collision checks).</li>
+</ul>
 
 
 

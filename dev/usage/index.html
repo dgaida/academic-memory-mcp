@@ -715,6 +715,28 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#e-mail-sortierung-studenten-ordner" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        E-Mail Sortierung (Studenten-Ordner)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#batch-klassifizierung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Batch-Klassifizierung
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -845,6 +867,45 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#konfiguration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Konfiguration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Konfiguration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#zweistufige-zusammenfassung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zweistufige Zusammenfassung
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hilfsskripte" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hilfsskripte
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1248,6 +1309,28 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#e-mail-sortierung-studenten-ordner" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        E-Mail Sortierung (Studenten-Ordner)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#batch-klassifizierung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Batch-Klassifizierung
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1381,6 +1464,45 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#konfiguration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Konfiguration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Konfiguration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#zweistufige-zusammenfassung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zweistufige Zusammenfassung
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hilfsskripte" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hilfsskripte
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1426,6 +1548,20 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python3<span class="w"> </span>mcp_university/classifier/predict.py<span class="w"> </span>/pfad/zur/email.msg
 </code></pre></div>
 <p>Die Ausgabe enthält die wahrscheinlichste Klasse sowie die Konfidenz und eine detaillierte Wahrscheinlichkeitsverteilung.</p>
+<h3 id="e-mail-sortierung-studenten-ordner">E-Mail Sortierung (Studenten-Ordner)<a class="headerlink" href="#e-mail-sortierung-studenten-ordner" title="Permanent link">&para;</a></h3>
+<p>Das leistungsfähigste Skript sortiert E-Mails nicht nur nach Klasse, sondern auch nach Semester und Student (Nachname):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>python3<span class="w"> </span>mcp_university/classifier/sort_emails.py<span class="w"> </span>/quell/ordner<span class="w"> </span>--config<span class="w"> </span>config/class_paths.yaml<span class="w"> </span>--model<span class="w"> </span>data/email_classifier.pkl
+</code></pre></div>
+<p>Es erkennt automatisch:
+- <strong>Semester:</strong> Basierend auf dem E-Mail-Datum (SoSe/WS).
+- <strong>Student:</strong> Extrahiert den Nachnamen aus <code>smail.th-koeln.de</code> Adressen oder Anzeigenamen.
+- <strong>Richtung:</strong> Sortiert in <code>Inbox</code> oder <code>SentItems</code> Unterordner.
+- <strong>Bericht:</strong> Erstellt eine <code>sorted_emails.md</code> mit einer Übersicht aller verschobenen Mails.</p>
+<h3 id="batch-klassifizierung">Batch-Klassifizierung<a class="headerlink" href="#batch-klassifizierung" title="Permanent link">&para;</a></h3>
+<p>Um einen ganzen Ordner mit E-Mails automatisch zu sortieren (nur Klassifizierung):
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>python3<span class="w"> </span>mcp_university/classifier/classify_folder.py<span class="w"> </span>/quell/ordner<span class="w"> </span>--model<span class="w"> </span>data/email_classifier.pkl
+</code></pre></div>
+Dies verschiebt die E-Mails in Unterordner, die nach den vorhergesagten Klassen benannt sind.</p>
 <h2 id="datenbank-management-db">Datenbank-Management (<code>db</code>)<a class="headerlink" href="#datenbank-management-db" title="Permanent link">&para;</a></h2>
 <p>Die <code>db</code> Befehlsgruppe erlaubt die direkte Verwaltung der Metadaten und des Suchindex.</p>
 <h3 id="auflisten-von-inhalten">Auflisten von Inhalten<a class="headerlink" href="#auflisten-von-inhalten" title="Permanent link">&para;</a></h3>
@@ -1439,7 +1575,7 @@
 </ul>
 <h3 id="synchronisierung-von-studenten-sync-students">Synchronisierung von Studenten (<code>sync-students</code>)<a class="headerlink" href="#synchronisierung-von-studenten-sync-students" title="Permanent link">&para;</a></h3>
 <p>Befüllt die Datenbank aus einer <code>students.yaml</code>.
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>mcp-uni<span class="w"> </span>db<span class="w"> </span>sync-students
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>mcp-uni<span class="w"> </span>db<span class="w"> </span>sync-students
 </code></pre></div></p>
 <h3 id="loschen-von-inhalten">Löschen von Inhalten<a class="headerlink" href="#loschen-von-inhalten" title="Permanent link">&para;</a></h3>
 <p>Einträge können über ihre ID gelöscht werden. Mit der Option <code>--force</code> oder <code>-f</code> wird die Bestätigungsabfrage übersprungen.</p>
@@ -1453,7 +1589,7 @@
 <h2 id="model-context-protocol-mcp">Model Context Protocol (MCP)<a class="headerlink" href="#model-context-protocol-mcp" title="Permanent link">&para;</a></h2>
 <p>Der leistungsfähigste Weg, das System zu nutzen, ist über einen MCP-Client (wie Claude Desktop).</p>
 <h3 id="server-starten">Server starten<a class="headerlink" href="#server-starten" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>mcp-uni<span class="w"> </span>serve-mcp
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>mcp-uni<span class="w"> </span>serve-mcp
 </code></pre></div>
 <h3 id="verfugbare-tools">Verfügbare Tools<a class="headerlink" href="#verfugbare-tools" title="Permanent link">&para;</a></h3>
 <ul>
@@ -1469,6 +1605,15 @@
 Der Agent nutzt <code>get_student_context</code> and <code>search_documents</code>, um Ihnen eine kompakte Übersicht zu liefern.</p>
 <h3 id="2-beantworten-von-e-mails">2. Beantworten von E-Mails<a class="headerlink" href="#2-beantworten-von-e-mails" title="Permanent link">&para;</a></h3>
 <p>Kopieren Sie die E-Mail eines Studenten in den Chat und nutzen Sie das Tool <code>generate_mail_reply</code>. Das System berücksichtigt dabei automatisch den Status der Abschlussarbeit oder offene Deadlines.</p>
+<h2 id="konfiguration">Konfiguration<a class="headerlink" href="#konfiguration" title="Permanent link">&para;</a></h2>
+<h3 id="zweistufige-zusammenfassung">Zweistufige Zusammenfassung<a class="headerlink" href="#zweistufige-zusammenfassung" title="Permanent link">&para;</a></h3>
+<p>In der <code>config/folders.yaml</code> kann die Option <code>summarize_emails_individually</code> (Standard: <code>false</code>) aktiviert werden. Wenn diese auf <code>true</code> gesetzt ist, werden E-Mail-Threads in zwei Stufen zusammengefasst: erst jede E-Mail einzeln, dann die gesamte Konversation.</p>
+<h2 id="hilfsskripte">Hilfsskripte<a class="headerlink" href="#hilfsskripte" title="Permanent link">&para;</a></h2>
+<p>Das System enthält nützliche Skripte im Ordner <code>scripts/</code>:</p>
+<ul>
+<li><strong><code>remove_empty_folders.py</code></strong>: Löscht rekursiv alle leeren Ordner in einem Verzeichnis.</li>
+<li><strong><code>flatten_directory.py</code></strong>: Flacht eine Ordnerstruktur ab, indem alle Dateien in das Wurzelverzeichnis verschoben werden (inkl. Namenskollisionsprüfung).</li>
+</ul>
 
 
 
