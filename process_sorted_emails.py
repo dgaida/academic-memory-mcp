@@ -3,11 +3,11 @@ import argparse
 import logging
 import extract_msg
 import yaml
-from mcp_university.classifier.sort_emails import process_emails, write_report, extract_lastname
+from mcp_university.classifier.sort_emails import process_emails, write_report, extract_lastname, extract_firstname
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 try:
     import win32com.client
@@ -18,6 +18,7 @@ except ImportError:
 from mcp_university.config import get_config
 from mcp_university.summarizer.engine import Summarizer
 from mcp_university.parser.mail_parser import MailParser
+from mcp_university.parser.factory import ParserFactory
 
 # Logging konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
@@ -76,13 +77,14 @@ def parse_sorted_report(report_path: Path) -> List[Dict]:
                 })
     return emails
 
-def create_outlook_draft(subject: str, body: str, recipient: str = "") -> bool:
+def create_outlook_draft(subject: str, body: str, recipient: str = "", attachments: List[Path] = None) -> bool:
     """Erstellt einen E-Mail-Entwurf in Outlook.
 
     Args:
         subject: Betreff der E-Mail.
         body: Inhalt der E-Mail.
         recipient: Empfänger-Adresse.
+        attachments: Liste der Dateipfade für Anhänge.
 
     Returns:
         bool: True wenn erfolgreich, sonst False.
@@ -102,6 +104,10 @@ def create_outlook_draft(subject: str, body: str, recipient: str = "") -> bool:
         mail = outlook.CreateItem(0)  # 0 = olMailItem
         mail.Subject = f"Re: {subject}"
         mail.Body = body
+        if attachments:
+            for attachment_path in attachments:
+                if attachment_path.exists():
+                    mail.Attachments.Add(str(attachment_path))
         if recipient:
             mail.To = recipient
         mail.Save()
@@ -110,7 +116,7 @@ def create_outlook_draft(subject: str, body: str, recipient: str = "") -> bool:
         logger.error(f"Fehler beim Erstellen des Outlook-Entwurfs: {e}")
         return False
 
-def generate_reply(summarizer: Summarizer, mail_path: Path, summary_content: str = "", skill_path: Path = None, conversation_content: str = "") -> str:
+def generate_reply(summarizer: Summarizer, mail_path: Path, summary_content: str = "", skill_path: Path = None, conversation_content: str = "", persona_path: Path = None, additional_context: str = "") -> Tuple[str, bool]:
     """Generiert eine Antwortmail mit dem LLM.
 
     Args:
@@ -119,9 +125,11 @@ def generate_reply(summarizer: Summarizer, mail_path: Path, summary_content: str
         summary_content: Inhalt der bisherigen Zusammenfassung.
         skill_path: Pfad zur SKILL-Datei.
         conversation_content: Optionaler Verlauf des Schriftverkehrs (statt Zusammenfassung).
+        persona_path: Pfad zur Persona-Datei.
+        additional_context: Zusätzlicher Kontext (z.B. aus einem PDF).
 
     Returns:
-        str: Der generierte Antwort-Text.
+        Tuple[str, bool]: (Antwort-Text, Soll ein Anhang angehängt werden?).
     """
     parser = MailParser()
     mail_content = parser.parse(mail_path)
@@ -130,14 +138,24 @@ def generate_reply(summarizer: Summarizer, mail_path: Path, summary_content: str
     if skill_path and skill_path.exists():
         skill_content = skill_path.read_text(encoding="utf-8")
 
+    persona_content = ""
+    if persona_path and persona_path.exists():
+        persona_content = persona_path.read_text(encoding="utf-8")
+
     context_label = "SCHRIFTVERKEHR DER LETZTEN 2 WOCHEN" if conversation_content else "ZUSAMMENFASSUNG DES SCHRIFTVERKEHRS"
     context_body = conversation_content if conversation_content else summary_content
 
     system_prompt = "Du bist ein hilfreicher Assistent an der TH Köln. Verfasse eine Antwort-E-Mail auf Deutsch."
-    user_prompt = f"""Basierend auf der folgenden E-Mail, dem Kontext des bisherigen Schriftverkehrs und den Skill-Anweisungen, verfasse eine professionelle Antwort.
+    user_prompt = f"""Basierend auf der folgenden E-Mail, dem Kontext des bisherigen Schriftverkehrs, der Persona und den Skill-Anweisungen, verfasse eine professionelle Antwort.
+
+PERSONA:
+{persona_content}
 
 SKILL ANWEISUNGEN:
 {skill_content}
+
+ZUSÄTZLICHER KONTEXT:
+{additional_context}
 
 {context_label}:
 {context_body}
@@ -145,7 +163,12 @@ SKILL ANWEISUNGEN:
 AKTUELLE E-MAIL:
 {mail_content}
 
-Antworte NUR mit dem Text der E-Mail.
+Gib die Antwort in folgendem Format zurück:
+ANHANG: [JA/NEIN]
+TEXT:
+[Der Antwort-Text]
+
+Antworte NUR in diesem Format.
 """
     try:
         response = summarizer.client.chat(
@@ -155,10 +178,20 @@ Antworte NUR mit dem Text der E-Mail.
                 {'role': 'user', 'content': user_prompt}
             ]
         )
-        return response['message']['content']
+        content = response['message']['content']
+
+        should_attach = False
+        if "ANHANG: JA" in content:
+            should_attach = True
+
+        reply_text = content
+        if "TEXT:" in content:
+            reply_text = content.split("TEXT:", 1)[1].strip()
+
+        return reply_text, should_attach
     except Exception as e:
         logger.error(f"Fehler bei LLM-Generierung: {e}")
-        return "Fehler bei der Generierung der Antwort."
+        return "Fehler bei der Generierung der Antwort.", False
 
 def main() -> None:
     """Haupteinstiegspunkt des Skripts."""
@@ -182,11 +215,14 @@ def main() -> None:
     config = get_config()
     summarizer = Summarizer(model=config.llm.model, base_url=config.llm.base_url)
     mail_parser = MailParser()
+    parser_factory = ParserFactory(config.data_dir / "cache")
 
     # Wir tracken verarbeitete student_folders, um Mehrfachverarbeitung zu vermeiden
     processed_folders = set()
 
     from datetime import timedelta
+
+    persona_path = Path("skills/SKILL_persona.md")
 
     for email in emails:
         mail_path = Path(email["path"])
@@ -206,7 +242,6 @@ def main() -> None:
 
         if is_ba_ma:
             # Speziallogik für BA/MA: Sammle alle Mails des Studenten in diesem Semester
-            # Diese liegen in .../Klasse/Semester/Inbox oder .../Klasse/Semester/SentItems
             semester_folder = mail_path.parent.parent
             inbox_folder = semester_folder / "Inbox"
             sent_folder = semester_folder / "SentItems"
@@ -258,12 +293,38 @@ def main() -> None:
                 if p:
                     conversation_content += f"\n--- EMAIL VOM {date} ---\n{p}\n"
 
-            skill_path = Path(f"skills/SKILL_{email['class']}.md")
-            reply = generate_reply(summarizer, latest_mail, skill_path=skill_path, conversation_content=conversation_content)
+            # Gender Determination und Salutation
+            first_name = "Unknown"
+            try:
+                with extract_msg.openMsg(str(latest_mail)) as msg:
+                    first_name = extract_firstname(msg.sender)
+            except Exception:
+                pass
+            gender_salutation = summarizer.determine_gender(first_name)
+            salutation = f"Guten Tag {gender_salutation} {email['lastname']}"
 
-            # Speichere Antwort (Draft oder File im Semester Ordner mit Name des Studenten)
+            skill_path = Path(f"skills/SKILL_{email['class']}.md")
+
+            # Zusätzlicher Kontext (z.B. PO-Wechsel)
+            additional_context = f"Anrede: {salutation}\n"
+            attachments = []
+            if email["class"] == "PO-Wechsel":
+                pdf_path = Path(r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf")
+                if pdf_path.exists():
+                    pdf_content = parser_factory.parse(pdf_path)
+                    if pdf_content:
+                        additional_context += f"\nINHALT INFOS PDF:\n{pdf_content}\n"
+
+            reply, should_attach = generate_reply(summarizer, latest_mail, skill_path=skill_path, conversation_content=conversation_content, persona_path=persona_path, additional_context=additional_context)
+
+            if should_attach and email["class"] == "PO-Wechsel":
+                pdf_path = Path(r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf")
+                if pdf_path.exists():
+                    attachments.append(pdf_path)
+
+            # Speichere Antwort
             subject = latest_mail.stem
-            success = create_outlook_draft(subject, reply)
+            success = create_outlook_draft(subject, reply, attachments=attachments)
             if success:
                 logger.info(f"Outlook-Entwurf für {latest_mail.name} erstellt.")
             else:
@@ -319,12 +380,37 @@ def main() -> None:
             if "Inbox" in latest_mail.parts and "SentItems" not in latest_mail.parts:
                 logger.info(f"Generiere Antwort für neueste Mail in {identifier.name}: {latest_mail.name}")
 
+                # Gender Determination und Salutation
+                first_name = "Unknown"
+                try:
+                    with extract_msg.openMsg(str(latest_mail)) as msg:
+                        first_name = extract_firstname(msg.sender)
+                except Exception:
+                    pass
+                gender_salutation = summarizer.determine_gender(first_name)
+                salutation = f"Guten Tag {gender_salutation} {email['lastname']}"
+
                 skill_path = Path(f"skills/SKILL_{email['class']}.md")
-                reply = generate_reply(summarizer, latest_mail, summary_content or "", skill_path)
+
+                additional_context = f"Anrede: {salutation}\n"
+                attachments = []
+                if email["class"] == "PO-Wechsel":
+                    pdf_path = Path(r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf")
+                    if pdf_path.exists():
+                        pdf_content = parser_factory.parse(pdf_path)
+                        if pdf_content:
+                            additional_context += f"\nINHALT INFOS PDF:\n{pdf_content}\n"
+
+                reply, should_attach = generate_reply(summarizer, latest_mail, summary_content or "", skill_path, persona_path=persona_path, additional_context=additional_context)
+
+                if should_attach and email["class"] == "PO-Wechsel":
+                    pdf_path = Path(r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf")
+                    if pdf_path.exists():
+                        attachments.append(pdf_path)
 
                 # Outlook Draft or Markdown
                 subject = latest_mail.stem
-                success = create_outlook_draft(subject, reply)
+                success = create_outlook_draft(subject, reply, attachments=attachments)
                 if success:
                     logger.info(f"Outlook-Entwurf für {latest_mail.name} erstellt.")
                 else:

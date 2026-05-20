@@ -237,6 +237,32 @@ Schriftverkehr:
 """
         return self._chat_request(system_prompt, user_prompt)
 
+    def determine_gender(self, first_name: str) -> str:
+        """Bestimmt die formale deutsche Anrede (Herr/Frau) basierend auf dem Vornamen mittels LLM.
+
+        Args:
+            first_name (str): Der Vorname der Person.
+
+        Returns:
+            str: "Herr", "Frau" oder "Herr/Frau".
+        """
+        logger.info(f"Determining gender for name: {first_name}")
+        system_prompt = "Du bist ein Assistent zur Namensanalyse. Bestimme die formale deutsche Anrede (Herr oder Frau) für den gegebenen Vornamen."
+        user_prompt = f"Bestimme die Anrede für den Vornamen '{first_name}'. Antworte NUR mit 'Herr', 'Frau' oder 'Herr/Frau', wenn es nicht eindeutig ist."
+
+        result = self._chat_request(system_prompt, user_prompt)
+        if not result:
+            return "Herr/Frau"
+
+        result = result.strip().replace(".", "")
+        if "Frau" in result and "Herr" in result:
+            return "Herr/Frau"
+        elif "Frau" in result:
+            return "Frau"
+        elif "Herr" in result:
+            return "Herr"
+        return "Herr/Frau"
+
     def answer_question(self, query: str, context: str) -> Optional[str]:
         """Beantwortet eine Frage basierend auf dem Kontext auf Deutsch."""
         logger.info(f"Answering question: {query}")
