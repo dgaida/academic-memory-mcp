@@ -17,7 +17,6 @@ try:
 except ImportError:
     OUTLOOK_AVAILABLE = False
 
-from mcp_university.classifier.sort_emails import process_emails, write_report, extract_lastname
 from mcp_university.config import get_config
 from mcp_university.summarizer.engine import Summarizer
 from mcp_university.parser.mail_parser import MailParser
@@ -26,6 +25,8 @@ from mcp_university.parser.factory import ParserFactory
 # Logging konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
+
+DEBUG = True
 
 def is_outlook_open() -> bool:
     """Prüft, ob Outlook aktuell geöffnet ist.
@@ -175,7 +176,7 @@ def create_outlook_draft(subject: str, body: str, recipient: str = "", attachmen
         logger.error(f"Fehler beim Erstellen des Outlook-Entwurfs: {e}")
         return False
 
-def generate_reply(summarizer: Summarizer, mail_path: Path, summary_content: str = "", skill_path: Path = None, conversation_content: str = "", persona_path: Path = None, additional_context: str = "") -> Tuple[str, bool]:
+def generate_reply(summarizer: Summarizer, mail_path: Path, summary_content: str = "", skill_path: Path = None, conversation_content: str = "", persona_path: Path = None, additional_context: str = "", debug: bool = False) -> Tuple[str, bool]:
     """Generiert eine Antwortmail mit dem LLM.
 
     Args:
@@ -186,6 +187,7 @@ def generate_reply(summarizer: Summarizer, mail_path: Path, summary_content: str
         conversation_content: Optionaler Verlauf des Schriftverkehrs (statt Zusammenfassung).
         persona_path: Pfad zur Persona-Datei.
         additional_context: Zusätzlicher Kontext (z.B. aus einem PDF).
+        debug: Ob Debug-Informationen gespeichert werden sollen.
 
     Returns:
         Tuple[str, bool]: (Antwort-Text, Soll ein Anhang angehängt werden?).
@@ -229,6 +231,12 @@ TEXT:
 
 Antworte NUR in diesem Format.
 """
+    if debug:
+        prompt_file = mail_path.parent / f"{mail_path.stem}_prompt.md"
+        prompt_content = f"# System Prompt\n{system_prompt}\n\n# User Prompt\n{user_prompt}"
+        prompt_file.write_text(prompt_content, encoding="utf-8")
+        logger.info(f"Debug-Prompt gespeichert: {prompt_file}")
+
     try:
         response = summarizer.client.chat(
             model=summarizer.model,
@@ -257,6 +265,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Verarbeitet sortierte E-Mails und generiert Antworten.")
     parser.add_argument("source_dir", help="Quellordner der E-Mails")
     parser.add_argument("--config", required=True, help="Pfad zur classifier_paths.yaml")
+    parser.add_argument("--debug", action="store_true", default=DEBUG, help="Speichert LLM Prompts als Markdown (Default: True)")
+    parser.add_argument("--no-debug", action="store_false", dest="debug", help="Deaktiviert das Speichern von Prompts")
     args = parser.parse_args()
 
     source_dir = Path(args.source_dir)
@@ -372,7 +382,7 @@ def main() -> None:
                     if pdf_content:
                         additional_context += f"\nINHALT INFOS PDF:\n{pdf_content}\n"
 
-            reply, should_attach = generate_reply(summarizer, latest_mail, skill_path=skill_path, conversation_content=conversation_content, persona_path=persona_path, additional_context=additional_context)
+            reply, should_attach = generate_reply(summarizer, latest_mail, skill_path=skill_path, conversation_content=conversation_content, persona_path=persona_path, additional_context=additional_context, debug=args.debug)
 
             if should_attach and email["class"] == "PO-Wechsel":
                 pdf_path = Path(r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf")
@@ -457,7 +467,7 @@ def main() -> None:
                         if pdf_content:
                             additional_context += f"\nINHALT INFOS PDF:\n{pdf_content}\n"
 
-                reply, should_attach = generate_reply(summarizer, latest_mail, summary_content or "", skill_path, persona_path=persona_path, additional_context=additional_context)
+                reply, should_attach = generate_reply(summarizer, latest_mail, summary_content or "", skill_path, persona_path=persona_path, additional_context=additional_context, debug=args.debug)
 
                 if should_attach and email["class"] == "PO-Wechsel":
                     pdf_path = Path(r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf")
