@@ -157,6 +157,19 @@ def create_outlook_draft(subject: str, body: str, recipient: str = "", cc: List[
                         if folder.Name.lower() == target_folder_name.lower():
                             target_folder = folder
                             break
+
+                    if not target_folder:
+                        # Suche in Posteingang
+                        for folder in root.Folders:
+                            if folder.Name.lower() in ["posteingang", "inbox"]:
+                                logger.info(f"Suche in {folder.Name}...")
+                                for sub in folder.Folders:
+                                    logger.info(f"   - {sub.Name}")
+                                    if sub.Name.lower() == target_folder_name.lower():
+                                        target_folder = sub
+                                        break
+                            if target_folder:
+                                break
                     if target_folder:
                         break
         except Exception as e:
@@ -509,6 +522,9 @@ def main() -> None:
                 salutation = f"Guten Tag {gender_salutation} {email['lastname']}"
 
                 skill_path = Path(f"skills/SKILL_{email['class']}.md")
+                if not skill_path.exists():
+                    # Fallback to script directory
+                    skill_path = Path(__file__).parent / "skills" / f"SKILL_{email['class']}.md"
 
                 additional_context = f"Anrede: {salutation}\n"
                 attachments = []
