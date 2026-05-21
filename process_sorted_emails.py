@@ -20,7 +20,7 @@ except ImportError:
 from mcp_university.config import get_config
 from mcp_university.summarizer.engine import Summarizer
 from mcp_university.parser.mail_parser import MailParser
-from mcp_university.parser.factory import ParserFactory
+from mcp_university.agent import Agent
 
 # Logging konfigurieren
 log_format = '%(asctime)s - %(levelname)s - %(message)s'
@@ -271,14 +271,13 @@ Antworte NUR in diesem Format.
         logger.info(f"Debug-Prompt gespeichert: {prompt_file}")
 
     try:
-        response = summarizer.client.chat(
-            model=summarizer.model,
+        agent = Agent(model=summarizer.model, base_url=summarizer.client._client.base_url)
+        content = agent.chat(
             messages=[
-                {'role': 'system', 'content': system_prompt},
                 {'role': 'user', 'content': user_prompt}
-            ]
+            ],
+            system_prompt=system_prompt
         )
-        content = response['message']['content']
 
         should_attach = "ANHANG: JA" in content
 
@@ -319,7 +318,6 @@ def main() -> None:
     config = get_config()
     summarizer = Summarizer(model=config.llm.model, base_url=config.llm.base_url)
     mail_parser = MailParser()
-    parser_factory = ParserFactory(config.data_dir / "cache")
 
     # Wir tracken verarbeitete student_folders, um Mehrfachverarbeitung zu vermeiden
     processed_folders = set()
@@ -428,9 +426,7 @@ def main() -> None:
             if email["class"] == "PO-Wechsel":
                 pdf_path = Path(r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf")
                 if pdf_path.exists():
-                    pdf_content = parser_factory.parse(pdf_path)
-                    if pdf_content:
-                        additional_context += f"\nINHALT INFOS PDF:\n{pdf_content}\n"
+                    additional_context += f"\nDu kannst bei Bedarf Details aus der Datei '{pdf_path}' mittels des read_file Tools auslesen.\n"
 
             reply_subject, reply, should_attach = generate_reply(summarizer, latest_mail, skill_path=skill_path, conversation_content=conversation_content, persona_path=persona_path, additional_context=additional_context, debug=args.debug)
 
@@ -531,9 +527,7 @@ def main() -> None:
                 if email["class"] == "PO-Wechsel":
                     pdf_path = Path(r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf")
                     if pdf_path.exists():
-                        pdf_content = parser_factory.parse(pdf_path)
-                        if pdf_content:
-                            additional_context += f"\nINHALT INFOS PDF:\n{pdf_content}\n"
+                        additional_context += f"\nDu kannst bei Bedarf Details aus der Datei '{pdf_path}' mittels des read_file Tools auslesen.\n"
 
                 reply_subject, reply, should_attach = generate_reply(summarizer, latest_mail, summary_content or "", skill_path, persona_path=persona_path, additional_context=additional_context, debug=args.debug)
 
