@@ -35,3 +35,7 @@ Diese Seite bietet eine Übersicht über die wichtigsten Module und Klassen des 
 ::: mcp_university.config.Config
 ::: mcp_university.config.LLMConfig
 ::: mcp_university.config.FolderConfig
+
+## Agent
+
+::: mcp_university.agent.engine.Agent

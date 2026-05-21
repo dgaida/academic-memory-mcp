@@ -35,3 +35,7 @@ This page provides an overview of the key modules and classes of the MCP Univers
 ::: mcp_university.config.Config
 ::: mcp_university.config.LLMConfig
 ::: mcp_university.config.FolderConfig
+
+## Agent
+
+::: mcp_university.agent.engine.Agent
