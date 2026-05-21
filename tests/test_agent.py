@@ -1,0 +1,80 @@
+import pytest
+from unittest.mock import MagicMock, patch
+from mcp_university.agent import Agent
+
+@pytest.fixture
+def mock_ollama_client():
+    with patch('ollama.Client') as mock:
+        yield mock
+
+@pytest.fixture
+def agent(mock_ollama_client):
+    # Mocking dependencies that Agent initializes
+    with patch('mcp_university.agent.engine.ParserFactory'),          patch('mcp_university.agent.engine.MetadataStore'),          patch('mcp_university.agent.engine.SearchIndex'):
+        return Agent(model="test-model", base_url="http://test-url")
+
+def test_agent_initialization(agent):
+    assert agent.model == "test-model"
+    assert agent.base_url == "http://test-url"
+    assert "read_file" in agent.available_tools
+    assert "search_documents" in agent.available_tools
+
+def test_agent_chat_no_tools(agent, mock_ollama_client):
+    # Mock Ollama response with no tool calls
+    mock_response = {
+        'message': {
+            'role': 'assistant',
+            'content': 'Hello! How can I help you?'
+        }
+    }
+    agent.client.chat.return_value = mock_response
+
+    response = agent.chat([{'role': 'user', 'content': 'Hi'}])
+
+    assert response == 'Hello! How can I help you?'
+    agent.client.chat.assert_called_once()
+
+def test_agent_chat_with_tool_call(agent, mock_ollama_client):
+    # First response triggers a tool call
+    mock_response_1 = {
+        'message': {
+            'role': 'assistant',
+            'tool_calls': [{
+                'id': 'call_1',
+                'function': {
+                    'name': 'read_file',
+                    'arguments': {'path': 'test.txt'}
+                }
+            }]
+        }
+    }
+    # Second response (after tool execution) provides the final answer
+    mock_response_2 = {
+        'message': {
+            'role': 'assistant',
+            'content': 'The content of the file is: Hello World'
+        }
+    }
+
+    agent.client.chat.side_effect = [mock_response_1, mock_response_2]
+
+    # Mock the tool execution and update available_tools
+    agent._tool_read_file = MagicMock(return_value="Hello World")
+    agent.available_tools["read_file"] = agent._tool_read_file
+
+    response = agent.chat([{'role': 'user', 'content': 'Read test.txt'}])
+
+    assert response == 'The content of the file is: Hello World'
+    agent._tool_read_file.assert_called_with(path='test.txt')
+    assert agent.client.chat.call_count == 2
+
+def test_tool_read_file(agent):
+    with patch.object(agent.parser_factory, 'parse', return_value="File content"):
+        with patch('pathlib.Path.exists', return_value=True):
+            result = agent._tool_read_file("some_path.txt")
+            assert result == "File content"
+
+def test_tool_read_file_not_found(agent):
+    with patch('pathlib.Path.exists', return_value=False):
+        result = agent._tool_read_file("non_existent.txt")
+        assert "nicht gefunden" in result

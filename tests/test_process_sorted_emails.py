@@ -36,16 +36,19 @@ def test_parse_sorted_report(tmp_path):
     assert emails[2]["class"] == "MasterThesis"
 
 @patch("process_sorted_emails.MailParser")
-def test_generate_reply(mock_parser_cls, tmp_path):
-    """Testet die Generierung einer Antwort mit dem LLM."""
+@patch("process_sorted_emails.Agent")
+def test_generate_reply(mock_agent_cls, mock_parser_cls, tmp_path):
+    """Testet die Generierung einer Antwort mit dem Agent."""
     mock_parser = mock_parser_cls.return_value
     mock_parser.parse.return_value = "Original Mail Content"
 
+    mock_agent = mock_agent_cls.return_value
+    mock_agent.chat.return_value = "ANHANG: NEIN\nBETREFF: Test Betreff\nTEXT:\nThis is the generated reply"
+
     mock_summarizer = MagicMock()
     mock_summarizer.model = "test-model"
-    mock_summarizer.client.chat.return_value = {
-        "message": {"content": "ANHANG: NEIN\nBETREFF: Test Betreff\nTEXT:\nThis is the generated reply"}
-    }
+    # Mocking Ollama client structure to avoid attribute errors in Agent init
+    mock_summarizer.client._client.base_url = "http://localhost:11434"
 
     mail_path = tmp_path / "test.msg"
     skill_path = tmp_path / "SKILL_Test.md"
@@ -56,7 +59,7 @@ def test_generate_reply(mock_parser_cls, tmp_path):
     assert subject == "Test Betreff"
     assert reply == "This is the generated reply"
     assert should_attach is False
-    mock_summarizer.client.chat.assert_called_once()
+    mock_agent.chat.assert_called_once()
 
 @patch("process_sorted_emails.OUTLOOK_AVAILABLE", True)
 @patch("process_sorted_emails.is_outlook_open", return_value=True)
@@ -95,9 +98,10 @@ def test_create_outlook_draft_no_outlook(mock_open):
 @patch("process_sorted_emails.run_sort_emails")
 @patch("process_sorted_emails.get_config")
 @patch("process_sorted_emails.Summarizer")
+@patch("process_sorted_emails.Agent")
 @patch("process_sorted_emails.MailParser")
 @patch("process_sorted_emails.create_outlook_draft")
-def test_main_reporting_and_cleanup(mock_draft, mock_parser_cls, mock_summ_cls, mock_config, mock_run_sort, tmp_path):
+def test_main_reporting_and_cleanup(mock_draft, mock_parser_cls, mock_agent_cls, mock_summ_cls, mock_config, mock_run_sort, tmp_path):
     """Testet die Berichterstellung und das Löschen der temporären Datei in main()."""
     source_dir = tmp_path / "emails"
     source_dir.mkdir()
@@ -119,6 +123,11 @@ def test_main_reporting_and_cleanup(mock_draft, mock_parser_cls, mock_summ_cls, 
     # Mock Summarizer
     mock_summ = mock_summ_cls.return_value
     mock_summ.summarize_email_conversation.return_value = "Test Summary"
+    mock_summ.client._client.base_url = "http://localhost:11434"
+
+    # Mock Agent
+    mock_agent = mock_agent_cls.return_value
+    mock_agent.chat.return_value = "ANHANG: NEIN\nBETREFF: Test\nTEXT:\nReply"
 
     # Call main with args
     with patch("sys.argv", ["process_sorted_emails.py", str(source_dir), "--config", "config.yaml"]):
