@@ -1,0 +1,41 @@
+name: mcp-university
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python>=3.10
+  - pip
+  - pip:
+    - fastmcp
+    - ollama
+    - qdrant-client
+    - watchdog
+    - pydantic
+    - pyyaml
+    - rank_bm25
+    - sentence-transformers
+    - docling
+    - extract-msg
+    - pdfminer.six
+    - python-docx
+    - beautifulsoup4
+    - markdown
+    - rich
+    - typer
+    - scikit-learn
+    - pandas
+    - numpy
+    - seaborn
+    - matplotlib
+    - tabulate
+    - xgboost
+    - pytest
+    - pytest-asyncio
+    - pytest-mock
+    - ruff
+    - interrogate
+    - mkdocs-material
+    - mkdocs-static-i18n
+    - "mkdocstrings[python]"
+    - mkdocs-mermaid2-plugin
+    - mike
