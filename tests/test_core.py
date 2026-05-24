@@ -6,11 +6,12 @@ def test_config_loading(tmp_path):
     config_dir = tmp_path / "config"
     config_dir.mkdir()
     (config_dir / "folders.yaml").write_text("folders: ['/test']")
-    (config_dir / "models.yaml").write_text("llm: {model: 'test-model'}")
+    (config_dir / "models.yaml").write_text("llm: {model: 'test-model'}\ncalendar: {send_invitations_automatically: true}")
 
     cfg = Config(config_dir)
     assert cfg.folders.folders == ['/test']
     assert cfg.llm.model == 'test-model'
+    assert cfg.calendar.send_invitations_automatically is True
 
 def test_metadata_store(tmp_path):
     db_path = tmp_path / "test.db"
