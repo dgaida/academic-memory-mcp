@@ -382,6 +382,8 @@ class Agent:
                 else:
                     tool_result = f"Tool {function_name} nicht verfügbar."
 
+                logger.info(f"Tool Ergebnis: {tool_result}")
+
                 all_messages.append({
                     'role': 'tool',
                     'content': str(tool_result),
