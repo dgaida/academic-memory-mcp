@@ -8,3 +8,6 @@ embeddings:
 
 reranker:
   model: "BAAI/bge-reranker-v2-m3"
+
+calendar:
+  send_invitations_automatically: false

@@ -20,6 +20,10 @@ class RerankerConfig(BaseModel):
     """Konfiguration für das Reranker-Modell."""
     model: str = "BAAI/bge-reranker-v2-m3"
 
+class CalendarConfig(BaseModel):
+    """Konfiguration für den Kalender."""
+    send_invitations_automatically: bool = False
+
 class FolderConfig(BaseModel):
     """Konfiguration der zu überwachenden Ordner und Dateitypen."""
     folders: List[str] = []
@@ -46,6 +50,7 @@ class Config:
         self.folders = self._load_yaml(config_dir / "folders.yaml", FolderConfig)
 
         models_data = self._load_raw_yaml(config_dir / "models.yaml")
+        self.calendar = CalendarConfig(**models_data.get("calendar", {}))
         self.llm = LLMConfig(**models_data.get("llm", {}))
         self.embeddings = EmbeddingConfig(**models_data.get("embeddings", {}))
         self.reranker = RerankerConfig(**models_data.get("reranker", {}))
