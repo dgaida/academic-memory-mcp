@@ -77,14 +77,12 @@ def test_create_outlook_draft_success(mock_open):
     mock_namespace.Stores = [mock_store]
 
     mock_mail = MagicMock()
-    mock_outlook.CreateItem.return_value = mock_mail
-    mock_mail.Move.return_value = mock_mail
+    mock_folder.Items.Add.return_value = mock_mail
 
     success = create_outlook_draft("Test Subject", "Test Body")
 
     assert success is True
     mock_mail.Save.assert_called_once()
-    mock_mail.Move.assert_called_with(mock_folder)
     mock_mail.Display.assert_called_with(False)
     assert mock_mail.Subject == "Test Subject"
 

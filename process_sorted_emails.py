@@ -175,7 +175,13 @@ def create_outlook_draft(subject: str, body: str, recipient: str = "", cc: List[
         except Exception as e:
             logger.warning(f"Fehler beim Suchen des Zielordners: {e}")
 
-        mail = outlook.CreateItem(0)  # 0 = olMailItem
+        if target_folder:
+            mail = target_folder.Items.Add(0)  # 0 = olMailItem
+            logger.info(f"Erstelle Entwurf direkt in {target_account} -> {target_folder_name}.")
+        else:
+            mail = outlook.CreateItem(0)
+            logger.warning(f"Zielordner {target_folder_name} nicht gefunden. Erstelle in Standard-Entwürfen.")
+
         mail.Subject = subject
         mail.Body = body
         if attachments:
@@ -187,16 +193,8 @@ def create_outlook_draft(subject: str, body: str, recipient: str = "", cc: List[
         if cc:
             mail.CC = "; ".join(cc)
 
-
-        if target_folder:
-            mail.Save()  # Erst in Standard-Drafts speichern
-            moved_mail = mail.Move(target_folder)
-            logger.info(f"Entwurf in {target_account} -> {target_folder_name} gespeichert.")
-            moved_mail.Display(False)
-        else:
-            mail.Save()
-            logger.warning(f"Zielordner {target_folder_name} nicht gefunden. In Standard-Entwürfen gespeichert.")
-            mail.Display(False)
+        mail.Save()
+        mail.Display(False)
 
         return True
     except Exception as e:
@@ -271,7 +269,7 @@ Antworte NUR in diesem Format.
         logger.info(f"Debug-Prompt gespeichert: {prompt_file}")
 
     try:
-        agent = Agent(model=summarizer.model, base_url=summarizer.client._client.base_url)
+        agent = Agent(model=summarizer.model, base_url=str(summarizer.client._client.base_url))
         content = agent.chat(
             messages=[
                 {'role': 'user', 'content': user_prompt}
@@ -298,7 +296,7 @@ def main() -> None:
     """Haupteinstiegspunkt des Skripts."""
     parser = argparse.ArgumentParser(description="Verarbeitet sortierte E-Mails und generiert Antworten.")
     parser.add_argument("source_dir", help="Quellordner der E-Mails")
-    parser.add_argument("--config", required=True, help="Pfad zur classifier_paths.yaml")
+    parser.add_argument("--config", default="config/folders.yaml", help="Pfad zur Konfiguration")
     parser.add_argument("--debug", action="store_true", default=DEBUG, help="Speichert LLM Prompts als Markdown (Default: True)")
     parser.add_argument("--no-debug", action="store_false", dest="debug", help="Deaktiviert das Speichern von Prompts")
     args = parser.parse_args()
@@ -322,6 +320,74 @@ def main() -> None:
     # Wir tracken verarbeitete student_folders, um Mehrfachverarbeitung zu vermeiden
     processed_folders = set()
     processed_results = []
+
+    # Liste der zu beantwortenden E-Mails erstellen
+    emails_to_process_path = source_dir / "emails_to_process.md"
+    unique_emails_to_process = []
+    temp_folders = set()
+
+    for email in emails:
+        mail_path = Path(email["path"])
+        is_ba_ma = email["class"].startswith(("BA_", "MA_"))
+        if is_ba_ma:
+            identifier = (email["class"], email["semester"], email["lastname"])
+            # BA/MA logic to find latest mail
+            semester_folder = mail_path.parent.parent
+            inbox_folder = semester_folder / "Inbox"
+            sent_folder = semester_folder / "SentItems"
+            all_files = []
+            if inbox_folder.exists():
+                all_files.extend(list(inbox_folder.glob("*.msg")) + list(inbox_folder.glob("*.eml")))
+            if sent_folder.exists():
+                all_files.extend(list(sent_folder.glob("*.msg")) + list(sent_folder.glob("*.eml")))
+
+            student_emails = []
+            for f in all_files:
+                try:
+                    with extract_msg.openMsg(str(f)) as msg:
+                        sender_lastname = extract_lastname(msg.sender)
+                        recipient_lastname = "None"
+                        if msg.recipients:
+                            recipient_lastname = extract_lastname(msg.recipients[0].name or msg.recipients[0].email)
+                        if sender_lastname == email["lastname"] or recipient_lastname == email["lastname"]:
+                            date = mail_parser.get_email_date(f)
+                            student_emails.append((date, f))
+                except Exception:
+                    continue
+
+            if not student_emails:
+                continue
+            student_emails.sort(key=lambda x: x[0])
+            latest_date, latest_mail = student_emails[-1]
+            needs_answer = "Inbox" in latest_mail.parts
+        else:
+            identifier = mail_path.parent.parent
+            # Normal student folder logic
+            email_files = list(identifier.rglob("*.msg")) + list(identifier.rglob("*.eml"))
+            if not email_files:
+                continue
+            dated_emails = []
+            for f in email_files:
+                try:
+                    date = mail_parser.get_email_date(f)
+                    dated_emails.append((date, f))
+                except Exception:
+                    dated_emails.append((datetime.min, f))
+            dated_emails.sort(key=lambda x: x[0])
+            latest_date, latest_mail = dated_emails[-1]
+            needs_answer = "Inbox" in latest_mail.parts and "SentItems" not in latest_mail.parts
+
+        if needs_answer and identifier not in temp_folders:
+            temp_folders.add(identifier)
+            unique_emails_to_process.append(email)
+
+    with open(emails_to_process_path, "w", encoding="utf-8") as f:
+        f.write("# Zu beantwortende E-Mails\n\n")
+        f.write("| Student | Klasse | Semester |\n")
+        f.write("| :--- | :--- | :--- |\n")
+        for email in unique_emails_to_process:
+            f.write("| {} | {} | {} |\n".format(email["lastname"], email["class"], email["semester"]))
+    logger.info(f"Liste der zu beantwortenden E-Mails erstellt: {emails_to_process_path}")
 
     persona_path = Path("skills/SKILL_persona.md")
 
@@ -378,6 +444,7 @@ def main() -> None:
             latest_date, latest_mail = student_emails[-1]
 
             if "Inbox" not in latest_mail.parts:
+                logger.info(f"Neueste Mail für {email['lastname']} ist in SentItems. Überspringe Antwortgenerierung.")
                 continue
 
             logger.info(f"Verarbeite BA/MA E-Mails für {email['lastname']} in {email['class']}")
@@ -548,6 +615,8 @@ def main() -> None:
                     result_status = f"Datei: {reply_path}"
 
                 processed_results.append({"lastname": email["lastname"], "subject": subject, "status": result_status})
+            else:
+                 logger.info(f"Neueste Mail in {identifier.name} ist nicht in Inbox oder bereits in SentItems. Überspringe.")
 
     # 3. Abschluss-Bericht erstellen und aufräumen
     if processed_results:
