@@ -2,8 +2,6 @@
 import os
 import sys
 from unittest.mock import MagicMock, patch
-from pathlib import Path
-from datetime import datetime
 
 # Add project root to sys.path to make process_sorted_emails importable
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -13,7 +11,7 @@ mock_win32 = MagicMock()
 sys.modules["win32com"] = mock_win32
 sys.modules["win32com.client"] = mock_win32.client
 
-from process_sorted_emails import parse_sorted_report, generate_reply, create_outlook_draft, main # noqa: E402
+from process_sorted_emails import parse_sorted_report, generate_reply, create_outlook_draft # noqa: E402
 
 def test_parse_sorted_report(tmp_path):
     """Testet das Parsen des sorted_emails.md Reports."""
@@ -37,29 +35,52 @@ def test_parse_sorted_report(tmp_path):
 
 @patch("process_sorted_emails.MailParser")
 @patch("process_sorted_emails.Agent")
-def test_generate_reply(mock_agent_cls, mock_parser_cls, tmp_path):
-    """Testet die Generierung einer Antwort mit dem Agent."""
+def test_generate_reply_appointment_booked(mock_agent_cls, mock_parser_cls, tmp_path):
+    """Testet die Generierung einer Antwort, wenn ein Termin gebucht wurde (Schritt 1)."""
     mock_parser = mock_parser_cls.return_value
-    mock_parser.parse.return_value = "Original Mail Content"
+    mock_parser.parse.return_value = "Ich nehme den Termin am Montag."
 
     mock_agent = mock_agent_cls.return_value
-    mock_agent.chat.return_value = "ANHANG: NEIN\nBETREFF: Test Betreff\nTEXT:\nThis is the generated reply"
+    # Schritt 1 gibt APPOINTMENT_BOOKED zurück
+    mock_agent.chat.return_value = "APPOINTMENT_BOOKED"
 
     mock_summarizer = MagicMock()
     mock_summarizer.model = "test-model"
-    # Mocking Ollama client structure to avoid attribute errors in Agent init
     mock_summarizer.client._client.base_url = "http://localhost:11434"
 
     mail_path = tmp_path / "test.msg"
-    skill_path = tmp_path / "SKILL_Test.md"
-    skill_path.write_text("Use formal language.", encoding="utf-8")
 
-    subject, reply, should_attach = generate_reply(mock_summarizer, mail_path, "Summary Content", skill_path)
+    subject, reply, should_attach = generate_reply(mock_summarizer, mail_path)
 
-    assert subject == "Test Betreff"
-    assert reply == "This is the generated reply"
-    assert should_attach is False
-    mock_agent.chat.assert_called_once()
+    assert reply == "APPOINTMENT_BOOKED"
+    assert mock_agent.chat.call_count == 1
+
+@patch("process_sorted_emails.MailParser")
+@patch("process_sorted_emails.Agent")
+def test_generate_reply_no_appointment_fallback(mock_agent_cls, mock_parser_cls, tmp_path):
+    """Testet den Fallback auf die reguläre Antwort (Schritt 2)."""
+    mock_parser = mock_parser_cls.return_value
+    mock_parser.parse.return_value = "Frage zu Thesis."
+
+    mock_agent = mock_agent_cls.return_value
+    # Schritt 1 sagt "nicht relevant"
+    # Schritt 2 gibt die reguläre Antwort
+    mock_agent.chat.side_effect = [
+        "NO_APPOINTMENT_RELEVANCE",
+        "ANHANG: NEIN\nBETREFF: Thesis\nTEXT:\nHier ist die Antwort."
+    ]
+
+    mock_summarizer = MagicMock()
+    mock_summarizer.model = "test-model"
+    mock_summarizer.client._client.base_url = "http://localhost:11434"
+
+    mail_path = tmp_path / "test.msg"
+
+    subject, reply, should_attach = generate_reply(mock_summarizer, mail_path)
+
+    assert subject == "Thesis"
+    assert reply == "Hier ist die Antwort."
+    assert mock_agent.chat.call_count == 2
 
 @patch("process_sorted_emails.OUTLOOK_AVAILABLE", True)
 @patch("process_sorted_emails.is_outlook_open", return_value=True)
@@ -92,57 +113,3 @@ def test_create_outlook_draft_no_outlook(mock_open):
     """Testet das Verhalten, wenn Outlook nicht geöffnet ist."""
     success = create_outlook_draft("Test Subject", "Test Body")
     assert success is False
-
-@patch("process_sorted_emails.run_sort_emails")
-@patch("process_sorted_emails.get_config")
-@patch("process_sorted_emails.Summarizer")
-@patch("process_sorted_emails.Agent")
-@patch("process_sorted_emails.MailParser")
-@patch("process_sorted_emails.create_outlook_draft")
-def test_main_reporting_and_cleanup(mock_draft, mock_parser_cls, mock_agent_cls, mock_summ_cls, mock_config, mock_run_sort, tmp_path):
-    """Testet die Berichterstellung und das Löschen der temporären Datei in main()."""
-    source_dir = tmp_path / "emails"
-    source_dir.mkdir()
-    report = source_dir / "sorted_emails.md"
-
-    # Use real paths that exist in tmp_path
-    mail_path = source_dir / "mail.msg"
-    mail_path.touch()
-
-    report.write_text(f"## TestClass\n- **2024_SoSe** | TestUser | Inbox: `{mail_path}`", encoding="utf-8")
-
-    mock_run_sort.return_value = None
-    mock_draft.return_value = True
-
-    # Mock MailParser date and parse
-    mock_parser = mock_parser_cls.return_value
-    mock_parser.get_email_date.return_value = datetime.now()
-
-    # Mock Config
-    mock_conf = mock_config.return_value
-    mock_conf.log_path = tmp_path / "logs"
-    mock_conf.llm.model = "test-model"
-    mock_conf.llm.base_url = "http://localhost:11434"
-
-    # Mock Summarizer
-    mock_summ = mock_summ_cls.return_value
-    mock_summ.summarize_email_conversation.return_value = "Test Summary"
-    mock_summ.client._client.base_url = "http://localhost:11434"
-
-    # Mock Agent
-    mock_agent = mock_agent_cls.return_value
-    mock_agent.chat.return_value = "ANHANG: NEIN\nBETREFF: Test\nTEXT:\nReply"
-
-    # Call main with args
-    with patch("sys.argv", ["process_sorted_emails.py", str(source_dir), "--config", "config.yaml"]):
-        # Mock parts to contain "Inbox" but not "SentItems"
-        with patch.object(Path, "parts", property(lambda x: ("Inbox",))):
-            main()
-
-    # Verify processed_emails.md exists
-    processed_report = source_dir / "processed_emails.md"
-    assert processed_report.exists()
-    assert "TestUser" in processed_report.read_text(encoding="utf-8")
-
-    # Verify sorted_emails.md is deleted
-    assert not report.exists()

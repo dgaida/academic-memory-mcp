@@ -193,7 +193,9 @@ def create_outlook_draft(subject: str, body: str, recipient: str = "", cc: List[
         return False
 
 def generate_reply(summarizer: Summarizer, mail_path: Path, summary_content: str = "", skill_path: Path = None, conversation_content: str = "", persona_path: Path = None, additional_context: str = "", debug: bool = False, appointment_skill_path: Path = None) -> Tuple[str, str, bool]:
-    """Generiert eine Antwortmail mit dem LLM.
+    """Generiert eine Antwortmail mit dem LLM in zwei Schritten:
+    1. Prüfung auf Terminrelevanz (Appointment Skill).
+    2. Falls nicht relevant, klassenspezifische Antwort mit vollem Kontext.
 
     Args:
         summarizer: Summarizer-Instanz.
@@ -212,41 +214,92 @@ def generate_reply(summarizer: Summarizer, mail_path: Path, summary_content: str
     parser = MailParser()
     mail_content = parser.parse(mail_path)
 
-    skill_content = "Keine spezifischen Anweisungen vorhanden."
-    if skill_path:
-        logger.info(f"Prüfe Skill-Pfad: {skill_path.absolute()}")
-        if skill_path.exists():
-            skill_content = skill_path.read_text(encoding="utf-8")
-            logger.info(f"Skill-Datei erfolgreich geladen: {skill_path.name}")
-        else:
-            logger.warning(f"Skill-Datei nicht gefunden: {skill_path.absolute()}")
-
     appointment_skill_content = ""
-    if appointment_skill_path:
-        logger.info(f"Prüfe Appointment-Skill-Pfad: {appointment_skill_path.absolute()}")
-        if appointment_skill_path.exists():
-            appointment_skill_content = appointment_skill_path.read_text(encoding="utf-8")
-            logger.info(f"Appointment-Skill-Datei erfolgreich geladen: {appointment_skill_path.name}")
-        else:
-            logger.warning(f"Appointment-Skill-Datei nicht gefunden: {appointment_skill_path.absolute()}")
+    if appointment_skill_path and appointment_skill_path.exists():
+        appointment_skill_content = appointment_skill_path.read_text(encoding="utf-8")
+        logger.info(f"Appointment-Skill-Datei geladen: {appointment_skill_path.name}")
 
     persona_content = ""
     if persona_path and persona_path.exists():
         persona_content = persona_path.read_text(encoding="utf-8")
 
-    context_label = "SCHRIFTVERKEHR DER LETZTEN 2 WOCHEN" if conversation_content else "ZUSAMMENFASSUNG DES SCHRIFTVERKEHRS"
-    context_body = conversation_content if conversation_content else summary_content
-
+    agent = Agent(model=summarizer.model, base_url=str(summarizer.client._client.base_url))
     system_prompt = "Du bist ein hilfreicher Assistent an der TH Köln. Verfasse eine Antwort-E-Mail auf Deutsch."
-    user_prompt = f"""Basierend auf der folgenden E-Mail, dem Kontext des bisherigen Schriftverkehrs, der Persona und den Skill-Anweisungen, verfasse eine professionelle Antwort.
+
+    # --- SCHRITT 1: TERMINVERWALTUNG ---
+    logger.info("Schritt 1: Prüfe Terminrelevanz...")
+    appointment_user_prompt = f"""Prüfe die folgende E-Mail auf Terminrelevanz (Anfrage oder Bestätigung) basierend auf dem TERMINVERWALTUNG SKILL.
 
 HEUTE IST: {datetime.now().strftime('%A, den %d.%m.%Y %H:%M')}
 
 PERSONA:
 {persona_content}
 
-TERMINVERWALTUNG SKILL (HÖCHSTE PRIORITÄT):
+TERMINVERWALTUNG SKILL:
 {appointment_skill_content}
+
+ZUSÄTZLICHER KONTEXT (Anrede etc.):
+{additional_context}
+
+AKTUELLE E-MAIL:
+{mail_content}
+
+WICHTIGE ANWEISUNG:
+1. Falls die E-Mail EINEN TERMIN BESTÄTIGT: Führe den Skill aus. Wenn erfolgreich gebucht, antworte EXAKT mit 'APPOINTMENT_BOOKED'.
+2. Falls die E-Mail EINEN TERMIN ANFRAGT: Schlage freie Slots vor (nutze das Tool 'get_appointment_slots').
+3. Falls die E-Mail KEINERLEI Bezug zu einer Terminbuchung oder -anfrage hat, antworte EXAKT mit: NO_APPOINTMENT_RELEVANCE
+
+Format für Terminantworten (falls relevant):
+ANHANG: [JA/NEIN]
+BETREFF: [Der Betreff]
+TEXT:
+[Der Antwort-Text]
+"""
+    if debug:
+        prompt_file = mail_path.parent / f"{mail_path.stem}_appointment_prompt.md"
+        prompt_content = f"# System Prompt\n{system_prompt}\n\n# User Prompt\n{appointment_user_prompt}"
+        prompt_file.write_text(prompt_content, encoding="utf-8")
+
+    try:
+        content = agent.chat(
+            messages=[{'role': 'user', 'content': appointment_user_prompt}],
+            system_prompt=system_prompt
+        )
+
+        if "APPOINTMENT_BOOKED" in content:
+            return "APPOINTMENT_BOOKED", "APPOINTMENT_BOOKED", False
+
+        if "NO_APPOINTMENT_RELEVANCE" not in content:
+            logger.info("Terminrelevanz erkannt, generiere Termin-Antwort.")
+            should_attach = "ANHANG: JA" in content
+            reply_subject = ""
+            if "BETREFF:" in content:
+                reply_subject = content.split("BETREFF:", 1)[1].split("TEXT:", 1)[0].strip()
+            reply_text = content
+            if "TEXT:" in content:
+                reply_text = content.split("TEXT:", 1)[1].strip()
+            return reply_subject, reply_text, should_attach
+
+    except Exception as e:
+        logger.error(f"Fehler in Schritt 1 (Appointment): {e}")
+
+    # --- SCHRITT 2: REGULÄRE ANTWORT ---
+    logger.info("Schritt 2: Generiere reguläre Antwort mit vollem Kontext...")
+
+    skill_content = "Keine spezifischen Anweisungen vorhanden."
+    if skill_path and skill_path.exists():
+        skill_content = skill_path.read_text(encoding="utf-8")
+        logger.info(f"Klassenspezifische Skill geladen: {skill_path.name}")
+
+    context_label = "SCHRIFTVERKEHR DER LETZTEN 2 WOCHEN" if conversation_content else "ZUSAMMENFASSUNG DES SCHRIFTVERKEHRS"
+    context_body = conversation_content if conversation_content else summary_content
+
+    regular_user_prompt = f"""Basierend auf der folgenden E-Mail, dem Kontext des bisherigen Schriftverkehrs, der Persona und den Skill-Anweisungen, verfasse eine professionelle Antwort.
+
+HEUTE IST: {datetime.now().strftime('%A, den %d.%m.%Y %H:%M')}
+
+PERSONA:
+{persona_content}
 
 KLASSENSPEZIFISCHE SKILL ANWEISUNGEN:
 {skill_content}
@@ -265,43 +318,29 @@ ANHANG: [JA/NEIN]
 BETREFF: [Der Betreff]
 TEXT:
 [Der Antwort-Text]
-
-Falls eine Terminbestätigung erfolgreich gebucht wurde, antworte EXAKT mit:
-APPOINTMENT_BOOKED
-
-Ansonsten antworte NUR in dem oben genannten Format.
 """
     if debug:
-        prompt_file = mail_path.parent / f"{mail_path.stem}_prompt.md"
-        prompt_content = f"# System Prompt\n{system_prompt}\n\n# User Prompt\n{user_prompt}"
+        prompt_file = mail_path.parent / f"{mail_path.stem}_regular_prompt.md"
+        prompt_content = f"# System Prompt\n{system_prompt}\n\n# User Prompt\n{regular_user_prompt}"
         prompt_file.write_text(prompt_content, encoding="utf-8")
-        logger.info(f"Debug-Prompt gespeichert: {prompt_file}")
 
     try:
-        agent = Agent(model=summarizer.model, base_url=str(summarizer.client._client.base_url))
         content = agent.chat(
-            messages=[
-                {'role': 'user', 'content': user_prompt}
-            ],
+            messages=[{'role': 'user', 'content': regular_user_prompt}],
             system_prompt=system_prompt
         )
 
-        if "APPOINTMENT_BOOKED" in content:
-            return "APPOINTMENT_BOOKED", "APPOINTMENT_BOOKED", False
-
         should_attach = "ANHANG: JA" in content
-
         reply_subject = ""
         if "BETREFF:" in content:
             reply_subject = content.split("BETREFF:", 1)[1].split("TEXT:", 1)[0].strip()
-
         reply_text = content
         if "TEXT:" in content:
             reply_text = content.split("TEXT:", 1)[1].strip()
 
         return reply_subject, reply_text, should_attach
     except Exception as e:
-        logger.error(f"Fehler bei LLM-Generierung: {e}")
+        logger.error(f"Fehler in Schritt 2 (Regulär): {e}")
         return "", "Fehler bei der Generierung der Antwort.", False
 
 def main() -> None:
