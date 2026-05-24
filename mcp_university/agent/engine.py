@@ -2,6 +2,7 @@
 import logging
 from typing import List, Dict, Callable
 from pathlib import Path
+from datetime import datetime
 import ollama
 
 from ..config import get_config
@@ -33,7 +34,9 @@ class Agent:
         self.available_tools: Dict[str, Callable] = {
             "read_file": self._tool_read_file,
             "search_documents": self._tool_search_documents,
-            "get_student_info": self._tool_get_student_info
+            "get_student_info": self._tool_get_student_info,
+            "get_appointment_slots": self._tool_get_appointment_slots,
+            "manage_calendar_appointment": self._tool_manage_calendar_appointment
         }
 
         self.tools_definition = [
@@ -87,11 +90,59 @@ class Agent:
                         "required": ["student_name"]
                     }
                 }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "get_appointment_slots",
+                    "description": "Liest die aktuell verfügbaren freien Terminslots aus einer Datei.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {},
+                        "required": []
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "manage_calendar_appointment",
+                    "description": "Prüft die Verfügbarkeit eines Slots und trägt bei Erfolg einen Kalendertermin ein und lädt den Studenten ein.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "start_time": {
+                                "type": "string",
+                                "description": "Beginn des Termins im Format 'YYYY-MM-DD HH:MM'."
+                            },
+                            "end_time": {
+                                "type": "string",
+                                "description": "Ende des Termins im Format 'YYYY-MM-DD HH:MM'."
+                            },
+                            "subject": {
+                                "type": "string",
+                                "description": "Der Betreff des Kalendereintrags."
+                            },
+                            "student_email": {
+                                "type": "string",
+                                "description": "Die E-Mail-Adresse des Studenten, der eingeladen werden soll."
+                            }
+                        },
+                        "required": ["start_time", "end_time", "subject", "student_email"]
+                    }
+                }
             }
         ]
 
     def _tool_read_file(self, path: str) -> str:
-        """Liest eine Datei ein."""
+        """Liest eine Datei ein.
+
+        Args:
+            path: Der Pfad zur Datei.
+
+        Returns:
+            str: Dateiinhalt oder Fehlermeldung.
+        """
         p = Path(path)
         if not p.exists():
             return f"Fehler: Datei {path} nicht gefunden."
@@ -99,7 +150,14 @@ class Agent:
         return content or "Fehler: Datei konnte nicht gelesen werden oder ist leer."
 
     def _tool_search_documents(self, query: str) -> str:
-        """Sucht im Index."""
+        """Sucht im Index.
+
+        Args:
+            query: Die Suchanfrage.
+
+        Returns:
+            str: Suchergebnisse oder Hinweis.
+        """
         results = self.index.search(query, top_k=3)
         if not results:
             return "Keine relevanten Dokumente gefunden."
@@ -110,7 +168,14 @@ class Agent:
         return output
 
     def _tool_get_student_info(self, student_name: str) -> str:
-        """Holt Studentendaten."""
+        """Holt Studentendaten.
+
+        Args:
+            student_name: Name des Studenten.
+
+        Returns:
+            str: Informationen zum Studenten.
+        """
         with self.store._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('''
@@ -125,6 +190,114 @@ class Agent:
             # (id, name, email, topic, status, folder_id, folder_path)
             context = f"Student: {student[1]}\nEmail: {student[2]}\nThema: {student[3]}\nStatus: {student[4]}\nOrdner: {student[6]}\n"
             return context
+
+    def _tool_get_appointment_slots(self) -> str:
+        """Liest die Datei mit den freien Terminslots ein.
+
+        Returns:
+            str: Freie Slots als Markdown oder Fehlermeldung.
+        """
+        path = Path(r"D:\TH_Koeln\academic-memory-mcp\data\free_slots.md")
+        if not path.exists():
+            return "Fehler: Die Datei mit freien Slots wurde nicht gefunden. Das Makro Freeslotexport.bas muss eventuell zuerst ausgeführt werden."
+        try:
+            return path.read_text(encoding="utf-8")
+        except Exception as e:
+            return f"Fehler beim Lesen der freien Slots: {e}"
+
+    def _tool_manage_calendar_appointment(self, start_time: str, end_time: str, subject: str, student_email: str) -> str:
+        """Prüft einen Slot und trägt einen Kalendertermin ein, falls frei.
+
+        Args:
+            start_time: Beginn des Termins ('YYYY-MM-DD HH:MM').
+            end_time: Ende des Termins ('YYYY-MM-DD HH:MM').
+            subject: Betreff des Kalendereintrags.
+            student_email: E-Mail-Adresse des Studenten.
+
+        Returns:
+            str: Erfolgs- oder Fehlermeldung.
+        """
+        try:
+            import win32com.client
+        except ImportError:
+            return "Fehler: pywin32 ist nicht installiert. Kalender-Funktionen sind nicht verfügbar."
+
+        try:
+            outlook = win32com.client.Dispatch("Outlook.Application")
+            namespace = outlook.GetNamespace("MAPI")
+
+            target_account = "daniel.gaida@th-koeln.de"
+            target_calendar_name = "Kalender (Nur dieser Computer)"
+
+            # Kalender suchen
+            cal_folder = None
+            for i in range(1, namespace.Accounts.Count + 1):
+                account = namespace.Accounts.Item(i)
+                if account.SmtpAddress.lower() == target_account.lower():
+                    store = account.DeliveryStore
+                    root = store.GetRootFolder()
+                    for j in range(1, root.Folders.Count + 1):
+                        folder = root.Folders.Item(j)
+                        if folder.Name == target_calendar_name:
+                            cal_folder = folder
+                            break
+                    if not cal_folder:
+                        # Fallback: Default Calendar for this store (olFolderCalendar = 9)
+                        try:
+                            cal_folder = store.GetDefaultFolder(9)
+                        except Exception:
+                            pass
+                    break
+
+            if not cal_folder:
+                return f"Fehler: Kalender '{target_calendar_name}' für '{target_account}' nicht gefunden."
+
+            # Slot prüfen
+            dt_start = datetime.strptime(start_time, "%Y-%m-%d %H:%M")
+            dt_end = datetime.strptime(end_time, "%Y-%m-%d %H:%M")
+
+            outlook_start = dt_start.strftime("%m/%d/%Y %H:%M %p")
+            outlook_end = dt_end.strftime("%m/%d/%Y %H:%M %p")
+
+            filter_str = f'[Start] < "{outlook_end}" AND [End] > "{outlook_start}"'
+            items = cal_folder.Items
+            items.IncludeRecurrences = True
+            items.Sort("[Start]")
+            restricted_items = items.Restrict(filter_str)
+
+            # Ignore all-day events as in the VBA macro
+            is_free = True
+            for item in restricted_items:
+                try:
+                    if not item.AllDayEvent:
+                        is_free = False
+                        break
+                except Exception:
+                    continue
+
+            if not is_free:
+                return f"Fehler: Der Slot von {start_time} bis {end_time} ist bereits belegt."
+
+            # Termin eintragen
+            appointment = cal_folder.Items.Add(1) # 1 = olAppointmentItem
+            appointment.Subject = subject
+            appointment.Start = dt_start
+            appointment.End = dt_end
+            appointment.Location = "Zoom (siehe E-Mail-Signatur)"
+            appointment.Body = "Terminbestätigung via MCP University System."
+
+            # Einladung senden
+            recipient = appointment.Recipients.Add(student_email)
+            recipient.Type = 1 # 1 = olTo
+            appointment.MeetingStatus = 1 # 1 = olMeeting
+
+            appointment.Save()
+            appointment.Send()
+
+            return f"ERFOLG: Termin '{subject}' am {start_time} wurde eingetragen und Einladung an {student_email} gesendet."
+
+        except Exception as e:
+            return f"Fehler bei der Kalender-Verarbeitung: {e}"
 
     def chat(self, messages: List[Dict[str, str]], system_prompt: str = None) -> str:
         """Führt eine Chat-Interaktion mit Tool-Calling-Loop durch.
