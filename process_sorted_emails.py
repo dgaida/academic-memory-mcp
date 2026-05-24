@@ -201,7 +201,7 @@ def create_outlook_draft(subject: str, body: str, recipient: str = "", cc: List[
         logger.error(f"Fehler beim Erstellen des Outlook-Entwurfs: {e}")
         return False
 
-def generate_reply(summarizer: Summarizer, mail_path: Path, summary_content: str = "", skill_path: Path = None, conversation_content: str = "", persona_path: Path = None, additional_context: str = "", debug: bool = False) -> Tuple[str, str, bool]:
+def generate_reply(summarizer: Summarizer, mail_path: Path, summary_content: str = "", skill_path: Path = None, conversation_content: str = "", persona_path: Path = None, additional_context: str = "", debug: bool = False, appointment_skill_path: Path = None) -> Tuple[str, str, bool]:
     """Generiert eine Antwortmail mit dem LLM.
 
     Args:
@@ -213,6 +213,7 @@ def generate_reply(summarizer: Summarizer, mail_path: Path, summary_content: str
         persona_path: Pfad zur Persona-Datei.
         additional_context: Zusätzlicher Kontext (z.B. aus einem PDF).
         debug: Ob Debug-Informationen gespeichert werden sollen.
+        appointment_skill_path: Pfad zum Terminverwaltungs-Skill.
 
     Returns:
         Tuple[str, str, bool]: (Betreff, Antwort-Text, Soll ein Anhang angehängt werden?).
@@ -229,6 +230,10 @@ def generate_reply(summarizer: Summarizer, mail_path: Path, summary_content: str
         else:
             logger.warning(f"Skill-Datei nicht gefunden: {skill_path.absolute()}")
 
+    appointment_skill_content = ""
+    if appointment_skill_path and appointment_skill_path.exists():
+        appointment_skill_content = appointment_skill_path.read_text(encoding="utf-8")
+
     persona_content = ""
     if persona_path and persona_path.exists():
         persona_content = persona_path.read_text(encoding="utf-8")
@@ -242,7 +247,10 @@ def generate_reply(summarizer: Summarizer, mail_path: Path, summary_content: str
 PERSONA:
 {persona_content}
 
-SKILL ANWEISUNGEN:
+TERMINVERWALTUNG SKILL (HÖCHSTE PRIORITÄT):
+{appointment_skill_content}
+
+KLASSENSPEZIFISCHE SKILL ANWEISUNGEN:
 {skill_content}
 
 ZUSÄTZLICHER KONTEXT:
@@ -260,7 +268,10 @@ BETREFF: [Der Betreff]
 TEXT:
 [Der Antwort-Text]
 
-Antworte NUR in diesem Format.
+Falls eine Terminbestätigung erfolgreich gebucht wurde, antworte EXAKT mit:
+APPOINTMENT_BOOKED
+
+Ansonsten antworte NUR in dem oben genannten Format.
 """
     if debug:
         prompt_file = mail_path.parent / f"{mail_path.stem}_prompt.md"
@@ -276,6 +287,9 @@ Antworte NUR in diesem Format.
             ],
             system_prompt=system_prompt
         )
+
+        if "APPOINTMENT_BOOKED" in content:
+            return "APPOINTMENT_BOOKED", "APPOINTMENT_BOOKED", False
 
         should_attach = "ANHANG: JA" in content
 
@@ -390,6 +404,7 @@ def main() -> None:
     logger.info(f"Liste der zu beantwortenden E-Mails erstellt: {emails_to_process_path}")
 
     persona_path = Path("skills/SKILL_persona.md")
+    appointment_skill_path = Path("skills/SKILL_Appointment.md")
 
     for email in emails:
         mail_path = Path(email["path"])
@@ -398,24 +413,13 @@ def main() -> None:
         if is_ba_ma:
             # Bei BA/MA tracken wir (class, semester, lastname)
             identifier = (email["class"], email["semester"], email["lastname"])
-        else:
-            # Pfadstruktur: .../Klasse/Semester/Nachname/Inbox/mail.msg
-            student_folder = mail_path.parent.parent
-            identifier = student_folder
+            if identifier in processed_folders:
+                continue
+            processed_folders.add(identifier)
 
-        if identifier in processed_folders:
-            continue
-        processed_folders.add(identifier)
-
-        subject = mail_path.stem
-        result_status = "Übersprungen"
-
-        if is_ba_ma:
-            # Speziallogik für BA/MA: Sammle alle Mails des Studenten in diesem Semester
             semester_folder = mail_path.parent.parent
             inbox_folder = semester_folder / "Inbox"
             sent_folder = semester_folder / "SentItems"
-
             all_files = []
             if inbox_folder.exists():
                 all_files.extend(list(inbox_folder.glob("*.msg")) + list(inbox_folder.glob("*.eml")))
@@ -430,7 +434,6 @@ def main() -> None:
                         recipient_lastname = "None"
                         if msg.recipients:
                             recipient_lastname = extract_lastname(msg.recipients[0].name or msg.recipients[0].email)
-
                         if sender_lastname == email["lastname"] or recipient_lastname == email["lastname"]:
                             date = mail_parser.get_email_date(f)
                             student_emails.append((date, f))
@@ -489,13 +492,19 @@ def main() -> None:
 
             # Zusätzlicher Kontext (z.B. PO-Wechsel)
             additional_context = f"Anrede: {salutation}\n"
+            additional_context += f"Studenten-E-Mail: {student_email}\n"
             attachments = []
             if email["class"] == "PO-Wechsel":
                 pdf_path = Path(r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf")
                 if pdf_path.exists():
                     additional_context += f"\nDu kannst bei Bedarf Details aus der Datei '{pdf_path}' mittels des read_file Tools auslesen.\n"
 
-            reply_subject, reply, should_attach = generate_reply(summarizer, latest_mail, skill_path=skill_path, conversation_content=conversation_content, persona_path=persona_path, additional_context=additional_context, debug=args.debug)
+            reply_subject, reply, should_attach = generate_reply(summarizer, latest_mail, skill_path=skill_path, conversation_content=conversation_content, persona_path=persona_path, additional_context=additional_context, debug=args.debug, appointment_skill_path=appointment_skill_path)
+
+            if reply == "APPOINTMENT_BOOKED":
+                 logger.info(f"Termin für {email['lastname']} wurde erfolgreich gebucht.")
+                 processed_results.append({"lastname": email["lastname"], "subject": latest_mail.stem, "status": "Termin gebucht (Kalender)"})
+                 continue
 
             if should_attach and email["class"] == "PO-Wechsel":
                 pdf_path = Path(r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf")
@@ -517,6 +526,11 @@ def main() -> None:
             processed_results.append({"lastname": email["lastname"], "subject": subject, "status": result_status})
 
         else:
+            identifier = mail_path.parent.parent
+            if identifier in processed_folders:
+                continue
+            processed_folders.add(identifier)
+
             summary_file = identifier / ".emails_summary.md"
             email_files = list(identifier.rglob("*.msg")) + list(identifier.rglob("*.eml"))
             if not email_files:
@@ -590,13 +604,19 @@ def main() -> None:
                     skill_path = Path(__file__).parent / "skills" / f"SKILL_{email['class']}.md"
 
                 additional_context = f"Anrede: {salutation}\n"
+                additional_context += f"Studenten-E-Mail: {student_email}\n"
                 attachments = []
                 if email["class"] == "PO-Wechsel":
                     pdf_path = Path(r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf")
                     if pdf_path.exists():
                         additional_context += f"\nDu kannst bei Bedarf Details aus der Datei '{pdf_path}' mittels des read_file Tools auslesen.\n"
 
-                reply_subject, reply, should_attach = generate_reply(summarizer, latest_mail, summary_content or "", skill_path, persona_path=persona_path, additional_context=additional_context, debug=args.debug)
+                reply_subject, reply, should_attach = generate_reply(summarizer, latest_mail, summary_content or "", skill_path, persona_path=persona_path, additional_context=additional_context, debug=args.debug, appointment_skill_path=appointment_skill_path)
+
+                if reply == "APPOINTMENT_BOOKED":
+                    logger.info(f"Termin für {email['lastname']} wurde erfolgreich gebucht.")
+                    processed_results.append({"lastname": email["lastname"], "subject": latest_mail.stem, "status": "Termin gebucht (Kalender)"})
+                    continue
 
                 if should_attach and email["class"] == "PO-Wechsel":
                     pdf_path = Path(r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf")
