@@ -21,8 +21,9 @@ class Summarizer:
             base_url (str): Basis-URL des Ollama-API-Servers. Defaults to "http://localhost:11434".
         """
         self.model = model
-        self.client = ollama.Client(host=base_url)
-        logger.debug(f"Summarizer initialized with model={model} and base_url={base_url}")
+        self.base_url = str(base_url)
+        self.client = ollama.Client(host=self.base_url)
+        logger.debug(f"Summarizer initialized with model={model} and base_url={self.base_url}")
 
     def _identify_document_type(self, content: str) -> str:
         """Identifiziert den Dokumenttyp basierend auf dem Inhalt des Dokuments (erste Seite/Anfang).

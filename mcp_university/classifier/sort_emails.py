@@ -41,6 +41,24 @@ def get_semester(date: datetime) -> str:
             return f"{year-1}_{str(year)[2:]}_WS"
 
 
+def normalize_name(name: str) -> str:
+    """Normalisiert Namen durch Ersetzung von Umlauten und Sonderzeichen.
+
+    Args:
+        name: Der zu normalisierende Name.
+
+    Returns:
+        str: Der normalisierte Name.
+    """
+    replacements = {
+        "ä": "ae", "ö": "oe", "ü": "ue",
+        "Ä": "Ae", "Ö": "Oe", "Ü": "Ue",
+        "ß": "ss"
+    }
+    for old, new in replacements.items():
+        name = name.replace(old, new)
+    return name
+
 def extract_firstname(name_str: str) -> str:
     """Extrahiert den Vornamen aus einem Namensstring oder einer E-Mail-Adresse.
 
@@ -108,7 +126,8 @@ def extract_lastname(name_str: str) -> str:
                 lastname_part = local_part.split(".", 1)[1]
                 # Teile nach Unterstrich und schreibe jeden Teil groß
                 parts = lastname_part.split("_")
-                return "_".join(p[0].upper() + p[1:] for p in parts if p)
+                res = "_".join(p[0].upper() + p[1:] for p in parts if p)
+                return normalize_name(res)
 
     # Fallback für Namen ohne (Smail-)Adresse
     # Entferne E-Mail Adresse in Klammern falls vorhanden
@@ -117,15 +136,14 @@ def extract_lastname(name_str: str) -> str:
     if "," in clean_name:
         # Format: Lastname, Firstname
         res = clean_name.split(",")[0].strip()
-        return res[:-1] if res.endswith("'") else res
+        res = res.strip("'")
+        return normalize_name(res)
     else:
         # Format: Firstname Lastname
         parts = clean_name.split()
         if parts:
-            res = parts[-1]
-            if res.endswith("'"):
-                res = res[:-1]
-            return res
+            res = parts[-1].strip("'")
+            return normalize_name(res)
     return "Unknown"
 
 

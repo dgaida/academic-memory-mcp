@@ -23,7 +23,7 @@ class Agent:
         """
         cfg = get_config()
         self.model = model or cfg.llm.model
-        self.base_url = base_url or cfg.llm.base_url
+        self.base_url = str(base_url or cfg.llm.base_url)
         self.client = ollama.Client(host=self.base_url)
 
         self.parser_factory = ParserFactory(cfg.data_dir / "cache")
