@@ -22,7 +22,16 @@ from mcp_university.summarizer.engine import Summarizer
 from mcp_university.parser.mail_parser import MailParser
 from mcp_university.agent import Agent
 
-# Globaler Logger (wird in main konfiguriert)
+# Logging konfigurieren
+log_format = '%(asctime)s - %(levelname)s - %(message)s'
+logging.basicConfig(
+    level=logging.INFO,
+    format=log_format,
+    handlers=[
+        logging.FileHandler("process_emails.log", encoding="utf-8"),
+        logging.StreamHandler()
+    ]
+)
 logger = logging.getLogger(__name__)
 
 DEBUG = True
@@ -222,13 +231,8 @@ def generate_reply(summarizer: Summarizer, mail_path: Path, summary_content: str
             logger.warning(f"Skill-Datei nicht gefunden: {skill_path.absolute()}")
 
     appointment_skill_content = ""
-    if appointment_skill_path:
-        logger.info(f"Prüfe Appointment-Skill-Pfad: {appointment_skill_path.absolute()}")
-        if appointment_skill_path.exists():
-            appointment_skill_content = appointment_skill_path.read_text(encoding="utf-8")
-            logger.info(f"Appointment-Skill-Datei erfolgreich geladen: {appointment_skill_path.name}")
-        else:
-            logger.warning(f"Appointment-Skill-Datei nicht gefunden: {appointment_skill_path.absolute()}")
+    if appointment_skill_path and appointment_skill_path.exists():
+        appointment_skill_content = appointment_skill_path.read_text(encoding="utf-8")
 
     persona_content = ""
     if persona_path and persona_path.exists():
@@ -239,8 +243,6 @@ def generate_reply(summarizer: Summarizer, mail_path: Path, summary_content: str
 
     system_prompt = "Du bist ein hilfreicher Assistent an der TH Köln. Verfasse eine Antwort-E-Mail auf Deutsch."
     user_prompt = f"""Basierend auf der folgenden E-Mail, dem Kontext des bisherigen Schriftverkehrs, der Persona und den Skill-Anweisungen, verfasse eine professionelle Antwort.
-
-HEUTE IST: {datetime.now().strftime('%A, den %d.%m.%Y %H:%M')}
 
 PERSONA:
 {persona_content}
@@ -306,23 +308,6 @@ Ansonsten antworte NUR in dem oben genannten Format.
 
 def main() -> None:
     """Haupteinstiegspunkt des Skripts."""
-    config = get_config()
-
-    # Log-Verzeichnis sicherstellen
-    config.log_path.mkdir(parents=True, exist_ok=True)
-
-    # Logging konfigurieren
-    log_format = '%(asctime)s - %(levelname)s - %(message)s'
-    file_handler = logging.FileHandler(config.log_path / "process_emails.log", encoding="utf-8")
-    stream_handler = logging.StreamHandler()
-
-    logging.basicConfig(
-        level=logging.INFO,
-        format=log_format,
-        handlers=[file_handler, stream_handler],
-        force=True # Vorhandene Konfiguration überschreiben
-    )
-
     parser = argparse.ArgumentParser(description="Verarbeitet sortierte E-Mails und generiert Antworten.")
     parser.add_argument("source_dir", help="Quellordner der E-Mails")
     parser.add_argument("--config", default="config/folders.yaml", help="Pfad zur Konfiguration")
@@ -342,6 +327,7 @@ def main() -> None:
     emails = parse_sorted_report(report_path)
     logger.info(f"{len(emails)} sortierte E-Mails gefunden.")
 
+    config = get_config()
     summarizer = Summarizer(model=config.llm.model, base_url=config.llm.base_url)
     mail_parser = MailParser()
 

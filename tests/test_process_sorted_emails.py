@@ -118,12 +118,6 @@ def test_main_reporting_and_cleanup(mock_draft, mock_parser_cls, mock_agent_cls,
     mock_parser = mock_parser_cls.return_value
     mock_parser.get_email_date.return_value = datetime.now()
 
-    # Mock Config
-    mock_conf = mock_config.return_value
-    mock_conf.log_path = tmp_path / "logs"
-    mock_conf.llm.model = "test-model"
-    mock_conf.llm.base_url = "http://localhost:11434"
-
     # Mock Summarizer
     mock_summ = mock_summ_cls.return_value
     mock_summ.summarize_email_conversation.return_value = "Test Summary"
