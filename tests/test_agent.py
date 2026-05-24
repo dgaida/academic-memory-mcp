@@ -10,7 +10,9 @@ def mock_ollama_client():
 @pytest.fixture
 def agent(mock_ollama_client):
     # Mocking dependencies that Agent initializes
-    with patch('mcp_university.agent.engine.ParserFactory'),          patch('mcp_university.agent.engine.MetadataStore'),          patch('mcp_university.agent.engine.SearchIndex'):
+    with patch('mcp_university.agent.engine.ParserFactory'), \
+         patch('mcp_university.agent.engine.MetadataStore'), \
+         patch('mcp_university.agent.engine.SearchIndex'):
         return Agent(model="test-model", base_url="http://test-url")
 
 def test_agent_initialization(agent):
@@ -18,6 +20,8 @@ def test_agent_initialization(agent):
     assert agent.base_url == "http://test-url"
     assert "read_file" in agent.available_tools
     assert "search_documents" in agent.available_tools
+    assert "get_appointment_slots" in agent.available_tools
+    assert "manage_calendar_appointment" in agent.available_tools
 
 def test_agent_chat_no_tools(agent, mock_ollama_client):
     # Mock Ollama response with no tool calls
@@ -78,3 +82,58 @@ def test_tool_read_file_not_found(agent):
     with patch('pathlib.Path.exists', return_value=False):
         result = agent._tool_read_file("non_existent.txt")
         assert "nicht gefunden" in result
+
+def test_tool_get_appointment_slots(agent):
+    with patch('pathlib.Path.exists', return_value=True):
+        with patch('pathlib.Path.read_text', return_value="Slots content"):
+            result = agent._tool_get_appointment_slots()
+            assert result == "Slots content"
+
+def test_tool_get_appointment_slots_not_found(agent):
+    with patch('pathlib.Path.exists', return_value=False):
+        result = agent._tool_get_appointment_slots()
+        assert "nicht gefunden" in result
+
+def test_tool_manage_calendar_appointment_import_error(agent):
+    with patch.dict('sys.modules', {'win32com': None, 'win32com.client': None}):
+        result = agent._tool_manage_calendar_appointment(
+            "2026-06-01 13:30", "2026-06-01 14:00", "Subject", "student@example.com"
+        )
+        assert "pywin32 ist nicht installiert" in result
+
+@patch('mcp_university.agent.engine.Agent._tool_manage_calendar_appointment')
+def test_agent_chat_with_appointment_booked(mock_tool, agent, mock_ollama_client):
+    # Mock the tool to return success
+    mock_tool.return_value = "ERFOLG: Termin eingetragen"
+
+    # Mock Ollama to call the tool and then return the signal word
+    mock_response_1 = {
+        'message': {
+            'role': 'assistant',
+            'tool_calls': [{
+                'id': 'call_1',
+                'function': {
+                    'name': 'manage_calendar_appointment',
+                    'arguments': {
+                        'start_time': '2026-06-01 13:30',
+                        'end_time': '2026-06-01 14:00',
+                        'subject': 'Test',
+                        'student_email': 'student@example.com'
+                    }
+                }
+            }]
+        }
+    }
+    mock_response_2 = {
+        'message': {
+            'role': 'assistant',
+            'content': 'APPOINTMENT_BOOKED'
+        }
+    }
+
+    agent.client.chat.side_effect = [mock_response_1, mock_response_2]
+
+    response = agent.chat([{'role': 'user', 'content': 'Bestätige Termin'}])
+
+    assert response == "APPOINTMENT_BOOKED"
+    assert agent.client.chat.call_count == 2
