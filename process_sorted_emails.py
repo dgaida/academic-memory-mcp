@@ -331,10 +331,53 @@ def main() -> None:
         is_ba_ma = email["class"].startswith(("BA_", "MA_"))
         if is_ba_ma:
             identifier = (email["class"], email["semester"], email["lastname"])
+            # BA/MA logic to find latest mail
+            semester_folder = mail_path.parent.parent
+            inbox_folder = semester_folder / "Inbox"
+            sent_folder = semester_folder / "SentItems"
+            all_files = []
+            if inbox_folder.exists():
+                all_files.extend(list(inbox_folder.glob("*.msg")) + list(inbox_folder.glob("*.eml")))
+            if sent_folder.exists():
+                all_files.extend(list(sent_folder.glob("*.msg")) + list(sent_folder.glob("*.eml")))
+
+            student_emails = []
+            for f in all_files:
+                try:
+                    with extract_msg.openMsg(str(f)) as msg:
+                        sender_lastname = extract_lastname(msg.sender)
+                        recipient_lastname = "None"
+                        if msg.recipients:
+                            recipient_lastname = extract_lastname(msg.recipients[0].name or msg.recipients[0].email)
+                        if sender_lastname == email["lastname"] or recipient_lastname == email["lastname"]:
+                            date = mail_parser.get_email_date(f)
+                            student_emails.append((date, f))
+                except Exception:
+                    continue
+
+            if not student_emails:
+                continue
+            student_emails.sort(key=lambda x: x[0])
+            latest_date, latest_mail = student_emails[-1]
+            needs_answer = "Inbox" in latest_mail.parts
         else:
             identifier = mail_path.parent.parent
+            # Normal student folder logic
+            email_files = list(identifier.rglob("*.msg")) + list(identifier.rglob("*.eml"))
+            if not email_files:
+                continue
+            dated_emails = []
+            for f in email_files:
+                try:
+                    date = mail_parser.get_email_date(f)
+                    dated_emails.append((date, f))
+                except Exception:
+                    dated_emails.append((datetime.min, f))
+            dated_emails.sort(key=lambda x: x[0])
+            latest_date, latest_mail = dated_emails[-1]
+            needs_answer = "Inbox" in latest_mail.parts and "SentItems" not in latest_mail.parts
 
-        if identifier not in temp_folders:
+        if needs_answer and identifier not in temp_folders:
             temp_folders.add(identifier)
             unique_emails_to_process.append(email)
 
@@ -591,5 +634,4 @@ def main() -> None:
         logger.info(f"Temporärer Report gelöscht: {report_path}")
 
 if __name__ == "__main__":
-    main()
     main()
