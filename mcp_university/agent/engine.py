@@ -22,14 +22,14 @@ class Agent:
             model (str, optional): Name des Ollama-Modells.
             base_url (str, optional): Basis-URL des Ollama-Servers.
         """
-        cfg = get_config()
-        self.model = model or cfg.llm.model
-        self.base_url = str(base_url or cfg.llm.base_url)
+        self.cfg = get_config()
+        self.model = model or self.cfg.llm.model
+        self.base_url = str(base_url or self.cfg.llm.base_url)
         self.client = ollama.Client(host=self.base_url)
 
-        self.parser_factory = ParserFactory(cfg.data_dir / "cache")
-        self.store = MetadataStore(cfg.sqlite_path)
-        self.index = SearchIndex(str(cfg.qdrant_path), cfg.embeddings.model, store=self.store)
+        self.parser_factory = ParserFactory(self.cfg.data_dir / "cache")
+        self.store = MetadataStore(self.cfg.sqlite_path)
+        self.index = SearchIndex(str(self.cfg.qdrant_path), self.cfg.embeddings.model, store=self.store)
 
         self.available_tools: Dict[str, Callable] = {
             "read_file": self._tool_read_file,
@@ -252,6 +252,31 @@ class Agent:
             if not cal_folder:
                 return f"Fehler: Kalender '{target_calendar_name}' für '{target_account}' nicht gefunden."
 
+            # Zielordner für Entwürfe suchen (Work in Progress)
+            target_folder_name = "Work in Progress"
+            target_folder = None
+            try:
+                for store in namespace.Stores:
+                    if store.DisplayName.lower() == target_account.lower():
+                        root = store.GetRootFolder()
+                        for folder in root.Folders:
+                            if folder.Name.lower() == target_folder_name.lower():
+                                target_folder = folder
+                                break
+                        if not target_folder:
+                            for folder in root.Folders:
+                                if folder.Name.lower() in ["posteingang", "inbox"]:
+                                    for sub in folder.Folders:
+                                        if sub.Name.lower() == target_folder_name.lower():
+                                            target_folder = sub
+                                            break
+                                if target_folder:
+                                    break
+                        if target_folder:
+                            break
+            except Exception as e:
+                logger.warning(f"Fehler beim Suchen des Zielordners '{target_folder_name}': {e}")
+
             # Slot prüfen
             dt_start = datetime.strptime(start_time, "%Y-%m-%d %H:%M")
             dt_end = datetime.strptime(end_time, "%Y-%m-%d %H:%M")
@@ -279,22 +304,36 @@ class Agent:
                 return f"Fehler: Der Slot von {start_time} bis {end_time} ist bereits belegt."
 
             # Termin eintragen
-            appointment = cal_folder.Items.Add(1) # 1 = olAppointmentItem
+            # Wenn automatisch gesendet werden soll, direkt im Kalender erstellen
+            # Ansonsten versuchen, in "Work in Progress" zu erstellen, falls vorhanden
+            auto_send = self.cfg.calendar.send_invitations_automatically
+
+            if not auto_send and target_folder:
+                appointment = target_folder.Items.Add(1) # 1 = olAppointmentItem
+                logger.info(f"Erstelle Termin-Entwurf in '{target_folder_name}'.")
+            else:
+                appointment = cal_folder.Items.Add(1) # 1 = olAppointmentItem
+                if not auto_send:
+                    logger.warning(f"Zielordner '{target_folder_name}' nicht gefunden. Erstelle im Standard-Kalender.")
+
             appointment.Subject = subject
             appointment.Start = dt_start
             appointment.End = dt_end
             appointment.Location = "Zoom (siehe E-Mail-Signatur)"
             appointment.Body = "Terminbestätigung via MCP University System."
 
-            # Einladung senden
+            # Einladung vorbereiten
             recipient = appointment.Recipients.Add(student_email)
             recipient.Type = 1 # 1 = olTo
             appointment.MeetingStatus = 1 # 1 = olMeeting
 
             appointment.Save()
-            appointment.Send()
 
-            return f"ERFOLG: Termin '{subject}' am {start_time} wurde eingetragen und Einladung an {student_email} gesendet."
+            if auto_send:
+                appointment.Send()
+                return f"ERFOLG: Termin '{subject}' am {start_time} wurde eingetragen und Einladung an {student_email} gesendet."
+            else:
+                return f"ERFOLG: Termin-Entwurf '{subject}' am {start_time} wurde in '{target_folder_name if target_folder else cal_folder.Name}' gespeichert (nicht gesendet)."
 
         except Exception as e:
             return f"Fehler bei der Kalender-Verarbeitung: {e}"
