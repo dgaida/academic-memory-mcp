@@ -346,7 +346,6 @@ def main() -> None:
     mail_parser = MailParser()
 
     # Wir tracken verarbeitete student_folders, um Mehrfachverarbeitung zu vermeiden
-    processed_folders = set()
     processed_results = []
 
     # Liste der zu beantwortenden E-Mails erstellen
@@ -388,6 +387,12 @@ def main() -> None:
             student_emails.sort(key=lambda x: x[0])
             latest_date, latest_mail = student_emails[-1]
             needs_answer = "Inbox" in latest_mail.parts
+
+            # Bereicherung des E-Mail-Dicts für spätere Verarbeitung
+            email["latest_date"] = latest_date
+            email["latest_mail"] = latest_mail
+            email["student_emails"] = student_emails
+            email["semester_folder"] = semester_folder
         else:
             identifier = mail_path.parent.parent
             # Normal student folder logic
@@ -405,6 +410,12 @@ def main() -> None:
             latest_date, latest_mail = dated_emails[-1]
             needs_answer = "Inbox" in latest_mail.parts and "SentItems" not in latest_mail.parts
 
+            # Bereicherung des E-Mail-Dicts für spätere Verarbeitung
+            email["latest_date"] = latest_date
+            email["latest_mail"] = latest_mail
+            email["dated_emails"] = dated_emails
+            email["identifier_path"] = identifier
+
         if needs_answer and identifier not in temp_folders:
             temp_folders.add(identifier)
             unique_emails_to_process.append(email)
@@ -420,49 +431,14 @@ def main() -> None:
     persona_path = Path("skills/SKILL_persona.md")
     appointment_skill_path = Path("skills/SKILL_Appointment.md")
 
-    for email in emails:
-        mail_path = Path(email["path"])
+    for email in unique_emails_to_process:
+        latest_mail = email["latest_mail"]
+        latest_date = email["latest_date"]
         is_ba_ma = email["class"].startswith(("BA_", "MA_"))
 
         if is_ba_ma:
-            # Bei BA/MA tracken wir (class, semester, lastname)
-            identifier = (email["class"], email["semester"], email["lastname"])
-            if identifier in processed_folders:
-                continue
-            processed_folders.add(identifier)
-
-            semester_folder = mail_path.parent.parent
-            inbox_folder = semester_folder / "Inbox"
-            sent_folder = semester_folder / "SentItems"
-            all_files = []
-            if inbox_folder.exists():
-                all_files.extend(list(inbox_folder.glob("*.msg")) + list(inbox_folder.glob("*.eml")))
-            if sent_folder.exists():
-                all_files.extend(list(sent_folder.glob("*.msg")) + list(sent_folder.glob("*.eml")))
-
-            student_emails = []
-            for f in all_files:
-                try:
-                    with extract_msg.openMsg(str(f)) as msg:
-                        sender_lastname = extract_lastname(msg.sender)
-                        recipient_lastname = "None"
-                        if msg.recipients:
-                            recipient_lastname = extract_lastname(msg.recipients[0].name or msg.recipients[0].email)
-                        if sender_lastname == email["lastname"] or recipient_lastname == email["lastname"]:
-                            date = mail_parser.get_email_date(f)
-                            student_emails.append((date, f))
-                except Exception:
-                    continue
-
-            if not student_emails:
-                continue
-
-            student_emails.sort(key=lambda x: x[0])
-            latest_date, latest_mail = student_emails[-1]
-
-            if "Inbox" not in latest_mail.parts:
-                logger.info(f"Neueste Mail für {email['lastname']} ist in SentItems. Überspringe Antwortgenerierung.")
-                continue
+            semester_folder = email["semester_folder"]
+            student_emails = email["student_emails"]
 
             logger.info(f"Verarbeite BA/MA E-Mails für {email['lastname']} in {email['class']}")
 
@@ -540,26 +516,10 @@ def main() -> None:
             processed_results.append({"lastname": email["lastname"], "subject": subject, "status": result_status})
 
         else:
-            identifier = mail_path.parent.parent
-            if identifier in processed_folders:
-                continue
-            processed_folders.add(identifier)
+            identifier = email["identifier_path"]
+            dated_emails = email["dated_emails"]
 
             summary_file = identifier / ".emails_summary.md"
-            email_files = list(identifier.rglob("*.msg")) + list(identifier.rglob("*.eml"))
-            if not email_files:
-                continue
-
-            dated_emails = []
-            for f in email_files:
-                try:
-                    date = mail_parser.get_email_date(f)
-                    dated_emails.append((date, f))
-                except Exception:
-                    dated_emails.append((datetime.min, f))
-            dated_emails.sort(key=lambda x: x[0])
-
-            latest_date, latest_mail = dated_emails[-1]
 
             should_update = False
             if not summary_file.exists():
@@ -584,73 +544,70 @@ def main() -> None:
             else:
                 summary_content = summary_file.read_text(encoding="utf-8")
 
-            if "Inbox" in latest_mail.parts and "SentItems" not in latest_mail.parts:
-                logger.info(f"Generiere Antwort für neueste Mail in {identifier.name}: {latest_mail.name}")
+            logger.info(f"Generiere Antwort für neueste Mail in {identifier.name}: {latest_mail.name}")
 
-                # Extraktion von Empfänger und CC
-                student_email = ""
-                cc_list = []
-                try:
-                    with extract_msg.openMsg(str(latest_mail)) as msg:
-                        student_email = msg.sender
-                        if msg.recipients:
-                            for rec in msg.recipients:
-                                rec_email = rec.email or rec.name
-                                if rec_email and "daniel.gaida@th-koeln.de" not in rec_email.lower():
-                                    if rec_email.lower() != student_email.lower():
-                                        cc_list.append(rec_email)
-                except Exception:
-                    pass
+            # Extraktion von Empfänger und CC
+            student_email = ""
+            cc_list = []
+            try:
+                with extract_msg.openMsg(str(latest_mail)) as msg:
+                    student_email = msg.sender
+                    if msg.recipients:
+                        for rec in msg.recipients:
+                            rec_email = rec.email or rec.name
+                            if rec_email and "daniel.gaida@th-koeln.de" not in rec_email.lower():
+                                if rec_email.lower() != student_email.lower():
+                                    cc_list.append(rec_email)
+            except Exception:
+                pass
 
-                # Gender Determination und Salutation
-                first_name = "Unknown"
-                try:
-                    with extract_msg.openMsg(str(latest_mail)) as msg:
-                        first_name = extract_firstname(msg.sender)
-                except Exception:
-                    pass
-                gender_salutation = summarizer.determine_gender(first_name)
-                salutation = f"Guten Tag {gender_salutation} {email['lastname']}"
+            # Gender Determination und Salutation
+            first_name = "Unknown"
+            try:
+                with extract_msg.openMsg(str(latest_mail)) as msg:
+                    first_name = extract_firstname(msg.sender)
+            except Exception:
+                pass
+            gender_salutation = summarizer.determine_gender(first_name)
+            salutation = f"Guten Tag {gender_salutation} {email['lastname']}"
 
-                skill_path = Path(f"skills/SKILL_{email['class']}.md")
-                if not skill_path.exists():
-                    # Fallback to script directory
-                    skill_path = Path(__file__).parent / "skills" / f"SKILL_{email['class']}.md"
+            skill_path = Path(f"skills/SKILL_{email['class']}.md")
+            if not skill_path.exists():
+                # Fallback to script directory
+                skill_path = Path(__file__).parent / "skills" / f"SKILL_{email['class']}.md"
 
-                additional_context = f"Anrede: {salutation}\n"
-                additional_context += f"Studenten-E-Mail: {student_email}\n"
-                attachments = []
-                if email["class"] == "PO-Wechsel":
-                    pdf_path = Path(r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf")
-                    if pdf_path.exists():
-                        additional_context += f"\nDu kannst bei Bedarf Details aus der Datei '{pdf_path}' mittels des read_file Tools auslesen.\n"
+            additional_context = f"Anrede: {salutation}\n"
+            additional_context += f"Studenten-E-Mail: {student_email}\n"
+            attachments = []
+            if email["class"] == "PO-Wechsel":
+                pdf_path = Path(r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf")
+                if pdf_path.exists():
+                    additional_context += f"\nDu kannst bei Bedarf Details aus der Datei '{pdf_path}' mittels des read_file Tools auslesen.\n"
 
-                reply_subject, reply, should_attach = generate_reply(summarizer, latest_mail, summary_content or "", skill_path, persona_path=persona_path, additional_context=additional_context, debug=args.debug, appointment_skill_path=appointment_skill_path)
+            reply_subject, reply, should_attach = generate_reply(summarizer, latest_mail, summary_content or "", skill_path, persona_path=persona_path, additional_context=additional_context, debug=args.debug, appointment_skill_path=appointment_skill_path)
 
-                if reply == "APPOINTMENT_BOOKED":
-                    logger.info(f"Termin für {email['lastname']} wurde erfolgreich gebucht.")
-                    processed_results.append({"lastname": email["lastname"], "subject": latest_mail.stem, "status": "Termin gebucht (Kalender)"})
-                    continue
+            if reply == "APPOINTMENT_BOOKED":
+                logger.info(f"Termin für {email['lastname']} wurde erfolgreich gebucht.")
+                processed_results.append({"lastname": email["lastname"], "subject": latest_mail.stem, "status": "Termin gebucht (Kalender)"})
+                continue
 
-                if should_attach and email["class"] == "PO-Wechsel":
-                    pdf_path = Path(r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf")
-                    if pdf_path.exists():
-                        attachments.append(pdf_path)
+            if should_attach and email["class"] == "PO-Wechsel":
+                pdf_path = Path(r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf")
+                if pdf_path.exists():
+                    attachments.append(pdf_path)
 
-                subject = latest_mail.stem
-                success = create_outlook_draft(reply_subject or subject, reply, recipient=student_email, cc=cc_list, attachments=attachments)
-                if success:
-                    logger.info(f"Outlook-Entwurf für {latest_mail.name} erstellt.")
-                    result_status = "Outlook Entwurf (Work in Progress)"
-                else:
-                    reply_path = identifier / f"{latest_mail.stem}_reply.md"
-                    reply_path.write_text(reply, encoding="utf-8")
-                    logger.info(f"Antwort als Markdown gespeichert: {reply_path}")
-                    result_status = f"Datei: {reply_path}"
-
-                processed_results.append({"lastname": email["lastname"], "subject": subject, "status": result_status})
+            subject = latest_mail.stem
+            success = create_outlook_draft(reply_subject or subject, reply, recipient=student_email, cc=cc_list, attachments=attachments)
+            if success:
+                logger.info(f"Outlook-Entwurf für {latest_mail.name} erstellt.")
+                result_status = "Outlook Entwurf (Work in Progress)"
             else:
-                 logger.info(f"Neueste Mail in {identifier.name} ist nicht in Inbox oder bereits in SentItems. Überspringe.")
+                reply_path = identifier / f"{latest_mail.stem}_reply.md"
+                reply_path.write_text(reply, encoding="utf-8")
+                logger.info(f"Antwort als Markdown gespeichert: {reply_path}")
+                result_status = f"Datei: {reply_path}"
+
+            processed_results.append({"lastname": email["lastname"], "subject": subject, "status": result_status})
 
     # 3. Abschluss-Bericht erstellen und aufräumen
     if processed_results:
