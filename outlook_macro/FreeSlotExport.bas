@@ -258,9 +258,20 @@ Private Function GetAppointmentsForWindow(ByVal calFolder As Outlook.Folder, _
     allItems.IncludeRecurrences = True ' Serienelemente einbeziehen
     allItems.Sort "[Start]"
 
-    ' Datumsformat fuer Outlook-Filter: MM/DD/YYYY HH:MM AM/PM
-    filterStr = "[Start] < """ & Format(windowEnd, "MM/DD/YYYY HH:MM AM/PM") & _
-                """ AND [End] > """ & Format(windowStart, "MM/DD/YYYY HH:MM AM/PM") & """"
+    ' Filter auf den gesamten Tag, nicht auf das engere Zeitfenster.
+    ' Grund: Format(..., "HH:MM AM/PM") liefert unter deutschen Systemeinstellungen
+    ' kein gueltiges AM/PM-Suffix, was den Restrict-Filter unzuverlaessig macht.
+    ' Die genaue Zeitpruefung uebernimmt IsSlotFree zuverlaessig per VBA-Vergleich.
+    Dim dayStart As Date
+    Dim dayEnd   As Date
+    dayStart = Int(windowStart)     ' Mitternacht des Tages
+    dayEnd   = Int(windowStart) + 1 ' Mitternacht des Folgetags
+
+    ' Format() respektiert die Windows-Locale und liefert auf deutschen Systemen
+    ' "TT.MM.JJJJ" statt "MM/DD/YYYY". Outlook-Filter braucht zwingend MM/DD/YYYY,
+    ' daher manuell aus den Datumsteilen zusammenbauen (locale-unabhaengig).
+    filterStr = "[Start] < """ & Month(dayEnd)   & "/" & Day(dayEnd)   & "/" & Year(dayEnd)   & """ " & _
+                "AND [End] > """ & Month(dayStart) & "/" & Day(dayStart) & "/" & Year(dayStart) & """"
 
     Set restricted = allItems.Restrict(filterStr)
     Set GetAppointmentsForWindow = restricted
