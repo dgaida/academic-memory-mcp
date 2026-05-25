@@ -27,6 +27,7 @@ dependencies = [
     "matplotlib",
     "tabulate",
     "xgboost",
+    "pytest-asyncio",
 ]
 requires-python = ">=3.10"
 
