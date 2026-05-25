@@ -12,7 +12,7 @@ from mcp_university.classifier.engine import EmailClassifier
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
 
-def run_xai_analysis(model_path: Path, test_data_path: Path, samples_per_class: int = 20, top_n_words: int = 10) -> None:
+def run_xai_analysis(model_path: Path, test_data_path: Path, samples_per_class: int = 120, top_n_words: int = 15) -> None:
     """Führt eine XAI-Analyse mit SHAP durch.
 
     Args:
