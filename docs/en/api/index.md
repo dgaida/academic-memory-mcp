@@ -26,6 +26,10 @@ This page provides an overview of the key modules and classes of the MCP Univers
 
 ::: mcp_university.classifier.engine.EmailClassifier
 
+## Visualization
+
+::: mcp_university.classifier.plot_data_distribution
+
 ## CLI Database Management
 
 ::: mcp_university.cli.db

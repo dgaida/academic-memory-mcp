@@ -26,6 +26,10 @@ Diese Seite bietet eine Übersicht über die wichtigsten Module und Klassen des 
 
 ::: mcp_university.classifier.engine.EmailClassifier
 
+## Visualisierung
+
+::: mcp_university.classifier.plot_data_distribution
+
 ## CLI Datenbank-Management
 
 ::: mcp_university.cli.db

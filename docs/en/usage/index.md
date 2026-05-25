@@ -65,6 +65,17 @@ python3 mcp_university/classifier/classify_folder.py /source/folder --model data
 ```
 This moves the emails into subfolders named after their predicted classes.
 
+### Data Distribution Visualization
+To visualize the distribution of emails per class (split by Inbox and SentItems), the following script can be used:
+
+```bash
+python3 mcp_university/classifier/plot_data_distribution.py --train-dir D:\\TH_Koeln\\MailTrainingData --test-dir D:\\TH_Koeln\\MailTestData --output-dir data
+```
+
+This generates two high-resolution PNG files in `data/`:
+- `train_data_distribution.png`
+- `test_data_distribution.png`
+
 
 ## Database Management (`db`)
 
