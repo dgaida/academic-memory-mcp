@@ -130,3 +130,25 @@ The system includes useful scripts in the `scripts/` folder:
 
 - **`remove_empty_folders.py`**: Recursively deletes all empty folders in a directory.  
 - **`flatten_directory.py`**: Flattens a directory structure by moving all files to the root directory (includes name collision checks).  
+
+## Feature Modeling (Email Classification)
+
+The `EmailClassifier` supports three different modes for feature extraction:
+
+1.  **TF-IDF (`tfidf`)**:
+    - **How it works:** Uses Term Frequency-Inverse Document Frequency to weigh the importance of keywords.
+    - **Pros:** Very fast, interpretable, effective for distinct terminology (e.g., "Bachelor Thesis", "Registration").
+    - **Cons:** Ignores word order and semantics (doesn't recognize synonyms).
+
+2.  **Embeddings (`embedding`)**:
+    - **How it works:** Uses `Sentence-Transformers` (default: `paraphrase-multilingual-MiniLM-L12-v2`) to project text into a high-dimensional vector space.
+    - **Pros:** Captures semantic meaning. Recognizes similar concepts even if different words are used.
+    - **Cons:** More computationally expensive (requires model downloads), harder to interpret.
+
+3.  **Combined (`combined`)**:
+    - **How it works:** Concatenates TF-IDF vectors with embedding vectors.
+    - **Pros:** Combines keyword precision with deep semantic understanding. Usually yields the highest accuracy.
+    - **Cons:** Largest feature vectors, longer training time.
+
+### Model Naming
+During training, the chosen mode is automatically appended to the filename (e.g., `email_classifier_combined.pkl`) to prevent model confusion.

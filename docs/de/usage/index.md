@@ -130,3 +130,25 @@ Das System enthält nützliche Skripte im Ordner `scripts/`:
 
 - **`remove_empty_folders.py`**: Löscht rekursiv alle leeren Ordner in einem Verzeichnis.  
 - **`flatten_directory.py`**: Flacht eine Ordnerstruktur ab, indem alle Dateien in das Wurzelverzeichnis verschoben werden (inkl. Namenskollisionsprüfung).  
+
+## Feature-Modellierung (E-Mail Klassifikation)
+
+Der `EmailClassifier` unterstützt drei verschiedene Modi für die Merkmalsextraktion (Feature Engineering):
+
+1.  **TF-IDF (`tfidf`)**:
+    - **Funktionsweise:** Verwendet die Term Frequency-Inverse Document Frequency. Es werden Worthäufigkeiten gezählt und gewichtet, um wichtige Schlüsselwörter hervorzuheben.
+    - **Vorteile:** Sehr schnell, gut interpretierbar, effektiv bei klar definierten Fachbegriffen (z.B. "Bachelorarbeit", "Anmeldung").
+    - **Nachteile:** Ignoriert Wortreihenfolge und Semantik (Synonyme werden nicht erkannt).
+
+2.  **Embeddings (`embedding`)**:
+    - **Funktionsweise:** Verwendet `Sentence-Transformers` (Standard: `paraphrase-multilingual-MiniLM-L12-v2`), um den Text in einen hochdimensionalen Vektorraum zu projizieren.
+    - **Vorteile:** Erfasst die semantische Bedeutung. Erkennt ähnliche Konzepte, auch wenn unterschiedliche Wörter verwendet werden.
+    - **Nachteile:** Rechenintensiver (erfordert Modell-Downloads), schwerer interpretierbar.
+
+3.  **Kombiniert (`combined`)**:
+    - **Funktionsweise:** Konkateniert die TF-IDF-Vektoren mit den Embedding-Vektoren.
+    - **Vorteile:** Kombiniert die Präzision von Schlüsselwörtern mit dem tiefen semantischen Verständnis. In der Regel die höchste Genauigkeit.
+    - **Nachteile:** Größte Feature-Vektoren, längere Trainingszeit.
+
+### Modell-Benennung
+Beim Training wird die gewählte Methode automatisch an den Dateinamen angehängt (z.B. `email_classifier_combined.pkl`), um eine Verwechslung der Modelle zu vermeiden.
