@@ -122,9 +122,9 @@ def main() -> None:
             }
         else:  # xgboost
             param_grid = {
-                'n_estimators': [100, 150, 200],
-                'max_depth': [2, 3, 6],
-                'learning_rate': [0.1, 0.05]
+                'n_estimators': [100, 200],
+                'max_depth': [2, 3],
+                'learning_rate': [0.1]
             }
 
         logger.info(f"Starte GridSearchCV mit 5-fold CV und 9 Experimenten für {args.method}...")
