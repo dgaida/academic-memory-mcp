@@ -26,6 +26,10 @@ Diese Seite bietet eine Übersicht über die wichtigsten Module und Klassen des 
 
 ::: mcp_university.classifier.engine.EmailClassifier
 
+## XAI Analyse
+
+::: mcp_university.classifier.xai_analysis
+
 ## CLI Datenbank-Management
 
 ::: mcp_university.cli.db
