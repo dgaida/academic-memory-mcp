@@ -1,4 +1,5 @@
 """Watcher module."""
+
 import time
 import logging
 from pathlib import Path
@@ -8,8 +9,10 @@ from .crawler import Crawler
 
 logger = logging.getLogger(__name__)
 
+
 class IndexingHandler(FileSystemEventHandler):
     """Handler for indexing."""
+
     def __init__(self, crawler: Crawler):
         """Init."""
         self.crawler = crawler
@@ -30,8 +33,10 @@ class IndexingHandler(FileSystemEventHandler):
                 logger.info(f"File created: {path}")
                 self.crawler._process_file(path, 0)
 
+
 class Watcher:
     """Watcher class."""
+
     def __init__(self, crawler: Crawler):
         """Init."""
         self.crawler = crawler

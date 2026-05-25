@@ -8,6 +8,7 @@ from mcp_university.parser.factory import ParserFactory
 from mcp_university.summarizer.engine import Summarizer
 from mcp_university.retrieval.index import SearchIndex
 
+
 @pytest.fixture
 def mock_deps(tmp_path):
     config = MagicMock(spec=Config)
@@ -23,9 +24,12 @@ def mock_deps(tmp_path):
 
     summarizer.summarize_folder.return_value = "# Folder Summary"
     summarizer.summarize_email_conversation.return_value = "# Conversation Summary"
-    summarizer.summarize_file.side_effect = lambda filename, content: f"Summary for {filename}"
+    summarizer.summarize_file.side_effect = lambda filename, content: (
+        f"Summary for {filename}"
+    )
 
     return config, store, parser, summarizer, index
+
 
 def test_email_conversation_logging(tmp_path, mock_deps, caplog):
     config, store, parser, summarizer, index = mock_deps
@@ -49,6 +53,7 @@ def test_email_conversation_logging(tmp_path, mock_deps, caplog):
     assert "Order of emails for conversation summary:" in caplog.text
     assert "  - a.eml" in caplog.text
     assert "  - b.eml" in caplog.text
+
 
 def test_individual_email_summarization_option(tmp_path, mock_deps):
     config, store, parser, summarizer, index = mock_deps

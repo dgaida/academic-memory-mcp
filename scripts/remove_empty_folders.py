@@ -1,6 +1,8 @@
 """Skript zum rekursiven Löschen leerer Ordner."""
+
 import argparse
 from pathlib import Path
+
 
 def remove_empty_folders(path: Path) -> int:
     """Löscht rekursiv alle leeren Ordner unterhalb des angegebenen Pfads.
@@ -32,6 +34,7 @@ def remove_empty_folders(path: Path) -> int:
 
     return deleted_count
 
+
 def main():
     """Haupteinstiegspunkt für das Skript."""
     parser = argparse.ArgumentParser(description="Löscht rekursiv leere Ordner.")
@@ -46,6 +49,7 @@ def main():
     print(f"Starte Bereinigung in: {start_path.absolute()}")
     total_deleted = remove_empty_folders(start_path)
     print(f"Fertig. Es wurden {total_deleted} leere Ordner gelöscht.")
+
 
 if __name__ == "__main__":
     main()

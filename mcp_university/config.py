@@ -1,4 +1,5 @@
 """Modul für die Konfiguration des MCP University Systems."""
+
 from pathlib import Path
 from typing import List, Dict, Any, Type, TypeVar
 import yaml
@@ -6,30 +7,52 @@ from pydantic import BaseModel
 
 T = TypeVar("T", bound=BaseModel)
 
+
 class LLMConfig(BaseModel):
     """Konfiguration für das Large Language Model (Ollama)."""
+
     model: str = "gemma2:2b"
     temperature: float = 0.0
     base_url: str = "http://localhost:11434"
 
+
 class EmbeddingConfig(BaseModel):
     """Konfiguration für das Embedding-Modell."""
+
     model: str = "BAAI/bge-m3"
+
 
 class RerankerConfig(BaseModel):
     """Konfiguration für das Reranker-Modell."""
+
     model: str = "BAAI/bge-reranker-v2-m3"
+
 
 class CalendarConfig(BaseModel):
     """Konfiguration für den Kalender."""
+
     send_invitations_automatically: bool = False
+
 
 class FolderConfig(BaseModel):
     """Konfiguration der zu überwachenden Ordner und Dateitypen."""
+
     folders: List[str] = []
     exclude_patterns: List[str] = [".git", "node_modules", "*.tmp", "*.bak"]
-    supported_extensions: List[str] = [".pdf", ".docx", ".md", ".txt", ".eml", ".msg", ".py", ".ipynb", ".json", ".html"]
+    supported_extensions: List[str] = [
+        ".pdf",
+        ".docx",
+        ".md",
+        ".txt",
+        ".eml",
+        ".msg",
+        ".py",
+        ".ipynb",
+        ".json",
+        ".html",
+    ]
     summarize_emails_individually: bool = False
+
 
 class Config:
     """Zentrale Konfigurationsklasse für das MCP University System.
@@ -120,6 +143,7 @@ class Config:
             Path: Index-Pfad.
         """
         return self.data_dir / "indexes" / "qdrant"
+
 
 def get_config() -> Config:
     """Singleton-ähnlicher Zugriff auf die Systemkonfiguration.

@@ -2,16 +2,16 @@ import pytest
 from unittest.mock import patch
 from mcp_university.summarizer.engine import Summarizer
 
+
 @pytest.fixture
 def mock_ollama_client():
-    with patch('ollama.Client') as mock:
+    with patch("ollama.Client") as mock:
         yield mock
+
 
 def test_answer_question(mock_ollama_client):
     mock_instance = mock_ollama_client.return_value
-    mock_instance.chat.return_value = {
-        'message': {'content': 'Die Antwort ist 42.'}
-    }
+    mock_instance.chat.return_value = {"message": {"content": "Die Antwort ist 42."}}
 
     summarizer = Summarizer(model="test-model", base_url="http://test:11434")
     query = "Was ist die Antwort?"
@@ -24,15 +24,16 @@ def test_answer_question(mock_ollama_client):
 
     # Check if German prompts are in the call
     args, kwargs = mock_instance.chat.call_args
-    messages = kwargs['messages']
-    assert any("universitäres Wissensmanagement" in m['content'] for m in messages)
-    assert any(query in m['content'] for m in messages)
-    assert any(context in m['content'] for m in messages)
+    messages = kwargs["messages"]
+    assert any("universitäres Wissensmanagement" in m["content"] for m in messages)
+    assert any(query in m["content"] for m in messages)
+    assert any(context in m["content"] for m in messages)
+
 
 def test_summarize_email(mock_ollama_client):
     mock_instance = mock_ollama_client.return_value
     mock_instance.chat.return_value = {
-        'message': {'content': '# E-Mail Zusammenfassung\ntest.msg'}
+        "message": {"content": "# E-Mail Zusammenfassung\ntest.msg"}
     }
 
     summarizer = Summarizer()
@@ -41,15 +42,16 @@ def test_summarize_email(mock_ollama_client):
     assert "# E-Mail Zusammenfassung" in summary
 
     args, kwargs = mock_instance.chat.call_args
-    messages = kwargs['messages']
-    assert any("E-Mail Zusammenfassung" in m['content'] for m in messages)
+    messages = kwargs["messages"]
+    assert any("E-Mail Zusammenfassung" in m["content"] for m in messages)
+
 
 def test_summarize_long_doc(mock_ollama_client):
     mock_instance = mock_ollama_client.return_value
     # First call: identify type, Second call: summarize
     mock_instance.chat.side_effect = [
-        {'message': {'content': 'Abschlussarbeit'}},
-        {'message': {'content': '# Dokument\ntest.pdf\n# Typ\nAbschlussarbeit'}}
+        {"message": {"content": "Abschlussarbeit"}},
+        {"message": {"content": "# Dokument\ntest.pdf\n# Typ\nAbschlussarbeit"}},
     ]
 
     summarizer = Summarizer()
@@ -57,6 +59,7 @@ def test_summarize_long_doc(mock_ollama_client):
 
     assert "Abschlussarbeit" in summary
     assert mock_instance.chat.call_count == 2
+
 
 def test_answer_question_error(mock_ollama_client):
     mock_instance = mock_ollama_client.return_value

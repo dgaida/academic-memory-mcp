@@ -1,4 +1,5 @@
 """Skript zum rekursiven Verschieben aller Dateien in den Startordner."""
+
 import argparse
 import shutil
 from pathlib import Path

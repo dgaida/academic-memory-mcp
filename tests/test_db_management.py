@@ -5,13 +5,16 @@ from typer.testing import CliRunner
 from mcp_university.cli.main import app
 import mcp_university.cli.db as db_module
 
+
 @pytest.fixture
 def db_path(tmp_path):
     return tmp_path / "test_university.db"
 
+
 @pytest.fixture
 def store(db_path):
     return MetadataStore(db_path)
+
 
 @pytest.fixture
 def qdrant_path(tmp_path):
@@ -19,9 +22,11 @@ def qdrant_path(tmp_path):
     path.mkdir()
     return path
 
+
 @pytest.fixture
 def search_index(qdrant_path, store):
     return SearchIndex(str(qdrant_path), "all-MiniLM-L6-v2", store=store)
+
 
 def test_metadata_store_retrieval(store):
     fid = store.upsert_file("/path/to/file.txt", "hash1", 123.45, ".txt")
@@ -30,19 +35,22 @@ def test_metadata_store_retrieval(store):
 
     files = store.get_all_files()
     assert len(files) == 1
-    assert files[0]['path'] == "/path/to/file.txt"
+    assert files[0]["path"] == "/path/to/file.txt"
 
     folders = store.get_all_folders()
     assert len(folders) == 1
-    assert folders[0]['path'] == "/path/to/folder"
+    assert folders[0]["path"] == "/path/to/folder"
 
     summaries = store.get_all_summaries()
     assert len(summaries) == 1
-    assert summaries[0]['content'] == "Test summary"
+    assert summaries[0]["content"] == "Test summary"
+
 
 def test_metadata_store_deletion(store):
     folder_id = store.upsert_folder("/path/to/folder")
-    fid = store.upsert_file("/path/to/file.txt", "hash1", 123.45, ".txt", folder_id=folder_id)
+    fid = store.upsert_file(
+        "/path/to/file.txt", "hash1", 123.45, ".txt", folder_id=folder_id
+    )
     store.add_summary("file", fid, "File summary")
     store.add_summary("folder", folder_id, "Folder summary")
 
@@ -51,6 +59,7 @@ def test_metadata_store_deletion(store):
     assert len(store.get_all_folders()) == 0
     assert len(store.get_all_files()) == 0
     assert len(store.get_all_summaries()) == 0
+
 
 def test_search_index_deletion(search_index):
     doc_id = "/path/to/doc.txt"
@@ -61,12 +70,13 @@ def test_search_index_deletion(search_index):
 
     results = search_index.search("test document")
     assert len(results) > 0
-    assert results[0]['path'] == doc_id
+    assert results[0]["path"] == doc_id
 
     search_index.delete_document(doc_id)
 
     results = search_index.search("test document")
-    assert len(results) == 0 or all(r['path'] != doc_id for r in results)
+    assert len(results) == 0 or all(r["path"] != doc_id for r in results)
+
 
 def test_cli_list_files(store, search_index, monkeypatch):
     monkeypatch.setattr(db_module, "get_store_and_index", lambda: (store, search_index))
@@ -79,6 +89,7 @@ def test_cli_list_files(store, search_index, monkeypatch):
     assert result.exit_code == 0
     assert "/test/path.txt" in result.stdout
 
+
 def test_cli_delete_file(store, search_index, monkeypatch):
     monkeypatch.setattr(db_module, "get_store_and_index", lambda: (store, search_index))
     fid = store.upsert_file("/test/delete_me.txt", "hash", 1.0, ".txt")
@@ -89,7 +100,8 @@ def test_cli_delete_file(store, search_index, monkeypatch):
     assert "erfolgreich gelöscht" in result.stdout
     assert len(store.get_all_files()) == 0
     results = search_index.search("content")
-    assert all(r['path'] != "/test/delete_me.txt" for r in results)
+    assert all(r["path"] != "/test/delete_me.txt" for r in results)
+
 
 def test_cli_delete_folder(store, search_index, monkeypatch):
     monkeypatch.setattr(db_module, "get_store_and_index", lambda: (store, search_index))
@@ -103,4 +115,4 @@ def test_cli_delete_folder(store, search_index, monkeypatch):
     assert len(store.get_all_folders()) == 0
     assert len(store.get_all_files()) == 0
     results = search_index.search("content")
-    assert all(r['path'] != "/test/folder/file.txt" for r in results)
+    assert all(r["path"] != "/test/folder/file.txt" for r in results)

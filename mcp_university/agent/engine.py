@@ -1,4 +1,5 @@
 """Modul für den Agenten mit Tool-Calling-Unterstützung."""
+
 import logging
 from typing import List, Dict, Callable
 from pathlib import Path
@@ -11,6 +12,7 @@ from ..retrieval.index import SearchIndex
 from ..metadata.store import MetadataStore
 
 logger = logging.getLogger(__name__)
+
 
 class Agent:
     """Agent, der Tool-Calling mittels Ollama unterstützt."""
@@ -29,14 +31,16 @@ class Agent:
 
         self.parser_factory = ParserFactory(self.cfg.data_dir / "cache")
         self.store = MetadataStore(self.cfg.sqlite_path)
-        self.index = SearchIndex(str(self.cfg.qdrant_path), self.cfg.embeddings.model, store=self.store)
+        self.index = SearchIndex(
+            str(self.cfg.qdrant_path), self.cfg.embeddings.model, store=self.store
+        )
 
         self.available_tools: Dict[str, Callable] = {
             "read_file": self._tool_read_file,
             "search_documents": self._tool_search_documents,
             "get_student_info": self._tool_get_student_info,
             "get_appointment_slots": self._tool_get_appointment_slots,
-            "manage_calendar_appointment": self._tool_manage_calendar_appointment
+            "manage_calendar_appointment": self._tool_manage_calendar_appointment,
         }
 
         self.tools_definition = [
@@ -50,12 +54,12 @@ class Agent:
                         "properties": {
                             "path": {
                                 "type": "string",
-                                "description": "Der Pfad zur Datei."
+                                "description": "Der Pfad zur Datei.",
                             }
                         },
-                        "required": ["path"]
-                    }
-                }
+                        "required": ["path"],
+                    },
+                },
             },
             {
                 "type": "function",
@@ -67,12 +71,12 @@ class Agent:
                         "properties": {
                             "query": {
                                 "type": "string",
-                                "description": "Die Suchanfrage."
+                                "description": "Die Suchanfrage.",
                             }
                         },
-                        "required": ["query"]
-                    }
-                }
+                        "required": ["query"],
+                    },
+                },
             },
             {
                 "type": "function",
@@ -84,24 +88,20 @@ class Agent:
                         "properties": {
                             "student_name": {
                                 "type": "string",
-                                "description": "Name oder Teilname des Studenten."
+                                "description": "Name oder Teilname des Studenten.",
                             }
                         },
-                        "required": ["student_name"]
-                    }
-                }
+                        "required": ["student_name"],
+                    },
+                },
             },
             {
                 "type": "function",
                 "function": {
                     "name": "get_appointment_slots",
                     "description": "Liest die aktuell verfügbaren freien Terminslots aus einer Datei.",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {},
-                        "required": []
-                    }
-                }
+                    "parameters": {"type": "object", "properties": {}, "required": []},
+                },
             },
             {
                 "type": "function",
@@ -113,25 +113,30 @@ class Agent:
                         "properties": {
                             "start_time": {
                                 "type": "string",
-                                "description": "Beginn des Termins im Format 'YYYY-MM-DD HH:MM'."
+                                "description": "Beginn des Termins im Format 'YYYY-MM-DD HH:MM'.",
                             },
                             "end_time": {
                                 "type": "string",
-                                "description": "Ende des Termins im Format 'YYYY-MM-DD HH:MM'."
+                                "description": "Ende des Termins im Format 'YYYY-MM-DD HH:MM'.",
                             },
                             "subject": {
                                 "type": "string",
-                                "description": "Der Betreff des Kalendereintrags."
+                                "description": "Der Betreff des Kalendereintrags.",
                             },
                             "student_email": {
                                 "type": "string",
-                                "description": "Die E-Mail-Adresse des Studenten, der eingeladen werden soll."
-                            }
+                                "description": "Die E-Mail-Adresse des Studenten, der eingeladen werden soll.",
+                            },
                         },
-                        "required": ["start_time", "end_time", "subject", "student_email"]
-                    }
-                }
-            }
+                        "required": [
+                            "start_time",
+                            "end_time",
+                            "subject",
+                            "student_email",
+                        ],
+                    },
+                },
+            },
         ]
 
     def _tool_read_file(self, path: str) -> str:
@@ -178,11 +183,14 @@ class Agent:
         """
         with self.store._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute('''
+            cursor.execute(
+                """
                 SELECT s.*, f.path as folder_path FROM students s
                 LEFT JOIN folders f ON s.folder_id = f.id
                 WHERE s.name LIKE ?
-            ''', (f"%{student_name}%",))
+            """,
+                (f"%{student_name}%",),
+            )
             student = cursor.fetchone()
             if not student:
                 return f"Kein Student mit dem Namen {student_name} gefunden."
@@ -205,7 +213,9 @@ class Agent:
         except Exception as e:
             return f"Fehler beim Lesen der freien Slots: {e}"
 
-    def _tool_manage_calendar_appointment(self, start_time: str, end_time: str, subject: str, student_email: str) -> str:
+    def _tool_manage_calendar_appointment(
+        self, start_time: str, end_time: str, subject: str, student_email: str
+    ) -> str:
         """Prüft einen Slot und trägt einen Kalendertermin ein, falls frei.
 
         Args:
@@ -267,7 +277,10 @@ class Agent:
                             for folder in root.Folders:
                                 if folder.Name.lower() in ["posteingang", "inbox"]:
                                     for sub in folder.Folders:
-                                        if sub.Name.lower() == target_folder_name.lower():
+                                        if (
+                                            sub.Name.lower()
+                                            == target_folder_name.lower()
+                                        ):
                                             target_folder = sub
                                             break
                                 if target_folder:
@@ -275,7 +288,9 @@ class Agent:
                         if target_folder:
                             break
             except Exception as e:
-                logger.warning(f"Fehler beim Suchen des Zielordners '{target_folder_name}': {e}")
+                logger.warning(
+                    f"Fehler beim Suchen des Zielordners '{target_folder_name}': {e}"
+                )
 
             # Slot prüfen
             dt_start = datetime.strptime(start_time, "%Y-%m-%d %H:%M")
@@ -309,12 +324,14 @@ class Agent:
             auto_send = self.cfg.calendar.send_invitations_automatically
 
             if not auto_send and target_folder:
-                appointment = target_folder.Items.Add(1) # 1 = olAppointmentItem
+                appointment = target_folder.Items.Add(1)  # 1 = olAppointmentItem
                 logger.info(f"Erstelle Termin-Entwurf in '{target_folder_name}'.")
             else:
-                appointment = cal_folder.Items.Add(1) # 1 = olAppointmentItem
+                appointment = cal_folder.Items.Add(1)  # 1 = olAppointmentItem
                 if not auto_send:
-                    logger.warning(f"Zielordner '{target_folder_name}' nicht gefunden. Erstelle im Standard-Kalender.")
+                    logger.warning(
+                        f"Zielordner '{target_folder_name}' nicht gefunden. Erstelle im Standard-Kalender."
+                    )
 
             appointment.Subject = subject
             appointment.Start = dt_start
@@ -324,8 +341,8 @@ class Agent:
 
             # Einladung vorbereiten
             recipient = appointment.Recipients.Add(student_email)
-            recipient.Type = 1 # 1 = olTo
-            appointment.MeetingStatus = 1 # 1 = olMeeting
+            recipient.Type = 1  # 1 = olTo
+            appointment.MeetingStatus = 1  # 1 = olMeeting
 
             appointment.Save()
 
@@ -350,27 +367,25 @@ class Agent:
         """
         all_messages = []
         if system_prompt:
-            all_messages.append({'role': 'system', 'content': system_prompt})
+            all_messages.append({"role": "system", "content": system_prompt})
         all_messages.extend(messages)
 
         max_iterations = 5
         for _ in range(max_iterations):
             response = self.client.chat(
-                model=self.model,
-                messages=all_messages,
-                tools=self.tools_definition
+                model=self.model, messages=all_messages, tools=self.tools_definition
             )
 
-            message = response.get('message', {})
+            message = response.get("message", {})
             all_messages.append(message)
 
-            if not message.get('tool_calls'):
-                return message.get('content', "")
+            if not message.get("tool_calls"):
+                return message.get("content", "")
 
             # Verarbeite Tool-Calls
-            for tool_call in message['tool_calls']:
-                function_name = tool_call['function']['name']
-                args = tool_call['function'].get('arguments', {})
+            for tool_call in message["tool_calls"]:
+                function_name = tool_call["function"]["name"]
+                args = tool_call["function"].get("arguments", {})
 
                 logger.info(f"Agent ruft Tool auf: {function_name} mit {args}")
 
@@ -384,10 +399,14 @@ class Agent:
 
                 logger.info(f"Tool Ergebnis: {tool_result}")
 
-                all_messages.append({
-                    'role': 'tool',
-                    'content': str(tool_result),
-                    'tool_call_id': tool_call.get('id') # Ollama supports this if present
-                })
+                all_messages.append(
+                    {
+                        "role": "tool",
+                        "content": str(tool_result),
+                        "tool_call_id": tool_call.get(
+                            "id"
+                        ),  # Ollama supports this if present
+                    }
+                )
 
         return "Fehler: Maximale Anzahl an Iterationen erreicht."

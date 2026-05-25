@@ -2,11 +2,14 @@ from unittest.mock import MagicMock, patch
 from mcp_university.parser.pdf_parser import PDFParser
 from mcp_university.parser.mail_parser import MailParser
 
+
 def test_pdf_parser_docling(tmp_path):
     """Testet den PDFParser mit docling."""
     cache_dir = tmp_path / "cache"
 
-    with patch("mcp_university.parser.pdf_parser.DocumentConverter") as mock_converter_class:
+    with patch(
+        "mcp_university.parser.pdf_parser.DocumentConverter"
+    ) as mock_converter_class:
         mock_converter = mock_converter_class.return_value
         mock_result = MagicMock()
         mock_result.status = "SUCCESS"
@@ -20,6 +23,7 @@ def test_pdf_parser_docling(tmp_path):
         content = parser.parse(pdf_file)
         assert content == "Parsed docling content"
         mock_converter.convert.assert_called_once_with(str(pdf_file), max_num_pages=3)
+
 
 def test_mail_parser_msg_handling(tmp_path):
     """Testet die Verarbeitung von .msg Dateien im MailParser."""
@@ -39,12 +43,15 @@ def test_mail_parser_msg_handling(tmp_path):
         assert "Test Subject" in content
         assert "This is a test message body." in content
 
+
 def test_mail_parser_eml_fallback_on_decode_error(tmp_path):
     """Testet den Fallback auf latin-1 bei Kodierungsfehlern in EML-Dateien."""
     parser = MailParser()
     eml_file = tmp_path / "test.eml"
     # Create a dummy EML with non-UTF-8 characters (e.g. 0xD0)
-    eml_content = b"Subject: Test\nContent-Type: text/plain; charset=utf-8\n\n\xd0 Invalid"
+    eml_content = (
+        b"Subject: Test\nContent-Type: text/plain; charset=utf-8\n\n\xd0 Invalid"
+    )
     eml_file.write_bytes(eml_content)
 
     # This should now handle the UnicodeDecodeError using the latin-1 fallback

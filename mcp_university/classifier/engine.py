@@ -1,4 +1,5 @@
 """Engine für die Klassifizierung von E-Mails."""
+
 import pickle
 from pathlib import Path
 from typing import List, Tuple, Dict, Any, Optional, Union
@@ -11,6 +12,7 @@ from sklearn.preprocessing import LabelEncoder
 
 from mcp_university.parser.mail_parser import MailParser
 
+
 class EmailClassifier:
     """Klassifiziert E-Mails basierend auf TF-IDF und/oder Embeddings."""
 
@@ -18,7 +20,7 @@ class EmailClassifier:
         self,
         mode: str = "combined",
         method: str = "xgboost",
-        embedding_model_name: str = "paraphrase-multilingual-MiniLM-L12-v2"
+        embedding_model_name: str = "paraphrase-multilingual-MiniLM-L12-v2",
     ) -> None:
         """Initialisiert den Klassifikator.
 
@@ -40,7 +42,10 @@ class EmailClassifier:
             self.classifier = RandomForestClassifier(n_estimators=100, random_state=42)
         elif method == "xgboost":
             from xgboost import XGBClassifier
-            self.classifier = XGBClassifier(n_estimators=100, random_state=42, eval_metric='logloss')
+
+            self.classifier = XGBClassifier(
+                n_estimators=100, random_state=42, eval_metric="logloss"
+            )
         else:
             raise ValueError(f"Ungültige Klassifizierungsmethode: {method}")
 
@@ -51,6 +56,7 @@ class EmailClassifier:
         """Lädt das Embedding-Modell verzögert (Lazy Loading)."""
         if self._embedding_model is None:
             from sentence_transformers import SentenceTransformer
+
             self._embedding_model = SentenceTransformer(self.embedding_model_name)
         return self._embedding_model
 
@@ -58,7 +64,9 @@ class EmailClassifier:
         """Extrahiert Text aus einer E-Mail-Datei."""
         return self.parser.parse(file_path)
 
-    def preprocess_data(self, root_dir: Union[str, Path]) -> Tuple[List[str], List[str]]:
+    def preprocess_data(
+        self, root_dir: Union[str, Path]
+    ) -> Tuple[List[str], List[str]]:
         """Liest E-Mails aus Ordnerstrukturen ein.
 
         Die Ordnernamen werden als Klassenlabels verwendet.
@@ -150,7 +158,7 @@ class EmailClassifier:
         return {
             "prediction": label,
             "probabilities": probs,
-            "confidence": float(np.max(y_prob))
+            "confidence": float(np.max(y_prob)),
         }
 
     def save(self, model_path: Union[str, Path]) -> None:
@@ -166,7 +174,7 @@ class EmailClassifier:
             "tfidf_vectorizer": self.tfidf_vectorizer,
             "classifier": self.classifier,
             "label_encoder": self.label_encoder,
-            "is_trained": self.is_trained
+            "is_trained": self.is_trained,
         }
         with open(model_path, "wb") as f:
             pickle.dump(data, f)

@@ -1,4 +1,5 @@
 """Skript zum Trainieren des E-Mail-Klassifikators."""
+
 import argparse
 from pathlib import Path
 import logging
@@ -11,10 +12,18 @@ from sklearn.model_selection import GridSearchCV
 from mcp_university.classifier.engine import EmailClassifier
 
 # Logging konfigurieren
-logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
-def evaluate_and_save(classifier: EmailClassifier, texts: list, labels: list, output_dir: Path, prefix: str = "train", cv_results: dict = None) -> None:
+
+def evaluate_and_save(
+    classifier: EmailClassifier,
+    texts: list,
+    labels: list,
+    output_dir: Path,
+    prefix: str = "train",
+    cv_results: dict = None,
+) -> None:
     """Evaluiert das Modell und speichert Metriken und Konfusionsmatrix.
 
     Args:
@@ -39,12 +48,17 @@ def evaluate_and_save(classifier: EmailClassifier, texts: list, labels: list, ou
 
     # 1. Konfusionsmatrix plotten
     plt.figure(figsize=(10, 8))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
-                xticklabels=classifier.label_encoder.classes_,
-                yticklabels=classifier.label_encoder.classes_)
-    plt.title(f'Konfusionsmatrix ({prefix.capitalize()})')
-    plt.ylabel('Wahre Klasse')
-    plt.xlabel('Vorhergesagte Klasse')
+    sns.heatmap(
+        cm,
+        annot=True,
+        fmt="d",
+        cmap="Blues",
+        xticklabels=classifier.label_encoder.classes_,
+        yticklabels=classifier.label_encoder.classes_,
+    )
+    plt.title(f"Konfusionsmatrix ({prefix.capitalize()})")
+    plt.ylabel("Wahre Klasse")
+    plt.xlabel("Vorhergesagte Klasse")
     plt.tight_layout()
 
     img_path = output_dir / f"{prefix}_confusion_matrix.png"
@@ -60,12 +74,19 @@ def evaluate_and_save(classifier: EmailClassifier, texts: list, labels: list, ou
         if cv_results:
             f.write("## Kreuzvalidierung (Cross-Validation)\n\n")
             f.write(f"**Beste Parameter:** `{cv_results['best_params']}`\n\n")
-            f.write(f"**Bester CV-Score (Accuracy):** {cv_results['best_score']:.2%}\n\n")
+            f.write(
+                f"**Bester CV-Score (Accuracy):** {cv_results['best_score']:.2%}\n\n"
+            )
             f.write("### Alle Experimente\n\n")
-            cv_df = pd.DataFrame(cv_results['results'])
+            cv_df = pd.DataFrame(cv_results["results"])
             # Nur relevante Spalten anzeigen
-            cols = [col for col in cv_df.columns if col.startswith('param_') or col in ['mean_test_score', 'std_test_score', 'rank_test_score']]
-            f.write(cv_df[cols].sort_values('rank_test_score').to_markdown(index=False))
+            cols = [
+                col
+                for col in cv_df.columns
+                if col.startswith("param_")
+                or col in ["mean_test_score", "std_test_score", "rank_test_score"]
+            ]
+            f.write(cv_df[cols].sort_values("rank_test_score").to_markdown(index=False))
             f.write("\n\n")
 
         f.write(f"**Genauigkeit auf Trainingsdaten (Accuracy):** {accuracy:.2%}\n\n")
@@ -74,23 +95,53 @@ def evaluate_and_save(classifier: EmailClassifier, texts: list, labels: list, ou
         f.write(report)
         f.write("\n```\n\n")
         f.write("## Konfusionsmatrix\n\n")
-        cm_df = pd.DataFrame(cm, index=classifier.label_encoder.classes_, columns=classifier.label_encoder.classes_)
+        cm_df = pd.DataFrame(
+            cm,
+            index=classifier.label_encoder.classes_,
+            columns=classifier.label_encoder.classes_,
+        )
         f.write(cm_df.to_markdown())
         f.write("\n")
 
     logger.info(f"Metriken gespeichert unter {md_path}")
 
+
 def main() -> None:
     """Main function for training the classifier."""
-    parser = argparse.ArgumentParser(description="Trainiert einen E-Mail-Klassifikator.")
-    parser.add_argument("data_dir", type=str, help="Pfad zum Verzeichnis mit den Trainingsdaten (Unterordner pro Klasse).")
-    parser.add_argument("--model-path", type=str, default="data/email_classifier.pkl", help="Pfad zum Speichern des Modells.")
-    parser.add_argument("--mode", type=str, choices=["tfidf", "embedding", "combined"], default="combined",
-                        help="Modus der Merkmalsextraktion (default: combined).")
-    parser.add_argument("--method", type=str, choices=["randomforest", "xgboost"], default="xgboost",
-                        help="Klassifizierungsmethode (default: xgboost).")
-    parser.add_argument("--embedding-model", type=str, default="paraphrase-multilingual-MiniLM-L12-v2",
-                        help="Sentence-Transformer Modell (default: paraphrase-multilingual-MiniLM-L12-v2).")
+    parser = argparse.ArgumentParser(
+        description="Trainiert einen E-Mail-Klassifikator."
+    )
+    parser.add_argument(
+        "data_dir",
+        type=str,
+        help="Pfad zum Verzeichnis mit den Trainingsdaten (Unterordner pro Klasse).",
+    )
+    parser.add_argument(
+        "--model-path",
+        type=str,
+        default="data/email_classifier.pkl",
+        help="Pfad zum Speichern des Modells.",
+    )
+    parser.add_argument(
+        "--mode",
+        type=str,
+        choices=["tfidf", "embedding", "combined"],
+        default="combined",
+        help="Modus der Merkmalsextraktion (default: combined).",
+    )
+    parser.add_argument(
+        "--method",
+        type=str,
+        choices=["randomforest", "xgboost"],
+        default="xgboost",
+        help="Klassifizierungsmethode (default: xgboost).",
+    )
+    parser.add_argument(
+        "--embedding-model",
+        type=str,
+        default="paraphrase-multilingual-MiniLM-L12-v2",
+        help="Sentence-Transformer Modell (default: paraphrase-multilingual-MiniLM-L12-v2).",
+    )
 
     args = parser.parse_args()
 
@@ -99,8 +150,12 @@ def main() -> None:
         logger.error(f"Datenverzeichnis {args.data_dir} existiert nicht.")
         return
 
-    logger.info(f"Starte Training im Modus '{args.mode}' mit Methode '{args.method}'...")
-    classifier = EmailClassifier(mode=args.mode, method=args.method, embedding_model_name=args.embedding_model)
+    logger.info(
+        f"Starte Training im Modus '{args.mode}' mit Methode '{args.method}'..."
+    )
+    classifier = EmailClassifier(
+        mode=args.mode, method=args.method, embedding_model_name=args.embedding_model
+    )
 
     try:
         # Daten laden
@@ -116,25 +171,27 @@ def main() -> None:
         # GridSearchCV Setup
         if args.method == "randomforest":
             param_grid = {
-                'n_estimators': [50, 100, 200],
-                'max_depth': [None, 10, 20],
-                'criterion': ['gini']
+                "n_estimators": [50, 100, 200],
+                "max_depth": [None, 10, 20],
+                "criterion": ["gini"],
             }
         else:  # xgboost
             param_grid = {
-                'n_estimators': [100, 200],
-                'max_depth': [2, 3],
-                'learning_rate': [0.1]
+                "n_estimators": [100, 200],
+                "max_depth": [2, 3],
+                "learning_rate": [0.1],
             }
 
-        logger.info(f"Starte GridSearchCV mit 5-fold CV und 9 Experimenten für {args.method}...")
+        logger.info(
+            f"Starte GridSearchCV mit 5-fold CV und 9 Experimenten für {args.method}..."
+        )
         grid_search = GridSearchCV(
             estimator=classifier.classifier,
             param_grid=param_grid,
             cv=5,
-            scoring='accuracy',
+            scoring="accuracy",
             n_jobs=-1,
-            verbose=1
+            verbose=1,
         )
 
         grid_search.fit(X, y)
@@ -148,15 +205,17 @@ def main() -> None:
 
         # CV Ergebnisse für den Bericht vorbereiten
         cv_results = {
-            'best_params': grid_search.best_params_,
-            'best_score': grid_search.best_score_,
-            'results': grid_search.cv_results_
+            "best_params": grid_search.best_params_,
+            "best_score": grid_search.best_score_,
+            "results": grid_search.cv_results_,
         }
 
         # Sicherstellen, dass Zielverzeichnis existiert
         model_file = Path(args.model_path)
         if f"_{args.mode}" not in model_file.stem:
-            model_file = model_file.with_name(f"{model_file.stem}_{args.mode}{model_file.suffix}")
+            model_file = model_file.with_name(
+                f"{model_file.stem}_{args.mode}{model_file.suffix}"
+            )
         model_file.parent.mkdir(parents=True, exist_ok=True)
 
         classifier.save(model_file)
@@ -164,12 +223,21 @@ def main() -> None:
 
         # Evaluierung auf Trainingsdaten
         logger.info("Starte Evaluierung und Berichterstellung...")
-        evaluate_and_save(classifier, texts, labels, model_file.parent, prefix="train", cv_results=cv_results)
+        evaluate_and_save(
+            classifier,
+            texts,
+            labels,
+            model_file.parent,
+            prefix="train",
+            cv_results=cv_results,
+        )
 
     except Exception as e:
         logger.error(f"Fehler beim Training: {e}")
         import traceback
+
         logger.error(traceback.format_exc())
+
 
 if __name__ == "__main__":
     main()

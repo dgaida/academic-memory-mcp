@@ -1,4 +1,5 @@
 """Skript zur Umstrukturierung der Trainings- und Testdaten des Klassifikators."""
+
 import argparse
 import shutil
 from pathlib import Path
@@ -11,11 +12,12 @@ except ImportError:
     exit(1)
 
 # Logging konfigurieren
-logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 # Warnungen von extract-msg unterdrücken
 logging.getLogger("extract_msg").setLevel(logging.ERROR)
+
 
 def restructure_data(root_dir: Path):
     """Verschiebt E-Mails in Inbox/SentItems Unterordner pro Klasse.
@@ -66,12 +68,18 @@ def restructure_data(root_dir: Path):
             except Exception as e:
                 logger.error(f"Fehler beim Verarbeiten von {msg_file.name}: {e}")
 
+
 def main():
-    parser = argparse.ArgumentParser(description="Restrukturiert E-Mail-Klassifikationsdaten in Inbox/SentItems.")
-    parser.add_argument("data_dir", type=str, help="Verzeichnis mit den Klassen-Unterordnern.")
+    parser = argparse.ArgumentParser(
+        description="Restrukturiert E-Mail-Klassifikationsdaten in Inbox/SentItems."
+    )
+    parser.add_argument(
+        "data_dir", type=str, help="Verzeichnis mit den Klassen-Unterordnern."
+    )
     args = parser.parse_args()
 
     restructure_data(Path(args.data_dir))
+
 
 if __name__ == "__main__":
     main()

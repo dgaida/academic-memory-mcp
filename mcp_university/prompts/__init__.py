@@ -1,2 +1,3 @@
 """Prompts init."""
+
 """Init."""

@@ -1,2 +1,3 @@
 """Summarizer init."""
+
 """Init."""

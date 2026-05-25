@@ -1,4 +1,5 @@
 """Skript zur Evaluierung des E-Mail-Klassifikators."""
+
 import argparse
 from pathlib import Path
 import logging
@@ -11,8 +12,9 @@ import seaborn as sns
 from mcp_university.classifier.engine import EmailClassifier
 
 # Logging konfigurieren
-logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
+
 
 def evaluate(model_path: Path, test_dir: Path) -> None:
     """Evaluiert das Modell auf Testdaten.
@@ -54,29 +56,38 @@ def evaluate(model_path: Path, test_dir: Path) -> None:
     cm = confusion_matrix(y_true, y_pred, labels=classifier.label_encoder.classes_)
 
     # Ergebnisse ausgeben
-    print("\n" + "="*30)
+    print("\n" + "=" * 30)
     print("EVALUIERUNGSERGEBNISSE")
-    print("="*30)
+    print("=" * 30)
     print(f"Genauigkeit (Accuracy): {accuracy:.2%}")
     print("\nKlassifizierungsbericht:")
     print(report)
 
     print("\nKonfusionsmatrix:")
-    cm_df = pd.DataFrame(cm, index=classifier.label_encoder.classes_, columns=classifier.label_encoder.classes_)
+    cm_df = pd.DataFrame(
+        cm,
+        index=classifier.label_encoder.classes_,
+        columns=classifier.label_encoder.classes_,
+    )
     print(cm_df)
-    print("="*30 + "\n")
+    print("=" * 30 + "\n")
 
     # 1. Konfusionsmatrix plotten und speichern
     output_dir = model_path.parent
     output_dir.mkdir(parents=True, exist_ok=True)
 
     plt.figure(figsize=(10, 8))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Greens',
-                xticklabels=classifier.label_encoder.classes_,
-                yticklabels=classifier.label_encoder.classes_)
-    plt.title('Konfusionsmatrix (Testdaten)')
-    plt.ylabel('Wahre Klasse')
-    plt.xlabel('Vorhergesagte Klasse')
+    sns.heatmap(
+        cm,
+        annot=True,
+        fmt="d",
+        cmap="Greens",
+        xticklabels=classifier.label_encoder.classes_,
+        yticklabels=classifier.label_encoder.classes_,
+    )
+    plt.title("Konfusionsmatrix (Testdaten)")
+    plt.ylabel("Wahre Klasse")
+    plt.xlabel("Vorhergesagte Klasse")
     plt.tight_layout()
 
     img_path = output_dir / "test_confusion_matrix.png"
@@ -99,15 +110,28 @@ def evaluate(model_path: Path, test_dir: Path) -> None:
 
     logger.info(f"Metriken gespeichert unter {md_path}")
 
+
 def main() -> None:
     """Main function for evaluating the classifier."""
-    parser = argparse.ArgumentParser(description="Evaluiert einen E-Mail-Klassifikator.")
-    parser.add_argument("test_dir", type=str, help="Pfad zum Verzeichnis mit den Testdaten (Unterordner pro Klasse).")
-    parser.add_argument("--model-path", type=str, default="data/email_classifier.pkl", help="Pfad zum trainierten Modell.")
+    parser = argparse.ArgumentParser(
+        description="Evaluiert einen E-Mail-Klassifikator."
+    )
+    parser.add_argument(
+        "test_dir",
+        type=str,
+        help="Pfad zum Verzeichnis mit den Testdaten (Unterordner pro Klasse).",
+    )
+    parser.add_argument(
+        "--model-path",
+        type=str,
+        default="data/email_classifier.pkl",
+        help="Pfad zum trainierten Modell.",
+    )
 
     args = parser.parse_args()
 
     evaluate(Path(args.model_path), Path(args.test_dir))
+
 
 if __name__ == "__main__":
     main()

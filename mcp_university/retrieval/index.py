@@ -1,4 +1,5 @@
 """Schnittstelle zum hybriden Suchindex (qmd oder native Qdrant+BM25)."""
+
 import logging
 import json
 import pickle
@@ -14,11 +15,13 @@ try:
     from qdrant_client import QdrantClient, models
     from sentence_transformers import SentenceTransformer
     from rank_bm25 import BM25Okapi
+
     NATIVE_AVAILABLE = True
 except ImportError:
     NATIVE_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
+
 
 class SearchIndex:
     """Schnittstelle zum Suchindex.
@@ -27,7 +30,12 @@ class SearchIndex:
     Python-Implementierung als Fallback verwendet.
     """
 
-    def __init__(self, location: str, embedding_model_name: str = "BAAI/bge-m3", store: Any = None):
+    def __init__(
+        self,
+        location: str,
+        embedding_model_name: str = "BAAI/bge-m3",
+        store: Any = None,
+    ):
         """Initialisiert den SearchIndex.
 
         Args:
@@ -41,15 +49,19 @@ class SearchIndex:
         self.embedding_model_name = embedding_model_name
         self._model = None
 
-        self.use_shell = os.name == 'nt'
+        self.use_shell = os.name == "nt"
         self._qmd_available = self._check_qmd()
 
         if self._qmd_available:
             logger.info("Using qmd CLI as primary search backend.")
         else:
-            logger.warning("qmd CLI not found. Falling back to native Python implementation. Install with: npm install -g @tobilu/qmd")
+            logger.warning(
+                "qmd CLI not found. Falling back to native Python implementation. Install with: npm install -g @tobilu/qmd"
+            )
             if not NATIVE_AVAILABLE:
-                logger.error("Native search dependencies missing. Search will be unavailable.")
+                logger.error(
+                    "Native search dependencies missing. Search will be unavailable."
+                )
 
         # Initialize native components anyway as fallback
         if NATIVE_AVAILABLE:
@@ -59,11 +71,13 @@ class SearchIndex:
         """Prüft, ob das qmd-Tool verfügbar ist."""
         try:
             logger.debug("Checking for qmd CLI availability...")
-            result = subprocess.run(["qmd", "--version"],
-                           capture_output=True,
-                           shell=self.use_shell,
-                           check=True,
-                           text=True)
+            result = subprocess.run(
+                ["qmd", "--version"],
+                capture_output=True,
+                shell=self.use_shell,
+                check=True,
+                text=True,
+            )
             logger.debug(f"qmd version: {result.stdout.strip()}")
             return True
         except (subprocess.CalledProcessError, FileNotFoundError) as e:
@@ -74,16 +88,19 @@ class SearchIndex:
     def model(self):
         """Gibt das SentenceTransformer-Modell zurück (Lazy Loading)."""
         if self._model is None and NATIVE_AVAILABLE:
-            logger.info(f"Loading SentenceTransformer model: {self.embedding_model_name}")
+            logger.info(
+                f"Loading SentenceTransformer model: {self.embedding_model_name}"
+            )
             self._model = SentenceTransformer(self.embedding_model_name)
         return self._model
 
     def _init_native(self) -> None:
         """Initialisiert die native Fallback-Suche."""
-        logger.info(f"Initializing native search with model: {self.embedding_model_name}")
+        logger.info(
+            f"Initializing native search with model: {self.embedding_model_name}"
+        )
         self.client = QdrantClient(path=str(self.location))
         self.collection_name = "university_documents"
-
 
         self.bm25_path = self.location / "bm25_index.pkl"
         self.corpus_path = self.location / "corpus.json"
@@ -98,14 +115,13 @@ class SearchIndex:
 
         if not exists:
             logger.info(f"Creating Qdrant collection: {self.collection_name}")
-            dummy_vector = self.model.encode("dummy") if self.model else [0]*1024
+            dummy_vector = self.model.encode("dummy") if self.model else [0] * 1024
             vector_size = len(dummy_vector)
             self.client.create_collection(
                 collection_name=self.collection_name,
                 vectors_config=models.VectorParams(
-                    size=vector_size,
-                    distance=models.Distance.COSINE
-                )
+                    size=vector_size, distance=models.Distance.COSINE
+                ),
             )
 
     def _load_bm25(self) -> None:
@@ -148,9 +164,9 @@ class SearchIndex:
                 models.PointStruct(
                     id=doc_hash,
                     vector=vector,
-                    payload={"doc_id": doc_id, "content": content, **metadata}
+                    payload={"doc_id": doc_id, "content": content, **metadata},
                 )
-            ]
+            ],
         )
 
         self.corpus = [doc for doc in self.corpus if doc["doc_id"] != doc_id]
@@ -174,7 +190,7 @@ class SearchIndex:
         # Lösche aus Qdrant
         self.client.delete(
             collection_name=self.collection_name,
-            points_selector=models.PointIdsList(points=[doc_hash])
+            points_selector=models.PointIdsList(points=[doc_hash]),
         )
 
         # Lösche aus Corpus und BM25
@@ -225,20 +241,28 @@ class SearchIndex:
         try:
             # Try 'query' (hybrid) first
             logger.debug("Executing 'qmd query'...")
-            result = subprocess.run([
-                "qmd", "query", query, "--json", "-n", str(top_k)
-            ], capture_output=True, text=True, shell=self.use_shell)
+            result = subprocess.run(
+                ["qmd", "query", query, "--json", "-n", str(top_k)],
+                capture_output=True,
+                text=True,
+                shell=self.use_shell,
+            )
 
             if result.returncode != 0:
-                logger.debug(f"'qmd query' failed (rc={result.returncode}), trying 'qmd search'...")
+                logger.debug(
+                    f"'qmd query' failed (rc={result.returncode}), trying 'qmd search'..."
+                )
                 # Fallback to simple 'search'
-                result = subprocess.run([
-                    "qmd", "search", query, "--json", "-n", str(top_k)
-                ], capture_output=True, text=True, shell=self.use_shell)
+                result = subprocess.run(
+                    ["qmd", "search", query, "--json", "-n", str(top_k)],
+                    capture_output=True,
+                    text=True,
+                    shell=self.use_shell,
+                )
 
             if result.returncode == 0:
                 stdout = result.stdout
-                match = re.search(r'\[\s*\{.*\}\s*\]', stdout, re.DOTALL)
+                match = re.search(r"\[\s*\{.*\}\s*\]", stdout, re.DOTALL)
                 if match:
                     json_results = json.loads(match.group(0))
                     formatted = []
@@ -248,13 +272,15 @@ class SearchIndex:
                         # Immer die Zusammenfassung bevorzugen, falls vorhanden
                         content = self._enrich_with_summary(path, content)
 
-                        formatted.append({
-                            "path": path,
-                            "content": content,
-                            "filename": res.get("title", ""),
-                            "score": res.get("score", 0),
-                            "metadata": res
-                        })
+                        formatted.append(
+                            {
+                                "path": path,
+                                "content": content,
+                                "filename": res.get("title", ""),
+                                "score": res.get("score", 0),
+                                "metadata": res,
+                            }
+                        )
                     return formatted
                 else:
                     logger.debug("No JSON array found in qmd output.")
@@ -271,9 +297,7 @@ class SearchIndex:
 
         logger.debug("Querying Qdrant...")
         dense_results = self.client.query_points(
-            collection_name=self.collection_name,
-            query=query_vector,
-            limit=top_k * 2
+            collection_name=self.collection_name, query=query_vector, limit=top_k * 2
         ).points
 
         results_map = {}
@@ -285,14 +309,14 @@ class SearchIndex:
                 "content": content,
                 "filename": res.payload.get("filename", ""),
                 "score": res.score,
-                "metadata": res.payload
+                "metadata": res.payload,
             }
 
         if self.bm25:
             logger.debug("Executing BM25 scoring...")
             tokenized_query = query.lower().split()
             scores = self.bm25.get_scores(tokenized_query)
-            top_n = np.argsort(scores)[::-1][:top_k * 2]
+            top_n = np.argsort(scores)[::-1][: top_k * 2]
             for idx in top_n:
                 if scores[idx] > 0:
                     doc = self.corpus[idx]
@@ -306,9 +330,11 @@ class SearchIndex:
                             "content": content,
                             "score": float(scores[idx]),
                             "metadata": doc["metadata"],
-                            "filename": doc["metadata"].get("filename", "")
+                            "filename": doc["metadata"].get("filename", ""),
                         }
 
-        sorted_results = sorted(results_map.values(), key=lambda x: x["score"], reverse=True)
+        sorted_results = sorted(
+            results_map.values(), key=lambda x: x["score"], reverse=True
+        )
         logger.debug(f"Native search found {len(sorted_results)} candidates.")
         return sorted_results[:top_k]

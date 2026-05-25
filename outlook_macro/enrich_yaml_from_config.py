@@ -51,15 +51,18 @@ from pathlib import Path
 # Reihenfolge ist wichtig: der erste Treffer gewinnt (fuer denselben Pfad).
 # ---------------------------------------------------------------------------
 KEYWORD_RULES: list[tuple[list[str], str]] = [
-    (["bachelorthesis", "bachelorarbeit", "ba-thesis", "bachelor_thesis"], "Bachelorthesis"),
-    (["masterthesis", "masterarbeit", "ma-thesis", "master_thesis"],       "Masterthesis"),
-    (["praxisprojekt", "praxis_projekt", "pp"],                            "Praxisprojekt"),
-    (["anerkennung", "anerkennungen"],                                     "Anerkennung"),
-    (["seminar"],                                                           "Seminar"),
-    (["pruefung", "pruefungen", "exam"],                                    "Pruefung"),
-    (["kolloquium"],                                                        "Kolloquium"),
-    (["beratung", "beratungen"],                                            "Beratung"),
-    (["allgemein", "sonstiges", "misc"],                                    "Allgemein"),
+    (
+        ["bachelorthesis", "bachelorarbeit", "ba-thesis", "bachelor_thesis"],
+        "Bachelorthesis",
+    ),
+    (["masterthesis", "masterarbeit", "ma-thesis", "master_thesis"], "Masterthesis"),
+    (["praxisprojekt", "praxis_projekt", "pp"], "Praxisprojekt"),
+    (["anerkennung", "anerkennungen"], "Anerkennung"),
+    (["seminar"], "Seminar"),
+    (["pruefung", "pruefungen", "exam"], "Pruefung"),
+    (["kolloquium"], "Kolloquium"),
+    (["beratung", "beratungen"], "Beratung"),
+    (["allgemein", "sonstiges", "misc"], "Allgemein"),
 ]
 
 
@@ -67,12 +70,13 @@ KEYWORD_RULES: list[tuple[list[str], str]] = [
 # Pfade
 # ---------------------------------------------------------------------------
 DEFAULT_CONFIG_PATH = Path("D:/TH_Koeln/academic-memory-mcp/email_config.md")
-DEFAULT_YAML_PATH   = Path("D:/TH_Koeln/academic-memory-mcp/students.yaml")
+DEFAULT_YAML_PATH = Path("D:/TH_Koeln/academic-memory-mcp/students.yaml")
 
 
 # ---------------------------------------------------------------------------
 # email_config.md einlesen
 # ---------------------------------------------------------------------------
+
 
 def read_email_config(config_path: Path) -> dict[str, str]:
     """Liest die email_config.md und gibt ein Dict {email_lower: folder_path} zurueck.
@@ -92,7 +96,9 @@ def read_email_config(config_path: Path) -> dict[str, str]:
 
     email_map: dict[str, str] = {}
 
-    for raw_line in config_path.read_text(encoding="utf-8", errors="replace").splitlines():
+    for raw_line in config_path.read_text(
+        encoding="utf-8", errors="replace"
+    ).splitlines():
         line = raw_line.strip()
 
         # Leerzeilen und Kommentare ueberspringen
@@ -124,6 +130,7 @@ def read_email_config(config_path: Path) -> dict[str, str]:
 # ---------------------------------------------------------------------------
 # Keyword-Matching
 # ---------------------------------------------------------------------------
+
 
 def classify_path(
     folder_path: str,
@@ -169,6 +176,7 @@ class FolderEntry:
 # ---------------------------------------------------------------------------
 # YAML einlesen (zustandsorientierter Mini-Parser)
 # ---------------------------------------------------------------------------
+
 
 class Student:
     """Repraesentiert einen Studierenden mit allen YAML-Feldern.
@@ -279,7 +287,11 @@ def load_students_yaml(yaml_path: Path) -> list[Student]:
             state = "in_student" if rest in ("", "[]") else "in_folders"
 
         # Neuer folder-Eintrag: "- keys:" oder "- path:" auf Indent 2
-        elif state in ("in_folders", "in_folder_entry") and stripped.startswith("- ") and indent == 2:
+        elif (
+            state in ("in_folders", "in_folder_entry")
+            and stripped.startswith("- ")
+            and indent == 2
+        ):
             _commit_entry()
             current_entry = FolderEntry(keys=[], path="")
             state = "in_folder_entry"
@@ -312,7 +324,12 @@ def load_students_yaml(yaml_path: Path) -> list[Student]:
             elif stripped.startswith("path:"):
                 current_entry.path = _extract_yaml_value(stripped, "path")
                 state = "in_folder_entry"
-            elif stripped and not stripped.startswith("#") and indent <= 2 and not stripped.startswith("- "):
+            elif (
+                stripped
+                and not stripped.startswith("#")
+                and indent <= 2
+                and not stripped.startswith("- ")
+            ):
                 _commit_entry()
                 state = "in_student"
 
@@ -340,7 +357,7 @@ def _extract_yaml_value(line: str, key: str) -> str:
     prefix = f"{key}:"
     if not line.startswith(prefix):
         return ""
-    return line[len(prefix):].strip().strip('"').strip("'")
+    return line[len(prefix) :].strip().strip('"').strip("'")
 
 
 def _parse_inline_list(raw: str, *, lowercase: bool = False) -> list[str]:
@@ -366,6 +383,7 @@ def _parse_inline_list(raw: str, *, lowercase: bool = False) -> list[str]:
 # ---------------------------------------------------------------------------
 # Ordnerpfade zuordnen
 # ---------------------------------------------------------------------------
+
 
 def enrich_students(
     students: list[Student],
@@ -431,6 +449,7 @@ def enrich_students(
 # YAML schreiben
 # ---------------------------------------------------------------------------
 
+
 def write_students_yaml(yaml_path: Path, students: list[Student]) -> None:
     """Schreibt die Studierenden-Liste in die YAML-Datei.
 
@@ -488,6 +507,7 @@ def write_students_yaml(yaml_path: Path, students: list[Student]) -> None:
 # Hauptprogramm
 # ---------------------------------------------------------------------------
 
+
 def main() -> None:
     """Hauptfunktion: parst Argumente und fuehrt die Anreicherung durch."""
     parser = argparse.ArgumentParser(
@@ -523,7 +543,9 @@ def main() -> None:
     print(f"  {len(students)} Studierende geladen.")
 
     if not students:
-        print("Keine Studierenden in der YAML-Datei. Bitte zuerst CollectStudentEmails ausfuehren.")
+        print(
+            "Keine Studierenden in der YAML-Datei. Bitte zuerst CollectStudentEmails ausfuehren."
+        )
         sys.exit(0)
 
     new_count, changed_count = enrich_students(students, email_map, KEYWORD_RULES)

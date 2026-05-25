@@ -1,4 +1,5 @@
 """FastMCP Server-Implementierung."""
+
 import subprocess
 import os
 from fastmcp import FastMCP
@@ -13,6 +14,7 @@ from ..summarizer.engine import Summarizer
 
 logger = logging.getLogger(__name__)
 
+
 def create_server() -> FastMCP:
     """Initialisiert und konfiguriert den FastMCP-Server für das University Memory System.
 
@@ -22,13 +24,16 @@ def create_server() -> FastMCP:
         FastMCP: Die konfigurierte MCP-Serverinstanz.
     """
     cfg = get_config()
-    mcp = FastMCP("University Memory System", instructions="I am your university research and student management assistant.")
+    mcp = FastMCP(
+        "University Memory System",
+        instructions="I am your university research and student management assistant.",
+    )
 
     # Lazy init components
     store = MetadataStore(cfg.sqlite_path)
     index = SearchIndex(str(cfg.qdrant_path), cfg.embeddings.model, store=store)
     summarizer = Summarizer(cfg.llm.model, cfg.llm.base_url)
-    use_shell = os.name == 'nt'
+    use_shell = os.name == "nt"
 
     @mcp.tool
     def search_documents(query: str, top_k: int = 5) -> List[Dict[str, Any]]:
@@ -56,12 +61,15 @@ def create_server() -> FastMCP:
         """
         with store._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute('''
+            cursor.execute(
+                """
                 SELECT content FROM summaries
                 JOIN folders ON summaries.item_id = folders.id
                 WHERE folders.path = ? AND summaries.item_type = 'folder'
                 ORDER BY summaries.created_at DESC LIMIT 1
-            ''', (folder_path,))
+            """,
+                (folder_path,),
+            )
             row = cursor.fetchone()
             if row:
                 return row[0]
@@ -79,11 +87,14 @@ def create_server() -> FastMCP:
         """
         with store._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute('''
+            cursor.execute(
+                """
                 SELECT s.*, f.path as folder_path FROM students s
                 LEFT JOIN folders f ON s.folder_id = f.id
                 WHERE s.name LIKE ?
-            ''', (f"%{student_name}%",))
+            """,
+                (f"%{student_name}%",),
+            )
             student = cursor.fetchone()
             if not student:
                 return f"No student found with name {student_name}"
@@ -134,7 +145,9 @@ Draft Reply:
         results = index.search("offene Aufgaben open tasks TODO", top_k=20)
         tasks = []
         for res in results:
-            tasks.append(f"- From {res.get('filename', 'Unknown')}: {res['content'][:200]}...")
+            tasks.append(
+                f"- From {res.get('filename', 'Unknown')}: {res['content'][:200]}..."
+            )
 
         return "\n".join(tasks) if tasks else "No open tasks found."
 
@@ -150,6 +163,7 @@ Draft Reply:
             str: Analyse der Unterschiede und Verbesserungen.
         """
         from ..parser.factory import ParserFactory
+
         parser = ParserFactory(cfg.data_dir / "cache")
         c1 = parser.parse(Path(path1))
         c2 = parser.parse(Path(path2))
@@ -170,7 +184,6 @@ Comparison Summary:
 """
         return summarizer.summarize_file("comparison", prompt)
 
-
     @mcp.tool
     def run_qmd_command(command: str, args: List[str]) -> str:
         """Führt einen beliebigen qmd-Befehl aus (z.B. status, ls, get).
@@ -183,7 +196,9 @@ Comparison Summary:
             str: Die Ausgabe des Befehls.
         """
         try:
-            result = subprocess.run(["qmd", command] + args, capture_output=True, text=True, shell=use_shell)
+            result = subprocess.run(
+                ["qmd", command] + args, capture_output=True, text=True, shell=use_shell
+            )
             if result.returncode == 0:
                 return result.stdout
             else:
@@ -192,6 +207,7 @@ Comparison Summary:
             return f"Exception: {str(e)}"
 
     return mcp
+
 
 if __name__ == "__main__":
     mcp = create_server()

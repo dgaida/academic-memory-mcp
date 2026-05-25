@@ -1,4 +1,5 @@
 """Skript zur Vorhersage mit dem E-Mail-Klassifikator."""
+
 import argparse
 import json
 from pathlib import Path
@@ -7,21 +8,29 @@ import logging
 from mcp_university.classifier.engine import EmailClassifier
 
 # Logging konfigurieren
-logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
+
 
 def main() -> None:
     """Main function for classifying an email."""
     parser = argparse.ArgumentParser(description="Klassifiziert eine E-Mail Datei.")
     parser.add_argument("file_path", type=str, help="Pfad zur .msg oder .eml Datei.")
-    parser.add_argument("--model-path", type=str, default="data/email_classifier.pkl", help="Pfad zum trainierten Modell.")
+    parser.add_argument(
+        "--model-path",
+        type=str,
+        default="data/email_classifier.pkl",
+        help="Pfad zum trainierten Modell.",
+    )
     parser.add_argument("--json", action="store_true", help="Ausgabe im JSON-Format.")
 
     args = parser.parse_args()
 
     model_path = Path(args.model_path)
     if not model_path.exists():
-        logger.error(f"Modell {args.model_path} wurde nicht gefunden. Bitte zuerst trainieren.")
+        logger.error(
+            f"Modell {args.model_path} wurde nicht gefunden. Bitte zuerst trainieren."
+        )
         return
 
     file_path = Path(args.file_path)
@@ -41,12 +50,15 @@ def main() -> None:
             print(f"Klasse: {result['prediction']}")
             print(f"Konfidenz: {result['confidence']:.2%}")
             print("\nWahrscheinlichkeiten:")
-            for label, prob in sorted(result['probabilities'].items(), key=lambda x: x[1], reverse=True):
+            for label, prob in sorted(
+                result["probabilities"].items(), key=lambda x: x[1], reverse=True
+            ):
                 if prob > 0.01:
                     print(f"  - {label}: {prob:.2%}")
 
     except Exception as e:
         logger.error(f"Fehler bei der Klassifizierung: {e}")
+
 
 if __name__ == "__main__":
     main()

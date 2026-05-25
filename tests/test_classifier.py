@@ -1,4 +1,5 @@
 """Tests für den E-Mail-Klassifikator."""
+
 import pytest
 from pathlib import Path
 import shutil
@@ -6,6 +7,7 @@ import tempfile
 from unittest.mock import MagicMock, patch
 
 from mcp_university.classifier.engine import EmailClassifier
+
 
 @pytest.fixture
 def temp_data_dir():
@@ -31,6 +33,7 @@ def temp_data_dir():
     yield root
     shutil.rmtree(tmpdir)
 
+
 def test_classifier_train_predict_tfidf(temp_data_dir):
     """Testet das Training und die Vorhersage im TF-IDF Modus mit Unterordnern."""
     classifier = EmailClassifier(mode="tfidf")
@@ -51,6 +54,7 @@ def test_classifier_train_predict_tfidf(temp_data_dir):
         assert "confidence" in result
         assert "probabilities" in result
 
+
 def test_classifier_save_load(temp_data_dir, tmp_path):
     """Testet Speichern und Laden des Modells."""
     classifier = EmailClassifier(mode="tfidf")
@@ -68,6 +72,7 @@ def test_classifier_save_load(temp_data_dir, tmp_path):
         assert new_classifier.is_trained
         assert new_classifier.mode == "tfidf"
         assert len(new_classifier.label_encoder.classes_) == 2
+
 
 @patch("sentence_transformers.SentenceTransformer")
 def test_classifier_embedding_mode(mock_st, temp_data_dir):
@@ -90,6 +95,7 @@ def test_classifier_embedding_mode(mock_st, temp_data_dir):
         test_file = temp_data_dir / "BachelorThesis" / "Inbox" / "test1.msg"
         result = classifier.predict(test_file)
         assert result["prediction"] in ["BachelorThesis", "MasterThesis"]
+
 
 def test_classifier_train_predict_xgboost(temp_data_dir):
     """Testet das Training und die Vorhersage im XGBoost Modus."""

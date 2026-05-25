@@ -2,7 +2,8 @@ from pathlib import Path
 from unittest.mock import patch
 from mcp_university.classifier.classify_folder import classify_and_move
 
-@patch('mcp_university.classifier.classify_folder.EmailClassifier')
+
+@patch("mcp_university.classifier.classify_folder.EmailClassifier")
 def test_classify_and_move(mock_classifier_class, tmp_path):
     source_dir = tmp_path / "source"
     source_dir.mkdir()
@@ -17,7 +18,7 @@ def test_classify_and_move(mock_classifier_class, tmp_path):
     mock_classifier = mock_classifier_class.return_value
     mock_classifier.predict.side_effect = [
         {"prediction": "ClassA"},
-        {"prediction": "ClassB"}
+        {"prediction": "ClassB"},
     ]
 
     classify_and_move(source_dir, Path("dummy_model"))
@@ -28,7 +29,8 @@ def test_classify_and_move(mock_classifier_class, tmp_path):
     assert not msg1.exists()
     assert not msg2.exists()
 
-@patch('mcp_university.classifier.classify_folder.EmailClassifier')
+
+@patch("mcp_university.classifier.classify_folder.EmailClassifier")
 def test_classify_and_move_with_output_dir(mock_classifier_class, tmp_path):
     source_dir = tmp_path / "source"
     source_dir.mkdir()
@@ -46,7 +48,8 @@ def test_classify_and_move_with_output_dir(mock_classifier_class, tmp_path):
     assert (output_dir / "ClassA" / "test1.msg").exists()
     assert not msg1.exists()
 
-@patch('mcp_university.classifier.classify_folder.EmailClassifier')
+
+@patch("mcp_university.classifier.classify_folder.EmailClassifier")
 def test_classify_and_move_duplicate_names(mock_classifier_class, tmp_path):
     source_dir = tmp_path / "source"
     source_dir.mkdir()

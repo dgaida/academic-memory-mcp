@@ -1,8 +1,10 @@
 """Metadaten-Speicherung und Verwaltung."""
+
 import sqlite3
 import time
 from pathlib import Path
 from typing import Optional, List, Dict, Any, Tuple
+
 
 class MetadataStore:
     """Verwaltet die Metadaten-Persistenz in einer SQLite-Datenbank.
@@ -33,7 +35,7 @@ class MetadataStore:
         with self._get_connection() as conn:
             cursor = conn.cursor()
 
-            cursor.execute('''
+            cursor.execute("""
                 CREATE TABLE IF NOT EXISTS files (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     path TEXT UNIQUE,
@@ -44,9 +46,9 @@ class MetadataStore:
                     folder_id INTEGER,
                     FOREIGN KEY(folder_id) REFERENCES folders(id)
                 )
-            ''')
+            """)
 
-            cursor.execute('''
+            cursor.execute("""
                 CREATE TABLE IF NOT EXISTS folders (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     path TEXT UNIQUE,
@@ -55,9 +57,9 @@ class MetadataStore:
                     last_summarized REAL,
                     FOREIGN KEY(parent_id) REFERENCES folders(id)
                 )
-            ''')
+            """)
 
-            cursor.execute('''
+            cursor.execute("""
                 CREATE TABLE IF NOT EXISTS summaries (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     item_type TEXT,
@@ -66,9 +68,9 @@ class MetadataStore:
                     version INTEGER,
                     created_at REAL
                 )
-            ''')
+            """)
 
-            cursor.execute('''
+            cursor.execute("""
                 CREATE TABLE IF NOT EXISTS students (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     name TEXT UNIQUE,
@@ -78,9 +80,9 @@ class MetadataStore:
                     folder_id INTEGER,
                     FOREIGN KEY(folder_id) REFERENCES folders(id)
                 )
-            ''')
+            """)
 
-            cursor.execute('''
+            cursor.execute("""
                 CREATE TABLE IF NOT EXISTS deadlines (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     title TEXT,
@@ -88,11 +90,18 @@ class MetadataStore:
                     item_type TEXT,
                     item_id INTEGER
                 )
-            ''')
+            """)
 
             conn.commit()
 
-    def upsert_file(self, path: str, file_hash: str, mtime: float, file_type: str, folder_id: Optional[int] = None) -> int:
+    def upsert_file(
+        self,
+        path: str,
+        file_hash: str,
+        mtime: float,
+        file_type: str,
+        folder_id: Optional[int] = None,
+    ) -> int:
         """Fügt eine Datei hinzu oder aktualisiert sie.
 
         Args:
@@ -107,7 +116,8 @@ class MetadataStore:
         """
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute('''
+            cursor.execute(
+                """
                 INSERT INTO files (path, hash, mtime, type, folder_id)
                 VALUES (?, ?, ?, ?, ?)
                 ON CONFLICT(path) DO UPDATE SET
@@ -115,7 +125,9 @@ class MetadataStore:
                     mtime=excluded.mtime,
                     type=excluded.type,
                     folder_id=excluded.folder_id
-            ''', (path, file_hash, mtime, file_type, folder_id))
+            """,
+                (path, file_hash, mtime, file_type, folder_id),
+            )
             conn.commit()
             return cursor.lastrowid
 
@@ -130,7 +142,7 @@ class MetadataStore:
         """
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute('SELECT * FROM files WHERE path = ?', (path,))
+            cursor.execute("SELECT * FROM files WHERE path = ?", (path,))
             return cursor.fetchone()
 
     def get_all_files(self) -> List[Dict[str, Any]]:
@@ -142,7 +154,7 @@ class MetadataStore:
         with self._get_connection() as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
-            cursor.execute('SELECT * FROM files')
+            cursor.execute("SELECT * FROM files")
             return [dict(row) for row in cursor.fetchall()]
 
     def upsert_folder(self, path: str, parent_id: Optional[int] = None) -> int:
@@ -157,14 +169,17 @@ class MetadataStore:
         """
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute('''
+            cursor.execute(
+                """
                 INSERT INTO folders (path, parent_id)
                 VALUES (?, ?)
                 ON CONFLICT(path) DO UPDATE SET
                     parent_id=excluded.parent_id
-            ''', (path, parent_id))
+            """,
+                (path, parent_id),
+            )
             conn.commit()
-            cursor.execute('SELECT id FROM folders WHERE path = ?', (path,))
+            cursor.execute("SELECT id FROM folders WHERE path = ?", (path,))
             return cursor.fetchone()[0]
 
     def get_all_folders(self) -> List[Dict[str, Any]]:
@@ -176,7 +191,7 @@ class MetadataStore:
         with self._get_connection() as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
-            cursor.execute('SELECT * FROM folders')
+            cursor.execute("SELECT * FROM folders")
             return [dict(row) for row in cursor.fetchall()]
 
     def add_summary(self, item_type: str, item_id: int, content: str) -> None:
@@ -189,10 +204,13 @@ class MetadataStore:
         """
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute('''
+            cursor.execute(
+                """
                 INSERT INTO summaries (item_type, item_id, content, created_at)
                 VALUES (?, ?, ?, ?)
-            ''', (item_type, item_id, content, time.time()))
+            """,
+                (item_type, item_id, content, time.time()),
+            )
             conn.commit()
 
     def get_all_summaries(self) -> List[Dict[str, Any]]:
@@ -204,7 +222,7 @@ class MetadataStore:
         with self._get_connection() as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
-            cursor.execute('SELECT * FROM summaries')
+            cursor.execute("SELECT * FROM summaries")
             return [dict(row) for row in cursor.fetchall()]
 
     def get_folder_files(self, folder_id: int) -> List[Tuple]:
@@ -218,7 +236,7 @@ class MetadataStore:
         """
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute('SELECT * FROM files WHERE folder_id = ?', (folder_id,))
+            cursor.execute("SELECT * FROM files WHERE folder_id = ?", (folder_id,))
             return cursor.fetchall()
 
     def get_summary(self, item_type: str, item_id: int) -> Optional[str]:
@@ -233,15 +251,25 @@ class MetadataStore:
         """
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute('''
+            cursor.execute(
+                """
                 SELECT content FROM summaries
                 WHERE item_type = ? AND item_id = ?
                 ORDER BY created_at DESC LIMIT 1
-            ''', (item_type, item_id))
+            """,
+                (item_type, item_id),
+            )
             row = cursor.fetchone()
             return row[0] if row else None
 
-    def upsert_student(self, name: str, email: str = None, topic: str = None, status: str = None, folder_id: int = None) -> int:
+    def upsert_student(
+        self,
+        name: str,
+        email: str = None,
+        topic: str = None,
+        status: str = None,
+        folder_id: int = None,
+    ) -> int:
         """Fügt einen Studenten hinzu oder aktualisiert ihn.
 
         Args:
@@ -256,7 +284,8 @@ class MetadataStore:
         """
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO students (name, email, thesis_topic, status, folder_id)
                 VALUES (?, ?, ?, ?, ?)
                 ON CONFLICT(name) DO UPDATE SET
@@ -264,7 +293,9 @@ class MetadataStore:
                     thesis_topic=COALESCE(excluded.thesis_topic, students.thesis_topic),
                     status=COALESCE(excluded.status, students.status),
                     folder_id=COALESCE(excluded.folder_id, students.folder_id)
-            """, (name, email, topic, status, folder_id))
+            """,
+                (name, email, topic, status, folder_id),
+            )
             conn.commit()
             cursor.execute("SELECT id FROM students WHERE name = ?", (name,))
             return cursor.fetchone()[0]
@@ -278,7 +309,7 @@ class MetadataStore:
         with self._get_connection() as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
-            cursor.execute('SELECT * FROM students')
+            cursor.execute("SELECT * FROM students")
             return [dict(row) for row in cursor.fetchall()]
 
     def get_all_deadlines(self) -> List[Dict[str, Any]]:
@@ -290,7 +321,7 @@ class MetadataStore:
         with self._get_connection() as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
-            cursor.execute('SELECT * FROM deadlines')
+            cursor.execute("SELECT * FROM deadlines")
             return [dict(row) for row in cursor.fetchall()]
 
     def delete_file(self, file_id: int) -> None:
@@ -301,8 +332,11 @@ class MetadataStore:
         """
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute('DELETE FROM summaries WHERE item_type = "file" AND item_id = ?', (file_id,))
-            cursor.execute('DELETE FROM files WHERE id = ?', (file_id,))
+            cursor.execute(
+                'DELETE FROM summaries WHERE item_type = "file" AND item_id = ?',
+                (file_id,),
+            )
+            cursor.execute("DELETE FROM files WHERE id = ?", (file_id,))
             conn.commit()
 
     def delete_folder(self, folder_id: int) -> None:
@@ -314,19 +348,25 @@ class MetadataStore:
         with self._get_connection() as conn:
             cursor = conn.cursor()
             # Finde alle Dateien im Ordner
-            cursor.execute('SELECT id FROM files WHERE folder_id = ?', (folder_id,))
+            cursor.execute("SELECT id FROM files WHERE folder_id = ?", (folder_id,))
             file_ids = [row[0] for row in cursor.fetchall()]
 
             # Lösche alle Dateien (und deren Zusammenfassungen)
             for f_id in file_ids:
-                cursor.execute('DELETE FROM summaries WHERE item_type = "file" AND item_id = ?', (f_id,))
-                cursor.execute('DELETE FROM files WHERE id = ?', (f_id,))
+                cursor.execute(
+                    'DELETE FROM summaries WHERE item_type = "file" AND item_id = ?',
+                    (f_id,),
+                )
+                cursor.execute("DELETE FROM files WHERE id = ?", (f_id,))
 
             # Lösche Zusammenfassungen des Ordners
-            cursor.execute('DELETE FROM summaries WHERE item_type = "folder" AND item_id = ?', (folder_id,))
+            cursor.execute(
+                'DELETE FROM summaries WHERE item_type = "folder" AND item_id = ?',
+                (folder_id,),
+            )
 
             # Lösche den Ordner selbst
-            cursor.execute('DELETE FROM folders WHERE id = ?', (folder_id,))
+            cursor.execute("DELETE FROM folders WHERE id = ?", (folder_id,))
             conn.commit()
 
     def delete_student(self, student_id: int) -> None:
@@ -337,7 +377,7 @@ class MetadataStore:
         """
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute('DELETE FROM students WHERE id = ?', (student_id,))
+            cursor.execute("DELETE FROM students WHERE id = ?", (student_id,))
             conn.commit()
 
     def delete_deadline(self, deadline_id: int) -> None:
@@ -348,7 +388,7 @@ class MetadataStore:
         """
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute('DELETE FROM deadlines WHERE id = ?', (deadline_id,))
+            cursor.execute("DELETE FROM deadlines WHERE id = ?", (deadline_id,))
             conn.commit()
 
     def delete_summary(self, summary_id: int) -> None:
@@ -359,7 +399,7 @@ class MetadataStore:
         """
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute('DELETE FROM summaries WHERE id = ?', (summary_id,))
+            cursor.execute("DELETE FROM summaries WHERE id = ?", (summary_id,))
             conn.commit()
 
     def update_folder_summarized(self, folder_id: int) -> None:
@@ -370,5 +410,8 @@ class MetadataStore:
         """
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute('UPDATE folders SET last_summarized = ? WHERE id = ?', (time.time(), folder_id))
+            cursor.execute(
+                "UPDATE folders SET last_summarized = ? WHERE id = ?",
+                (time.time(), folder_id),
+            )
             conn.commit()

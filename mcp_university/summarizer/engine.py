@@ -1,10 +1,12 @@
 """KI-basierte Zusammenfassungs-Engine."""
+
 import ollama
 from typing import Optional, List
 import logging
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
 
 class Summarizer:
     """LLM-basierter Dienst zur Erstellung von Zusammenfassungen für Dateien und Ordner.
@@ -13,7 +15,9 @@ class Summarizer:
     vordefinierten Prompts für den universitären Kontext.
     """
 
-    def __init__(self, model: str = "gemma2:2b", base_url: str = "http://localhost:11434"):
+    def __init__(
+        self, model: str = "gemma2:2b", base_url: str = "http://localhost:11434"
+    ):
         """Initialisiert den Summarizer mit Modellkonfiguration.
 
         Args:
@@ -23,7 +27,9 @@ class Summarizer:
         self.model = model
         self.base_url = str(base_url)
         self.client = ollama.Client(host=self.base_url)
-        logger.debug(f"Summarizer initialized with model={model} and base_url={self.base_url}")
+        logger.debug(
+            f"Summarizer initialized with model={model} and base_url={self.base_url}"
+        )
 
     def _identify_document_type(self, content: str) -> str:
         """Identifiziert den Dokumenttyp basierend auf dem Inhalt des Dokuments (erste Seite/Anfang).
@@ -42,12 +48,14 @@ Textanfang:
 {content[:2000]}
 """
         messages = [
-            {'role': 'system', 'content': system_prompt},
-            {'role': 'user', 'content': user_prompt}
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
         ]
         try:
-            response = self.client.chat(model=self.model, messages=messages, options={"temperature": 0})
-            doc_type = response['message']['content'].strip()
+            response = self.client.chat(
+                model=self.model, messages=messages, options={"temperature": 0}
+            )
+            doc_type = response["message"]["content"].strip()
             logger.debug(f"Identified document type: {doc_type}")
             return doc_type
         except Exception as e:
@@ -161,23 +169,23 @@ Inhalt:
     def _chat_request(self, system_prompt: str, user_prompt: str) -> Optional[str]:
         """Hilfsmethode für Ollama-Chat-Anfragen."""
         messages = [
-            {'role': 'system', 'content': system_prompt},
-            {'role': 'user', 'content': user_prompt}
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
         ]
         try:
             response = self.client.chat(
-                model=self.model,
-                messages=messages,
-                options={"temperature": 0}
+                model=self.model, messages=messages, options={"temperature": 0}
             )
-            return response['message']['content']
+            return response["message"]["content"]
         except Exception as e:
             logger.error(f"Error in chat request: {e}")
             if "memory" in str(e).lower():
                 logger.error("Likely Out of Memory error from Ollama.")
             return None
 
-    def summarize_folder(self, folder_name: str, item_summaries: List[str]) -> Optional[str]:
+    def summarize_folder(
+        self, folder_name: str, item_summaries: List[str]
+    ) -> Optional[str]:
         """Erstellt eine aggregierte Zusammenfassung für einen Ordner auf Deutsch."""
         logger.info(f"Summarizing folder: {folder_name}")
         items_combined = "\n---\n".join(item_summaries)
@@ -209,7 +217,9 @@ Inhalte:
 """
         return self._chat_request(system_prompt, user_prompt)
 
-    def summarize_email_conversation(self, folder_name: str, conversation_content: str) -> Optional[str]:
+    def summarize_email_conversation(
+        self, folder_name: str, conversation_content: str
+    ) -> Optional[str]:
         """Erstellt eine Zusammenfassung eines E-Mail-Schriftverkehrs (Inbox & SentItems)."""
         logger.info(f"Summarizing email conversation in folder: {folder_name}")
 

@@ -1,9 +1,11 @@
 """Parser-Fabrik zur Bereitstellung des passenden Parsers."""
+
 from pathlib import Path
 from typing import Optional
 from .pdf_parser import PDFParser
 from .text_parser import TextParser
 from .mail_parser import MailParser
+
 
 class ParserFactory:
     """Factory-Klasse zur Bereitstellung des passenden Parsers für verschiedene Dateitypen."""

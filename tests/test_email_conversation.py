@@ -7,6 +7,7 @@ from mcp_university.parser.factory import ParserFactory
 from mcp_university.summarizer.engine import Summarizer
 from mcp_university.retrieval.index import SearchIndex
 
+
 @pytest.fixture
 def mock_deps(tmp_path):
     config = MagicMock(spec=Config)
@@ -24,6 +25,7 @@ def mock_deps(tmp_path):
     summarizer.summarize_email_conversation.return_value = "# Conversation Summary"
 
     return config, store, parser, summarizer, index
+
 
 def test_email_conversation_processing(tmp_path, mock_deps):
     config, store, parser, summarizer, index = mock_deps
@@ -64,6 +66,7 @@ def test_email_conversation_processing(tmp_path, mock_deps):
     assert args[1] == "# Conversation Summary"
     assert args[2]["is_conversation_summary"] == "true"
     assert args[2]["filename"] == ".emails_summary.md"
+
 
 def test_email_sorting(tmp_path, mock_deps):
     config, store, parser, summarizer, index = mock_deps

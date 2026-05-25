@@ -1,4 +1,5 @@
 """Kommandozeilen-Schnittstelle (CLI) für das MCP University System."""
+
 import typer
 import logging
 from logging.handlers import RotatingFileHandler
@@ -11,8 +12,11 @@ from ..retrieval.index import SearchIndex
 from ..mcp_server.server import create_server
 from .db import db_app
 
-app = typer.Typer(help="MCP University Memory System CLI - Lokales Wissensmanagement für die Universität")
+app = typer.Typer(
+    help="MCP University Memory System CLI - Lokales Wissensmanagement für die Universität"
+)
 app.add_typer(db_app, name="db")
+
 
 def setup_logging(debug: bool):
     """Konfiguriert das Logging für Konsole und Datei."""
@@ -26,7 +30,9 @@ def setup_logging(debug: bool):
     logger.setLevel(logging.DEBUG)
 
     # Formatter
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
 
     # Console Handler
     console_level = logging.DEBUG if debug else logging.INFO
@@ -37,9 +43,9 @@ def setup_logging(debug: bool):
     # File Handler (immer DEBUG)
     file_handler = RotatingFileHandler(
         log_file,
-        maxBytes=10*1024*1024, # 10MB
+        maxBytes=10 * 1024 * 1024,  # 10MB
         backupCount=5,
-        encoding='utf-8'
+        encoding="utf-8",
     )
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(formatter)
@@ -51,8 +57,11 @@ def setup_logging(debug: bool):
     logger.addHandler(console_handler)
     logger.addHandler(file_handler)
 
+
 @app.command()
-def index(debug: bool = typer.Option(False, "--debug", "-d", help="Debug-Logging aktivieren")) -> None:
+def index(
+    debug: bool = typer.Option(False, "--debug", "-d", help="Debug-Logging aktivieren"),
+) -> None:
     """Startet den vollständigen Indexierungsprozess aller konfigurierten Ordner."""
     setup_logging(debug)
     cfg = get_config()
@@ -64,10 +73,11 @@ def index(debug: bool = typer.Option(False, "--debug", "-d", help="Debug-Logging
     crawler = Crawler(cfg, store, parser, summarizer, idx)
     crawler.crawl()
 
+
 @app.command()
 def search(
     query: str,
-    debug: bool = typer.Option(False, "--debug", "-d", help="Debug-Logging aktivieren")
+    debug: bool = typer.Option(False, "--debug", "-d", help="Debug-Logging aktivieren"),
 ) -> None:
     """Führt eine hybride Suche über die indexierten Dokumente aus und generiert eine Antwort.
 
@@ -80,9 +90,9 @@ def search(
     idx = SearchIndex(str(cfg.qdrant_path), cfg.embeddings.model, store=store)
     results = idx.search(query)
 
-    print("\n" + "="*50)
+    print("\n" + "=" * 50)
     print("SUCHERGEBNISSE")
-    print("="*50 + "\n")
+    print("=" * 50 + "\n")
 
     context_parts = []
     for res in results:
@@ -91,9 +101,9 @@ def search(
         context_parts.append(f"Quelle: {res['filename']}\nInhalt: {res['content']}")
 
     if results:
-        print("="*50)
+        print("=" * 50)
         print("GENERIERTE ANTWORT")
-        print("="*50 + "\n")
+        print("=" * 50 + "\n")
 
         summarizer = Summarizer(cfg.llm.model, cfg.llm.base_url)
         context = "\n\n---\n\n".join(context_parts)
@@ -103,15 +113,19 @@ def search(
             print(answer)
         else:
             print("Fehler beim Generieren der Antwort.")
-        print("\n" + "="*50)
+        print("\n" + "=" * 50)
     else:
         print("Keine relevanten Dokumente gefunden.")
 
+
 @app.command()
-def watch(debug: bool = typer.Option(False, "--debug", "-d", help="Debug-Logging aktivieren")) -> None:
+def watch(
+    debug: bool = typer.Option(False, "--debug", "-d", help="Debug-Logging aktivieren"),
+) -> None:
     """Startet den Watchdog zur Echtzeit-Überwachung von Ordnern."""
     setup_logging(debug)
     from ..crawler.watcher import Watcher
+
     cfg = get_config()
     store = MetadataStore(cfg.sqlite_path)
     parser = ParserFactory(cfg.data_dir / "cache")
@@ -122,12 +136,16 @@ def watch(debug: bool = typer.Option(False, "--debug", "-d", help="Debug-Logging
     watcher = Watcher(crawler)
     watcher.start()
 
+
 @app.command()
-def serve_mcp(debug: bool = typer.Option(False, "--debug", "-d", help="Debug-Logging aktivieren")) -> None:
+def serve_mcp(
+    debug: bool = typer.Option(False, "--debug", "-d", help="Debug-Logging aktivieren"),
+) -> None:
     """Startet den FastMCP-Server zur Integration in KI-Agenten."""
     setup_logging(debug)
     server = create_server()
     server.run()
+
 
 if __name__ == "__main__":
     app()

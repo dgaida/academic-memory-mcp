@@ -1,4 +1,5 @@
 """Skript zum Sortieren von E-Mails basierend auf Klassifizierung."""
+
 import argparse
 import logging
 import re
@@ -13,7 +14,7 @@ from mcp_university.classifier.engine import EmailClassifier
 from mcp_university.parser.mail_parser import MailParser
 
 # Logging konfigurieren
-logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -38,7 +39,7 @@ def get_semester(date: datetime) -> str:
         if month >= 10:
             return f"{year}_{str(year + 1)[2:]}_WS"
         else:
-            return f"{year-1}_{str(year)[2:]}_WS"
+            return f"{year - 1}_{str(year)[2:]}_WS"
 
 
 def normalize_name(name: str) -> str:
@@ -51,13 +52,18 @@ def normalize_name(name: str) -> str:
         str: Der normalisierte Name.
     """
     replacements = {
-        "ä": "ae", "ö": "oe", "ü": "ue",
-        "Ä": "Ae", "Ö": "Oe", "Ü": "Ue",
-        "ß": "ss"
+        "ä": "ae",
+        "ö": "oe",
+        "ü": "ue",
+        "Ä": "Ae",
+        "Ö": "Oe",
+        "Ü": "Ue",
+        "ß": "ss",
     }
     for old, new in replacements.items():
         name = name.replace(old, new)
     return name
+
 
 def extract_firstname(name_str: str) -> str:
     """Extrahiert den Vornamen aus einem Namensstring oder einer E-Mail-Adresse.
@@ -225,17 +231,19 @@ def process_emails(
                         found_student = False
                         for rec in recipients:
                             rec_email = (rec.email or "").lower()
-                            if "@smail.th-koeln.de" in rec_email or "@smail.fh-koeln.de" in rec_email:
+                            if (
+                                "@smail.th-koeln.de" in rec_email
+                                or "@smail.fh-koeln.de" in rec_email
+                            ):
                                 lastname = extract_lastname(rec.name or rec.email)
                                 found_student = True
                                 break
                         if not found_student:
                             # Fallback falls kein Student in Empfängern
-                            lastname = extract_lastname(recipients[0].name or recipients[0].email)
-                elif (
-                    "@smail.th-koeln.de" in sender
-                    or "@smail.fh-koeln.de" in sender
-                ):
+                            lastname = extract_lastname(
+                                recipients[0].name or recipients[0].email
+                            )
+                elif "@smail.th-koeln.de" in sender or "@smail.fh-koeln.de" in sender:
                     target_folder = "Inbox"
                     lastname = extract_lastname(msg.sender)
                 else:
@@ -246,16 +254,19 @@ def process_emails(
                     if recipients:
                         for rec in recipients:
                             rec_email = (rec.email or "").lower()
-                            if "@smail.th-koeln.de" in rec_email or "@smail.fh-koeln.de" in rec_email:
+                            if (
+                                "@smail.th-koeln.de" in rec_email
+                                or "@smail.fh-koeln.de" in rec_email
+                            ):
                                 target_folder = "SentItems"
                                 lastname = extract_lastname(rec.name or rec.email)
                                 found_student = True
                                 break
 
                     if not found_student:
-                         # Wenn immer noch nichts, bleibe bei Inbox und versuche Sender
-                         target_folder = "Inbox"
-                         lastname = extract_lastname(msg.sender)
+                        # Wenn immer noch nichts, bleibe bei Inbox und versuche Sender
+                        target_folder = "Inbox"
+                        lastname = extract_lastname(msg.sender)
 
             # Ziel-Pfad bestimmen
             if email_class.startswith(("BA_", "MA_")):
@@ -329,9 +340,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Sortiert E-Mails basierend auf Klassifizierung."
     )
-    parser.add_argument(
-        "source_dir", type=str, help="Quellordner mit E-Mails."
-    )
+    parser.add_argument("source_dir", type=str, help="Quellordner mit E-Mails.")
     parser.add_argument(
         "--config",
         type=str,

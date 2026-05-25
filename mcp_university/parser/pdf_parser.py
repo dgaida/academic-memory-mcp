@@ -1,4 +1,5 @@
 """Modul zum Parsen von PDF-Dokumenten mittels Docling."""
+
 import logging
 import warnings
 from pathlib import Path
@@ -9,6 +10,7 @@ from docling.document_converter import DocumentConverter
 warnings.filterwarnings("ignore", message=".*pin_memory.*")
 
 logger = logging.getLogger(__name__)
+
 
 class PDFParser:
     """Parser für PDF- und DOCX-Dokumente mittels Docling."""
@@ -51,12 +53,14 @@ class PDFParser:
         """Parsen von DOCX als Fallback mittels python-docx."""
         try:
             import docx
+
             logger.info(f"Parsing DOCX (Fallback): {path}")
             doc = docx.Document(path)
             return "\n".join([p.text for p in doc.paragraphs])
         except Exception as e:
             logger.error(f"Error parsing DOCX {path} (Fallback): {e}")
             return None
+
 
 def get_parser(cache_dir: Path) -> PDFParser:
     """Liefert eine Parser-Instanz.

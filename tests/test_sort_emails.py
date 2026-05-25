@@ -2,7 +2,13 @@ from pathlib import Path
 from datetime import datetime
 from unittest.mock import MagicMock, patch
 
-from mcp_university.classifier.sort_emails import get_semester, extract_lastname, process_emails, write_report
+from mcp_university.classifier.sort_emails import (
+    get_semester,
+    extract_lastname,
+    process_emails,
+    write_report,
+)
+
 
 def test_get_semester():
     # SoSe: 01.04. - 30.09.
@@ -14,6 +20,7 @@ def test_get_semester():
     assert get_semester(datetime(2026, 3, 31)) == "2025_26_WS"
     assert get_semester(datetime(2025, 1, 15)) == "2024_25_WS"
 
+
 def test_extract_lastname():
     assert extract_lastname("Max Mustermann") == "Mustermann"
     assert extract_lastname("Mustermann, Max") == "Mustermann"
@@ -24,10 +31,13 @@ def test_extract_lastname():
     assert extract_lastname("(No Sender)") == "Unknown"
     assert extract_lastname("") == "Unknown"
 
-@patch('mcp_university.classifier.sort_emails.EmailClassifier')
-@patch('mcp_university.classifier.sort_emails.MailParser')
-@patch('extract_msg.openMsg')
-def test_process_emails(mock_open_msg, mock_mail_parser, mock_classifier_class, tmp_path):
+
+@patch("mcp_university.classifier.sort_emails.EmailClassifier")
+@patch("mcp_university.classifier.sort_emails.MailParser")
+@patch("extract_msg.openMsg")
+def test_process_emails(
+    mock_open_msg, mock_mail_parser, mock_classifier_class, tmp_path
+):
     # Setup source directory - now with arbitrary structure
     source_root = tmp_path / "source"
     some_folder = source_root / "ArbitraryFolder"
@@ -51,17 +61,17 @@ def test_process_emails(mock_open_msg, mock_mail_parser, mock_classifier_class, 
     # Mock classifier
     mock_classifier = mock_classifier_class.return_value
     mock_classifier.predict.side_effect = [
-        {"prediction": "BachelorThesis"}, # mail1
-        {"prediction": "BachelorThesis"}, # mail2
-        {"prediction": "BachelorThesis"}  # mail3
+        {"prediction": "BachelorThesis"},  # mail1
+        {"prediction": "BachelorThesis"},  # mail2
+        {"prediction": "BachelorThesis"},  # mail3
     ]
 
     # Mock parser
     mock_parser = mock_mail_parser.return_value
     mock_parser.get_email_date.side_effect = [
-        datetime(2025, 5, 10), # mail1 SoSe
-        datetime(2025, 11, 20), # mail2 WS
-        datetime(2025, 6, 10)  # mail3 SoSe
+        datetime(2025, 5, 10),  # mail1 SoSe
+        datetime(2025, 11, 20),  # mail2 WS
+        datetime(2025, 6, 10),  # mail3 SoSe
     ]
 
     # Mock extract_msg
@@ -88,9 +98,7 @@ def test_process_emails(mock_open_msg, mock_mail_parser, mock_classifier_class, 
 
     mock_open_msg.return_value.__enter__.side_effect = [mock_msg1, mock_msg2, mock_msg3]
 
-    config = {
-        "BachelorThesis": str(target_root)
-    }
+    config = {"BachelorThesis": str(target_root)}
 
     moved = process_emails(source_root, Path("dummy_model"), config)
 
@@ -101,12 +109,15 @@ def test_process_emails(mock_open_msg, mock_mail_parser, mock_classifier_class, 
     assert expected_path1.exists()
 
     # Verify second file (From Gaida to Student)
-    expected_path2 = target_root / "2025_26_WS" / "Musterfrau" / "SentItems" / "mail2.msg"
+    expected_path2 = (
+        target_root / "2025_26_WS" / "Musterfrau" / "SentItems" / "mail2.msg"
+    )
     assert expected_path2.exists()
 
     # Verify third file (From Unknown to Student)
     expected_path3 = target_root / "2025_SoSe" / "Huber" / "SentItems" / "mail3.msg"
     assert expected_path3.exists()
+
 
 def test_write_report(tmp_path):
     source_root = tmp_path
@@ -116,15 +127,15 @@ def test_write_report(tmp_path):
             "semester": "2025_SoSe",
             "lastname": "Mustermann",
             "folder": "Inbox",
-            "path": "/path/to/mail1.msg"
+            "path": "/path/to/mail1.msg",
         },
         {
             "class": "BachelorThesis",
             "semester": "2025_26_WS",
             "lastname": "Musterfrau",
             "folder": "SentItems",
-            "path": "/path/to/mail2.msg"
-        }
+            "path": "/path/to/mail2.msg",
+        },
     ]
 
     write_report(source_root, moved_emails)
