@@ -29,6 +29,7 @@ dependencies:
     - matplotlib
     - tabulate
     - xgboost
+    - shap
     - pytest
     - pytest-asyncio
     - pytest-mock
