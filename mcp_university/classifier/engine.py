@@ -76,7 +76,7 @@ class EmailClassifier:
         for class_dir in root_path.iterdir():
             if class_dir.is_dir():
                 label = class_dir.name
-                for file_path in class_dir.glob("*.msg"):
+                for file_path in class_dir.rglob("*.msg"):
                     text = self._extract_text(file_path)
                     if text:
                         texts.append(text)

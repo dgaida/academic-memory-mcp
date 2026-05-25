@@ -155,10 +155,12 @@ def main() -> None:
 
         # Sicherstellen, dass Zielverzeichnis existiert
         model_file = Path(args.model_path)
+        if f"_{args.mode}" not in model_file.stem:
+            model_file = model_file.with_name(f"{model_file.stem}_{args.mode}{model_file.suffix}")
         model_file.parent.mkdir(parents=True, exist_ok=True)
 
         classifier.save(model_file)
-        logger.info(f"Modell erfolgreich trainiert und unter {args.model_path} gespeichert.")
+        logger.info(f"Modell erfolgreich trainiert und unter {model_file} gespeichert.")
 
         # Evaluierung auf Trainingsdaten
         logger.info("Starte Evaluierung und Berichterstellung...")

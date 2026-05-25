@@ -9,25 +9,30 @@ from mcp_university.classifier.engine import EmailClassifier
 
 @pytest.fixture
 def temp_data_dir():
-    """Erstellt ein temporäres Verzeichnis mit Testdaten."""
+    """Erstellt ein temporäres Verzeichnis mit Testdaten in der neuen Struktur."""
     tmpdir = tempfile.mkdtemp()
     root = Path(tmpdir)
 
     # Erstelle zwei Klassen-Ordner
-    (root / "BachelorThesis").mkdir()
-    (root / "MasterThesis").mkdir()
+    bach = root / "BachelorThesis"
+    mast = root / "MasterThesis"
 
-    # Erstelle Dummy .msg Dateien
-    (root / "BachelorThesis" / "test1.msg").write_text("Anmeldung Bachelorarbeit")
-    (root / "BachelorThesis" / "test2.msg").write_text("Frage zu Bachelor")
-    (root / "MasterThesis" / "test3.msg").write_text("Masterarbeit Thema")
-    (root / "MasterThesis" / "test4.msg").write_text("Kolloquium Master")
+    for d in [bach, mast]:
+        d.mkdir()
+        (d / "Inbox").mkdir()
+        (d / "SentItems").mkdir()
+
+    # Erstelle Dummy .msg Dateien in Unterordnern
+    (bach / "Inbox" / "test1.msg").write_text("Anmeldung Bachelorarbeit")
+    (bach / "SentItems" / "test2.msg").write_text("Frage zu Bachelor")
+    (mast / "Inbox" / "test3.msg").write_text("Masterarbeit Thema")
+    (mast / "SentItems" / "test4.msg").write_text("Kolloquium Master")
 
     yield root
     shutil.rmtree(tmpdir)
 
 def test_classifier_train_predict_tfidf(temp_data_dir):
-    """Testet das Training und die Vorhersage im TF-IDF Modus."""
+    """Testet das Training und die Vorhersage im TF-IDF Modus mit Unterordnern."""
     classifier = EmailClassifier(mode="tfidf")
 
     # Mock MailParser.parse
@@ -38,7 +43,7 @@ def test_classifier_train_predict_tfidf(temp_data_dir):
         assert classifier.is_trained
 
         # Test Vorhersage
-        test_file = temp_data_dir / "BachelorThesis" / "test1.msg"
+        test_file = temp_data_dir / "BachelorThesis" / "Inbox" / "test1.msg"
         result = classifier.predict(test_file)
 
         assert "prediction" in result
@@ -82,7 +87,7 @@ def test_classifier_embedding_mode(mock_st, temp_data_dir):
 
         # Mock for predict
         mock_model.encode.return_value = [[0.1, 0.2, 0.3]]
-        test_file = temp_data_dir / "BachelorThesis" / "test1.msg"
+        test_file = temp_data_dir / "BachelorThesis" / "Inbox" / "test1.msg"
         result = classifier.predict(test_file)
         assert result["prediction"] in ["BachelorThesis", "MasterThesis"]
 
@@ -99,7 +104,7 @@ def test_classifier_train_predict_xgboost(temp_data_dir):
         assert classifier.method == "xgboost"
 
         # Test Vorhersage
-        test_file = temp_data_dir / "BachelorThesis" / "test1.msg"
+        test_file = temp_data_dir / "BachelorThesis" / "Inbox" / "test1.msg"
         result = classifier.predict(test_file)
 
         assert "prediction" in result
