@@ -45,6 +45,16 @@ python3 mcp_university/classifier/predict.py /path/to/email.msg
 ```
 
 The output contains the most likely class as well as the confidence and a detailed probability distribution.
+
+### XAI Analysis (Interpretability)
+To understand which words were particularly important for classification, the XAI analysis can be used. It uses SHAP values to calculate the influence of individual words on the prediction.
+
+```bash
+python3 mcp_university/classifier/xai_analysis.py --model-path data/email_classifier_tfidf.pkl --test-data-path /path/to/test_data
+```
+
+The script analyzes up to 20 emails per class and returns the top 5 words that are most characteristic for the respective class.
+
 ### Email Sorting (Student Folders)
 The most powerful script sorts emails not only by class, but also by semester and student (last name):
 
