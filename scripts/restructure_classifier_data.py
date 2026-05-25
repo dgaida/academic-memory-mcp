@@ -14,6 +14,9 @@ except ImportError:
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
 
+# Warnungen von extract-msg unterdrücken
+logging.getLogger("extract_msg").setLevel(logging.ERROR)
+
 def restructure_data(root_dir: Path):
     """Verschiebt E-Mails in Inbox/SentItems Unterordner pro Klasse.
 
@@ -47,17 +50,19 @@ def restructure_data(root_dir: Path):
 
         for msg_file in msg_files:
             try:
+                # Absender extrahieren und Datei danach sofort schließen
                 with extract_msg.openMsg(str(msg_file)) as msg:
                     sender = (msg.sender.lower() if msg.sender else "").strip()
 
-                    if "daniel.gaida@th-koeln.de" in sender:
-                        target_path = sent_dir / msg_file.name
-                        shutil.move(str(msg_file), str(target_path))
-                        logger.info(f"Verschoben nach SentItems: {msg_file.name}")
-                    else:
-                        target_path = inbox_dir / msg_file.name
-                        shutil.move(str(msg_file), str(target_path))
-                        logger.info(f"Verschoben nach Inbox: {msg_file.name}")
+                # Datei verschieben (außerhalb des Context-Managers, um Locks zu vermeiden)
+                if "daniel.gaida@th-koeln.de" in sender:
+                    target_path = sent_dir / msg_file.name
+                    shutil.move(str(msg_file), str(target_path))
+                    logger.info(f"Verschoben nach SentItems: {msg_file.name}")
+                else:
+                    target_path = inbox_dir / msg_file.name
+                    shutil.move(str(msg_file), str(target_path))
+                    logger.info(f"Verschoben nach Inbox: {msg_file.name}")
             except Exception as e:
                 logger.error(f"Fehler beim Verarbeiten von {msg_file.name}: {e}")
 
