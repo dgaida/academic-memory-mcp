@@ -12,11 +12,11 @@ mock_win32 = MagicMock()
 sys.modules["win32com"] = mock_win32
 sys.modules["win32com.client"] = mock_win32.client
 
-from process_sorted_emails import (
+from process_sorted_emails import (  # noqa: E402
     parse_sorted_report,
     generate_reply,
     create_outlook_draft,
-)  # noqa: E402
+)
 
 
 def test_parse_sorted_report(tmp_path):
