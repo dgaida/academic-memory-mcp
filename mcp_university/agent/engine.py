@@ -234,14 +234,12 @@ class Agent:
             for i in range(1, namespace.Accounts.Count + 1):
                 account = namespace.Accounts.Item(i)
                 if account.SmtpAddress.lower() == target_account.lower():
-                    logger.info(f"Konto gefunden: {account.SmtpAddress}")
                     store = account.DeliveryStore
                     root = store.GetRootFolder()
                     for j in range(1, root.Folders.Count + 1):
                         folder = root.Folders.Item(j)
                         if folder.Name == target_calendar_name:
                             cal_folder = folder
-                            logger.info(f"Ziel-Kalender gefunden: {folder.FolderPath}")
                             break
                     if not cal_folder:
                         # Fallback: Default Calendar for this store (olFolderCalendar = 9)
@@ -278,16 +276,6 @@ class Agent:
                             break
             except Exception as e:
                 logger.warning(f"Fehler beim Suchen des Zielordners '{target_folder_name}': {e}")
-
-            if not cal_folder:
-                logger.error(f"Kein Kalender gefunden für {target_account}")
-            else:
-                logger.info(f"Nutze Kalender: {cal_folder.Name} (Pfad: {cal_folder.FolderPath})")
-
-            if target_folder:
-                logger.info(f"Zielordner für Entwürfe gefunden: {target_folder.FolderPath}")
-            else:
-                logger.warning(f"Zielordner {target_folder_name} nicht gefunden.")
 
             # Slot prüfen
             dt_start = datetime.strptime(start_time, "%Y-%m-%d %H:%M")
@@ -377,9 +365,7 @@ class Agent:
             all_messages.append(message)
 
             if not message.get('tool_calls'):
-                final_content = message.get('content', "")
-                logger.info(f"Agent finale Antwort: {final_content}")
-                return final_content
+                return message.get('content', "")
 
             # Verarbeite Tool-Calls
             for tool_call in message['tool_calls']:
