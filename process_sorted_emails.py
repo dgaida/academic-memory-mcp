@@ -193,13 +193,13 @@ def create_outlook_draft(subject: str, body: str, recipient: str = "", cc: List[
         logger.error(f"Fehler beim Erstellen des Outlook-Entwurfs: {e}")
         return False
 
-def generate_reply(summarizer: Summarizer, mail_path: Path, summary_content: str = "", skill_path: Path = None, conversation_content: str = "", persona_path: Path = None, additional_context: str = "", debug: bool = False, appointment_skill_path: Path = None) -> Tuple[str, str, bool]:
+def generate_reply(agent: Agent, mail_path: Path, summary_content: str = "", skill_path: Path = None, conversation_content: str = "", persona_path: Path = None, additional_context: str = "", debug: bool = False, appointment_skill_path: Path = None) -> Tuple[str, str, bool]:
     """Generiert eine Antwortmail mit dem LLM in zwei Schritten:
     1. Prüfung auf Terminrelevanz (Appointment Skill).
     2. Falls nicht relevant, klassenspezifische Antwort mit vollem Kontext.
 
     Args:
-        summarizer: Summarizer-Instanz.
+        agent: Agent-Instanz.
         mail_path: Pfad zur aktuellen E-Mail.
         summary_content: Inhalt der bisherigen Zusammenfassung.
         skill_path: Pfad zur SKILL-Datei.
@@ -224,7 +224,6 @@ def generate_reply(summarizer: Summarizer, mail_path: Path, summary_content: str
     if persona_path and persona_path.exists():
         persona_content = persona_path.read_text(encoding="utf-8")
 
-    agent = Agent(model=summarizer.model, base_url=str(summarizer.client._client.base_url))
     system_prompt = "Du bist ein hilfreicher Assistent an der TH Köln. Verfasse eine Antwort-E-Mail auf Deutsch."
 
     # --- SCHRITT 1: TERMINVERWALTUNG ---
@@ -247,7 +246,7 @@ AKTUELLE E-MAIL:
 
 WICHTIGE ANWEISUNG:
 1. Falls die E-Mail EINEN TERMIN BESTÄTIGT: RUFE ZWINGEND das Tool 'manage_calendar_appointment' auf. Erst wenn dieses 'ERFOLG' zurückgibt, antworte EXAKT mit 'APPOINTMENT_BOOKED'. Antworte NIEMALS mit 'APPOINTMENT_BOOKED' ohne vorher das Tool erfolgreich aufgerufen zu haben!
-2. Falls die E-Mail EINEN TERMIN ANFRAGT: Schlage freie Slots vor (nutze das Tool 'get_appointment_slots').
+2. Falls die E-Mail EINEN TERMIN ANFRAGT: Du MUSST ZWINGEND das Tool 'get_appointment_slots' aufrufen, um die verfügbaren Terminvorschläge zu erhalten und diese in die Antwort einzubinden. Antworte erst, nachdem du das Tool aufgerufen und die Daten erhalten hast.
 3. Falls die E-Mail KEINERLEI Bezug zu einer Terminbuchung oder -anfrage hat, antworte EXAKT mit: NO_APPOINTMENT_RELEVANCE
 
 Format für Terminantworten (falls relevant):
@@ -387,6 +386,7 @@ def main() -> None:
     logger.info(f"{len(emails)} sortierte E-Mails gefunden.")
 
     summarizer = Summarizer(model=config.llm.model, base_url=config.llm.base_url)
+    agent = Agent(model=config.llm.model, base_url=config.llm.base_url)
     mail_parser = MailParser()
 
     # Wir tracken verarbeitete student_folders, um Mehrfachverarbeitung zu vermeiden
@@ -533,7 +533,7 @@ def main() -> None:
                 if pdf_path.exists():
                     additional_context += f"\nDu kannst bei Bedarf Details aus der Datei '{pdf_path}' mittels des read_file Tools auslesen.\n"
 
-            reply_subject, reply, should_attach = generate_reply(summarizer, latest_mail, skill_path=skill_path, conversation_content=conversation_content, persona_path=persona_path, additional_context=additional_context, debug=args.debug, appointment_skill_path=appointment_skill_path)
+            reply_subject, reply, should_attach = generate_reply(agent, latest_mail, skill_path=skill_path, conversation_content=conversation_content, persona_path=persona_path, additional_context=additional_context, debug=args.debug, appointment_skill_path=appointment_skill_path)
 
             if reply == "APPOINTMENT_BOOKED":
                  logger.info(f"Termin für {email['lastname']} wurde erfolgreich gebucht.")
@@ -628,7 +628,7 @@ def main() -> None:
                 if pdf_path.exists():
                     additional_context += f"\nDu kannst bei Bedarf Details aus der Datei '{pdf_path}' mittels des read_file Tools auslesen.\n"
 
-            reply_subject, reply, should_attach = generate_reply(summarizer, latest_mail, summary_content or "", skill_path, persona_path=persona_path, additional_context=additional_context, debug=args.debug, appointment_skill_path=appointment_skill_path)
+            reply_subject, reply, should_attach = generate_reply(agent, latest_mail, summary_content or "", skill_path, persona_path=persona_path, additional_context=additional_context, debug=args.debug, appointment_skill_path=appointment_skill_path)
 
             if reply == "APPOINTMENT_BOOKED":
                 logger.info(f"Termin für {email['lastname']} wurde erfolgreich gebucht.")
@@ -664,9 +664,9 @@ def main() -> None:
                 f.write(f"| {res['lastname']} | {res['subject']} | {res['status']} |\n")
         logger.info(f"Abschlussbericht erstellt: {processed_report_path}")
 
-    if report_path.exists():
-        report_path.unlink()
-        logger.info(f"Temporärer Report gelöscht: {report_path}")
+    # if report_path.exists():
+    #     report_path.unlink()
+    #     logger.info(f"Temporärer Report gelöscht: {report_path}")
 
 if __name__ == "__main__":
     main()
