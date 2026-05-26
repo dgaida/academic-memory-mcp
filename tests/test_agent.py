@@ -1,16 +1,15 @@
 import pytest
 from unittest.mock import MagicMock, patch
 import sys
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
-# Mock win32com before importing Agent if necessary,
-# but Agent imports it inside methods, so we just need to mock it for the test.
+# Use a fixture or a helper to mock win32com to avoid E402
 mock_win32com = MagicMock()
 sys.modules["win32com"] = mock_win32com
 sys.modules["win32com.client"] = mock_win32com.client
 
-from mcp_university.agent import Agent
-from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
+from mcp_university.agent import Agent # noqa: E402
 
 @pytest.fixture
 def mock_ollama_client():
@@ -178,17 +177,13 @@ def test_agent_chat_with_tool_argument_error(agent, mock_ollama_client):
 
     agent.client.chat.side_effect = [mock_response_1, mock_response_2]
 
-    # Force a TypeError by calling the actual method with missing args
-    # But wait, we need to make sure Agent uses the version we expect.
-
-    response = agent.chat([{'role': 'user', 'content': 'Book a meeting'}])
+    # We call agent.chat and verify tool error handling
+    agent.chat([{'role': 'user', 'content': 'Book a meeting'}])
 
     # Check if the error message is what we expect
     second_call_messages = agent.client.chat.call_args_list[1][1]['messages']
     tool_message = [m for m in second_call_messages if m.get('role') == 'tool'][0]
 
-    # If the TypeError block works, it should contain our custom string.
-    # If not, it will contain "Fehler bei Tool-Ausführung".
     assert "Falsche Argumente für Tool" in tool_message['content']
 
 def test_tool_manage_calendar_appointment_kolloquium_duration(agent):

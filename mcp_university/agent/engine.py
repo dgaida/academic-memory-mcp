@@ -1,3 +1,4 @@
+"""Engine-Modul für den Agenten."""
 import logging
 from typing import List, Dict, Callable
 from pathlib import Path
