@@ -76,6 +76,58 @@ class MailParser:
         except Exception:
             return datetime.min
 
+    def extract_latest_message(self, text: str) -> str:
+        """Extrahiert den neuesten Teil einer E-Mail-Konversation.
+
+        Sucht nach typischen Trennern von Antwort-Historien und gibt nur den Text
+        oberhalb des ersten Trenners zurück.
+
+        Args:
+            text: Der vollständige Text der E-Mail.
+
+        Returns:
+            str: Der extrahierte neueste Teil der E-Mail.
+        """
+        if not text:
+            return ""
+
+        # Wir splitten die Mail Zeile für Zeile, um die "viele Zeilen mit >" Logik besser zu handhaben
+        lines = text.splitlines()
+        new_lines = []
+
+        # Regex für "Am ... schrieb ..."
+        date_wrote_pattern = re.compile(r"Am \d{2}\.\d{2}\.\d{4} um \d{2}:\d{2} schrieb")
+        # Regex für "From: daniel.gaida@th-koeln.de" (auch mit Display Name)
+        from_gaida_pattern = re.compile(r"From: .*daniel\.gaida@th-koeln\.de", re.IGNORECASE)
+
+        quote_count = 0
+        for line in lines:
+            # Check for standard markers
+            if "Zitat von daniel.gaida@th-koeln.de:" in line:
+                break
+            if "-------- Weitergeleitete Nachricht --------" in line:
+                break
+            if date_wrote_pattern.search(line):
+                break
+            if from_gaida_pattern.search(line):
+                break
+
+            # Check for multiple lines starting with >
+            if line.strip().startswith(">"):
+                quote_count += 1
+            else:
+                quote_count = 0
+
+            if quote_count >= 2:
+                # Wir entfernen die letzte Zeile auch, da sie schon der Anfang des Zitats war
+                if new_lines:
+                    new_lines.pop()
+                break
+
+            new_lines.append(line)
+
+        return "\n".join(new_lines).strip()
+
     def _parse_msg(self, file_path: Path) -> Optional[str]:
         """Parsen einer Outlook .msg Datei mit extract-msg."""
         try:
