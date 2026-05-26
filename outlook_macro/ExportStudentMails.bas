@@ -134,6 +134,7 @@ Private Sub ProcessFolder(ByVal olFolder As Outlook.folder, ByVal subFolderName 
     Dim addr As String
     Dim savedCount As Long
     Dim cutoffDate As Date
+    Dim filterStr As String
 
     targetPath = ROOT_PATH & "\" & subFolderName
     If Not EnsureDirectory(targetPath) Then
@@ -141,26 +142,29 @@ Private Sub ProcessFolder(ByVal olFolder As Outlook.folder, ByVal subFolderName 
         Exit Sub
     End If
 
+    ' Items laden
+    Set items = olFolder.items
+
+    ' Zeitfilter anwenden (effizient via Restrict)
     If DaysBack > 0 Then
         cutoffDate = DateAdd("d", -DaysBack, Date)
-    Else
-        cutoffDate = 0
+        ' Outlook Restrict Filter braucht US-Format (MM/DD/YYYY)
+        ' Wir bauen ihn locale-unabhaengig zusammen.
+        filterStr = "[ReceivedTime] >= """ & Month(cutoffDate) & "/" & Day(cutoffDate) & "/" & Year(cutoffDate) & " 00:00"""
+        Set items = items.Restrict(filterStr)
     End If
 
-    Set items = olFolder.items
+    ' Sortieren (neueste zuerst)
+    items.Sort "[ReceivedTime]", True
+
     savedCount = 0
 
-    ' Rueckwaerts durchlaufen ist bei Outlook-Kollektionen oft stabiler
+    ' Rueckwaerts durchlaufen ist bei Outlook-Kollektionen notwendig, wenn geloescht wird
     For i = items.count To 1 Step -1
         Set item = items(i)
 
         If TypeOf item Is mailItem Then
             Set mail = item
-
-            ' Zeitfilter pruefen
-            If cutoffDate > 0 Then
-                If mail.ReceivedTime < cutoffDate Then GoTo NextItem
-            End If
 
             ' Adresse ermitteln (je nach Ordner Absender oder Empfaenger)
             If subFolderName = "Inbox" Then
@@ -189,7 +193,6 @@ Private Sub ProcessFolder(ByVal olFolder As Outlook.folder, ByVal subFolderName 
             End If
         End If
 
-NextItem:
         ' System entlasten
         If i Mod 10 = 0 Then
             DoEvents
