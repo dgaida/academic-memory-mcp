@@ -6,9 +6,10 @@
 '   1. Greift auf das Konto "daniel.gaida@th-koeln.de" zu.
 '   2. Durchlaeuft den Posteingang (Inbox) und "Sent Items".
 '   3. Filtert Mails von/an "@smail.th-koeln.de" oder "@smail.fh-koeln.de".
-'   4. Speichert diese als .msg-Dateien unter "D:\TH_Koeln\StudentMails".
-'   5. Dateiname: YYYYMMDD_HHMMSS - Betreff.msg
-'   6. Loescht die E-Mail nach erfolgreichem Export oder falls bereits vorhanden.
+'   4. Ermoeglicht zeitliche Einschraenkung (z.B. letzte 7 Tage).
+'   5. Speichert diese als .msg-Dateien unter "D:\TH_Koeln\StudentMails".
+'   6. Dateiname: YYYYMMDD_HHMMSS - Betreff.msg
+'   7. Loescht die E-Mail nach erfolgreichem Export oder falls bereits vorhanden.
 '
 ' WICHTIG: Nutzt DoEvents und Sleep, um Outlook waehrend des Exports
 ' reaktionsfaehig zu halten.
@@ -28,11 +29,48 @@ Private Const ROOT_PATH As String = "D:\TH_Koeln\StudentMails"
 Private Const STUDENT_DOMAINS As String = "@smail.th-koeln.de|@smail.fh-koeln.de"
 
 ' =============================================================================
+' Master-Makro
+' =============================================================================
+
+''' Ruft nacheinander den FreeSlot-Export und den StudentMail-Export auf.
+Public Sub RunAllExports()
+    Dim daysInput As String
+    Dim days As Long
+
+    daysInput = InputBox("Über wie viele Tage rückwärts soll nach studentischen Mails gesucht werden?" & vbCrLf & _
+                         "(0 oder leer für alle Mails)", "Export-Konfiguration", "7")
+
+    If daysInput = "" Then
+        days = 0
+    ElseIf IsNumeric(daysInput) Then
+        days = CLng(daysInput)
+    Else
+        MsgBox "Ungültige Eingabe. Nutze Standardwert (7 Tage).", vbExclamation
+        days = 7
+    End If
+
+    ' 1. Free Slots exportieren (aus FreeSlotExport.bas)
+    On Error Resume Next
+    ExportFreeSlots
+    If Err.Number <> 0 Then
+        Debug.Print "Hinweis: ExportFreeSlots konnte nicht direkt gerufen werden oder warf Fehler: " & Err.Description
+        Err.Clear
+    End If
+    On Error GoTo 0
+
+    ' 2. Student Mails exportieren
+    ExportStudentEmails days
+End Sub
+
+' =============================================================================
 ' Hauptprozedur
 ' =============================================================================
 
 ''' Einstiegspunkt fuer das Makro. Initialisiert den Export fuer Inbox und Sent Items.
-Public Sub ExportStudentEmails()
+'''
+''' Args:
+'''     DaysBack: Anzahl der Tage, die zurueckgeblickt werden soll (0 = alle).
+Public Sub ExportStudentEmails(Optional ByVal DaysBack As Long = 7)
     Dim ns As Outlook.NameSpace
     Dim account As Outlook.account
     Dim store As Outlook.store
@@ -70,8 +108,8 @@ Public Sub ExportStudentEmails()
     End If
 
     ' Verarbeitung starten
-    ProcessFolder inbox, "Inbox"
-    ProcessFolder sentItems, "SentItems"
+    ProcessFolder inbox, "Inbox", DaysBack
+    ProcessFolder sentItems, "SentItems", DaysBack
 
     MsgBox "Export abgeschlossen!", vbInformation, "ExportStudentMails"
 End Sub
@@ -85,7 +123,8 @@ End Sub
 ''' Args:
 '''     olFolder: Der zu durchsuchende Outlook-Ordner.
 '''     subFolderName: Der Name des Unterordners im Zielpfad ("Inbox" oder "SentItems").
-Private Sub ProcessFolder(ByVal olFolder As Outlook.folder, ByVal subFolderName As String)
+'''     DaysBack: Zeitliche Einschraenkung in Tagen (0 = alle).
+Private Sub ProcessFolder(ByVal olFolder As Outlook.folder, ByVal subFolderName As String, ByVal DaysBack As Long)
     Dim items As Outlook.items
     Dim item As Object
     Dim mail As Outlook.mailItem
@@ -94,11 +133,18 @@ Private Sub ProcessFolder(ByVal olFolder As Outlook.folder, ByVal subFolderName 
     Dim filePath As String
     Dim addr As String
     Dim savedCount As Long
+    Dim cutoffDate As Date
 
     targetPath = ROOT_PATH & "\" & subFolderName
     If Not EnsureDirectory(targetPath) Then
         MsgBox "Zielverzeichnis konnte nicht erstellt werden: " & targetPath, vbCritical
         Exit Sub
+    End If
+
+    If DaysBack > 0 Then
+        cutoffDate = DateAdd("d", -DaysBack, Date)
+    Else
+        cutoffDate = 0
     End If
 
     Set items = olFolder.items
@@ -110,6 +156,11 @@ Private Sub ProcessFolder(ByVal olFolder As Outlook.folder, ByVal subFolderName 
 
         If TypeOf item Is mailItem Then
             Set mail = item
+
+            ' Zeitfilter pruefen
+            If cutoffDate > 0 Then
+                If mail.ReceivedTime < cutoffDate Then GoTo NextItem
+            End If
 
             ' Adresse ermitteln (je nach Ordner Absender oder Empfaenger)
             If subFolderName = "Inbox" Then
@@ -138,6 +189,7 @@ Private Sub ProcessFolder(ByVal olFolder As Outlook.folder, ByVal subFolderName 
             End If
         End If
 
+NextItem:
         ' System entlasten
         If i Mod 10 = 0 Then
             DoEvents
