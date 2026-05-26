@@ -245,7 +245,7 @@ AKTUELLE E-MAIL:
 {mail_content}
 
 WICHTIGE ANWEISUNG:
-1. Falls die E-Mail EINEN TERMIN BESTÄTIGT: Führe den Skill aus. Wenn erfolgreich gebucht, antworte EXAKT mit 'APPOINTMENT_BOOKED'.
+1. Falls die E-Mail EINEN TERMIN BESTÄTIGT: RUFE ZWINGEND das Tool 'manage_calendar_appointment' auf. Erst wenn dieses 'ERFOLG' zurückgibt, antworte EXAKT mit 'APPOINTMENT_BOOKED'. Antworte NIEMALS mit 'APPOINTMENT_BOOKED' ohne vorher das Tool erfolgreich aufgerufen zu haben!
 2. Falls die E-Mail EINEN TERMIN ANFRAGT: Schlage freie Slots vor (nutze das Tool 'get_appointment_slots').
 3. Falls die E-Mail KEINERLEI Bezug zu einer Terminbuchung oder -anfrage hat, antworte EXAKT mit: NO_APPOINTMENT_RELEVANCE
 
@@ -265,6 +265,7 @@ TEXT:
             messages=[{'role': 'user', 'content': appointment_user_prompt}],
             system_prompt=system_prompt
         )
+        logger.info(f"Antwort von Agent (Appointment-Check): {content}")
 
         if "APPOINTMENT_BOOKED" in content:
             return "APPOINTMENT_BOOKED", "APPOINTMENT_BOOKED", False
