@@ -1,5 +1,4 @@
 import sys
-import os
 from unittest.mock import MagicMock, patch
 
 # Mock win32com before importing anything that might use it
