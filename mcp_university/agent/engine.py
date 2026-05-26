@@ -1,8 +1,8 @@
+"""Modul für den Agenten mit Tool-Calling-Unterstützung."""
 import logging
 from typing import List, Dict, Callable
 from pathlib import Path
 from datetime import datetime
-from zoneinfo import ZoneInfo
 import ollama
 
 from ..config import get_config
@@ -107,29 +107,25 @@ class Agent:
                 "type": "function",
                 "function": {
                     "name": "manage_calendar_appointment",
-                    "description": "Prüft die Verfügbarkeit eines Slots (Standard: 30 Min) und trägt bei Erfolg einen Kalendertermin (Europe/Berlin) ein.",
+                    "description": "Prüft die Verfügbarkeit eines Slots und trägt bei Erfolg einen Kalendertermin ein und lädt den Studenten ein.",
                     "parameters": {
                         "type": "object",
                         "properties": {
                             "start_time": {
                                 "type": "string",
-                                "description": "Beginn des Termins ('YYYY-MM-DD HH:MM')."
+                                "description": "Beginn des Termins im Format 'YYYY-MM-DD HH:MM'."
                             },
                             "end_time": {
                                 "type": "string",
-                                "description": "Ende des Termins ('YYYY-MM-DD HH:MM')."
+                                "description": "Ende des Termins im Format 'YYYY-MM-DD HH:MM'."
                             },
                             "subject": {
                                 "type": "string",
-                                "description": "Betreff des Kalendereintrags."
+                                "description": "Der Betreff des Kalendereintrags."
                             },
                             "student_email": {
                                 "type": "string",
-                                "description": "E-Mail-Adresse des Studenten."
-                            },
-                            "original_mail_date": {
-                                "type": "string",
-                                "description": "Datum der studentischen Mail im Format DD.MM.YY."
+                                "description": "Die E-Mail-Adresse des Studenten, der eingeladen werden soll."
                             }
                         },
                         "required": ["start_time", "end_time", "subject", "student_email"]
@@ -209,15 +205,14 @@ class Agent:
         except Exception as e:
             return f"Fehler beim Lesen der freien Slots: {e}"
 
-    def _tool_manage_calendar_appointment(self, start_time: str, end_time: str, subject: str, student_email: str, original_mail_date: str = None) -> str:
+    def _tool_manage_calendar_appointment(self, start_time: str, end_time: str, subject: str, student_email: str) -> str:
         """Prüft einen Slot und trägt einen Kalendertermin ein, falls frei.
 
         Args:
-            start_time: Beginn des Termins ('YYYY-MM-DD HH:MM'). Default-Dauer: 30 Min.
+            start_time: Beginn des Termins ('YYYY-MM-DD HH:MM').
             end_time: Ende des Termins ('YYYY-MM-DD HH:MM').
             subject: Betreff des Kalendereintrags.
             student_email: E-Mail-Adresse des Studenten.
-            original_mail_date: Datum der studentischen Mail (DD.MM.YY).
 
         Returns:
             str: Erfolgs- oder Fehlermeldung.
@@ -294,10 +289,9 @@ class Agent:
             else:
                 logger.warning(f"Zielordner {target_folder_name} nicht gefunden.")
 
-            # Slot prüfen - Nutze Europe/Berlin Zeitzone
-            tz = ZoneInfo("Europe/Berlin")
-            dt_start = datetime.strptime(start_time, "%Y-%m-%d %H:%M").replace(tzinfo=tz)
-            dt_end = datetime.strptime(end_time, "%Y-%m-%d %H:%M").replace(tzinfo=tz)
+            # Slot prüfen
+            dt_start = datetime.strptime(start_time, "%Y-%m-%d %H:%M")
+            dt_end = datetime.strptime(end_time, "%Y-%m-%d %H:%M")
 
             outlook_start = dt_start.strftime("%m/%d/%Y %H:%M %p")
             outlook_end = dt_end.strftime("%m/%d/%Y %H:%M %p")
@@ -338,8 +332,7 @@ class Agent:
             appointment.Start = dt_start
             appointment.End = dt_end
             appointment.Location = "Zoom (siehe E-Mail-Signatur)"
-            body_text = f"Terminbestätigung auf Basis Ihrer Mail vom {original_mail_date}" if original_mail_date else "Terminbestätigung via MCP University System."
-            appointment.Body = body_text
+            appointment.Body = "Terminbestätigung via MCP University System."
 
             # Einladung vorbereiten
             recipient = appointment.Recipients.Add(student_email)

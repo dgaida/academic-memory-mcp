@@ -8,7 +8,6 @@ import yaml
 from mcp_university.classifier.sort_emails import process_emails, write_report, extract_lastname, extract_firstname
 import re
 from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -231,7 +230,7 @@ def generate_reply(summarizer: Summarizer, mail_path: Path, summary_content: str
     logger.info("Schritt 1: Prüfe Terminrelevanz...")
     appointment_user_prompt = f"""Prüfe die folgende E-Mail auf Terminrelevanz (Anfrage oder Bestätigung) basierend auf dem TERMINVERWALTUNG SKILL.
 
-HEUTE IST: {datetime.now(ZoneInfo('Europe/Berlin')).strftime('%A, den %d.%m.%Y %H:%M')}
+HEUTE IST: {datetime.now().strftime('%A, den %d.%m.%Y %H:%M')}
 
 PERSONA:
 {persona_content}
@@ -271,11 +270,8 @@ TEXT:
         if "APPOINTMENT_BOOKED" in content:
             return "APPOINTMENT_BOOKED", "APPOINTMENT_BOOKED", False
 
-        # Erklärung: "ANHANG: JA" im Agent-Output dient als Signal für das Skript,
-        # ob Dateien (wie PO-Wechsel-Infos) angehängt werden sollen.
         if "NO_APPOINTMENT_RELEVANCE" not in content:
             logger.info("Terminrelevanz erkannt, generiere Termin-Antwort.")
-            # Signalprüfung für Anhänge (z.B. PO-Infos)
             should_attach = "ANHANG: JA" in content
             reply_subject = ""
             if "BETREFF:" in content:
@@ -301,7 +297,7 @@ TEXT:
 
     regular_user_prompt = f"""Basierend auf der folgenden E-Mail, dem Kontext des bisherigen Schriftverkehrs, der Persona und den Skill-Anweisungen, verfasse eine professionelle Antwort.
 
-HEUTE IST: {datetime.now(ZoneInfo('Europe/Berlin')).strftime('%A, den %d.%m.%Y %H:%M')}
+HEUTE IST: {datetime.now().strftime('%A, den %d.%m.%Y %H:%M')}
 
 PERSONA:
 {persona_content}
