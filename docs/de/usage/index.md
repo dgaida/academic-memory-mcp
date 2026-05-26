@@ -59,6 +59,22 @@ Das Skript analysiert bis zu 20 E-Mails pro Klasse und gibt die Top 5 Wörter zu
 Das leistungsfähigste Skript sortiert E-Mails nicht nur nach Klasse, sondern auch nach Semester und Student (Nachname):
 
 ```bash
+python3 process_sorted_emails.py /pfad/zu/daten
+```
+
+#### Terminverwaltung (Workflows)
+Das Skript erkennt automatisch Terminanfragen und -bestätigungen.
+- **Terminbestätigungen:** Erkennt das System eine Bestätigung, wird automatisch ein Kalendertermin in Outlook angelegt (Zeitzone: Europe/Berlin). Standardmäßig beträgt die Dauer **30 Minuten**.
+- **Speicherort:** Termine werden als Entwurf im Ordner **"Work in Progress"** oder direkt im Kalender des Kontos `daniel.gaida@th-koeln.de` angelegt.
+- **Wichtig:** Auch wenn der Termin in "Work in Progress" nicht sofort sichtbar ist, wird er im Outlook-Kalender angelegt. Dort kann er geöffnet, geprüft und final abgesendet werden.
+
+#### Bedeutung von "ANHANG: JA"
+In den Logs oder Ausgaben des Agenten erscheint oft die Zeile `ANHANG: JA`.
+- Dies ist ein **Steuerungssignal** für das Skript. Es bedeutet, dass das LLM empfiehlt, eine zusätzliche Informationsdatei (z.B. ein PDF mit PO-Wechsel-Informationen) an den E-Mail-Entwurf anzuhängen.
+- Es bedeutet **nicht**, dass dem Kalendereintrag selbst eine Datei angehängt wurde.
+
+
+```bash
 python3 mcp_university/classifier/sort_emails.py /quell/ordner --config config/class_paths.yaml --model data/email_classifier.pkl
 ```
 
