@@ -540,6 +540,7 @@ def main() -> None:
                  processed_results.append({"lastname": email["lastname"], "subject": latest_mail.stem, "status": "Termin gebucht (Kalender)"})
                  continue
 
+            attachments.append(latest_mail)
             if should_attach and email["class"] == "PO-Wechsel":
                 pdf_path = Path(r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf")
                 if pdf_path.exists():
@@ -635,6 +636,7 @@ def main() -> None:
                 processed_results.append({"lastname": email["lastname"], "subject": latest_mail.stem, "status": "Termin gebucht (Kalender)"})
                 continue
 
+            attachments.append(latest_mail)
             if should_attach and email["class"] == "PO-Wechsel":
                 pdf_path = Path(r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf")
                 if pdf_path.exists():

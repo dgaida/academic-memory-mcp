@@ -50,7 +50,7 @@ def test_generate_reply_appointment_booked(mock_agent_cls, mock_parser_cls, tmp_
 
     mail_path = tmp_path / "test.msg"
 
-    subject, reply, should_attach = generate_reply(mock_summarizer, mail_path)
+    subject, reply, should_attach = generate_reply(mock_agent, mail_path)
 
     assert reply == "APPOINTMENT_BOOKED"
     assert mock_agent.chat.call_count == 1
@@ -76,7 +76,7 @@ def test_generate_reply_no_appointment_fallback(mock_agent_cls, mock_parser_cls,
 
     mail_path = tmp_path / "test.msg"
 
-    subject, reply, should_attach = generate_reply(mock_summarizer, mail_path)
+    subject, reply, should_attach = generate_reply(mock_agent, mail_path)
 
     assert subject == "Thesis"
     assert reply == "Hier ist die Antwort."
