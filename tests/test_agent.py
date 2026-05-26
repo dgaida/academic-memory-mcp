@@ -1,6 +1,16 @@
 import pytest
 from unittest.mock import MagicMock, patch
+import sys
+
+# Mock win32com before importing Agent if necessary,
+# but Agent imports it inside methods, so we just need to mock it for the test.
+mock_win32com = MagicMock()
+sys.modules["win32com"] = mock_win32com
+sys.modules["win32com.client"] = mock_win32com.client
+
 from mcp_university.agent import Agent
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 @pytest.fixture
 def mock_ollama_client():
@@ -95,6 +105,7 @@ def test_tool_get_appointment_slots_not_found(agent):
         assert "nicht gefunden" in result
 
 def test_tool_manage_calendar_appointment_import_error(agent):
+    # For this test, we temporarily remove the mock
     with patch.dict('sys.modules', {'win32com': None, 'win32com.client': None}):
         result = agent._tool_manage_calendar_appointment(
             "2026-06-01 13:30", "2026-06-01 14:00", "Subject", "student@example.com"
@@ -137,3 +148,86 @@ def test_agent_chat_with_appointment_booked(mock_tool, agent, mock_ollama_client
 
     assert response == "APPOINTMENT_BOOKED"
     assert agent.client.chat.call_count == 2
+
+def test_agent_chat_with_tool_argument_error(agent, mock_ollama_client):
+    # Mock tool call with missing arguments
+    mock_response_1 = {
+        'message': {
+            'role': 'assistant',
+            'tool_calls': [{
+                'id': 'call_1',
+                'function': {
+                    'name': 'manage_calendar_appointment',
+                    'arguments': {
+                        'start_time': '2026-06-01 13:30',
+                        'end_time': '2026-06-01 14:00',
+                        'subject': 'Test'
+                        # student_email is missing
+                    }
+                }
+            }]
+        }
+    }
+
+    mock_response_2 = {
+        'message': {
+            'role': 'assistant',
+            'content': 'Oops, I missed an argument.'
+        }
+    }
+
+    agent.client.chat.side_effect = [mock_response_1, mock_response_2]
+
+    # Force a TypeError by calling the actual method with missing args
+    # But wait, we need to make sure Agent uses the version we expect.
+
+    response = agent.chat([{'role': 'user', 'content': 'Book a meeting'}])
+
+    # Check if the error message is what we expect
+    second_call_messages = agent.client.chat.call_args_list[1][1]['messages']
+    tool_message = [m for m in second_call_messages if m.get('role') == 'tool'][0]
+
+    # If the TypeError block works, it should contain our custom string.
+    # If not, it will contain "Fehler bei Tool-Ausführung".
+    assert "Falsche Argumente für Tool" in tool_message['content']
+
+def test_tool_manage_calendar_appointment_kolloquium_duration(agent):
+    # Mock Outlook objects
+    mock_outlook = mock_win32com.client.Dispatch.return_value
+    mock_namespace = mock_outlook.GetNamespace.return_value
+    mock_account = MagicMock()
+    mock_account.SmtpAddress = "daniel.gaida@th-koeln.de"
+    mock_namespace.Accounts.Count = 1
+    mock_namespace.Accounts.Item.return_value = mock_account
+
+    mock_store = mock_account.DeliveryStore
+    mock_root = mock_store.GetRootFolder.return_value
+    mock_calendar = MagicMock()
+    mock_calendar.Name = "Kalender (Nur dieser Computer)"
+    mock_root.Folders.Count = 1
+    mock_root.Folders.Item.return_value = mock_calendar
+
+    mock_appointment = MagicMock()
+    mock_calendar.Items.Add.return_value = mock_appointment
+
+    # Mock restrictive items (empty = slot free)
+    mock_calendar.Items.Restrict.return_value = []
+
+    # Call tool with Kolloquium in subject but only 30 min duration
+    start = "2026-07-22 13:30"
+    end = "2026-07-22 14:00"
+    subject = "Kolloquium Max Mustermann"
+    email = "max@smail.th-koeln.de"
+
+    agent.cfg.calendar.send_invitations_automatically = True
+
+    result = agent._tool_manage_calendar_appointment(start, end, subject, email)
+
+    assert "ERFOLG" in result
+    # Verify that the end time was adjusted to 60 minutes
+    tz = ZoneInfo("Europe/Berlin")
+    expected_start = datetime.strptime(start, "%Y-%m-%d %H:%M").replace(tzinfo=tz)
+    expected_end = expected_start + timedelta(minutes=60)
+
+    assert mock_appointment.Start == expected_start
+    assert mock_appointment.End == expected_end

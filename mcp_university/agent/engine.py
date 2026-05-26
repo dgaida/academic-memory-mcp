@@ -1,7 +1,7 @@
 import logging
 from typing import List, Dict, Callable
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 import ollama
 
@@ -299,6 +299,12 @@ class Agent:
             dt_start = datetime.strptime(start_time, "%Y-%m-%d %H:%M").replace(tzinfo=tz)
             dt_end = datetime.strptime(end_time, "%Y-%m-%d %H:%M").replace(tzinfo=tz)
 
+            # Logik: Kolloquium immer 60 Min
+            if "kolloquium" in subject.lower():
+                if (dt_end - dt_start) < timedelta(minutes=60):
+                    logger.info("Kolloquium erkannt, setze Dauer auf 60 Minuten.")
+                    dt_end = dt_start + timedelta(minutes=60)
+
             outlook_start = dt_start.strftime("%m/%d/%Y %H:%M %p")
             outlook_end = dt_end.strftime("%m/%d/%Y %H:%M %p")
 
@@ -398,8 +404,12 @@ class Agent:
                 if function_name in self.available_tools:
                     try:
                         tool_result = self.available_tools[function_name](**args)
+                    except TypeError as e:
+                        tool_result = f"Fehler: Falsche Argumente für Tool '{function_name}'. Details: {e}. Bitte stelle sicher, dass ALLE erforderlichen Argumente korrekt übergeben werden."
+                        logger.error(f"Tool-Argument-Fehler: {e}")
                     except Exception as e:
                         tool_result = f"Fehler bei Tool-Ausführung: {e}"
+                        logger.error(f"Tool-Ausführungs-Fehler: {e}")
                 else:
                     tool_result = f"Tool {function_name} nicht verfügbar."
 

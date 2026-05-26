@@ -11,19 +11,23 @@ Wenn ein Studierender nach einem Termin fragt (z.B. für eine Besprechung, Sprec
 ## 2. Erkennung von Terminbestätigungen
 Wenn ein Studierender einen konkreten Termin bestätigt (z.B. "Ich nehme den Termin am Montag um 14:00 Uhr"):
 1. Extrahiere das Datum und die Uhrzeit aus der Mail.
-2. **WICHTIG:** Die Standarddauer eines Termins beträgt **30 Minuten**, sofern der Studierende nichts anderes explizit anfragt.
-3. **PFLICHT:** Rufe das Tool `manage_calendar_appointment` auf. Dies ist der wichtigste Schritt!
-   - `start_time`: Format 'YYYY-MM-DD HH:MM' (Zeitzone: Europe/Berlin)
-   - `end_time`: Format 'YYYY-MM-DD HH:MM' (30 Minuten nach start_time)
-   - `subject`: Generiere einen passenden Betreff (z.B. "Besprechung [Name des Studierenden] - [Thema]").
+2. **WICHTIG:** Achte UNBEDINGT auf das korrekte Jahr (aktuell 2026).
+3. **DAUER:**
+   - Die Standarddauer eines Termins beträgt **30 Minuten**.
+   - **AUSNAHME:** Termine für ein **Kolloquium** dauern IMMER **60 Minuten**.
+4. **PFLICHT:** Rufe das Tool `manage_calendar_appointment` auf. Dies ist der wichtigste Schritt!
+   - `start_time`: Format 'YYYY-MM-DD HH:MM' (Zeitzone: Europe/Berlin). Achte auf das korrekte Jahr!
+   - `end_time`: Format 'YYYY-MM-DD HH:MM'. Muss bei Kolloquien 60 Min nach start_time liegen, sonst 30 Min.
+   - `subject`: Generiere einen passenden Betreff (z.B. "Kolloquium Max Mustermann" oder "Besprechung [Name] - [Thema]").
    - `student_email`: Die E-Mail-Adresse des Studierenden (aus dem Kontext).
    - `original_mail_date`: Das Datum der E-Mail des Studierenden im Format DD.MM.YY.
-4. **ERST NACH ERFOLGREICHEM TOOL-AUFRUF:** Wenn das Tool eine Nachricht mit "ERFOLG" zurückgibt:
+5. **ERST NACH ERFOLGREICHEM TOOL-AUFRUF:** Wenn das Tool eine Nachricht mit "ERFOLG" zurückgibt:
    - Antworte EXAKT mit dem Signalwort: **APPOINTMENT_BOOKED**
    - Behaupte NIEMALS, dass ein Termin gebucht wurde, wenn das Tool nicht aufgerufen wurde oder einen Fehler gemeldet hat.
    - Sende keine weitere E-Mail an den Studierenden (die Einladung erfolgt automatisch über Outlook).
-5. Wenn das Tool einen Fehler meldet (z.B. Slot belegt):
-   - Informiere den Studierenden in der Antwortmail darüber und schlage erneut freie Slots vor (siehe Punkt 1).
+6. Wenn das Tool einen Fehler meldet (z.B. Slot belegt oder fehlende Argumente):
+   - Korrigiere den Tool-Aufruf, falls möglich (z.B. fehlende Argumente ergänzen).
+   - Falls der Slot belegt ist, informiere den Studierenden in der Antwortmail darüber und schlage erneut freie Slots vor (siehe Punkt 1).
 
 ## 3. Priorität
 Dieser Skill hat höchste Priorität. Wenn eine Mail eine Terminanfrage oder -bestätigung enthält, befolge diese Anweisungen. Wenn beides nicht zutrifft, fahre mit dem normalen Prozess (andere Skills/Zusammenfassung) fort.
