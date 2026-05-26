@@ -22,6 +22,7 @@ from mcp_university.config import get_config
 from mcp_university.summarizer.engine import Summarizer
 from mcp_university.parser.mail_parser import MailParser
 from mcp_university.agent import Agent
+from mcp_university.agent.mcp_agent import MCPAgent
 
 # Globaler Logger (wird in main konfiguriert)
 logger = logging.getLogger(__name__)
@@ -214,6 +215,7 @@ def generate_reply(agent: Agent, mail_path: Path, summary_content: str = "", ski
     """
     parser = MailParser()
     mail_content = parser.parse(mail_path)
+    mail_content = parser.extract_latest_message(mail_content)
 
     appointment_skill_content = ""
     if appointment_skill_path and appointment_skill_path.exists():
@@ -371,6 +373,7 @@ def main() -> None:
     parser.add_argument("--config", default="config/folders.yaml", help="Pfad zur Konfiguration")
     parser.add_argument("--debug", action="store_true", default=DEBUG, help="Speichert LLM Prompts als Markdown (Default: True)")
     parser.add_argument("--no-debug", action="store_false", dest="debug", help="Deaktiviert das Speichern von Prompts")
+    parser.add_argument("--use-mcp", action="store_true", help="Nutzt den MCP Server für Tools")
     args = parser.parse_args()
 
     source_dir = Path(args.source_dir)
@@ -386,7 +389,11 @@ def main() -> None:
     logger.info(f"{len(emails)} sortierte E-Mails gefunden.")
 
     summarizer = Summarizer(model=config.llm.model, base_url=config.llm.base_url)
-    agent = Agent(model=config.llm.model, base_url=config.llm.base_url)
+    if args.use_mcp:
+        logger.info("Nutze MCP Agent.")
+        agent = MCPAgent(model=config.llm.model, base_url=config.llm.base_url)
+    else:
+        agent = Agent(model=config.llm.model, base_url=config.llm.base_url)
     mail_parser = MailParser()
 
     # Wir tracken verarbeitete student_folders, um Mehrfachverarbeitung zu vermeiden
