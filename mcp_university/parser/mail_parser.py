@@ -94,10 +94,20 @@ class MailParser:
         # Wir splitten die Mail Zeile für Zeile, um die "viele Zeilen mit >" Logik besser zu handhaben
         lines = text.splitlines()
 
-        # Regex für "Am ... schrieb ..."
-        date_wrote_pattern = re.compile(r"Am \d{2}\.\d{2}\.\d{4} um \d{2}:\d{2} schrieb")
+        # Regex für "Am ... schrieb ..." (Deutsch und Englisch)
+        date_wrote_pattern = re.compile(r"(Am|On) .* (schrieb|wrote):?", re.IGNORECASE)
         # Regex für "From: daniel.gaida@th-koeln.de" (auch mit Display Name)
         from_gaida_pattern = re.compile(r"From: .*daniel\.gaida@th-koeln\.de", re.IGNORECASE)
+        # Regex für "Zitat von daniel.gaida@th-koeln.de:"
+        zitat_pattern = re.compile(r"Zitat von .*daniel\.gaida@th-koeln\.de:?", re.IGNORECASE)
+
+        def is_header_marker(line: str) -> bool:
+            """Prüft, ob eine Zeile ein Header-Marker für eine Antwort ist."""
+            return (zitat_pattern.search(line) is not None or
+                    "-------- Weitergeleitete Nachricht --------" in line or
+                    "-----Original Message-----" in line or
+                    date_wrote_pattern.search(line) is not None or
+                    from_gaida_pattern.search(line) is not None)
 
         # 1. Führende Zitate überspringen, falls vorhanden (Bottom-Posting)
         start_index = 0
@@ -109,21 +119,12 @@ class MailParser:
 
         if first_content_line_idx != -1:
             first_line = lines[first_content_line_idx]
-            is_marker = "Zitat von daniel.gaida@th-koeln.de:" in first_line or \
-                        "-------- Weitergeleitete Nachricht --------" in first_line or \
-                        date_wrote_pattern.search(first_line) or \
-                        from_gaida_pattern.search(first_line) or \
-                        first_line.strip().startswith(">")
+            is_marker = is_header_marker(first_line) or first_line.strip().startswith(">")
 
             if is_marker:
                 for i in range(first_content_line_idx, len(lines)):
                     line = lines[i]
-                    current_is_marker = "Zitat von daniel.gaida@th-koeln.de:" in line or \
-                                        "-------- Weitergeleitete Nachricht --------" in line or \
-                                        date_wrote_pattern.search(line) or \
-                                        from_gaida_pattern.search(line)
-
-                    if line.strip().startswith(">") or current_is_marker or not line.strip():
+                    if line.strip().startswith(">") or is_header_marker(line) or not line.strip():
                         continue
                     else:
                         start_index = i
@@ -135,13 +136,7 @@ class MailParser:
         for i in range(start_index, len(lines)):
             line = lines[i]
             # Check for standard markers
-            if "Zitat von daniel.gaida@th-koeln.de:" in line:
-                break
-            if "-------- Weitergeleitete Nachricht --------" in line:
-                break
-            if date_wrote_pattern.search(line):
-                break
-            if from_gaida_pattern.search(line):
+            if is_header_marker(line):
                 break
 
             # Check for multiple lines starting with >
@@ -158,7 +153,17 @@ class MailParser:
 
             new_lines.append(line)
 
-        return "\n".join(new_lines).strip()
+        extracted_text = "\n".join(new_lines).strip()
+
+        # Fallback: Wenn die extrahierte Nachricht zu kurz ist (< 2 Zeilen), nehmen wir die ganze Mail
+        # Aber NUR wenn die ursprüngliche Mail mehr als diese Zeilen hatte
+        original_lines_count = len([line for line in text.splitlines() if line.strip()])
+        extracted_lines_count = len([line for line in extracted_text.splitlines() if line.strip()])
+
+        if extracted_lines_count < 2 and original_lines_count >= 2:
+            return text.strip()
+
+        return extracted_text
 
     def _parse_msg(self, file_path: Path) -> Optional[str]:
         """Parsen einer Outlook .msg Datei mit extract-msg."""
