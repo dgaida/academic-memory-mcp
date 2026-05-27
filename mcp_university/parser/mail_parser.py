@@ -93,15 +93,47 @@ class MailParser:
 
         # Wir splitten die Mail Zeile für Zeile, um die "viele Zeilen mit >" Logik besser zu handhaben
         lines = text.splitlines()
-        new_lines = []
 
         # Regex für "Am ... schrieb ..."
         date_wrote_pattern = re.compile(r"Am \d{2}\.\d{2}\.\d{4} um \d{2}:\d{2} schrieb")
         # Regex für "From: daniel.gaida@th-koeln.de" (auch mit Display Name)
         from_gaida_pattern = re.compile(r"From: .*daniel\.gaida@th-koeln\.de", re.IGNORECASE)
 
+        # 1. Führende Zitate überspringen, falls vorhanden (Bottom-Posting)
+        start_index = 0
+        first_content_line_idx = -1
+        for i, line in enumerate(lines):
+            if line.strip():
+                first_content_line_idx = i
+                break
+
+        if first_content_line_idx != -1:
+            first_line = lines[first_content_line_idx]
+            is_marker = "Zitat von daniel.gaida@th-koeln.de:" in first_line or \
+                        "-------- Weitergeleitete Nachricht --------" in first_line or \
+                        date_wrote_pattern.search(first_line) or \
+                        from_gaida_pattern.search(first_line) or \
+                        first_line.strip().startswith(">")
+
+            if is_marker:
+                for i in range(first_content_line_idx, len(lines)):
+                    line = lines[i]
+                    current_is_marker = "Zitat von daniel.gaida@th-koeln.de:" in line or \
+                                        "-------- Weitergeleitete Nachricht --------" in line or \
+                                        date_wrote_pattern.search(line) or \
+                                        from_gaida_pattern.search(line)
+
+                    if line.strip().startswith(">") or current_is_marker or not line.strip():
+                        continue
+                    else:
+                        start_index = i
+                        break
+
+        # 2. Den eigentlichen Inhalt extrahieren (ab start_index bis zum nächsten Trenner)
+        new_lines = []
         quote_count = 0
-        for line in lines:
+        for i in range(start_index, len(lines)):
+            line = lines[i]
             # Check for standard markers
             if "Zitat von daniel.gaida@th-koeln.de:" in line:
                 break
