@@ -28,16 +28,10 @@ class MCPAgent:
         self.available_tools = {}
         self.tools_definition = []
 
-        for tool in self.mcp_instance._tools:
-            name = tool.name
-            self.available_tools[name] = tool.callable
-
-            # Konvertiere FastMCP Tool-Definition zu Ollama Format
-            # Da FastMCP Docstrings und Typen nutzt, müssen wir sie parsen oder
-            # (einfacher) wir nehmen an sie sind analog zum lokalen Agenten.
-
-            # Wir nutzen hier die Definitionen aus dem tool_server.py
-            # Da Ollama ein spezifisches Format braucht:
+        for component in self.mcp_instance.local_provider._components.values():
+            if hasattr(component, "fn") and hasattr(component, "name"):
+                name = component.name
+                self.available_tools[name] = component.fn
 
         # Hardcoded definitions for the MCP tools to ensure correctness with Ollama
         self.tools_definition = [
