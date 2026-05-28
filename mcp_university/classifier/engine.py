@@ -1,5 +1,6 @@
 """Engine für die Klassifizierung von E-Mails."""
 import pickle
+import logging
 from pathlib import Path
 from typing import List, Tuple, Dict, Any, Optional, Union
 
@@ -10,6 +11,9 @@ from sklearn.preprocessing import LabelEncoder
 
 
 from mcp_university.parser.mail_parser import MailParser
+from mcp_university.config import get_config
+
+logger = logging.getLogger(__name__)
 
 class EmailClassifier:
     """Klassifiziert E-Mails basierend auf TF-IDF und/oder Embeddings."""
@@ -51,7 +55,20 @@ class EmailClassifier:
         """Lädt das Embedding-Modell verzögert (Lazy Loading)."""
         if self._embedding_model is None:
             from sentence_transformers import SentenceTransformer
-            self._embedding_model = SentenceTransformer(self.embedding_model_name)
+            config = get_config()
+
+            try:
+                # Versuch 1: Nur lokale Dateien (verhindert HEAD-Requests an HF)
+                logger.info(f"Versuche Embedding-Modell lokal zu laden: {self.embedding_model_name}")
+                self._embedding_model = SentenceTransformer(self.embedding_model_name, local_files_only=True)
+            except Exception as e:
+                if config.offline:
+                    logger.error(f"Modell {self.embedding_model_name} nicht lokal gefunden und Offline-Modus ist aktiv: {e}")
+                    raise
+
+                # Versuch 2: Normales Laden (erlaubt Download), falls nicht im strikten Offline-Modus
+                logger.info(f"Modell nicht lokal gefunden. Lade von Hugging Face: {self.embedding_model_name}")
+                self._embedding_model = SentenceTransformer(self.embedding_model_name)
         return self._embedding_model
 
     def _extract_text(self, file_path: Path) -> Optional[str]:

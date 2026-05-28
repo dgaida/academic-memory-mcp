@@ -1,4 +1,5 @@
 """Modul für die Konfiguration des MCP University Systems."""
+import os
 from pathlib import Path
 from typing import List, Dict, Any, Type, TypeVar
 import yaml
@@ -120,6 +121,22 @@ class Config:
             Path: Index-Pfad.
         """
         return self.data_dir / "indexes" / "qdrant"
+
+    @property
+    def offline(self) -> bool:
+        """Prüft, ob das System im Offline-Modus betrieben wird.
+
+        Wird über die Umgebungsvariable 'MCP_UNIVERSITY_OFFLINE' gesteuert.
+        Falls True, werden auch HF_HUB_OFFLINE und TRANSFORMERS_OFFLINE gesetzt.
+
+        Returns:
+            bool: True, wenn Offline-Modus aktiv.
+        """
+        is_offline = os.environ.get("MCP_UNIVERSITY_OFFLINE", "0").lower() in ("1", "true", "yes")
+        if is_offline:
+            os.environ["HF_HUB_OFFLINE"] = "1"
+            os.environ["TRANSFORMERS_OFFLINE"] = "1"
+        return is_offline
 
 def get_config() -> Config:
     """Singleton-ähnlicher Zugriff auf die Systemkonfiguration.
