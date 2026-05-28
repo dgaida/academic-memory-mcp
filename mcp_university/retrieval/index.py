@@ -81,7 +81,6 @@ class SearchIndex:
                 # Versuch 1: Nur lokale Dateien (verhindert HEAD-Requests an HF)
                 logger.info(f"Versuche Embedding-Modell lokal zu laden: {self.embedding_model_name}")
                 self._model = SentenceTransformer(self.embedding_model_name, local_files_only=True)
-                logger.info(f"ERFOLG: Modell {self.embedding_model_name} wurde LOKAL geladen.")
             except Exception as e:
                 if config.offline:
                     logger.error(f"Modell {self.embedding_model_name} nicht lokal gefunden und Offline-Modus ist aktiv: {e}")
