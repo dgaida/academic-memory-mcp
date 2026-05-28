@@ -1,8 +1,6 @@
 import pytest
 from unittest.mock import MagicMock, patch
 import sys
-from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
 
 # Use a fixture or a helper to mock win32com to avoid E402
 mock_win32com = MagicMock()
