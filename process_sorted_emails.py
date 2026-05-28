@@ -274,7 +274,11 @@ TEXT:
         logger.info(f"Antwort von Agent (Appointment-Check): {content}")
 
         if "APPOINTMENT_BOOKED" in content:
-            return "APPOINTMENT_BOOKED", "APPOINTMENT_BOOKED", False
+            apt_info = agent.last_appointment_info
+            apt_text = "APPOINTMENT_BOOKED"
+            if apt_info and "start_time" in apt_info:
+                apt_text = f"APPOINTMENT_BOOKED|{apt_info['start_time']}"
+            return "APPOINTMENT_BOOKED", apt_text, False
 
         # Erklärung: "ANHANG: JA" im Agent-Output dient als Signal für das Skript,
         # ob Dateien (wie PO-Wechsel-Infos) angehängt werden sollen.
@@ -546,9 +550,12 @@ def main() -> None:
 
             reply_subject, reply, should_attach = generate_reply(agent, latest_mail, skill_path=skill_path, conversation_content=conversation_content, persona_path=persona_path, additional_context=additional_context, debug=args.debug, appointment_skill_path=appointment_skill_path)
 
-            if reply == "APPOINTMENT_BOOKED":
-                 logger.info(f"Termin für {email['lastname']} wurde erfolgreich gebucht.")
-                 processed_results.append({"lastname": email["lastname"], "subject": latest_mail.stem, "status": "Termin gebucht (Kalender)"})
+            if reply.startswith("APPOINTMENT_BOOKED"):
+                 apt_time = reply.split("|")[1] if "|" in reply else ""
+                 log_msg = f" am {apt_time}" if apt_time else ""
+                 logger.info(f"Termin für {email['lastname']} wurde erfolgreich gebucht{log_msg}.")
+                 status = f"Termin gebucht ({apt_time})" if apt_time else "Termin gebucht (Kalender)"
+                 processed_results.append({"lastname": email["lastname"], "subject": latest_mail.stem, "status": status})
                  continue
 
             attachments.append(latest_mail)
@@ -642,9 +649,12 @@ def main() -> None:
 
             reply_subject, reply, should_attach = generate_reply(agent, latest_mail, summary_content or "", skill_path, persona_path=persona_path, additional_context=additional_context, debug=args.debug, appointment_skill_path=appointment_skill_path)
 
-            if reply == "APPOINTMENT_BOOKED":
-                logger.info(f"Termin für {email['lastname']} wurde erfolgreich gebucht.")
-                processed_results.append({"lastname": email["lastname"], "subject": latest_mail.stem, "status": "Termin gebucht (Kalender)"})
+            if reply.startswith("APPOINTMENT_BOOKED"):
+                apt_time = reply.split("|")[1] if "|" in reply else ""
+                log_msg = f" am {apt_time}" if apt_time else ""
+                logger.info(f"Termin für {email['lastname']} wurde erfolgreich gebucht{log_msg}.")
+                status = f"Termin gebucht ({apt_time})" if apt_time else "Termin gebucht (Kalender)"
+                processed_results.append({"lastname": email["lastname"], "subject": latest_mail.stem, "status": status})
                 continue
 
             attachments.append(latest_mail)

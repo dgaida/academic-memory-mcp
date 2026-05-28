@@ -6,7 +6,7 @@ mock_win32com = MagicMock()
 sys.modules["win32com"] = mock_win32com
 sys.modules["win32com.client"] = mock_win32com.client
 
-from mcp_university.agent.mcp_agent import MCPAgent
+from mcp_university.agent.mcp_agent import MCPAgent  # noqa: E402
 
 def test_mcp_agent_initialization():
     # Mock Ollama Client

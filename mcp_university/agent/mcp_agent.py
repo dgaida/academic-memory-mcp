@@ -12,6 +12,7 @@ class MCPAgent:
     def __init__(self, model: str = None, base_url: str = None):
         self.cfg = get_config()
         self.model = model or self.cfg.llm.model
+        self.last_appointment_info = None
         self.base_url = str(base_url or self.cfg.llm.base_url)
         self.client = ollama.Client(host=self.base_url)
 
@@ -110,6 +111,7 @@ class MCPAgent:
 
     def chat(self, messages: List[Dict[str, str]], system_prompt: str = None) -> str:
         """Analog zu Agent.chat, nutzt aber MCP Tools."""
+        self.last_appointment_info = None
         all_messages = []
         if system_prompt:
             all_messages.append({'role': 'system', 'content': system_prompt})
@@ -137,6 +139,8 @@ class MCPAgent:
                 if function_name in self.available_tools:
                     try:
                         tool_result = self.available_tools[function_name](**args)
+                        if function_name == "manage_calendar_appointment" and "ERFOLG" in str(tool_result):
+                            self.last_appointment_info = args
                     except Exception as e:
                         tool_result = f"Fehler bei MCP Tool-Ausführung: {e}"
                 else:
