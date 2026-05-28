@@ -4,6 +4,7 @@ import warnings
 from pathlib import Path
 from typing import Optional
 from docling.document_converter import DocumentConverter
+from mcp_university.config import get_config
 
 # Suppress torch pin_memory warnings when no accelerator is found
 warnings.filterwarnings("ignore", message=".*pin_memory.*")
@@ -21,6 +22,15 @@ class PDFParser:
         """
         self.cache_dir = cache_dir
         self.cache_dir.mkdir(parents=True, exist_ok=True)
+
+        config = get_config()
+        if config.offline:
+            # Im Offline-Modus setzen wir Umgebungsvariablen, die Docling/Transformers beeinflussen
+            # Docling nutzt intern oft Hugging Face Modelle.
+            import os
+            os.environ["HF_HUB_OFFLINE"] = "1"
+            os.environ["TRANSFORMERS_OFFLINE"] = "1"
+
         self.converter = DocumentConverter()
 
     def parse(self, file_path: Path) -> Optional[str]:

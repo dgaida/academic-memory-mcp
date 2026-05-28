@@ -9,6 +9,7 @@ import hashlib
 from pathlib import Path
 from typing import List, Dict, Any
 import numpy as np
+from mcp_university.config import get_config
 
 try:
     from qdrant_client import QdrantClient, models
@@ -73,9 +74,21 @@ class SearchIndex:
     @property
     def model(self):
         """Gibt das SentenceTransformer-Modell zurück (Lazy Loading)."""
-        if self._model is None and NATIVE_AVAILABLE:
+        if self._model is None:
             logger.info(f"Loading SentenceTransformer model: {self.embedding_model_name}")
-            self._model = SentenceTransformer(self.embedding_model_name)
+            config = get_config()
+            try:
+                # Versuch 1: Nur lokale Dateien (verhindert HEAD-Requests an HF)
+                logger.info(f"Versuche Embedding-Modell lokal zu laden: {self.embedding_model_name}")
+                self._model = SentenceTransformer(self.embedding_model_name, local_files_only=True)
+            except Exception as e:
+                if config.offline:
+                    logger.error(f"Modell {self.embedding_model_name} nicht lokal gefunden und Offline-Modus ist aktiv: {e}")
+                    raise
+
+                # Versuch 2: Normales Laden (erlaubt Download), falls nicht im strikten Offline-Modus
+                logger.info(f"Modell nicht lokal gefunden. Lade von Hugging Face: {self.embedding_model_name}")
+                self._model = SentenceTransformer(self.embedding_model_name)
         return self._model
 
     def _init_native(self) -> None:
