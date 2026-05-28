@@ -31,6 +31,7 @@ class Agent:
         self.parser_factory = ParserFactory(self.cfg.data_dir / "cache")
         self.store = MetadataStore(self.cfg.sqlite_path)
         self.index = SearchIndex(str(self.cfg.qdrant_path), self.cfg.embeddings.model, store=self.store)
+        self.last_appointment_info = None
 
         self.available_tools: Dict[str, Callable] = {
             "read_file": self._tool_read_file,
@@ -374,6 +375,7 @@ class Agent:
         Returns:
             str: Die finale Antwort des Agenten.
         """
+        self.last_appointment_info = None
         all_messages = []
         if system_prompt:
             all_messages.append({'role': 'system', 'content': system_prompt})
@@ -405,6 +407,8 @@ class Agent:
                 if function_name in self.available_tools:
                     try:
                         tool_result = self.available_tools[function_name](**args)
+                        if function_name == "manage_calendar_appointment" and "ERFOLG" in str(tool_result):
+                            self.last_appointment_info = args
                     except TypeError as e:
                         tool_result = f"Fehler: Falsche Argumente für Tool '{function_name}'. Details: {e}. Bitte stelle sicher, dass ALLE erforderlichen Argumente korrekt übergeben werden."
                         logger.error(f"Tool-Argument-Fehler: {e}")
