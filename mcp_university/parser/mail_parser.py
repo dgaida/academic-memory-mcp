@@ -155,12 +155,12 @@ class MailParser:
 
         extracted_text = "\n".join(new_lines).strip()
 
-        # Fallback: Wenn die extrahierte Nachricht zu kurz ist (< 2 Zeilen), nehmen wir die ganze Mail
+        # Fallback: Wenn die extrahierte Nachricht zu kurz ist (< 5 Zeilen), nehmen wir die ganze Mail
         # Aber NUR wenn die ursprüngliche Mail mehr als diese Zeilen hatte
         original_lines_count = len([line for line in text.splitlines() if line.strip()])
         extracted_lines_count = len([line for line in extracted_text.splitlines() if line.strip()])
 
-        if extracted_lines_count < 2 and original_lines_count >= 2:
+        if extracted_lines_count < 5 and original_lines_count >= 5:
             return text.strip()
 
         return extracted_text
