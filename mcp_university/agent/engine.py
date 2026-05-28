@@ -251,6 +251,7 @@ class Agent:
                             logger.info(f"Ziel-Kalender gefunden: {folder.FolderPath}")
                             break
                     if not cal_folder:
+                        logger.error(f"Fehler: Kalender '{target_calendar_name}' für '{target_account}' nicht gefunden.")
                         # Fallback: Default Calendar for this store (olFolderCalendar = 9)
                         try:
                             cal_folder = store.GetDefaultFolder(9)
@@ -259,6 +260,7 @@ class Agent:
                     break
 
             if not cal_folder:
+                logger.error(f"Fehler: Kalender '{target_calendar_name}' für '{target_account}' nicht gefunden.")
                 return f"Fehler: Kalender '{target_calendar_name}' für '{target_account}' nicht gefunden."
 
             # Zielordner für Entwürfe suchen (Work in Progress)
@@ -287,6 +289,7 @@ class Agent:
                 logger.warning(f"Fehler beim Suchen des Zielordners '{target_folder_name}': {e}")
 
             if not cal_folder:
+                logger.error(f"Fehler: Kalender '{target_calendar_name}' für '{target_account}' nicht gefunden.")
                 logger.error(f"Kein Kalender gefunden für {target_account}")
             else:
                 logger.info(f"Nutze Kalender: {cal_folder.Name} (Pfad: {cal_folder.FolderPath})")
@@ -360,7 +363,9 @@ class Agent:
                 appointment.Send()
                 return f"ERFOLG: Termin '{subject}' am {start_time} wurde eingetragen und Einladung an {student_email} gesendet."
             else:
-                return f"ERFOLG: Termin-Entwurf '{subject}' am {start_time} wurde in '{target_folder_name if target_folder else cal_folder.Name}' gespeichert (nicht gesendet)."
+                msg = f"ERFOLG: Termin-Entwurf '{subject}' am {start_time} wurde in '{target_folder_name if target_folder else cal_folder.Name}' gespeichert (nicht gesendet)."
+                logger.info(msg)
+                return msg
 
         except Exception as e:
             return f"Fehler bei der Kalender-Verarbeitung: {e}"
