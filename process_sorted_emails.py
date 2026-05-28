@@ -217,6 +217,10 @@ def generate_reply(agent: Agent, mail_path: Path, summary_content: str = "", ski
     mail_content = parser.parse(mail_path)
     mail_content = parser.extract_latest_message(mail_content)
 
+    if debug:
+        extracted_file = mail_path.parent / f"{mail_path.stem}_extracted.md"
+        extracted_file.write_text(mail_content, encoding="utf-8")
+
     appointment_skill_content = ""
     if appointment_skill_path and appointment_skill_path.exists():
         appointment_skill_content = appointment_skill_path.read_text(encoding="utf-8")
