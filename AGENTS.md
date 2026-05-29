@@ -94,3 +94,15 @@ Delete all temporary files before submission:
 - **Body Text:** The body of the calendar appointment MUST follow the format: "Terminbestätigung auf Basis Ihrer Mail vom DD.MM.YY".
 - **Tool Usage:** Always use the `manage_calendar_appointment` tool for bookings. Pass the date of the student's email as `original_mail_date`.
 - **ANHANG: JA:** This output in the agent's response is a control flag for the script to attach relevant info files (like PO-Wechsel PDFs) to the EMAIL draft. It does not affect the calendar entry.
+
+## Wichtige Hinweise zur Implementierung
+
+### 1. Embedding-Modelle
+In `mcp_university/classifier/engine.py` und `mcp_university/retrieval/index.py` MUSS nach dem erfolgreichen lokalen Laden des SentenceTransformer-Modells (mit `local_files_only=True`) zwingend folgende Log-Ausgabe erfolgen:
+`logger.info(f"ERFOLG: Modell {self.embedding_model_name} wurde LOKAL geladen.")`
+Dies dient der Verifikation, dass keine unnötigen Netzwerk-Anfragen gestellt werden.
+
+### 2. Terminbuchung (Appointment Booking)
+In `process_sorted_emails.py` muss bei der Verarbeitung des `APPOINTMENT_BOOKED` Signals zwingend `agent.last_appointment_info` geprüft werden. Dies verhindert, dass der Agent eine erfolgreiche Buchung halluziniert, ohne das entsprechende Tool tatsächlich aufgerufen zu haben.
+
+In `mcp_university/agent/engine.py` sollten im `_tool_manage_calendar_appointment` wichtige Zwischenschritte (Konto gefunden, Kalender gefunden, Entwurf erstellt) mit `ERFOLG:` geloggt werden, um die Fehlersuche zu erleichtern.

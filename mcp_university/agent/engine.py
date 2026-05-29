@@ -241,12 +241,14 @@ class Agent:
             for i in range(1, namespace.Accounts.Count + 1):
                 account = namespace.Accounts.Item(i)
                 if account.SmtpAddress.lower() == target_account.lower():
+                    logger.info(f"ERFOLG: Konto gefunden: {account.SmtpAddress}")
                     logger.info(f"Konto gefunden: {account.SmtpAddress}")
                     store = account.DeliveryStore
                     root = store.GetRootFolder()
                     for j in range(1, root.Folders.Count + 1):
                         folder = root.Folders.Item(j)
                         if folder.Name == target_calendar_name:
+                            logger.info(f"ERFOLG: Ziel-Kalender gefunden: {folder.FolderPath}")
                             cal_folder = folder
                             logger.info(f"Ziel-Kalender gefunden: {folder.FolderPath}")
                             break
@@ -336,7 +338,7 @@ class Agent:
 
             if not auto_send and target_folder:
                 appointment = target_folder.Items.Add(1) # 1 = olAppointmentItem
-                logger.info(f"Erstelle Termin-Entwurf in '{target_folder_name}'.")
+                logger.info(f"ERFOLG: Erstelle Termin-Entwurf in '{target_folder_name}' ({target_folder.FolderPath}).")
             else:
                 appointment = cal_folder.Items.Add(1) # 1 = olAppointmentItem
                 if not auto_send:
@@ -360,7 +362,9 @@ class Agent:
                 appointment.Send()
                 return f"ERFOLG: Termin '{subject}' am {start_time} wurde eingetragen und Einladung an {student_email} gesendet."
             else:
-                return f"ERFOLG: Termin-Entwurf '{subject}' am {start_time} wurde in '{target_folder_name if target_folder else cal_folder.Name}' gespeichert (nicht gesendet)."
+                msg = f"ERFOLG: Termin-Entwurf '{subject}' am {start_time} wurde in '{target_folder_name if target_folder else cal_folder.Name}' gespeichert (nicht gesendet)."
+                logger.info(msg)
+                return msg
 
         except Exception as e:
             return f"Fehler bei der Kalender-Verarbeitung: {e}"
