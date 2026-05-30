@@ -1,51 +1,46 @@
 """Agent, der Tools über einen MCP-Server aufruft."""
 import logging
-from typing import List, Dict
-import ollama
+from typing import List, Dict, Optional
 from ..config import get_config
+from ..utils.llm_client_wrapper import LLMClientWrapper
+from ..utils.anonymizer import Anonymizer
 
 logger = logging.getLogger(__name__)
 
 class MCPAgent:
-    """Agent, der Tool-Calling mittels Ollama und MCP-Tools unterstützt."""
+    """Agent, der Tool-Calling mittels Cloud/Lokal LLM und MCP-Tools unterstützt."""
 
-    def __init__(self, model: str = None, base_url: str = None):
+    def __init__(self, model: str = None, base_url: str = None, use_cloud: bool = False, cloud_provider: str = "openai", cloud_model: str = "gpt-4o", api_key: str = None):
         self.cfg = get_config()
         self.model = model or self.cfg.llm.model
-        self.last_appointment_info = None
         self.base_url = str(base_url or self.cfg.llm.base_url)
-        self.client = ollama.Client(host=self.base_url)
+        self.last_appointment_info = None
 
-        # In einer echten Umgebung würde man sich hier mit dem MCP Server verbinden
-        # und die Tool-Definitionen dynamisch abrufen.
-        # Da wir im selben Repo sind und die Tools statisch bekannt sind,
-        # simulieren wir den MCP-Aufruf indem wir die Tool-Server-Logik einbinden
-        # oder (für diese Aufgabe) die Tools manuell definieren, die im tool_server.py stehen.
+        self.use_cloud = use_cloud
+        if self.use_cloud:
+            self.client = LLMClientWrapper(provider=cloud_provider, model=cloud_model, api_key=api_key)
+            self.anonymizer = Anonymizer(model=self.model, base_url=self.base_url)
+        else:
+            self.client = LLMClientWrapper(provider="ollama", model=self.model, base_url=self.base_url)
+            self.anonymizer = None
 
         from ..mcp_server.tool_server import create_tool_server
         self.mcp_instance = create_tool_server()
 
-        # Tools aus MCP extrahieren
         self.available_tools = {}
-        self.tools_definition = []
-
         for component in self.mcp_instance.local_provider._components.values():
             if hasattr(component, "fn") and hasattr(component, "name"):
-                name = component.name
-                self.available_tools[name] = component.fn
+                self.available_tools[component.name] = component.fn
 
-        # Hardcoded definitions for the MCP tools to ensure correctness with Ollama
         self.tools_definition = [
             {
                 "type": "function",
                 "function": {
                     "name": "read_file",
-                    "description": "Liest den Inhalt einer Datei (PDF, DOCX, MD, TXT, MSG) ein.",
+                    "description": "Liest den Inhalt einer Datei ein.",
                     "parameters": {
                         "type": "object",
-                        "properties": {
-                            "path": {"type": "string", "description": "Der Pfad zur Datei."}
-                        },
+                        "properties": {"path": {"type": "string"}},
                         "required": ["path"]
                     }
                 }
@@ -54,12 +49,10 @@ class MCPAgent:
                 "type": "function",
                 "function": {
                     "name": "search_documents",
-                    "description": "Sucht in den indexierten Universitäts-Dokumenten nach Informationen.",
+                    "description": "Sucht in Dokumenten.",
                     "parameters": {
                         "type": "object",
-                        "properties": {
-                            "query": {"type": "string", "description": "Die Suchanfrage."}
-                        },
+                        "properties": {"query": {"type": "string"}},
                         "required": ["query"]
                     }
                 }
@@ -68,12 +61,10 @@ class MCPAgent:
                 "type": "function",
                 "function": {
                     "name": "get_student_info",
-                    "description": "Liefert Informationen und Kontext zu einem Studenten.",
+                    "description": "Liefert Studentendaten.",
                     "parameters": {
                         "type": "object",
-                        "properties": {
-                            "student_name": {"type": "string", "description": "Name des Studenten."}
-                        },
+                        "properties": {"student_name": {"type": "string"}},
                         "required": ["student_name"]
                     }
                 }
@@ -82,26 +73,23 @@ class MCPAgent:
                 "type": "function",
                 "function": {
                     "name": "get_appointment_slots",
-                    "description": "Liest die aktuell verfügbaren freien Terminslots aus.",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {}
-                    }
+                    "description": "Liest freie Slots.",
+                    "parameters": {"type": "object", "properties": {}}
                 }
             },
             {
                 "type": "function",
                 "function": {
                     "name": "manage_calendar_appointment",
-                    "description": "Trägt einen Kalendertermin ein.",
+                    "description": "Trägt Kalendertermin ein.",
                     "parameters": {
                         "type": "object",
                         "properties": {
-                            "start_time": {"type": "string", "description": "Beginn (YYYY-MM-DD HH:MM)."},
-                            "end_time": {"type": "string", "description": "Ende (YYYY-MM-DD HH:MM)."},
-                            "subject": {"type": "string", "description": "Betreff."},
-                            "student_email": {"type": "string", "description": "E-Mail."},
-                            "original_mail_date": {"type": "string", "description": "Datum der studentischen Mail (DD.MM.YY)."}
+                            "start_time": {"type": "string"},
+                            "end_time": {"type": "string"},
+                            "subject": {"type": "string"},
+                            "student_email": {"type": "string"},
+                            "original_mail_date": {"type": "string"}
                         },
                         "required": ["start_time", "end_time", "subject", "student_email"]
                     }
@@ -109,47 +97,57 @@ class MCPAgent:
             }
         ]
 
-    def chat(self, messages: List[Dict[str, str]], system_prompt: str = None) -> str:
-        """Analog zu Agent.chat, nutzt aber MCP Tools."""
+    def chat(self, messages: List[Dict[str, str]], system_prompt: str = None, sender_name: str = None, sender_email: str = None) -> str:
+        """Chat-Interaktion mit MCP Tools und optionaler Anonymisierung."""
         self.last_appointment_info = None
-        all_messages = []
-        if system_prompt:
-            all_messages.append({'role': 'system', 'content': system_prompt})
-        all_messages.extend(messages)
 
+        processed_messages = []
+        if self.use_cloud and self.anonymizer and sender_name and sender_email:
+            for msg in messages:
+                if msg['role'] == 'user':
+                    anon_content = self.anonymizer.anonymize(msg['content'], sender_name, sender_email)
+                    processed_messages.append({'role': 'user', 'content': anon_content})
+                else:
+                    processed_messages.append(msg)
+            if system_prompt:
+                system_prompt = self.anonymizer.anonymize(system_prompt, sender_name, sender_email)
+        else:
+            processed_messages = messages
+
+        all_messages = processed_messages.copy()
         max_iterations = 5
         for _ in range(max_iterations):
-            response = self.client.chat(
-                model=self.model,
-                messages=all_messages,
-                tools=self.tools_definition
-            )
-
+            response = self.client.chat(messages=all_messages, system_prompt=system_prompt, tools=self.tools_definition)
             message = response.get('message', {})
-            all_messages.append(message)
 
+            if self.use_cloud and self.anonymizer:
+                if message.get('content'):
+                    message['content'] = self.anonymizer.deanonymize_text(message['content'])
+                if message.get('tool_calls'):
+                    for tc in message['tool_calls']:
+                        tc['function']['arguments'] = self.anonymizer.deanonymize_args(tc['function'].get('arguments', {}))
+
+            all_messages.append(message)
             if not message.get('tool_calls'):
                 return message.get('content', "")
 
             for tool_call in message['tool_calls']:
-                function_name = tool_call['function']['name']
+                fn_name = tool_call['function']['name']
                 args = tool_call['function'].get('arguments', {})
-                logger.info(f"MCP Agent ruft Tool auf: {function_name} mit {args}")
-
-                if function_name in self.available_tools:
+                if fn_name in self.available_tools:
                     try:
-                        tool_result = self.available_tools[function_name](**args)
-                        if function_name == "manage_calendar_appointment" and "ERFOLG" in str(tool_result):
+                        res = self.available_tools[fn_name](**args)
+                        if fn_name == "manage_calendar_appointment" and "ERFOLG" in str(res):
                             self.last_appointment_info = args
                     except Exception as e:
-                        tool_result = f"Fehler bei MCP Tool-Ausführung: {e}"
+                        res = f"Fehler: {e}"
                 else:
-                    tool_result = f"MCP Tool {function_name} nicht verfügbar."
+                    res = "Tool nicht gefunden."
 
-                all_messages.append({
-                    'role': 'tool',
-                    'content': str(tool_result),
-                    'tool_call_id': tool_call.get('id')
-                })
+                if self.use_cloud and self.anonymizer:
+                    for placeholder, original in self.anonymizer.mapping.items():
+                        res = str(res).replace(original, placeholder)
 
-        return "Fehler: Maximale Iterationen im MCP Agent erreicht."
+                all_messages.append({'role': 'tool', 'content': str(res), 'tool_call_id': tool_call.get('id')})
+
+        return "Fehler: Maximale Iterationen erreicht."

@@ -1,0 +1,90 @@
+"""Utility to anonymize and de-anonymize email content using a local LLM."""
+import logging
+from typing import Dict
+import ollama
+from ..config import get_config
+
+logger = logging.getLogger(__name__)
+
+class Anonymizer:
+    """Utility to anonymize and de-anonymize email content using a local LLM."""
+
+    def __init__(self, model: str = None, base_url: str = None):
+        """Initializes the Anonymizer."""
+        cfg = get_config()
+        self.model = model or cfg.llm.model
+        self.base_url = str(base_url or cfg.llm.base_url)
+        self.client = ollama.Client(host=self.base_url)
+        # Placeholder -> Original
+        self.mapping: Dict[str, str] = {}
+
+    def anonymize(self, text: str, sender_name: str, sender_email: str, recipient_name: str = "Daniel Gaida", recipient_email: str = "daniel.gaida@th-koeln.de") -> str:
+        """Anonymizes the given text by replacing sender and recipient names/emails."""
+        # Define standard replacements
+        std_sender_name = "Max Mustermann"
+        std_sender_email = "max.mustermann@student.th-koeln.de"
+        std_recipient_name = "Melanie Musterfrau"
+        std_recipient_email = "melanie.musterfrau@th-koeln.de"
+
+        self.mapping = {
+            std_sender_name: sender_name,
+            std_sender_email: sender_email,
+            std_recipient_name: recipient_name,
+            std_recipient_email: recipient_email
+        }
+
+        system_prompt = (
+            "Du bist ein Datenschutz-Assistent. Anonymisiere die folgende E-Mail.\n"
+            f"Ersetze den Absender ({sender_name} <{sender_email}>) durch '{std_sender_name}' und '{std_sender_email}'.\n"
+            f"Ersetze den Empfänger ({recipient_name} <{recipient_email}>) durch '{std_recipient_name}' und '{std_recipient_email}'.\n"
+            "Achte darauf, ALLE Vorkommen dieser Namen und E-Mails im gesamten Text konsistent zu ersetzen.\n"
+            "Gib NUR den anonymisierten Text zurück."
+        )
+
+        try:
+            response = self.client.chat(
+                model=self.model,
+                messages=[
+                    {'role': 'system', 'content': system_prompt},
+                    {'role': 'user', 'content': text}
+                ],
+                options={"temperature": 0}
+            )
+            anonymized_text = response['message']['content'].strip()
+            logger.info("Content successfully anonymized via local LLM.")
+            return anonymized_text
+        except Exception as e:
+            logger.error(f"Error during local LLM anonymization: {e}. Using regex/string fallback.")
+            # Fallback
+            t = text
+            t = t.replace(sender_name, std_sender_name)
+            t = t.replace(sender_email, std_sender_email)
+            t = t.replace(recipient_name, std_recipient_name)
+            t = t.replace(recipient_email, std_recipient_email)
+            return t
+
+    def deanonymize_text(self, text: str) -> str:
+        """Replaces anonymized placeholders back with original values in a text block."""
+        if not self.mapping:
+            return text
+
+        result = text
+        for placeholder, original in self.mapping.items():
+            result = result.replace(placeholder, original)
+        return result
+
+    def deanonymize_args(self, args: Dict) -> Dict:
+        """De-anonymizes tool arguments."""
+        if not self.mapping:
+            return args
+
+        new_args = {}
+        for k, v in args.items():
+            if isinstance(v, str):
+                new_v = v
+                for placeholder, original in self.mapping.items():
+                    new_v = new_v.replace(placeholder, original)
+                new_args[k] = new_v
+            else:
+                new_args[k] = v
+        return new_args

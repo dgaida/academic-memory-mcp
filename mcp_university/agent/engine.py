@@ -4,29 +4,33 @@ from typing import List, Dict, Callable
 from pathlib import Path
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
-import ollama
 
 from ..config import get_config
 from ..parser.factory import ParserFactory
 from ..retrieval.index import SearchIndex
 from ..metadata.store import MetadataStore
+from ..utils.llm_client_wrapper import LLMClientWrapper
+from ..utils.anonymizer import Anonymizer
 
 logger = logging.getLogger(__name__)
 
 class Agent:
-    """Agent, der Tool-Calling mittels Ollama unterstützt."""
+    """Agent, der Tool-Calling unterstützt und optional Cloud-LLMs mit Anonymisierung nutzt."""
 
-    def __init__(self, model: str = None, base_url: str = None):
-        """Initialisiert den Agenten.
-
-        Args:
-            model (str, optional): Name des Ollama-Modells.
-            base_url (str, optional): Basis-URL des Ollama-Servers.
-        """
+    def __init__(self, model: str = None, base_url: str = None, use_cloud: bool = False,
+                 cloud_provider: str = "openai", cloud_model: str = "gpt-4o", api_key: str = None):
+        """Initialisiert den Agenten."""
         self.cfg = get_config()
         self.model = model or self.cfg.llm.model
         self.base_url = str(base_url or self.cfg.llm.base_url)
-        self.client = ollama.Client(host=self.base_url)
+
+        self.use_cloud = use_cloud
+        if self.use_cloud:
+            self.client = LLMClientWrapper(provider=cloud_provider, model=cloud_model, api_key=api_key)
+            self.anonymizer = Anonymizer(model=self.model, base_url=self.base_url)
+        else:
+            self.client = LLMClientWrapper(provider="ollama", model=self.model, base_url=self.base_url)
+            self.anonymizer = None
 
         self.parser_factory = ParserFactory(self.cfg.data_dir / "cache")
         self.store = MetadataStore(self.cfg.sqlite_path)
@@ -50,10 +54,7 @@ class Agent:
                     "parameters": {
                         "type": "object",
                         "properties": {
-                            "path": {
-                                "type": "string",
-                                "description": "Der Pfad zur Datei."
-                            }
+                            "path": {"type": "string", "description": "Der Pfad zur Datei."}
                         },
                         "required": ["path"]
                     }
@@ -67,10 +68,7 @@ class Agent:
                     "parameters": {
                         "type": "object",
                         "properties": {
-                            "query": {
-                                "type": "string",
-                                "description": "Die Suchanfrage."
-                            }
+                            "query": {"type": "string", "description": "Die Suchanfrage."}
                         },
                         "required": ["query"]
                     }
@@ -84,10 +82,7 @@ class Agent:
                     "parameters": {
                         "type": "object",
                         "properties": {
-                            "student_name": {
-                                "type": "string",
-                                "description": "Name oder Teilname des Studenten."
-                            }
+                            "student_name": {"type": "string", "description": "Name oder Teilname des Studenten."}
                         },
                         "required": ["student_name"]
                     }
@@ -100,8 +95,7 @@ class Agent:
                     "description": "Liest die aktuell verfügbaren freien Terminslots aus einer Datei.",
                     "parameters": {
                         "type": "object",
-                        "properties": {},
-                        "required": []
+                        "properties": {}
                     }
                 }
             },
@@ -109,30 +103,15 @@ class Agent:
                 "type": "function",
                 "function": {
                     "name": "manage_calendar_appointment",
-                    "description": "Prüft die Verfügbarkeit eines Slots (Standard: 30 Min) und trägt bei Erfolg einen Kalendertermin (Europe/Berlin) ein.",
+                    "description": "Prüft die Verfügbarkeit eines Slots und trägt einen Kalendertermin ein.",
                     "parameters": {
                         "type": "object",
                         "properties": {
-                            "start_time": {
-                                "type": "string",
-                                "description": "Beginn des Termins ('YYYY-MM-DD HH:MM')."
-                            },
-                            "end_time": {
-                                "type": "string",
-                                "description": "Ende des Termins ('YYYY-MM-DD HH:MM')."
-                            },
-                            "subject": {
-                                "type": "string",
-                                "description": "Betreff des Kalendereintrags."
-                            },
-                            "student_email": {
-                                "type": "string",
-                                "description": "E-Mail-Adresse des Studenten."
-                            },
-                            "original_mail_date": {
-                                "type": "string",
-                                "description": "Datum der studentischen Mail im Format DD.MM.YY."
-                            }
+                            "start_time": {"type": "string", "description": "Beginn (YYYY-MM-DD HH:MM)."},
+                            "end_time": {"type": "string", "description": "Ende (YYYY-MM-DD HH:MM)."},
+                            "subject": {"type": "string", "description": "Betreff."},
+                            "student_email": {"type": "string", "description": "E-Mail-Adresse."},
+                            "original_mail_date": {"type": "string", "description": "Datum der studentischen Mail (DD.MM.YY)."}
                         },
                         "required": ["start_time", "end_time", "subject", "student_email"]
                     }
@@ -141,14 +120,7 @@ class Agent:
         ]
 
     def _tool_read_file(self, path: str) -> str:
-        """Liest eine Datei ein.
-
-        Args:
-            path: Der Pfad zur Datei.
-
-        Returns:
-            str: Dateiinhalt oder Fehlermeldung.
-        """
+        """Reads a file content."""
         p = Path(path)
         if not p.exists():
             return f"Fehler: Datei {path} nicht gefunden."
@@ -156,32 +128,17 @@ class Agent:
         return content or "Fehler: Datei konnte nicht gelesen werden oder ist leer."
 
     def _tool_search_documents(self, query: str) -> str:
-        """Sucht im Index.
-
-        Args:
-            query: Die Suchanfrage.
-
-        Returns:
-            str: Suchergebnisse oder Hinweis.
-        """
+        """Searches documents."""
         results = self.index.search(query, top_k=3)
         if not results:
             return "Keine relevanten Dokumente gefunden."
-
         output = ""
         for res in results:
             output += f"--- {res['filename']} (Score: {res['score']:.2f}) ---\n{res['content']}\n\n"
         return output
 
     def _tool_get_student_info(self, student_name: str) -> str:
-        """Holt Studentendaten.
-
-        Args:
-            student_name: Name des Studenten.
-
-        Returns:
-            str: Informationen zum Studenten.
-        """
+        """Gets student info."""
         with self.store._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('''
@@ -192,68 +149,44 @@ class Agent:
             student = cursor.fetchone()
             if not student:
                 return f"Kein Student mit dem Namen {student_name} gefunden."
-
-            # (id, name, email, topic, status, folder_id, folder_path)
-            context = f"Student: {student[1]}\nEmail: {student[2]}\nThema: {student[3]}\nStatus: {student[4]}\nOrdner: {student[6]}\n"
-            return context
+            return f"Student: {student[1]}\nEmail: {student[2]}\nThema: {student[3]}\nStatus: {student[4]}\nOrdner: {student[6]}\n"
 
     def _tool_get_appointment_slots(self) -> str:
-        """Liest die Datei mit den freien Terminslots ein.
-
-        Returns:
-            str: Freie Slots als Markdown oder Fehlermeldung.
-        """
+        """Gets appointment slots."""
         path = Path(r"D:\TH_Koeln\academic-memory-mcp\data\free_slots.md")
         if not path.exists():
-            return "Fehler: Die Datei mit freien Slots wurde nicht gefunden. Das Makro Freeslotexport.bas muss eventuell zuerst ausgeführt werden."
+            return "Fehler: Die Datei mit freien Slots wurde nicht gefunden."
         try:
             return path.read_text(encoding="utf-8")
         except Exception as e:
             return f"Fehler beim Lesen der freien Slots: {e}"
 
-    def _tool_manage_calendar_appointment(self, start_time: str, end_time: str, subject: str, student_email: str, original_mail_date: str = None) -> str:
-        """Prüft einen Slot und trägt einen Kalendertermin ein, falls frei.
-
-        Args:
-            start_time: Beginn des Termins ('YYYY-MM-DD HH:MM'). Default-Dauer: 30 Min.
-            end_time: Ende des Termins ('YYYY-MM-DD HH:MM').
-            subject: Betreff des Kalendereintrags.
-            student_email: E-Mail-Adresse des Studenten.
-            original_mail_date: Datum der studentischen Mail (DD.MM.YY).
-
-        Returns:
-            str: Erfolgs- oder Fehlermeldung.
-        """
+    def _tool_manage_calendar_appointment(self, start_time: str, end_time: str, subject: str,
+                                         student_email: str, original_mail_date: str = None) -> str:
+        """Manages calendar appointment."""
         try:
             import win32com.client
         except ImportError:
-            return "Fehler: pywin32 ist nicht installiert. Kalender-Funktionen sind nicht verfügbar."
+            return "Fehler: pywin32 nicht installiert."
 
         try:
             outlook = win32com.client.Dispatch("Outlook.Application")
             namespace = outlook.GetNamespace("MAPI")
-
             target_account = "daniel.gaida@th-koeln.de"
             target_calendar_name = "Kalender (Nur dieser Computer)"
 
-            # Kalender suchen
             cal_folder = None
             for i in range(1, namespace.Accounts.Count + 1):
                 account = namespace.Accounts.Item(i)
                 if account.SmtpAddress.lower() == target_account.lower():
-                    logger.info(f"ERFOLG: Konto gefunden: {account.SmtpAddress}")
-                    logger.info(f"Konto gefunden: {account.SmtpAddress}")
                     store = account.DeliveryStore
                     root = store.GetRootFolder()
                     for j in range(1, root.Folders.Count + 1):
                         folder = root.Folders.Item(j)
                         if folder.Name == target_calendar_name:
-                            logger.info(f"ERFOLG: Ziel-Kalender gefunden: {folder.FolderPath}")
                             cal_folder = folder
-                            logger.info(f"Ziel-Kalender gefunden: {folder.FolderPath}")
                             break
                     if not cal_folder:
-                        # Fallback: Default Calendar for this store (olFolderCalendar = 9)
                         try:
                             cal_folder = store.GetDefaultFolder(9)
                         except Exception:
@@ -261,173 +194,95 @@ class Agent:
                     break
 
             if not cal_folder:
-                return f"Fehler: Kalender '{target_calendar_name}' für '{target_account}' nicht gefunden."
+                return "Fehler: Kalender nicht gefunden."
 
-            # Zielordner für Entwürfe suchen (Work in Progress)
-            target_folder_name = "Work in Progress"
-            target_folder = None
-            try:
-                for store in namespace.Stores:
-                    if store.DisplayName.lower() == target_account.lower():
-                        root = store.GetRootFolder()
-                        for folder in root.Folders:
-                            if folder.Name.lower() == target_folder_name.lower():
-                                target_folder = folder
-                                break
-                        if not target_folder:
-                            for folder in root.Folders:
-                                if folder.Name.lower() in ["posteingang", "inbox"]:
-                                    for sub in folder.Folders:
-                                        if sub.Name.lower() == target_folder_name.lower():
-                                            target_folder = sub
-                                            break
-                                if target_folder:
-                                    break
-                        if target_folder:
-                            break
-            except Exception as e:
-                logger.warning(f"Fehler beim Suchen des Zielordners '{target_folder_name}': {e}")
-
-            if not cal_folder:
-                logger.error(f"Kein Kalender gefunden für {target_account}")
-            else:
-                logger.info(f"Nutze Kalender: {cal_folder.Name} (Pfad: {cal_folder.FolderPath})")
-
-            if target_folder:
-                logger.info(f"Zielordner für Entwürfe gefunden: {target_folder.FolderPath}")
-            else:
-                logger.warning(f"Zielordner {target_folder_name} nicht gefunden.")
-
-            # Slot prüfen - Nutze Europe/Berlin Zeitzone
             tz = ZoneInfo("Europe/Berlin")
             dt_start = datetime.strptime(start_time, "%Y-%m-%d %H:%M").replace(tzinfo=tz)
             dt_end = datetime.strptime(end_time, "%Y-%m-%d %H:%M").replace(tzinfo=tz)
 
-            # Logik: Kolloquium immer 60 Min
-            if "kolloquium" in subject.lower():
-                if (dt_end - dt_start) < timedelta(minutes=60):
-                    logger.info("Kolloquium erkannt, setze Dauer auf 60 Minuten.")
-                    dt_end = dt_start + timedelta(minutes=60)
+            if "kolloquium" in subject.lower() and (dt_end - dt_start) < timedelta(minutes=60):
+                dt_end = dt_start + timedelta(minutes=60)
 
-            outlook_start = dt_start.strftime("%m/%d/%Y %H:%M %p")
-            outlook_end = dt_end.strftime("%m/%d/%Y %H:%M %p")
-
-            filter_str = f'[Start] < "{outlook_end}" AND [End] > "{outlook_start}"'
-            items = cal_folder.Items
-            items.IncludeRecurrences = True
-            items.Sort("[Start]")
-            restricted_items = items.Restrict(filter_str)
-
-            # Ignore all-day events as in the VBA macro
-            is_free = True
-            for item in restricted_items:
-                try:
-                    if not item.AllDayEvent:
-                        is_free = False
-                        break
-                except Exception:
-                    continue
-
-            if not is_free:
-                return f"Fehler: Der Slot von {start_time} bis {end_time} ist bereits belegt."
-
-            # Termin eintragen
-            # Wenn automatisch gesendet werden soll, direkt im Kalender erstellen
-            # Ansonsten versuchen, in "Work in Progress" zu erstellen, falls vorhanden
-            auto_send = self.cfg.calendar.send_invitations_automatically
-
-            if not auto_send and target_folder:
-                appointment = target_folder.Items.Add(1) # 1 = olAppointmentItem
-                logger.info(f"ERFOLG: Erstelle Termin-Entwurf in '{target_folder_name}' ({target_folder.FolderPath}).")
-            else:
-                appointment = cal_folder.Items.Add(1) # 1 = olAppointmentItem
-                if not auto_send:
-                    logger.warning(f"Zielordner '{target_folder_name}' nicht gefunden. Erstelle im Standard-Kalender.")
-
+            appointment = cal_folder.Items.Add(1)
             appointment.Subject = subject
             appointment.Start = dt_start
             appointment.End = dt_end
-            appointment.Location = "Zoom (siehe E-Mail-Signatur)"
-            body_text = f"Terminbestätigung auf Basis Ihrer Mail vom {original_mail_date}" if original_mail_date else "Terminbestätigung via MCP University System."
-            appointment.Body = body_text
+            appointment.Location = "Zoom"
+            appointment.Body = f"Terminbestätigung auf Basis Ihrer Mail vom {original_mail_date}" if original_mail_date else "Terminbestätigung."
 
-            # Einladung vorbereiten
-            recipient = appointment.Recipients.Add(student_email)
-            recipient.Type = 1 # 1 = olTo
-            appointment.MeetingStatus = 1 # 1 = olMeeting
-
+            rec = appointment.Recipients.Add(student_email)
+            rec.Type = 1
+            appointment.MeetingStatus = 1
             appointment.Save()
 
-            if auto_send:
-                appointment.Send()
-                return f"ERFOLG: Termin '{subject}' am {start_time} wurde eingetragen und Einladung an {student_email} gesendet."
-            else:
-                msg = f"ERFOLG: Termin-Entwurf '{subject}' am {start_time} wurde in '{target_folder_name if target_folder else cal_folder.Name}' gespeichert (nicht gesendet)."
-                logger.info(msg)
-                return msg
-
+            return f"ERFOLG: Termin '{subject}' am {start_time} wurde eingetragen."
         except Exception as e:
             return f"Fehler bei der Kalender-Verarbeitung: {e}"
 
-    def chat(self, messages: List[Dict[str, str]], system_prompt: str = None) -> str:
-        """Führt eine Chat-Interaktion mit Tool-Calling-Loop durch.
-
-        Args:
-            messages: Liste der Chat-Nachrichten.
-            system_prompt: Optionaler System-Prompt.
-
-        Returns:
-            str: Die finale Antwort des Agenten.
-        """
+    def chat(self, messages: List[Dict[str, str]], system_prompt: str = None,
+             sender_name: str = None, sender_email: str = None) -> str:
+        """Führt eine Chat-Interaktion durch, optional mit Anonymisierung."""
         self.last_appointment_info = None
-        all_messages = []
-        if system_prompt:
-            all_messages.append({'role': 'system', 'content': system_prompt})
-        all_messages.extend(messages)
+
+        processed_messages = []
+        if self.use_cloud and self.anonymizer and sender_name and sender_email:
+            for msg in messages:
+                if msg['role'] == 'user':
+                    anon_content = self.anonymizer.anonymize(msg['content'], sender_name, sender_email)
+                    processed_messages.append({'role': 'user', 'content': anon_content})
+                else:
+                    processed_messages.append(msg)
+
+            if system_prompt:
+                system_prompt = self.anonymizer.anonymize(system_prompt, sender_name, sender_email)
+        else:
+            processed_messages = messages
+
+        all_messages = processed_messages.copy()
 
         max_iterations = 5
         for _ in range(max_iterations):
             response = self.client.chat(
-                model=self.model,
                 messages=all_messages,
+                system_prompt=system_prompt,
                 tools=self.tools_definition
             )
 
             message = response.get('message', {})
+            if self.use_cloud and self.anonymizer:
+                if message.get('content'):
+                    message['content'] = self.anonymizer.deanonymize_text(message['content'])
+                if message.get('tool_calls'):
+                    for tc in message['tool_calls']:
+                        tc['function']['arguments'] = self.anonymizer.deanonymize_args(tc['function'].get('arguments', {}))
+
             all_messages.append(message)
 
             if not message.get('tool_calls'):
-                final_content = message.get('content', "")
-                logger.info(f"Agent finale Antwort: {final_content}")
-                return final_content
+                return message.get('content', "")
 
-            # Verarbeite Tool-Calls
             for tool_call in message['tool_calls']:
-                function_name = tool_call['function']['name']
+                fn_name = tool_call['function']['name']
                 args = tool_call['function'].get('arguments', {})
 
-                logger.info(f"Agent ruft Tool auf: {function_name} mit {args}")
-
-                if function_name in self.available_tools:
+                if fn_name in self.available_tools:
                     try:
-                        tool_result = self.available_tools[function_name](**args)
-                        if function_name == "manage_calendar_appointment" and "ERFOLG" in str(tool_result):
+                        res = self.available_tools[fn_name](**args)
+                        if fn_name == "manage_calendar_appointment" and "ERFOLG" in str(res):
                             self.last_appointment_info = args
-                    except TypeError as e:
-                        tool_result = f"Fehler: Falsche Argumente für Tool '{function_name}'. Details: {e}. Bitte stelle sicher, dass ALLE erforderlichen Argumente korrekt übergeben werden."
-                        logger.error(f"Tool-Argument-Fehler: {e}")
                     except Exception as e:
-                        tool_result = f"Fehler bei Tool-Ausführung: {e}"
-                        logger.error(f"Tool-Ausführungs-Fehler: {e}")
+                        res = f"Fehler: {e}"
                 else:
-                    tool_result = f"Tool {function_name} nicht verfügbar."
+                    res = "Tool nicht gefunden."
 
-                logger.info(f"Tool Ergebnis: {tool_result}")
+                if self.use_cloud and self.anonymizer:
+                    for placeholder, original in self.anonymizer.mapping.items():
+                        res = str(res).replace(original, placeholder)
 
                 all_messages.append({
                     'role': 'tool',
-                    'content': str(tool_result),
-                    'tool_call_id': tool_call.get('id') # Ollama supports this if present
+                    'content': str(res),
+                    'tool_call_id': tool_call.get('id')
                 })
 
-        return "Fehler: Maximale Anzahl an Iterationen erreicht."
+        return "Fehler: Maximale Iterationen erreicht."
