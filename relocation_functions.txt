@@ -1,0 +1,137 @@
+def relocate_emails(email_changes: List[Dict], config: Dict):
+    """Verschiebt E-Mails in neue Ordner basierend auf Benutzerkorrektur.
+
+    Args:
+        email_changes: Liste von Dicts mit Pfad und neuer Klasse.
+        config: Klassen-Pfad-Konfiguration.
+    """
+    mail_parser = MailParser()
+    for change in email_changes:
+        old_path = Path(change['path'])
+        new_class = change['new_class']
+        old_class = change['class']
+
+        if new_class == old_class:
+            continue
+
+        lastname = change['lastname']
+        logger.info(f"Relocating {old_path.name} from {old_class} to {new_class}")
+
+        if new_class == "Others":
+            class_base_path = Path(r"D:\TH_Koeln\MailTrainingDataFuture\Others")
+        else:
+            if new_class not in config:
+                logger.error(f"Klasse {new_class} nicht in Konfiguration gefunden.")
+                continue
+            class_base_path = Path(config[new_class])
+
+        try:
+            date = mail_parser.get_email_date(old_path)
+        except Exception:
+            date = datetime.now()
+        semester = get_semester(date)
+
+        if new_class == "Others":
+            target_dir = class_base_path
+        elif new_class.startswith(("BA_", "MA_")):
+            target_dir = class_base_path / semester / change['folder']
+        else:
+            student_dir = find_student_folder(class_base_path, lastname)
+            if not student_dir:
+                student_dir = class_base_path / semester / lastname
+            target_dir = student_dir / change['folder']
+
+        target_dir.mkdir(parents=True, exist_ok=True)
+
+        # Finde zugehörige Dateien (gleicher Zeitstempel-Präfix)
+        match = re.match(r"(\d{8}_\d{6})", old_path.name)
+        files_to_process = [old_path]
+        if match:
+            date_prefix = match.group(1)
+            for md_file in old_path.parent.glob(f"{date_prefix}*.md"):
+                if md_file != old_path:
+                    files_to_process.append(md_file)
+
+        for f in files_to_process:
+            if new_class == "Others" and f.suffix == ".md":
+                logger.info(f"Lösche {f.name}")
+                f.unlink()
+            else:
+                dest = target_dir / f.name
+                logger.info(f"Verschiebe {f.name} nach {dest}")
+                if dest.exists():
+                    dest.unlink()
+                shutil.move(str(f), str(dest))
+
+        # Aufräumen
+        old_folder = old_path.parent
+        summary_file = old_folder / ".emails_summary.md"
+        if summary_file.exists():
+            summary_file.unlink()
+
+        def delete_if_empty(folder: Path):
+            if folder.exists() and folder.is_dir():
+                items = list(folder.iterdir())
+                if not items:
+                    logger.info(f"Lösche leeren Ordner {folder}")
+                    folder.rmdir()
+                    return True
+            return False
+
+        if delete_if_empty(old_folder):
+            parent_folder = old_folder.parent
+            if parent_folder.name == lastname:
+                delete_if_empty(parent_folder)
+
+def run_gradio_gui(report_path: Path, config: Dict):
+    """Startet die Gradio GUI zur Korrektur der Einsortierung.
+
+    Args:
+        report_path: Pfad zum sorted_emails.md Report.
+        config: Klassen-Pfad-Konfiguration.
+    """
+    emails = parse_sorted_report(report_path)
+    if not emails:
+        logger.info("Keine E-Mails zum Anzeigen im Gradio GUI.")
+        return
+
+    available_classes = sorted(list(config.keys())) + ["Others"]
+
+    with gr.Blocks(title="E-Mail Sortierung Überprüfung") as demo:
+        gr.Markdown("# E-Mail Sortierung Überprüfung")
+        gr.Markdown("Bitte kontrollieren Sie die automatisch vorgenommene Einsortierung.")
+
+        dropdowns = []
+        email_data = []
+
+        for mail in emails:
+            with gr.Group():
+                with gr.Row():
+                    with gr.Column(scale=4):
+                        gr.Markdown(f"**Student:** {mail['lastname']} ({mail['semester']}) | **Ordner:** {mail['folder']}\n**Datei:** `{mail['path'].name}`")
+                    with gr.Column(scale=1):
+                        dd = gr.Dropdown(choices=available_classes, value=mail['class'], label="Korrektes Ziel")
+                        dropdowns.append(dd)
+                        email_data.append(mail)
+
+        with gr.Row():
+            btn = gr.Button("Mails neu einsortieren", variant="primary")
+            status_out = gr.Textbox(label="Ergebnis")
+
+        def handle_click(*selected_classes):
+            changes = []
+            for mail, new_class in zip(email_data, selected_classes):
+                m = mail.copy()
+                m['new_class'] = new_class
+                changes.append(m)
+
+            try:
+                relocate_emails(changes, config)
+                return "Verarbeitung abgeschlossen. Mails wurden ggf. verschoben und Ordner bereinigt."
+            except Exception as e:
+                logger.exception("Fehler bei Relokation")
+                return f"Fehler: {str(e)}"
+
+        btn.click(handle_click, inputs=dropdowns, outputs=status_out)
+
+    demo.launch(inbrowser=True)
