@@ -10,7 +10,12 @@ class Anonymizer:
     """Utility to anonymize and de-anonymize email content using a local LLM."""
 
     def __init__(self, model: str = None, base_url: str = None):
-        """Initializes the Anonymizer."""
+        """Initializes the anonymizer.
+
+        Args:
+            model (str, optional): Name of the local LLM model. Defaults to None.
+            base_url (str, optional): Base URL of the Ollama server. Defaults to None.
+        """
         cfg = get_config()
         self.model = model or cfg.llm.model
         self.base_url = str(base_url or cfg.llm.base_url)
@@ -18,8 +23,21 @@ class Anonymizer:
         # Placeholder -> Original
         self.mapping: Dict[str, str] = {}
 
-    def anonymize(self, text: str, sender_name: str, sender_email: str, recipient_name: str = "Daniel Gaida", recipient_email: str = "daniel.gaida@th-koeln.de") -> str:
-        """Anonymizes the given text by replacing sender and recipient names/emails."""
+    def anonymize(self, text: str, sender_name: str, sender_email: str,
+                  recipient_name: str = "Daniel Gaida",
+                  recipient_email: str = "daniel.gaida@th-koeln.de") -> str:
+        """Anonymizes the given text by replacing sender and recipient names/emails.
+
+        Args:
+            text (str): The text to anonymize.
+            sender_name (str): Original name of the sender.
+            sender_email (str): Original email of the sender.
+            recipient_name (str): Original name of the recipient. Defaults to "Daniel Gaida".
+            recipient_email (str): Original email of the recipient. Defaults to "daniel.gaida@th-koeln.de".
+
+        Returns:
+            str: Anonymized text.
+        """
         # Define standard replacements
         std_sender_name = "Max Mustermann"
         std_sender_email = "max.mustermann@student.th-koeln.de"
@@ -64,7 +82,14 @@ class Anonymizer:
             return t
 
     def deanonymize_text(self, text: str) -> str:
-        """Replaces anonymized placeholders back with original values in a text block."""
+        """Replaces anonymized placeholders back with original values in a text block.
+
+        Args:
+            text (str): The text to de-anonymize.
+
+        Returns:
+            str: De-anonymized text.
+        """
         if not self.mapping:
             return text
 
@@ -74,7 +99,14 @@ class Anonymizer:
         return result
 
     def deanonymize_args(self, args: Dict) -> Dict:
-        """De-anonymizes tool arguments."""
+        """De-anonymizes tool arguments.
+
+        Args:
+            args (Dict): The tool arguments to de-anonymize.
+
+        Returns:
+            Dict: De-anonymized tool arguments.
+        """
         if not self.mapping:
             return args
 

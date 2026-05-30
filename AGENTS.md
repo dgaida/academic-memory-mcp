@@ -106,3 +106,9 @@ Dies dient der Verifikation, dass keine unnötigen Netzwerk-Anfragen gestellt we
 In `process_sorted_emails.py` muss bei der Verarbeitung des `APPOINTMENT_BOOKED` Signals zwingend `agent.last_appointment_info` geprüft werden. Dies verhindert, dass der Agent eine erfolgreiche Buchung halluziniert, ohne das entsprechende Tool tatsächlich aufgerufen zu haben.
 
 In `mcp_university/agent/engine.py` sollten im `_tool_manage_calendar_appointment` wichtige Zwischenschritte (Konto gefunden, Kalender gefunden, Entwurf erstellt) mit `ERFOLG:` geloggt werden, um die Fehlersuche zu erleichtern.
+
+### 3. Email Anonymization & Cloud LLMs
+When using cloud-based LLMs (e.g., OpenAI via the \`--use-cloud\` flag), student data MUST be anonymized before being sent to the cloud.
+- **Requirement:** Use the local Ollama model (via \`Anonymizer\`) to replace student names and emails with "Max Mustermann" and "max.mustermann@student.th-koeln.de".
+- **Bi-directional:** The agent must de-anonymize data locally (using \`Anonymizer.deanonymize_text\` or \`deanonymize_args\`) before executing tools like \`manage_calendar_appointment\` or creating Outlook drafts. This ensures that sensitive internal systems always receive the correct student information while external cloud providers only see placeholders.
+- **Trigger:** Anonymization is automatically handled within \`Agent.chat\` and \`MCPAgent.chat\` when \`use_cloud\` is enabled.

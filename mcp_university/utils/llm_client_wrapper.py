@@ -15,8 +15,16 @@ except ImportError:
 
 class LLMClientWrapper:
     """Synchronous wrapper for LLM calls, supporting both local Ollama and cloud providers."""
+
     def __init__(self, provider: str = "ollama", model: str = None, base_url: str = None, api_key: str = None):
-        """Initializes the LLMClientWrapper."""
+        """Initializes the LLMClientWrapper.
+
+        Args:
+            provider (str): Name of the provider (ollama, openai, etc.). Defaults to "ollama".
+            model (str, optional): Name of the LLM model. Defaults to None.
+            base_url (str, optional): Base URL for the LLM API. Defaults to None.
+            api_key (str, optional): API key for cloud providers. Defaults to None.
+        """
         self.cfg = get_config()
         self.provider = provider.lower()
         self.model = model or self.cfg.llm.model
@@ -44,13 +52,23 @@ class LLMClientWrapper:
             self.client = ollama.Client(host=str(self.base_url))
 
     def chat(self, messages: List[Dict[str, str]], system_prompt: str = None, tools: List[Dict] = None) -> Dict[str, Any]:
-        """Sends a chat request and returns a dict compatible with Ollama's response format."""
+        """Sends a chat request and returns a dict compatible with Ollama's response format.
+
+        Args:
+            messages (List[Dict[str, str]]): List of chat messages.
+            system_prompt (str, optional): System prompt. Defaults to None.
+            tools (List[Dict], optional): List of tool definitions. Defaults to None.
+
+        Returns:
+            Dict[str, Any]: Response dictionary with 'message' key.
+        """
         if self.provider == "ollama":
             all_messages = []
             if system_prompt:
                 all_messages.append({'role': 'system', 'content': system_prompt})
             all_messages.extend(messages)
 
+            # Ollama's client.chat is synchronous
             response = self.client.chat(model=self.model, messages=all_messages, tools=tools)
             return response
 
@@ -60,10 +78,12 @@ class LLMClientWrapper:
                 chat_messages.append(ChatMessage(role=Role.SYSTEM, content=system_prompt))
             for msg in messages:
                 role = Role.USER if msg['role'] == 'user' else Role.ASSISTANT
-                if msg['role'] == 'system': role = Role.SYSTEM
+                if msg["role"] == "system":
+                    role = Role.SYSTEM
                 chat_messages.append(ChatMessage(role=role, content=msg['content']))
 
             try:
+                # llm-client is mostly async. We wrap it in a sync call.
                 loop = asyncio.get_event_loop()
                 if loop.is_running():
                     import nest_asyncio

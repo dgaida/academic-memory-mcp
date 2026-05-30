@@ -107,7 +107,7 @@ def test_tool_manage_calendar_appointment_import_error(agent):
         result = agent._tool_manage_calendar_appointment(
             "2026-06-01 13:30", "2026-06-01 14:00", "Subject", "student@example.com"
         )
-        assert "pywin32 nicht installiert" in result
+        assert "pywin32 ist nicht installiert" in result
 
 @patch('mcp_university.agent.engine.Agent._tool_manage_calendar_appointment')
 def test_agent_chat_with_appointment_booked(mock_tool, agent, mock_ollama_client):

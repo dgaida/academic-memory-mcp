@@ -6,8 +6,6 @@ dependencies:
   - python>=3.10
   - pip
   - pip:
-    - llm-client
-    - nest-asyncio
     - fastmcp
     - ollama
     - qdrant-client
