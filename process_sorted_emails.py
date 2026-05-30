@@ -61,8 +61,8 @@ def run_sort_emails(source_dir: str, config_path: str) -> None:
     """Sortiert E-Mails basierend auf Klassifizierung.
 
     Args:
-        source_dir: Quellordner mit den E-Mails.
-        config_path: Pfad zur Konfigurationsdatei.
+        source_dir (str): Quellordner mit den E-Mails.
+        config_path (str): Pfad zur Konfigurationsdatei.
     """
     logger.info(f"Sortiere E-Mails in {source_dir}...")
 
@@ -81,7 +81,7 @@ def parse_sorted_report(report_path: Path) -> List[Dict]:
     """Parst die sorted_emails.md Datei.
 
     Args:
-        report_path: Pfad zum Markdown-Report.
+        report_path (Path): Pfad zum Markdown-Report.
 
     Returns:
         List[Dict]: Liste der extrahierten E-Mail-Daten.
@@ -114,11 +114,11 @@ def create_outlook_draft(subject: str, body: str, recipient: str = "", cc: List[
     """Erstellt einen E-Mail-Entwurf in Outlook.
 
     Args:
-        subject: Betreff der E-Mail.
-        body: Inhalt der E-Mail.
-        recipient: Empfänger-Adresse.
-        cc: Liste der CC-Adressen.
-        attachments: Liste der Dateipfade für Anhänge.
+        subject (str): Betreff der E-Mail.
+        body (str): Inhalt der E-Mail.
+        recipient (str): Empfänger-Adresse.
+        cc (List[str], optional): Liste der CC-Adressen. Defaults to None.
+        attachments (List[Path], optional): Liste der Dateipfade für Anhänge. Defaults to None.
 
     Returns:
         bool: True wenn erfolgreich, sonst False.
@@ -194,21 +194,23 @@ def create_outlook_draft(subject: str, body: str, recipient: str = "", cc: List[
         logger.error(f"Fehler beim Erstellen des Outlook-Entwurfs: {e}")
         return False
 
-def generate_reply(agent: Agent, mail_path: Path, summary_content: str = "", skill_path: Path = None, conversation_content: str = "", persona_path: Path = None, additional_context: str = "", debug: bool = False, appointment_skill_path: Path = None) -> Tuple[str, str, bool]:
+def generate_reply(agent, mail_path: Path, summary_content: str = "", skill_path: Path = None, conversation_content: str = "", persona_path: Path = None, additional_context: str = "", debug: bool = False, appointment_skill_path: Path = None, sender_name: str = None, sender_email: str = None) -> Tuple[str, str, bool]:
     """Generiert eine Antwortmail mit dem LLM in zwei Schritten:
     1. Prüfung auf Terminrelevanz (Appointment Skill).
     2. Falls nicht relevant, klassenspezifische Antwort mit vollem Kontext.
 
     Args:
         agent: Agent-Instanz.
-        mail_path: Pfad zur aktuellen E-Mail.
-        summary_content: Inhalt der bisherigen Zusammenfassung.
-        skill_path: Pfad zur SKILL-Datei.
-        conversation_content: Optionaler Verlauf des Schriftverkehrs (statt Zusammenfassung).
-        persona_path: Pfad zur Persona-Datei.
-        additional_context: Zusätzlicher Kontext (z.B. aus einem PDF).
-        debug: Ob Debug-Informationen gespeichert werden sollen.
-        appointment_skill_path: Pfad zum Terminverwaltungs-Skill.
+        mail_path (Path): Pfad zur aktuellen E-Mail.
+        summary_content (str): Inhalt der bisherigen Zusammenfassung.
+        skill_path (Path, optional): Pfad zur SKILL-Datei.
+        conversation_content (str, optional): Verlauf des Schriftverkehrs.
+        persona_path (Path, optional): Pfad zur Persona-Datei.
+        additional_context (str, optional): Zusätzlicher Kontext.
+        debug (bool): Ob Debug-Informationen gespeichert werden sollen.
+        appointment_skill_path (Path, optional): Pfad zum Terminverwaltungs-Skill.
+        sender_name (str, optional): Name des Absenders (für Anonymisierung).
+        sender_email (str, optional): E-Mail des Absenders (für Anonymisierung).
 
     Returns:
         Tuple[str, str, bool]: (Betreff, Antwort-Text, Soll ein Anhang angehängt werden?).
@@ -269,7 +271,9 @@ TEXT:
     try:
         content = agent.chat(
             messages=[{'role': 'user', 'content': appointment_user_prompt}],
-            system_prompt=system_prompt
+            system_prompt=system_prompt,
+            sender_name=sender_name,
+            sender_email=sender_email
         )
         logger.info(f"Antwort von Agent (Appointment-Check): {content}")
 
@@ -341,7 +345,9 @@ TEXT:
     try:
         content = agent.chat(
             messages=[{'role': 'user', 'content': regular_user_prompt}],
-            system_prompt=system_prompt
+            system_prompt=system_prompt,
+            sender_name=sender_name,
+            sender_email=sender_email
         )
 
         should_attach = "ANHANG: JA" in content
@@ -382,6 +388,10 @@ def main() -> None:
     parser.add_argument("--debug", action="store_true", default=DEBUG, help="Speichert LLM Prompts als Markdown (Default: True)")
     parser.add_argument("--no-debug", action="store_false", dest="debug", help="Deaktiviert das Speichern von Prompts")
     parser.add_argument("--use-mcp", action="store_true", help="Nutzt den MCP Server für Tools")
+    parser.add_argument("--use-cloud", action="store_true", help="Nutzt ein Cloud-LLM (mit Anonymisierung)")
+    parser.add_argument("--cloud-provider", default="openai", help="Cloud-LLM Provider")
+    parser.add_argument("--cloud-model", default="gpt-4o", help="Cloud-LLM Modell")
+    parser.add_argument("--api-key", help="Cloud-LLM API-Key")
     args = parser.parse_args()
 
     source_dir = Path(args.source_dir)
@@ -397,11 +407,22 @@ def main() -> None:
     logger.info(f"{len(emails)} sortierte E-Mails gefunden.")
 
     summarizer = Summarizer(model=config.llm.model, base_url=config.llm.base_url)
+
+    agent_args = {
+        "model": config.llm.model,
+        "base_url": config.llm.base_url,
+        "use_cloud": args.use_cloud,
+        "cloud_provider": args.cloud_provider,
+        "cloud_model": args.cloud_model,
+        "api_key": args.api_key
+    }
+
     if args.use_mcp:
         logger.info("Nutze MCP Agent.")
-        agent = MCPAgent(model=config.llm.model, base_url=config.llm.base_url)
+        agent = MCPAgent(**agent_args)
     else:
-        agent = Agent(model=config.llm.model, base_url=config.llm.base_url)
+        agent = Agent(**agent_args)
+
     mail_parser = MailParser()
 
     # Wir tracken verarbeitete student_folders, um Mehrfachverarbeitung zu vermeiden
@@ -495,6 +516,15 @@ def main() -> None:
         latest_date = email["latest_date"]
         is_ba_ma = email["class"].startswith(("BA_", "MA_"))
 
+        student_email = ""
+        sender_name = ""
+        try:
+            with extract_msg.openMsg(str(latest_mail)) as msg:
+                student_email = msg.sender
+                sender_name = msg.senderName or email["lastname"]
+        except Exception:
+            pass
+
         if is_ba_ma:
             semester_folder = email["semester_folder"]
             student_emails = email["student_emails"]
@@ -513,11 +543,9 @@ def main() -> None:
                     conversation_content += f"\n--- EMAIL VOM {date} ---\n{p}\n"
 
             # Extraktion von Empfänger und CC
-            student_email = ""
             cc_list = []
             try:
                 with extract_msg.openMsg(str(latest_mail)) as msg:
-                    student_email = msg.sender
                     if msg.recipients:
                         for rec in msg.recipients:
                             rec_email = rec.email or rec.name
@@ -538,6 +566,9 @@ def main() -> None:
             salutation = f"Guten Tag {gender_salutation} {email['lastname']}"
 
             skill_path = Path(f"skills/SKILL_{email['class']}.md")
+            if not skill_path.exists():
+                # Fallback to script directory
+                skill_path = Path(__file__).parent / "skills" / f"SKILL_{email['class']}.md"
 
             # Zusätzlicher Kontext (z.B. PO-Wechsel)
             additional_context = f"Anrede: {salutation}\n"
@@ -548,7 +579,7 @@ def main() -> None:
                 if pdf_path.exists():
                     additional_context += f"\nDu kannst bei Bedarf Details aus der Datei '{pdf_path}' mittels des read_file Tools auslesen.\n"
 
-            reply_subject, reply, should_attach = generate_reply(agent, latest_mail, skill_path=skill_path, conversation_content=conversation_content, persona_path=persona_path, additional_context=additional_context, debug=args.debug, appointment_skill_path=appointment_skill_path)
+            reply_subject, reply, should_attach = generate_reply(agent, latest_mail, skill_path=skill_path, conversation_content=conversation_content, persona_path=persona_path, additional_context=additional_context, debug=args.debug, appointment_skill_path=appointment_skill_path, sender_name=sender_name, sender_email=student_email)
 
             if reply.startswith("APPOINTMENT_BOOKED"):
                 apt_info = agent.last_appointment_info
@@ -617,11 +648,9 @@ def main() -> None:
             logger.info(f"Generiere Antwort für neueste Mail in {identifier.name}: {latest_mail.name}")
 
             # Extraktion von Empfänger und CC
-            student_email = ""
             cc_list = []
             try:
                 with extract_msg.openMsg(str(latest_mail)) as msg:
-                    student_email = msg.sender
                     if msg.recipients:
                         for rec in msg.recipients:
                             rec_email = rec.email or rec.name
@@ -654,7 +683,7 @@ def main() -> None:
                 if pdf_path.exists():
                     additional_context += f"\nDu kannst bei Bedarf Details aus der Datei '{pdf_path}' mittels des read_file Tools auslesen.\n"
 
-            reply_subject, reply, should_attach = generate_reply(agent, latest_mail, summary_content or "", skill_path, persona_path=persona_path, additional_context=additional_context, debug=args.debug, appointment_skill_path=appointment_skill_path)
+            reply_subject, reply, should_attach = generate_reply(agent, latest_mail, summary_content or "", skill_path, persona_path=persona_path, additional_context=additional_context, debug=args.debug, appointment_skill_path=appointment_skill_path, sender_name=sender_name, sender_email=student_email)
 
             if reply.startswith("APPOINTMENT_BOOKED"):
                 apt_info = agent.last_appointment_info

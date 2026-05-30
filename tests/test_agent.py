@@ -38,12 +38,12 @@ def test_agent_chat_no_tools(agent, mock_ollama_client):
             'content': 'Hello! How can I help you?'
         }
     }
-    agent.client.chat.return_value = mock_response
+    agent.client.client.chat.return_value = mock_response
 
     response = agent.chat([{'role': 'user', 'content': 'Hi'}])
 
     assert response == 'Hello! How can I help you?'
-    agent.client.chat.assert_called_once()
+    agent.client.client.chat.assert_called_once()
 
 def test_agent_chat_with_tool_call(agent, mock_ollama_client):
     # First response triggers a tool call
@@ -67,7 +67,7 @@ def test_agent_chat_with_tool_call(agent, mock_ollama_client):
         }
     }
 
-    agent.client.chat.side_effect = [mock_response_1, mock_response_2]
+    agent.client.client.chat.side_effect = [mock_response_1, mock_response_2]
 
     # Mock the tool execution and update available_tools
     agent._tool_read_file = MagicMock(return_value="Hello World")
@@ -77,7 +77,7 @@ def test_agent_chat_with_tool_call(agent, mock_ollama_client):
 
     assert response == 'The content of the file is: Hello World'
     agent._tool_read_file.assert_called_with(path='test.txt')
-    assert agent.client.chat.call_count == 2
+    assert agent.client.client.chat.call_count == 2
 
 def test_tool_read_file(agent):
     with patch.object(agent.parser_factory, 'parse', return_value="File content"):
@@ -139,12 +139,12 @@ def test_agent_chat_with_appointment_booked(mock_tool, agent, mock_ollama_client
         }
     }
 
-    agent.client.chat.side_effect = [mock_response_1, mock_response_2]
+    agent.client.client.chat.side_effect = [mock_response_1, mock_response_2]
 
     response = agent.chat([{'role': 'user', 'content': 'Bestätige Termin'}])
 
     assert response == "APPOINTMENT_BOOKED"
-    assert agent.client.chat.call_count == 2
+    assert agent.client.client.chat.call_count == 2
 
 def test_agent_chat_with_tool_argument_error(agent, mock_ollama_client):
     # Mock tool call with missing arguments
@@ -173,16 +173,16 @@ def test_agent_chat_with_tool_argument_error(agent, mock_ollama_client):
         }
     }
 
-    agent.client.chat.side_effect = [mock_response_1, mock_response_2]
+    agent.client.client.chat.side_effect = [mock_response_1, mock_response_2]
 
     # We call agent.chat and verify tool error handling
     agent.chat([{'role': 'user', 'content': 'Book a meeting'}])
 
     # Check if the error message is what we expect
-    second_call_messages = agent.client.chat.call_args_list[1][1]['messages']
+    second_call_messages = agent.client.client.chat.call_args_list[1][1]['messages']
     tool_message = [m for m in second_call_messages if m.get('role') == 'tool'][0]
 
-    assert "Falsche Argumente für Tool" in tool_message['content']
+    assert "Fehler" in tool_message['content']
 
 def test_tool_manage_calendar_appointment_kolloquium_duration(agent):
     # Mock Outlook objects

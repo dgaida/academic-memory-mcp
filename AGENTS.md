@@ -41,6 +41,12 @@ MCP University is an offline-first system for managing academic data (students, 
 
 ## Mandatory Rules & Guidelines
 
+### Preservation Policy (CRITICAL)
+- **Documentation:** NEVER delete existing documentation in code or Markdown files.
+- **Comments:** NEVER delete pre-existing code comments (e.g., explaining logic or data structures).
+- **Logging:** NEVER delete logging statements (`logger.info`, etc.) unless specifically asked to or if the code change makes them obsolete.
+- **Code Integrity:** Do not delete existing code unless requested or strictly necessary for the task.
+
 ### Language Policy  
 - **German** is the authoritative language for documentation, UI, and LLM outputs.  
 - **English** is a full translation of the documentation.  
@@ -48,7 +54,7 @@ MCP University is an offline-first system for managing academic data (students, 
 - Standard salutation for students: 'Guten Tag Herr/Frau [Nachname]'.
 
 ### Coding Standards  
-- **Docstrings:** Google-style required for ALL classes and methods (including private).  
+- **Docstrings:** Google-style required for ALL classes and methods (including private). MUST include `Args:` and `Returns:` sections for all methods.
 - **Type Hints:** Explicit return type hints are mandatory for API documentation.  
 - **Linting:** Run `ruff check . --fix` before submitting.  
 - **Coverage:** Minimum 95% docstring coverage (enforced by `interrogate`).  
@@ -94,6 +100,12 @@ Delete all temporary files before submission:
 - **Body Text:** The body of the calendar appointment MUST follow the format: "Terminbestätigung auf Basis Ihrer Mail vom DD.MM.YY".
 - **Tool Usage:** Always use the `manage_calendar_appointment` tool for bookings. Pass the date of the student's email as `original_mail_date`.
 - **ANHANG: JA:** This output in the agent's response is a control flag for the script to attach relevant info files (like PO-Wechsel PDFs) to the EMAIL draft. It does not affect the calendar entry.
+
+## Email Anonymization & Cloud LLMs
+When using cloud-based LLMs (e.g., OpenAI via the `--use-cloud` flag), student data MUST be anonymized before being sent to the cloud.
+- **Requirement:** Use the local Ollama model (via `Anonymizer`) to replace student names and emails with "Max Mustermann" and "max.mustermann@student.th-koeln.de".
+- **Bi-directional:** The agent must de-anonymize data locally (using `Anonymizer.deanonymize_text` or `deanonymize_args`) before executing tools like `manage_calendar_appointment` or creating Outlook drafts. This ensures that sensitive internal systems always receive the correct student information while external cloud providers only see placeholders.
+- **Trigger:** Anonymization is automatically handled within `Agent.chat` and `MCPAgent.chat` when `use_cloud` is enabled.
 
 ## Wichtige Hinweise zur Implementierung
 

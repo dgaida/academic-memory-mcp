@@ -4,29 +4,42 @@ from typing import List, Dict, Callable
 from pathlib import Path
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
-import ollama
 
 from ..config import get_config
 from ..parser.factory import ParserFactory
 from ..retrieval.index import SearchIndex
 from ..metadata.store import MetadataStore
+from ..utils.llm_client_wrapper import LLMClientWrapper
+from ..utils.anonymizer import Anonymizer
 
 logger = logging.getLogger(__name__)
 
 class Agent:
-    """Agent, der Tool-Calling mittels Ollama unterstützt."""
+    """Agent, der Tool-Calling mittels Ollama unterstützt und optional Cloud-LLMs mit Anonymisierung nutzt."""
 
-    def __init__(self, model: str = None, base_url: str = None):
+    def __init__(self, model: str = None, base_url: str = None, use_cloud: bool = False,
+                 cloud_provider: str = "openai", cloud_model: str = "gpt-4o", api_key: str = None):
         """Initialisiert den Agenten.
 
         Args:
-            model (str, optional): Name des Ollama-Modells.
-            base_url (str, optional): Basis-URL des Ollama-Servers.
+            model (str, optional): Name des lokalen Ollama-Modells. Defaults to None.
+            base_url (str, optional): Basis-URL des Ollama-Servers. Defaults to None.
+            use_cloud (bool): Ob ein Cloud-LLM genutzt werden soll. Defaults to False.
+            cloud_provider (str): Name des Cloud-Providers. Defaults to "openai".
+            cloud_model (str): Name des Cloud-Modells. Defaults to "gpt-4o".
+            api_key (str, optional): API-Key für den Cloud-Provider. Defaults to None.
         """
         self.cfg = get_config()
         self.model = model or self.cfg.llm.model
         self.base_url = str(base_url or self.cfg.llm.base_url)
-        self.client = ollama.Client(host=self.base_url)
+
+        self.use_cloud = use_cloud
+        if self.use_cloud:
+            self.client = LLMClientWrapper(provider=cloud_provider, model=cloud_model, api_key=api_key)
+            self.anonymizer = Anonymizer(model=self.model, base_url=self.base_url)
+        else:
+            self.client = LLMClientWrapper(provider="ollama", model=self.model, base_url=self.base_url)
+            self.anonymizer = None
 
         self.parser_factory = ParserFactory(self.cfg.data_dir / "cache")
         self.store = MetadataStore(self.cfg.sqlite_path)
@@ -144,7 +157,7 @@ class Agent:
         """Liest eine Datei ein.
 
         Args:
-            path: Der Pfad zur Datei.
+            path (str): Der Pfad zur Datei.
 
         Returns:
             str: Dateiinhalt oder Fehlermeldung.
@@ -156,10 +169,10 @@ class Agent:
         return content or "Fehler: Datei konnte nicht gelesen werden oder ist leer."
 
     def _tool_search_documents(self, query: str) -> str:
-        """Sucht im Index.
+        """Sucht im Index nach Informationen.
 
         Args:
-            query: Die Suchanfrage.
+            query (str): Die Suchanfrage.
 
         Returns:
             str: Suchergebnisse oder Hinweis.
@@ -174,10 +187,10 @@ class Agent:
         return output
 
     def _tool_get_student_info(self, student_name: str) -> str:
-        """Holt Studentendaten.
+        """Holt Studentendaten aus dem MetadataStore.
 
         Args:
-            student_name: Name des Studenten.
+            student_name (str): Name oder Teilname des Studenten.
 
         Returns:
             str: Informationen zum Studenten.
@@ -198,7 +211,7 @@ class Agent:
             return context
 
     def _tool_get_appointment_slots(self) -> str:
-        """Liest die Datei mit den freien Terminslots ein.
+        """Liest die aktuell verfügbaren freien Terminslots ein.
 
         Returns:
             str: Freie Slots als Markdown oder Fehlermeldung.
@@ -212,14 +225,14 @@ class Agent:
             return f"Fehler beim Lesen der freien Slots: {e}"
 
     def _tool_manage_calendar_appointment(self, start_time: str, end_time: str, subject: str, student_email: str, original_mail_date: str = None) -> str:
-        """Prüft einen Slot und trägt einen Kalendertermin ein, falls frei.
+        """Prüft die Verfügbarkeit eines Slots und trägt bei Erfolg einen Kalendertermin ein.
 
         Args:
-            start_time: Beginn des Termins ('YYYY-MM-DD HH:MM'). Default-Dauer: 30 Min.
-            end_time: Ende des Termins ('YYYY-MM-DD HH:MM').
-            subject: Betreff des Kalendereintrags.
-            student_email: E-Mail-Adresse des Studenten.
-            original_mail_date: Datum der studentischen Mail (DD.MM.YY).
+            start_time (str): Beginn des Termins ('YYYY-MM-DD HH:MM').
+            end_time (str): Ende des Termins ('YYYY-MM-DD HH:MM').
+            subject (str): Betreff des Kalendereintrags.
+            student_email (str): E-Mail-Adresse des Studenten.
+            original_mail_date (str, optional): Datum der studentischen Mail (DD.MM.YY). Defaults to None.
 
         Returns:
             str: Erfolgs- oder Fehlermeldung.
@@ -242,7 +255,6 @@ class Agent:
                 account = namespace.Accounts.Item(i)
                 if account.SmtpAddress.lower() == target_account.lower():
                     logger.info(f"ERFOLG: Konto gefunden: {account.SmtpAddress}")
-                    logger.info(f"Konto gefunden: {account.SmtpAddress}")
                     store = account.DeliveryStore
                     root = store.GetRootFolder()
                     for j in range(1, root.Folders.Count + 1):
@@ -250,7 +262,6 @@ class Agent:
                         if folder.Name == target_calendar_name:
                             logger.info(f"ERFOLG: Ziel-Kalender gefunden: {folder.FolderPath}")
                             cal_folder = folder
-                            logger.info(f"Ziel-Kalender gefunden: {folder.FolderPath}")
                             break
                     if not cal_folder:
                         # Fallback: Default Calendar for this store (olFolderCalendar = 9)
@@ -294,7 +305,7 @@ class Agent:
                 logger.info(f"Nutze Kalender: {cal_folder.Name} (Pfad: {cal_folder.FolderPath})")
 
             if target_folder:
-                logger.info(f"Zielordner für Entwürfe gefunden: {target_folder.FolderPath}")
+                logger.info(f"ERFOLG: Zielordner für Entwürfe gefunden: {target_folder.FolderPath}")
             else:
                 logger.warning(f"Zielordner {target_folder_name} nicht gefunden.")
 
@@ -332,8 +343,6 @@ class Agent:
                 return f"Fehler: Der Slot von {start_time} bis {end_time} ist bereits belegt."
 
             # Termin eintragen
-            # Wenn automatisch gesendet werden soll, direkt im Kalender erstellen
-            # Ansonsten versuchen, in "Work in Progress" zu erstellen, falls vorhanden
             auto_send = self.cfg.calendar.send_invitations_automatically
 
             if not auto_send and target_folder:
@@ -369,31 +378,59 @@ class Agent:
         except Exception as e:
             return f"Fehler bei der Kalender-Verarbeitung: {e}"
 
-    def chat(self, messages: List[Dict[str, str]], system_prompt: str = None) -> str:
-        """Führt eine Chat-Interaktion mit Tool-Calling-Loop durch.
+    def chat(self, messages: List[Dict[str, str]], system_prompt: str = None,
+             sender_name: str = None, sender_email: str = None) -> str:
+        """Führt eine Chat-Interaktion mit Tool-Calling-Loop durch, optional mit Anonymisierung.
 
         Args:
-            messages: Liste der Chat-Nachrichten.
-            system_prompt: Optionaler System-Prompt.
+            messages (List[Dict[str, str]]): Liste der Chat-Nachrichten.
+            system_prompt (str, optional): Optionaler System-Prompt. Defaults to None.
+            sender_name (str, optional): Name des Absenders für Anonymisierung. Defaults to None.
+            sender_email (str, optional): E-Mail des Absenders für Anonymisierung. Defaults to None.
 
         Returns:
             str: Die finale Antwort des Agenten.
         """
         self.last_appointment_info = None
+
+        processed_messages = []
+        if self.use_cloud and self.anonymizer and sender_name and sender_email:
+            # Anonymisiere alle User-Nachrichten
+            for msg in messages:
+                if msg['role'] == 'user':
+                    anon_content = self.anonymizer.anonymize(msg['content'], sender_name, sender_email)
+                    processed_messages.append({'role': 'user', 'content': anon_content})
+                else:
+                    processed_messages.append(msg)
+
+            # Anonymisiere System Prompt falls vorhanden
+            if system_prompt:
+                system_prompt = self.anonymizer.anonymize(system_prompt, sender_name, sender_email)
+        else:
+            processed_messages = messages
+
         all_messages = []
         if system_prompt:
             all_messages.append({'role': 'system', 'content': system_prompt})
-        all_messages.extend(messages)
+        all_messages.extend(processed_messages)
 
         max_iterations = 5
         for _ in range(max_iterations):
             response = self.client.chat(
-                model=self.model,
                 messages=all_messages,
                 tools=self.tools_definition
             )
 
             message = response.get('message', {})
+
+            # Falls Cloud, de-anonymisieren wir das Ergebnis für den internen Gebrauch
+            if self.use_cloud and self.anonymizer:
+                if message.get('content'):
+                    message['content'] = self.anonymizer.deanonymize_text(message['content'])
+                if message.get('tool_calls'):
+                    for tc in message['tool_calls']:
+                        tc['function']['arguments'] = self.anonymizer.deanonymize_args(tc['function'].get('arguments', {}))
+
             all_messages.append(message)
 
             if not message.get('tool_calls'):
@@ -424,10 +461,15 @@ class Agent:
 
                 logger.info(f"Tool Ergebnis: {tool_result}")
 
+                # Falls Cloud, anonymisiere das Tool-Ergebnis bevor es zurück geht
+                if self.use_cloud and self.anonymizer:
+                    for placeholder, original in self.anonymizer.mapping.items():
+                        tool_result = str(tool_result).replace(original, placeholder)
+
                 all_messages.append({
                     'role': 'tool',
                     'content': str(tool_result),
-                    'tool_call_id': tool_call.get('id') # Ollama supports this if present
+                    'tool_call_id': tool_call.get('id')
                 })
 
         return "Fehler: Maximale Anzahl an Iterationen erreicht."
