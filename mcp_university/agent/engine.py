@@ -154,7 +154,14 @@ class Agent:
         ]
 
     def _tool_read_file(self, path: str) -> str:
-        """Reads a file content."""
+        """Liest eine Datei ein.
+
+        Args:
+            path (str): Der Pfad zur Datei.
+
+        Returns:
+            str: Dateiinhalt oder Fehlermeldung.
+        """
         p = Path(path)
         if not p.exists():
             return f"Fehler: Datei {path} nicht gefunden."
@@ -162,7 +169,14 @@ class Agent:
         return content or "Fehler: Datei konnte nicht gelesen werden oder ist leer."
 
     def _tool_search_documents(self, query: str) -> str:
-        """Searches documents."""
+        """Sucht im Index nach Informationen.
+
+        Args:
+            query (str): Die Suchanfrage.
+
+        Returns:
+            str: Suchergebnisse oder Hinweis.
+        """
         results = self.index.search(query, top_k=3)
         if not results:
             return "Keine relevanten Dokumente gefunden."
@@ -173,7 +187,14 @@ class Agent:
         return output
 
     def _tool_get_student_info(self, student_name: str) -> str:
-        """Gets student info."""
+        """Holt Studentendaten aus dem MetadataStore.
+
+        Args:
+            student_name (str): Name oder Teilname des Studenten.
+
+        Returns:
+            str: Informationen zum Studenten.
+        """
         with self.store._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('''
@@ -190,7 +211,11 @@ class Agent:
             return context
 
     def _tool_get_appointment_slots(self) -> str:
-        """Gets appointment slots."""
+        """Liest die aktuell verfügbaren freien Terminslots ein.
+
+        Returns:
+            str: Freie Slots als Markdown oder Fehlermeldung.
+        """
         path = Path(r"D:\TH_Koeln\academic-memory-mcp\data\free_slots.md")
         if not path.exists():
             return "Fehler: Die Datei mit freien Slots wurde nicht gefunden. Das Makro Freeslotexport.bas muss eventuell zuerst ausgeführt werden."
@@ -200,7 +225,18 @@ class Agent:
             return f"Fehler beim Lesen der freien Slots: {e}"
 
     def _tool_manage_calendar_appointment(self, start_time: str, end_time: str, subject: str, student_email: str, original_mail_date: str = None) -> str:
-        """Manages calendar appointment."""
+        """Prüft die Verfügbarkeit eines Slots und trägt bei Erfolg einen Kalendertermin ein.
+
+        Args:
+            start_time (str): Beginn des Termins ('YYYY-MM-DD HH:MM').
+            end_time (str): Ende des Termins ('YYYY-MM-DD HH:MM').
+            subject (str): Betreff des Kalendereintrags.
+            student_email (str): E-Mail-Adresse des Studenten.
+            original_mail_date (str, optional): Datum der studentischen Mail (DD.MM.YY). Defaults to None.
+
+        Returns:
+            str: Erfolgs- oder Fehlermeldung.
+        """
         try:
             import win32com.client
         except ImportError:
@@ -342,7 +378,8 @@ class Agent:
         except Exception as e:
             return f"Fehler bei der Kalender-Verarbeitung: {e}"
 
-    def chat(self, messages: List[Dict[str, str]], system_prompt: str = None, sender_name: str = None, sender_email: str = None) -> str:
+    def chat(self, messages: List[Dict[str, str]], system_prompt: str = None,
+             sender_name: str = None, sender_email: str = None) -> str:
         """Führt eine Chat-Interaktion mit Tool-Calling-Loop durch, optional mit Anonymisierung.
 
         Args:

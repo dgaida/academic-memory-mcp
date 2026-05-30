@@ -61,8 +61,8 @@ def run_sort_emails(source_dir: str, config_path: str) -> None:
     """Sortiert E-Mails basierend auf Klassifizierung.
 
     Args:
-        source_dir: Quellordner mit den E-Mails.
-        config_path: Pfad zur Konfigurationsdatei.
+        source_dir (str): Quellordner mit den E-Mails.
+        config_path (str): Pfad zur Konfigurationsdatei.
     """
     logger.info(f"Sortiere E-Mails in {source_dir}...")
 
@@ -81,7 +81,7 @@ def parse_sorted_report(report_path: Path) -> List[Dict]:
     """Parst die sorted_emails.md Datei.
 
     Args:
-        report_path: Pfad zum Markdown-Report.
+        report_path (Path): Pfad zum Markdown-Report.
 
     Returns:
         List[Dict]: Liste der extrahierten E-Mail-Daten.
@@ -114,11 +114,11 @@ def create_outlook_draft(subject: str, body: str, recipient: str = "", cc: List[
     """Erstellt einen E-Mail-Entwurf in Outlook.
 
     Args:
-        subject: Betreff der E-Mail.
-        body: Inhalt der E-Mail.
-        recipient: Empfänger-Adresse.
-        cc: Liste der CC-Adressen.
-        attachments: Liste der Dateipfade für Anhänge.
+        subject (str): Betreff der E-Mail.
+        body (str): Inhalt der E-Mail.
+        recipient (str): Empfänger-Adresse.
+        cc (List[str], optional): Liste der CC-Adressen. Defaults to None.
+        attachments (List[Path], optional): Liste der Dateipfade für Anhänge. Defaults to None.
 
     Returns:
         bool: True wenn erfolgreich, sonst False.
@@ -201,16 +201,16 @@ def generate_reply(agent, mail_path: Path, summary_content: str = "", skill_path
 
     Args:
         agent: Agent-Instanz.
-        mail_path: Pfad zur aktuellen E-Mail.
-        summary_content: Inhalt der bisherigen Zusammenfassung.
-        skill_path: Pfad zur SKILL-Datei.
-        conversation_content: Optionaler Verlauf des Schriftverkehrs.
-        persona_path: Pfad zur Persona-Datei.
-        additional_context: Zusätzlicher Kontext.
-        debug: Ob Debug-Informationen gespeichert werden sollen.
-        appointment_skill_path: Pfad zum Terminverwaltungs-Skill.
-        sender_name (str, optional): Name des Absenders.
-        sender_email (str, optional): E-Mail des Absenders.
+        mail_path (Path): Pfad zur aktuellen E-Mail.
+        summary_content (str): Inhalt der bisherigen Zusammenfassung.
+        skill_path (Path, optional): Pfad zur SKILL-Datei.
+        conversation_content (str, optional): Verlauf des Schriftverkehrs.
+        persona_path (Path, optional): Pfad zur Persona-Datei.
+        additional_context (str, optional): Zusätzlicher Kontext.
+        debug (bool): Ob Debug-Informationen gespeichert werden sollen.
+        appointment_skill_path (Path, optional): Pfad zum Terminverwaltungs-Skill.
+        sender_name (str, optional): Name des Absenders (für Anonymisierung).
+        sender_email (str, optional): E-Mail des Absenders (für Anonymisierung).
 
     Returns:
         Tuple[str, str, bool]: (Betreff, Antwort-Text, Soll ein Anhang angehängt werden?).
@@ -284,8 +284,11 @@ TEXT:
                 apt_text = f"APPOINTMENT_BOOKED|{apt_info['start_time']}"
             return "APPOINTMENT_BOOKED", apt_text, False
 
+        # Erklärung: "ANHANG: JA" im Agent-Output dient als Signal für das Skript,
+        # ob Dateien (wie PO-Wechsel-Infos) angehängt werden sollen.
         if "NO_APPOINTMENT_RELEVANCE" not in content:
             logger.info("Terminrelevanz erkannt, generiere Termin-Antwort.")
+            # Signalprüfung für Anhänge (z.B. PO-Infos)
             should_attach = "ANHANG: JA" in content
             reply_subject = ""
             if "BETREFF:" in content:
@@ -376,7 +379,7 @@ def main() -> None:
         level=logging.INFO,
         format=log_format,
         handlers=[file_handler, stream_handler],
-        force=True
+        force=True # Vorhandene Konfiguration überschreiben
     )
 
     parser = argparse.ArgumentParser(description="Verarbeitet sortierte E-Mails und generiert Antworten.")
@@ -435,6 +438,7 @@ def main() -> None:
         is_ba_ma = email["class"].startswith(("BA_", "MA_"))
         if is_ba_ma:
             identifier = (email["class"], email["semester"], email["lastname"])
+            # BA/MA logic to find latest mail
             semester_folder = mail_path.parent.parent
             inbox_folder = semester_folder / "Inbox"
             sent_folder = semester_folder / "SentItems"
@@ -464,12 +468,14 @@ def main() -> None:
             latest_date, latest_mail = student_emails[-1]
             needs_answer = "Inbox" in latest_mail.parts
 
+            # Bereicherung des E-Mail-Dicts für spätere Verarbeitung
             email["latest_date"] = latest_date
             email["latest_mail"] = latest_mail
             email["student_emails"] = student_emails
             email["semester_folder"] = semester_folder
         else:
             identifier = mail_path.parent.parent
+            # Normal student folder logic
             email_files = list(identifier.rglob("*.msg")) + list(identifier.rglob("*.eml"))
             if not email_files:
                 continue
@@ -484,6 +490,7 @@ def main() -> None:
             latest_date, latest_mail = dated_emails[-1]
             needs_answer = "Inbox" in latest_mail.parts and "SentItems" not in latest_mail.parts
 
+            # Bereicherung des E-Mail-Dicts für spätere Verarbeitung
             email["latest_date"] = latest_date
             email["latest_mail"] = latest_mail
             email["dated_emails"] = dated_emails
@@ -521,6 +528,7 @@ def main() -> None:
         if is_ba_ma:
             semester_folder = email["semester_folder"]
             student_emails = email["student_emails"]
+
             logger.info(f"Verarbeite BA/MA E-Mails für {email['lastname']} in {email['class']}")
 
             threshold_date = latest_date - timedelta(days=14)
@@ -558,6 +566,11 @@ def main() -> None:
             salutation = f"Guten Tag {gender_salutation} {email['lastname']}"
 
             skill_path = Path(f"skills/SKILL_{email['class']}.md")
+            if not skill_path.exists():
+                # Fallback to script directory
+                skill_path = Path(__file__).parent / "skills" / f"SKILL_{email['class']}.md"
+
+            # Zusätzlicher Kontext (z.B. PO-Wechsel)
             additional_context = f"Anrede: {salutation}\n"
             additional_context += f"Studenten-E-Mail: {student_email}\n"
             attachments = []
@@ -575,8 +588,11 @@ def main() -> None:
                     logger.info(f"ERFOLG: Termin für {email['lastname']} wurde am {apt_time} im Kalender gebucht.")
                     status = f"Termin gebucht ({apt_time})"
                 else:
+                    # Fallback
                     apt_time = reply.split("|")[1] if "|" in reply else ""
+                    logger.info(f"Termin für {email['lastname']} wurde erfolgreich gebucht{f' am {apt_time}' if apt_time else ''}.")
                     status = f"Termin gebucht ({apt_time})" if apt_time else "Termin gebucht (Kalender)"
+
                 processed_results.append({"lastname": email["lastname"], "subject": latest_mail.stem, "status": status})
                 continue
 
@@ -603,21 +619,33 @@ def main() -> None:
         else:
             identifier = email["identifier_path"]
             dated_emails = email["dated_emails"]
+
             summary_file = identifier / ".emails_summary.md"
-            should_update = not summary_file.exists() or latest_date > datetime.fromtimestamp(summary_file.stat().st_mtime)
+
+            should_update = False
+            if not summary_file.exists():
+                should_update = True
+            else:
+                summary_mtime = datetime.fromtimestamp(summary_file.stat().st_mtime)
+                if latest_date > summary_mtime:
+                    should_update = True
 
             summary_content = ""
             if should_update:
+                logger.info(f"Erstelle/Aktualisiere Zusammenfassung für {identifier.name}")
                 conv_content = ""
                 for date, f in dated_emails:
                     p = mail_parser.parse(f)
                     if p:
                         conv_content += f"\n--- EMAIL VOM {date} ---\n{p}\n"
+
                 summary_content = summarizer.summarize_email_conversation(identifier.name, conv_content)
                 if summary_content:
                     summary_file.write_text(summary_content, encoding="utf-8")
             else:
                 summary_content = summary_file.read_text(encoding="utf-8")
+
+            logger.info(f"Generiere Antwort für neueste Mail in {identifier.name}: {latest_mail.name}")
 
             # Extraktion von Empfänger und CC
             cc_list = []
@@ -643,6 +671,10 @@ def main() -> None:
             salutation = f"Guten Tag {gender_salutation} {email['lastname']}"
 
             skill_path = Path(f"skills/SKILL_{email['class']}.md")
+            if not skill_path.exists():
+                # Fallback to script directory
+                skill_path = Path(__file__).parent / "skills" / f"SKILL_{email['class']}.md"
+
             additional_context = f"Anrede: {salutation}\n"
             additional_context += f"Studenten-E-Mail: {student_email}\n"
             attachments = []
@@ -660,8 +692,11 @@ def main() -> None:
                     logger.info(f"ERFOLG: Termin für {email['lastname']} wurde am {apt_time} im Kalender gebucht.")
                     status = f"Termin gebucht ({apt_time})"
                 else:
+                    # Fallback
                     apt_time = reply.split("|")[1] if "|" in reply else ""
+                    logger.info(f"Termin für {email['lastname']} wurde erfolgreich gebucht{f' am {apt_time}' if apt_time else ''}.")
                     status = f"Termin gebucht ({apt_time})" if apt_time else "Termin gebucht (Kalender)"
+
                 processed_results.append({"lastname": email["lastname"], "subject": latest_mail.stem, "status": status})
                 continue
 
@@ -684,13 +719,20 @@ def main() -> None:
 
             processed_results.append({"lastname": email["lastname"], "subject": subject, "status": result_status})
 
+    # 3. Abschluss-Bericht erstellen und aufräumen
     if processed_results:
         processed_report_path = source_dir / "processed_emails.md"
         with open(processed_report_path, "w", encoding="utf-8") as f:
-            f.write("# Verarbeitete E-Mails\n\n| Student | Betreff | Status |\n| :--- | :--- | :--- |\n")
+            f.write("# Verarbeitete E-Mails\n\n")
+            f.write("| Student | Betreff | Status |\n")
+            f.write("| :--- | :--- | :--- |\n")
             for res in processed_results:
                 f.write(f"| {res['lastname']} | {res['subject']} | {res['status']} |\n")
         logger.info(f"Abschlussbericht erstellt: {processed_report_path}")
+
+    # if report_path.exists():
+    #     report_path.unlink()
+    #     logger.info(f"Temporärer Report gelöscht: {report_path}")
 
 if __name__ == "__main__":
     main()
