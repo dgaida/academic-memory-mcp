@@ -1,4 +1,3 @@
-import os
 content = r'''"""Skript zur Verarbeitung sortierter E-Mails und Generierung von Antworten."""
 import argparse
 import logging

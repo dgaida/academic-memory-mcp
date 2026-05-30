@@ -223,6 +223,13 @@ def generate_reply(agent, mail_path: Path, summary_content: str = "", skill_path
         extracted_file = mail_path.parent / f"{mail_path.stem}_extracted.md"
         extracted_file.write_text(mail_content, encoding="utf-8")
 
+        # Wenn Cloud/Anonymisierung aktiv ist, speichern wir die anonymisierte Fassung
+        if agent.use_cloud and agent.anonymizer and sender_name and sender_email:
+            anonymized_content = agent.anonymizer.anonymize(mail_content, sender_name, sender_email)
+            anon_file = mail_path.parent / f"{mail_path.stem}_anonymized.md"
+            anon_file.write_text(anonymized_content, encoding="utf-8")
+            logger.info(f"Anonymisierte Mail gespeichert: {anon_file}")
+
     appointment_skill_content = ""
     if appointment_skill_path and appointment_skill_path.exists():
         appointment_skill_content = appointment_skill_path.read_text(encoding="utf-8")
