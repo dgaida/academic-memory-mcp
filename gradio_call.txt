@@ -1,8 +1,0 @@
-    # 4. Gradio GUI zur Überprüfung der Sortierung
-    try:
-        with open(args.config, "r", encoding="utf-8") as f:
-            full_config = yaml.safe_load(f)
-        class_paths = full_config.get("class_paths", full_config)
-        run_gradio_gui(report_path, class_paths)
-    except Exception as e:
-        logger.error(f"Fehler beim Starten der Gradio GUI: {e}")
