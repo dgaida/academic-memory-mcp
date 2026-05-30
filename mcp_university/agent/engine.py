@@ -354,8 +354,8 @@ class Agent:
                     logger.warning(f"Zielordner '{target_folder_name}' nicht gefunden. Erstelle im Standard-Kalender.")
 
             appointment.Subject = subject
-            appointment.Start = dt_start.replace(tzinfo=None)
-            appointment.End = dt_end.replace(tzinfo=None)
+            appointment.Start = dt_start
+            appointment.End = dt_end
             appointment.Location = "Zoom (siehe E-Mail-Signatur)"
             body_text = f"Terminbestätigung auf Basis Ihrer Mail vom {original_mail_date}" if original_mail_date else "Terminbestätigung via MCP University System."
             appointment.Body = body_text
