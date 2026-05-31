@@ -1,7 +1,6 @@
 """Tests für das evaluate.py CLI."""
 import subprocess
 import sys
-from pathlib import Path
 import pytest
 
 def test_evaluate_cli_help():
