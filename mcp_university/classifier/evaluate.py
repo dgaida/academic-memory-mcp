@@ -104,10 +104,17 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Evaluiert einen E-Mail-Klassifikator.")
     parser.add_argument("test_dir", type=str, help="Pfad zum Verzeichnis mit den Testdaten (Unterordner pro Klasse).")
     parser.add_argument("--model-path", type=str, default="data/email_classifier.pkl", help="Pfad zum trainierten Modell.")
+    parser.add_argument("--mode", type=str, choices=["tfidf", "embedding", "combined"], default="combined",
+                        help="Modus der Merkmalsextraktion (default: combined).")
 
     args = parser.parse_args()
 
-    evaluate(Path(args.model_path), Path(args.test_dir))
+    model_path = Path(args.model_path)
+    # Suffix hinzufügen, falls nicht vorhanden (analog zu train.py)
+    if f"_{args.mode}" not in model_path.stem:
+        model_path = model_path.with_name(f"{model_path.stem}_{args.mode}{model_path.suffix}")
+
+    evaluate(model_path, Path(args.test_dir))
 
 if __name__ == "__main__":
     main()
