@@ -82,9 +82,9 @@ To visualize the distribution of emails per class (split by Inbox and SentItems)
 python3 mcp_university/classifier/plot_data_distribution.py --train-dir D:\\TH_Koeln\\MailTrainingData --test-dir D:\\TH_Koeln\\MailTestData --output-dir data
 ```
 
-This generates two high-resolution PNG files in `data/`:
-- `train_data_distribution.png`
-- `test_data_distribution.png`
+This generates two high-resolution PNG files in `data/`:  
+- `train_data_distribution.png`  
+- `test_data_distribution.png`  
 
 
 ## Database Management (`db`)
@@ -156,20 +156,20 @@ The system includes useful scripts in the `scripts/` folder:
 
 The `EmailClassifier` supports three different modes for feature extraction:
 
-1.  **TF-IDF (`tfidf`)**:
-    - **How it works:** Uses Term Frequency-Inverse Document Frequency to weigh the importance of keywords.
-    - **Pros:** Very fast, interpretable, effective for distinct terminology (e.g., "Bachelor Thesis", "Registration").
-    - **Cons:** Ignores word order and semantics (doesn't recognize synonyms).
+1.  **TF-IDF (`tfidf`)**:  
+    - **How it works:** Uses Term Frequency-Inverse Document Frequency to weigh the importance of keywords.  
+    - **Pros:** Very fast, interpretable, effective for distinct terminology (e.g., "Bachelor Thesis", "Registration").  
+    - **Cons:** Ignores word order and semantics (doesn't recognize synonyms).  
 
-2.  **Embeddings (`embedding`)**:
-    - **How it works:** Uses `Sentence-Transformers` (default: `paraphrase-multilingual-MiniLM-L12-v2`) to project text into a high-dimensional vector space.
-    - **Pros:** Captures semantic meaning. Recognizes similar concepts even if different words are used.
-    - **Cons:** More computationally expensive (requires model downloads), harder to interpret.
+2.  **Embeddings (`embedding`)**:  
+    - **How it works:** Uses `Sentence-Transformers` (default: `paraphrase-multilingual-MiniLM-L12-v2`) to project text into a high-dimensional vector space.  
+    - **Pros:** Captures semantic meaning. Recognizes similar concepts even if different words are used.  
+    - **Cons:** More computationally expensive (requires model downloads), harder to interpret.  
 
-3.  **Combined (`combined`)**:
-    - **How it works:** Concatenates TF-IDF vectors with embedding vectors.
-    - **Pros:** Combines keyword precision with deep semantic understanding. Usually yields the highest accuracy.
-    - **Cons:** Largest feature vectors, longer training time.
+3.  **Combined (`combined`)**:  
+    - **How it works:** Concatenates TF-IDF vectors with embedding vectors.  
+    - **Pros:** Combines keyword precision with deep semantic understanding. Usually yields the highest accuracy.  
+    - **Cons:** Largest feature vectors, longer training time.  
 
 ### Model Naming
 During training, the chosen mode is automatically appended to the filename (e.g., `email_classifier_combined.pkl`) to prevent model confusion.

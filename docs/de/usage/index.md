@@ -63,15 +63,15 @@ python3 process_sorted_emails.py /pfad/zu/daten
 ```
 
 #### Terminverwaltung (Workflows)
-Das Skript erkennt automatisch Terminanfragen und -bestätigungen.
-- **Terminbestätigungen:** Erkennt das System eine Bestätigung, wird automatisch ein Kalendertermin in Outlook angelegt (Zeitzone: Europe/Berlin). Standardmäßig beträgt die Dauer **30 Minuten**.
-- **Speicherort:** Termine werden als Entwurf im Ordner **"Work in Progress"** oder direkt im Kalender des Kontos `daniel.gaida@th-koeln.de` angelegt.
-- **Wichtig:** Auch wenn der Termin in "Work in Progress" nicht sofort sichtbar ist, wird er im Outlook-Kalender angelegt. Dort kann er geöffnet, geprüft und final abgesendet werden.
+Das Skript erkennt automatisch Terminanfragen und -bestätigungen.  
+- **Terminbestätigungen:** Erkennt das System eine Bestätigung, wird automatisch ein Kalendertermin in Outlook angelegt (Zeitzone: Europe/Berlin). Standardmäßig beträgt die Dauer **30 Minuten**.  
+- **Speicherort:** Termine werden als Entwurf im Ordner **"Work in Progress"** oder direkt im Kalender des Kontos `daniel.gaida@th-koeln.de` angelegt.  
+- **Wichtig:** Auch wenn der Termin in "Work in Progress" nicht sofort sichtbar ist, wird er im Outlook-Kalender angelegt. Dort kann er geöffnet, geprüft und final abgesendet werden.  
 
 #### Bedeutung von "ANHANG: JA"
-In den Logs oder Ausgaben des Agenten erscheint oft die Zeile `ANHANG: JA`.
-- Dies ist ein **Steuerungssignal** für das Skript. Es bedeutet, dass das LLM empfiehlt, eine zusätzliche Informationsdatei (z.B. ein PDF mit PO-Wechsel-Informationen) an den E-Mail-Entwurf anzuhängen.
-- Es bedeutet **nicht**, dass dem Kalendereintrag selbst eine Datei angehängt wurde.
+In den Logs oder Ausgaben des Agenten erscheint oft die Zeile `ANHANG: JA`.  
+- Dies ist ein **Steuerungssignal** für das Skript. Es bedeutet, dass das LLM empfiehlt, eine zusätzliche Informationsdatei (z.B. ein PDF mit PO-Wechsel-Informationen) an den E-Mail-Entwurf anzuhängen.  
+- Es bedeutet **nicht**, dass dem Kalendereintrag selbst eine Datei angehängt wurde.  
 
 
 ```bash
@@ -98,9 +98,9 @@ Um die Verteilung der E-Mails pro Klasse (aufgeteilt nach Inbox und SentItems) z
 python3 mcp_university/classifier/plot_data_distribution.py --train-dir D:\\TH_Koeln\\MailTrainingData --test-dir D:\\TH_Koeln\\MailTestData --output-dir data
 ```
 
-Dies erzeugt zwei hochauflösende PNG-Dateien in `data/`:
-- `train_data_distribution.png`
-- `test_data_distribution.png`
+Dies erzeugt zwei hochauflösende PNG-Dateien in `data/`:  
+- `train_data_distribution.png`  
+- `test_data_distribution.png`  
 
 ## Datenbank-Management (`db`)
 
@@ -171,20 +171,20 @@ Das System enthält nützliche Skripte im Ordner `scripts/`:
 
 Der `EmailClassifier` unterstützt drei verschiedene Modi für die Merkmalsextraktion (Feature Engineering):
 
-1.  **TF-IDF (`tfidf`)**:
-    - **Funktionsweise:** Verwendet die Term Frequency-Inverse Document Frequency. Es werden Worthäufigkeiten gezählt und gewichtet, um wichtige Schlüsselwörter hervorzuheben.
-    - **Vorteile:** Sehr schnell, gut interpretierbar, effektiv bei klar definierten Fachbegriffen (z.B. "Bachelorarbeit", "Anmeldung").
-    - **Nachteile:** Ignoriert Wortreihenfolge und Semantik (Synonyme werden nicht erkannt).
+1.  **TF-IDF (`tfidf`)**:  
+    - **Funktionsweise:** Verwendet die Term Frequency-Inverse Document Frequency. Es werden Worthäufigkeiten gezählt und gewichtet, um wichtige Schlüsselwörter hervorzuheben.  
+    - **Vorteile:** Sehr schnell, gut interpretierbar, effektiv bei klar definierten Fachbegriffen (z.B. "Bachelorarbeit", "Anmeldung").  
+    - **Nachteile:** Ignoriert Wortreihenfolge und Semantik (Synonyme werden nicht erkannt).  
 
-2.  **Embeddings (`embedding`)**:
-    - **Funktionsweise:** Verwendet `Sentence-Transformers` (Standard: `paraphrase-multilingual-MiniLM-L12-v2`), um den Text in einen hochdimensionalen Vektorraum zu projizieren. Dabei wird der gesamte E-Mail-Text als eine Einheit verarbeitet, sodass pro E-Mail genau ein Merkmalsvektor entsteht (keine Unterteilung in einzelne Sätze).
-    - **Vorteile:** Erfasst die semantische Bedeutung. Erkennt ähnliche Konzepte, auch wenn unterschiedliche Wörter verwendet werden.
-    - **Nachteile:** Rechenintensiver (erfordert Modell-Downloads), schwerer interpretierbar.
+2.  **Embeddings (`embedding`)**:  
+    - **Funktionsweise:** Verwendet `Sentence-Transformers` (Standard: `paraphrase-multilingual-MiniLM-L12-v2`), um den Text in einen hochdimensionalen Vektorraum zu projizieren. Dabei wird der gesamte E-Mail-Text als eine Einheit verarbeitet, sodass pro E-Mail genau ein Merkmalsvektor entsteht (keine Unterteilung in einzelne Sätze).  
+    - **Vorteile:** Erfasst die semantische Bedeutung. Erkennt ähnliche Konzepte, auch wenn unterschiedliche Wörter verwendet werden.  
+    - **Nachteile:** Rechenintensiver (erfordert Modell-Downloads), schwerer interpretierbar.  
 
-3.  **Kombiniert (`combined`)**:
-    - **Funktionsweise:** Konkateniert die TF-IDF-Vektoren mit den Embedding-Vektoren.
-    - **Vorteile:** Kombiniert die Präzision von Schlüsselwörtern mit dem tiefen semantischen Verständnis. In der Regel die höchste Genauigkeit.
-    - **Nachteile:** Größte Feature-Vektoren, längere Trainingszeit.
+3.  **Kombiniert (`combined`)**:  
+    - **Funktionsweise:** Konkateniert die TF-IDF-Vektoren mit den Embedding-Vektoren.  
+    - **Vorteile:** Kombiniert die Präzision von Schlüsselwörtern mit dem tiefen semantischen Verständnis. In der Regel die höchste Genauigkeit.  
+    - **Nachteile:** Größte Feature-Vektoren, längere Trainingszeit.  
 
 ### Modell-Benennung
 Beim Training wird die gewählte Methode automatisch an den Dateinamen angehängt (z.B. `email_classifier_combined.pkl`), um eine Verwechslung der Modelle zu vermeiden.

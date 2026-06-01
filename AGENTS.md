@@ -13,11 +13,11 @@ MCP University is an offline-first system for managing academic data (students, 
    - Suppresses noisy `extract-msg` warnings.  
 3. **Classifier (`mcp_university/classifier/`)**:  
    - Classifies emails using XGBoost or RandomForest.  
-   - **Data Structure:** Training and test data are organized by class folders, each containing `Inbox` and `SentItems` subfolders.
-   - **Feature Modes:** Supports `tfidf` (keyword-based), `embedding` (semantic-based), and `combined`.
-   - **Model Naming:** Trained models automatically append the mode to the filename (e.g., `email_classifier_tfidf.pkl`).
+   - **Data Structure:** Training and test data are organized by class folders, each containing `Inbox` and `SentItems` subfolders.  
+   - **Feature Modes:** Supports `tfidf` (keyword-based), `embedding` (semantic-based), and `combined`.  
+   - **Model Naming:** Trained models automatically append the mode to the filename (e.g., `email_classifier_tfidf.pkl`).  
    - `sort_emails.py` sorts emails into semester and student folders.  
-   - **Special Logic:** Classes starting with `BA_` or `MA_` are stored directly in `Semester/Inbox` or `Semester/SentItems` (no student subfolder).
+   - **Special Logic:** Classes starting with `BA_` or `MA_` are stored directly in `Semester/Inbox` or `Semester/SentItems` (no student subfolder).  
    - **Name Extraction:** Extracts lastnames from `smail.th-koeln.de` (format: `v.n@smail.th-koeln.de` -> `N`).  
 4. **Retrieval (`mcp_university/retrieval/`)**:  
    - Hybrid search using Qdrant (vector) and BM25 (text).  
@@ -25,13 +25,13 @@ MCP University is an offline-first system for managing academic data (students, 
 5. **Summarizer (`mcp_university/summarizer/`)**:  
    - German-localized summarization and Q&A using Ollama.  
    - Specialized prompts for document types (Thesis, Protokoll, Formular, etc.).  
-   - **Persona:** Daniel Gaida, Professor at TH Köln. Signature: 'Viele Grüße, Daniel Gaida'.
+   - **Persona:** Daniel Gaida, Professor at TH Köln. Signature: 'Viele Grüße, Daniel Gaida'.  
 6. **Metadata Store (`mcp_university/metadata/`)**:  
    - SQLite database for file metadata, student info, and folder summaries.  
-   - Primary source of truth for students is `students.yaml`.
+   - Primary source of truth for students is `students.yaml`.  
 7. **Outlook Integration (`outlook_macro/`)**:  
-   - VBA macros for sorting and archiving emails.
-   - Consistency: Use 'SentItems' (no space) for sent email folders.
+   - VBA macros for sorting and archiving emails.  
+   - Consistency: Use 'SentItems' (no space) for sent email folders.  
 
 ## General Guidelines  
 - Follow the project structure and naming conventions.  
@@ -41,20 +41,20 @@ MCP University is an offline-first system for managing academic data (students, 
 
 ## Mandatory Rules & Guidelines
 
-### Preservation Policy (CRITICAL)
-- **Documentation:** NEVER delete existing documentation in code or Markdown files.
-- **Comments:** NEVER delete pre-existing code comments (e.g., explaining logic or data structures).
-- **Logging:** NEVER delete logging statements (`logger.info`, etc.) unless specifically asked to or if the code change makes them obsolete.
-- **Code Integrity:** Do not delete existing code unless requested or strictly necessary for the task.
+### Preservation Policy (CRITICAL)  
+- **Documentation:** NEVER delete existing documentation in code or Markdown files.  
+- **Comments:** NEVER delete pre-existing code comments (e.g., explaining logic or data structures).  
+- **Logging:** NEVER delete logging statements (`logger.info`, etc.) unless specifically asked to or if the code change makes them obsolete.  
+- **Code Integrity:** Do not delete existing code unless requested or strictly necessary for the task.  
 
 ### Language Policy  
 - **German** is the authoritative language for documentation, UI, and LLM outputs.  
 - **English** is a full translation of the documentation.  
 - Internal prompts can be English but MUST instruct the model to output German.  
-- Standard salutation for students: 'Guten Tag Herr/Frau [Nachname]'.
+- Standard salutation for students: 'Guten Tag Herr/Frau [Nachname]'.  
 
 ### Coding Standards  
-- **Docstrings:** Google-style required for ALL classes and methods (including private). MUST include `Args:` and `Returns:` sections for all methods.
+- **Docstrings:** Google-style required for ALL classes and methods (including private). MUST include `Args:` and `Returns:` sections for all methods.  
 - **Type Hints:** Explicit return type hints are mandatory for API documentation.  
 - **Linting:** Run `ruff check . --fix` before submitting.  
 - **Coverage:** Minimum 95% docstring coverage (enforced by `interrogate`).  
@@ -92,20 +92,20 @@ Delete all temporary files before submission:
 - Verify email address and folder existence before processing to avoid runtime errors.  
 - Use `latin-1` encoding when reading/writing VBA files via Python scripts.  
 - **Performance:** Use `DoEvents` and `Sleep` in long-running loops (e.g., email processing) to ensure Outlook remains responsive and does not freeze.  
-- **Item Creation:** Use `target_folder.Items.Add(0)` instead of `mail.Move()` to avoid specific Outlook errors in non-default folders.
+- **Item Creation:** Use `target_folder.Items.Add(0)` instead of `mail.Move()` to avoid specific Outlook errors in non-default folders.  
 
-## Appointment Management Rules
-- **Timezone:** All appointments must be created in the `Europe/Berlin` timezone.
-- **Default Duration:** If not otherwise specified by the student, the default duration for appointments is **30 minutes**.
-- **Body Text:** The body of the calendar appointment MUST follow the format: "Terminbestätigung auf Basis Ihrer Mail vom DD.MM.YY".
-- **Tool Usage:** Always use the `manage_calendar_appointment` tool for bookings. Pass the date of the student's email as `original_mail_date`.
-- **ANHANG: JA:** This output in the agent's response is a control flag for the script to attach relevant info files (like PO-Wechsel PDFs) to the EMAIL draft. It does not affect the calendar entry.
+## Appointment Management Rules  
+- **Timezone:** All appointments must be created in the `Europe/Berlin` timezone.  
+- **Default Duration:** If not otherwise specified by the student, the default duration for appointments is **30 minutes**.  
+- **Body Text:** The body of the calendar appointment MUST follow the format: "Terminbestätigung auf Basis Ihrer Mail vom DD.MM.YY".  
+- **Tool Usage:** Always use the `manage_calendar_appointment` tool for bookings. Pass the date of the student's email as `original_mail_date`.  
+- **ANHANG: JA:** This output in the agent's response is a control flag for the script to attach relevant info files (like PO-Wechsel PDFs) to the EMAIL draft. It does not affect the calendar entry.  
 
 ## Email Anonymization & Cloud LLMs
-When using cloud-based LLMs (e.g., OpenAI via the `--use-cloud` flag), student data MUST be anonymized before being sent to the cloud.
-- **Requirement:** Use the local Ollama model (via `Anonymizer`) to replace student names and emails with "Max Mustermann" and "max.mustermann@student.th-koeln.de".
-- **Bi-directional:** The agent must de-anonymize data locally (using `Anonymizer.deanonymize_text` or `deanonymize_args`) before executing tools like `manage_calendar_appointment` or creating Outlook drafts. This ensures that sensitive internal systems always receive the correct student information while external cloud providers only see placeholders.
-- **Trigger:** Anonymization is automatically handled within `Agent.chat` and `MCPAgent.chat` when `use_cloud` is enabled.
+When using cloud-based LLMs (e.g., OpenAI via the `--use-cloud` flag), student data MUST be anonymized before being sent to the cloud.  
+- **Requirement:** Use the local Ollama model (via `Anonymizer`) to replace student names and emails with "Max Mustermann" and "max.mustermann@student.th-koeln.de".  
+- **Bi-directional:** The agent must de-anonymize data locally (using `Anonymizer.deanonymize_text` or `deanonymize_args`) before executing tools like `manage_calendar_appointment` or creating Outlook drafts. This ensures that sensitive internal systems always receive the correct student information while external cloud providers only see placeholders.  
+- **Trigger:** Anonymization is automatically handled within `Agent.chat` and `MCPAgent.chat` when `use_cloud` is enabled.  
 
 ## Wichtige Hinweise zur Implementierung
 
