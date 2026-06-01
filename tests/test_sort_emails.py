@@ -85,7 +85,6 @@ def test_process_emails(mock_open_msg, mock_mail_parser, mock_classifier_class, 
     mock_msg3.recipients = [mock_recip3]
 
     # Correct mocking for context manager with multiple calls
-    # Note: openMsg() returns the context manager, so we mock return_value.return_value for the object inside 'with'
     mock_open_msg.return_value.__enter__.side_effect = [mock_msg1, mock_msg2, mock_msg3]
 
     config = {
@@ -94,20 +93,13 @@ def test_process_emails(mock_open_msg, mock_mail_parser, mock_classifier_class, 
 
     # IMPORTANT: We MUST mock shutil.move to verify it's called correctly,
     # as the real shutil.move will fail if the file doesn't exist (which it won't after being moved once)
-    # OR the test fails because it expects files to exist after the loop, but if the side_effect order is wrong,
-    # it might move files to different places.
 
-    with patch('shutil.move') as mock_move:
+    with patch('shutil.move'):
         moved = process_emails(source_root, Path("dummy_model"), config)
 
     assert len(moved) == 3
 
-    # Check move calls
-    # Call 1: a_mail1.msg (msg3 in sorted rglob)
-    # Call 2: b_mail2.msg (msg1 in sorted rglob)
-    # Call 3: c_mail3.msg (msg2 in sorted rglob)
-
-    # Actually let's just check if the moved list has correct entries
+    # Check that moved list has correct entries
     assert moved[0]["lastname"] == "Mustermann"
     assert moved[1]["lastname"] == "Musterfrau"
     assert moved[2]["lastname"] == "Huber"
