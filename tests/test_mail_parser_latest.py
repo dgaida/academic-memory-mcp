@@ -47,12 +47,20 @@ Am 01.01.2024 um 10:00 schrieb student@smail.th-koeln.de:
     assert "Und noch mehr Text." in latest
     assert "Alte Antwort" not in latest
 
-def test_extract_latest_message_fallback_on_short():
+def test_extract_latest_message_no_fallback_on_clear_marker():
     parser = MailParser()
-    text = """Short.
+    text = """Short reply.
 Zitat von daniel.gaida@th-koeln.de:
 > Quote"""
     latest = parser.extract_latest_message(text)
-    # Should fall back to full text because "Short." is only 1 line
-    assert "Short." in latest
-    assert "Quote" in latest
+    # Even if only 1 line, we should NOT fall back because Zitat von is a clear marker.
+    assert latest == "Short reply."
+
+def test_extract_latest_message_no_fallback_on_quotes():
+    parser = MailParser()
+    text = """Short.
+> Quote line 1
+> Quote line 2"""
+    latest = parser.extract_latest_message(text)
+    # 2 quotes is also a clear marker.
+    assert latest == "Short."
