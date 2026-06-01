@@ -28,7 +28,7 @@ def test_extract_lastname():
 @patch('mcp_university.classifier.sort_emails.MailParser')
 @patch('extract_msg.openMsg')
 def test_process_emails(mock_open_msg, mock_mail_parser, mock_classifier_class, tmp_path):
-    # Setup source directory - now with arbitrary structure
+    # Setup source directory
     source_root = tmp_path / "source"
     some_folder = source_root / "ArbitraryFolder"
     some_folder.mkdir(parents=True)
@@ -65,12 +65,10 @@ def test_process_emails(mock_open_msg, mock_mail_parser, mock_classifier_class, 
     ]
 
     # Mock extract_msg
-    # Mail 1: From Student -> Inbox
     mock_msg1 = MagicMock()
     mock_msg1.sender = "max.mustermann@smail.th-koeln.de"
     mock_msg1.recipients = []
 
-    # Mail 2: From Daniel Gaida to Student -> SentItems
     mock_msg2 = MagicMock()
     mock_msg2.sender = "daniel.gaida@th-koeln.de"
     mock_recip2 = MagicMock()
@@ -78,7 +76,6 @@ def test_process_emails(mock_open_msg, mock_mail_parser, mock_classifier_class, 
     mock_recip2.name = "Erika Musterfrau"
     mock_msg2.recipients = [mock_recip2]
 
-    # Mail 3: From Unknown to Student -> SentItems (fallback logic)
     mock_msg3 = MagicMock()
     mock_msg3.sender = "someone@else.com"
     mock_recip3 = MagicMock()
@@ -86,11 +83,16 @@ def test_process_emails(mock_open_msg, mock_mail_parser, mock_classifier_class, 
     mock_recip3.name = "Hans Huber"
     mock_msg3.recipients = [mock_recip3]
 
+    # Correct mocking for context manager with multiple calls
     mock_open_msg.return_value.__enter__.side_effect = [mock_msg1, mock_msg2, mock_msg3]
 
     config = {
         "BachelorThesis": str(target_root)
     }
+
+    # We need to mock shutil.move to avoid WinError 32 or similar if files are locked (not the case in Linux usually, but good practice)
+    # But since we are touch-ing files and extract_msg is mocked, it should be fine.
+    # The actual failure was likely due to path mismatches in how the mock was used.
 
     moved = process_emails(source_root, Path("dummy_model"), config)
 
@@ -98,13 +100,16 @@ def test_process_emails(mock_open_msg, mock_mail_parser, mock_classifier_class, 
 
     # Verify first file (From Student)
     expected_path1 = target_root / "2025_SoSe" / "Mustermann" / "Inbox" / "mail1.msg"
+    # Note: In process_emails, we call shutil.move(str(msg_file), str(target_path))
+    # Let's verify it actually exists or use mocks for file movement too if needed.
+    # Since we use tmp_path, real file operations should work.
     assert expected_path1.exists()
 
-    # Verify second file (From Gaida to Student)
+    # Verify second file
     expected_path2 = target_root / "2025_26_WS" / "Musterfrau" / "SentItems" / "mail2.msg"
     assert expected_path2.exists()
 
-    # Verify third file (From Unknown to Student)
+    # Verify third file
     expected_path3 = target_root / "2025_SoSe" / "Huber" / "SentItems" / "mail3.msg"
     assert expected_path3.exists()
 

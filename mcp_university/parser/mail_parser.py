@@ -91,14 +91,11 @@ class MailParser:
         if not text:
             return ""
 
-        # Wir splitten die Mail Zeile für Zeile, um die "viele Zeilen mit >" Logik besser zu handhaben
         lines = text.splitlines()
 
-        # Regex für "Am ... schrieb ..." (Deutsch und Englisch)
+        # Regex patterns
         date_wrote_pattern = re.compile(r"(Am|On) .* (schrieb|wrote):?", re.IGNORECASE)
-        # Regex für "From: daniel.gaida@th-koeln.de" (auch mit Display Name)
         from_gaida_pattern = re.compile(r"From: .*daniel\.gaida@th-koeln\.de", re.IGNORECASE)
-        # Regex für "Zitat von daniel.gaida@th-koeln.de:"
         zitat_pattern = re.compile(r"Zitat von .*daniel\.gaida@th-koeln\.de:?", re.IGNORECASE)
 
         def is_header_marker(line: str) -> bool:
@@ -109,7 +106,7 @@ class MailParser:
                     date_wrote_pattern.search(line) is not None or
                     from_gaida_pattern.search(line) is not None)
 
-        # 1. Führende Zitate überspringen, falls vorhanden (Bottom-Posting)
+        # 1. Führende Zitate überspringen (Bottom-Posting)
         start_index = 0
         first_content_line_idx = -1
         for i, line in enumerate(lines):
@@ -117,6 +114,7 @@ class MailParser:
                 first_content_line_idx = i
                 break
 
+        did_skip_start = False
         if first_content_line_idx != -1:
             first_line = lines[first_content_line_idx]
             is_marker = is_header_marker(first_line) or first_line.strip().startswith(">")
@@ -128,25 +126,23 @@ class MailParser:
                         continue
                     else:
                         start_index = i
+                        did_skip_start = True
                         break
 
-        # 2. Den eigentlichen Inhalt extrahieren (ab start_index bis zum nächsten Trenner)
+        # 2. Inhalt extrahieren
         new_lines = []
         quote_count = 0
         for i in range(start_index, len(lines)):
             line = lines[i]
-            # Check for standard markers
             if is_header_marker(line):
                 break
 
-            # Check for multiple lines starting with >
             if line.strip().startswith(">"):
                 quote_count += 1
             else:
                 quote_count = 0
 
             if quote_count >= 2:
-                # Wir entfernen die letzte Zeile auch, da sie schon der Anfang des Zitats war
                 if new_lines:
                     new_lines.pop()
                 break
@@ -155,13 +151,20 @@ class MailParser:
 
         extracted_text = "\n".join(new_lines).strip()
 
-        # Fallback: Wenn die extrahierte Nachricht zu kurz ist (< 5 Zeilen), nehmen wir die ganze Mail
-        # Aber NUR wenn die ursprüngliche Mail mehr als diese Zeilen hatte
-        original_lines_count = len([line for line in text.splitlines() if line.strip()])
+        # Fallback Logic
         extracted_lines_count = len([line for line in extracted_text.splitlines() if line.strip()])
 
-        if extracted_lines_count < 5 and original_lines_count >= 5:
-            return text.strip()
+        # Wenn wir Bottom-Posting hatten (am Anfang geskippt), vertrauen wir dem Ergebnis immer
+        if did_skip_start:
+            return extracted_text
+
+        # Wenn wir Top-Posting haben und das Ergebnis EXTREM kurz ist (nur 1 Zeile),
+        # nehmen wir das Original als Sicherheit.
+        if extracted_lines_count < 2:
+            # Nur fall-back wenn wir wirklich etwas weggeschnitten haben
+            original_lines_count = len([line for line in text.splitlines() if line.strip()])
+            if original_lines_count > extracted_lines_count:
+                return text.strip()
 
         return extracted_text
 
