@@ -132,9 +132,11 @@ class MailParser:
         # 2. Inhalt extrahieren
         new_lines = []
         quote_count = 0
+        marker_found = False
         for i in range(start_index, len(lines)):
             line = lines[i]
             if is_header_marker(line):
+                marker_found = True
                 break
 
             if line.strip().startswith(">"):
@@ -143,6 +145,7 @@ class MailParser:
                 quote_count = 0
 
             if quote_count >= 2:
+                marker_found = True
                 if new_lines:
                     new_lines.pop()
                 break
@@ -154,12 +157,13 @@ class MailParser:
         # Fallback Logic
         extracted_lines_count = len([line for line in extracted_text.splitlines() if line.strip()])
 
-        # Wenn wir Bottom-Posting hatten (am Anfang geskippt), vertrauen wir dem Ergebnis immer
-        if did_skip_start:
+        # Wenn wir Bottom-Posting hatten (am Anfang geskippt) oder ein Marker gefunden wurde,
+        # vertrauen wir dem Ergebnis.
+        if did_skip_start or marker_found:
             return extracted_text
 
-        # Wenn wir Top-Posting haben und das Ergebnis EXTREM kurz ist (nur 1 Zeile),
-        # nehmen wir das Original als Sicherheit.
+        # Wenn wir Top-Posting haben und kein Marker gefunden wurde,
+        # nehmen wir das Original als Sicherheit, falls das Ergebnis EXTREM kurz ist.
         if extracted_lines_count < 2:
             # Nur fall-back wenn wir wirklich etwas weggeschnitten haben
             original_lines_count = len([line for line in text.splitlines() if line.strip()])
