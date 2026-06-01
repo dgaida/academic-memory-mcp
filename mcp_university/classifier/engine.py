@@ -9,6 +9,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import LabelEncoder
 from mcp_university.classifier.stopwords import ALL_STOP_WORDS
+from mcp_university.utils.anonymizer import anonymize_th_koeln_names
 
 
 from mcp_university.parser.mail_parser import MailParser
@@ -98,6 +99,8 @@ class EmailClassifier:
                 for file_path in class_dir.rglob("*.msg"):
                     text = self._extract_text(file_path)
                     if text:
+                        # Anonymisierung vor der Weiterverarbeitung
+                        text = anonymize_th_koeln_names(text)
                         texts.append(text)
                         labels.append(label)
 
@@ -154,6 +157,8 @@ class EmailClassifier:
         if not text:
             raise ValueError(f"Konnte Text aus {file_path} nicht extrahieren.")
 
+        # Anonymisierung vor der Merkmalsextraktion
+        text = anonymize_th_koeln_names(text)
         X = self.get_features([text], train=False)
         y_pred = self.classifier.predict(X)[0]
         y_prob = self.classifier.predict_proba(X)[0]

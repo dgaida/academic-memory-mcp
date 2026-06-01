@@ -1,10 +1,72 @@
-"""Utility to anonymize and de-anonymize email content using a local LLM."""
+"""Utility to anonymize and de-anonymize email content."""
 import logging
-from typing import Dict
+import re
+from typing import Dict, List, Set
 import ollama
 from ..config import get_config
 
 logger = logging.getLogger(__name__)
+
+def anonymize_th_koeln_names(text: str) -> str:
+    """Anonymizes TH Köln names and emails in the given text.
+
+    Replaces vorname.nachname@... with max.mustermann@... and
+    replaces any occurrences of the extracted name parts with 'Max Mustermann'.
+    Skips daniel.gaida@th-koeln.de.
+
+    Args:
+        text (str): The text to anonymize.
+
+    Returns:
+        str: Anonymized text.
+    """
+    if not text:
+        return text
+
+    # Pattern for TH Köln emails (smail.th-koeln.de or th-koeln.de)
+    email_pattern = r'\b([a-zA-Z0-9._-]+)@((?:smail\.)?th-koeln\.de)\b'
+
+    # Find all TH Köln emails
+    emails = re.findall(email_pattern, text, re.IGNORECASE)
+
+    names_to_replace: Set[str] = set()
+    emails_to_replace: List[tuple] = []
+
+    for local_part, domain in emails:
+        if local_part.lower() == "daniel.gaida":
+            continue
+
+        emails_to_replace.append((f"{local_part}@{domain}", domain))
+
+        # Extract name parts
+        # Split by . and _ to get individual name components
+        parts = re.split(r'[._]', local_part)
+        for part in parts:
+            if len(part) > 2: # Ignore very short parts like initials
+                names_to_replace.add(part)
+
+    anonymized_text = text
+
+    # 1. Temporarily replace email addresses with placeholders to avoid name replacement inside them
+    email_placeholders = {}
+    for i, (full_email, domain) in enumerate(emails_to_replace):
+        placeholder = f"TEMP_EMAIL_PLACEHOLDER_{i}"
+        email_placeholders[placeholder] = f"max.mustermann@{domain}"
+        anonymized_text = re.sub(re.escape(full_email), placeholder, anonymized_text, flags=re.IGNORECASE)
+
+    # 2. Sort names by length descending to replace longer strings first
+    sorted_names = sorted(list(names_to_replace), key=len, reverse=True)
+
+    # 3. Replace name parts with "Max Mustermann"
+    for name in sorted_names:
+        # Use word boundaries to avoid replacing parts of other words
+        anonymized_text = re.sub(rf'\b{re.escape(name)}\b', "Max Mustermann", anonymized_text, flags=re.IGNORECASE)
+
+    # 4. Replace email placeholders with anonymized email addresses
+    for placeholder, anonymized_email in email_placeholders.items():
+        anonymized_text = anonymized_text.replace(placeholder, anonymized_email)
+
+    return anonymized_text
 
 class Anonymizer:
     """Utility to anonymize and de-anonymize email content using a local LLM."""
@@ -38,6 +100,9 @@ class Anonymizer:
         Returns:
             str: Anonymized text.
         """
+        # First use rule-based anonymization for TH Köln specifics
+        text = anonymize_th_koeln_names(text)
+
         # Define standard replacements
         std_sender_name = "Max Mustermann"
         std_sender_email = "max.mustermann@student.th-koeln.de"
