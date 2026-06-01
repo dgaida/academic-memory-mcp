@@ -718,6 +718,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#xai-analysis-interpretability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        XAI Analysis (Interpretability)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#email-sorting-student-folders" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -733,6 +744,17 @@
     <span class="md-ellipsis">
       
         Batch Classification
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-distribution-visualization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Distribution Visualization
       
     </span>
   </a>
@@ -908,6 +930,34 @@
       
     </span>
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#feature-modeling-email-classification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Feature Modeling (Email Classification)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Feature Modeling (Email Classification)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#model-naming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model Naming
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1312,6 +1362,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#xai-analysis-interpretability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        XAI Analysis (Interpretability)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#email-sorting-student-folders" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1327,6 +1388,17 @@
     <span class="md-ellipsis">
       
         Batch Classification
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-distribution-visualization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Distribution Visualization
       
     </span>
   </a>
@@ -1505,6 +1577,34 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#feature-modeling-email-classification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Feature Modeling (Email Classification)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Feature Modeling (Email Classification)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#model-naming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model Naming
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1550,9 +1650,14 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python3<span class="w"> </span>mcp_university/classifier/predict.py<span class="w"> </span>/path/to/email.msg
 </code></pre></div>
 <p>The output contains the most likely class as well as the confidence and a detailed probability distribution.</p>
+<h3 id="xai-analysis-interpretability">XAI Analysis (Interpretability)<a class="headerlink" href="#xai-analysis-interpretability" title="Permanent link">&para;</a></h3>
+<p>To understand which words were particularly important for classification, the XAI analysis can be used. It uses SHAP values to calculate the influence of individual words on the prediction.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>python3<span class="w"> </span>mcp_university/classifier/xai_analysis.py<span class="w"> </span>--model-path<span class="w"> </span>data/email_classifier_tfidf.pkl<span class="w"> </span>--test-data-path<span class="w"> </span>/path/to/test_data
+</code></pre></div>
+<p>The script analyzes up to 20 emails per class and returns the top 5 words that are most characteristic for the respective class.</p>
 <h3 id="email-sorting-student-folders">Email Sorting (Student Folders)<a class="headerlink" href="#email-sorting-student-folders" title="Permanent link">&para;</a></h3>
 <p>The most powerful script sorts emails not only by class, but also by semester and student (last name):</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>python3<span class="w"> </span>mcp_university/classifier/sort_emails.py<span class="w"> </span>/source/folder<span class="w"> </span>--config<span class="w"> </span>config/class_paths.yaml<span class="w"> </span>--model<span class="w"> </span>data/email_classifier.pkl
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>python3<span class="w"> </span>mcp_university/classifier/sort_emails.py<span class="w"> </span>/source/folder<span class="w"> </span>--config<span class="w"> </span>config/class_paths.yaml<span class="w"> </span>--model<span class="w"> </span>data/email_classifier.pkl
 </code></pre></div>
 <p>It automatically detects:<br />
 - <strong>Semester:</strong> Based on the email date (Summer/Winter semester).<br />
@@ -1561,9 +1666,16 @@
 - <strong>Report:</strong> Creates a <code>sorted_emails.md</code> with an overview of all moved emails.  </p>
 <h3 id="batch-classification">Batch Classification<a class="headerlink" href="#batch-classification" title="Permanent link">&para;</a></h3>
 <p>To automatically sort an entire folder of emails (classification only):
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>python3<span class="w"> </span>mcp_university/classifier/classify_folder.py<span class="w"> </span>/source/folder<span class="w"> </span>--model<span class="w"> </span>data/email_classifier.pkl
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>python3<span class="w"> </span>mcp_university/classifier/classify_folder.py<span class="w"> </span>/source/folder<span class="w"> </span>--model<span class="w"> </span>data/email_classifier.pkl
 </code></pre></div>
 This moves the emails into subfolders named after their predicted classes.</p>
+<h3 id="data-distribution-visualization">Data Distribution Visualization<a class="headerlink" href="#data-distribution-visualization" title="Permanent link">&para;</a></h3>
+<p>To visualize the distribution of emails per class (split by Inbox and SentItems), the following script can be used:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>python3<span class="w"> </span>mcp_university/classifier/plot_data_distribution.py<span class="w"> </span>--train-dir<span class="w"> </span>D:<span class="se">\\</span>TH_Koeln<span class="se">\\</span>MailTrainingData<span class="w"> </span>--test-dir<span class="w"> </span>D:<span class="se">\\</span>TH_Koeln<span class="se">\\</span>MailTestData<span class="w"> </span>--output-dir<span class="w"> </span>data
+</code></pre></div>
+<p>This generates two high-resolution PNG files in <code>data/</code>:<br />
+- <code>train_data_distribution.png</code><br />
+- <code>test_data_distribution.png</code>  </p>
 <h2 id="database-management-db">Database Management (<code>db</code>)<a class="headerlink" href="#database-management-db" title="Permanent link">&para;</a></h2>
 <p>The <code>db</code> command group allows for direct management of metadata and the search index.</p>
 <h3 id="listing-content">Listing Content<a class="headerlink" href="#listing-content" title="Permanent link">&para;</a></h3>
@@ -1577,7 +1689,7 @@ This moves the emails into subfolders named after their predicted classes.</p>
 </ul>
 <h3 id="student-synchronization-sync-students">Student Synchronization (<code>sync-students</code>)<a class="headerlink" href="#student-synchronization-sync-students" title="Permanent link">&para;</a></h3>
 <p>Populates the database from a <code>students.yaml</code>.
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>mcp-uni<span class="w"> </span>db<span class="w"> </span>sync-students
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>mcp-uni<span class="w"> </span>db<span class="w"> </span>sync-students
 </code></pre></div></p>
 <h3 id="deleting-content">Deleting Content<a class="headerlink" href="#deleting-content" title="Permanent link">&para;</a></h3>
 <p>Entries can be deleted using their ID. Use the <code>--force</code> or <code>-f</code> option to skip the confirmation prompt.</p>
@@ -1591,7 +1703,7 @@ This moves the emails into subfolders named after their predicted classes.</p>
 <h2 id="model-context-protocol-mcp">Model Context Protocol (MCP)<a class="headerlink" href="#model-context-protocol-mcp" title="Permanent link">&para;</a></h2>
 <p>The most powerful way to use the system is via an MCP client (like Claude Desktop).</p>
 <h3 id="start-server">Start Server<a class="headerlink" href="#start-server" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>mcp-uni<span class="w"> </span>serve-mcp
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>mcp-uni<span class="w"> </span>serve-mcp
 </code></pre></div>
 <h3 id="available-tools">Available Tools<a class="headerlink" href="#available-tools" title="Permanent link">&para;</a></h3>
 <ul>
@@ -1616,6 +1728,36 @@ The agent uses <code>get_student_context</code> and <code>search_documents</code
 <li><strong><code>remove_empty_folders.py</code></strong>: Recursively deletes all empty folders in a directory.  </li>
 <li><strong><code>flatten_directory.py</code></strong>: Flattens a directory structure by moving all files to the root directory (includes name collision checks).  </li>
 </ul>
+<h2 id="feature-modeling-email-classification">Feature Modeling (Email Classification)<a class="headerlink" href="#feature-modeling-email-classification" title="Permanent link">&para;</a></h2>
+<p>The <code>EmailClassifier</code> supports three different modes for feature extraction:</p>
+<ol>
+<li>
+<p><strong>TF-IDF (<code>tfidf</code>)</strong>:  </p>
+<ul>
+<li><strong>How it works:</strong> Uses Term Frequency-Inverse Document Frequency to weigh the importance of keywords.  </li>
+<li><strong>Pros:</strong> Very fast, interpretable, effective for distinct terminology (e.g., "Bachelor Thesis", "Registration").  </li>
+<li><strong>Cons:</strong> Ignores word order and semantics (doesn't recognize synonyms).  </li>
+</ul>
+</li>
+<li>
+<p><strong>Embeddings (<code>embedding</code>)</strong>:  </p>
+<ul>
+<li><strong>How it works:</strong> Uses <code>Sentence-Transformers</code> (default: <code>paraphrase-multilingual-MiniLM-L12-v2</code>) to project text into a high-dimensional vector space.  </li>
+<li><strong>Pros:</strong> Captures semantic meaning. Recognizes similar concepts even if different words are used.  </li>
+<li><strong>Cons:</strong> More computationally expensive (requires model downloads), harder to interpret.  </li>
+</ul>
+</li>
+<li>
+<p><strong>Combined (<code>combined</code>)</strong>:  </p>
+<ul>
+<li><strong>How it works:</strong> Concatenates TF-IDF vectors with embedding vectors.  </li>
+<li><strong>Pros:</strong> Combines keyword precision with deep semantic understanding. Usually yields the highest accuracy.  </li>
+<li><strong>Cons:</strong> Largest feature vectors, longer training time.  </li>
+</ul>
+</li>
+</ol>
+<h3 id="model-naming">Model Naming<a class="headerlink" href="#model-naming" title="Permanent link">&para;</a></h3>
+<p>During training, the chosen mode is automatically appended to the filename (e.g., <code>email_classifier_combined.pkl</code>) to prevent model confusion.</p>
 
 
 
