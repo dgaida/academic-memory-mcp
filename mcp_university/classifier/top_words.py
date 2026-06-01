@@ -14,7 +14,11 @@ logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
 
 def get_top_words_per_class(data_dir: Path, top_n: int = 5) -> Dict[str, List[str]]:
-    """Findet die signifikantesten Wörter pro Klasse.
+    """Findet die signifikantesten Wörter pro Klasse mittels klassenbasiertem TF-IDF.
+
+    Hierbei werden alle E-Mails einer Klasse zu einem großen Dokument zusammengefasst,
+    um die Einzigartigkeit von Wörtern für eine Klasse im Vergleich zu anderen Klassen
+    zu bestimmen.
 
     Args:
         data_dir: Pfad zum Verzeichnis mit den Daten (Unterordner pro Klasse).
@@ -31,31 +35,34 @@ def get_top_words_per_class(data_dir: Path, top_n: int = 5) -> Dict[str, List[st
         logger.error(f"Keine Daten in {data_dir} gefunden.")
         return {}
 
-    # TF-IDF Vectorizer mit deutschen Stoppwörtern
-    # Da sklearn standardmäßig keine deutschen Stoppwörter hat,
-    # verwenden wir eine einfache Liste oder vertrauen darauf, dass
-    # die signifikantesten Wörter klassenspezifisch genug sind.
-    # Wir nutzen 'german' falls verfügbar, ansonsten laden wir Texte.
-    vectorizer = TfidfVectorizer(max_features=5000, stop_words=None) # standardmäßig
+    # Gruppiere Texte nach Klassen und konkateniere sie
+    class_documents = {}
+    for text, label in zip(texts, labels):
+        if label not in class_documents:
+            class_documents[label] = []
+        class_documents[label].append(text)
 
-    X = vectorizer.fit_transform(texts)
+    unique_labels = sorted(class_documents.keys())
+    # Konkateniere alle Texte einer Klasse zu einem einzigen Dokument
+    concatenated_docs = [" ".join(class_documents[label]) for label in unique_labels]
+
+    # TF-IDF Vectorizer
+    # Wir nutzen standardmäßig keine festen Stoppwörter, da klassenspezifische Begriffe
+    # durch IDF ohnehin höher gewichtet werden als allgemeine Begriffe.
+    vectorizer = TfidfVectorizer(max_features=5000)
+
+    # Berechne TF-IDF auf den klassenbasierten Dokumenten
+    X = vectorizer.fit_transform(concatenated_docs)
     feature_names = np.array(vectorizer.get_feature_names_out())
 
-    unique_labels = sorted(list(set(labels)))
     results = {}
 
-    for label in unique_labels:
-        # Indizes der Dokumente dieser Klasse
-        indices = [i for i, lbl in enumerate(labels) if lbl == label]
-
-        # TF-IDF Matrix für diese Klasse
-        class_tfidf = X[indices]
-
-        # Durchschnittlicher TF-IDF Wert pro Wort in dieser Klasse
-        mean_tfidf = np.asarray(class_tfidf.mean(axis=0)).flatten()
+    for i, label in enumerate(unique_labels):
+        # TF-IDF Werte für diese Klasse (Zeile i in der Matrix)
+        class_tfidf = X[i].toarray().flatten()
 
         # Top N Indizes
-        top_indices = mean_tfidf.argsort()[::-1][:top_n]
+        top_indices = class_tfidf.argsort()[::-1][:top_n]
 
         results[label] = feature_names[top_indices].tolist()
 
@@ -78,7 +85,7 @@ def main():
 
     if results:
         print("\n" + "="*40)
-        print(f"Top {args.top_n} Wörter pro Klasse (TF-IDF Basis)")
+        print(f"Top {args.top_n} Wörter pro Klasse (Klassenbasiertes TF-IDF)")
         print("="*40)
         for class_name, top_words in results.items():
             print(f"\nKlasse: {class_name}")
