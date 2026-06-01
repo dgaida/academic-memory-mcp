@@ -8,6 +8,7 @@ import shap
 
 from mcp_university.classifier.engine import EmailClassifier
 
+from mcp_university.utils.anonymizer import anonymize_th_koeln_names
 # Logging konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
@@ -72,6 +73,8 @@ def run_xai_analysis(model_path: Path, test_data_path: Path, samples_per_class: 
                 text = file_path.read_text()
 
             if text:
+                # Anonymisierung vor der Merkmalsextraktion für XAI
+                text = anonymize_th_koeln_names(text)
                 texts.append(text)
 
         if not texts:
