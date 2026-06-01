@@ -36,7 +36,7 @@ GERMAN_STOP_WORDS = [
 UNIVERSITY_STOP_WORDS = [
     "th", "koeln", "de", "gaida", "viele", "grüße", "signatur", "nachricht",
     "mail", "hallo", "geehrte", "geehrter", "mfg", "vg", "daniel", "professor",
-    "informatik", "hochschule", "technische", "re", "aw", "fwd", "gesendet",
+    "hochschule", "technische", "re", "aw", "fwd", "gesendet",
     "datum", "betreff", "an", "von", "herr", "frau", "mit", "vielen", "herzlichen"
 ]
 
