@@ -55,7 +55,7 @@ def get_detailed_stats(data_dir: Path, top_n: int = 5) -> Dict[str, Any]:
     concatenated_docs = [" ".join(class_documents[label]) for label in unique_labels]
 
     # TF-IDF auf Klassenebene
-    tfidf_vec = TfidfVectorizer(max_features=5000, stop_words=ALL_STOP_WORDS, sublinear_tf=True)
+    tfidf_vec = TfidfVectorizer(max_features=5000, stop_words=ALL_STOP_WORDS)  #, sublinear_tf=True)
     tfidf_matrix = tfidf_vec.fit_transform(concatenated_docs)
     tfidf_feature_names = np.array(tfidf_vec.get_feature_names_out())
     idf_values = tfidf_vec.idf_
