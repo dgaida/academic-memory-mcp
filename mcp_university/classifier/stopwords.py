@@ -24,7 +24,7 @@ GERMAN_STOP_WORDS = [
     "nur", "ob", "oder", "ohne", "sehr", "sein", "seine", "seinem",
     "seinen", "seiner", "seines", "selbst", "sich", "sie", "ihnen",
     "sind", "so", "solche", "solchem", "solchen", "solcher", "solches",
-    "soll", "sollte", "sondern", "sonst", "über", "um", "und", "uns",
+    "soll", "sollte", "sondern", "sonst", "über", "uhr", "um", "und", "uns",
     "unsere", "unserem", "unseren", "unser", "unseres", "unter", "viel",
     "vom", "von", "vor", "während", "war", "waren", "warst", "was",
     "weg", "weil", "weiter", "welche", "welchem", "welchen", "welcher",
@@ -36,7 +36,7 @@ GERMAN_STOP_WORDS = [
 ENGLISH_STOP_WORDS = [
     "a", "about", "above", "after", "again", "against", "all", "am", "an", "and",
     "any", "are", "as", "at", "be", "because", "been", "before", "being", "below",
-    "between", "both", "but", "by", "can", "could", "did", "do", "does", "doing",
+    "between", "both", "but", "by", "can", "could", "date", "did", "do", "does", "doing",
     "down", "during", "each", "few", "for", "from", "further", "had", "has",
     "have", "having", "he", "her", "here", "hers", "herself", "him", "himself",
     "his", "how", "i", "if", "in", "into", "is", "it", "its", "itself", "just",
@@ -55,7 +55,7 @@ UNIVERSITY_STOP_WORDS = [
     "mail", "smail", "mailto", "hallo", "geehrte", "geehrter", "mfg", "vg", "daniel", "professor",
     "hochschule", "technische", "re", "aw", "fwd", "gesendet", "gm", "gummersbach", 
     "datum", "betreff", "an", "von", "herr", "frau", "mit", "vielen", "herzlichen",
-    "max", "mustermann"
+    "max", "mustermann", "prof", "subject", "49", "freundlichen", "https", "http"
 ]
 
 ALL_STOP_WORDS = list(set(GERMAN_STOP_WORDS + ENGLISH_STOP_WORDS + UNIVERSITY_STOP_WORDS))
