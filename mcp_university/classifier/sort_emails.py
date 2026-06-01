@@ -190,7 +190,7 @@ def process_emails(
 
     logger.info(f"Verarbeite Quellverzeichnis: {source_root}")
 
-    for msg_file in source_root.rglob("*.msg"):
+    for msg_file in sorted(source_root.rglob("*.msg")):
         try:
             # Klassifizierung
             prediction = classifier.predict(msg_file)
