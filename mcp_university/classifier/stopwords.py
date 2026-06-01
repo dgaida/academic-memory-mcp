@@ -5,7 +5,7 @@ GERMAN_STOP_WORDS = [
     "ander", "andere", "anderem", "anderen", "anderer", "anderes", "anderm",
     "andern", "anderr", "anders", "auch", "auf", "aus", "bei", "bin", "bis",
     "bist", "da", "damit", "dann", "der", "den", "des", "dem", "die", "das",
-    "daß", "derselbe", "derselben", "denselben", "desselben", "demselben",
+    "daß", "dass", "derselbe", "derselben", "denselben", "desselben", "demselben",
     "dieselbe", "dieselben", "dasselbe", "dazu", "dein", "deine", "deinem",
     "deinen", "deiner", "deines", "denn", "derer", "dessen", "dich", "dir",
     "du", "dies", "diese", "diesem", "diesen", "dieser", "dieses", "doch",
@@ -29,14 +29,14 @@ GERMAN_STOP_WORDS = [
     "vom", "von", "vor", "während", "war", "waren", "warst", "was",
     "weg", "weil", "weiter", "welche", "welchem", "welchen", "welcher",
     "welches", "wenn", "werde", "werden", "wie", "wieder", "will",
-    "wir", "wird", "wirst", "wo", "wollen", "wollte", "würde", "würden",
+    "wir", "wird", "wirst", "wo", "wollen", "wollte", "würde", "würden", "www", 
     "zu", "zum", "zur", "zwar", "zwischen"
 ]
 
 UNIVERSITY_STOP_WORDS = [
-    "th", "koeln", "de", "gaida", "viele", "grüße", "signatur", "nachricht",
-    "mail", "hallo", "geehrte", "geehrter", "mfg", "vg", "daniel", "professor",
-    "hochschule", "technische", "re", "aw", "fwd", "gesendet",
+    "th", "koeln", "de", "gaida", "viele", "grüße", "grüßen", "signatur", "nachricht",
+    "mail", "smail", "mailto", "hallo", "geehrte", "geehrter", "mfg", "vg", "daniel", "professor",
+    "hochschule", "technische", "re", "aw", "fwd", "gesendet", "gm", "gummersbach", 
     "datum", "betreff", "an", "von", "herr", "frau", "mit", "vielen", "herzlichen"
 ]
 
