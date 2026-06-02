@@ -1,8 +1,10 @@
 import pytest
+import numpy as np
 from mcp_university.metadata.store import MetadataStore
 from mcp_university.retrieval.index import SearchIndex
 from typer.testing import CliRunner
 from mcp_university.cli.main import app
+from unittest.mock import patch
 import mcp_university.cli.db as db_module
 
 @pytest.fixture
@@ -21,7 +23,11 @@ def qdrant_path(tmp_path):
 
 @pytest.fixture
 def search_index(qdrant_path, store):
-    return SearchIndex(str(qdrant_path), "all-MiniLM-L6-v2", store=store)
+    with patch("mcp_university.retrieval.index.SentenceTransformer") as mock_st:
+        mock_model = mock_st.return_value
+        # Mock encode to return a vector of size 384 (MiniLM standard)
+        mock_model.encode.return_value = np.zeros(384)
+        return SearchIndex(str(qdrant_path), "all-MiniLM-L6-v2", store=store)
 
 def test_metadata_store_retrieval(store):
     fid = store.upsert_file("/path/to/file.txt", "hash1", 123.45, ".txt")

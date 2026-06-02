@@ -67,6 +67,7 @@ def test_generate_reply_no_appointment_fallback(mock_agent_cls, mock_parser_cls,
     # Schritt 2 gibt die reguläre Antwort
     mock_agent.chat.side_effect = [
         "NO_APPOINTMENT_RELEVANCE",
+        "REPLY_NEEDED",
         "ANHANG: NEIN\nBETREFF: Thesis\nTEXT:\nHier ist die Antwort."
     ]
 
@@ -80,7 +81,7 @@ def test_generate_reply_no_appointment_fallback(mock_agent_cls, mock_parser_cls,
 
     assert subject == "Thesis"
     assert reply == "Hier ist die Antwort."
-    assert mock_agent.chat.call_count == 2
+    assert mock_agent.chat.call_count == 3
 
 @patch("process_sorted_emails.OUTLOOK_AVAILABLE", True)
 @patch("process_sorted_emails.is_outlook_open", return_value=True)
@@ -113,3 +114,27 @@ def test_create_outlook_draft_no_outlook(mock_open):
     """Testet das Verhalten, wenn Outlook nicht geöffnet ist."""
     success = create_outlook_draft("Test Subject", "Test Body")
     assert success is False
+
+@patch("process_sorted_emails.MailParser")
+@patch("process_sorted_emails.Agent")
+def test_generate_reply_no_reply_needed(mock_agent_cls, mock_parser_cls, tmp_path):
+    """Testet die Erkennung, dass keine Antwort erforderlich ist."""
+    mock_parser = mock_parser_cls.return_value
+    mock_parser.parse.return_value = "Vielen Dank für die Information!"
+    mock_parser.extract_latest_message.return_value = "Vielen Dank für die Information!"
+
+    mock_agent = mock_agent_cls.return_value
+    # Schritt 1: Nicht terminrelevant
+    # Schritt 1.5: Keine Antwort erforderlich
+    mock_agent.chat.side_effect = [
+        "NO_APPOINTMENT_RELEVANCE",
+        "NO_REPLY_NEEDED|Reine Dankesmail ohne Fragen."
+    ]
+
+    mail_path = tmp_path / "test.msg"
+
+    subject, reply, should_attach = generate_reply(mock_agent, mail_path)
+
+    assert subject == "NO_REPLY_NEEDED"
+    assert "Reine Dankesmail" in reply
+    assert mock_agent.chat.call_count == 2

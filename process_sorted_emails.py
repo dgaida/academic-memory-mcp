@@ -434,11 +434,8 @@ TEXT:
                 apt_text = f"APPOINTMENT_BOOKED|{apt_info['start_time']}"
             return "APPOINTMENT_BOOKED", apt_text, False
 
-        # Erklärung: "ANHANG: JA" im Agent-Output dient als Signal für das Skript,
-        # ob Dateien (wie PO-Wechsel-Infos) angehängt werden sollen.
         if "NO_APPOINTMENT_RELEVANCE" not in content:
             logger.info("Terminrelevanz erkannt, generiere Termin-Antwort.")
-            # Signalprüfung für Anhänge (z.B. PO-Infos)
             should_attach = "ANHANG: JA" in content
             reply_subject = ""
             if "BETREFF:" in content:
@@ -451,6 +448,37 @@ TEXT:
     except Exception as e:
         logger.error(f"Fehler in Schritt 1 (Appointment): {e}")
 
+    # --- SCHRITT 1.5: NOTWENDIGKEITSPRÜFUNG ---
+    logger.info("Schritt 1.5: Prüfe, ob eine Antwort notwendig ist...")
+    necessity_user_prompt = f"""Prüfe, ob die folgende E-Mail eine Antwort erfordert oder ob es sich lediglich um eine Informationsmail handelt, die keiner Antwort bedarf.
+
+PERSONA:
+{persona_content}
+
+ZUSÄTZLICHER KONTEXT (Anrede etc.):
+{additional_context}
+
+AKTUELLE E-MAIL:
+{mail_content}
+
+WICHTIGE ANWEISUNG:
+- Falls die E-Mail KEINE Antwort erfordert (z.B. reine Bestätigung ohne Fragen, reine Information, Dankesmail ohne weitere Anliegen), antworte EXAKT im Format: NO_REPLY_NEEDED|BEGRÜNDUNG
+- Falls die E-Mail eine Antwort erfordert, antworte EXAKT mit: REPLY_NEEDED
+"""
+    try:
+        necessity_content = agent.chat(
+            messages=[{"role": "user", "content": necessity_user_prompt}],
+            system_prompt=system_prompt,
+            sender_name=sender_name,
+            sender_email=sender_email
+        )
+        logger.info(f"Antwort von Agent (Necessity-Check): {necessity_content}")
+
+        if necessity_content.startswith("NO_REPLY_NEEDED"):
+            reason = necessity_content.split("|", 1)[1] if "|" in necessity_content else "Keine Begründung angegeben."
+            return "NO_REPLY_NEEDED", reason, False
+    except Exception as e:
+        logger.error(f"Fehler in Schritt 1.5 (Necessity-Check): {e}")
     # --- SCHRITT 2: REGULÄRE ANTWORT ---
     logger.info("Schritt 2: Generiere reguläre Antwort mit vollem Kontext...")
 
@@ -731,10 +759,16 @@ def main() -> None:
 
             reply_subject, reply, should_attach = generate_reply(agent, latest_mail, skill_path=skill_path, conversation_content=conversation_content, persona_path=persona_path, additional_context=additional_context, debug=args.debug, appointment_skill_path=appointment_skill_path, sender_name=sender_name, sender_email=student_email)
 
+            if reply_subject == "NO_REPLY_NEEDED":
+                logger.info(f"Keine Antwort für {email['lastname']} erforderlich. Grund: {reply}")
+                status = f"Keine Antwort erforderlich ({reply})"
+                processed_results.append({"lastname": email['lastname'], "subject": latest_mail.stem, "status": status})
+                continue
+
             if reply.startswith("APPOINTMENT_BOOKED"):
                 apt_info = agent.last_appointment_info
                 if apt_info and "start_time" in apt_info:
-                    apt_time = apt_info["start_time"]
+                    apt_time = apt_info['start_time']
                     logger.info(f"ERFOLG: Termin für {email['lastname']} wurde am {apt_time} im Kalender gebucht.")
                     status = f"Termin gebucht ({apt_time})"
                 else:
@@ -835,10 +869,16 @@ def main() -> None:
 
             reply_subject, reply, should_attach = generate_reply(agent, latest_mail, summary_content or "", skill_path, persona_path=persona_path, additional_context=additional_context, debug=args.debug, appointment_skill_path=appointment_skill_path, sender_name=sender_name, sender_email=student_email)
 
+            if reply_subject == "NO_REPLY_NEEDED":
+                logger.info(f"Keine Antwort für {email['lastname']} erforderlich. Grund: {reply}")
+                status = f"Keine Antwort erforderlich ({reply})"
+                processed_results.append({"lastname": email['lastname'], "subject": latest_mail.stem, "status": status})
+                continue
+
             if reply.startswith("APPOINTMENT_BOOKED"):
                 apt_info = agent.last_appointment_info
                 if apt_info and "start_time" in apt_info:
-                    apt_time = apt_info["start_time"]
+                    apt_time = apt_info['start_time']
                     logger.info(f"ERFOLG: Termin für {email['lastname']} wurde am {apt_time} im Kalender gebucht.")
                     status = f"Termin gebucht ({apt_time})"
                 else:
