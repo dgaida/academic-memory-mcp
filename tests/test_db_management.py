@@ -4,8 +4,7 @@ from mcp_university.metadata.store import MetadataStore
 from mcp_university.retrieval.index import SearchIndex
 from typer.testing import CliRunner
 from mcp_university.cli.main import app
-from unittest.mock import MagicMock, patch
-from sentence_transformers import SentenceTransformer
+from unittest.mock import patch
 import mcp_university.cli.db as db_module
 
 @pytest.fixture
