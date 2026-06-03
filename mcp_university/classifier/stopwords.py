@@ -51,11 +51,12 @@ ENGLISH_STOP_WORDS = [
 ]
 
 UNIVERSITY_STOP_WORDS = [
-    "th", "koeln", "de", "gaida", "viele", "grüße", "grüßen", "signatur", "nachricht",
+    "th", "koeln", "de", "dr", "gaida", "viele", "grüße", "grüßen", "signatur", "nachricht",
     "mail", "smail", "mailto", "hallo", "geehrte", "geehrter", "mfg", "vg", "daniel", "professor",
-    "hochschule", "technische", "re", "aw", "fwd", "gesendet", "gm", "gummersbach", 
+    "hochschule", "technische", "re", "aw", "antw", "fwd", "gesendet", "gm", "gummersbach", 
     "datum", "betreff", "an", "von", "herr", "frau", "mit", "vielen", "herzlichen",
-    "max", "mustermann", "prof", "subject", "49", "freundlichen", "https", "http"
+    "max", "mustermann", "prof", "subject", "00", "49", "freundlichen", "https", "http", 
+    "university", "applied", "sciences"
 ]
 
 ALL_STOP_WORDS = list(set(GERMAN_STOP_WORDS + ENGLISH_STOP_WORDS + UNIVERSITY_STOP_WORDS))
