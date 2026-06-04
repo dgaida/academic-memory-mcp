@@ -11,6 +11,7 @@ import yaml
 
 from mcp_university.classifier.engine import EmailClassifier
 from mcp_university.parser.mail_parser import MailParser
+from mcp_university.config import get_config
 
 # Logging konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
@@ -217,7 +218,7 @@ def process_emails(
             with extract_msg.openMsg(str(msg_file)) as msg:
                 sender = (msg.sender.lower() if msg.sender else "").strip()
 
-                if "daniel.gaida@th-koeln.de" in sender:
+                if get_config().user.email in sender:
                     target_folder = "SentItems"
                     # Suche in Empfängern nach Student
                     recipients = msg.recipients

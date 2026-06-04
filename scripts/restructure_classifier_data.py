@@ -1,3 +1,4 @@
+from mcp_university.config import get_config
 """Skript zur Umstrukturierung der Trainings- und Testdaten des Klassifikators."""
 import argparse
 import shutil
@@ -55,7 +56,7 @@ def restructure_data(root_dir: Path):
                     sender = (msg.sender.lower() if msg.sender else "").strip()
 
                 # Datei verschieben (außerhalb des Context-Managers, um Locks zu vermeiden)
-                if "daniel.gaida@th-koeln.de" in sender:
+                if get_config().user.email in sender:
                     target_path = sent_dir / msg_file.name
                     shutil.move(str(msg_file), str(target_path))
                     logger.info(f"Verschoben nach SentItems: {msg_file.name}")

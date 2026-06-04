@@ -278,7 +278,7 @@ def create_outlook_draft(subject: str, body: str, recipient: str = "", cc: List[
         outlook = win32com.client.Dispatch("Outlook.Application")
         namespace = outlook.GetNamespace("MAPI")
 
-        target_account = "daniel.gaida@th-koeln.de"
+        target_account = get_config().user.email
         target_folder_name = "Work in Progress"
 
         # Versuche den spezifischen Ordner zu finden
@@ -727,7 +727,7 @@ def main() -> None:
                     if msg.recipients:
                         for rec in msg.recipients:
                             rec_email = rec.email or rec.name
-                            if rec_email and "daniel.gaida@th-koeln.de" not in rec_email.lower():
+                            if rec_email and get_config().user.email not in rec_email.lower():
                                 if rec_email.lower() != student_email.lower():
                                     cc_list.append(rec_email)
             except Exception:
@@ -838,7 +838,7 @@ def main() -> None:
                     if msg.recipients:
                         for rec in msg.recipients:
                             rec_email = rec.email or rec.name
-                            if rec_email and "daniel.gaida@th-koeln.de" not in rec_email.lower():
+                            if rec_email and get_config().user.email not in rec_email.lower():
                                 if rec_email.lower() != student_email.lower():
                                     cc_list.append(rec_email)
             except Exception:

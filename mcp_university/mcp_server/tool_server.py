@@ -140,7 +140,7 @@ def create_tool_server() -> FastMCP:
         try:
             outlook = win32com.client.Dispatch("Outlook.Application")
             namespace = outlook.GetNamespace("MAPI")
-            target_account = "daniel.gaida@th-koeln.de"
+            target_account = get_config().user.email
             target_calendar_name = "Kalender (Nur dieser Computer)"
 
             # (Rest der Logik analog zu mcp_university/agent/engine.py _tool_manage_calendar_appointment)

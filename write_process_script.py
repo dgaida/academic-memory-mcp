@@ -84,7 +84,7 @@ def create_outlook_draft(subject: str, body: str, recipient: str = "", cc: List[
     try:
         outlook = win32com.client.Dispatch("Outlook.Application")
         namespace = outlook.GetNamespace("MAPI")
-        target_account = "daniel.gaida@th-koeln.de"
+        target_account = get_config().user.email
         target_folder_name = "Work in Progress"
         target_folder = None
         for store in namespace.Stores:
