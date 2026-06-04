@@ -18,7 +18,7 @@
         <link rel="prev" href="../configuration/">
       
       
-        <link rel="next" href="../api/">
+        <link rel="next" href="email-workflow/">
       
       
         
@@ -33,7 +33,7 @@
     
     
       
-        <title>Nutzung - MCP University Memory System</title>
+        <title>Übersicht - MCP University Memory System</title>
       
     
     
@@ -126,7 +126,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Nutzung
+              Übersicht
             
           </span>
         </div>
@@ -335,17 +335,18 @@
     
   
   
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="./" class="md-tabs__link">
-        
-  
-  
     
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
   
   Nutzung
 
-      </a>
-    </li>
+        </a>
+      </li>
+    
   
 
       
@@ -575,6 +576,63 @@
   
   
   
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nutzung
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Nutzung
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
     <li class="md-nav__item md-nav__item--active">
       
       <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
@@ -590,7 +648,7 @@
   <span class="md-ellipsis">
     
   
-    Nutzung
+    Übersicht
   
 
     
@@ -608,7 +666,7 @@
   <span class="md-ellipsis">
     
   
-    Nutzung
+    Übersicht
   
 
     
@@ -964,6 +1022,42 @@
     </ul>
   
 </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="email-workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    E-Mail Workflow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
       
     </li>
   
@@ -1628,36 +1722,36 @@
 <p>The CLI is the primary way to manage the system and perform manual searches.</p>
 <h3 id="indexing-index">Indexing (<code>index</code>)<a class="headerlink" href="#indexing-index" title="Permanent link">&para;</a></h3>
 <p>This command scans all configured folders, creates summaries, and updates the index.
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>mcp-uni<span class="w"> </span>index
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>mcp-uni<span class="w"> </span>index
 </code></pre></div></p>
 <h3 id="search-search">Search (<code>search</code>)<a class="headerlink" href="#search-search" title="Permanent link">&para;</a></h3>
 <p>Performs a quick query across the entire dataset.
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>mcp-uni<span class="w"> </span>search<span class="w"> </span><span class="s2">&quot;Content of lecture 5&quot;</span>
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>mcp-uni<span class="w"> </span>search<span class="w"> </span><span class="s2">&quot;Content of lecture 5&quot;</span>
 </code></pre></div></p>
 <h3 id="watchdog-watch">Watchdog (<code>watch</code>)<a class="headerlink" href="#watchdog-watch" title="Permanent link">&para;</a></h3>
 <p>Starts a background process that reacts to file changes and updates the index in real-time.
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>mcp-uni<span class="w"> </span>watch
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>mcp-uni<span class="w"> </span>watch
 </code></pre></div></p>
 <h2 id="email-classification">Email Classification<a class="headerlink" href="#email-classification" title="Permanent link">&para;</a></h2>
 <p>The system includes a subpackage for the automated classification of student emails (e.g., Bachelor's thesis, internship project).</p>
 <h3 id="training-the-model">Training the Model<a class="headerlink" href="#training-the-model" title="Permanent link">&para;</a></h3>
 <p>To use the classifier, it must first be trained with example data. It expects a folder structure where each subfolder represents a class and contains the emails (.msg).</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python3<span class="w"> </span>mcp_university/classifier/train.py<span class="w"> </span>/path/to/training_data<span class="w"> </span>--mode<span class="w"> </span>combined<span class="w"> </span>--method<span class="w"> </span>xgboost
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python3<span class="w"> </span>mcp_university/classifier/train.py<span class="w"> </span>/path/to/training_data<span class="w"> </span>--mode<span class="w"> </span>combined<span class="w"> </span>--method<span class="w"> </span>xgboost
 </code></pre></div>
 <p>You can choose between <code>randomforest</code> and <code>xgboost</code> (default).</p>
 <h3 id="classifying-an-email">Classifying an Email<a class="headerlink" href="#classifying-an-email" title="Permanent link">&para;</a></h3>
 <p>After training, a single email file can be classified:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python3<span class="w"> </span>mcp_university/classifier/predict.py<span class="w"> </span>/path/to/email.msg
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python3<span class="w"> </span>mcp_university/classifier/predict.py<span class="w"> </span>/path/to/email.msg
 </code></pre></div>
 <p>The output contains the most likely class as well as the confidence and a detailed probability distribution.</p>
 <h3 id="xai-analysis-interpretability">XAI Analysis (Interpretability)<a class="headerlink" href="#xai-analysis-interpretability" title="Permanent link">&para;</a></h3>
 <p>To understand which words were particularly important for classification, the XAI analysis can be used. It uses SHAP values to calculate the influence of individual words on the prediction.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>python3<span class="w"> </span>mcp_university/classifier/xai_analysis.py<span class="w"> </span>--model-path<span class="w"> </span>data/email_classifier_tfidf.pkl<span class="w"> </span>--test-data-path<span class="w"> </span>/path/to/test_data
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>python3<span class="w"> </span>mcp_university/classifier/xai_analysis.py<span class="w"> </span>--model-path<span class="w"> </span>data/email_classifier_tfidf.pkl<span class="w"> </span>--test-data-path<span class="w"> </span>/path/to/test_data
 </code></pre></div>
 <p>The script analyzes up to 20 emails per class and returns the top 5 words that are most characteristic for the respective class.</p>
 <h3 id="email-sorting-student-folders">Email Sorting (Student Folders)<a class="headerlink" href="#email-sorting-student-folders" title="Permanent link">&para;</a></h3>
 <p>The most powerful script sorts emails not only by class, but also by semester and student (last name):</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>python3<span class="w"> </span>mcp_university/classifier/sort_emails.py<span class="w"> </span>/source/folder<span class="w"> </span>--config<span class="w"> </span>config/class_paths.yaml<span class="w"> </span>--model<span class="w"> </span>data/email_classifier.pkl
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>python3<span class="w"> </span>mcp_university/classifier/sort_emails.py<span class="w"> </span>/source/folder<span class="w"> </span>--config<span class="w"> </span>config/class_paths.yaml<span class="w"> </span>--model<span class="w"> </span>data/email_classifier.pkl
 </code></pre></div>
 <p>It automatically detects:<br />
 - <strong>Semester:</strong> Based on the email date (Summer/Winter semester).<br />
@@ -1666,12 +1760,12 @@
 - <strong>Report:</strong> Creates a <code>sorted_emails.md</code> with an overview of all moved emails.  </p>
 <h3 id="batch-classification">Batch Classification<a class="headerlink" href="#batch-classification" title="Permanent link">&para;</a></h3>
 <p>To automatically sort an entire folder of emails (classification only):
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>python3<span class="w"> </span>mcp_university/classifier/classify_folder.py<span class="w"> </span>/source/folder<span class="w"> </span>--model<span class="w"> </span>data/email_classifier.pkl
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>python3<span class="w"> </span>mcp_university/classifier/classify_folder.py<span class="w"> </span>/source/folder<span class="w"> </span>--model<span class="w"> </span>data/email_classifier.pkl
 </code></pre></div>
 This moves the emails into subfolders named after their predicted classes.</p>
 <h3 id="data-distribution-visualization">Data Distribution Visualization<a class="headerlink" href="#data-distribution-visualization" title="Permanent link">&para;</a></h3>
 <p>To visualize the distribution of emails per class (split by Inbox and SentItems), the following script can be used:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>python3<span class="w"> </span>mcp_university/classifier/plot_data_distribution.py<span class="w"> </span>--train-dir<span class="w"> </span>D:<span class="se">\\</span>TH_Koeln<span class="se">\\</span>MailTrainingData<span class="w"> </span>--test-dir<span class="w"> </span>D:<span class="se">\\</span>TH_Koeln<span class="se">\\</span>MailTestData<span class="w"> </span>--output-dir<span class="w"> </span>data
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>python3<span class="w"> </span>mcp_university/classifier/plot_data_distribution.py<span class="w"> </span>--train-dir<span class="w"> </span>D:<span class="se">\\</span>TH_Koeln<span class="se">\\</span>MailTrainingData<span class="w"> </span>--test-dir<span class="w"> </span>D:<span class="se">\\</span>TH_Koeln<span class="se">\\</span>MailTestData<span class="w"> </span>--output-dir<span class="w"> </span>data
 </code></pre></div>
 <p>This generates two high-resolution PNG files in <code>data/</code>:<br />
 - <code>train_data_distribution.png</code><br />
@@ -1689,7 +1783,7 @@ This moves the emails into subfolders named after their predicted classes.</p>
 </ul>
 <h3 id="student-synchronization-sync-students">Student Synchronization (<code>sync-students</code>)<a class="headerlink" href="#student-synchronization-sync-students" title="Permanent link">&para;</a></h3>
 <p>Populates the database from a <code>students.yaml</code>.
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>mcp-uni<span class="w"> </span>db<span class="w"> </span>sync-students
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>mcp-uni<span class="w"> </span>db<span class="w"> </span>sync-students
 </code></pre></div></p>
 <h3 id="deleting-content">Deleting Content<a class="headerlink" href="#deleting-content" title="Permanent link">&para;</a></h3>
 <p>Entries can be deleted using their ID. Use the <code>--force</code> or <code>-f</code> option to skip the confirmation prompt.</p>
@@ -1703,7 +1797,7 @@ This moves the emails into subfolders named after their predicted classes.</p>
 <h2 id="model-context-protocol-mcp">Model Context Protocol (MCP)<a class="headerlink" href="#model-context-protocol-mcp" title="Permanent link">&para;</a></h2>
 <p>The most powerful way to use the system is via an MCP client (like Claude Desktop).</p>
 <h3 id="start-server">Start Server<a class="headerlink" href="#start-server" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>mcp-uni<span class="w"> </span>serve-mcp
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>mcp-uni<span class="w"> </span>serve-mcp
 </code></pre></div>
 <h3 id="available-tools">Available Tools<a class="headerlink" href="#available-tools" title="Permanent link">&para;</a></h3>
 <ul>
@@ -1815,7 +1909,7 @@ The agent uses <code>get_student_context</code> and <code>search_documents</code
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "content.tabs.link", "content.code.annotate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "content.tabs.link", "content.code.annotate", "content.code.copy", "content.tooltips"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>

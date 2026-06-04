@@ -18,7 +18,7 @@
         <link rel="prev" href="../configuration/">
       
       
-        <link rel="next" href="../api/">
+        <link rel="next" href="email-workflow/">
       
       
         
@@ -33,7 +33,7 @@
     
     
       
-        <title>Nutzung - MCP University Memory System</title>
+        <title>Übersicht - MCP University Memory System</title>
       
     
     
@@ -124,7 +124,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Nutzung
+              Übersicht
             
           </span>
         </div>
@@ -333,17 +333,18 @@
     
   
   
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="./" class="md-tabs__link">
-        
-  
-  
     
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
   
   Nutzung
 
-      </a>
-    </li>
+        </a>
+      </li>
+    
   
 
       
@@ -573,6 +574,63 @@
   
   
   
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nutzung
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Nutzung
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
     <li class="md-nav__item md-nav__item--active">
       
       <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
@@ -588,7 +646,7 @@
   <span class="md-ellipsis">
     
   
-    Nutzung
+    Übersicht
   
 
     
@@ -606,7 +664,7 @@
   <span class="md-ellipsis">
     
   
-    Nutzung
+    Übersicht
   
 
     
@@ -990,6 +1048,42 @@
     </ul>
   
 </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="email-workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    E-Mail Workflow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
       
     </li>
   
@@ -1682,36 +1776,36 @@
 <p>Die CLI ist der primäre Weg, um das System zu verwalten und manuelle Suchen durchzuführen.</p>
 <h3 id="indexierung-index">Indexierung (<code>index</code>)<a class="headerlink" href="#indexierung-index" title="Permanent link">&para;</a></h3>
 <p>Dieser Befehl scannt alle konfigurierten Ordner, erstellt Zusammenfassungen und aktualisiert den Index.
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>mcp-uni<span class="w"> </span>index
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>mcp-uni<span class="w"> </span>index
 </code></pre></div></p>
 <h3 id="suche-search">Suche (<code>search</code>)<a class="headerlink" href="#suche-search" title="Permanent link">&para;</a></h3>
 <p>Führt eine schnelle Abfrage über den gesamten Datenbestand durch.
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>mcp-uni<span class="w"> </span>search<span class="w"> </span><span class="s2">&quot;Inhalt der Vorlesung 5&quot;</span>
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>mcp-uni<span class="w"> </span>search<span class="w"> </span><span class="s2">&quot;Inhalt der Vorlesung 5&quot;</span>
 </code></pre></div></p>
 <h3 id="uberwachung-watch">Überwachung (<code>watch</code>)<a class="headerlink" href="#uberwachung-watch" title="Permanent link">&para;</a></h3>
 <p>Startet einen Hintergrundprozess, der auf Dateiänderungen reagiert und den Index in Echtzeit aktualisiert.
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>mcp-uni<span class="w"> </span>watch
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>mcp-uni<span class="w"> </span>watch
 </code></pre></div></p>
 <h2 id="e-mail-klassifizierung">E-Mail Klassifizierung<a class="headerlink" href="#e-mail-klassifizierung" title="Permanent link">&para;</a></h2>
 <p>Das System enthält ein Subpackage zur automatisierten Klassifizierung von studentischen E-Mails (z.B. Bachelorarbeit, Praxisprojekt).</p>
 <h3 id="modell-trainieren">Modell trainieren<a class="headerlink" href="#modell-trainieren" title="Permanent link">&para;</a></h3>
 <p>Um den Klassifikator zu nutzen, muss er zuerst mit Beispieldaten trainiert werden. Erwarten wird eine Ordnerstruktur, in der jeder Unterordner eine Klasse repräsentiert und die E-Mails (.msg) enthält.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python3<span class="w"> </span>mcp_university/classifier/train.py<span class="w"> </span>/pfad/zu/trainingsdaten<span class="w"> </span>--mode<span class="w"> </span>combined<span class="w"> </span>--method<span class="w"> </span>xgboost
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python3<span class="w"> </span>mcp_university/classifier/train.py<span class="w"> </span>/pfad/zu/trainingsdaten<span class="w"> </span>--mode<span class="w"> </span>combined<span class="w"> </span>--method<span class="w"> </span>xgboost
 </code></pre></div>
 <p>Dabei kann zwischen <code>randomforest</code> und <code>xgboost</code> (Standard) gewählt werden.</p>
 <h3 id="e-mail-klassifizieren">E-Mail klassifizieren<a class="headerlink" href="#e-mail-klassifizieren" title="Permanent link">&para;</a></h3>
 <p>Nach dem Training kann eine einzelne E-Mail-Datei klassifiziert werden:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python3<span class="w"> </span>mcp_university/classifier/predict.py<span class="w"> </span>/pfad/zur/email.msg
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python3<span class="w"> </span>mcp_university/classifier/predict.py<span class="w"> </span>/pfad/zur/email.msg
 </code></pre></div>
 <p>Die Ausgabe enthält die wahrscheinlichste Klasse sowie die Konfidenz und eine detaillierte Wahrscheinlichkeitsverteilung.</p>
 <h3 id="xai-analyse-interpretierbarkeit">XAI Analyse (Interpretierbarkeit)<a class="headerlink" href="#xai-analyse-interpretierbarkeit" title="Permanent link">&para;</a></h3>
 <p>Um zu verstehen, welche Wörter für die Klassifizierung besonders wichtig waren, kann die XAI Analyse genutzt werden. Diese nutzt SHAP-Werte, um den Einfluss einzelner Wörter auf die Vorhersage zu berechnen.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>python3<span class="w"> </span>mcp_university/classifier/xai_analysis.py<span class="w"> </span>--model-path<span class="w"> </span>data/email_classifier_tfidf.pkl<span class="w"> </span>--test-data-path<span class="w"> </span>/pfad/zu/testdaten
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>python3<span class="w"> </span>mcp_university/classifier/xai_analysis.py<span class="w"> </span>--model-path<span class="w"> </span>data/email_classifier_tfidf.pkl<span class="w"> </span>--test-data-path<span class="w"> </span>/pfad/zu/testdaten
 </code></pre></div>
 <p>Das Skript analysiert bis zu 20 E-Mails pro Klasse und gibt die Top 5 Wörter zurück, die für die jeweilige Klasse am charakteristischsten sind.</p>
 <h3 id="e-mail-sortierung-studenten-ordner">E-Mail Sortierung (Studenten-Ordner)<a class="headerlink" href="#e-mail-sortierung-studenten-ordner" title="Permanent link">&para;</a></h3>
 <p>Das leistungsfähigste Skript sortiert E-Mails nicht nur nach Klasse, sondern auch nach Semester und Student (Nachname):</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>python3<span class="w"> </span>process_sorted_emails.py<span class="w"> </span>/pfad/zu/daten
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>python3<span class="w"> </span>process_sorted_emails.py<span class="w"> </span>/pfad/zu/daten
 </code></pre></div>
 <h4 id="terminverwaltung-workflows">Terminverwaltung (Workflows)<a class="headerlink" href="#terminverwaltung-workflows" title="Permanent link">&para;</a></h4>
 <p>Das Skript erkennt automatisch Terminanfragen und -bestätigungen.<br />
@@ -1722,7 +1816,7 @@
 <p>In den Logs oder Ausgaben des Agenten erscheint oft die Zeile <code>ANHANG: JA</code>.<br />
 - Dies ist ein <strong>Steuerungssignal</strong> für das Skript. Es bedeutet, dass das LLM empfiehlt, eine zusätzliche Informationsdatei (z.B. ein PDF mit PO-Wechsel-Informationen) an den E-Mail-Entwurf anzuhängen.<br />
 - Es bedeutet <strong>nicht</strong>, dass dem Kalendereintrag selbst eine Datei angehängt wurde.  </p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>python3<span class="w"> </span>mcp_university/classifier/sort_emails.py<span class="w"> </span>/quell/ordner<span class="w"> </span>--config<span class="w"> </span>config/class_paths.yaml<span class="w"> </span>--model<span class="w"> </span>data/email_classifier.pkl
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>python3<span class="w"> </span>mcp_university/classifier/sort_emails.py<span class="w"> </span>/quell/ordner<span class="w"> </span>--config<span class="w"> </span>config/class_paths.yaml<span class="w"> </span>--model<span class="w"> </span>data/email_classifier.pkl
 </code></pre></div>
 <p>Es erkennt automatisch:<br />
 - <strong>Semester:</strong> Basierend auf dem E-Mail-Datum (SoSe/WS).<br />
@@ -1731,12 +1825,12 @@
 - <strong>Bericht:</strong> Erstellt eine <code>sorted_emails.md</code> mit einer Übersicht aller verschobenen Mails.  </p>
 <h3 id="batch-klassifizierung">Batch-Klassifizierung<a class="headerlink" href="#batch-klassifizierung" title="Permanent link">&para;</a></h3>
 <p>Um einen ganzen Ordner mit E-Mails automatisch zu sortieren (nur Klassifizierung):
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>python3<span class="w"> </span>mcp_university/classifier/classify_folder.py<span class="w"> </span>/quell/ordner<span class="w"> </span>--model<span class="w"> </span>data/email_classifier.pkl
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>python3<span class="w"> </span>mcp_university/classifier/classify_folder.py<span class="w"> </span>/quell/ordner<span class="w"> </span>--model<span class="w"> </span>data/email_classifier.pkl
 </code></pre></div>
 Dies verschiebt die E-Mails in Unterordner, die nach den vorhergesagten Klassen benannt sind.</p>
 <h3 id="visualisierung-der-datenverteilung">Visualisierung der Datenverteilung<a class="headerlink" href="#visualisierung-der-datenverteilung" title="Permanent link">&para;</a></h3>
 <p>Um die Verteilung der E-Mails pro Klasse (aufgeteilt nach Inbox und SentItems) zu visualisieren, kann folgendes Skript genutzt werden:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>python3<span class="w"> </span>mcp_university/classifier/plot_data_distribution.py<span class="w"> </span>--train-dir<span class="w"> </span>D:<span class="se">\\</span>TH_Koeln<span class="se">\\</span>MailTrainingData<span class="w"> </span>--test-dir<span class="w"> </span>D:<span class="se">\\</span>TH_Koeln<span class="se">\\</span>MailTestData<span class="w"> </span>--output-dir<span class="w"> </span>data
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>python3<span class="w"> </span>mcp_university/classifier/plot_data_distribution.py<span class="w"> </span>--train-dir<span class="w"> </span>D:<span class="se">\\</span>TH_Koeln<span class="se">\\</span>MailTrainingData<span class="w"> </span>--test-dir<span class="w"> </span>D:<span class="se">\\</span>TH_Koeln<span class="se">\\</span>MailTestData<span class="w"> </span>--output-dir<span class="w"> </span>data
 </code></pre></div>
 <p>Dies erzeugt zwei hochauflösende PNG-Dateien in <code>data/</code>:<br />
 - <code>train_data_distribution.png</code><br />
@@ -1754,7 +1848,7 @@ Dies verschiebt die E-Mails in Unterordner, die nach den vorhergesagten Klassen 
 </ul>
 <h3 id="synchronisierung-von-studenten-sync-students">Synchronisierung von Studenten (<code>sync-students</code>)<a class="headerlink" href="#synchronisierung-von-studenten-sync-students" title="Permanent link">&para;</a></h3>
 <p>Befüllt die Datenbank aus einer <code>students.yaml</code>.
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>mcp-uni<span class="w"> </span>db<span class="w"> </span>sync-students
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>mcp-uni<span class="w"> </span>db<span class="w"> </span>sync-students
 </code></pre></div></p>
 <h3 id="loschen-von-inhalten">Löschen von Inhalten<a class="headerlink" href="#loschen-von-inhalten" title="Permanent link">&para;</a></h3>
 <p>Einträge können über ihre ID gelöscht werden. Mit der Option <code>--force</code> oder <code>-f</code> wird die Bestätigungsabfrage übersprungen.</p>
@@ -1768,7 +1862,7 @@ Dies verschiebt die E-Mails in Unterordner, die nach den vorhergesagten Klassen 
 <h2 id="model-context-protocol-mcp">Model Context Protocol (MCP)<a class="headerlink" href="#model-context-protocol-mcp" title="Permanent link">&para;</a></h2>
 <p>Der leistungsfähigste Weg, das System zu nutzen, ist über einen MCP-Client (wie Claude Desktop).</p>
 <h3 id="server-starten">Server starten<a class="headerlink" href="#server-starten" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>mcp-uni<span class="w"> </span>serve-mcp
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>mcp-uni<span class="w"> </span>serve-mcp
 </code></pre></div>
 <h3 id="verfugbare-tools">Verfügbare Tools<a class="headerlink" href="#verfugbare-tools" title="Permanent link">&para;</a></h3>
 <ul>
@@ -1880,7 +1974,7 @@ Der Agent nutzt <code>get_student_context</code> and <code>search_documents</cod
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "content.tabs.link", "content.code.annotate", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "content.tabs.link", "content.code.annotate", "content.code.copy", "content.tooltips"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike"}}</script>
     
     
       <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
