@@ -32,6 +32,12 @@ class FolderConfig(BaseModel):
     supported_extensions: List[str] = [".pdf", ".docx", ".md", ".txt", ".eml", ".msg", ".py", ".ipynb", ".json", ".html"]
     summarize_emails_individually: bool = False
 
+
+class UserConfig(BaseModel):
+    """Konfiguration für den Nutzer des Tools."""
+    name: str = "Daniel Gaida"
+    email: str = "daniel.gaida@th-koeln.de"
+
 class Config:
     """Zentrale Konfigurationsklasse für das MCP University System.
 
@@ -49,6 +55,7 @@ class Config:
 
         self.config_dir = config_dir
         self.folders = self._load_yaml(config_dir / "folders.yaml", FolderConfig)
+        self.user = self._load_yaml(config_dir / "user.yaml", UserConfig)
 
         models_data = self._load_raw_yaml(config_dir / "models.yaml")
         self.calendar = CalendarConfig(**models_data.get("calendar", {}))

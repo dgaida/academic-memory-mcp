@@ -12,7 +12,7 @@ def anonymize_th_koeln_names(text: str) -> str:
 
     Replaces vorname.nachname@... with max.mustermann@... and
     replaces any occurrences of the extracted name parts with 'Max Mustermann'.
-    Skips daniel.gaida@th-koeln.de.
+    Skips the configured user email.
 
     Args:
         text (str): The text to anonymize.
@@ -33,7 +33,9 @@ def anonymize_th_koeln_names(text: str) -> str:
     emails_to_replace: List[tuple] = []
 
     for local_part, domain in emails:
-        if local_part.lower() == "daniel.gaida":
+        cfg = get_config()
+        user_email_local = cfg.user.email.split("@")[0].lower()
+        if local_part.lower() == user_email_local:
             continue
 
         emails_to_replace.append((f"{local_part}@{domain}", domain))
@@ -86,21 +88,24 @@ class Anonymizer:
         self.mapping: Dict[str, str] = {}
 
     def anonymize(self, text: str, sender_name: str, sender_email: str,
-                  recipient_name: str = "Daniel Gaida",
-                  recipient_email: str = "daniel.gaida@th-koeln.de") -> str:
+                  recipient_name: str = None,
+                  recipient_email: str = None) -> str:
         """Anonymizes the given text by replacing sender and recipient names/emails.
 
         Args:
             text (str): The text to anonymize.
             sender_name (str): Original name of the sender.
             sender_email (str): Original email of the sender.
-            recipient_name (str): Original name of the recipient. Defaults to "Daniel Gaida".
-            recipient_email (str): Original email of the recipient. Defaults to "daniel.gaida@th-koeln.de".
+            recipient_name (str): Original name of the recipient. Defaults to the configured user name.
+            recipient_email (str): Original email of the recipient. Defaults to the configured user email.
 
         Returns:
             str: Anonymized text.
         """
         # First use rule-based anonymization for TH Köln specifics
+        cfg = get_config()
+        recipient_name = recipient_name or cfg.user.name
+        recipient_email = recipient_email or cfg.user.email
         text = anonymize_th_koeln_names(text)
 
         # Define standard replacements

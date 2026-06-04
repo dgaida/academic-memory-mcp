@@ -246,7 +246,7 @@ class Agent:
             outlook = win32com.client.Dispatch("Outlook.Application")
             namespace = outlook.GetNamespace("MAPI")
 
-            target_account = "daniel.gaida@th-koeln.de"
+            target_account = get_config().user.email
             target_calendar_name = "Kalender (Nur dieser Computer)"
 
             # Kalender suchen

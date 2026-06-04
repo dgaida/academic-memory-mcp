@@ -7,6 +7,7 @@ import email
 from email import policy
 from email.utils import parsedate_to_datetime
 from datetime import datetime
+from ..config import get_config
 logging.getLogger("extract_msg").setLevel(logging.ERROR)
 
 logger = logging.getLogger(__name__)
@@ -94,9 +95,11 @@ class MailParser:
         lines = text.splitlines()
 
         # Regex patterns
+        cfg = get_config()
+        user_email_esc = re.escape(cfg.user.email)
         date_wrote_pattern = re.compile(r"(Am|On) .* (schrieb|wrote):?", re.IGNORECASE)
-        from_gaida_pattern = re.compile(r"From: .*daniel\.gaida@th-koeln\.de", re.IGNORECASE)
-        zitat_pattern = re.compile(r"Zitat von .*daniel\.gaida@th-koeln\.de:?", re.IGNORECASE)
+        from_gaida_pattern = re.compile(rf"From: .*{user_email_esc}", re.IGNORECASE)
+        zitat_pattern = re.compile(rf"Zitat von .*{user_email_esc}:?", re.IGNORECASE)
 
         def is_header_marker(line: str) -> bool:
             """Prüft, ob eine Zeile ein Header-Marker für eine Antwort ist."""
