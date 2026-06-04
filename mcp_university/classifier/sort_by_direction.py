@@ -3,7 +3,7 @@ import argparse
 import logging
 import shutil
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Dict
 
 import extract_msg
 from mcp_university.config import get_config

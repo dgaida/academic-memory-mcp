@@ -1,9 +1,9 @@
-from mcp_university.config import get_config
 """Skript zur Umstrukturierung der Trainings- und Testdaten des Klassifikators."""
 import argparse
 import shutil
 from pathlib import Path
 import logging
+from mcp_university.config import get_config
 
 try:
     import extract_msg
