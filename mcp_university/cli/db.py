@@ -1,12 +1,12 @@
-"""Datenbank-Management-Befehle für die CLI."""
-
-from pathlib import Path
-from typing import Tuple, List
-import yaml
+"""CLI-Modul für das Datenbank-Management."""
 import typer
+from typing import List, Tuple
+from pathlib import Path
+from datetime import datetime
+import yaml
 from rich.console import Console
 from rich.table import Table
-from datetime import datetime
+
 from ..config import get_config
 from ..metadata.store import MetadataStore
 from ..retrieval.index import SearchIndex
@@ -75,6 +75,11 @@ def list_folders():
 
 @db_app.command("sync-students")
 def sync_students(yaml_path: str = typer.Option("students.yaml", help="Pfad zur students.yaml")):
+    """Synchronisiert Studentendaten aus einer YAML-Datei mit der Datenbank.
+
+    Args:
+        yaml_path (str): Pfad zur YAML-Datei mit den Studentendaten.
+    """
     path = Path(yaml_path)
     if not path.exists():
         console.print(f"[red]Datei {yaml_path} nicht gefunden.[/red]")
@@ -169,6 +174,12 @@ def list_deadlines():
 
 @db_app.command("delete-file")
 def delete_file(file_ids: List[int] = typer.Argument(..., help="Datei-IDs"), force: bool = typer.Option(False, "--force", "-f", help="Force")):
+    """Löscht Dateien aus der Datenbank und dem Suchindex.
+
+    Args:
+        file_ids (List[int]): Liste der Datei-IDs, die gelöscht werden sollen.
+        force (bool): Wenn True, wird ohne Bestätigung gelöscht.
+    """
     store, idx = get_store_and_index()
     all_files = store.get_all_files()
     for fid in file_ids:
@@ -185,7 +196,12 @@ def delete_file(file_ids: List[int] = typer.Argument(..., help="Datei-IDs"), for
 
 @db_app.command("delete-folder")
 def delete_folder(folder_id: int, force: bool = typer.Option(False, "--force", "-f", help="Ohne Bestätigung löschen")):
-    """Löscht einen Ordner und alle zugehörigen Dateien aus der Datenbank und dem Index."""
+    """Löscht einen Ordner und alle zugehörigen Dateien aus der Datenbank und dem Index.
+
+    Args:
+        folder_id (int): ID des zu löschenden Ordners.
+        force (bool): Wenn True, wird ohne Bestätigung gelöscht.
+    """
     store, idx = get_store_and_index()
 
     all_folders = store.get_all_folders()
@@ -213,7 +229,12 @@ def delete_folder(folder_id: int, force: bool = typer.Option(False, "--force", "
 
 @db_app.command("delete-student")
 def delete_student(student_id: int, force: bool = typer.Option(False, "--force", "-f", help="Ohne Bestätigung löschen")):
-    """Löscht einen Studenten aus der Datenbank."""
+    """Löscht einen Studenten aus der Datenbank.
+
+    Args:
+        student_id (int): ID des zu löschenden Studenten.
+        force (bool): Wenn True, wird ohne Bestätigung gelöscht.
+    """
     store, _ = get_store_and_index()
 
     students = store.get_all_students()
@@ -233,7 +254,12 @@ def delete_student(student_id: int, force: bool = typer.Option(False, "--force",
 
 @db_app.command("delete-summary")
 def delete_summary(summary_id: int, force: bool = typer.Option(False, "--force", "-f", help="Ohne Bestätigung löschen")):
-    """Löscht eine Zusammenfassung aus der Datenbank."""
+    """Löscht eine Zusammenfassung aus der Datenbank.
+
+    Args:
+        summary_id (int): ID der zu löschenden Zusammenfassung.
+        force (bool): Wenn True, wird ohne Bestätigung gelöscht.
+    """
     store, _ = get_store_and_index()
 
     summaries = store.get_all_summaries()
@@ -253,7 +279,12 @@ def delete_summary(summary_id: int, force: bool = typer.Option(False, "--force",
 
 @db_app.command("delete-deadline")
 def delete_deadline(deadline_id: int, force: bool = typer.Option(False, "--force", "-f", help="Ohne Bestätigung löschen")):
-    """Löscht eine Deadline aus der Datenbank."""
+    """Löscht eine Deadline aus der Datenbank.
+
+    Args:
+        deadline_id (int): ID der zu löschenden Deadline.
+        force (bool): Wenn True, wird ohne Bestätigung gelöscht.
+    """
     store, _ = get_store_and_index()
 
     deadlines = store.get_all_deadlines()
