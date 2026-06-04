@@ -65,7 +65,7 @@ python3 process_sorted_emails.py /pfad/zu/daten
 #### Terminverwaltung (Workflows)
 Das Skript erkennt automatisch Terminanfragen und -bestätigungen.  
 - **Terminbestätigungen:** Erkennt das System eine Bestätigung, wird automatisch ein Kalendertermin in Outlook angelegt (Zeitzone: Europe/Berlin). Standardmäßig beträgt die Dauer **30 Minuten**.  
-- **Speicherort:** Termine werden als Entwurf im Ordner **"Work in Progress"** oder direkt im Kalender des Kontos `der konfigurierten E-Mail-Adresse` angelegt.
+- **Speicherort:** Termine werden als Entwurf im Ordner **"Work in Progress"** oder direkt im Kalender des Kontos `der konfigurierten E-Mail-Adresse` angelegt.  
 - **Wichtig:** Auch wenn der Termin in "Work in Progress" nicht sofort sichtbar ist, wird er im Outlook-Kalender angelegt. Dort kann er geöffnet, geprüft und final abgesendet werden.  
 
 #### Bedeutung von "ANHANG: JA"

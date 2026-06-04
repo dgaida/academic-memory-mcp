@@ -4,14 +4,14 @@ Diese Seite beschreibt die notwendigen Schritte zur Einrichtung des MCP Universi
 
 ## Voraussetzungen
 
-- Python 3.10 oder höher
-- Ollama (für lokale LLM-Unterstützung)
-- Outlook (für die Arbeit mit .msg Dateien und Kalenderintegration unter Windows)
+- Python 3.10 oder höher  
+- Ollama (für lokale LLM-Unterstützung)  
+- Outlook (für die Arbeit mit .msg Dateien und Kalenderintegration unter Windows)  
 
 ## Installation
 
-1. Klonen Sie das Repository.
-2. Erstellen Sie eine virtuelle Umgebung und installieren Sie die Abhängigkeiten:
+1. Klonen Sie das Repository.  
+2. Erstellen Sie eine virtuelle Umgebung und installieren Sie die Abhängigkeiten:  
 
 ```bash
 pip install -e .
