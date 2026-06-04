@@ -59,6 +59,7 @@ MCP University is an offline-first system for managing academic data (students, 
 - **Linting:** Run `ruff check . --fix` before submitting.  
 - **Coverage:** Minimum 95% docstring coverage (enforced by `interrogate`).  
 - **Tests:** Use `pytest`. Avoid global monkey-patching; use scoped patches or fixtures.  
+- **File Handling:** Files opened with context managers (e.g., `with extract_msg.openMsg(...) as msg:`) MUST be closed (by exiting the context) before they are moved, renamed, or deleted. This is critical for Windows compatibility to avoid `[WinError 32]` (Permission denied).
 
 ### Documentation Skill  
 - **MANDATORY:** Always use the [MkDocs Documentation Ecosystem Skill](https://github.com/dgaida/auto-version-action/blob/main/skills/SKILL_docs.md) when updating documentation, `README.md`, or MkDocs configurations.  
