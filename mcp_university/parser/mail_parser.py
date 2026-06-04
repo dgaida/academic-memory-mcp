@@ -187,7 +187,16 @@ class MailParser:
 
                 attachment_names = []
                 for att in msg.attachments:
-                    name = att.getFilename()
+                    name = None
+                    if hasattr(att, "getFilename"):
+                        try:
+                            name = att.getFilename()
+                        except Exception:
+                            pass
+
+                    if not name:
+                        name = getattr(att, "name", None) or getattr(att, "longFilename", None)
+
                     if name:
                         attachment_names.append(name)
 
