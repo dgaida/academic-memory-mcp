@@ -1,8 +1,5 @@
-import pytest
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 from mcp_university.parser.mail_parser import MailParser
-import email
 from email.message import EmailMessage
 
 def test_parse_msg_with_attachments(tmp_path):
