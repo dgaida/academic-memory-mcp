@@ -33,6 +33,7 @@ theme:
     - content.tabs.link
     - content.code.annotate
     - content.code.copy
+    - content.tooltips
 
 plugins:
   - search
@@ -54,6 +55,7 @@ plugins:
             show_source: true
             show_root_heading: true
             show_category_heading: true
+            separate_signature: true
   - mermaid2:
       arguments:
         theme: 'default'
@@ -70,10 +72,13 @@ markdown_extensions:
           format: !!python/name:mermaid2.fence_mermaid
   - pymdownx.highlight:
       anchor_linenums: true
+      pygments_lang_class: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.tabbed:
       alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
   - attr_list
   - md_in_html
   - toc:
@@ -91,7 +96,9 @@ nav:
   - Start: getting-started.md
   - Installation: installation.md
   - Konfiguration: configuration.md
-  - Nutzung: usage/index.md
+  - Nutzung:
+      - Übersicht: usage/index.md
+      - E-Mail Workflow: usage/email-workflow.md
   - API: api/index.md
   - Architektur: architecture/index.md
   - Entwicklung:

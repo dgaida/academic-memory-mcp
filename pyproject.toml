@@ -50,4 +50,4 @@ ignore-init-module = false
 ignore-magic = true
 fail-under = 95
 verbose = 1
-exclude = ["setup.py", "docs", "build", "tests", "mcp_university/classifier/stopwords.py"]
+exclude = ["setup.py", "docs", "build", "tests"]
