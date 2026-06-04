@@ -31,6 +31,7 @@ def sort_emails_by_direction(source_dir: Path, user_email: str) -> Dict[str, int
 
     for msg_file in source_dir.glob("*.msg"):
         try:
+            target_folder = None
             with extract_msg.openMsg(str(msg_file)) as msg:
                 sender = (msg.sender.lower() if msg.sender else "").strip()
 
@@ -41,6 +42,7 @@ def sort_emails_by_direction(source_dir: Path, user_email: str) -> Dict[str, int
                     # Standardmäßig Inbox
                     target_folder = "Inbox"
 
+            if target_folder:
                 target_dir = source_dir / target_folder
                 target_dir.mkdir(exist_ok=True)
 
