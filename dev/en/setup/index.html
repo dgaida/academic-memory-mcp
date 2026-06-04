@@ -1,6 +1,6 @@
 
 <!doctype html>
-<html lang="de" class="no-js">
+<html lang="en" class="no-js">
   <head>
     
       <meta charset="utf-8">
@@ -12,19 +12,15 @@
         <meta name="author" content="Senior Python Architect">
       
       
-        <link rel="canonical" href="https://dgaida.github.io/academic-memory-mcp/dev/usage/email-workflow/">
+        <link rel="canonical" href="https://dgaida.github.io/academic-memory-mcp/dev/en/setup/">
       
       
-        <link rel="prev" href="../">
-      
-      
-        <link rel="next" href="../../api/">
       
       
         
-          <link rel="alternate" href="./" hreflang="de">
+          <link rel="alternate" href="../../setup/" hreflang="de">
         
-          <link rel="alternate" href="../../en/usage/email-workflow/" hreflang="en">
+          <link rel="alternate" href="./" hreflang="en">
         
       
       
@@ -33,7 +29,7 @@
     
     
       
-        <title>E-Mail Workflow - MCP University Memory System</title>
+        <title>Einrichtung der Software - MCP University Memory System</title>
       
     
     
@@ -58,6 +54,8 @@
         <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
     
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
       <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
@@ -86,8 +84,8 @@
     <div data-md-component="skip">
       
         
-        <a href="#e-mail-management-workflow" class="md-skip">
-          Zum Inhalt
+        <a href="#einrichtung-der-software" class="md-skip">
+          Skip to content
         </a>
       
     </div>
@@ -103,8 +101,8 @@
       
 
 <header class="md-header" data-md-component="header">
-  <nav class="md-header__inner md-grid" aria-label="Kopfzeile">
-    <a href="../.." title="MCP University Memory System" class="md-header__button md-logo" aria-label="MCP University Memory System" data-md-component="logo">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../" title="MCP University Memory System" class="md-header__button md-logo" aria-label="MCP University Memory System" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -124,7 +122,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              E-Mail Workflow
+              Einrichtung der Software
             
           </span>
         </div>
@@ -164,20 +162,20 @@
       <div class="md-header__option">
   <div class="md-select">
     
-    <button class="md-header__button md-icon" aria-label="Sprache wechseln">
+    <button class="md-header__button md-icon" aria-label="Select language">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
     </button>
     <div class="md-select__inner">
       <ul class="md-select__list">
         
           <li class="md-select__item">
-            <a href="./" hreflang="de" class="md-select__link">
+            <a href="../../setup/" hreflang="de" class="md-select__link">
               Deutsch
             </a>
           </li>
         
           <li class="md-select__item">
-            <a href="../../en/usage/email-workflow/" hreflang="en" class="md-select__link">
+            <a href="./" hreflang="en" class="md-select__link">
               English
             </a>
           </li>
@@ -198,21 +196,21 @@
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="Suche" placeholder="Suche" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
         
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
         
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
       </label>
-      <nav class="md-search__options" aria-label="Suche">
+      <nav class="md-search__options" aria-label="Search">
         
-          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Teilen" aria-label="Teilen" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
             
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
           </a>
         
-        <button type="reset" class="md-search__icon md-icon" title="Zurücksetzen" aria-label="Zurücksetzen" tabindex="-1">
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
           
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
         </button>
@@ -225,7 +223,7 @@
       <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
         <div class="md-search-result" data-md-component="search-result">
           <div class="md-search-result__meta">
-            Suche wird initialisiert
+            Initializing search
           </div>
           <ol class="md-search-result__list" role="presentation"></ol>
         </div>
@@ -246,7 +244,7 @@
         
           
             
-<nav class="md-tabs" aria-label="Hauptnavigation" data-md-component="tabs">
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
   <div class="md-grid">
     <ul class="md-tabs__list">
       
@@ -256,7 +254,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../.." class="md-tabs__link">
+      <a href="../" class="md-tabs__link">
         
   
   
@@ -275,7 +273,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../getting-started/" class="md-tabs__link">
+      <a href="../getting-started/" class="md-tabs__link">
         
   
   
@@ -294,7 +292,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../installation/" class="md-tabs__link">
+      <a href="../installation/" class="md-tabs__link">
         
   
   
@@ -313,7 +311,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../configuration/" class="md-tabs__link">
+      <a href="../configuration/" class="md-tabs__link">
         
   
   
@@ -330,13 +328,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="../" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../usage/" class="md-tabs__link">
           
   
   
@@ -354,7 +350,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../api/" class="md-tabs__link">
+      <a href="../api/" class="md-tabs__link">
         
   
   
@@ -373,7 +369,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../architecture/" class="md-tabs__link">
+      <a href="../architecture/" class="md-tabs__link">
         
   
   
@@ -394,7 +390,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../development/" class="md-tabs__link">
+        <a href="../development/" class="md-tabs__link">
           
   
   
@@ -412,7 +408,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../troubleshooting/" class="md-tabs__link">
+      <a href="../troubleshooting/" class="md-tabs__link">
         
   
   
@@ -447,7 +443,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="MCP University Memory System" class="md-nav__button md-logo" aria-label="MCP University Memory System" data-md-component="logo">
+    <a href="../" title="MCP University Memory System" class="md-nav__button md-logo" aria-label="MCP University Memory System" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -465,7 +461,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href="../" class="md-nav__link">
         
   
   
@@ -492,7 +488,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/" class="md-nav__link">
+      <a href="../getting-started/" class="md-nav__link">
         
   
   
@@ -519,7 +515,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../installation/" class="md-nav__link">
+      <a href="../installation/" class="md-nav__link">
         
   
   
@@ -546,7 +542,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../configuration/" class="md-nav__link">
+      <a href="../configuration/" class="md-nav__link">
         
   
   
@@ -570,31 +566,28 @@
       
   
   
-    
   
   
-  
     
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
             
   
   
@@ -612,7 +605,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -630,7 +623,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../" class="md-nav__link">
+      <a href="../usage/" class="md-nav__link">
         
   
   
@@ -655,37 +648,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    E-Mail Workflow
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../usage/email-workflow/" class="md-nav__link">
         
   
   
@@ -701,81 +667,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Inhaltsverzeichnis">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Inhaltsverzeichnis
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#1-export-aus-outlook" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        1. Export aus Outlook
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#2-klassifizierung-und-sortierung" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        2. Klassifizierung und Sortierung
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#3-analyse-und-antwort-generierung" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        3. Analyse und Antwort-Generierung
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#4-uberprufung-gradio-gui" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        4. Überprüfung (Gradio GUI)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#5-abschlussbericht" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        5. Abschlussbericht
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -795,7 +686,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/" class="md-nav__link">
+      <a href="../api/" class="md-nav__link">
         
   
   
@@ -822,7 +713,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../architecture/" class="md-nav__link">
+      <a href="../architecture/" class="md-nav__link">
         
   
   
@@ -903,7 +794,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/" class="md-nav__link">
+      <a href="../development/" class="md-nav__link">
         
   
   
@@ -931,7 +822,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/docstring-guide/" class="md-nav__link">
+      <a href="../development/docstring-guide/" class="md-nav__link">
         
   
   
@@ -959,7 +850,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/changelog/" class="md-nav__link">
+      <a href="../development/changelog/" class="md-nav__link">
         
   
   
@@ -987,7 +878,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/versioning/" class="md-nav__link">
+      <a href="../development/versioning/" class="md-nav__link">
         
   
   
@@ -1015,7 +906,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../metrics/" class="md-nav__link">
+      <a href="../metrics/" class="md-nav__link">
         
   
   
@@ -1050,7 +941,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../troubleshooting/" class="md-nav__link">
+      <a href="../troubleshooting/" class="md-nav__link">
         
   
   
@@ -1083,7 +974,7 @@
                   <div class="md-sidebar__inner">
                     
 
-<nav class="md-nav md-nav--secondary" aria-label="Inhaltsverzeichnis">
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
   
@@ -1092,15 +983,15 @@
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
-      Inhaltsverzeichnis
+      Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#1-export-aus-outlook" class="md-nav__link">
+  <a href="#voraussetzungen" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Export aus Outlook
+        Voraussetzungen
       
     </span>
   </a>
@@ -1108,10 +999,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#2-klassifizierung-und-sortierung" class="md-nav__link">
+  <a href="#installation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Klassifizierung und Sortierung
+        Installation
       
     </span>
   </a>
@@ -1119,35 +1010,102 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#3-analyse-und-antwort-generierung" class="md-nav__link">
+  <a href="#konfiguration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Analyse und Antwort-Generierung
+        Konfiguration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Konfiguration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-nutzer-konfiguration-useryaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Nutzer-Konfiguration (user.yaml)
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#4-uberprufung-gradio-gui" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#2-ordner-konfiguration-foldersyaml" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. Überprüfung (Gradio GUI)
+        2. Ordner-Konfiguration (folders.yaml)
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#5-abschlussbericht" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#3-klassifikator-pfade-classifier_pathsyaml" class="md-nav__link">
     <span class="md-ellipsis">
       
-        5. Abschlussbericht
+        3. Klassifikator-Pfade (classifier_paths.yaml)
       
     </span>
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-modell-konfiguration-modelsyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Modell-Konfiguration (models.yaml)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nutzung-der-skripte" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Nutzung der Skripte
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Nutzung der Skripte">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#e-mails-nach-richtung-sortieren" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        E-Mails nach Richtung sortieren
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#e-mails-nach-klassen-sortieren" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        E-Mails nach Klassen sortieren
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1168,33 +1126,56 @@
 
 
 
-<h1 id="e-mail-management-workflow">E-Mail Management Workflow<a class="headerlink" href="#e-mail-management-workflow" title="Permanent link">&para;</a></h1>
-<p>Dieser Workflow beschreibt den Prozess vom Erhalt einer E-Mail bis zur Erstellung eines Antwort-Entwurfs in Outlook.</p>
-<h2 id="1-export-aus-outlook">1. Export aus Outlook<a class="headerlink" href="#1-export-aus-outlook" title="Permanent link">&para;</a></h2>
-<p>Der Prozess beginnt in Outlook. Verwenden Sie die bereitgestellten VBA-Makros, um relevante Daten zu exportieren:<br />
-- <strong>Studenten-E-Mails:</strong> Exportiert E-Mails von Studenten-Domains als <code>.msg</code> Dateien.<br />
-- <strong>Freie Termine:</strong> Exportiert freie Zeitfenster aus Ihrem Kalender in eine YAML-Datei (<code>free_slots.yaml</code>).  </p>
-<h2 id="2-klassifizierung-und-sortierung">2. Klassifizierung und Sortierung<a class="headerlink" href="#2-klassifizierung-und-sortierung" title="Permanent link">&para;</a></h2>
-<p>Führen Sie das Sortier-Skript aus:
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python<span class="w"> </span>-m<span class="w"> </span>mcp_university.classifier.sort_emails<span class="w"> </span>--source<span class="w"> </span>./inbox<span class="w"> </span>--target<span class="w"> </span>./sorted_mails
-</code></pre></div>
-Das System nutzt den <code>EmailClassifier</code>, um die Mails nach Themen (z.B. Bachelor Thesis, Projekt) zu kategorisieren und in entsprechende Unterordner zu verschieben.</p>
-<h2 id="3-analyse-und-antwort-generierung">3. Analyse und Antwort-Generierung<a class="headerlink" href="#3-analyse-und-antwort-generierung" title="Permanent link">&para;</a></h2>
-<p>Nach der Sortierung wird <code>process_sorted_emails.py</code> ausgeführt. Das Skript führt folgende Schritte für jede E-Mail durch:</p>
+<h1 id="einrichtung-der-software">Einrichtung der Software<a class="headerlink" href="#einrichtung-der-software" title="Permanent link">&para;</a></h1>
+<p>Diese Seite beschreibt die notwendigen Schritte zur Einrichtung des MCP University Systems.</p>
+<h2 id="voraussetzungen">Voraussetzungen<a class="headerlink" href="#voraussetzungen" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Python 3.10 oder höher</li>
+<li>Ollama (für lokale LLM-Unterstützung)</li>
+<li>Outlook (für die Arbeit mit .msg Dateien und Kalenderintegration unter Windows)</li>
+</ul>
+<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
 <ol>
-<li><strong>Kontext-Analyse:</strong> Das System analysiert andere E-Mails im Zielordner (den bisherigen Verlauf), um den Kontext der aktuellen Anfrage zu verstehen.  </li>
-<li><strong>Termin-Check:</strong> Prüft, ob der Student um einen Termin bittet. Falls ja, werden die <code>free_slots.yaml</code> genutzt, um einen Vorschlag zu machen oder den Termin direkt zu buchen.  </li>
-<li><strong>Notwendigkeits-Check (Necessity Check):</strong> Ein LLM entscheidet, ob die E-Mail überhaupt eine Antwort erfordert (oder ob es sich z.B. nur um eine Information handelt).  </li>
-<li><strong>Entwurf schreiben:</strong> Falls eine Antwort nötig ist, generiert der Agent unter Berücksichtigung der Skill-Vorgaben und der Persona (Daniel Gaida) einen Antworttext.  </li>
-<li><strong>Outlook Integration:</strong> Es wird automatisch ein Entwurf ("Draft") im Outlook-Ordner "Work in Progress" erstellt. Die Original-Mail wird als Anhang beigefügt.  </li>
+<li>Klonen Sie das Repository.</li>
+<li>Erstellen Sie eine virtuelle Umgebung und installieren Sie die Abhängigkeiten:</li>
 </ol>
-<h2 id="4-uberprufung-gradio-gui">4. Überprüfung (Gradio GUI)<a class="headerlink" href="#4-uberprufung-gradio-gui" title="Permanent link">&para;</a></h2>
-<p>Am Ende des Prozesses startet automatisch eine Gradio-Weboberfläche. Hier können Sie:<br />
-- Die getroffenen Klassifizierungen überprüfen.<br />
-- Mails bei Bedarf manuell in andere Kategorien verschieben.<br />
-- Den Status der verarbeiteten Mails einsehen.  </p>
-<h2 id="5-abschlussbericht">5. Abschlussbericht<a class="headerlink" href="#5-abschlussbericht" title="Permanent link">&para;</a></h2>
-<p>Das Skript erstellt eine Datei <code>processed_emails.md</code>, die eine tabellarische Übersicht über alle verarbeiteten Mails und deren Status (z.B. "Entwurf erstellt", "Termin gebucht", "Keine Antwort nötig") enthält.</p>
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</code></pre></div>
+<p>Oder nutzen Sie die bereitgestellte <code>environment.yml</code> mit Conda:</p>
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>conda<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>environment.yml
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>conda<span class="w"> </span>activate<span class="w"> </span>mcp-university
+</code></pre></div>
+<h2 id="konfiguration">Konfiguration<a class="headerlink" href="#konfiguration" title="Permanent link">&para;</a></h2>
+<p>Das System nutzt YAML-Dateien im Verzeichnis <code>config/</code> für die Konfiguration. Kopieren Sie die Beispiel-Dateien und passen Sie diese an.</p>
+<h3 id="1-nutzer-konfiguration-useryaml">1. Nutzer-Konfiguration (<code>user.yaml</code>)<a class="headerlink" href="#1-nutzer-konfiguration-useryaml" title="Permanent link">&para;</a></h3>
+<p>Erstellen Sie eine Datei <code>config/user.yaml</code> basierend auf <code>config/user.yaml.example</code>:</p>
+<div class="language-yaml highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Ihr</span><span class="nv"> </span><span class="s">Name&quot;</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nt">email</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ihre.email@th-koeln.de&quot;</span>
+</code></pre></div>
+<p>Diese Information wird für die Anonymisierung, die Kalenderbuchung und das Sortieren von E-Mails verwendet.</p>
+<h3 id="2-ordner-konfiguration-foldersyaml">2. Ordner-Konfiguration (<code>folders.yaml</code>)<a class="headerlink" href="#2-ordner-konfiguration-foldersyaml" title="Permanent link">&para;</a></h3>
+<p>Geben Sie an, welche Ordner überwacht werden sollen:</p>
+<div class="language-yaml highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nt">folders</span><span class="p">:</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;C:/Pfad/zu/Ihren/Dokumenten&quot;</span>
+</code></pre></div>
+<h3 id="3-klassifikator-pfade-classifier_pathsyaml">3. Klassifikator-Pfade (<code>classifier_paths.yaml</code>)<a class="headerlink" href="#3-klassifikator-pfade-classifier_pathsyaml" title="Permanent link">&para;</a></h3>
+<p>Definieren Sie die Zielpfade für die E-Mail-Einsortierung:</p>
+<div class="language-yaml highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nt">class_paths</span><span class="p">:</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">BachelorThesis</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;D:/BachelorThesis&quot;</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">MasterThesis</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;D:/MasterThesis&quot;</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="c1"># ... weitere Klassen</span>
+</code></pre></div>
+<h3 id="4-modell-konfiguration-modelsyaml">4. Modell-Konfiguration (<code>models.yaml</code>)<a class="headerlink" href="#4-modell-konfiguration-modelsyaml" title="Permanent link">&para;</a></h3>
+<p>Konfigurieren Sie die zu verwendenden LLM- und Embedding-Modelle.</p>
+<h2 id="nutzung-der-skripte">Nutzung der Skripte<a class="headerlink" href="#nutzung-der-skripte" title="Permanent link">&para;</a></h2>
+<h3 id="e-mails-nach-richtung-sortieren">E-Mails nach Richtung sortieren<a class="headerlink" href="#e-mails-nach-richtung-sortieren" title="Permanent link">&para;</a></h3>
+<p>Wenn Sie einen Ordner mit E-Mails haben, die noch nicht in Inbox/SentItems unterteilt sind, nutzen Sie:</p>
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>python<span class="w"> </span>-m<span class="w"> </span>mcp_university.classifier.sort_by_direction<span class="w"> </span>/pfad/zu/emails
+</code></pre></div>
+<h3 id="e-mails-nach-klassen-sortieren">E-Mails nach Klassen sortieren<a class="headerlink" href="#e-mails-nach-klassen-sortieren" title="Permanent link">&para;</a></h3>
+<p>Um E-Mails basierend auf ihrem Inhalt in die entsprechenden Projektordner zu sortieren:</p>
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>python<span class="w"> </span>-m<span class="w"> </span>mcp_university.classifier.sort_emails<span class="w"> </span>/pfad/zu/emails<span class="w"> </span>--config<span class="w"> </span>config/classifier_paths.yaml
+</code></pre></div>
 
 
 
@@ -1220,7 +1201,7 @@ Das System nutzt den <code>EmailClassifier</code>, um die Mails nach Themen (z.B
           <button type="button" class="md-top md-icon" data-md-component="top" hidden>
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
-  Zurück zum Seitenanfang
+  Back to top
 </button>
         
       </main>
@@ -1252,7 +1233,7 @@ Das System nutzt den <code>EmailClassifier</code>, um die Mails nach Themen (z.B
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "content.tabs.link", "content.code.annotate", "content.code.copy", "content.tooltips"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "content.tabs.link", "content.code.annotate", "content.code.copy", "content.tooltips"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
