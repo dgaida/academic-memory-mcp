@@ -184,7 +184,17 @@ class MailParser:
                 sender = msg.sender or '(No Sender)'
                 date = msg.date or '(No Date)'
                 body = msg.body or ''
-                return f"Subject: {subject}\nFrom: {sender}\nDate: {date}\n\n{body}"
+
+                attachment_names = []
+                for att in msg.attachments:
+                    name = att.getFilename()
+                    if name:
+                        attachment_names.append(name)
+
+                content = f"Subject: {subject}\nFrom: {sender}\nDate: {date}\n\n{body}"
+                if attachment_names:
+                    content += "\n\nAnhänge:\n" + "\n".join(attachment_names)
+                return content
         except ImportError:
             logger.warning("extract-msg not installed. Falling back to basic email parser for .msg file.")
             return self._parse_eml(file_path)
@@ -204,15 +214,23 @@ class MailParser:
             date = msg.get('Date', '(No Date)')
 
             body = ""
+            attachment_names = []
             if msg.is_multipart():
                 for part in msg.walk():
-                    if part.get_content_type() == "text/plain":
+                    content_type = part.get_content_type()
+                    content_disposition = str(part.get('Content-Disposition'))
+
+                    if content_type == "text/plain" and "attachment" not in content_disposition:
                         payload = part.get_payload(decode=True)
                         charset = part.get_content_charset() or 'utf-8'
                         try:
                             body += payload.decode(charset)
                         except (UnicodeDecodeError, LookupError):
                             body += payload.decode('latin-1', errors='replace')
+                    elif "attachment" in content_disposition:
+                        filename = part.get_filename()
+                        if filename:
+                            attachment_names.append(filename)
             else:
                 payload = msg.get_payload(decode=True)
                 charset = msg.get_content_charset() or 'utf-8'
@@ -221,7 +239,10 @@ class MailParser:
                 except (UnicodeDecodeError, LookupError):
                     body = payload.decode('latin-1', errors='replace')
 
-            return f"Subject: {subject}\nFrom: {sender}\nDate: {date}\n\n{body}"
+            content = f"Subject: {subject}\nFrom: {sender}\nDate: {date}\n\n{body}"
+            if attachment_names:
+                content += "\n\nAnhänge:\n" + "\n".join(attachment_names)
+            return content
         except Exception as e:
             logger.error(f"Error parsing mail {file_path}: {e}")
             return None
