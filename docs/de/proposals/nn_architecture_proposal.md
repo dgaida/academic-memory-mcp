@@ -6,10 +6,10 @@ Dieser Vorschlag beschreibt eine Alternative zu den aktuellen Modellen (XGBoost/
 
 Als Architektur wird ein **Transformer-basiertes Modell** (z. B. DistilBERT oder ein multilinguales MiniLM) vorgeschlagen. Im Gegensatz zu klassischen Verfahren, die Wortfrequenzen zählen, erfassen Transformer den semantischen Kontext und die Beziehung zwischen Wörtern (wie z. B. in Betreffzeilen und Body).
 
-### Hauptkomponenten:
-1.  **Encoder**: Ein vortrainiertes Modell wie `paraphrase-multilingual-MiniLM-L12-v2`.
-2.  **Input-Formatting**: Strukturierung der Rohdaten in ein für Transformer optimiertes Format.
-3.  **Classification Head**: Ein Fully Connected Layer (MLP) mit Softmax-Aktivierung über dem `[CLS]`-Token oder einem Mean-Pooling-Vektor.
+### Hauptkomponenten:  
+1.  **Encoder**: Ein vortrainiertes Modell wie `paraphrase-multilingual-MiniLM-L12-v2`.  
+2.  **Input-Formatting**: Strukturierung der Rohdaten in ein für Transformer optimiertes Format.  
+3.  **Classification Head**: Ein Fully Connected Layer (MLP) mit Softmax-Aktivierung über dem `[CLS]`-Token oder einem Mean-Pooling-Vektor.  
 
 ## 2. Datenaufbereitung & Input-Format
 
@@ -20,9 +20,9 @@ Anstatt den Text einfach flach zu übergeben, werden die Metadaten und der Inhal
 [CLS] SUBJECT: <Betreff> | ATTACHMENTS: <Datei1.pdf, Datei2.docx> [SEP] <Inhalt der E-Mail (anonymisiert)> [SEP]
 ```
 
--   **Betreff**: Hat oft die höchste Informationsdichte für die Klassifizierung.
--   **Anhänge**: Die Dateinamen (z. B. "Antrag_BA.pdf") geben starke Hinweise auf Klassen wie "BachelorThesis".
--   **Anonymisierung**: Die bereits implementierte `anonymize_th_koeln_names`-Logik bleibt erhalten, um PII zu schützen, während die Struktur (z. B. Vorhandensein einer TH-Köln Adresse vs. Externe) durch Platzhalter wie `max.mustermann@student.th-koeln.de` erhalten bleibt.
+-   **Betreff**: Hat oft die höchste Informationsdichte für die Klassifizierung.  
+-   **Anhänge**: Die Dateinamen (z. B. "Antrag_BA.pdf") geben starke Hinweise auf Klassen wie "BachelorThesis".  
+-   **Anonymisierung**: Die bereits implementierte `anonymize_th_koeln_names`-Logik bleibt erhalten, um PII zu schützen, während die Struktur (z. B. Vorhandensein einer TH-Köln Adresse vs. Externe) durch Platzhalter wie `max.mustermann@student.th-koeln.de` erhalten bleibt.  
 
 ## 3. Warum diese Architektur?
 
@@ -56,12 +56,12 @@ class EmailTransformerClassifier(nn.Module):
 
 ## 5. Trainingsstrategie
 
-1.  **Fine-Tuning**: Das gesamte Modell wird mit einer niedrigen Learning Rate auf den spezifischen E-Mail-Klassen der TH Köln trainiert.
-2.  **Weighted Cross-Entropy**: Um Klassenungleichgewichte (z. B. viele "Others", wenige "SHK") auszugleichen.
-3.  **Data Augmentation**: Leichtes Rauschen in den Text einfügen oder Synonym-Ersetzung, um die Robustheit zu erhöhen.
+1.  **Fine-Tuning**: Das gesamte Modell wird mit einer niedrigen Learning Rate auf den spezifischen E-Mail-Klassen der TH Köln trainiert.  
+2.  **Weighted Cross-Entropy**: Um Klassenungleichgewichte (z. B. viele "Others", wenige "SHK") auszugleichen.  
+3.  **Data Augmentation**: Leichtes Rauschen in den Text einfügen oder Synonym-Ersetzung, um die Robustheit zu erhöhen.  
 
 ## 6. Nächste Schritte
 
-- Integration von `transformers` und `torch` in die `EmailClassifier`-Engine.
-- Anpassung von `train.py`, um das Fine-Tuning des Modells zu ermöglichen.
-- Vergleich der Precision/Recall-Werte gegen das aktuelle XGBoost-Modell.
+- Integration von `transformers` und `torch` in die `EmailClassifier`-Engine.  
+- Anpassung von `train.py`, um das Fine-Tuning des Modells zu ermöglichen.  
+- Vergleich der Precision/Recall-Werte gegen das aktuelle XGBoost-Modell.  

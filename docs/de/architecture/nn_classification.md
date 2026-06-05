@@ -18,10 +18,10 @@ Dies ermöglicht es dem Modell, die starke Signalwirkung von Betreffzeilen und D
 
 ## Training
 
-Das Modell wird mittels Fine-Tuning trainiert. Dabei werden:
-1.  Die Gewichte des Transformer-Backbones aktualisiert.
-2.  Ein Klassifizierungskopf (Linear Layer) auf den `[CLS]`-Token angewendet.
-3.  Die E-Mails mit einer maximalen Sequenzlänge von 512 Token verarbeitet.
+Das Modell wird mittels Fine-Tuning trainiert. Dabei werden:  
+1.  Die Gewichte des Transformer-Backbones aktualisiert.  
+2.  Ein Klassifizierungskopf (Linear Layer) auf den `[CLS]`-Token angewendet.  
+3.  Die E-Mails mit einer maximalen Sequenzlänge von 512 Token verarbeitet.  
 
 ## Nutzung
 
