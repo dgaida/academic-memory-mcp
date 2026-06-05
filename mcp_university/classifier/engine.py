@@ -1,22 +1,19 @@
-import torch
-import torch.nn as nn
-from transformers import AutoModel, AutoTokenizer
 """Engine für die Klassifizierung von E-Mails."""
-import pickle
-import logging
+from mcp_university.classifier.stopwords import ALL_STOP_WORDS
+from mcp_university.config import get_config
+from mcp_university.parser.mail_parser import MailParser
+from mcp_university.utils.anonymizer import anonymize_th_koeln_names
 from pathlib import Path
-from typing import List, Tuple, Dict, Any, Optional, Union
-
-import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import LabelEncoder
-from mcp_university.classifier.stopwords import ALL_STOP_WORDS
-from mcp_university.utils.anonymizer import anonymize_th_koeln_names
-
-
-from mcp_university.parser.mail_parser import MailParser
-from mcp_university.config import get_config
+from transformers import AutoModel, AutoTokenizer
+from typing import List, Tuple, Dict, Any, Optional, Union
+import logging
+import numpy as np
+import pickle
+import torch
+import torch.nn as nn
 
 logger = logging.getLogger(__name__)
 
@@ -98,7 +95,8 @@ class EmailClassifier:
                     if hasattr(att, "getFilename"):
                         try:
                             name = att.getFilename()
-                        except Exception: pass
+                        except Exception:
+                            pass
                     if not name:
                         name = getattr(att, "name", None) or getattr(att, "longFilename", None)
                     if name:

@@ -1,16 +1,16 @@
-import torch
-from torch.utils.data import DataLoader, TensorDataset
 """Skript zum Trainieren des E-Mail-Klassifikators."""
-import argparse
+from mcp_university.classifier.engine import EmailClassifier
 from pathlib import Path
-import logging
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.model_selection import GridSearchCV
-
-from mcp_university.classifier.engine import EmailClassifier
+from torch.utils.data import DataLoader, TensorDataset
+import argparse
+import logging
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import torch
 
 # Logging konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')

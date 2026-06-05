@@ -1,14 +1,12 @@
 import pytest
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 import torch
-import numpy as np
 from mcp_university.classifier.engine import EmailClassifier
 
 @pytest.fixture
 def mock_transformer_classifier():
     with patch("transformers.AutoModel.from_pretrained") as mock_model:
-        with patch("transformers.AutoTokenizer.from_pretrained") as mock_tokenizer:
+        with patch("transformers.AutoTokenizer.from_pretrained"):
             # Mock model configuration
             mock_model.return_value.config.hidden_size = 384
             classifier = EmailClassifier(method="transformer")
