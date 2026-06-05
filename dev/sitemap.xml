@@ -64,6 +64,13 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/deven/architecture/"/>
     </url>
     <url>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/architecture/nn_classification/</loc>
+        <lastmod>2026-06-05</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/dev/architecture/nn_classification/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/deven/architecture/nn_classification/"/>
+    </url>
+    <url>
         <loc>https://dgaida.github.io/academic-memory-mcp/dev/development/</loc>
         <lastmod>2026-06-05</lastmod>
         <changefreq>daily</changefreq>
@@ -90,6 +97,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/dev/development/versioning/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/deven/development/versioning/"/>
+    </url>
+    <url>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/proposals/nn_architecture_proposal/</loc>
+        <lastmod>2026-06-05</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/dev/proposals/nn_architecture_proposal/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/deven/proposals/nn_architecture_proposal/"/>
     </url>
     <url>
         <loc>https://dgaida.github.io/academic-memory-mcp/dev/usage/</loc>
@@ -169,6 +183,13 @@
         <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/devarchitecture/"/>
     </url>
     <url>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/en/architecture/nn_classification/</loc>
+        <lastmod>2026-06-05</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/dev/en/architecture/nn_classification/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/devarchitecture/nn_classification/"/>
+    </url>
+    <url>
         <loc>https://dgaida.github.io/academic-memory-mcp/dev/en/development/</loc>
         <lastmod>2026-06-05</lastmod>
         <changefreq>daily</changefreq>
@@ -195,6 +216,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/dev/en/development/versioning/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/devdevelopment/versioning/"/>
+    </url>
+    <url>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/en/proposals/nn_architecture_proposal/</loc>
+        <lastmod>2026-06-05</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/dev/en/proposals/nn_architecture_proposal/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/devproposals/nn_architecture_proposal/"/>
     </url>
     <url>
         <loc>https://dgaida.github.io/academic-memory-mcp/dev/en/usage/</loc>
