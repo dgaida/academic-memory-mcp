@@ -30,7 +30,7 @@ GERMAN_STOP_WORDS = [
     "weg", "weil", "weiter", "welche", "welchem", "welchen", "welcher",
     "welches", "wenn", "werde", "werden", "wie", "wieder", "will",
     "wir", "wird", "wirst", "wo", "wollen", "wollte", "würde", "würden", "www", 
-    "zu", "zum", "zur", "zwar", "zwischen", "bereits", "daher", "bitten", "schon", "vielleicht", "gerne", "bitte", "mal", "sowie", "jedoch", "etwa", "bzw", "darüber", "ähnlich", "dafür"
+    "zu", "zum", "zur", "zwar", "zwischen", "bereits", "daher", "schon", "vielleicht", "gerne", "mal", "sowie", "jedoch", "etwa", "bzw", "darüber", "ähnlich", "dafür"
 ]
 
 ENGLISH_STOP_WORDS = [
