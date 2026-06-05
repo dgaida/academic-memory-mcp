@@ -1,14 +1,16 @@
 """Skript zum Trainieren des E-Mail-Klassifikators."""
-import argparse
+from mcp_university.classifier.engine import EmailClassifier
 from pathlib import Path
-import logging
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.model_selection import GridSearchCV
-
-from mcp_university.classifier.engine import EmailClassifier
+from torch.utils.data import DataLoader, TensorDataset
+import argparse
+import logging
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import torch
 
 # Logging konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
@@ -28,8 +30,24 @@ def evaluate_and_save(classifier: EmailClassifier, texts: list, labels: list, ou
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Vorhersagen
-    X = classifier.get_features(texts, train=False)
-    y_pred_idx = classifier.classifier.predict(X)
+    if classifier.method == "transformer":
+        classifier.classifier.eval()
+        y_pred_idx = []
+        with torch.no_grad():
+            # Batchweise Verarbeitung für Evaluierung
+            encodings = classifier.tokenizer(texts, truncation=True, padding=True, max_length=512, return_tensors="pt")
+            dataset = TensorDataset(encodings["input_ids"], encodings["attention_mask"])
+            loader = DataLoader(dataset, batch_size=8)
+            for batch in loader:
+                ids, mask = batch
+                outputs = classifier.classifier(ids, mask)
+                preds = torch.argmax(outputs, dim=1)
+                y_pred_idx.extend(preds.numpy())
+        y_pred_idx = np.array(y_pred_idx)
+    else:
+        X = classifier.get_features(texts, train=False)
+        y_pred_idx = classifier.classifier.predict(X)
+
     y_pred = classifier.label_encoder.inverse_transform(y_pred_idx.astype(int))
 
     # Metriken berechnen
@@ -87,7 +105,7 @@ def main() -> None:
     parser.add_argument("--model-path", type=str, default="data/email_classifier.pkl", help="Pfad zum Speichern des Modells.")
     parser.add_argument("--mode", type=str, choices=["tfidf", "embedding", "combined"], default="combined",
                         help="Modus der Merkmalsextraktion (default: combined).")
-    parser.add_argument("--method", type=str, choices=["randomforest", "xgboost"], default="xgboost",
+    parser.add_argument("--method", type=str, choices=["randomforest", "xgboost", "transformer"], default="xgboost",
                         help="Klassifizierungsmethode (default: xgboost).")
     parser.add_argument("--embedding-model", type=str, default="paraphrase-multilingual-MiniLM-L12-v2",
                         help="Sentence-Transformer Modell (default: paraphrase-multilingual-MiniLM-L12-v2).")
@@ -109,49 +127,82 @@ def main() -> None:
             logger.error(f"Keine Trainingsdaten in {args.data_dir} gefunden.")
             return
 
-        # Merkmale extrahieren
-        X = classifier.get_features(texts, train=True)
+        # Labels encoden
         y = classifier.label_encoder.fit_transform(labels)
+        num_classes = len(classifier.label_encoder.classes_)
 
-        # GridSearchCV Setup
-        if args.method == "randomforest":
-            param_grid = {
-                'n_estimators': [50, 100, 200],
-                'max_depth': [None, 10, 20],
-                'criterion': ['gini']
-            }
-        else:  # xgboost
-            param_grid = {
-                'n_estimators': [100, 200],
-                'max_depth': [2, 3],
-                'learning_rate': [0.1]
-            }
+        if args.method == "transformer":
+            logger.info("Starte Transformer Fine-Tuning...")
+            from mcp_university.classifier.engine import EmailTransformerClassifier
+            classifier.classifier = EmailTransformerClassifier(args.embedding_model, num_classes)
 
-        logger.info(f"Starte GridSearchCV mit 5-fold CV und 9 Experimenten für {args.method}...")
-        grid_search = GridSearchCV(
-            estimator=classifier.classifier,
-            param_grid=param_grid,
-            cv=5,
-            scoring='accuracy',
-            n_jobs=-1,
-            verbose=1
-        )
+            # Tokenisierung
+            encodings = classifier.tokenizer(texts, truncation=True, padding=True, max_length=512, return_tensors="pt")
+            dataset = TensorDataset(encodings["input_ids"], encodings["attention_mask"], torch.tensor(y))
+            loader = DataLoader(dataset, batch_size=8, shuffle=True)
 
-        grid_search.fit(X, y)
+            optimizer = torch.optim.AdamW(classifier.classifier.parameters(), lr=2e-5)
+            criterion = torch.nn.CrossEntropyLoss()
 
-        logger.info(f"Beste Parameter: {grid_search.best_params_}")
-        logger.info(f"Bester Score: {grid_search.best_score_:.4f}")
+            classifier.classifier.train()
+            for epoch in range(3): # 3 Epochen als Standard
+                total_loss = 0
+                for batch in loader:
+                    optimizer.zero_grad()
+                    input_ids, mask, targets = batch
+                    outputs = classifier.classifier(input_ids, mask)
+                    loss = criterion(outputs, targets)
+                    loss.backward()
+                    optimizer.step()
+                    total_loss += loss.item()
+                logger.info(f"Epoch {epoch+1}/3, Loss: {total_loss/len(loader):.4f}")
 
-        # Bestes Modell in den Classifier übernehmen
-        classifier.classifier = grid_search.best_estimator_
-        classifier.is_trained = True
+            classifier.is_trained = True
+            cv_results = None # Keine CV für Transformer in diesem einfachen Loop
+        else:
+            # Merkmale extrahieren für klassische Modelle
+            X = classifier.get_features(texts, train=True)
 
-        # CV Ergebnisse für den Bericht vorbereiten
-        cv_results = {
-            'best_params': grid_search.best_params_,
-            'best_score': grid_search.best_score_,
-            'results': grid_search.cv_results_
-        }
+            # GridSearchCV Setup
+            if args.method == "randomforest":
+                param_grid = {
+                    'n_estimators': [50, 100, 200],
+                    'max_depth': [None, 10, 20],
+                    'criterion': ['gini']
+                }
+            else:  # xgboost
+                param_grid = {
+                    'n_estimators': [100, 200],
+                    'max_depth': [2, 3],
+                    'learning_rate': [0.1]
+                }
+
+            logger.info(f"Starte GridSearchCV mit 5-fold CV und 9 Experimenten für {args.method}...")
+            grid_search = GridSearchCV(
+                estimator=classifier.classifier,
+                param_grid=param_grid,
+                cv=5,
+                scoring='accuracy',
+                n_jobs=-1,
+                verbose=1
+            )
+
+            grid_search.fit(X, y)
+
+            logger.info(f"Beste Parameter: {grid_search.best_params_}")
+            logger.info(f"Bester Score: {grid_search.best_score_:.4f}")
+
+            # Bestes Modell in den Classifier übernehmen
+            classifier.classifier = grid_search.best_estimator_
+            classifier.is_trained = True
+
+            if args.method != "transformer":
+                # CV Ergebnisse für den Bericht vorbereiten
+                cv_results = {
+                    'best_params': grid_search.best_params_,
+                    'best_score': grid_search.best_score_,
+                    'results': grid_search.cv_results_
+                }
 
         # Sicherstellen, dass Zielverzeichnis existiert
         model_file = Path(args.model_path)
