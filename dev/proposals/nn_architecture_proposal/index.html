@@ -1091,9 +1091,9 @@
 <p>Als Architektur wird ein <strong>Transformer-basiertes Modell</strong> (z. B. DistilBERT oder ein multilinguales MiniLM) vorgeschlagen. Im Gegensatz zu klassischen Verfahren, die Wortfrequenzen zählen, erfassen Transformer den semantischen Kontext und die Beziehung zwischen Wörtern (wie z. B. in Betreffzeilen und Body).</p>
 <h3 id="hauptkomponenten">Hauptkomponenten:<a class="headerlink" href="#hauptkomponenten" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Encoder</strong>: Ein vortrainiertes Modell wie <code>paraphrase-multilingual-MiniLM-L12-v2</code>.</li>
-<li><strong>Input-Formatting</strong>: Strukturierung der Rohdaten in ein für Transformer optimiertes Format.</li>
-<li><strong>Classification Head</strong>: Ein Fully Connected Layer (MLP) mit Softmax-Aktivierung über dem <code>[CLS]</code>-Token oder einem Mean-Pooling-Vektor.</li>
+<li><strong>Encoder</strong>: Ein vortrainiertes Modell wie <code>sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2</code>.</li>
+<li><strong>Input-Formatting</strong>: Strukturierung der Rohdaten in ein für Transformer optimiertes Format.  </li>
+<li><strong>Classification Head</strong>: Ein Fully Connected Layer (MLP) mit Softmax-Aktivierung über dem <code>[CLS]</code>-Token oder einem Mean-Pooling-Vektor.  </li>
 </ol>
 <h2 id="2-datenaufbereitung-input-format">2. Datenaufbereitung &amp; Input-Format<a class="headerlink" href="#2-datenaufbereitung-input-format" title="Permanent link">&para;</a></h2>
 <p>Anstatt den Text einfach flach zu übergeben, werden die Metadaten und der Inhalt strukturiert tokenisiert:</p>
@@ -1101,9 +1101,9 @@
 <div class="language-text highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>[CLS] SUBJECT: &lt;Betreff&gt; | ATTACHMENTS: &lt;Datei1.pdf, Datei2.docx&gt; [SEP] &lt;Inhalt der E-Mail (anonymisiert)&gt; [SEP]
 </code></pre></div></p>
 <ul>
-<li><strong>Betreff</strong>: Hat oft die höchste Informationsdichte für die Klassifizierung.</li>
-<li><strong>Anhänge</strong>: Die Dateinamen (z. B. "Antrag_BA.pdf") geben starke Hinweise auf Klassen wie "BachelorThesis".</li>
-<li><strong>Anonymisierung</strong>: Die bereits implementierte <code>anonymize_th_koeln_names</code>-Logik bleibt erhalten, um PII zu schützen, während die Struktur (z. B. Vorhandensein einer TH-Köln Adresse vs. Externe) durch Platzhalter wie <code>max.mustermann@student.th-koeln.de</code> erhalten bleibt.</li>
+<li><strong>Betreff</strong>: Hat oft die höchste Informationsdichte für die Klassifizierung.  </li>
+<li><strong>Anhänge</strong>: Die Dateinamen (z. B. "Antrag_BA.pdf") geben starke Hinweise auf Klassen wie "BachelorThesis".  </li>
+<li><strong>Anonymisierung</strong>: Die bereits implementierte <code>anonymize_th_koeln_names</code>-Logik bleibt erhalten, um PII zu schützen, während die Struktur (z. B. Vorhandensein einer TH-Köln Adresse vs. Externe) durch Platzhalter wie <code>max.mustermann@student.th-koeln.de</code> erhalten bleibt.  </li>
 </ul>
 <h2 id="3-warum-diese-architektur">3. Warum diese Architektur?<a class="headerlink" href="#3-warum-diese-architektur" title="Permanent link">&para;</a></h2>
 <table>
@@ -1157,15 +1157,15 @@
 </code></pre></div>
 <h2 id="5-trainingsstrategie">5. Trainingsstrategie<a class="headerlink" href="#5-trainingsstrategie" title="Permanent link">&para;</a></h2>
 <ol>
-<li><strong>Fine-Tuning</strong>: Das gesamte Modell wird mit einer niedrigen Learning Rate auf den spezifischen E-Mail-Klassen der TH Köln trainiert.</li>
-<li><strong>Weighted Cross-Entropy</strong>: Um Klassenungleichgewichte (z. B. viele "Others", wenige "SHK") auszugleichen.</li>
-<li><strong>Data Augmentation</strong>: Leichtes Rauschen in den Text einfügen oder Synonym-Ersetzung, um die Robustheit zu erhöhen.</li>
+<li><strong>Fine-Tuning</strong>: Das gesamte Modell wird mit einer niedrigen Learning Rate auf den spezifischen E-Mail-Klassen der TH Köln trainiert.  </li>
+<li><strong>Weighted Cross-Entropy</strong>: Um Klassenungleichgewichte (z. B. viele "Others", wenige "SHK") auszugleichen.  </li>
+<li><strong>Data Augmentation</strong>: Leichtes Rauschen in den Text einfügen oder Synonym-Ersetzung, um die Robustheit zu erhöhen.  </li>
 </ol>
 <h2 id="6-nachste-schritte">6. Nächste Schritte<a class="headerlink" href="#6-nachste-schritte" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Integration von <code>transformers</code> und <code>torch</code> in die <code>EmailClassifier</code>-Engine.</li>
-<li>Anpassung von <code>train.py</code>, um das Fine-Tuning des Modells zu ermöglichen.</li>
-<li>Vergleich der Precision/Recall-Werte gegen das aktuelle XGBoost-Modell.</li>
+<li>Integration von <code>transformers</code> und <code>torch</code> in die <code>EmailClassifier</code>-Engine.  </li>
+<li>Anpassung von <code>train.py</code>, um das Fine-Tuning des Modells zu ermöglichen.  </li>
+<li>Vergleich der Precision/Recall-Werte gegen das aktuelle XGBoost-Modell.  </li>
 </ul>
 
 

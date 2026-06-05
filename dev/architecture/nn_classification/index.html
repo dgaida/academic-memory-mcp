@@ -1055,17 +1055,17 @@
 <h1 id="e-mail-klassifizierung-mit-neuronalen-netzen-transformer">E-Mail-Klassifizierung mit Neuronalen Netzen (Transformer)<a class="headerlink" href="#e-mail-klassifizierung-mit-neuronalen-netzen-transformer" title="Permanent link">&para;</a></h1>
 <p>Dieses Modul bietet eine Alternative zu klassischen Modellen (XGBoost/Random Forest), indem es direkt auf den (anonymisierten) Rohdaten der E-Mails arbeitet.</p>
 <h2 id="architektur">Architektur<a class="headerlink" href="#architektur" title="Permanent link">&para;</a></h2>
-<p>Die Architektur basiert auf einem <strong>Transformer-Modell</strong> (Standard: <code>paraphrase-multilingual-MiniLM-L12-v2</code>), das für die Sequenzklassifizierung feinjustiert wird.</p>
+<p>Die Architektur basiert auf einem <strong>Transformer-Modell</strong> (Standard: <code>sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2</code>), das für die Sequenzklassifizierung feinjustiert wird.</p>
 <h3 id="datenaufbereitung">Datenaufbereitung<a class="headerlink" href="#datenaufbereitung" title="Permanent link">&para;</a></h3>
 <p>Anstatt den Text einfach als flachen String zu übergeben, werden die E-Mail-Komponenten strukturiert:</p>
 <div class="language-text highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>SUBJECT: &lt;Betreff&gt; | ATTACHMENTS: &lt;Datei1.pdf, ...&gt; [SEP] &lt;E-Mail-Body (anonymisiert)&gt;
 </code></pre></div>
 <p>Dies ermöglicht es dem Modell, die starke Signalwirkung von Betreffzeilen und Dateinamen explizit zu lernen.</p>
 <h2 id="training">Training<a class="headerlink" href="#training" title="Permanent link">&para;</a></h2>
-<p>Das Modell wird mittels Fine-Tuning trainiert. Dabei werden:
-1.  Die Gewichte des Transformer-Backbones aktualisiert.
-2.  Ein Klassifizierungskopf (Linear Layer) auf den <code>[CLS]</code>-Token angewendet.
-3.  Die E-Mails mit einer maximalen Sequenzlänge von 512 Token verarbeitet.</p>
+<p>Das Modell wird mittels Fine-Tuning trainiert. Dabei werden:<br />
+1.  Die Gewichte des Transformer-Backbones aktualisiert.<br />
+2.  Ein Klassifizierungskopf (Linear Layer) auf den <code>[CLS]</code>-Token angewendet.<br />
+3.  Die E-Mails mit einer maximalen Sequenzlänge von 512 Token verarbeitet.  </p>
 <h2 id="nutzung">Nutzung<a class="headerlink" href="#nutzung" title="Permanent link">&para;</a></h2>
 <p>Um den Transformer-Modus zu nutzen, muss beim Training der Parameter <code>--method transformer</code> übergeben werden:</p>
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>python<span class="w"> </span>-m<span class="w"> </span>mcp_university.classifier.train<span class="w"> </span>&lt;data_dir&gt;<span class="w"> </span>--method<span class="w"> </span>transformer

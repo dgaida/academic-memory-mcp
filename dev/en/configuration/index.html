@@ -668,6 +668,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#secrets-and-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Secrets and Authentication
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1162,6 +1173,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#secrets-and-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Secrets and Authentication
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1274,6 +1296,12 @@
 <li><code>DEBUG</code>: Enables detailed logging (True/False).  </li>
 <li><code>CONFIG_DIR</code>: Path to the configuration directory (Default: <code>./config</code>).  </li>
 </ul>
+<h2 id="secrets-and-authentication">Secrets and Authentication<a class="headerlink" href="#secrets-and-authentication" title="Permanent link">&para;</a></h2>
+<p>To handle private models or authentication tokens (e.g., for Hugging Face), the system supports loading variables from a <code>.env</code> or <code>secrets.env</code> file in the project root.</p>
+<p><strong>Example .env:</strong>
+<div class="language-text highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>HF_TOKEN=your_huggingface_token_here
+</code></pre></div></p>
+<p>These variables are automatically loaded during startup and used by libraries like <code>transformers</code> and <code>sentence-transformers</code>.</p>
 
 
 
