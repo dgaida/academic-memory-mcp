@@ -38,7 +38,7 @@ class EmailClassifier:
         self.embedding_model_name = embedding_model_name
         self.parser = MailParser()
 
-        self.tfidf_vectorizer = TfidfVectorizer(max_features=5000, stop_words=ALL_STOP_WORDS)  #, sublinear_tf=True)
+        self.tfidf_vectorizer = TfidfVectorizer(max_features=5000, stop_words=ALL_STOP_WORDS, sublinear_tf=False, token_pattern=r"(?u)\b(?!\d{2}\b)[a-zA-ZäöüÄÖÜß0-9]{2,}\b")
         self._embedding_model = None
         self.label_encoder = LabelEncoder()
 

@@ -120,6 +120,18 @@ def run_xai_analysis(model_path: Path, test_data_path: Path, samples_per_class: 
             print(f"Top Wörter: {', '.join(top_words)}")
         else:
             print("Keine signifikanten Wörter gefunden.")
+
+    # Globale Feature Importance ausgeben
+    if hasattr(classifier.classifier, "feature_importances_"):
+        print("\n" + "="*40)
+        print("GLOBALE FEATURE IMPORTANCE (Top 10)")
+        print("="*40)
+        importances = classifier.classifier.feature_importances_
+        indices = np.argsort(importances)[::-1][:10]
+
+        for i in indices:
+            print(f"{feature_names[i]:20} | Score: {importances[i]:.4f}")
+
     print("="*40)
 
 def main():
