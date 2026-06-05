@@ -1,3 +1,6 @@
+import torch
+import torch.nn as nn
+from transformers import AutoModel, AutoTokenizer
 """Engine für die Klassifizierung von E-Mails."""
 import pickle
 import logging
@@ -30,7 +33,7 @@ class EmailClassifier:
 
         Args:
             mode: Modus der Merkmalsextraktion ('tfidf', 'embedding', 'combined').
-            method: Klassifizierungsmethode ('randomforest', 'xgboost').
+            method: Klassifizierungsmethode ('randomforest', 'xgboost', 'transformer').
             embedding_model_name: Name des Sentence-Transformer Modells.
         """
         self.mode = mode
@@ -47,6 +50,9 @@ class EmailClassifier:
         elif method == "xgboost":
             from xgboost import XGBClassifier
             self.classifier = XGBClassifier(n_estimators=100, random_state=42, eval_metric='logloss')
+        elif method == "transformer":
+            self.classifier = None  # Wird im Training oder beim Laden initialisiert
+            self.tokenizer = AutoTokenizer.from_pretrained(embedding_model_name)
         else:
             raise ValueError(f"Ungültige Klassifizierungsmethode: {method}")
 
@@ -78,6 +84,34 @@ class EmailClassifier:
         """Extrahiert Text aus einer E-Mail-Datei."""
         return self.parser.parse(file_path)
 
+
+    def _format_transformer_input(self, file_path: Path) -> str:
+        """Formatiert die E-Mail-Komponenten für den Transformer-Input."""
+        try:
+            import extract_msg
+            with extract_msg.openMsg(str(file_path)) as msg:
+                subject = msg.subject or '(No Subject)'
+                body = msg.body or ''
+                attachment_names = []
+                for att in msg.attachments:
+                    name = None
+                    if hasattr(att, "getFilename"):
+                        try:
+                            name = att.getFilename()
+                        except Exception: pass
+                    if not name:
+                        name = getattr(att, "name", None) or getattr(att, "longFilename", None)
+                    if name:
+                        attachment_names.append(name)
+
+                attachments_str = ", ".join(attachment_names) if attachment_names else "None"
+                formatted = f"SUBJECT: {subject} | ATTACHMENTS: {attachments_str} [SEP] {body}"
+                return anonymize_th_koeln_names(formatted)
+        except Exception as e:
+            logger.warning(f"Error formatting transformer input for {file_path}: {e}")
+            text = self._extract_text(file_path)
+            return anonymize_th_koeln_names(text) if text else ""
+
     def preprocess_data(self, root_dir: Union[str, Path]) -> Tuple[List[str], List[str]]:
         """Liest E-Mails aus Ordnerstrukturen ein.
 
@@ -97,10 +131,14 @@ class EmailClassifier:
             if class_dir.is_dir():
                 label = class_dir.name
                 for file_path in class_dir.rglob("*.msg"):
-                    text = self._extract_text(file_path)
+                    if self.method == "transformer":
+                        text = self._format_transformer_input(file_path)
+                    else:
+                        text = self._extract_text(file_path)
+                        if text:
+                            text = anonymize_th_koeln_names(text)
+
                     if text:
-                        # Anonymisierung vor der Weiterverarbeitung
-                        text = anonymize_th_koeln_names(text)
                         texts.append(text)
                         labels.append(label)
 
@@ -153,15 +191,23 @@ class EmailClassifier:
         if not self.is_trained:
             raise RuntimeError("Modell muss zuerst trainiert oder geladen werden.")
 
-        text = self._extract_text(Path(file_path))
-        if not text:
-            raise ValueError(f"Konnte Text aus {file_path} nicht extrahieren.")
-
-        # Anonymisierung vor der Merkmalsextraktion
-        text = anonymize_th_koeln_names(text)
-        X = self.get_features([text], train=False)
-        y_pred = self.classifier.predict(X)[0]
-        y_prob = self.classifier.predict_proba(X)[0]
+        if self.method == "transformer":
+            text = self._format_transformer_input(Path(file_path))
+            inputs = self.tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=512)
+            self.classifier.eval()
+            with torch.no_grad():
+                outputs = self.classifier(inputs["input_ids"], inputs["attention_mask"])
+                probs = torch.softmax(outputs, dim=1)[0]
+                y_pred = torch.argmax(probs).item()
+                y_prob = probs.numpy()
+        else:
+            text = self._extract_text(Path(file_path))
+            if not text:
+                raise ValueError(f"Konnte Text aus {file_path} nicht extrahieren.")
+            text = anonymize_th_koeln_names(text)
+            X = self.get_features([text], train=False)
+            y_pred = self.classifier.predict(X)[0]
+            y_prob = self.classifier.predict_proba(X)[0]
 
         label = self.label_encoder.inverse_transform([int(y_pred)])[0]
 
@@ -183,12 +229,24 @@ class EmailClassifier:
         Args:
             model_path: Pfad zur Speicherdatei.
         """
+        if self.method == "transformer":
+            # Transformer Modelle separat speichern oder State Dict nutzen
+            classifier_data = {
+                "state_dict": self.classifier.state_dict(),
+                "config": {
+                    "model_name": self.embedding_model_name,
+                    "num_classes": len(self.label_encoder.classes_)
+                }
+            }
+        else:
+            classifier_data = self.classifier
+
         data = {
             "mode": self.mode,
             "method": self.method,
             "embedding_model_name": self.embedding_model_name,
             "tfidf_vectorizer": self.tfidf_vectorizer,
-            "classifier": self.classifier,
+            "classifier": classifier_data,
             "label_encoder": self.label_encoder,
             "is_trained": self.is_trained
         }
@@ -208,7 +266,32 @@ class EmailClassifier:
         self.method = data.get("method", "randomforest")  # Fallback für alte Modelle
         self.embedding_model_name = data["embedding_model_name"]
         self.tfidf_vectorizer = data["tfidf_vectorizer"]
-        self.classifier = data["classifier"]
+        if self.method == "transformer":
+            c_data = data["classifier"]
+            self.classifier = EmailTransformerClassifier(
+                c_data["config"]["model_name"],
+                c_data["config"]["num_classes"]
+            )
+            self.classifier.load_state_dict(c_data["state_dict"])
+            self.tokenizer = AutoTokenizer.from_pretrained(self.embedding_model_name)
+        else:
+            self.classifier = data["classifier"]
         self.label_encoder = data["label_encoder"]
         self.is_trained = data["is_trained"]
         # embedding_model wird bei Bedarf geladen (Lazy Loading)
+
+class EmailTransformerClassifier(nn.Module):
+    """Transformer-basiertes Modell zur E-Mail-Klassifizierung."""
+
+    def __init__(self, model_name: str, num_classes: int):
+        super().__init__()
+        self.transformer = AutoModel.from_pretrained(model_name)
+        self.dropout = nn.Dropout(0.1)
+        self.classifier = nn.Linear(self.transformer.config.hidden_size, num_classes)
+
+    def forward(self, input_ids, attention_mask):
+        outputs = self.transformer(input_ids=input_ids, attention_mask=attention_mask)
+        # Use [CLS] token (first token)
+        cls_output = outputs.last_hidden_state[:, 0, :]
+        cls_output = self.dropout(cls_output)
+        return self.classifier(cls_output)
