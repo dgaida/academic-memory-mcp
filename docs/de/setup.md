@@ -80,3 +80,15 @@ Um E-Mails basierend auf ihrem Inhalt in die entsprechenden Projektordner zu sor
 ```bash
 python -m mcp_university.classifier.sort_emails /pfad/zu/emails --config config/classifier_paths.yaml
 ```
+
+### 5. Hugging Face Authentifizierung (Optional)
+
+Falls Sie auf private Modelle zugreifen müssen oder Ratelimits bei Hugging Face umgehen möchten, können Sie einen Token hinterlegen.
+
+Erstellen Sie dazu eine Datei `.env` oder `secrets.env` im Wurzelverzeichnis des Projekts:
+
+```env
+HF_TOKEN=your_huggingface_token_here
+```
+
+Das System lädt diese Variablen automatisch beim Start.

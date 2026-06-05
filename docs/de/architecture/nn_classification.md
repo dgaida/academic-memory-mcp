@@ -4,7 +4,7 @@ Dieses Modul bietet eine Alternative zu klassischen Modellen (XGBoost/Random For
 
 ## Architektur
 
-Die Architektur basiert auf einem **Transformer-Modell** (Standard: `paraphrase-multilingual-MiniLM-L12-v2`), das für die Sequenzklassifizierung feinjustiert wird.
+Die Architektur basiert auf einem **Transformer-Modell** (Standard: `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`), das für die Sequenzklassifizierung feinjustiert wird.
 
 ### Datenaufbereitung
 

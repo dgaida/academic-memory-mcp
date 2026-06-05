@@ -51,3 +51,14 @@ Some settings can be overridden via environment variables:
 
 *   `DEBUG`: Enables detailed logging (True/False).  
 *   `CONFIG_DIR`: Path to the configuration directory (Default: `./config`).  
+
+## Secrets and Authentication
+
+To handle private models or authentication tokens (e.g., for Hugging Face), the system supports loading variables from a `.env` or `secrets.env` file in the project root.
+
+**Example .env:**
+```env
+HF_TOKEN=your_huggingface_token_here
+```
+
+These variables are automatically loaded during startup and used by libraries like `transformers` and `sentence-transformers`.

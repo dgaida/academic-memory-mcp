@@ -162,7 +162,7 @@ The `EmailClassifier` supports three different modes for feature extraction:
     - **Cons:** Ignores word order and semantics (doesn't recognize synonyms).  
 
 2.  **Embeddings (`embedding`)**:  
-    - **How it works:** Uses `Sentence-Transformers` (default: `paraphrase-multilingual-MiniLM-L12-v2`) to project text into a high-dimensional vector space.  
+    - **How it works:** Uses `Sentence-Transformers` (default: `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`) to project text into a high-dimensional vector space.
     - **Pros:** Captures semantic meaning. Recognizes similar concepts even if different words are used.  
     - **Cons:** More computationally expensive (requires model downloads), harder to interpret.  
 
