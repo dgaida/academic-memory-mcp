@@ -35,14 +35,19 @@ def evaluate_and_save(classifier: EmailClassifier, texts: list, labels: list, ou
         y_pred_idx = []
         with torch.no_grad():
             # Batchweise Verarbeitung für Evaluierung
+            logger.info(f"Tokenisiere {len(texts)} Texte für die Evaluierung...")
             encodings = classifier.tokenizer(texts, truncation=True, padding=True, max_length=512, return_tensors="pt")
             dataset = TensorDataset(encodings["input_ids"], encodings["attention_mask"])
             loader = DataLoader(dataset, batch_size=8)
-            for batch in loader:
+            num_batches = len(loader)
+            logger.info(f"Starte Batch-Vorhersage ({num_batches} Batches)...")
+            for i, batch in enumerate(loader):
                 ids, mask = batch
                 outputs = classifier.classifier(ids, mask)
                 preds = torch.argmax(outputs, dim=1)
                 y_pred_idx.extend(preds.numpy())
+                if (i + 1) % 10 == 0 or (i + 1) == num_batches:
+                    logger.info(f"Evaluierung: Batch {i + 1}/{num_batches} verarbeitet.")
         y_pred_idx = np.array(y_pred_idx)
     else:
         X = classifier.get_features(texts, train=False)
@@ -137,17 +142,20 @@ def main() -> None:
             classifier.classifier = EmailTransformerClassifier(args.embedding_model, num_classes)
 
             # Tokenisierung
+            logger.info(f"Tokenisiere {len(texts)} Texte für das Training...")
             encodings = classifier.tokenizer(texts, truncation=True, padding=True, max_length=512, return_tensors="pt")
             dataset = TensorDataset(encodings["input_ids"], encodings["attention_mask"], torch.tensor(y))
             loader = DataLoader(dataset, batch_size=8, shuffle=True)
+            num_batches = len(loader)
 
             optimizer = torch.optim.AdamW(classifier.classifier.parameters(), lr=2e-5)
             criterion = torch.nn.CrossEntropyLoss()
 
             classifier.classifier.train()
             for epoch in range(3): # 3 Epochen als Standard
+                logger.info(f"Starte Epoche {epoch+1}/3...")
                 total_loss = 0
-                for batch in loader:
+                for i, batch in enumerate(loader):
                     optimizer.zero_grad()
                     input_ids, mask, targets = batch
                     outputs = classifier.classifier(input_ids, mask)
@@ -155,7 +163,12 @@ def main() -> None:
                     loss.backward()
                     optimizer.step()
                     total_loss += loss.item()
-                logger.info(f"Epoch {epoch+1}/3, Loss: {total_loss/len(loader):.4f}")
+
+                    if (i + 1) % 10 == 0 or (i + 1) == num_batches:
+                        current_avg_loss = total_loss / (i + 1)
+                        logger.info(f"Epoche {epoch+1}/3, Batch {i+1}/{num_batches}, Aktueller Loss: {current_avg_loss:.4f}")
+
+                logger.info(f"Epoche {epoch+1}/3 abgeschlossen. Durchschnittlicher Loss: {total_loss/num_batches:.4f}")
 
             classifier.is_trained = True
             cv_results = None # Keine CV für Transformer in diesem einfachen Loop
