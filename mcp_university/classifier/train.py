@@ -107,8 +107,8 @@ def main() -> None:
                         help="Modus der Merkmalsextraktion (default: combined).")
     parser.add_argument("--method", type=str, choices=["randomforest", "xgboost", "transformer"], default="xgboost",
                         help="Klassifizierungsmethode (default: xgboost).")
-    parser.add_argument("--embedding-model", type=str, default="paraphrase-multilingual-MiniLM-L12-v2",
-                        help="Sentence-Transformer Modell (default: paraphrase-multilingual-MiniLM-L12-v2).")
+    parser.add_argument("--embedding-model", type=str, default="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+                        help="Sentence-Transformer Modell (default: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2).")
 
     args = parser.parse_args()
 

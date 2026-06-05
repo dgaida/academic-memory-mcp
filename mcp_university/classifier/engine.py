@@ -24,7 +24,7 @@ class EmailClassifier:
         self,
         mode: str = "combined",
         method: str = "xgboost",
-        embedding_model_name: str = "paraphrase-multilingual-MiniLM-L12-v2"
+        embedding_model_name: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
     ) -> None:
         """Initialisiert den Klassifikator.
 

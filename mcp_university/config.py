@@ -1,6 +1,7 @@
 """Modul für die Konfiguration des MCP University Systems."""
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 from typing import List, Dict, Any, Type, TypeVar
 import yaml
 from pydantic import BaseModel
@@ -54,6 +55,9 @@ class Config:
             config_dir = Path(__file__).resolve().parent.parent / "config"
 
         self.config_dir = config_dir
+        # Umgebungsvariablen aus .env oder secrets.env laden
+        load_dotenv(self.config_dir.parent / ".env")
+        load_dotenv(self.config_dir.parent / "secrets.env")
         self.folders = self._load_yaml(config_dir / "folders.yaml", FolderConfig)
         self.user = self._load_yaml(config_dir / "user.yaml", UserConfig)
 

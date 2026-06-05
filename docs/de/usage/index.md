@@ -177,7 +177,7 @@ Der `EmailClassifier` unterstützt drei verschiedene Modi für die Merkmalsextra
     - **Nachteile:** Ignoriert Wortreihenfolge und Semantik (Synonyme werden nicht erkannt).  
 
 2.  **Embeddings (`embedding`)**:  
-    - **Funktionsweise:** Verwendet `Sentence-Transformers` (Standard: `paraphrase-multilingual-MiniLM-L12-v2`), um den Text in einen hochdimensionalen Vektorraum zu projizieren. Dabei wird der gesamte E-Mail-Text als eine Einheit verarbeitet, sodass pro E-Mail genau ein Merkmalsvektor entsteht (keine Unterteilung in einzelne Sätze).  
+    - **Funktionsweise:** Verwendet `Sentence-Transformers` (Standard: `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`), um den Text in einen hochdimensionalen Vektorraum zu projizieren. Dabei wird der gesamte E-Mail-Text als eine Einheit verarbeitet, sodass pro E-Mail genau ein Merkmalsvektor entsteht (keine Unterteilung in einzelne Sätze).
     - **Vorteile:** Erfasst die semantische Bedeutung. Erkennt ähnliche Konzepte, auch wenn unterschiedliche Wörter verwendet werden.  
     - **Nachteile:** Rechenintensiver (erfordert Modell-Downloads), schwerer interpretierbar.  
 
