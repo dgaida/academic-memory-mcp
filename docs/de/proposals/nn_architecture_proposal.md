@@ -7,7 +7,7 @@ Dieser Vorschlag beschreibt eine Alternative zu den aktuellen Modellen (XGBoost/
 Als Architektur wird ein **Transformer-basiertes Modell** (z. B. DistilBERT oder ein multilinguales MiniLM) vorgeschlagen. Im Gegensatz zu klassischen Verfahren, die Wortfrequenzen zählen, erfassen Transformer den semantischen Kontext und die Beziehung zwischen Wörtern (wie z. B. in Betreffzeilen und Body).
 
 ### Hauptkomponenten:  
-1.  **Encoder**: Ein vortrainiertes Modell wie `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`.
+1.  **Encoder**: Ein vortrainiertes Modell wie `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`.  
 2.  **Input-Formatting**: Strukturierung der Rohdaten in ein für Transformer optimiertes Format.  
 3.  **Classification Head**: Ein Fully Connected Layer (MLP) mit Softmax-Aktivierung über dem `[CLS]`-Token oder einem Mean-Pooling-Vektor.  
 
