@@ -7,8 +7,11 @@ from sklearn.metrics import accuracy_score, confusion_matrix, classification_rep
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import torch
+import numpy as np
+from torch.utils.data import DataLoader, TensorDataset
 
-from mcp_university.classifier.engine import EmailClassifier
+from mcp_university.classifier.engine import EmailClassifier, resolve_model_path
 
 # Logging konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
@@ -41,11 +44,30 @@ def evaluate(model_path: Path, test_dir: Path) -> None:
 
     logger.info(f"{len(texts)} Test-E-Mails geladen. Starte Vorhersage...")
 
-    # Merkmale extrahieren
-    X = classifier.get_features(texts, train=False)
-
     # Vorhersagen
-    y_pred_idx = classifier.classifier.predict(X)
+    if classifier.method == 'transformer':
+        classifier.classifier.eval()
+        y_pred_idx = []
+        with torch.no_grad():
+            # Batchweise Verarbeitung für Evaluierung
+            logger.info(f'Tokenisiere {len(texts)} Texte für die Evaluierung...')
+            encodings = classifier.tokenizer(texts, truncation=True, padding=True, max_length=512, return_tensors='pt')
+            dataset = TensorDataset(encodings['input_ids'], encodings['attention_mask'])
+            loader = DataLoader(dataset, batch_size=8)
+            num_batches = len(loader)
+            logger.info(f'Starte Batch-Vorhersage ({num_batches} Batches)...')
+            for i, batch in enumerate(loader):
+                ids, mask = batch
+                outputs = classifier.classifier(ids, mask)
+                preds = torch.argmax(outputs, dim=1)
+                y_pred_idx.extend(preds.numpy())
+                if (i + 1) % 10 == 0 or (i + 1) == num_batches:
+                    logger.info(f'Evaluierung: Batch {i + 1}/{num_batches} verarbeitet.')
+        y_pred_idx = np.array(y_pred_idx)
+    else:
+        # Merkmale extrahieren für klassische Modelle
+        X = classifier.get_features(texts, train=False)
+        y_pred_idx = classifier.classifier.predict(X)
     y_pred = classifier.label_encoder.inverse_transform(y_pred_idx.astype(int))
 
     # Metriken berechnen
@@ -106,13 +128,12 @@ def main() -> None:
     parser.add_argument("--model-path", type=str, default="data/email_classifier.pkl", help="Pfad zum trainierten Modell.")
     parser.add_argument("--mode", type=str, choices=["tfidf", "embedding", "combined"], default="combined",
                         help="Modus der Merkmalsextraktion (default: combined).")
+    parser.add_argument("--method", type=str, choices=["randomforest", "xgboost", "transformer"], default="transformer",
+                        help="Klassifizierungsmethode (default: transformer).")
 
     args = parser.parse_args()
 
-    model_path = Path(args.model_path)
-    # Suffix hinzufügen, falls nicht vorhanden (analog zu train.py)
-    if f"_{args.mode}" not in model_path.stem:
-        model_path = model_path.with_name(f"{model_path.stem}_{args.mode}{model_path.suffix}")
+    model_path = resolve_model_path(args.model_path, args.method, args.mode)
 
     evaluate(model_path, Path(args.test_dir))
 
