@@ -1091,7 +1091,7 @@
 <p>Als Architektur wird ein <strong>Transformer-basiertes Modell</strong> (z. B. DistilBERT oder ein multilinguales MiniLM) vorgeschlagen. Im Gegensatz zu klassischen Verfahren, die Wortfrequenzen zählen, erfassen Transformer den semantischen Kontext und die Beziehung zwischen Wörtern (wie z. B. in Betreffzeilen und Body).</p>
 <h3 id="hauptkomponenten">Hauptkomponenten:<a class="headerlink" href="#hauptkomponenten" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Encoder</strong>: Ein vortrainiertes Modell wie <code>sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2</code>.</li>
+<li><strong>Encoder</strong>: Ein vortrainiertes Modell wie <code>sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2</code>.  </li>
 <li><strong>Input-Formatting</strong>: Strukturierung der Rohdaten in ein für Transformer optimiertes Format.  </li>
 <li><strong>Classification Head</strong>: Ein Fully Connected Layer (MLP) mit Softmax-Aktivierung über dem <code>[CLS]</code>-Token oder einem Mean-Pooling-Vektor.  </li>
 </ol>

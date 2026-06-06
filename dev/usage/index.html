@@ -1901,7 +1901,7 @@ Der Agent nutzt <code>get_student_context</code> and <code>search_documents</cod
 <li>
 <p><strong>Embeddings (<code>embedding</code>)</strong>:  </p>
 <ul>
-<li><strong>Funktionsweise:</strong> Verwendet <code>Sentence-Transformers</code> (Standard: <code>sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2</code>), um den Text in einen hochdimensionalen Vektorraum zu projizieren. Dabei wird der gesamte E-Mail-Text als eine Einheit verarbeitet, sodass pro E-Mail genau ein Merkmalsvektor entsteht (keine Unterteilung in einzelne Sätze).</li>
+<li><strong>Funktionsweise:</strong> Verwendet <code>Sentence-Transformers</code> (Standard: <code>sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2</code>), um den Text in einen hochdimensionalen Vektorraum zu projizieren. Dabei wird der gesamte E-Mail-Text als eine Einheit verarbeitet, sodass pro E-Mail genau ein Merkmalsvektor entsteht (keine Unterteilung in einzelne Sätze).  </li>
 <li><strong>Vorteile:</strong> Erfasst die semantische Bedeutung. Erkennt ähnliche Konzepte, auch wenn unterschiedliche Wörter verwendet werden.  </li>
 <li><strong>Nachteile:</strong> Rechenintensiver (erfordert Modell-Downloads), schwerer interpretierbar.  </li>
 </ul>
