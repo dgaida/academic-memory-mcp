@@ -29,7 +29,7 @@ def test_evaluate_cli_mode_suffix():
             env={"PYTHONPATH": "."}
         )
         # Erwarteter Fehler: ERROR: Modell data/email_classifier_<mode>.pkl wurde nicht gefunden.
-        expected_path = f"data/email_classifier_transformer.pkl"
+        expected_path = "data/email_classifier_transformer.pkl"
         assert f"Modell {expected_path} wurde nicht gefunden" in result.stderr
 
 def test_evaluate_cli_custom_model_path_suffix():
