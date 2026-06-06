@@ -1790,9 +1790,9 @@
 <p>Das System enthält ein Subpackage zur automatisierten Klassifizierung von studentischen E-Mails (z.B. Bachelorarbeit, Praxisprojekt).</p>
 <h3 id="modell-trainieren">Modell trainieren<a class="headerlink" href="#modell-trainieren" title="Permanent link">&para;</a></h3>
 <p>Um den Klassifikator zu nutzen, muss er zuerst mit Beispieldaten trainiert werden. Erwarten wird eine Ordnerstruktur, in der jeder Unterordner eine Klasse repräsentiert und die E-Mails (.msg) enthält.</p>
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python3<span class="w"> </span>mcp_university/classifier/train.py<span class="w"> </span>/pfad/zu/trainingsdaten<span class="w"> </span>--mode<span class="w"> </span>combined<span class="w"> </span>--method<span class="w"> </span>xgboost
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python3<span class="w"> </span>mcp_university/classifier/train.py<span class="w"> </span>/pfad/zu/trainingsdaten<span class="w"> </span>--mode<span class="w"> </span>tfidf<span class="w"> </span>--method<span class="w"> </span>transformer
 </code></pre></div>
-<p>Dabei kann zwischen <code>randomforest</code> und <code>xgboost</code> (Standard) gewählt werden.</p>
+<p>Dabei kann zwischen <code>randomforest</code>, <code>xgboost</code> und <code>transformer</code> (Standard) gewählt werden.</p>
 <h3 id="e-mail-klassifizieren">E-Mail klassifizieren<a class="headerlink" href="#e-mail-klassifizieren" title="Permanent link">&para;</a></h3>
 <p>Nach dem Training kann eine einzelne E-Mail-Datei klassifiziert werden:</p>
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python3<span class="w"> </span>mcp_university/classifier/predict.py<span class="w"> </span>/pfad/zur/email.msg
@@ -1800,7 +1800,7 @@
 <p>Die Ausgabe enthält die wahrscheinlichste Klasse sowie die Konfidenz und eine detaillierte Wahrscheinlichkeitsverteilung.</p>
 <h3 id="xai-analyse-interpretierbarkeit">XAI Analyse (Interpretierbarkeit)<a class="headerlink" href="#xai-analyse-interpretierbarkeit" title="Permanent link">&para;</a></h3>
 <p>Um zu verstehen, welche Wörter für die Klassifizierung besonders wichtig waren, kann die XAI Analyse genutzt werden. Diese nutzt SHAP-Werte, um den Einfluss einzelner Wörter auf die Vorhersage zu berechnen.</p>
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>python3<span class="w"> </span>mcp_university/classifier/xai_analysis.py<span class="w"> </span>--model-path<span class="w"> </span>data/email_classifier_tfidf.pkl<span class="w"> </span>--test-data-path<span class="w"> </span>/pfad/zu/testdaten
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>python3<span class="w"> </span>mcp_university/classifier/xai_analysis.py<span class="w"> </span>--model-path<span class="w"> </span>data/email_classifier_xgboost_tfidf.pkl<span class="w"> </span>--test-data-path<span class="w"> </span>/pfad/zu/testdaten
 </code></pre></div>
 <p>Das Skript analysiert bis zu 20 E-Mails pro Klasse und gibt die Top 5 Wörter zurück, die für die jeweilige Klasse am charakteristischsten sind.</p>
 <h3 id="e-mail-sortierung-studenten-ordner">E-Mail Sortierung (Studenten-Ordner)<a class="headerlink" href="#e-mail-sortierung-studenten-ordner" title="Permanent link">&para;</a></h3>
@@ -1816,7 +1816,7 @@
 <p>In den Logs oder Ausgaben des Agenten erscheint oft die Zeile <code>ANHANG: JA</code>.<br />
 - Dies ist ein <strong>Steuerungssignal</strong> für das Skript. Es bedeutet, dass das LLM empfiehlt, eine zusätzliche Informationsdatei (z.B. ein PDF mit PO-Wechsel-Informationen) an den E-Mail-Entwurf anzuhängen.<br />
 - Es bedeutet <strong>nicht</strong>, dass dem Kalendereintrag selbst eine Datei angehängt wurde.  </p>
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>python3<span class="w"> </span>mcp_university/classifier/sort_emails.py<span class="w"> </span>/quell/ordner<span class="w"> </span>--config<span class="w"> </span>config/class_paths.yaml<span class="w"> </span>--model<span class="w"> </span>data/email_classifier.pkl
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>python3<span class="w"> </span>mcp_university/classifier/sort_emails.py<span class="w"> </span>/quell/ordner<span class="w"> </span>--config<span class="w"> </span>config/class_paths.yaml<span class="w"> </span>--model<span class="w"> </span>data/email_classifier_xgboost_combined.pkl
 </code></pre></div>
 <p>Es erkennt automatisch:<br />
 - <strong>Semester:</strong> Basierend auf dem E-Mail-Datum (SoSe/WS).<br />
@@ -1825,7 +1825,7 @@
 - <strong>Bericht:</strong> Erstellt eine <code>sorted_emails.md</code> mit einer Übersicht aller verschobenen Mails.  </p>
 <h3 id="batch-klassifizierung">Batch-Klassifizierung<a class="headerlink" href="#batch-klassifizierung" title="Permanent link">&para;</a></h3>
 <p>Um einen ganzen Ordner mit E-Mails automatisch zu sortieren (nur Klassifizierung):
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>python3<span class="w"> </span>mcp_university/classifier/classify_folder.py<span class="w"> </span>/quell/ordner<span class="w"> </span>--model<span class="w"> </span>data/email_classifier.pkl
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>python3<span class="w"> </span>mcp_university/classifier/classify_folder.py<span class="w"> </span>/quell/ordner<span class="w"> </span>--model<span class="w"> </span>data/email_classifier_xgboost_combined.pkl
 </code></pre></div>
 Dies verschiebt die E-Mails in Unterordner, die nach den vorhergesagten Klassen benannt sind.</p>
 <h3 id="visualisierung-der-datenverteilung">Visualisierung der Datenverteilung<a class="headerlink" href="#visualisierung-der-datenverteilung" title="Permanent link">&para;</a></h3>
@@ -1916,7 +1916,7 @@ Der Agent nutzt <code>get_student_context</code> and <code>search_documents</cod
 </li>
 </ol>
 <h3 id="modell-benennung">Modell-Benennung<a class="headerlink" href="#modell-benennung" title="Permanent link">&para;</a></h3>
-<p>Beim Training wird die gewählte Methode automatisch an den Dateinamen angehängt (z.B. <code>email_classifier_combined.pkl</code>), um eine Verwechslung der Modelle zu vermeiden.</p>
+<p>Beim Training wird die gewählte Methode und der Modus automatisch an den Dateinamen angehängt (z.B. <code>email_classifier_transformer.pkl</code> oder <code>email_classifier_xgboost_tfidf.pkl</code>), um eine Verwechslung der Modelle zu vermeiden.</p>
 
 
 
