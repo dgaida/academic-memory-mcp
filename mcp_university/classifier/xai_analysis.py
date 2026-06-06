@@ -6,7 +6,7 @@ from collections import Counter
 import numpy as np
 import shap
 
-from mcp_university.classifier.engine import EmailClassifier
+from mcp_university.classifier.engine import EmailClassifier, resolve_model_path
 
 from mcp_university.utils.anonymizer import anonymize_th_koeln_names
 # Logging konfigurieren
@@ -137,12 +137,16 @@ def run_xai_analysis(model_path: Path, test_data_path: Path, samples_per_class: 
 def main():
     """Main Entry Point."""
     parser = argparse.ArgumentParser(description="XAI Analyse für E-Mail Klassifizierung.")
-    parser.add_argument("--model-path", type=str, default="data/email_classifier_tfidf.pkl", help="Pfad zum Modell.")
+    parser.add_argument("--model-path", type=str, default="data/email_classifier.pkl", help="Pfad zum Modell.")
+    parser.add_argument("--mode", type=str, choices=["tfidf", "embedding", "combined"], default="tfidf",
+                        help="Modus der Merkmalsextraktion (default: tfidf).")
+    parser.add_argument("--method", type=str, choices=["randomforest", "xgboost", "transformer"], default="xgboost",
+                        help="Klassifizierungsmethode (default: xgboost).")
     parser.add_argument("--test-data-path", type=str, default="test_mail_data", help="Pfad zu den Testdaten.")
 
     args = parser.parse_args()
 
-    run_xai_analysis(Path(args.model_path), Path(args.test_data_path))
+    run_xai_analysis(resolve_model_path(args.model_path, args.method, args.mode), Path(args.test_data_path))
 
 if __name__ == "__main__":
     main()

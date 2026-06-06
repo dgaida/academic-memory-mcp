@@ -5,11 +5,12 @@ import shutil
 from pathlib import Path
 from typing import Optional
 
-from mcp_university.classifier.engine import EmailClassifier
+from mcp_university.classifier.engine import EmailClassifier, resolve_model_path
 
 # Logging konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
+
 
 def classify_and_move(source_dir: Path, model_path: Path, output_dir: Optional[Path] = None) -> None:
     """Klassifiziert E-Mails in einem Ordner und verschiebt sie in Unterordner basierend auf der Klasse.
@@ -61,17 +62,22 @@ def classify_and_move(source_dir: Path, model_path: Path, output_dir: Optional[P
         except Exception as e:
             logger.error(f"Fehler beim Verarbeiten von {msg_file.name}: {e}")
 
+
 def main() -> None:
     """Haupteinstiegspunkt für das Skript."""
     parser = argparse.ArgumentParser(description="Klassifiziert E-Mails in einem Ordner und verschiebt sie in Klassen-Unterordner.")
     parser.add_argument("source_dir", type=str, help="Quellordner mit .msg Dateien.")
     parser.add_argument("--model", type=str, default="data/email_classifier.pkl", help="Pfad zum trainierten Modell.")
     parser.add_argument("--output-dir", type=str, help="Zielordner (standardmäßig Quellordner).")
+    parser.add_argument("--mode", type=str, choices=["tfidf", "embedding", "combined"], default="tfidf",
+                        help="Modus der Merkmalsextraktion (default: tfidf).")
+    parser.add_argument("--method", type=str, choices=["randomforest", "xgboost", "transformer"], default="transformer",
+                        help="Klassifizierungsmethode (default: transformer).")
 
     args = parser.parse_args()
 
     source_dir = Path(args.source_dir)
-    model_path = Path(args.model)
+    model_path = resolve_model_path(args.model, args.method, args.mode)
     output_dir = Path(args.output_dir) if args.output_dir else None
 
     if not source_dir.exists():
@@ -83,6 +89,7 @@ def main() -> None:
         return
 
     classify_and_move(source_dir, model_path, output_dir)
+
 
 if __name__ == "__main__":
     main()

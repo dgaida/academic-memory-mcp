@@ -5,11 +5,13 @@ import platform
 import subprocess
 import extract_msg
 import yaml
-from mcp_university.classifier.sort_emails import process_emails, write_report, extract_lastname, extract_firstname
+from mcp_university.classifier.sort_emails import process_emails, write_report, extract_lastname, extract_firstname, write_report, extract_lastname, extract_firstname
 import re
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from pathlib import Path
+from mcp_university.classifier.engine import resolve_model_path
+from mcp_university.classifier.engine import resolve_model_path
 from typing import Dict, List, Tuple
 
 try:
@@ -46,14 +48,14 @@ def is_outlook_open() -> bool:
     except Exception:
         return False
 
-def run_sort_emails(source_dir: str, config_path: str) -> None:
+def run_sort_emails(source_dir: str, config_path: str, method: str, mode: str) -> None:
     logger.info(f"Sortiere E-Mails in {source_dir}...")
     with open(config_path, "r", encoding="utf-8") as f:
         config = yaml.safe_load(f)
     if config and "class_paths" in config:
         config = config["class_paths"]
     source_root = Path(source_dir)
-    model_path = Path("data/email_classifier_combined.pkl")
+    model_path = resolve_model_path("data/email_classifier.pkl", method, mode)
     moved_emails = process_emails(source_root, model_path, config)
     write_report(source_root, moved_emails)
 
@@ -214,10 +216,12 @@ def main() -> None:
     parser.add_argument("--cloud-provider", default="openai")
     parser.add_argument("--cloud-model", default="gpt-4o")
     parser.add_argument("--api-key")
+    parser.add_argument("--mode", type=str, choices=["tfidf", "embedding", "combined"], default="tfidf")
+    parser.add_argument("--method", type=str, choices=["randomforest", "xgboost", "transformer"], default="transformer")
     args = parser.parse_args()
 
     source_dir = Path(args.source_dir)
-    try: run_sort_emails(str(source_dir), args.config)
+    try: run_sort_emails(str(source_dir), args.config, args.method, args.mode)
     except Exception as e: logger.error(f"Sortierfehler: {e}")
 
     report_path = source_dir / "sorted_emails.md"

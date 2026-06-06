@@ -17,6 +17,36 @@ import torch.nn as nn
 
 logger = logging.getLogger(__name__)
 
+
+def resolve_model_path(base_path: Union[str, Path], method: str, mode: str) -> Path:
+    """Erstellt den vollständigen Modellpfad basierend auf Methode und Modus.
+
+    Args:
+        base_path: Basis-Pfad (z.B. data/email_classifier.pkl).
+        method: Klassifizierungsmethode (transformer, xgboost, randomforest).
+        mode: Merkmalsextraktion (tfidf, embedding, combined).
+
+    Returns:
+        Vollständiger Pfad als Path-Objekt.
+    """
+    path = Path(base_path)
+    if method == "transformer":
+        suffix = "_transformer"
+    else:
+        suffix = f"_{method}_{mode}"
+
+    # Suffix anhängen, falls noch nicht vorhanden
+    if suffix not in path.stem:
+        # Alte Suffixe entfernen, falls vorhanden (um Dopplungen zu vermeiden)
+        stem = path.stem
+        for m in ["_tfidf", "_embedding", "_combined", "_transformer", "_xgboost", "_randomforest"]:
+            if stem.endswith(m):
+                stem = stem[:-len(m)]
+        # Den Suffix gezielt anhängen
+        path = path.with_name(f"{stem}{suffix}{path.suffix}")
+    return path
+
+
 class EmailClassifier:
     """Klassifiziert E-Mails basierend auf TF-IDF und/oder Embeddings."""
 
@@ -31,22 +61,30 @@ class EmailClassifier:
         Args:
             mode: Modus der Merkmalsextraktion ('tfidf', 'embedding', 'combined').
             method: Klassifizierungsmethode ('randomforest', 'xgboost', 'transformer').
-            embedding_model_name: Name des Sentence-Transformer Modells.
+            embedding_model_name: Name des Sentence-Transformer Modell.
         """
         self.mode = mode
         self.method = method
         self.embedding_model_name = embedding_model_name
         self.parser = MailParser()
 
-        self.tfidf_vectorizer = TfidfVectorizer(max_features=5000, stop_words=ALL_STOP_WORDS, sublinear_tf=False, token_pattern=r"(?u)\b(?!\d{2}\b)[a-zA-ZäöüÄÖÜß0-9]{2,}\b")
-        self._embedding_model = None
+        # TF-IDF Vectorizer
+        self.tfidf_vectorizer = TfidfVectorizer(
+            max_features=5000,
+            stop_words=list(ALL_STOP_WORDS),
+            token_pattern=r"(?u)\b(?!\d{2}\b)[a-zA-ZäöüÄÖÜß0-9]{2,}\b",
+            sublinear_tf=False
+        )
+
+        # Label Encoder
         self.label_encoder = LabelEncoder()
 
+        # Klassifikator initialisieren
         if method == "randomforest":
             self.classifier = RandomForestClassifier(n_estimators=100, random_state=42)
         elif method == "xgboost":
             from xgboost import XGBClassifier
-            self.classifier = XGBClassifier(n_estimators=100, random_state=42, eval_metric='logloss')
+            self.classifier = XGBClassifier(use_label_encoder=False, eval_metric='mlogloss', random_state=42)
         elif method == "transformer":
             self.classifier = None  # Wird im Training oder beim Laden initialisiert
             self.tokenizer = AutoTokenizer.from_pretrained(embedding_model_name)
@@ -54,6 +92,7 @@ class EmailClassifier:
             raise ValueError(f"Ungültige Klassifizierungsmethode: {method}")
 
         self.is_trained = False
+        self._embedding_model = None
 
     @property
     def embedding_model(self):
@@ -80,7 +119,6 @@ class EmailClassifier:
     def _extract_text(self, file_path: Path) -> Optional[str]:
         """Extrahiert Text aus einer E-Mail-Datei."""
         return self.parser.parse(file_path)
-
 
     def _format_transformer_input(self, file_path: Path) -> str:
         """Formatiert die E-Mail-Komponenten für den Transformer-Input."""
@@ -277,6 +315,7 @@ class EmailClassifier:
         self.label_encoder = data["label_encoder"]
         self.is_trained = data["is_trained"]
         # embedding_model wird bei Bedarf geladen (Lazy Loading)
+
 
 class EmailTransformerClassifier(nn.Module):
     """Transformer-basiertes Modell zur E-Mail-Klassifizierung."""

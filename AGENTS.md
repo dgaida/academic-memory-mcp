@@ -15,7 +15,7 @@ MCP University is an offline-first system for managing academic data (students, 
    - Classifies emails using XGBoost or RandomForest.  
    - **Data Structure:** Training and test data are organized by class folders, each containing `Inbox` and `SentItems` subfolders.  
    - **Feature Modes:** Supports `tfidf` (keyword-based), `embedding` (semantic-based), and `combined`.  
-   - **Model Naming:** Trained models automatically append the mode to the filename (e.g., `email_classifier_tfidf.pkl`).  
+   - **Model Naming:** Trained models automatically append the method and mode to the filename (e.g., `email_classifier_transformer.pkl` or `email_classifier_xgboost_tfidf.pkl`).  
    - `sort_emails.py` sorts emails into semester and student folders.  
    - **Special Logic:** Classes starting with `BA_` or `MA_` are stored directly in `Semester/Inbox` or `Semester/SentItems` (no student subfolder).  
    - **Name Extraction:** Extracts lastnames from `smail.th-koeln.de` (format: `v.n@smail.th-koeln.de` -> `N`).  

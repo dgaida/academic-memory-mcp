@@ -1,5 +1,5 @@
 """Skript zum Trainieren des E-Mail-Klassifikators."""
-from mcp_university.classifier.engine import EmailClassifier
+from mcp_university.classifier.engine import EmailClassifier, resolve_model_path
 from pathlib import Path
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.model_selection import GridSearchCV
@@ -108,10 +108,10 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Trainiert einen E-Mail-Klassifikator.")
     parser.add_argument("data_dir", type=str, help="Pfad zum Verzeichnis mit den Trainingsdaten (Unterordner pro Klasse).")
     parser.add_argument("--model-path", type=str, default="data/email_classifier.pkl", help="Pfad zum Speichern des Modells.")
-    parser.add_argument("--mode", type=str, choices=["tfidf", "embedding", "combined"], default="combined",
-                        help="Modus der Merkmalsextraktion (default: combined).")
-    parser.add_argument("--method", type=str, choices=["randomforest", "xgboost", "transformer"], default="xgboost",
-                        help="Klassifizierungsmethode (default: xgboost).")
+    parser.add_argument("--mode", type=str, choices=["tfidf", "embedding", "combined"], default="tfidf",
+                        help="Modus der Merkmalsextraktion (default: tfidf).")
+    parser.add_argument("--method", type=str, choices=["randomforest", "xgboost", "transformer"], default="transformer",
+                        help="Klassifizierungsmethode (default: transformer).")
     parser.add_argument("--embedding-model", type=str, default="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
                         help="Sentence-Transformer Modell (default: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2).")
 
@@ -218,11 +218,9 @@ def main() -> None:
                 }
 
         # Sicherstellen, dass Zielverzeichnis existiert
-        model_file = Path(args.model_path)
-        if f"_{args.mode}" not in model_file.stem:
-            model_file = model_file.with_name(f"{model_file.stem}_{args.mode}{model_file.suffix}")
-        model_file.parent.mkdir(parents=True, exist_ok=True)
+        model_file = resolve_model_path(args.model_path, args.method, args.mode)
 
+        model_file.parent.mkdir(parents=True, exist_ok=True)
         classifier.save(model_file)
         logger.info(f"Modell erfolgreich trainiert und unter {model_file} gespeichert.")
 

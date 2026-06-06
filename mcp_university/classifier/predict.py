@@ -4,24 +4,29 @@ import json
 from pathlib import Path
 import logging
 
-from mcp_university.classifier.engine import EmailClassifier
+from mcp_university.classifier.engine import EmailClassifier, resolve_model_path
 
 # Logging konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
+
 
 def main() -> None:
     """Main function for classifying an email."""
     parser = argparse.ArgumentParser(description="Klassifiziert eine E-Mail Datei.")
     parser.add_argument("file_path", type=str, help="Pfad zur .msg oder .eml Datei.")
     parser.add_argument("--model-path", type=str, default="data/email_classifier.pkl", help="Pfad zum trainierten Modell.")
+    parser.add_argument("--mode", type=str, choices=["tfidf", "embedding", "combined"], default="tfidf",
+                        help="Modus der Merkmalsextraktion (default: tfidf).")
+    parser.add_argument("--method", type=str, choices=["randomforest", "xgboost", "transformer"], default="transformer",
+                        help="Klassifizierungsmethode (default: transformer).")
     parser.add_argument("--json", action="store_true", help="Ausgabe im JSON-Format.")
 
     args = parser.parse_args()
 
-    model_path = Path(args.model_path)
+    model_path = resolve_model_path(args.model_path, args.method, args.mode)
     if not model_path.exists():
-        logger.error(f"Modell {args.model_path} wurde nicht gefunden. Bitte zuerst trainieren.")
+        logger.error(f"Modell {model_path} wurde nicht gefunden. Bitte zuerst trainieren.")
         return
 
     file_path = Path(args.file_path)
@@ -47,6 +52,7 @@ def main() -> None:
 
     except Exception as e:
         logger.error(f"Fehler bei der Klassifizierung: {e}")
+
 
 if __name__ == "__main__":
     main()
