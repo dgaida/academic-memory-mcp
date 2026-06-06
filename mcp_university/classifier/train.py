@@ -219,10 +219,23 @@ def main() -> None:
 
         # Sicherstellen, dass Zielverzeichnis existiert
         model_file = Path(args.model_path)
-        if f"_{args.mode}" not in model_file.stem:
-            model_file = model_file.with_name(f"{model_file.stem}_{args.mode}{model_file.suffix}")
-        model_file.parent.mkdir(parents=True, exist_ok=True)
+        # Bestimme Suffix basierend auf Methode und Modus
+        if args.method == "transformer":
+            suffix = "_transformer"
+        else:
+            suffix = f"_{args.method}_{args.mode}"
 
+        # Suffix anhängen, falls noch nicht vorhanden
+        if suffix not in model_file.stem:
+            # Alte Suffixe entfernen, falls vorhanden (um Dopplungen zu vermeiden)
+            stem = model_file.stem
+            for m in ["_tfidf", "_embedding", "_combined"]:
+                if stem.endswith(m):
+                    stem = stem[:-len(m)]
+                    break
+            model_file = model_file.with_name(f"{stem}{suffix}{model_file.suffix}")
+
+        model_file.parent.mkdir(parents=True, exist_ok=True)
         classifier.save(model_file)
         logger.info(f"Modell erfolgreich trainiert und unter {model_file} gespeichert.")
 

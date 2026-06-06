@@ -137,7 +137,7 @@ def run_xai_analysis(model_path: Path, test_data_path: Path, samples_per_class: 
 def main():
     """Main Entry Point."""
     parser = argparse.ArgumentParser(description="XAI Analyse für E-Mail Klassifizierung.")
-    parser.add_argument("--model-path", type=str, default="data/email_classifier_tfidf.pkl", help="Pfad zum Modell.")
+    parser.add_argument("--model-path", type=str, default="data/email_classifier_xgboost_tfidf.pkl", help="Pfad zum Modell.")
     parser.add_argument("--test-data-path", type=str, default="test_mail_data", help="Pfad zu den Testdaten.")
 
     args = parser.parse_args()

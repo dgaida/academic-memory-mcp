@@ -50,7 +50,7 @@ Die Ausgabe enthält die wahrscheinlichste Klasse sowie die Konfidenz und eine d
 Um zu verstehen, welche Wörter für die Klassifizierung besonders wichtig waren, kann die XAI Analyse genutzt werden. Diese nutzt SHAP-Werte, um den Einfluss einzelner Wörter auf die Vorhersage zu berechnen.
 
 ```bash
-python3 mcp_university/classifier/xai_analysis.py --model-path data/email_classifier_tfidf.pkl --test-data-path /pfad/zu/testdaten
+python3 mcp_university/classifier/xai_analysis.py --model-path data/email_classifier_xgboost_tfidf.pkl --test-data-path /pfad/zu/testdaten
 ```
 
 Das Skript analysiert bis zu 20 E-Mails pro Klasse und gibt die Top 5 Wörter zurück, die für die jeweilige Klasse am charakteristischsten sind.
@@ -75,7 +75,7 @@ In den Logs oder Ausgaben des Agenten erscheint oft die Zeile `ANHANG: JA`.
 
 
 ```bash
-python3 mcp_university/classifier/sort_emails.py /quell/ordner --config config/class_paths.yaml --model data/email_classifier.pkl
+python3 mcp_university/classifier/sort_emails.py /quell/ordner --config config/class_paths.yaml --model data/email_classifier_xgboost_combined.pkl
 ```
 
 Es erkennt automatisch:  
@@ -87,7 +87,7 @@ Es erkennt automatisch:
 ### Batch-Klassifizierung
 Um einen ganzen Ordner mit E-Mails automatisch zu sortieren (nur Klassifizierung):
 ```bash
-python3 mcp_university/classifier/classify_folder.py /quell/ordner --model data/email_classifier.pkl
+python3 mcp_university/classifier/classify_folder.py /quell/ordner --model data/email_classifier_xgboost_combined.pkl
 ```
 Dies verschiebt die E-Mails in Unterordner, die nach den vorhergesagten Klassen benannt sind.
 
@@ -187,4 +187,4 @@ Der `EmailClassifier` unterstützt drei verschiedene Modi für die Merkmalsextra
     - **Nachteile:** Größte Feature-Vektoren, längere Trainingszeit.  
 
 ### Modell-Benennung
-Beim Training wird die gewählte Methode automatisch an den Dateinamen angehängt (z.B. `email_classifier_combined.pkl`), um eine Verwechslung der Modelle zu vermeiden.
+Beim Training wird die gewählte Methode und der Modus automatisch an den Dateinamen angehängt (z.B. `email_classifier_xgboost_combined.pkl`), um eine Verwechslung der Modelle zu vermeiden.

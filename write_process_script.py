@@ -53,7 +53,7 @@ def run_sort_emails(source_dir: str, config_path: str) -> None:
     if config and "class_paths" in config:
         config = config["class_paths"]
     source_root = Path(source_dir)
-    model_path = Path("data/email_classifier_combined.pkl")
+    model_path = Path("data/email_classifier.pkl")
     moved_emails = process_emails(source_root, model_path, config)
     write_report(source_root, moved_emails)
 

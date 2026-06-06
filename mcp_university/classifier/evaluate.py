@@ -106,13 +106,27 @@ def main() -> None:
     parser.add_argument("--model-path", type=str, default="data/email_classifier.pkl", help="Pfad zum trainierten Modell.")
     parser.add_argument("--mode", type=str, choices=["tfidf", "embedding", "combined"], default="combined",
                         help="Modus der Merkmalsextraktion (default: combined).")
+    parser.add_argument("--method", type=str, choices=["randomforest", "xgboost", "transformer"], default="xgboost",
+                        help="Klassifizierungsmethode (default: xgboost).")
 
     args = parser.parse_args()
 
     model_path = Path(args.model_path)
-    # Suffix hinzufügen, falls nicht vorhanden (analog zu train.py)
-    if f"_{args.mode}" not in model_path.stem:
-        model_path = model_path.with_name(f"{model_path.stem}_{args.mode}{model_path.suffix}")
+    # Bestimme Suffix basierend auf Methode und Modus
+    if args.method == "transformer":
+        suffix = "_transformer"
+    else:
+        suffix = f"_{args.method}_{args.mode}"
+
+    # Suffix anhängen, falls noch nicht vorhanden
+    if suffix not in model_path.stem:
+        # Alte Suffixe entfernen, falls vorhanden (um Dopplungen zu vermeiden)
+        stem = model_path.stem
+        for m in ["_tfidf", "_embedding", "_combined"]:
+            if stem.endswith(m):
+                stem = stem[:-len(m)]
+                break
+        model_path = model_path.with_name(f"{stem}{suffix}{model_path.suffix}")
 
     evaluate(model_path, Path(args.test_dir))
 
