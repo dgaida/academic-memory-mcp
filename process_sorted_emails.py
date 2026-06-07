@@ -161,14 +161,6 @@ def relocate_emails(email_changes: List[Dict], config: Dict):
         lastname = change["lastname"]
         logger.info(f"Relocating {old_path.name} from {old_class} to {new_class}")
 
-        if new_class == "Others":
-            class_base_path = Path(r"D:\TH_Koeln\MailTrainingDataFuture\Others")
-        else:
-            if new_class not in config:
-                logger.error(f"Klasse {new_class} nicht in Konfiguration gefunden.")
-                continue
-            class_base_path = Path(config[new_class])
-
         try:
             date = mail_parser.get_email_date(old_path)
         except Exception:
@@ -176,14 +168,25 @@ def relocate_emails(email_changes: List[Dict], config: Dict):
         semester = get_semester(date)
 
         if new_class == "Others":
-            target_dir = class_base_path
-        elif new_class.startswith(("BA_", "MA_")):
-            target_dir = class_base_path / semester / change["folder"]
+            if change["folder"] == "Inbox":
+                target_dir = Path(r"D:\TH_Koeln\StudentMails2\manuell beantworten")
+            elif change["folder"] == "SentItems":
+                target_dir = Path(r"D:\TH_Koeln\StudentMails2\manuell beantwortet")
+            else:
+                target_dir = Path(r"D:\TH_Koeln\MailTrainingDataFuture\Others")
         else:
-            student_dir = find_student_folder(class_base_path, lastname)
-            if not student_dir:
-                student_dir = class_base_path / semester / lastname
-            target_dir = student_dir / change["folder"]
+            if new_class not in config:
+                logger.error(f"Klasse {new_class} nicht in Konfiguration gefunden.")
+                continue
+            class_base_path = Path(config[new_class])
+
+            if new_class.startswith(("BA_", "MA_")):
+                target_dir = class_base_path / semester / change["folder"]
+            else:
+                student_dir = find_student_folder(class_base_path, lastname)
+                if not student_dir:
+                    student_dir = class_base_path / semester / lastname
+                target_dir = student_dir / change["folder"]
 
         target_dir.mkdir(parents=True, exist_ok=True)
 
@@ -197,15 +200,11 @@ def relocate_emails(email_changes: List[Dict], config: Dict):
                     files_to_process.append(md_file)
 
         for f in files_to_process:
-            if new_class == "Others" and f.suffix == ".md":
-                logger.info(f"Lösche {f.name}")
-                f.unlink()
-            else:
-                dest = target_dir / f.name
-                logger.info(f"Verschiebe {f.name} nach {dest}")
-                if dest.exists():
-                    dest.unlink()
-                shutil.move(str(f), str(dest))
+            dest = target_dir / f.name
+            logger.info(f"Verschiebe {f.name} nach {dest}")
+            if dest.exists():
+                dest.unlink()
+            shutil.move(str(f), str(dest))
 
         # Aufräumen
         old_folder = old_path.parent
@@ -240,7 +239,9 @@ def run_gradio_gui(report_path: Path, config: Dict):
         logger.info("Keine E-Mails zum Anzeigen im Gradio GUI.")
         return
 
-    available_classes = sorted(list(config.keys())) + ["Others"]
+    available_classes = sorted([c for c in config.keys() if c != "Other"])
+    if "Others" not in available_classes:
+        available_classes.append("Others")
 
     with gr.Blocks(title="E-Mail Sortierung Überprüfung") as demo:
         gr.Markdown("# E-Mail Sortierung Überprüfung")
@@ -259,9 +260,13 @@ def run_gradio_gui(report_path: Path, config: Dict):
                             f"**Student:** {mail['lastname']} ({mail['semester']}) | **Ordner:** {mail['folder']}\n**Datei:** `{mail['path'].name}`"
                         )
                     with gr.Column(scale=1):
+                        initial_value = mail["class"]
+                        if initial_value == "Other":
+                            initial_value = "Others"
+
                         dd = gr.Dropdown(
                             choices=available_classes,
-                            value=mail["class"],
+                            value=initial_value,
                             label="Korrektes Ziel",
                         )
                         dropdowns.append(dd)
