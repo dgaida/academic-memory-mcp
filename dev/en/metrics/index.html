@@ -1129,22 +1129,22 @@ fetch('../assets/metrics.json')
           <tr>
             <td>Docstring Coverage</td>
             <td>${data.interrogate_coverage}%</td>
-            <td>${data.interrogate_coverage >= 95 ? '✅ Pass' : '❌ Fail'}</td>
+            <td>${Number(data.interrogate_coverage) >= 95 ? '✅ Pass' : '❌ Fail'}</td>
           </tr>
           <tr>
             <td>Markdown Lint</td>
             <td>${data.markdownlint_errors} errors</td>
-            <td>${data.markdownlint_errors === 0 ? '✅ Clean' : '⚠️ Attention'}</td>
+            <td>${Number(data.markdownlint_errors) === 0 ? '✅ Clean' : '⚠️ Attention'}</td>
           </tr>
           <tr>
             <td>Broken Links</td>
             <td>${data.broken_links}</td>
-            <td>${data.broken_links === 0 ? '✅ All good' : '❌ Fix needed'}</td>
+            <td>${Number(data.broken_links) === 0 ? '✅ All good' : '❌ Fix needed'}</td>
           </tr>
           <tr>
             <td>Build Warnings</td>
             <td>${data.build_warnings}</td>
-            <td>${data.build_warnings === 0 ? '✅ Perfect' : '⚠️ Review'}</td>
+            <td>${Number(data.build_warnings) === 0 ? '✅ Perfect' : '⚠️ Review'}</td>
           </tr>
         </tbody>
       </table>
