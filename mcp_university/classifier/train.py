@@ -150,24 +150,25 @@ def main() -> None:
         )
         logger.info(f"Daten aufgeteilt: {len(texts_train)} Training, {len(texts_val)} Validation.")
 
-        # Labels encoden (auf Basis der Trainingsdaten fitten)
+        # Labels encoden (auf Basis der vollständigen Daten fitten)
         # Wenn Modell geladen wurde, prüfen wir ob die Klassen kompatibel sind
         if classifier.is_trained:
             try:
                 # Versuche neue Labels mit altem Encoder zu transformieren
-                classifier.label_encoder.transform(labels_train)
+                classifier.label_encoder.transform(labels)
                 num_classes = len(classifier.label_encoder.classes_)
                 logger.info(f"Klassen sind kompatibel mit dem geladenen Modell ({num_classes} Klassen).")
             except ValueError:
                 logger.info("Neue Klassen gefunden oder Reihenfolge anders. LabelEncoder wird neu gefittet.")
-                classifier.label_encoder.fit(labels_train)
+                classifier.label_encoder.fit(labels)
                 num_classes = len(classifier.label_encoder.classes_)
                 # Falls sich die Anzahl der Klassen geändert hat, markieren wir das Modell als nicht trainiert für den Reset
                 classifier.is_trained = False
         else:
-            classifier.label_encoder.fit(labels_train)
+            classifier.label_encoder.fit(labels)
             num_classes = len(classifier.label_encoder.classes_)
 
+        y = classifier.label_encoder.transform(labels)
         y_train = classifier.label_encoder.transform(labels_train)
         y_val = classifier.label_encoder.transform(labels_val)
 
@@ -237,9 +238,8 @@ def main() -> None:
             classifier.is_trained = True
             cv_results = None # Keine CV für Transformer in diesem einfachen Loop
         else:
-            # Merkmale extrahieren für klassische Modelle (nur auf Training)
-            X_train = classifier.get_features(texts_train, train=True)
-            # Validation Merkmale für spätere Evaluierung (optional, GridSearchCV macht eigene CV)
+            # Merkmale extrahieren für klassische Modelle (auf VOLLSTÄNDIGEN Daten)
+            X = classifier.get_features(texts, train=True)
 
             # GridSearchCV Setup
             if args.method == "randomforest":
@@ -265,7 +265,7 @@ def main() -> None:
                 verbose=1
             )
 
-            grid_search.fit(X_train, y_train)
+            grid_search.fit(X, y)
 
             logger.info(f"Beste Parameter: {grid_search.best_params_}")
             logger.info(f"Bester Score: {grid_search.best_score_:.4f}")
@@ -289,8 +289,11 @@ def main() -> None:
 
         # Evaluierung auf Trainings- und Validierungsdaten
         logger.info("Starte Evaluierung und Berichterstellung...")
-        evaluate_and_save(classifier, texts_train, labels_train, model_file.parent, prefix="train", cv_results=cv_results)
-        evaluate_and_save(classifier, texts_val, labels_val, model_file.parent, prefix="val")
+        if args.method == "transformer":
+            evaluate_and_save(classifier, texts_train, labels_train, model_file.parent, prefix="train", cv_results=cv_results)
+            evaluate_and_save(classifier, texts_val, labels_val, model_file.parent, prefix="val")
+        else:
+            evaluate_and_save(classifier, texts, labels, model_file.parent, prefix="train", cv_results=cv_results)
 
     except Exception as e:
         logger.error(f"Fehler beim Training: {e}")
