@@ -1,11 +1,20 @@
 """Skript zur Verarbeitung sortierter E-Mails und Generierung von Antworten."""
+
 import argparse
 import logging
+import sys
 import platform
 import subprocess
 import extract_msg
 import yaml
-from mcp_university.classifier.sort_emails import (process_emails, write_report, extract_lastname, extract_firstname, get_semester, find_student_folder)
+from mcp_university.classifier.sort_emails import (
+    process_emails,
+    write_report,
+    extract_lastname,
+    extract_firstname,
+    get_semester,
+    find_student_folder,
+)
 import re
 import shutil
 import gradio as gr
@@ -16,6 +25,7 @@ from typing import Dict, List, Tuple
 
 try:
     import win32com.client
+
     OUTLOOK_AVAILABLE = True
 except ImportError:
     OUTLOOK_AVAILABLE = False
@@ -25,11 +35,13 @@ from mcp_university.summarizer.engine import Summarizer
 from mcp_university.parser.mail_parser import MailParser
 from mcp_university.agent import Agent
 from mcp_university.agent.mcp_agent import MCPAgent
+from mcp_university.classifier.engine import resolve_model_path
 
 # Globaler Logger (wird in main konfiguriert)
 logger = logging.getLogger(__name__)
 
 DEBUG = True
+
 
 def is_outlook_open() -> bool:
     """Prüft, ob Outlook aktuell geöffnet ist.
@@ -59,12 +71,20 @@ def is_outlook_open() -> bool:
     except Exception:
         return False
 
-def run_sort_emails(source_dir: str, config_path: str) -> None:
+
+def run_sort_emails(
+    source_dir: str,
+    config_path: str,
+    method: str = "transformer",
+    mode: str = "combined",
+) -> None:
     """Sortiert E-Mails basierend auf Klassifizierung.
 
     Args:
         source_dir (str): Quellordner mit den E-Mails.
         config_path (str): Pfad zur Konfigurationsdatei.
+        method (str): Klassifizierungsmethode.
+        mode (str): Merkmalsextraktion.
     """
     logger.info(f"Sortiere E-Mails in {source_dir}...")
 
@@ -74,10 +94,17 @@ def run_sort_emails(source_dir: str, config_path: str) -> None:
         config = config["class_paths"]
 
     source_root = Path(source_dir)
-    model_path = Path("data/email_classifier_combined.pkl")
+    model_path = resolve_model_path("data/email_classifier.pkl", method, mode)
+
+    if not model_path.exists():
+        logger.error(
+            f"Modell-Datei nicht gefunden: {model_path}. Programm wird beendet."
+        )
+        sys.exit(1)
 
     moved_emails = process_emails(source_root, model_path, config)
     write_report(source_root, moved_emails)
+
 
 def parse_sorted_report(report_path: Path) -> List[Dict]:
     """Parst die sorted_emails.md Datei.
@@ -103,15 +130,16 @@ def parse_sorted_report(report_path: Path) -> List[Dict]:
 
             mail_match = re.search(r"- \*\*(.*?)\*\* \| (.*?) \| (.*?): `(.*?)`", line)
             if mail_match:
-                emails.append({
-                    "class": current_class,
-                    "semester": mail_match.group(1),
-                    "lastname": mail_match.group(2),
-                    "folder": mail_match.group(3),
-                    "path": Path(mail_match.group(4))
-                })
+                emails.append(
+                    {
+                        "class": current_class,
+                        "semester": mail_match.group(1),
+                        "lastname": mail_match.group(2),
+                        "folder": mail_match.group(3),
+                        "path": Path(mail_match.group(4)),
+                    }
+                )
     return emails
-
 
 
 def relocate_emails(email_changes: List[Dict], config: Dict):
@@ -123,14 +151,14 @@ def relocate_emails(email_changes: List[Dict], config: Dict):
     """
     mail_parser = MailParser()
     for change in email_changes:
-        old_path = Path(change['path'])
-        new_class = change['new_class']
-        old_class = change['class']
+        old_path = Path(change["path"])
+        new_class = change["new_class"]
+        old_class = change["class"]
 
         if new_class == old_class:
             continue
 
-        lastname = change['lastname']
+        lastname = change["lastname"]
         logger.info(f"Relocating {old_path.name} from {old_class} to {new_class}")
 
         if new_class == "Others":
@@ -150,12 +178,12 @@ def relocate_emails(email_changes: List[Dict], config: Dict):
         if new_class == "Others":
             target_dir = class_base_path
         elif new_class.startswith(("BA_", "MA_")):
-            target_dir = class_base_path / semester / change['folder']
+            target_dir = class_base_path / semester / change["folder"]
         else:
             student_dir = find_student_folder(class_base_path, lastname)
             if not student_dir:
                 student_dir = class_base_path / semester / lastname
-            target_dir = student_dir / change['folder']
+            target_dir = student_dir / change["folder"]
 
         target_dir.mkdir(parents=True, exist_ok=True)
 
@@ -199,6 +227,7 @@ def relocate_emails(email_changes: List[Dict], config: Dict):
             if parent_folder.name == lastname:
                 delete_if_empty(parent_folder)
 
+
 def run_gradio_gui(report_path: Path, config: Dict):
     """Startet die Gradio GUI zur Korrektur der Einsortierung.
 
@@ -215,7 +244,9 @@ def run_gradio_gui(report_path: Path, config: Dict):
 
     with gr.Blocks(title="E-Mail Sortierung Überprüfung") as demo:
         gr.Markdown("# E-Mail Sortierung Überprüfung")
-        gr.Markdown("Bitte kontrollieren Sie die automatisch vorgenommene Einsortierung.")
+        gr.Markdown(
+            "Bitte kontrollieren Sie die automatisch vorgenommene Einsortierung."
+        )
 
         dropdowns = []
         email_data = []
@@ -224,9 +255,15 @@ def run_gradio_gui(report_path: Path, config: Dict):
             with gr.Group():
                 with gr.Row():
                     with gr.Column(scale=4):
-                        gr.Markdown(f"**Student:** {mail['lastname']} ({mail['semester']}) | **Ordner:** {mail['folder']}\n**Datei:** `{mail['path'].name}`")
+                        gr.Markdown(
+                            f"**Student:** {mail['lastname']} ({mail['semester']}) | **Ordner:** {mail['folder']}\n**Datei:** `{mail['path'].name}`"
+                        )
                     with gr.Column(scale=1):
-                        dd = gr.Dropdown(choices=available_classes, value=mail['class'], label="Korrektes Ziel")
+                        dd = gr.Dropdown(
+                            choices=available_classes,
+                            value=mail["class"],
+                            label="Korrektes Ziel",
+                        )
                         dropdowns.append(dd)
                         email_data.append(mail)
 
@@ -238,7 +275,7 @@ def run_gradio_gui(report_path: Path, config: Dict):
             changes = []
             for mail, new_class in zip(email_data, selected_classes):
                 m = mail.copy()
-                m['new_class'] = new_class
+                m["new_class"] = new_class
                 changes.append(m)
 
             try:
@@ -253,7 +290,13 @@ def run_gradio_gui(report_path: Path, config: Dict):
     demo.launch(inbrowser=True)
 
 
-def create_outlook_draft(subject: str, body: str, recipient: str = "", cc: List[str] = None, attachments: List[Path] = None) -> bool:
+def create_outlook_draft(
+    subject: str,
+    body: str,
+    recipient: str = "",
+    cc: List[str] = None,
+    attachments: List[Path] = None,
+) -> bool:
     """Erstellt einen E-Mail-Entwurf in Outlook.
 
     Args:
@@ -313,10 +356,14 @@ def create_outlook_draft(subject: str, body: str, recipient: str = "", cc: List[
 
         if target_folder:
             mail = target_folder.Items.Add(0)  # 0 = olMailItem
-            logger.info(f"Erstelle Entwurf direkt in {target_account} -> {target_folder_name}.")
+            logger.info(
+                f"Erstelle Entwurf direkt in {target_account} -> {target_folder_name}."
+            )
         else:
             mail = outlook.CreateItem(0)
-            logger.warning(f"Zielordner {target_folder_name} nicht gefunden. Erstelle in Standard-Entwürfen.")
+            logger.warning(
+                f"Zielordner {target_folder_name} nicht gefunden. Erstelle in Standard-Entwürfen."
+            )
 
         mail.Subject = subject
         mail.Body = body
@@ -337,7 +384,20 @@ def create_outlook_draft(subject: str, body: str, recipient: str = "", cc: List[
         logger.error(f"Fehler beim Erstellen des Outlook-Entwurfs: {e}")
         return False
 
-def generate_reply(agent, mail_path: Path, summary_content: str = "", skill_path: Path = None, conversation_content: str = "", persona_path: Path = None, additional_context: str = "", debug: bool = False, appointment_skill_path: Path = None, sender_name: str = None, sender_email: str = None) -> Tuple[str, str, bool]:
+
+def generate_reply(
+    agent,
+    mail_path: Path,
+    summary_content: str = "",
+    skill_path: Path = None,
+    conversation_content: str = "",
+    persona_path: Path = None,
+    additional_context: str = "",
+    debug: bool = False,
+    appointment_skill_path: Path = None,
+    sender_name: str = None,
+    sender_email: str = None,
+) -> Tuple[str, str, bool]:
     """Generiert eine Antwortmail mit dem LLM in zwei Schritten:
     1. Prüfung auf Terminrelevanz (Appointment Skill).
     2. Falls nicht relevant, klassenspezifische Antwort mit vollem Kontext.
@@ -368,7 +428,9 @@ def generate_reply(agent, mail_path: Path, summary_content: str = "", skill_path
 
         # Wenn Cloud/Anonymisierung aktiv ist, speichern wir die anonymisierte Fassung
         if agent.use_cloud and agent.anonymizer and sender_name and sender_email:
-            anonymized_content = agent.anonymizer.anonymize(mail_content, sender_name, sender_email)
+            anonymized_content = agent.anonymizer.anonymize(
+                mail_content, sender_name, sender_email
+            )
             anon_file = mail_path.parent / f"{mail_path.stem}_anonymized.md"
             anon_file.write_text(anonymized_content, encoding="utf-8")
             logger.info(f"Anonymisierte Mail gespeichert: {anon_file}")
@@ -388,7 +450,7 @@ def generate_reply(agent, mail_path: Path, summary_content: str = "", skill_path
     logger.info("Schritt 1: Prüfe Terminrelevanz...")
     appointment_user_prompt = f"""Prüfe die folgende E-Mail auf Terminrelevanz (Anfrage oder Bestätigung) basierend auf dem TERMINVERWALTUNG SKILL.
 
-HEUTE IST: {datetime.now(ZoneInfo('Europe/Berlin')).strftime('%A, den %d.%m.%Y %H:%M')}
+HEUTE IST: {datetime.now(ZoneInfo("Europe/Berlin")).strftime("%A, den %d.%m.%Y %H:%M")}
 
 PERSONA:
 {persona_content}
@@ -420,10 +482,10 @@ TEXT:
 
     try:
         content = agent.chat(
-            messages=[{'role': 'user', 'content': appointment_user_prompt}],
+            messages=[{"role": "user", "content": appointment_user_prompt}],
             system_prompt=system_prompt,
             sender_name=sender_name,
-            sender_email=sender_email
+            sender_email=sender_email,
         )
         logger.info(f"Antwort von Agent (Appointment-Check): {content}")
 
@@ -439,7 +501,9 @@ TEXT:
             should_attach = "ANHANG: JA" in content
             reply_subject = ""
             if "BETREFF:" in content:
-                reply_subject = content.split("BETREFF:", 1)[1].split("TEXT:", 1)[0].strip()
+                reply_subject = (
+                    content.split("BETREFF:", 1)[1].split("TEXT:", 1)[0].strip()
+                )
             reply_text = content
             if "TEXT:" in content:
                 reply_text = content.split("TEXT:", 1)[1].strip()
@@ -470,12 +534,16 @@ WICHTIGE ANWEISUNG:
             messages=[{"role": "user", "content": necessity_user_prompt}],
             system_prompt=system_prompt,
             sender_name=sender_name,
-            sender_email=sender_email
+            sender_email=sender_email,
         )
         logger.info(f"Antwort von Agent (Necessity-Check): {necessity_content}")
 
         if necessity_content.startswith("NO_REPLY_NEEDED"):
-            reason = necessity_content.split("|", 1)[1] if "|" in necessity_content else "Keine Begründung angegeben."
+            reason = (
+                necessity_content.split("|", 1)[1]
+                if "|" in necessity_content
+                else "Keine Begründung angegeben."
+            )
             return "NO_REPLY_NEEDED", reason, False
     except Exception as e:
         logger.error(f"Fehler in Schritt 1.5 (Necessity-Check): {e}")
@@ -487,12 +555,16 @@ WICHTIGE ANWEISUNG:
         skill_content = skill_path.read_text(encoding="utf-8")
         logger.info(f"Klassenspezifische Skill geladen: {skill_path.name}")
 
-    context_label = "SCHRIFTVERKEHR DER LETZTEN 2 WOCHEN" if conversation_content else "ZUSAMMENFASSUNG DES SCHRIFTVERKEHRS"
+    context_label = (
+        "SCHRIFTVERKEHR DER LETZTEN 2 WOCHEN"
+        if conversation_content
+        else "ZUSAMMENFASSUNG DES SCHRIFTVERKEHRS"
+    )
     context_body = conversation_content if conversation_content else summary_content
 
     regular_user_prompt = f"""Basierend auf der folgenden E-Mail, dem Kontext des bisherigen Schriftverkehrs, der Persona und den Skill-Anweisungen, verfasse eine professionelle Antwort.
 
-HEUTE IST: {datetime.now(ZoneInfo('Europe/Berlin')).strftime('%A, den %d.%m.%Y %H:%M')}
+HEUTE IST: {datetime.now(ZoneInfo("Europe/Berlin")).strftime("%A, den %d.%m.%Y %H:%M")}
 
 PERSONA:
 {persona_content}
@@ -517,15 +589,17 @@ TEXT:
 """
     if debug:
         prompt_file = mail_path.parent / f"{mail_path.stem}_regular_prompt.md"
-        prompt_content = f"# System Prompt\n{system_prompt}\n\n# User Prompt\n{regular_user_prompt}"
+        prompt_content = (
+            f"# System Prompt\n{system_prompt}\n\n# User Prompt\n{regular_user_prompt}"
+        )
         prompt_file.write_text(prompt_content, encoding="utf-8")
 
     try:
         content = agent.chat(
-            messages=[{'role': 'user', 'content': regular_user_prompt}],
+            messages=[{"role": "user", "content": regular_user_prompt}],
             system_prompt=system_prompt,
             sender_name=sender_name,
-            sender_email=sender_email
+            sender_email=sender_email,
         )
 
         should_attach = "ANHANG: JA" in content
@@ -541,6 +615,7 @@ TEXT:
         logger.error(f"Fehler in Schritt 2 (Regulär): {e}")
         return "", "Fehler bei der Generierung der Antwort.", False
 
+
 def main() -> None:
     """Haupteinstiegspunkt des Skripts."""
     config = get_config()
@@ -549,35 +624,71 @@ def main() -> None:
     config.log_path.mkdir(parents=True, exist_ok=True)
 
     # Logging konfigurieren
-    log_format = '%(asctime)s - %(levelname)s - %(message)s'
-    file_handler = logging.FileHandler(config.log_path / "process_emails.log", encoding="utf-8")
+    log_format = "%(asctime)s - %(levelname)s - %(message)s"
+    file_handler = logging.FileHandler(
+        config.log_path / "process_emails.log", encoding="utf-8"
+    )
     stream_handler = logging.StreamHandler()
 
     logging.basicConfig(
         level=logging.INFO,
         format=log_format,
         handlers=[file_handler, stream_handler],
-        force=True # Vorhandene Konfiguration überschreiben
+        force=True,  # Vorhandene Konfiguration überschreiben
     )
 
-    parser = argparse.ArgumentParser(description="Verarbeitet sortierte E-Mails und generiert Antworten.")
+    parser = argparse.ArgumentParser(
+        description="Verarbeitet sortierte E-Mails und generiert Antworten."
+    )
     parser.add_argument("source_dir", help="Quellordner der E-Mails")
-    parser.add_argument("--config", default="config/folders.yaml", help="Pfad zur Konfiguration")
-    parser.add_argument("--debug", action="store_true", default=DEBUG, help="Speichert LLM Prompts als Markdown (Default: True)")
-    parser.add_argument("--no-debug", action="store_false", dest="debug", help="Deaktiviert das Speichern von Prompts")
-    parser.add_argument("--use-mcp", action="store_true", help="Nutzt den MCP Server für Tools")
-    parser.add_argument("--use-cloud", action="store_true", help="Nutzt ein Cloud-LLM (mit Anonymisierung)")
+    parser.add_argument(
+        "--config", default="config/folders.yaml", help="Pfad zur Konfiguration"
+    )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        default=DEBUG,
+        help="Speichert LLM Prompts als Markdown (Default: True)",
+    )
+    parser.add_argument(
+        "--no-debug",
+        action="store_false",
+        dest="debug",
+        help="Deaktiviert das Speichern von Prompts",
+    )
+    parser.add_argument(
+        "--use-mcp", action="store_true", help="Nutzt den MCP Server für Tools"
+    )
+    parser.add_argument(
+        "--use-cloud",
+        action="store_true",
+        help="Nutzt ein Cloud-LLM (mit Anonymisierung)",
+    )
     parser.add_argument("--cloud-provider", default="openai", help="Cloud-LLM Provider")
     parser.add_argument("--cloud-model", default="gpt-4o", help="Cloud-LLM Modell")
     parser.add_argument("--api-key", help="Cloud-LLM API-Key")
+    parser.add_argument(
+        "--method",
+        default="transformer",
+        help="Klassifizierungsmethode (transformer, xgboost, randomforest)",
+    )
+    parser.add_argument(
+        "--mode",
+        default="combined",
+        help="Merkmalsextraktion (tfidf, embedding, combined)",
+    )
     args = parser.parse_args()
 
     source_dir = Path(args.source_dir)
     # 1. Sortieren
     try:
-        run_sort_emails(str(source_dir), args.config)
+        run_sort_emails(
+            str(source_dir), args.config, method=args.method, mode=args.mode
+        )
     except Exception as e:
         logger.error(f"Fehler beim Sortieren: {e}")
+        # Wir beenden hier nicht zwingend, da run_sort_emails bereits sys.exit(1) ruft wenn das Modell fehlt.
+        # Andere Fehler beim Sortieren könnten toleriert werden, aber eigentlich ist es kritisch.
 
     # 2. Report parsen
     report_path = source_dir / "sorted_emails.md"
@@ -592,7 +703,7 @@ def main() -> None:
         "use_cloud": args.use_cloud,
         "cloud_provider": args.cloud_provider,
         "cloud_model": args.cloud_model,
-        "api_key": args.api_key
+        "api_key": args.api_key,
     }
 
     if args.use_mcp:
@@ -622,9 +733,13 @@ def main() -> None:
             sent_folder = semester_folder / "SentItems"
             all_files = []
             if inbox_folder.exists():
-                all_files.extend(list(inbox_folder.glob("*.msg")) + list(inbox_folder.glob("*.eml")))
+                all_files.extend(
+                    list(inbox_folder.glob("*.msg")) + list(inbox_folder.glob("*.eml"))
+                )
             if sent_folder.exists():
-                all_files.extend(list(sent_folder.glob("*.msg")) + list(sent_folder.glob("*.eml")))
+                all_files.extend(
+                    list(sent_folder.glob("*.msg")) + list(sent_folder.glob("*.eml"))
+                )
 
             student_emails = []
             for f in all_files:
@@ -633,8 +748,13 @@ def main() -> None:
                         sender_lastname = extract_lastname(msg.sender)
                         recipient_lastname = "None"
                         if msg.recipients:
-                            recipient_lastname = extract_lastname(msg.recipients[0].name or msg.recipients[0].email)
-                        if sender_lastname == email["lastname"] or recipient_lastname == email["lastname"]:
+                            recipient_lastname = extract_lastname(
+                                msg.recipients[0].name or msg.recipients[0].email
+                            )
+                        if (
+                            sender_lastname == email["lastname"]
+                            or recipient_lastname == email["lastname"]
+                        ):
                             date = mail_parser.get_email_date(f)
                             student_emails.append((date, f))
                 except Exception:
@@ -654,7 +774,9 @@ def main() -> None:
         else:
             identifier = mail_path.parent.parent
             # Normal student folder logic
-            email_files = list(identifier.rglob("*.msg")) + list(identifier.rglob("*.eml"))
+            email_files = list(identifier.rglob("*.msg")) + list(
+                identifier.rglob("*.eml")
+            )
             if not email_files:
                 continue
             dated_emails = []
@@ -666,7 +788,9 @@ def main() -> None:
                     dated_emails.append((datetime.min, f))
             dated_emails.sort(key=lambda x: x[0])
             latest_date, latest_mail = dated_emails[-1]
-            needs_answer = "Inbox" in latest_mail.parts and "SentItems" not in latest_mail.parts
+            needs_answer = (
+                "Inbox" in latest_mail.parts and "SentItems" not in latest_mail.parts
+            )
 
             # Bereicherung des E-Mail-Dicts für spätere Verarbeitung
             email["latest_date"] = latest_date
@@ -683,8 +807,14 @@ def main() -> None:
         f.write("| Student | Klasse | Semester |\n")
         f.write("| :--- | :--- | :--- |\n")
         for email in unique_emails_to_process:
-            f.write("| {} | {} | {} |\n".format(email["lastname"], email["class"], email["semester"]))
-    logger.info(f"Liste der zu beantwortenden E-Mails erstellt: {emails_to_process_path}")
+            f.write(
+                "| {} | {} | {} |\n".format(
+                    email["lastname"], email["class"], email["semester"]
+                )
+            )
+    logger.info(
+        f"Liste der zu beantwortenden E-Mails erstellt: {emails_to_process_path}"
+    )
 
     persona_path = Path("skills/SKILL_persona.md")
     appointment_skill_path = Path("skills/SKILL_Appointment.md")
@@ -707,7 +837,9 @@ def main() -> None:
             semester_folder = email["semester_folder"]
             student_emails = email["student_emails"]
 
-            logger.info(f"Verarbeite BA/MA E-Mails für {email['lastname']} in {email['class']}")
+            logger.info(
+                f"Verarbeite BA/MA E-Mails für {email['lastname']} in {email['class']}"
+            )
 
             threshold_date = latest_date - timedelta(days=14)
             recent_emails = [e for e in student_emails if e[0] >= threshold_date]
@@ -727,7 +859,10 @@ def main() -> None:
                     if msg.recipients:
                         for rec in msg.recipients:
                             rec_email = rec.email or rec.name
-                            if rec_email and get_config().user.email not in rec_email.lower():
+                            if (
+                                rec_email
+                                and get_config().user.email not in rec_email.lower()
+                            ):
                                 if rec_email.lower() != student_email.lower():
                                     cc_list.append(rec_email)
             except Exception:
@@ -746,59 +881,112 @@ def main() -> None:
             skill_path = Path(f"skills/SKILL_{email['class']}.md")
             if not skill_path.exists():
                 # Fallback to script directory
-                skill_path = Path(__file__).parent / "skills" / f"SKILL_{email['class']}.md"
+                skill_path = (
+                    Path(__file__).parent / "skills" / f"SKILL_{email['class']}.md"
+                )
 
             # Zusätzlicher Kontext (z.B. PO-Wechsel)
             additional_context = f"Anrede: {salutation}\n"
             additional_context += f"Studenten-E-Mail: {student_email}\n"
             attachments = []
             if email["class"] == "PO-Wechsel":
-                pdf_path = Path(r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf")
+                pdf_path = Path(
+                    r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf"
+                )
                 if pdf_path.exists():
                     additional_context += f"\nDu kannst bei Bedarf Details aus der Datei '{pdf_path}' mittels des read_file Tools auslesen.\n"
 
-            reply_subject, reply, should_attach = generate_reply(agent, latest_mail, skill_path=skill_path, conversation_content=conversation_content, persona_path=persona_path, additional_context=additional_context, debug=args.debug, appointment_skill_path=appointment_skill_path, sender_name=sender_name, sender_email=student_email)
+            reply_subject, reply, should_attach = generate_reply(
+                agent,
+                latest_mail,
+                skill_path=skill_path,
+                conversation_content=conversation_content,
+                persona_path=persona_path,
+                additional_context=additional_context,
+                debug=args.debug,
+                appointment_skill_path=appointment_skill_path,
+                sender_name=sender_name,
+                sender_email=student_email,
+            )
 
             if reply_subject == "NO_REPLY_NEEDED":
-                logger.info(f"Keine Antwort für {email['lastname']} erforderlich. Grund: {reply}")
+                logger.info(
+                    f"Keine Antwort für {email['lastname']} erforderlich. Grund: {reply}"
+                )
                 status = f"Keine Antwort erforderlich ({reply})"
-                processed_results.append({"lastname": email['lastname'], "subject": latest_mail.stem, "status": status})
+                processed_results.append(
+                    {
+                        "lastname": email["lastname"],
+                        "subject": latest_mail.stem,
+                        "status": status,
+                    }
+                )
                 continue
 
             if reply.startswith("APPOINTMENT_BOOKED"):
                 apt_info = agent.last_appointment_info
                 if apt_info and "start_time" in apt_info:
-                    apt_time = apt_info['start_time']
-                    logger.info(f"ERFOLG: Termin für {email['lastname']} wurde am {apt_time} im Kalender gebucht.")
+                    apt_time = apt_info["start_time"]
+                    logger.info(
+                        f"ERFOLG: Termin für {email['lastname']} wurde am {apt_time} im Kalender gebucht."
+                    )
                     status = f"Termin gebucht ({apt_time})"
                 else:
                     # Fallback
                     apt_time = reply.split("|")[1] if "|" in reply else ""
-                    logger.info(f"Termin für {email['lastname']} wurde erfolgreich gebucht{f' am {apt_time}' if apt_time else ''}.")
-                    status = f"Termin gebucht ({apt_time})" if apt_time else "Termin gebucht (Kalender)"
+                    logger.info(
+                        f"Termin für {email['lastname']} wurde erfolgreich gebucht{f' am {apt_time}' if apt_time else ''}."
+                    )
+                    status = (
+                        f"Termin gebucht ({apt_time})"
+                        if apt_time
+                        else "Termin gebucht (Kalender)"
+                    )
 
-                processed_results.append({"lastname": email["lastname"], "subject": latest_mail.stem, "status": status})
+                processed_results.append(
+                    {
+                        "lastname": email["lastname"],
+                        "subject": latest_mail.stem,
+                        "status": status,
+                    }
+                )
                 continue
 
             attachments.append(latest_mail)
             if should_attach and email["class"] == "PO-Wechsel":
-                pdf_path = Path(r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf")
+                pdf_path = Path(
+                    r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf"
+                )
                 if pdf_path.exists():
                     attachments.append(pdf_path)
 
             # Speichere Antwort
             subject = latest_mail.stem
-            success = create_outlook_draft(reply_subject or subject, reply, recipient=student_email, cc=cc_list, attachments=attachments)
+            success = create_outlook_draft(
+                reply_subject or subject,
+                reply,
+                recipient=student_email,
+                cc=cc_list,
+                attachments=attachments,
+            )
             if success:
                 logger.info(f"Outlook-Entwurf für {latest_mail.name} erstellt.")
                 result_status = "Outlook Entwurf (Work in Progress)"
             else:
-                reply_path = semester_folder / f"{latest_mail.stem}_{email['lastname']}_reply.md"
+                reply_path = (
+                    semester_folder / f"{latest_mail.stem}_{email['lastname']}_reply.md"
+                )
                 reply_path.write_text(reply, encoding="utf-8")
                 logger.info(f"Antwort als Markdown gespeichert: {reply_path}")
                 result_status = f"Datei: {reply_path}"
 
-            processed_results.append({"lastname": email["lastname"], "subject": subject, "status": result_status})
+            processed_results.append(
+                {
+                    "lastname": email["lastname"],
+                    "subject": subject,
+                    "status": result_status,
+                }
+            )
 
         else:
             identifier = email["identifier_path"]
@@ -816,20 +1004,26 @@ def main() -> None:
 
             summary_content = ""
             if should_update:
-                logger.info(f"Erstelle/Aktualisiere Zusammenfassung für {identifier.name}")
+                logger.info(
+                    f"Erstelle/Aktualisiere Zusammenfassung für {identifier.name}"
+                )
                 conv_content = ""
                 for date, f in dated_emails:
                     p = mail_parser.parse(f)
                     if p:
                         conv_content += f"\n--- EMAIL VOM {date} ---\n{p}\n"
 
-                summary_content = summarizer.summarize_email_conversation(identifier.name, conv_content)
+                summary_content = summarizer.summarize_email_conversation(
+                    identifier.name, conv_content
+                )
                 if summary_content:
                     summary_file.write_text(summary_content, encoding="utf-8")
             else:
                 summary_content = summary_file.read_text(encoding="utf-8")
 
-            logger.info(f"Generiere Antwort für neueste Mail in {identifier.name}: {latest_mail.name}")
+            logger.info(
+                f"Generiere Antwort für neueste Mail in {identifier.name}: {latest_mail.name}"
+            )
 
             # Extraktion von Empfänger und CC
             cc_list = []
@@ -838,7 +1032,10 @@ def main() -> None:
                     if msg.recipients:
                         for rec in msg.recipients:
                             rec_email = rec.email or rec.name
-                            if rec_email and get_config().user.email not in rec_email.lower():
+                            if (
+                                rec_email
+                                and get_config().user.email not in rec_email.lower()
+                            ):
                                 if rec_email.lower() != student_email.lower():
                                     cc_list.append(rec_email)
             except Exception:
@@ -857,47 +1054,92 @@ def main() -> None:
             skill_path = Path(f"skills/SKILL_{email['class']}.md")
             if not skill_path.exists():
                 # Fallback to script directory
-                skill_path = Path(__file__).parent / "skills" / f"SKILL_{email['class']}.md"
+                skill_path = (
+                    Path(__file__).parent / "skills" / f"SKILL_{email['class']}.md"
+                )
 
             additional_context = f"Anrede: {salutation}\n"
             additional_context += f"Studenten-E-Mail: {student_email}\n"
             attachments = []
             if email["class"] == "PO-Wechsel":
-                pdf_path = Path(r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf")
+                pdf_path = Path(
+                    r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf"
+                )
                 if pdf_path.exists():
                     additional_context += f"\nDu kannst bei Bedarf Details aus der Datei '{pdf_path}' mittels des read_file Tools auslesen.\n"
 
-            reply_subject, reply, should_attach = generate_reply(agent, latest_mail, summary_content or "", skill_path, persona_path=persona_path, additional_context=additional_context, debug=args.debug, appointment_skill_path=appointment_skill_path, sender_name=sender_name, sender_email=student_email)
+            reply_subject, reply, should_attach = generate_reply(
+                agent,
+                latest_mail,
+                summary_content or "",
+                skill_path,
+                persona_path=persona_path,
+                additional_context=additional_context,
+                debug=args.debug,
+                appointment_skill_path=appointment_skill_path,
+                sender_name=sender_name,
+                sender_email=student_email,
+            )
 
             if reply_subject == "NO_REPLY_NEEDED":
-                logger.info(f"Keine Antwort für {email['lastname']} erforderlich. Grund: {reply}")
+                logger.info(
+                    f"Keine Antwort für {email['lastname']} erforderlich. Grund: {reply}"
+                )
                 status = f"Keine Antwort erforderlich ({reply})"
-                processed_results.append({"lastname": email['lastname'], "subject": latest_mail.stem, "status": status})
+                processed_results.append(
+                    {
+                        "lastname": email["lastname"],
+                        "subject": latest_mail.stem,
+                        "status": status,
+                    }
+                )
                 continue
 
             if reply.startswith("APPOINTMENT_BOOKED"):
                 apt_info = agent.last_appointment_info
                 if apt_info and "start_time" in apt_info:
-                    apt_time = apt_info['start_time']
-                    logger.info(f"ERFOLG: Termin für {email['lastname']} wurde am {apt_time} im Kalender gebucht.")
+                    apt_time = apt_info["start_time"]
+                    logger.info(
+                        f"ERFOLG: Termin für {email['lastname']} wurde am {apt_time} im Kalender gebucht."
+                    )
                     status = f"Termin gebucht ({apt_time})"
                 else:
                     # Fallback
                     apt_time = reply.split("|")[1] if "|" in reply else ""
-                    logger.info(f"Termin für {email['lastname']} wurde erfolgreich gebucht{f' am {apt_time}' if apt_time else ''}.")
-                    status = f"Termin gebucht ({apt_time})" if apt_time else "Termin gebucht (Kalender)"
+                    logger.info(
+                        f"Termin für {email['lastname']} wurde erfolgreich gebucht{f' am {apt_time}' if apt_time else ''}."
+                    )
+                    status = (
+                        f"Termin gebucht ({apt_time})"
+                        if apt_time
+                        else "Termin gebucht (Kalender)"
+                    )
 
-                processed_results.append({"lastname": email["lastname"], "subject": latest_mail.stem, "status": status})
+                processed_results.append(
+                    {
+                        "lastname": email["lastname"],
+                        "subject": latest_mail.stem,
+                        "status": status,
+                    }
+                )
                 continue
 
             attachments.append(latest_mail)
             if should_attach and email["class"] == "PO-Wechsel":
-                pdf_path = Path(r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf")
+                pdf_path = Path(
+                    r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf"
+                )
                 if pdf_path.exists():
                     attachments.append(pdf_path)
 
             subject = latest_mail.stem
-            success = create_outlook_draft(reply_subject or subject, reply, recipient=student_email, cc=cc_list, attachments=attachments)
+            success = create_outlook_draft(
+                reply_subject or subject,
+                reply,
+                recipient=student_email,
+                cc=cc_list,
+                attachments=attachments,
+            )
             if success:
                 logger.info(f"Outlook-Entwurf für {latest_mail.name} erstellt.")
                 result_status = "Outlook Entwurf (Work in Progress)"
@@ -907,7 +1149,13 @@ def main() -> None:
                 logger.info(f"Antwort als Markdown gespeichert: {reply_path}")
                 result_status = f"Datei: {reply_path}"
 
-            processed_results.append({"lastname": email["lastname"], "subject": subject, "status": result_status})
+            processed_results.append(
+                {
+                    "lastname": email["lastname"],
+                    "subject": subject,
+                    "status": result_status,
+                }
+            )
 
     # 3. Abschluss-Bericht erstellen und aufräumen
     if processed_results:
@@ -920,8 +1168,6 @@ def main() -> None:
                 f.write(f"| {res['lastname']} | {res['subject']} | {res['status']} |\n")
         logger.info(f"Abschlussbericht erstellt: {processed_report_path}")
 
-
-
     # 4. Gradio GUI zur Überprüfung der Sortierung
     try:
         with open(args.config, "r", encoding="utf-8") as f:
@@ -930,7 +1176,6 @@ def main() -> None:
         run_gradio_gui(report_path, class_paths)
     except Exception as e:
         logger.error(f"Fehler beim Starten der Gradio GUI: {e}")
-
 
 
 if __name__ == "__main__":
