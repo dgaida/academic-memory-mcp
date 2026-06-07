@@ -125,6 +125,15 @@ def main() -> None:
     logger.info(f"Starte Training im Modus '{args.mode}' mit Methode '{args.method}'...")
     classifier = EmailClassifier(mode=args.mode, method=args.method, embedding_model_name=args.embedding_model)
 
+    # Bestehendes Modell laden falls vorhanden
+    model_file = resolve_model_path(args.model_path, args.method, args.mode)
+    if model_file.exists():
+        logger.info(f"Bestehendes Modell gefunden unter {model_file}. Lade für mögliches Weiter-Training...")
+        try:
+            classifier.load(model_file)
+        except Exception as e:
+            logger.warning(f"Bestehendes Modell konnte nicht geladen werden: {e}")
+
     try:
         # Daten laden
         texts, labels = classifier.preprocess_data(data_path)
@@ -133,13 +142,33 @@ def main() -> None:
             return
 
         # Labels encoden
-        y = classifier.label_encoder.fit_transform(labels)
-        num_classes = len(classifier.label_encoder.classes_)
+        # Wenn Modell geladen wurde, prüfen wir ob die Klassen kompatibel sind
+        if classifier.is_trained:
+            try:
+                # Versuche neue Labels mit altem Encoder zu transformieren
+                y = classifier.label_encoder.transform(labels)
+                num_classes = len(classifier.label_encoder.classes_)
+                logger.info(f"Klassen sind kompatibel mit dem geladenen Modell ({num_classes} Klassen).")
+            except ValueError:
+                logger.info("Neue Klassen gefunden oder Reihenfolge anders. LabelEncoder wird neu gefittet.")
+                y = classifier.label_encoder.fit_transform(labels)
+                num_classes = len(classifier.label_encoder.classes_)
+                # Falls sich die Anzahl der Klassen geändert hat, markieren wir das Modell als nicht trainiert für den Reset
+                classifier.is_trained = False
+        else:
+            y = classifier.label_encoder.fit_transform(labels)
+            num_classes = len(classifier.label_encoder.classes_)
 
         if args.method == "transformer":
             logger.info("Starte Transformer Fine-Tuning...")
             from mcp_university.classifier.engine import EmailTransformerClassifier
-            classifier.classifier = EmailTransformerClassifier(args.embedding_model, num_classes)
+
+            if classifier.is_trained and classifier.method == "transformer":
+                logger.info("Setze Training des geladenen Transformer-Modells fort.")
+                # Die Gewichte sind bereits in classifier.classifier geladen
+            else:
+                logger.info("Initialisiere neues Transformer-Modell.")
+                classifier.classifier = EmailTransformerClassifier(args.embedding_model, num_classes)
 
             # Tokenisierung
             logger.info(f"Tokenisiere {len(texts)} Texte für das Training...")
@@ -218,8 +247,6 @@ def main() -> None:
                 }
 
         # Sicherstellen, dass Zielverzeichnis existiert
-        model_file = resolve_model_path(args.model_path, args.method, args.mode)
-
         model_file.parent.mkdir(parents=True, exist_ok=True)
         classifier.save(model_file)
         logger.info(f"Modell erfolgreich trainiert und unter {model_file} gespeichert.")
