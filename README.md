@@ -11,30 +11,30 @@
 A locally-running, agentic knowledge and memory system for university and research work.
 
 ## Features  
-- **Recursive Analysis:** Analyzes local folders and documents recursively.
-- **Semantic Understanding:** Deep understanding of documents (PDF, DOCX) and emails (.msg, .eml).
-- **Advanced Classification:** Automated E-Mail classification using Transformer (MiniLM), XGBoost, or RandomForest.
-- **Privacy First:** Deterministic anonymization for PII and optional cloud LLM usage with bi-directional anonymization.
-- **Intelligent Workflows:** Automated reply generation, necessity checks, and calendar management (Outlook).
-- **Interactive Review:** Gradio-based GUI for manual review and re-classification of processed emails.
+- **Recursive Analysis:** Analyzes local folders and documents recursively.  
+- **Semantic Understanding:** Deep understanding of documents (PDF, DOCX) and emails (.msg, .eml).  
+- **Advanced Classification:** Automated E-Mail classification using Transformer (MiniLM), XGBoost, or RandomForest.  
+- **Privacy First:** Deterministic anonymization for PII and optional cloud LLM usage with bi-directional anonymization.  
+- **Intelligent Workflows:** Automated reply generation, necessity checks, and calendar management (Outlook).  
+- **Interactive Review:** Gradio-based GUI for manual review and re-classification of processed emails.  
 - **Hierarchical Summaries:** Generates summaries from file level up to the root folder.  
 - **Hybrid Search:** Combines BM25 keyword search with Qdrant vector search.  
-- **MCP Integration:** Fully integrated with the Model Context Protocol (FastMCP) for tool use.
-- **Fully Offline:** Optimized for local LLMs (Ollama) and local databases.
+- **MCP Integration:** Fully integrated with the Model Context Protocol (FastMCP) for tool use.  
+- **Fully Offline:** Optimized for local LLMs (Ollama) and local databases.  
 
 ## Prerequisites  
-- **Ollama:** Required for local LLM and embedding support.
+- **Ollama:** Required for local LLM and embedding support.  
 - **qmd CLI:** Required for hybrid search. Install globally via: `npm install -g @tobilu/qmd`  
 - **Docling:** Required for PDF parsing. Install with: `pip install docling` and initialize with `cp-config` if prompted.  
 
 ## Tech Stack  
-- **LLM/Embeddings:** Ollama, Sentence-Transformers (MiniLM, BGE-M3)
-- **Classification:** Scikit-learn, XGBoost, PyTorch (Transformers)
+- **LLM/Embeddings:** Ollama, Sentence-Transformers (MiniLM, BGE-M3)  
+- **Classification:** Scikit-learn, XGBoost, PyTorch (Transformers)  
 - **Vector DB:** Qdrant  
 - **Document Parsing:** Docling, extract-msg  
 - **MCP Framework:** FastMCP  
-- **Metadata:** SQLite, Pandas
-- **GUI:** Gradio
+- **Metadata:** SQLite, Pandas  
+- **GUI:** Gradio  
 
 ## Project Structure
 ```text

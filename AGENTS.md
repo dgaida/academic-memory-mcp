@@ -11,7 +11,7 @@ MCP University is an offline-first system for managing academic data (students, 
    - Supports PDF (via `docling`), DOCX, EML, and MSG (via `extract-msg`).  
    - Analyzes only the first 3 pages of documents to save resources.  
    - Suppresses noisy `extract-msg` warnings.  
-   - **Attachment Handling:** `_parse_msg` safely handles `SignedAttachment` objects by checking for `getFilename` and falling back to `name` or `longFilename`.
+   - **Attachment Handling:** `_parse_msg` safely handles `SignedAttachment` objects by checking for `getFilename` and falling back to `name` or `longFilename`.  
 3. **Classifier (`mcp_university/classifier/`)**:  
    - Classifies emails using XGBoost, RandomForest, or **Transformer** models.  
    - **Transformer Architecture:** Uses PyTorch-based `EmailTransformerClassifier` (e.g., MiniLM).  
@@ -24,7 +24,7 @@ MCP University is an offline-first system for managing academic data (students, 
    - **Remapping:** Initial classifications of 'Other' are automatically remapped to 'Others'.  
 4. **Retrieval (`mcp_university/retrieval/`)**:  
    - Hybrid search using Qdrant (vector) and BM25 (text).  
-   - **Embedding Loading:** Always attempt `local_files_only=True` first. Log `ERFOLG: Modell ... wurde LOKAL geladen.` on success. Fall back to cloud only if offline mode is disabled.
+   - **Embedding Loading:** Always attempt `local_files_only=True` first. Log `ERFOLG: Modell ... wurde LOKAL geladen.` on success. Fall back to cloud only if offline mode is disabled.  
 5. **Summarizer (`mcp_university/summarizer/`)**:  
    - German-localized summarization and Q&A using Ollama.  
    - **Persona:** Daniel Gaida, Professor at TH Köln. Signature: 'Viele Grüße, Daniel Gaida'.  
