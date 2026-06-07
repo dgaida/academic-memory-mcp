@@ -2,7 +2,7 @@
 from mcp_university.classifier.engine import EmailClassifier, resolve_model_path
 from pathlib import Path
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV, train_test_split
 from torch.utils.data import DataLoader, TensorDataset
 import argparse
 import logging
@@ -105,6 +105,8 @@ def evaluate_and_save(classifier: EmailClassifier, texts: list, labels: list, ou
 
 def main() -> None:
     """Main function for training the classifier."""
+    from mcp_university.config import get_config
+    get_config() # Sicherstellen, dass .env geladen ist
     parser = argparse.ArgumentParser(description="Trainiert einen E-Mail-Klassifikator.")
     parser.add_argument("data_dir", type=str, help="Pfad zum Verzeichnis mit den Trainingsdaten (Unterordner pro Klasse).")
     parser.add_argument("--model-path", type=str, default="data/email_classifier.pkl", help="Pfad zum Speichern des Modells.")
@@ -141,68 +143,102 @@ def main() -> None:
             logger.error(f"Keine Trainingsdaten in {args.data_dir} gefunden.")
             return
 
-        # Labels encoden
+        # 1. Daten in Train und Validation splitte (90/10)
+        # Wir splitten die Rohtexte und Labels, bevor wir sie encoden/tokenisieren
+        texts_train, texts_val, labels_train, labels_val = train_test_split(
+            texts, labels, test_size=0.1, random_state=42, stratify=labels
+        )
+        logger.info(f"Daten aufgeteilt: {len(texts_train)} Training, {len(texts_val)} Validation.")
+
+        # Labels encoden (auf Basis der vollständigen Daten fitten)
         # Wenn Modell geladen wurde, prüfen wir ob die Klassen kompatibel sind
         if classifier.is_trained:
             try:
                 # Versuche neue Labels mit altem Encoder zu transformieren
-                y = classifier.label_encoder.transform(labels)
+                classifier.label_encoder.transform(labels)
                 num_classes = len(classifier.label_encoder.classes_)
                 logger.info(f"Klassen sind kompatibel mit dem geladenen Modell ({num_classes} Klassen).")
             except ValueError:
                 logger.info("Neue Klassen gefunden oder Reihenfolge anders. LabelEncoder wird neu gefittet.")
-                y = classifier.label_encoder.fit_transform(labels)
+                classifier.label_encoder.fit(labels)
                 num_classes = len(classifier.label_encoder.classes_)
                 # Falls sich die Anzahl der Klassen geändert hat, markieren wir das Modell als nicht trainiert für den Reset
                 classifier.is_trained = False
         else:
-            y = classifier.label_encoder.fit_transform(labels)
+            classifier.label_encoder.fit(labels)
             num_classes = len(classifier.label_encoder.classes_)
+
+        y = classifier.label_encoder.transform(labels)
+        y_train = classifier.label_encoder.transform(labels_train)
+        y_val = classifier.label_encoder.transform(labels_val)
 
         if args.method == "transformer":
             logger.info("Starte Transformer Fine-Tuning...")
             from mcp_university.classifier.engine import EmailTransformerClassifier
+            import os
 
             if classifier.is_trained and classifier.method == "transformer":
                 logger.info("Setze Training des geladenen Transformer-Modells fort.")
                 # Die Gewichte sind bereits in classifier.classifier geladen
             else:
                 logger.info("Initialisiere neues Transformer-Modell.")
-                classifier.classifier = EmailTransformerClassifier(args.embedding_model, num_classes)
+                classifier.classifier = EmailTransformerClassifier(
+                    args.embedding_model,
+                    num_classes,
+                    token=os.environ.get("HF_TOKEN")
+                )
 
-            # Tokenisierung
-            logger.info(f"Tokenisiere {len(texts)} Texte für das Training...")
-            encodings = classifier.tokenizer(texts, truncation=True, padding=True, max_length=512, return_tensors="pt")
-            dataset = TensorDataset(encodings["input_ids"], encodings["attention_mask"], torch.tensor(y))
-            loader = DataLoader(dataset, batch_size=8, shuffle=True)
-            num_batches = len(loader)
+            # Tokenisierung Training
+            logger.info(f"Tokenisiere {len(texts_train)} Texte für das Training...")
+            enc_train = classifier.tokenizer(texts_train, truncation=True, padding=True, max_length=512, return_tensors="pt")
+            dataset_train = TensorDataset(enc_train["input_ids"], enc_train["attention_mask"], torch.tensor(y_train))
+            loader_train = DataLoader(dataset_train, batch_size=8, shuffle=True)
 
+            # Tokenisierung Validation
+            logger.info(f"Tokenisiere {len(texts_val)} Texte für die Validation...")
+            enc_val = classifier.tokenizer(texts_val, truncation=True, padding=True, max_length=512, return_tensors="pt")
+            dataset_val = TensorDataset(enc_val["input_ids"], enc_val["attention_mask"], torch.tensor(y_val))
+            loader_val = DataLoader(dataset_val, batch_size=8)
+
+            num_batches = len(loader_train)
             optimizer = torch.optim.AdamW(classifier.classifier.parameters(), lr=2e-5)
             criterion = torch.nn.CrossEntropyLoss()
 
-            classifier.classifier.train()
             for epoch in range(3): # 3 Epochen als Standard
+                classifier.classifier.train()
                 logger.info(f"Starte Epoche {epoch+1}/3...")
-                total_loss = 0
-                for i, batch in enumerate(loader):
+                total_train_loss = 0
+                for i, batch in enumerate(loader_train):
                     optimizer.zero_grad()
                     input_ids, mask, targets = batch
                     outputs = classifier.classifier(input_ids, mask)
                     loss = criterion(outputs, targets)
                     loss.backward()
                     optimizer.step()
-                    total_loss += loss.item()
+                    total_train_loss += loss.item()
 
                     if (i + 1) % 10 == 0 or (i + 1) == num_batches:
-                        current_avg_loss = total_loss / (i + 1)
-                        logger.info(f"Epoche {epoch+1}/3, Batch {i+1}/{num_batches}, Aktueller Loss: {current_avg_loss:.4f}")
+                        current_avg_loss = total_train_loss / (i + 1)
+                        logger.info(f"Epoche {epoch+1}/3, Batch {i+1}/{num_batches}, Train Loss: {current_avg_loss:.4f}")
 
-                logger.info(f"Epoche {epoch+1}/3 abgeschlossen. Durchschnittlicher Loss: {total_loss/num_batches:.4f}")
+                # Validation Loss am Ende der Epoche
+                classifier.classifier.eval()
+                total_val_loss = 0
+                with torch.no_grad():
+                    for batch in loader_val:
+                        input_ids, mask, targets = batch
+                        outputs = classifier.classifier(input_ids, mask)
+                        loss = criterion(outputs, targets)
+                        total_val_loss += loss.item()
+
+                avg_train_loss = total_train_loss / num_batches
+                avg_val_loss = total_val_loss / len(loader_val)
+                logger.info(f"Epoche {epoch+1}/3 abgeschlossen. Train Loss: {avg_train_loss:.4f}, Val Loss: {avg_val_loss:.4f}")
 
             classifier.is_trained = True
             cv_results = None # Keine CV für Transformer in diesem einfachen Loop
         else:
-            # Merkmale extrahieren für klassische Modelle
+            # Merkmale extrahieren für klassische Modelle (auf VOLLSTÄNDIGEN Daten)
             X = classifier.get_features(texts, train=True)
 
             # GridSearchCV Setup
@@ -251,9 +287,13 @@ def main() -> None:
         classifier.save(model_file)
         logger.info(f"Modell erfolgreich trainiert und unter {model_file} gespeichert.")
 
-        # Evaluierung auf Trainingsdaten
+        # Evaluierung auf Trainings- und Validierungsdaten
         logger.info("Starte Evaluierung und Berichterstellung...")
-        evaluate_and_save(classifier, texts, labels, model_file.parent, prefix="train", cv_results=cv_results)
+        if args.method == "transformer":
+            evaluate_and_save(classifier, texts_train, labels_train, model_file.parent, prefix="train", cv_results=cv_results)
+            evaluate_and_save(classifier, texts_val, labels_val, model_file.parent, prefix="val")
+        else:
+            evaluate_and_save(classifier, texts, labels, model_file.parent, prefix="train", cv_results=cv_results)
 
     except Exception as e:
         logger.error(f"Fehler beim Training: {e}")
