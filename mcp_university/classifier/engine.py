@@ -63,6 +63,9 @@ class EmailClassifier:
             method: Klassifizierungsmethode ('randomforest', 'xgboost', 'transformer').
             embedding_model_name: Name des Sentence-Transformer Modell.
         """
+        import os
+        get_config()  # Sicherstellen, dass .env/.secrets geladen sind
+
         self.mode = mode
         self.method = method
         self.embedding_model_name = embedding_model_name
@@ -87,7 +90,10 @@ class EmailClassifier:
             self.classifier = XGBClassifier(use_label_encoder=False, eval_metric='mlogloss', random_state=42)
         elif method == "transformer":
             self.classifier = None  # Wird im Training oder beim Laden initialisiert
-            self.tokenizer = AutoTokenizer.from_pretrained(embedding_model_name)
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                embedding_model_name,
+                token=os.environ.get("HF_TOKEN")
+            )
         else:
             raise ValueError(f"Ungültige Klassifizierungsmethode: {method}")
 
@@ -99,6 +105,7 @@ class EmailClassifier:
         """Lädt das Embedding-Modell verzögert (Lazy Loading)."""
         if self._embedding_model is None:
             from sentence_transformers import SentenceTransformer
+            import os
             config = get_config()
 
             try:
@@ -113,7 +120,10 @@ class EmailClassifier:
 
                 # Versuch 2: Normales Laden (erlaubt Download), falls nicht im strikten Offline-Modus
                 logger.info(f"Modell nicht lokal gefunden. Lade von Hugging Face: {self.embedding_model_name}")
-                self._embedding_model = SentenceTransformer(self.embedding_model_name)
+                self._embedding_model = SentenceTransformer(
+                    self.embedding_model_name,
+                    token=os.environ.get("HF_TOKEN")
+                )
         return self._embedding_model
 
     def _extract_text(self, file_path: Path) -> Optional[str]:
@@ -304,12 +314,17 @@ class EmailClassifier:
         self.tfidf_vectorizer = data["tfidf_vectorizer"]
         if self.method == "transformer":
             c_data = data["classifier"]
+            import os
             self.classifier = EmailTransformerClassifier(
                 c_data["config"]["model_name"],
-                c_data["config"]["num_classes"]
+                c_data["config"]["num_classes"],
+                token=os.environ.get("HF_TOKEN")
             )
             self.classifier.load_state_dict(c_data["state_dict"])
-            self.tokenizer = AutoTokenizer.from_pretrained(self.embedding_model_name)
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                self.embedding_model_name,
+                token=os.environ.get("HF_TOKEN")
+            )
         else:
             self.classifier = data["classifier"]
         self.label_encoder = data["label_encoder"]
@@ -320,9 +335,9 @@ class EmailClassifier:
 class EmailTransformerClassifier(nn.Module):
     """Transformer-basiertes Modell zur E-Mail-Klassifizierung."""
 
-    def __init__(self, model_name: str, num_classes: int):
+    def __init__(self, model_name: str, num_classes: int, token: Optional[str] = None):
         super().__init__()
-        self.transformer = AutoModel.from_pretrained(model_name)
+        self.transformer = AutoModel.from_pretrained(model_name, token=token)
         self.dropout = nn.Dropout(0.1)
         self.classifier = nn.Linear(self.transformer.config.hidden_size, num_classes)
 
