@@ -39,7 +39,7 @@ jobs:
         run: |
           mkdir -p docs/assets
           interrogate mcp_university/ --fail-under 95 --generate-badge docs/assets/interrogate.svg
-          INTERROGATE_VAL=$(interrogate mcp_university/ --fail-under 95 | grep -oP '\(\d+\.\d+%\)' | tr -d '()%' || true)
+          INTERROGATE_VAL=$(interrogate mcp_university/ --fail-under 95 | grep -oP 'actual: \d+(\.\d+)?%' | grep -oP '\d+(\.\d+)?' || true)
           echo "INTERROGATE_VAL=$INTERROGATE_VAL" >> $GITHUB_ENV
 
       - name: Lint Markdown
