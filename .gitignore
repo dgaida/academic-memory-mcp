@@ -20,3 +20,7 @@ htmlcov/
 site/
 .idea/
 data/
+
+# Environment and Batch files
+*.env
+*.bat

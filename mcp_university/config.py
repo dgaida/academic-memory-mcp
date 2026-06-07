@@ -58,6 +58,8 @@ class Config:
         # Umgebungsvariablen aus .env oder secrets.env laden
         load_dotenv(self.config_dir.parent / ".env")
         load_dotenv(self.config_dir.parent / "secrets.env")
+        load_dotenv(self.config_dir / ".env")
+        load_dotenv(self.config_dir / "secrets.env")
         self.folders = self._load_yaml(config_dir / "folders.yaml", FolderConfig)
         self.user = self._load_yaml(config_dir / "user.yaml", UserConfig)
 
