@@ -11,54 +11,72 @@
 A locally-running, agentic knowledge and memory system for university and research work.
 
 ## Features  
-- Recursive analysis of local folders  
-- Semantic understanding of documents and emails  
-- Hierarchical summaries (File -> Folder -> Root)  
-- Hybrid search (BM25 + Vector)  
-- MCP Server integration  
-- Fully offline using local LLMs (Ollama)  
-- Automated E-Mail classification (Bachelor thesis, projects, etc.)  
-- Database management for students, deadlines, and metadata  
+- **Recursive Analysis:** Analyzes local folders and documents recursively.
+- **Semantic Understanding:** Deep understanding of documents (PDF, DOCX) and emails (.msg, .eml).
+- **Advanced Classification:** Automated E-Mail classification using Transformer (MiniLM), XGBoost, or RandomForest.
+- **Privacy First:** Deterministic anonymization for PII and optional cloud LLM usage with bi-directional anonymization.
+- **Intelligent Workflows:** Automated reply generation, necessity checks, and calendar management (Outlook).
+- **Interactive Review:** Gradio-based GUI for manual review and re-classification of processed emails.
+- **Hierarchical Summaries:** Generates summaries from file level up to the root folder.  
+- **Hybrid Search:** Combines BM25 keyword search with Qdrant vector search.  
+- **MCP Integration:** Fully integrated with the Model Context Protocol (FastMCP) for tool use.
+- **Fully Offline:** Optimized for local LLMs (Ollama) and local databases.
 
 ## Prerequisites  
+- **Ollama:** Required for local LLM and embedding support.
 - **qmd CLI:** Required for hybrid search. Install globally via: `npm install -g @tobilu/qmd`  
 - **Docling:** Required for PDF parsing. Install with: `pip install docling` and initialize with `cp-config` if prompted.  
 
 ## Tech Stack  
-- **Document Parsing:** Docling  
-- **Local LLM:** Ollama  
-- **Embeddings:** bge-m3  
+- **LLM/Embeddings:** Ollama, Sentence-Transformers (MiniLM, BGE-M3)
+- **Classification:** Scikit-learn, XGBoost, PyTorch (Transformers)
 - **Vector DB:** Qdrant  
+- **Document Parsing:** Docling, extract-msg  
 - **MCP Framework:** FastMCP  
-- **Metadata:** SQLite  
-- **File Watching:** watchdog  
+- **Metadata:** SQLite, Pandas
+- **GUI:** Gradio
 
 ## Project Structure
 ```text
 mcp_university/
 ├── config/             # YAML configurations and prompts
-├── data/               # Persistent data (SQLite, Indexes, Cache)
-├── src/mcp_university/ # Core package
+├── data/               # Persistent data (SQLite, Models, Cache)
+├── mcp_university/     # Core package
+│   ├── agent/          # Agentic workflows and tool definitions
+│   ├── classifier/     # Email classification pipeline (Train, Predict, Evaluate)
 │   ├── crawler/        # File system crawling and watching
-│   ├── parser/         # Document and email parsing
-│   ├── summarizer/     # LLM summary generation
-│   ├── retrieval/      # Hybrid search index
-│   ├── metadata/       # SQLite storage
-│   ├── mcp_server/     # FastMCP server
-│   ├── agent/          # Agentic workflows
-│   ├── cli/            # Typer-based CLI
-│   └── config.py       # Config loader
-└── tests/              # Unit and integration tests
+│   ├── metadata/       # SQLite storage and student management
+│   ├── mcp_server/     # FastMCP server implementation
+│   ├── parser/         # Document and email parsing logic
+│   ├── retrieval/      # Hybrid search index (Qdrant + BM25)
+│   ├── summarizer/     # LLM summary and response generation
+│   ├── utils/          # Utilities (Anonymization, Config loader)
+│   └── cli/            # Typer-based CLI
+├── outlook_macro/      # VBA macros for Outlook integration
+├── tests/              # Unit and integration tests
+└── process_sorted_emails.py # Main workflow script
 ```
 
 ## Installation
 ```bash
 pip install -e .
+# Or using conda
+conda env create -f environment.yml
 ```
 
 ## Usage
 ```bash
+# Index your files
 mcp-uni index
-mcp-uni search "your query"
+
+# Search the knowledge base
+mcp-uni search "Themenvorschläge Bachelorarbeit"
+
+# Start the MCP server
 mcp-uni serve-mcp
+
+# Process and classify new emails
+python process_sorted_emails.py
 ```
+
+Detailed documentation can be found in the `docs/` directory or on the [Documentation Page](https://dgaida.github.io/academic-memory-mcp/).
