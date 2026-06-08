@@ -1,4 +1,5 @@
 """Kommandozeilen-Schnittstelle (CLI) für das MCP University System."""
+from pathlib import Path
 import typer
 import logging
 from logging.handlers import RotatingFileHandler
@@ -9,9 +10,63 @@ from ..parser.factory import ParserFactory
 from ..summarizer.engine import Summarizer
 from ..retrieval.index import SearchIndex
 from ..mcp_server.server import create_server
+from ..knowledge_graph.engine import KnowledgeGraphEngine
+import yaml
 from .db import db_app
 
+
+graph_app = typer.Typer(help="Verwaltung des Wissensgraphen")
+
+
+@graph_app.command("build")
+def graph_build(debug: bool = typer.Option(False, "--debug", "-d", help="Debug-Logging aktivieren")):
+    """Baut den Wissensgraphen basierend auf den vorhandenen Zusammenfassungen auf."""
+    setup_logging(debug)
+    cfg = get_config()
+    store = MetadataStore(cfg.sqlite_path)
+    summarizer = Summarizer(cfg.llm.model, cfg.llm.base_url)
+    graph_engine = KnowledgeGraphEngine(store, summarizer)
+
+    # User-Knoten sicherstellen
+    user_node_id = store.upsert_node(cfg.user.name, "Person", {"email": cfg.user.email, "role": ["User"]})
+    print(f"Benutzer-Knoten initialisiert: {cfg.user.name}")
+
+    # classifier_paths.yaml laden
+    paths_file = cfg.config_dir / "classifier_paths.yaml"
+    if not paths_file.exists():
+        paths_file = cfg.config_dir / "classifier_paths.yaml.example"
+
+    if not paths_file.exists():
+        print("Fehler: classifier_paths.yaml nicht gefunden.")
+        return
+
+    with open(paths_file, "r", encoding="utf-8") as f:
+        paths_data = yaml.safe_load(f)
+
+    class_paths = paths_data.get("class_paths", {})
+
+    for class_name, base_path_str in class_paths.items():
+        base_path = Path(base_path_str)
+        if not base_path.exists():
+            continue
+
+        print(f"Verarbeite Klasse: {class_name}")
+        for summary_file in base_path.rglob(".emails_summary.md"):
+            print(f"  Analysiere {summary_file}")
+            content = summary_file.read_text(encoding='utf-8')
+            graph_engine.process_summary(content, user_node_id)
+
+        for summary_file in base_path.rglob(".*_summary.md"):
+            if summary_file.name == ".emails_summary.md":
+                continue
+            print(f"  Analysiere Ordner-Zusammenfassung {summary_file}")
+            content = summary_file.read_text(encoding='utf-8')
+            graph_engine.process_summary(content, user_node_id)
+
+    print("Wissensgraph erfolgreich aktualisiert.")
+
 app = typer.Typer(help="MCP University Memory System CLI - Lokales Wissensmanagement für die Universität")
+app.add_typer(graph_app, name="graph")
 app.add_typer(db_app, name="db")
 
 def setup_logging(debug: bool):

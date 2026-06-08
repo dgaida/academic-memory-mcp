@@ -1,5 +1,6 @@
 """Metadaten-Speicherung und Verwaltung."""
 import sqlite3
+import json
 import time
 from pathlib import Path
 from typing import Optional, List, Dict, Any, Tuple
@@ -87,6 +88,29 @@ class MetadataStore:
                     due_date REAL,
                     item_type TEXT,
                     item_id INTEGER
+                )
+            ''')
+
+
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS nodes (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT UNIQUE,
+                    type TEXT,
+                    properties_json TEXT
+                )
+            ''')
+
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS edges (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    source_id INTEGER,
+                    target_id INTEGER,
+                    relation_type TEXT,
+                    properties_json TEXT,
+                    FOREIGN KEY(source_id) REFERENCES nodes(id),
+                    FOREIGN KEY(target_id) REFERENCES nodes(id),
+                    UNIQUE(source_id, target_id, relation_type)
                 )
             ''')
 
@@ -372,3 +396,72 @@ class MetadataStore:
             cursor = conn.cursor()
             cursor.execute('UPDATE folders SET last_summarized = ? WHERE id = ?', (time.time(), folder_id))
             conn.commit()
+
+    def upsert_node(self, name: str, node_type: str, properties: Dict[str, Any] = None) -> int:
+        """Fügt einen Knoten hinzu oder aktualisiert ihn.
+
+        Args:
+            name (str): Name des Knotens.
+            node_type (str): Typ des Knotens (Person, Modul, Unternehmen).
+            properties (Dict[str, Any]): Zusätzliche Eigenschaften.
+
+        Returns:
+            int: Die ID des Knotens.
+        """
+        props_json = json.dumps(properties or {})
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO nodes (name, type, properties_json)
+                VALUES (?, ?, ?)
+                ON CONFLICT(name) DO UPDATE SET
+                    type=excluded.type,
+                    properties_json=excluded.properties_json
+            ''', (name, node_type, props_json))
+            conn.commit()
+            cursor.execute('SELECT id FROM nodes WHERE name = ?', (name,))
+            return cursor.fetchone()[0]
+
+    def upsert_edge(self, source_id: int, target_id: int, relation_type: str, properties: Dict[str, Any] = None) -> int:
+        """Fügt eine Kante hinzu oder aktualisiert sie.
+
+        Args:
+            source_id (int): ID des Startknotens.
+            target_id (int): ID des Zielknotens.
+            relation_type (str): Typ der Beziehung.
+            properties (Dict[str, Any]): Zusätzliche Eigenschaften.
+
+        Returns:
+            int: Die ID der Kante.
+        """
+        props_json = json.dumps(properties or {})
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO edges (source_id, target_id, relation_type, properties_json)
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT(source_id, target_id, relation_type) DO UPDATE SET
+                    properties_json=excluded.properties_json
+            ''', (source_id, target_id, relation_type, props_json))
+            conn.commit()
+            cursor.execute('''
+                SELECT id FROM edges
+                WHERE source_id = ? AND target_id = ? AND relation_type = ?
+            ''', (source_id, target_id, relation_type))
+            return cursor.fetchone()[0]
+
+    def get_all_nodes(self) -> List[Dict[str, Any]]:
+        """Ruft alle Knoten ab."""
+        with self._get_connection() as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM nodes')
+            return [dict(row) for row in cursor.fetchall()]
+
+    def get_all_edges(self) -> List[Dict[str, Any]]:
+        """Ruft alle Kanten ab."""
+        with self._get_connection() as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM edges')
+            return [dict(row) for row in cursor.fetchall()]
