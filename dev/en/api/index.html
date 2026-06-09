@@ -6361,7 +6361,26 @@ vordefinierten Prompts für den universitären Kontext.</p>
 <span class="normal"><a href="#__codelineno-0-464">464</a></span>
 <span class="normal"><a href="#__codelineno-0-465">465</a></span>
 <span class="normal"><a href="#__codelineno-0-466">466</a></span>
-<span class="normal"><a href="#__codelineno-0-467">467</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-8" name="__codelineno-0-8"></a><span class="k">class</span><span class="w"> </span><span class="nc">MetadataStore</span><span class="p">:</span>
+<span class="normal"><a href="#__codelineno-0-467">467</a></span>
+<span class="normal"><a href="#__codelineno-0-468">468</a></span>
+<span class="normal"><a href="#__codelineno-0-469">469</a></span>
+<span class="normal"><a href="#__codelineno-0-470">470</a></span>
+<span class="normal"><a href="#__codelineno-0-471">471</a></span>
+<span class="normal"><a href="#__codelineno-0-472">472</a></span>
+<span class="normal"><a href="#__codelineno-0-473">473</a></span>
+<span class="normal"><a href="#__codelineno-0-474">474</a></span>
+<span class="normal"><a href="#__codelineno-0-475">475</a></span>
+<span class="normal"><a href="#__codelineno-0-476">476</a></span>
+<span class="normal"><a href="#__codelineno-0-477">477</a></span>
+<span class="normal"><a href="#__codelineno-0-478">478</a></span>
+<span class="normal"><a href="#__codelineno-0-479">479</a></span>
+<span class="normal"><a href="#__codelineno-0-480">480</a></span>
+<span class="normal"><a href="#__codelineno-0-481">481</a></span>
+<span class="normal"><a href="#__codelineno-0-482">482</a></span>
+<span class="normal"><a href="#__codelineno-0-483">483</a></span>
+<span class="normal"><a href="#__codelineno-0-484">484</a></span>
+<span class="normal"><a href="#__codelineno-0-485">485</a></span>
+<span class="normal"><a href="#__codelineno-0-486">486</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-8" name="__codelineno-0-8"></a><span class="k">class</span><span class="w"> </span><span class="nc">MetadataStore</span><span class="p">:</span>
 <a id="__codelineno-0-9" name="__codelineno-0-9"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Verwaltet die Metadaten-Persistenz in einer SQLite-Datenbank.</span>
 <a id="__codelineno-0-10" name="__codelineno-0-10"></a>
 <a id="__codelineno-0-11" name="__codelineno-0-11"></a><span class="sd">    Speichert Informationen über Dateien, Ordner, Studenten, Deadlines und Zusammenfassungen.</span>
@@ -6753,7 +6772,7 @@ vordefinierten Prompts für den universitären Kontext.</p>
 <a id="__codelineno-0-397" name="__codelineno-0-397"></a>            <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;UPDATE folders SET last_summarized = ? WHERE id = ?&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">(),</span> <span class="n">folder_id</span><span class="p">))</span>
 <a id="__codelineno-0-398" name="__codelineno-0-398"></a>            <span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
 <a id="__codelineno-0-399" name="__codelineno-0-399"></a>
-<a id="__codelineno-0-400" name="__codelineno-0-400"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">upsert_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">node_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">properties</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<a id="__codelineno-0-400" name="__codelineno-0-400"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">upsert_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">node_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">properties</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
 <a id="__codelineno-0-401" name="__codelineno-0-401"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Fügt einen Knoten hinzu oder aktualisiert ihn.</span>
 <a id="__codelineno-0-402" name="__codelineno-0-402"></a>
 <a id="__codelineno-0-403" name="__codelineno-0-403"></a><span class="sd">        Args:</span>
@@ -6762,65 +6781,84 @@ vordefinierten Prompts für den universitären Kontext.</p>
 <a id="__codelineno-0-406" name="__codelineno-0-406"></a><span class="sd">            properties (Dict[str, Any]): Zusätzliche Eigenschaften.</span>
 <a id="__codelineno-0-407" name="__codelineno-0-407"></a>
 <a id="__codelineno-0-408" name="__codelineno-0-408"></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-409" name="__codelineno-0-409"></a><span class="sd">            int: Die ID des Knotens.</span>
+<a id="__codelineno-0-409" name="__codelineno-0-409"></a><span class="sd">            Tuple[int, bool]: Die ID des Knotens und ob er neu erstellt wurde.</span>
 <a id="__codelineno-0-410" name="__codelineno-0-410"></a><span class="sd">        &quot;&quot;&quot;</span>
 <a id="__codelineno-0-411" name="__codelineno-0-411"></a>        <span class="n">props_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">properties</span> <span class="ow">or</span> <span class="p">{})</span>
 <a id="__codelineno-0-412" name="__codelineno-0-412"></a>        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_connection</span><span class="p">()</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
 <a id="__codelineno-0-413" name="__codelineno-0-413"></a>            <span class="n">cursor</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
-<a id="__codelineno-0-414" name="__codelineno-0-414"></a>            <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
-<a id="__codelineno-0-415" name="__codelineno-0-415"></a><span class="s1">                INSERT INTO nodes (name, type, properties_json)</span>
-<a id="__codelineno-0-416" name="__codelineno-0-416"></a><span class="s1">                VALUES (?, ?, ?)</span>
-<a id="__codelineno-0-417" name="__codelineno-0-417"></a><span class="s1">                ON CONFLICT(name) DO UPDATE SET</span>
-<a id="__codelineno-0-418" name="__codelineno-0-418"></a><span class="s1">                    type=excluded.type,</span>
-<a id="__codelineno-0-419" name="__codelineno-0-419"></a><span class="s1">                    properties_json=excluded.properties_json</span>
-<a id="__codelineno-0-420" name="__codelineno-0-420"></a><span class="s1">            &#39;&#39;&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">node_type</span><span class="p">,</span> <span class="n">props_json</span><span class="p">))</span>
-<a id="__codelineno-0-421" name="__codelineno-0-421"></a>            <span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
-<a id="__codelineno-0-422" name="__codelineno-0-422"></a>            <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;SELECT id FROM nodes WHERE name = ?&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,))</span>
-<a id="__codelineno-0-423" name="__codelineno-0-423"></a>            <span class="k">return</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
-<a id="__codelineno-0-424" name="__codelineno-0-424"></a>
-<a id="__codelineno-0-425" name="__codelineno-0-425"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">upsert_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">target_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">relation_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">properties</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<a id="__codelineno-0-426" name="__codelineno-0-426"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Fügt eine Kante hinzu oder aktualisiert sie.</span>
-<a id="__codelineno-0-427" name="__codelineno-0-427"></a>
-<a id="__codelineno-0-428" name="__codelineno-0-428"></a><span class="sd">        Args:</span>
-<a id="__codelineno-0-429" name="__codelineno-0-429"></a><span class="sd">            source_id (int): ID des Startknotens.</span>
-<a id="__codelineno-0-430" name="__codelineno-0-430"></a><span class="sd">            target_id (int): ID des Zielknotens.</span>
-<a id="__codelineno-0-431" name="__codelineno-0-431"></a><span class="sd">            relation_type (str): Typ der Beziehung.</span>
-<a id="__codelineno-0-432" name="__codelineno-0-432"></a><span class="sd">            properties (Dict[str, Any]): Zusätzliche Eigenschaften.</span>
-<a id="__codelineno-0-433" name="__codelineno-0-433"></a>
-<a id="__codelineno-0-434" name="__codelineno-0-434"></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-435" name="__codelineno-0-435"></a><span class="sd">            int: Die ID der Kante.</span>
-<a id="__codelineno-0-436" name="__codelineno-0-436"></a><span class="sd">        &quot;&quot;&quot;</span>
-<a id="__codelineno-0-437" name="__codelineno-0-437"></a>        <span class="n">props_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">properties</span> <span class="ow">or</span> <span class="p">{})</span>
-<a id="__codelineno-0-438" name="__codelineno-0-438"></a>        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_connection</span><span class="p">()</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
-<a id="__codelineno-0-439" name="__codelineno-0-439"></a>            <span class="n">cursor</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
-<a id="__codelineno-0-440" name="__codelineno-0-440"></a>            <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
-<a id="__codelineno-0-441" name="__codelineno-0-441"></a><span class="s1">                INSERT INTO edges (source_id, target_id, relation_type, properties_json)</span>
-<a id="__codelineno-0-442" name="__codelineno-0-442"></a><span class="s1">                VALUES (?, ?, ?, ?)</span>
-<a id="__codelineno-0-443" name="__codelineno-0-443"></a><span class="s1">                ON CONFLICT(source_id, target_id, relation_type) DO UPDATE SET</span>
-<a id="__codelineno-0-444" name="__codelineno-0-444"></a><span class="s1">                    properties_json=excluded.properties_json</span>
-<a id="__codelineno-0-445" name="__codelineno-0-445"></a><span class="s1">            &#39;&#39;&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">source_id</span><span class="p">,</span> <span class="n">target_id</span><span class="p">,</span> <span class="n">relation_type</span><span class="p">,</span> <span class="n">props_json</span><span class="p">))</span>
-<a id="__codelineno-0-446" name="__codelineno-0-446"></a>            <span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
-<a id="__codelineno-0-447" name="__codelineno-0-447"></a>            <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
-<a id="__codelineno-0-448" name="__codelineno-0-448"></a><span class="s1">                SELECT id FROM edges</span>
-<a id="__codelineno-0-449" name="__codelineno-0-449"></a><span class="s1">                WHERE source_id = ? AND target_id = ? AND relation_type = ?</span>
-<a id="__codelineno-0-450" name="__codelineno-0-450"></a><span class="s1">            &#39;&#39;&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">source_id</span><span class="p">,</span> <span class="n">target_id</span><span class="p">,</span> <span class="n">relation_type</span><span class="p">))</span>
-<a id="__codelineno-0-451" name="__codelineno-0-451"></a>            <span class="k">return</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
-<a id="__codelineno-0-452" name="__codelineno-0-452"></a>
-<a id="__codelineno-0-453" name="__codelineno-0-453"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_all_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
-<a id="__codelineno-0-454" name="__codelineno-0-454"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Ruft alle Knoten ab.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-455" name="__codelineno-0-455"></a>        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_connection</span><span class="p">()</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
-<a id="__codelineno-0-456" name="__codelineno-0-456"></a>            <span class="n">conn</span><span class="o">.</span><span class="n">row_factory</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Row</span>
-<a id="__codelineno-0-457" name="__codelineno-0-457"></a>            <span class="n">cursor</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
-<a id="__codelineno-0-458" name="__codelineno-0-458"></a>            <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;SELECT * FROM nodes&#39;</span><span class="p">)</span>
-<a id="__codelineno-0-459" name="__codelineno-0-459"></a>            <span class="k">return</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()]</span>
-<a id="__codelineno-0-460" name="__codelineno-0-460"></a>
-<a id="__codelineno-0-461" name="__codelineno-0-461"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_all_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
-<a id="__codelineno-0-462" name="__codelineno-0-462"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Ruft alle Kanten ab.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-463" name="__codelineno-0-463"></a>        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_connection</span><span class="p">()</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
-<a id="__codelineno-0-464" name="__codelineno-0-464"></a>            <span class="n">conn</span><span class="o">.</span><span class="n">row_factory</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Row</span>
-<a id="__codelineno-0-465" name="__codelineno-0-465"></a>            <span class="n">cursor</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
-<a id="__codelineno-0-466" name="__codelineno-0-466"></a>            <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;SELECT * FROM edges&#39;</span><span class="p">)</span>
-<a id="__codelineno-0-467" name="__codelineno-0-467"></a>            <span class="k">return</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()]</span>
+<a id="__codelineno-0-414" name="__codelineno-0-414"></a>            <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;SELECT id FROM nodes WHERE name = ?&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,))</span>
+<a id="__codelineno-0-415" name="__codelineno-0-415"></a>            <span class="n">row</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+<a id="__codelineno-0-416" name="__codelineno-0-416"></a>            <span class="n">is_new</span> <span class="o">=</span> <span class="n">row</span> <span class="ow">is</span> <span class="kc">None</span>
+<a id="__codelineno-0-417" name="__codelineno-0-417"></a>
+<a id="__codelineno-0-418" name="__codelineno-0-418"></a>            <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
+<a id="__codelineno-0-419" name="__codelineno-0-419"></a><span class="s1">                INSERT INTO nodes (name, type, properties_json)</span>
+<a id="__codelineno-0-420" name="__codelineno-0-420"></a><span class="s1">                VALUES (?, ?, ?)</span>
+<a id="__codelineno-0-421" name="__codelineno-0-421"></a><span class="s1">                ON CONFLICT(name) DO UPDATE SET</span>
+<a id="__codelineno-0-422" name="__codelineno-0-422"></a><span class="s1">                    type=excluded.type,</span>
+<a id="__codelineno-0-423" name="__codelineno-0-423"></a><span class="s1">                    properties_json=excluded.properties_json</span>
+<a id="__codelineno-0-424" name="__codelineno-0-424"></a><span class="s1">            &#39;&#39;&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">node_type</span><span class="p">,</span> <span class="n">props_json</span><span class="p">))</span>
+<a id="__codelineno-0-425" name="__codelineno-0-425"></a>            <span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+<a id="__codelineno-0-426" name="__codelineno-0-426"></a>
+<a id="__codelineno-0-427" name="__codelineno-0-427"></a>            <span class="k">if</span> <span class="n">is_new</span><span class="p">:</span>
+<a id="__codelineno-0-428" name="__codelineno-0-428"></a>                <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;SELECT id FROM nodes WHERE name = ?&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,))</span>
+<a id="__codelineno-0-429" name="__codelineno-0-429"></a>                <span class="k">return</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">True</span>
+<a id="__codelineno-0-430" name="__codelineno-0-430"></a>            <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-431" name="__codelineno-0-431"></a>                <span class="k">return</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">False</span>
+<a id="__codelineno-0-432" name="__codelineno-0-432"></a>
+<a id="__codelineno-0-433" name="__codelineno-0-433"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">upsert_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">target_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">relation_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">properties</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+<a id="__codelineno-0-434" name="__codelineno-0-434"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Fügt eine Kante hinzu oder aktualisiert sie.</span>
+<a id="__codelineno-0-435" name="__codelineno-0-435"></a>
+<a id="__codelineno-0-436" name="__codelineno-0-436"></a><span class="sd">        Args:</span>
+<a id="__codelineno-0-437" name="__codelineno-0-437"></a><span class="sd">            source_id (int): ID des Startknotens.</span>
+<a id="__codelineno-0-438" name="__codelineno-0-438"></a><span class="sd">            target_id (int): ID des Zielknotens.</span>
+<a id="__codelineno-0-439" name="__codelineno-0-439"></a><span class="sd">            relation_type (str): Typ der Beziehung.</span>
+<a id="__codelineno-0-440" name="__codelineno-0-440"></a><span class="sd">            properties (Dict[str, Any]): Zusätzliche Eigenschaften.</span>
+<a id="__codelineno-0-441" name="__codelineno-0-441"></a>
+<a id="__codelineno-0-442" name="__codelineno-0-442"></a><span class="sd">        Returns:</span>
+<a id="__codelineno-0-443" name="__codelineno-0-443"></a><span class="sd">            Tuple[int, bool]: Die ID der Kante und ob sie neu erstellt wurde.</span>
+<a id="__codelineno-0-444" name="__codelineno-0-444"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-445" name="__codelineno-0-445"></a>        <span class="n">props_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">properties</span> <span class="ow">or</span> <span class="p">{})</span>
+<a id="__codelineno-0-446" name="__codelineno-0-446"></a>        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_connection</span><span class="p">()</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+<a id="__codelineno-0-447" name="__codelineno-0-447"></a>            <span class="n">cursor</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+<a id="__codelineno-0-448" name="__codelineno-0-448"></a>            <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
+<a id="__codelineno-0-449" name="__codelineno-0-449"></a><span class="s1">                SELECT id FROM edges</span>
+<a id="__codelineno-0-450" name="__codelineno-0-450"></a><span class="s1">                WHERE source_id = ? AND target_id = ? AND relation_type = ?</span>
+<a id="__codelineno-0-451" name="__codelineno-0-451"></a><span class="s1">            &#39;&#39;&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">source_id</span><span class="p">,</span> <span class="n">target_id</span><span class="p">,</span> <span class="n">relation_type</span><span class="p">))</span>
+<a id="__codelineno-0-452" name="__codelineno-0-452"></a>            <span class="n">row</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+<a id="__codelineno-0-453" name="__codelineno-0-453"></a>            <span class="n">is_new</span> <span class="o">=</span> <span class="n">row</span> <span class="ow">is</span> <span class="kc">None</span>
+<a id="__codelineno-0-454" name="__codelineno-0-454"></a>
+<a id="__codelineno-0-455" name="__codelineno-0-455"></a>            <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
+<a id="__codelineno-0-456" name="__codelineno-0-456"></a><span class="s1">                INSERT INTO edges (source_id, target_id, relation_type, properties_json)</span>
+<a id="__codelineno-0-457" name="__codelineno-0-457"></a><span class="s1">                VALUES (?, ?, ?, ?)</span>
+<a id="__codelineno-0-458" name="__codelineno-0-458"></a><span class="s1">                ON CONFLICT(source_id, target_id, relation_type) DO UPDATE SET</span>
+<a id="__codelineno-0-459" name="__codelineno-0-459"></a><span class="s1">                    properties_json=excluded.properties_json</span>
+<a id="__codelineno-0-460" name="__codelineno-0-460"></a><span class="s1">            &#39;&#39;&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">source_id</span><span class="p">,</span> <span class="n">target_id</span><span class="p">,</span> <span class="n">relation_type</span><span class="p">,</span> <span class="n">props_json</span><span class="p">))</span>
+<a id="__codelineno-0-461" name="__codelineno-0-461"></a>            <span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+<a id="__codelineno-0-462" name="__codelineno-0-462"></a>
+<a id="__codelineno-0-463" name="__codelineno-0-463"></a>            <span class="k">if</span> <span class="n">is_new</span><span class="p">:</span>
+<a id="__codelineno-0-464" name="__codelineno-0-464"></a>                <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
+<a id="__codelineno-0-465" name="__codelineno-0-465"></a><span class="s1">                    SELECT id FROM edges</span>
+<a id="__codelineno-0-466" name="__codelineno-0-466"></a><span class="s1">                    WHERE source_id = ? AND target_id = ? AND relation_type = ?</span>
+<a id="__codelineno-0-467" name="__codelineno-0-467"></a><span class="s1">                &#39;&#39;&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">source_id</span><span class="p">,</span> <span class="n">target_id</span><span class="p">,</span> <span class="n">relation_type</span><span class="p">))</span>
+<a id="__codelineno-0-468" name="__codelineno-0-468"></a>                <span class="k">return</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">True</span>
+<a id="__codelineno-0-469" name="__codelineno-0-469"></a>            <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-470" name="__codelineno-0-470"></a>                <span class="k">return</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">False</span>
+<a id="__codelineno-0-471" name="__codelineno-0-471"></a>
+<a id="__codelineno-0-472" name="__codelineno-0-472"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_all_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<a id="__codelineno-0-473" name="__codelineno-0-473"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Ruft alle Knoten ab.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-474" name="__codelineno-0-474"></a>        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_connection</span><span class="p">()</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+<a id="__codelineno-0-475" name="__codelineno-0-475"></a>            <span class="n">conn</span><span class="o">.</span><span class="n">row_factory</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Row</span>
+<a id="__codelineno-0-476" name="__codelineno-0-476"></a>            <span class="n">cursor</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+<a id="__codelineno-0-477" name="__codelineno-0-477"></a>            <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;SELECT * FROM nodes&#39;</span><span class="p">)</span>
+<a id="__codelineno-0-478" name="__codelineno-0-478"></a>            <span class="k">return</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()]</span>
+<a id="__codelineno-0-479" name="__codelineno-0-479"></a>
+<a id="__codelineno-0-480" name="__codelineno-0-480"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_all_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<a id="__codelineno-0-481" name="__codelineno-0-481"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Ruft alle Kanten ab.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-482" name="__codelineno-0-482"></a>        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_connection</span><span class="p">()</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+<a id="__codelineno-0-483" name="__codelineno-0-483"></a>            <span class="n">conn</span><span class="o">.</span><span class="n">row_factory</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Row</span>
+<a id="__codelineno-0-484" name="__codelineno-0-484"></a>            <span class="n">cursor</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+<a id="__codelineno-0-485" name="__codelineno-0-485"></a>            <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;SELECT * FROM edges&#39;</span><span class="p">)</span>
+<a id="__codelineno-0-486" name="__codelineno-0-486"></a>            <span class="k">return</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()]</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -7509,19 +7547,19 @@ vordefinierten Prompts für den universitären Kontext.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mcp_university/metadata/store.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-461">461</a></span>
-<span class="normal"><a href="#__codelineno-0-462">462</a></span>
-<span class="normal"><a href="#__codelineno-0-463">463</a></span>
-<span class="normal"><a href="#__codelineno-0-464">464</a></span>
-<span class="normal"><a href="#__codelineno-0-465">465</a></span>
-<span class="normal"><a href="#__codelineno-0-466">466</a></span>
-<span class="normal"><a href="#__codelineno-0-467">467</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-461" name="__codelineno-0-461"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_all_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
-<a id="__codelineno-0-462" name="__codelineno-0-462"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Ruft alle Kanten ab.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-463" name="__codelineno-0-463"></a>    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_connection</span><span class="p">()</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
-<a id="__codelineno-0-464" name="__codelineno-0-464"></a>        <span class="n">conn</span><span class="o">.</span><span class="n">row_factory</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Row</span>
-<a id="__codelineno-0-465" name="__codelineno-0-465"></a>        <span class="n">cursor</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
-<a id="__codelineno-0-466" name="__codelineno-0-466"></a>        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;SELECT * FROM edges&#39;</span><span class="p">)</span>
-<a id="__codelineno-0-467" name="__codelineno-0-467"></a>        <span class="k">return</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()]</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-480">480</a></span>
+<span class="normal"><a href="#__codelineno-0-481">481</a></span>
+<span class="normal"><a href="#__codelineno-0-482">482</a></span>
+<span class="normal"><a href="#__codelineno-0-483">483</a></span>
+<span class="normal"><a href="#__codelineno-0-484">484</a></span>
+<span class="normal"><a href="#__codelineno-0-485">485</a></span>
+<span class="normal"><a href="#__codelineno-0-486">486</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-480" name="__codelineno-0-480"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_all_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<a id="__codelineno-0-481" name="__codelineno-0-481"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Ruft alle Kanten ab.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-482" name="__codelineno-0-482"></a>    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_connection</span><span class="p">()</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+<a id="__codelineno-0-483" name="__codelineno-0-483"></a>        <span class="n">conn</span><span class="o">.</span><span class="n">row_factory</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Row</span>
+<a id="__codelineno-0-484" name="__codelineno-0-484"></a>        <span class="n">cursor</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+<a id="__codelineno-0-485" name="__codelineno-0-485"></a>        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;SELECT * FROM edges&#39;</span><span class="p">)</span>
+<a id="__codelineno-0-486" name="__codelineno-0-486"></a>        <span class="k">return</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()]</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -7682,19 +7720,19 @@ vordefinierten Prompts für den universitären Kontext.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mcp_university/metadata/store.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-453">453</a></span>
-<span class="normal"><a href="#__codelineno-0-454">454</a></span>
-<span class="normal"><a href="#__codelineno-0-455">455</a></span>
-<span class="normal"><a href="#__codelineno-0-456">456</a></span>
-<span class="normal"><a href="#__codelineno-0-457">457</a></span>
-<span class="normal"><a href="#__codelineno-0-458">458</a></span>
-<span class="normal"><a href="#__codelineno-0-459">459</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-453" name="__codelineno-0-453"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_all_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
-<a id="__codelineno-0-454" name="__codelineno-0-454"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Ruft alle Knoten ab.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-455" name="__codelineno-0-455"></a>    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_connection</span><span class="p">()</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
-<a id="__codelineno-0-456" name="__codelineno-0-456"></a>        <span class="n">conn</span><span class="o">.</span><span class="n">row_factory</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Row</span>
-<a id="__codelineno-0-457" name="__codelineno-0-457"></a>        <span class="n">cursor</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
-<a id="__codelineno-0-458" name="__codelineno-0-458"></a>        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;SELECT * FROM nodes&#39;</span><span class="p">)</span>
-<a id="__codelineno-0-459" name="__codelineno-0-459"></a>        <span class="k">return</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()]</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-472">472</a></span>
+<span class="normal"><a href="#__codelineno-0-473">473</a></span>
+<span class="normal"><a href="#__codelineno-0-474">474</a></span>
+<span class="normal"><a href="#__codelineno-0-475">475</a></span>
+<span class="normal"><a href="#__codelineno-0-476">476</a></span>
+<span class="normal"><a href="#__codelineno-0-477">477</a></span>
+<span class="normal"><a href="#__codelineno-0-478">478</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-472" name="__codelineno-0-472"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_all_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<a id="__codelineno-0-473" name="__codelineno-0-473"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Ruft alle Knoten ab.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-474" name="__codelineno-0-474"></a>    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_connection</span><span class="p">()</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+<a id="__codelineno-0-475" name="__codelineno-0-475"></a>        <span class="n">conn</span><span class="o">.</span><span class="n">row_factory</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Row</span>
+<a id="__codelineno-0-476" name="__codelineno-0-476"></a>        <span class="n">cursor</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+<a id="__codelineno-0-477" name="__codelineno-0-477"></a>        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;SELECT * FROM nodes&#39;</span><span class="p">)</span>
+<a id="__codelineno-0-478" name="__codelineno-0-478"></a>        <span class="k">return</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()]</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -8347,18 +8385,18 @@ vordefinierten Prompts für den universitären Kontext.</p>
     <table>
       <thead>
         <tr>
-<th>Name</th>          <th>Type</th>
+          <th>Type</th>
           <th>Description</th>
         </tr>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-<td><code>int</code></td>            <td>
-                  <code><span title="int">int</span></code>
+            <td>
+                  <code><span title="typing.Tuple">Tuple</span>[<span title="int">int</span>, <span title="bool">bool</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Die ID der Kante.</p>
+                <p>Tuple[int, bool]: Die ID der Kante und ob sie neu erstellt wurde.</p>
               </div>
             </td>
           </tr>
@@ -8368,15 +8406,7 @@ vordefinierten Prompts für den universitären Kontext.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mcp_university/metadata/store.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-425">425</a></span>
-<span class="normal"><a href="#__codelineno-0-426">426</a></span>
-<span class="normal"><a href="#__codelineno-0-427">427</a></span>
-<span class="normal"><a href="#__codelineno-0-428">428</a></span>
-<span class="normal"><a href="#__codelineno-0-429">429</a></span>
-<span class="normal"><a href="#__codelineno-0-430">430</a></span>
-<span class="normal"><a href="#__codelineno-0-431">431</a></span>
-<span class="normal"><a href="#__codelineno-0-432">432</a></span>
-<span class="normal"><a href="#__codelineno-0-433">433</a></span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-433">433</a></span>
 <span class="normal"><a href="#__codelineno-0-434">434</a></span>
 <span class="normal"><a href="#__codelineno-0-435">435</a></span>
 <span class="normal"><a href="#__codelineno-0-436">436</a></span>
@@ -8394,33 +8424,63 @@ vordefinierten Prompts für den universitären Kontext.</p>
 <span class="normal"><a href="#__codelineno-0-448">448</a></span>
 <span class="normal"><a href="#__codelineno-0-449">449</a></span>
 <span class="normal"><a href="#__codelineno-0-450">450</a></span>
-<span class="normal"><a href="#__codelineno-0-451">451</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-425" name="__codelineno-0-425"></a><span class="k">def</span><span class="w"> </span><span class="nf">upsert_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">target_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">relation_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">properties</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<a id="__codelineno-0-426" name="__codelineno-0-426"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Fügt eine Kante hinzu oder aktualisiert sie.</span>
-<a id="__codelineno-0-427" name="__codelineno-0-427"></a>
-<a id="__codelineno-0-428" name="__codelineno-0-428"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-429" name="__codelineno-0-429"></a><span class="sd">        source_id (int): ID des Startknotens.</span>
-<a id="__codelineno-0-430" name="__codelineno-0-430"></a><span class="sd">        target_id (int): ID des Zielknotens.</span>
-<a id="__codelineno-0-431" name="__codelineno-0-431"></a><span class="sd">        relation_type (str): Typ der Beziehung.</span>
-<a id="__codelineno-0-432" name="__codelineno-0-432"></a><span class="sd">        properties (Dict[str, Any]): Zusätzliche Eigenschaften.</span>
-<a id="__codelineno-0-433" name="__codelineno-0-433"></a>
-<a id="__codelineno-0-434" name="__codelineno-0-434"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-435" name="__codelineno-0-435"></a><span class="sd">        int: Die ID der Kante.</span>
-<a id="__codelineno-0-436" name="__codelineno-0-436"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-437" name="__codelineno-0-437"></a>    <span class="n">props_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">properties</span> <span class="ow">or</span> <span class="p">{})</span>
-<a id="__codelineno-0-438" name="__codelineno-0-438"></a>    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_connection</span><span class="p">()</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
-<a id="__codelineno-0-439" name="__codelineno-0-439"></a>        <span class="n">cursor</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
-<a id="__codelineno-0-440" name="__codelineno-0-440"></a>        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
-<a id="__codelineno-0-441" name="__codelineno-0-441"></a><span class="s1">            INSERT INTO edges (source_id, target_id, relation_type, properties_json)</span>
-<a id="__codelineno-0-442" name="__codelineno-0-442"></a><span class="s1">            VALUES (?, ?, ?, ?)</span>
-<a id="__codelineno-0-443" name="__codelineno-0-443"></a><span class="s1">            ON CONFLICT(source_id, target_id, relation_type) DO UPDATE SET</span>
-<a id="__codelineno-0-444" name="__codelineno-0-444"></a><span class="s1">                properties_json=excluded.properties_json</span>
-<a id="__codelineno-0-445" name="__codelineno-0-445"></a><span class="s1">        &#39;&#39;&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">source_id</span><span class="p">,</span> <span class="n">target_id</span><span class="p">,</span> <span class="n">relation_type</span><span class="p">,</span> <span class="n">props_json</span><span class="p">))</span>
-<a id="__codelineno-0-446" name="__codelineno-0-446"></a>        <span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
-<a id="__codelineno-0-447" name="__codelineno-0-447"></a>        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
-<a id="__codelineno-0-448" name="__codelineno-0-448"></a><span class="s1">            SELECT id FROM edges</span>
-<a id="__codelineno-0-449" name="__codelineno-0-449"></a><span class="s1">            WHERE source_id = ? AND target_id = ? AND relation_type = ?</span>
-<a id="__codelineno-0-450" name="__codelineno-0-450"></a><span class="s1">        &#39;&#39;&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">source_id</span><span class="p">,</span> <span class="n">target_id</span><span class="p">,</span> <span class="n">relation_type</span><span class="p">))</span>
-<a id="__codelineno-0-451" name="__codelineno-0-451"></a>        <span class="k">return</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+<span class="normal"><a href="#__codelineno-0-451">451</a></span>
+<span class="normal"><a href="#__codelineno-0-452">452</a></span>
+<span class="normal"><a href="#__codelineno-0-453">453</a></span>
+<span class="normal"><a href="#__codelineno-0-454">454</a></span>
+<span class="normal"><a href="#__codelineno-0-455">455</a></span>
+<span class="normal"><a href="#__codelineno-0-456">456</a></span>
+<span class="normal"><a href="#__codelineno-0-457">457</a></span>
+<span class="normal"><a href="#__codelineno-0-458">458</a></span>
+<span class="normal"><a href="#__codelineno-0-459">459</a></span>
+<span class="normal"><a href="#__codelineno-0-460">460</a></span>
+<span class="normal"><a href="#__codelineno-0-461">461</a></span>
+<span class="normal"><a href="#__codelineno-0-462">462</a></span>
+<span class="normal"><a href="#__codelineno-0-463">463</a></span>
+<span class="normal"><a href="#__codelineno-0-464">464</a></span>
+<span class="normal"><a href="#__codelineno-0-465">465</a></span>
+<span class="normal"><a href="#__codelineno-0-466">466</a></span>
+<span class="normal"><a href="#__codelineno-0-467">467</a></span>
+<span class="normal"><a href="#__codelineno-0-468">468</a></span>
+<span class="normal"><a href="#__codelineno-0-469">469</a></span>
+<span class="normal"><a href="#__codelineno-0-470">470</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-433" name="__codelineno-0-433"></a><span class="k">def</span><span class="w"> </span><span class="nf">upsert_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">target_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">relation_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">properties</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+<a id="__codelineno-0-434" name="__codelineno-0-434"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Fügt eine Kante hinzu oder aktualisiert sie.</span>
+<a id="__codelineno-0-435" name="__codelineno-0-435"></a>
+<a id="__codelineno-0-436" name="__codelineno-0-436"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-437" name="__codelineno-0-437"></a><span class="sd">        source_id (int): ID des Startknotens.</span>
+<a id="__codelineno-0-438" name="__codelineno-0-438"></a><span class="sd">        target_id (int): ID des Zielknotens.</span>
+<a id="__codelineno-0-439" name="__codelineno-0-439"></a><span class="sd">        relation_type (str): Typ der Beziehung.</span>
+<a id="__codelineno-0-440" name="__codelineno-0-440"></a><span class="sd">        properties (Dict[str, Any]): Zusätzliche Eigenschaften.</span>
+<a id="__codelineno-0-441" name="__codelineno-0-441"></a>
+<a id="__codelineno-0-442" name="__codelineno-0-442"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-443" name="__codelineno-0-443"></a><span class="sd">        Tuple[int, bool]: Die ID der Kante und ob sie neu erstellt wurde.</span>
+<a id="__codelineno-0-444" name="__codelineno-0-444"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-445" name="__codelineno-0-445"></a>    <span class="n">props_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">properties</span> <span class="ow">or</span> <span class="p">{})</span>
+<a id="__codelineno-0-446" name="__codelineno-0-446"></a>    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_connection</span><span class="p">()</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+<a id="__codelineno-0-447" name="__codelineno-0-447"></a>        <span class="n">cursor</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+<a id="__codelineno-0-448" name="__codelineno-0-448"></a>        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
+<a id="__codelineno-0-449" name="__codelineno-0-449"></a><span class="s1">            SELECT id FROM edges</span>
+<a id="__codelineno-0-450" name="__codelineno-0-450"></a><span class="s1">            WHERE source_id = ? AND target_id = ? AND relation_type = ?</span>
+<a id="__codelineno-0-451" name="__codelineno-0-451"></a><span class="s1">        &#39;&#39;&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">source_id</span><span class="p">,</span> <span class="n">target_id</span><span class="p">,</span> <span class="n">relation_type</span><span class="p">))</span>
+<a id="__codelineno-0-452" name="__codelineno-0-452"></a>        <span class="n">row</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+<a id="__codelineno-0-453" name="__codelineno-0-453"></a>        <span class="n">is_new</span> <span class="o">=</span> <span class="n">row</span> <span class="ow">is</span> <span class="kc">None</span>
+<a id="__codelineno-0-454" name="__codelineno-0-454"></a>
+<a id="__codelineno-0-455" name="__codelineno-0-455"></a>        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
+<a id="__codelineno-0-456" name="__codelineno-0-456"></a><span class="s1">            INSERT INTO edges (source_id, target_id, relation_type, properties_json)</span>
+<a id="__codelineno-0-457" name="__codelineno-0-457"></a><span class="s1">            VALUES (?, ?, ?, ?)</span>
+<a id="__codelineno-0-458" name="__codelineno-0-458"></a><span class="s1">            ON CONFLICT(source_id, target_id, relation_type) DO UPDATE SET</span>
+<a id="__codelineno-0-459" name="__codelineno-0-459"></a><span class="s1">                properties_json=excluded.properties_json</span>
+<a id="__codelineno-0-460" name="__codelineno-0-460"></a><span class="s1">        &#39;&#39;&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">source_id</span><span class="p">,</span> <span class="n">target_id</span><span class="p">,</span> <span class="n">relation_type</span><span class="p">,</span> <span class="n">props_json</span><span class="p">))</span>
+<a id="__codelineno-0-461" name="__codelineno-0-461"></a>        <span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+<a id="__codelineno-0-462" name="__codelineno-0-462"></a>
+<a id="__codelineno-0-463" name="__codelineno-0-463"></a>        <span class="k">if</span> <span class="n">is_new</span><span class="p">:</span>
+<a id="__codelineno-0-464" name="__codelineno-0-464"></a>            <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
+<a id="__codelineno-0-465" name="__codelineno-0-465"></a><span class="s1">                SELECT id FROM edges</span>
+<a id="__codelineno-0-466" name="__codelineno-0-466"></a><span class="s1">                WHERE source_id = ? AND target_id = ? AND relation_type = ?</span>
+<a id="__codelineno-0-467" name="__codelineno-0-467"></a><span class="s1">            &#39;&#39;&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">source_id</span><span class="p">,</span> <span class="n">target_id</span><span class="p">,</span> <span class="n">relation_type</span><span class="p">))</span>
+<a id="__codelineno-0-468" name="__codelineno-0-468"></a>            <span class="k">return</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">True</span>
+<a id="__codelineno-0-469" name="__codelineno-0-469"></a>        <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-470" name="__codelineno-0-470"></a>            <span class="k">return</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">False</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -8838,18 +8898,18 @@ vordefinierten Prompts für den universitären Kontext.</p>
     <table>
       <thead>
         <tr>
-<th>Name</th>          <th>Type</th>
+          <th>Type</th>
           <th>Description</th>
         </tr>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-<td><code>int</code></td>            <td>
-                  <code><span title="int">int</span></code>
+            <td>
+                  <code><span title="typing.Tuple">Tuple</span>[<span title="int">int</span>, <span title="bool">bool</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Die ID des Knotens.</p>
+                <p>Tuple[int, bool]: Die ID des Knotens und ob er neu erstellt wurde.</p>
               </div>
             </td>
           </tr>
@@ -8882,7 +8942,15 @@ vordefinierten Prompts für den universitären Kontext.</p>
 <span class="normal"><a href="#__codelineno-0-420">420</a></span>
 <span class="normal"><a href="#__codelineno-0-421">421</a></span>
 <span class="normal"><a href="#__codelineno-0-422">422</a></span>
-<span class="normal"><a href="#__codelineno-0-423">423</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-400" name="__codelineno-0-400"></a><span class="k">def</span><span class="w"> </span><span class="nf">upsert_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">node_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">properties</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="normal"><a href="#__codelineno-0-423">423</a></span>
+<span class="normal"><a href="#__codelineno-0-424">424</a></span>
+<span class="normal"><a href="#__codelineno-0-425">425</a></span>
+<span class="normal"><a href="#__codelineno-0-426">426</a></span>
+<span class="normal"><a href="#__codelineno-0-427">427</a></span>
+<span class="normal"><a href="#__codelineno-0-428">428</a></span>
+<span class="normal"><a href="#__codelineno-0-429">429</a></span>
+<span class="normal"><a href="#__codelineno-0-430">430</a></span>
+<span class="normal"><a href="#__codelineno-0-431">431</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-400" name="__codelineno-0-400"></a><span class="k">def</span><span class="w"> </span><span class="nf">upsert_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">node_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">properties</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
 <a id="__codelineno-0-401" name="__codelineno-0-401"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Fügt einen Knoten hinzu oder aktualisiert ihn.</span>
 <a id="__codelineno-0-402" name="__codelineno-0-402"></a>
 <a id="__codelineno-0-403" name="__codelineno-0-403"></a><span class="sd">    Args:</span>
@@ -8891,21 +8959,29 @@ vordefinierten Prompts für den universitären Kontext.</p>
 <a id="__codelineno-0-406" name="__codelineno-0-406"></a><span class="sd">        properties (Dict[str, Any]): Zusätzliche Eigenschaften.</span>
 <a id="__codelineno-0-407" name="__codelineno-0-407"></a>
 <a id="__codelineno-0-408" name="__codelineno-0-408"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-409" name="__codelineno-0-409"></a><span class="sd">        int: Die ID des Knotens.</span>
+<a id="__codelineno-0-409" name="__codelineno-0-409"></a><span class="sd">        Tuple[int, bool]: Die ID des Knotens und ob er neu erstellt wurde.</span>
 <a id="__codelineno-0-410" name="__codelineno-0-410"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-411" name="__codelineno-0-411"></a>    <span class="n">props_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">properties</span> <span class="ow">or</span> <span class="p">{})</span>
 <a id="__codelineno-0-412" name="__codelineno-0-412"></a>    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_connection</span><span class="p">()</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
 <a id="__codelineno-0-413" name="__codelineno-0-413"></a>        <span class="n">cursor</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
-<a id="__codelineno-0-414" name="__codelineno-0-414"></a>        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
-<a id="__codelineno-0-415" name="__codelineno-0-415"></a><span class="s1">            INSERT INTO nodes (name, type, properties_json)</span>
-<a id="__codelineno-0-416" name="__codelineno-0-416"></a><span class="s1">            VALUES (?, ?, ?)</span>
-<a id="__codelineno-0-417" name="__codelineno-0-417"></a><span class="s1">            ON CONFLICT(name) DO UPDATE SET</span>
-<a id="__codelineno-0-418" name="__codelineno-0-418"></a><span class="s1">                type=excluded.type,</span>
-<a id="__codelineno-0-419" name="__codelineno-0-419"></a><span class="s1">                properties_json=excluded.properties_json</span>
-<a id="__codelineno-0-420" name="__codelineno-0-420"></a><span class="s1">        &#39;&#39;&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">node_type</span><span class="p">,</span> <span class="n">props_json</span><span class="p">))</span>
-<a id="__codelineno-0-421" name="__codelineno-0-421"></a>        <span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
-<a id="__codelineno-0-422" name="__codelineno-0-422"></a>        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;SELECT id FROM nodes WHERE name = ?&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,))</span>
-<a id="__codelineno-0-423" name="__codelineno-0-423"></a>        <span class="k">return</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-0-414" name="__codelineno-0-414"></a>        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;SELECT id FROM nodes WHERE name = ?&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,))</span>
+<a id="__codelineno-0-415" name="__codelineno-0-415"></a>        <span class="n">row</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+<a id="__codelineno-0-416" name="__codelineno-0-416"></a>        <span class="n">is_new</span> <span class="o">=</span> <span class="n">row</span> <span class="ow">is</span> <span class="kc">None</span>
+<a id="__codelineno-0-417" name="__codelineno-0-417"></a>
+<a id="__codelineno-0-418" name="__codelineno-0-418"></a>        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
+<a id="__codelineno-0-419" name="__codelineno-0-419"></a><span class="s1">            INSERT INTO nodes (name, type, properties_json)</span>
+<a id="__codelineno-0-420" name="__codelineno-0-420"></a><span class="s1">            VALUES (?, ?, ?)</span>
+<a id="__codelineno-0-421" name="__codelineno-0-421"></a><span class="s1">            ON CONFLICT(name) DO UPDATE SET</span>
+<a id="__codelineno-0-422" name="__codelineno-0-422"></a><span class="s1">                type=excluded.type,</span>
+<a id="__codelineno-0-423" name="__codelineno-0-423"></a><span class="s1">                properties_json=excluded.properties_json</span>
+<a id="__codelineno-0-424" name="__codelineno-0-424"></a><span class="s1">        &#39;&#39;&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">node_type</span><span class="p">,</span> <span class="n">props_json</span><span class="p">))</span>
+<a id="__codelineno-0-425" name="__codelineno-0-425"></a>        <span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+<a id="__codelineno-0-426" name="__codelineno-0-426"></a>
+<a id="__codelineno-0-427" name="__codelineno-0-427"></a>        <span class="k">if</span> <span class="n">is_new</span><span class="p">:</span>
+<a id="__codelineno-0-428" name="__codelineno-0-428"></a>            <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;SELECT id FROM nodes WHERE name = ?&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,))</span>
+<a id="__codelineno-0-429" name="__codelineno-0-429"></a>            <span class="k">return</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">True</span>
+<a id="__codelineno-0-430" name="__codelineno-0-430"></a>        <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-431" name="__codelineno-0-431"></a>            <span class="k">return</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">False</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
