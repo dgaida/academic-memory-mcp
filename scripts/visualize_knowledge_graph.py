@@ -1,3 +1,4 @@
+"""Skript zur interaktiven Visualisierung des Wissensgraphen mittels Pyvis."""
 import sys
 from pathlib import Path
 import networkx as nx
@@ -13,7 +14,12 @@ from mcp_university.metadata.store import MetadataStore
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def main():
+def main() -> None:
+    """Hauptfunktion zur Generierung der HTML-Visualisierung des Wissensgraphen.
+    
+    Liest alle Knoten und Kanten aus dem MetadataStore und erstellt eine
+    interaktive Pyvis-Visualisierung.
+    """
     config = get_config()
     store = MetadataStore(config.sqlite_path)
 

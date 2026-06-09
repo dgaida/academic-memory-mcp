@@ -477,6 +477,54 @@ class MetadataStore:
             cursor.execute('SELECT * FROM nodes')
             return [dict(row) for row in cursor.fetchall()]
 
+    def add_alias(self, alias: str, canonical_name: str, category: str) -> None:
+        """Fügt ein Alias für einen kanonischen Namen hinzu.
+
+        Args:
+            alias (str): Die alternative Schreibweise.
+            canonical_name (str): Der bevorzugte/eindeutige Name.
+            category (str): 'Person' oder 'Modul'.
+        """
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                           INSERT INTO aliases (alias, canonical_name, category)
+                           VALUES (?, ?, ?) ON CONFLICT(alias) DO
+                           UPDATE SET
+                               canonical_name=excluded.canonical_name,
+                               category=excluded.category
+                           ''', (alias, canonical_name, category))
+            conn.commit()
+
+    def resolve_canonical_name(self, name: str, category: str) -> str:
+        """Löst einen Namen über die Aliases-Tabelle auf.
+
+        Args:
+            name (str): Der aufzulösende Name.
+            category (str): Die Kategorie ('Person', 'Modul').
+
+        Returns:
+            str: Der kanonische Name oder der ursprüngliche Name, falls kein Alias existiert.
+        """
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                           SELECT canonical_name
+                           FROM aliases
+                           WHERE alias = ?
+                             AND category = ?
+                           ''', (name, category))
+            row = cursor.fetchone()
+            return row[0] if row else name
+
+    def get_all_aliases(self) -> List[Dict[str, Any]]:
+        """Ruft alle Aliase ab."""
+        with self._get_connection() as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM aliases')
+            return [dict(row) for row in cursor.fetchall()]
+
     def get_all_edges(self) -> List[Dict[str, Any]]:
         """Ruft alle Kanten ab."""
         with self._get_connection() as conn:

@@ -37,20 +37,24 @@ class KnowledgeGraphEngine:
             if not source_name or not target_name or not relation:
                 continue
 
-            source_id, s_new = self.store.upsert_node(source_name, source_type)
-            if s_new:
-                changes["new_nodes"].append(f"{source_name} ({source_type})")
-            else:
-                changes["updated_nodes"].append(source_name)
+            # Alias-Auflösung
+            canonical_source = self.store.resolve_canonical_name(source_name, source_type)
+            canonical_target = self.store.resolve_canonical_name(target_name, target_type)
 
-            target_id, t_new = self.store.upsert_node(target_name, target_type)
-            if t_new:
-                changes["new_nodes"].append(f"{target_name} ({target_type})")
+            source_id, s_new = self.store.upsert_node(canonical_source, source_type)
+            if s_new:
+                changes["new_nodes"].append(f"{canonical_source} ({source_type})")
             else:
-                changes["updated_nodes"].append(target_name)
+                changes["updated_nodes"].append(canonical_source)
+
+            target_id, t_new = self.store.upsert_node(canonical_target, target_type)
+            if t_new:
+                changes["new_nodes"].append(f"{canonical_target} ({target_type})")
+            else:
+                changes["updated_nodes"].append(canonical_target)
 
             edge_id, e_new = self.store.upsert_edge(source_id, target_id, relation, properties)
-            edge_desc = f"{source_name} --[{relation}]--> {target_name}"
+            edge_desc = f"{canonical_source} --[{relation}]--> {canonical_target}"
             if e_new:
                 changes["new_edges"].append(edge_desc)
             else:

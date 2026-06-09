@@ -34,8 +34,12 @@ Hier ist der Text der Folien:
 ---
 """
 
-def summarize_pdf(pdf_path: Path, client: LLMClient, parser: PDFParser) -> Optional[str]:
-    """Extrahiert Text aus einem PDF und lässt ihn vom LLM zusammenfassen."""
+def summarize_pdf(pdf_path: Path, client: LLMClient, parser: PDFParser, fallback_client: Optional[LLMClient] = None) -> Optional[str]:
+    """Extrahiert Text aus einem PDF und lässt ihn vom LLM zusammenfassen.
+
+    Nutzt ein Fallback auf Ollama, falls die primäre Anfrage fehlschlägt.
+    Formatiert die Antwort so, dass sie direkt mit Bulletpoints startet.
+    """
     logger.info(f"Verarbeite: {pdf_path.name}")
 
     content = parser.parse(pdf_path)
@@ -48,12 +52,36 @@ def summarize_pdf(pdf_path: Path, client: LLMClient, parser: PDFParser) -> Optio
         {"role": "user", "content": PROMPT_TEMPLATE.format(content=content)}
     ]
 
+    response = None
     try:
         response = client.chat_completion(messages)
-        return response
     except Exception as e:
-        logger.error(f"Fehler bei der LLM-Anfrage für {pdf_path}: {e}")
+        logger.warning(f"Fehler bei der primären LLM-Anfrage für {pdf_path}: {e}")
+        if fallback_client:
+            logger.info(f"Versuche Fallback mit Ollama für {pdf_path}...")
+            try:
+                response = fallback_client.chat_completion(messages)
+            except Exception as e2:
+                logger.error(f"Fehler auch bei Fallback-LLM-Anfrage für {pdf_path}: {e2}")
+
+    if not response:
         return None
+
+    # Formatierung anpassen: Text vor dem ersten Bulletpoint entfernen
+    lines = response.splitlines()
+    start_idx = -1
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if stripped.startswith("*") or stripped.startswith("-"):
+            start_idx = i
+            break
+
+    if start_idx != -1:
+        cleaned_content = "\n".join(lines[start_idx:])
+    else:
+        cleaned_content = response
+
+    return f"Hier ist die Zusammenfassung des Dokuments {pdf_path.name}\n\n{cleaned_content}"
 
 @app.command()
 def main(
@@ -77,6 +105,11 @@ def main(
     # api_choice in LLMClient erwartet Literal['openai', 'groq', 'gemini', 'ollama']
     client = LLMClient(api_choice=api_choice, llm=model)
 
+    # Fallback Client (Ollama) vorbereiten, falls nicht bereits Ollama gewählt wurde
+    fallback_client = None
+    if api_choice != "ollama":
+        fallback_client = LLMClient(api_choice="ollama")
+
     pdf_files = list(source_dir.glob("*.pdf"))
     if not pdf_files:
         logger.info(f"Keine PDF-Dateien in {source_dir} gefunden.")
@@ -85,7 +118,7 @@ def main(
     logger.info(f"Gefunden: {len(pdf_files)} PDFs. Starte Verarbeitung...")
 
     for pdf_path in pdf_files:
-        summary = summarize_pdf(pdf_path, client, parser)
+        summary = summarize_pdf(pdf_path, client, parser, fallback_client=fallback_client)
         if summary:
             target_path = target_dir / f"{pdf_path.stem}.md"
             with open(target_path, "w", encoding="utf-8") as f:

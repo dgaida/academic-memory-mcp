@@ -23,7 +23,8 @@ def qdrant_path(tmp_path):
 
 @pytest.fixture
 def search_index(qdrant_path, store):
-    with patch("mcp_university.retrieval.index.SentenceTransformer") as mock_st:
+    # We must patch where SearchIndex looks for SentenceTransformer
+    with patch("mcp_university.retrieval.index.SentenceTransformer", create=True) as mock_st:
         mock_model = mock_st.return_value
         # Mock encode to return a vector of size 384 (MiniLM standard)
         mock_model.encode.return_value = np.zeros(384)
@@ -36,6 +37,7 @@ def test_metadata_store_retrieval(store):
 
     files = store.get_all_files()
     assert len(files) == 1
+    # Check dict/Row behavior
     assert files[0]['path'] == "/path/to/file.txt"
 
     folders = store.get_all_folders()
