@@ -14,13 +14,17 @@ class KnowledgeGraphEngine:
         self.store = store
         self.summarizer = summarizer
 
-    def process_summary(self, summary_content: str, user_node_id: int):
+    def process_summary(self, summary_content: str, user_node_id: int) -> Dict[str, List[str]]:
         """Analysiert eine Zusammenfassung und aktualisiert den Graphen.
 
         Args:
             summary_content (str): Der Text der Zusammenfassung (.emails_summary.md).
             user_node_id (int): Die ID des Benutzer-Knotens (Zentrum).
+
+        Returns:
+            Dict[str, List[str]]: Zusammenfassung der Änderungen (neue/aktualisierte Knoten/Kanten).
         """
+        changes = {"new_nodes": [], "updated_nodes": [], "new_edges": [], "updated_edges": []}
         triplets = self._extract_triplets(summary_content)
         for triplet in triplets:
             source_name = triplet.get("source")
@@ -33,13 +37,30 @@ class KnowledgeGraphEngine:
             if not source_name or not target_name or not relation:
                 continue
 
-            # Falls source oder target der "User" ist (oder "ich", "mich", etc.), nutzen wir user_node_id
-            # Das LLM sollte idealerweise schon die Namen kennen.
+            source_id, s_new = self.store.upsert_node(source_name, source_type)
+            if s_new:
+                changes["new_nodes"].append(f"{source_name} ({source_type})")
+            else:
+                changes["updated_nodes"].append(source_name)
 
-            source_id = self.store.upsert_node(source_name, source_type)
-            target_id = self.store.upsert_node(target_name, target_type)
+            target_id, t_new = self.store.upsert_node(target_name, target_type)
+            if t_new:
+                changes["new_nodes"].append(f"{target_name} ({target_type})")
+            else:
+                changes["updated_nodes"].append(target_name)
 
-            self.store.upsert_edge(source_id, target_id, relation, properties)
+            edge_id, e_new = self.store.upsert_edge(source_id, target_id, relation, properties)
+            edge_desc = f"{source_name} --[{relation}]--> {target_name}"
+            if e_new:
+                changes["new_edges"].append(edge_desc)
+            else:
+                changes["updated_edges"].append(edge_desc)
+
+        # Dubletten entfernen
+        for key in changes:
+            changes[key] = list(set(changes[key]))
+
+        return changes
 
     def _extract_triplets(self, content: str) -> List[Dict[str, Any]]:
         """Nutzt das LLM, um Triplets aus dem Inhalt zu extrahieren."""

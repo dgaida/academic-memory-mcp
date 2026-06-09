@@ -39,7 +39,7 @@ def test_knowledge_graph_extraction(temp_db, mock_summarizer):
     ]
     mock_summarizer._chat_request.return_value = json.dumps(mock_triplets)
 
-    user_node_id = temp_db.upsert_node("Daniel Gaida", "Person", {"role": ["User"]})
+    user_node_id, _ = temp_db.upsert_node("Daniel Gaida", "Person", {"role": ["User"]})
 
     engine.process_summary("Dummy summary content", user_node_id)
 

@@ -26,7 +26,7 @@ def main():
     graph_engine = KnowledgeGraphEngine(store, summarizer)
 
     # 1. Initialize User Node
-    user_node_id = store.upsert_node(config.user.name, "Person", {"email": config.user.email, "role": ["User"]})
+    user_node_id, _ = store.upsert_node(config.user.name, "Person", {"email": config.user.email, "role": ["User"]})
     logger.info(f"Initialized user node: {config.user.name} (ID: {user_node_id})")
 
     # 2. Load classifier_paths.yaml
@@ -60,7 +60,17 @@ def main():
         for summary_file in base_path.rglob(".emails_summary.md"):
             logger.info(f"Processing existing summary: {summary_file}")
             content = summary_file.read_text(encoding="utf-8")
-            graph_engine.process_summary(content, user_node_id)
+            changes = graph_engine.process_summary(content, user_node_id)
+            if any(changes.values()):
+                logger.info(f"Changes from {summary_file.name}:")
+                if changes['new_nodes']:
+                    logger.info(f"  New Nodes: {', '.join(changes['new_nodes'])}")
+                if changes['new_edges']:
+                    logger.info("  New Edges:")
+                    for edge in changes['new_edges']:
+                        logger.info(f"    - {edge}")
+            else:
+                logger.info(f"No new information extracted from {summary_file.name}.")
 
         # Also look for the alternative naming pattern .<dirname>_summary.md
         for summary_file in base_path.rglob(".*_summary.md"):
@@ -68,7 +78,17 @@ def main():
                 continue
             logger.info(f"Processing folder summary: {summary_file}")
             content = summary_file.read_text(encoding="utf-8")
-            graph_engine.process_summary(content, user_node_id)
+            changes = graph_engine.process_summary(content, user_node_id)
+            if any(changes.values()):
+                logger.info(f"Changes from {summary_file.name}:")
+                if changes['new_nodes']:
+                    logger.info(f"  New Nodes: {', '.join(changes['new_nodes'])}")
+                if changes['new_edges']:
+                    logger.info("  New Edges:")
+                    for edge in changes['new_edges']:
+                        logger.info(f"    - {edge}")
+            else:
+                logger.info(f"No new information extracted from {summary_file.name}.")
 
     logger.info("Knowledge Graph build complete.")
 

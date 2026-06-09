@@ -397,7 +397,7 @@ class MetadataStore:
             cursor.execute('UPDATE folders SET last_summarized = ? WHERE id = ?', (time.time(), folder_id))
             conn.commit()
 
-    def upsert_node(self, name: str, node_type: str, properties: Dict[str, Any] = None) -> int:
+    def upsert_node(self, name: str, node_type: str, properties: Dict[str, Any] = None) -> Tuple[int, bool]:
         """Fügt einen Knoten hinzu oder aktualisiert ihn.
 
         Args:
@@ -406,11 +406,15 @@ class MetadataStore:
             properties (Dict[str, Any]): Zusätzliche Eigenschaften.
 
         Returns:
-            int: Die ID des Knotens.
+            Tuple[int, bool]: Die ID des Knotens und ob er neu erstellt wurde.
         """
         props_json = json.dumps(properties or {})
         with self._get_connection() as conn:
             cursor = conn.cursor()
+            cursor.execute('SELECT id FROM nodes WHERE name = ?', (name,))
+            row = cursor.fetchone()
+            is_new = row is None
+
             cursor.execute('''
                 INSERT INTO nodes (name, type, properties_json)
                 VALUES (?, ?, ?)
@@ -419,10 +423,14 @@ class MetadataStore:
                     properties_json=excluded.properties_json
             ''', (name, node_type, props_json))
             conn.commit()
-            cursor.execute('SELECT id FROM nodes WHERE name = ?', (name,))
-            return cursor.fetchone()[0]
 
-    def upsert_edge(self, source_id: int, target_id: int, relation_type: str, properties: Dict[str, Any] = None) -> int:
+            if is_new:
+                cursor.execute('SELECT id FROM nodes WHERE name = ?', (name,))
+                return cursor.fetchone()[0], True
+            else:
+                return row[0], False
+
+    def upsert_edge(self, source_id: int, target_id: int, relation_type: str, properties: Dict[str, Any] = None) -> Tuple[int, bool]:
         """Fügt eine Kante hinzu oder aktualisiert sie.
 
         Args:
@@ -432,11 +440,18 @@ class MetadataStore:
             properties (Dict[str, Any]): Zusätzliche Eigenschaften.
 
         Returns:
-            int: Die ID der Kante.
+            Tuple[int, bool]: Die ID der Kante und ob sie neu erstellt wurde.
         """
         props_json = json.dumps(properties or {})
         with self._get_connection() as conn:
             cursor = conn.cursor()
+            cursor.execute('''
+                SELECT id FROM edges
+                WHERE source_id = ? AND target_id = ? AND relation_type = ?
+            ''', (source_id, target_id, relation_type))
+            row = cursor.fetchone()
+            is_new = row is None
+
             cursor.execute('''
                 INSERT INTO edges (source_id, target_id, relation_type, properties_json)
                 VALUES (?, ?, ?, ?)
@@ -444,11 +459,15 @@ class MetadataStore:
                     properties_json=excluded.properties_json
             ''', (source_id, target_id, relation_type, props_json))
             conn.commit()
-            cursor.execute('''
-                SELECT id FROM edges
-                WHERE source_id = ? AND target_id = ? AND relation_type = ?
-            ''', (source_id, target_id, relation_type))
-            return cursor.fetchone()[0]
+
+            if is_new:
+                cursor.execute('''
+                    SELECT id FROM edges
+                    WHERE source_id = ? AND target_id = ? AND relation_type = ?
+                ''', (source_id, target_id, relation_type))
+                return cursor.fetchone()[0], True
+            else:
+                return row[0], False
 
     def get_all_nodes(self) -> List[Dict[str, Any]]:
         """Ruft alle Knoten ab."""
