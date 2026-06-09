@@ -4,10 +4,19 @@ from mcp_university.parser.pdf_parser import PDFParser
 from mcp_university.parser.mail_parser import MailParser
 
 def test_pdf_parser_docling(tmp_path):
-    """Testet den PDFParser mit docling."""
+    """Testet den PDFParser mit docling als Fallback."""
     cache_dir = tmp_path / "cache"
 
-    with patch("mcp_university.parser.pdf_parser.DocumentConverter") as mock_converter_class:
+    with patch("mcp_university.parser.pdf_parser.DocumentConverter") as mock_converter_class, \
+         patch("mcp_university.parser.pdf_parser.LiteParse") as mock_liteparse_class:
+
+        # LiteParse schlägt fehl (gibt MagicMock zurück, dessen .text wir auf None setzen)
+        mock_lite_parser = mock_liteparse_class.return_value
+        mock_lite_result = MagicMock()
+        del mock_lite_result.text # Damit hasattr(result, "text") False ist
+        mock_lite_result.__str__.return_value = "" # Damit bool("") False ist
+        mock_lite_parser.parse.return_value = "" # Direkt String zurückgeben
+
         mock_converter = mock_converter_class.return_value
         mock_result = MagicMock()
         mock_result.status = "SUCCESS"
@@ -53,16 +62,12 @@ def test_mail_parser_eml_fallback_on_decode_error(tmp_path):
     assert content is not None
     assert "Subject: Test" in content
 
-def test_pdf_parser_fallback_to_liteparse(tmp_path):
-    """Testet den Fallback von docling auf liteparse im PDFParser."""
+def test_pdf_parser_priority_liteparse(tmp_path):
+    """Testet, dass der PDFParser liteparse bevorzugt."""
     cache_dir = tmp_path / "cache"
 
     with patch("mcp_university.parser.pdf_parser.DocumentConverter") as mock_docling_class, \
          patch("mcp_university.parser.pdf_parser.LiteParse") as mock_liteparse_class:
-
-        # Docling schlägt fehl
-        mock_docling = mock_docling_class.return_value
-        mock_docling.convert.side_effect = Exception("Docling failure")
 
         # LiteParse ist erfolgreich
         mock_lite_parser = mock_liteparse_class.return_value
@@ -70,13 +75,16 @@ def test_pdf_parser_fallback_to_liteparse(tmp_path):
         mock_result.text = "Parsed liteparse content"
         mock_lite_parser.parse.return_value = mock_result
 
+        # Docling (sollte gar nicht erst aufgerufen werden, wenn LiteParse Erfolg hat)
+        mock_docling = mock_docling_class.return_value
+
         parser = PDFParser(cache_dir)
-        pdf_file = tmp_path / "test_fallback.pdf"
+        pdf_file = tmp_path / "test_priority.pdf"
         pdf_file.touch()
 
         content = parser.parse(pdf_file)
         assert content == "Parsed liteparse content"
 
-        # Verifizieren, dass beide aufgerufen wurden
-        mock_docling.convert.assert_called_once()
+        # Verifizieren, dass nur LiteParse aufgerufen wurde
         mock_lite_parser.parse.assert_called_once_with(str(pdf_file))
+        mock_docling.convert.assert_not_called()
