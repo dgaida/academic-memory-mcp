@@ -179,6 +179,10 @@ class MetadataStore:
             cursor.execute('SELECT * FROM files WHERE path = ?', (path,))
             return cursor.fetchone()
 
+    def get_file(self, path: str) -> Optional[Tuple]:
+        """Alias für get_file_by_path für Abwärtskompatibilität."""
+        return self.get_file_by_path(path)
+
     def get_folder_by_path(self, path: str) -> Optional[Tuple]:
         """Ruft einen Ordner anhand seines Pfades ab."""
         with self._get_connection() as conn:
@@ -191,6 +195,24 @@ class MetadataStore:
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('SELECT * FROM files WHERE folder_id = ?', (folder_id,))
+            return cursor.fetchall()
+
+    def get_folder_files(self, folder_id: int) -> List[Tuple]:
+        """Alias für get_files_in_folder für Abwärtskompatibilität."""
+        return self.get_files_in_folder(folder_id)
+
+    def get_all_files(self) -> List[Tuple]:
+        """Ruft alle Dateien ab."""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM files')
+            return cursor.fetchall()
+
+    def get_all_folders(self) -> List[Tuple]:
+        """Ruft alle Ordner ab."""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM folders')
             return cursor.fetchall()
 
     def get_summary(self, item_type: str, item_id: int) -> Optional[str]:
