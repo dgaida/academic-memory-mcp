@@ -33,6 +33,7 @@ dependencies:
     - xgboost
     - gradio
     - shap
+    - "llm-client @ git+https://github.com/dgaida/llm_client.git"
     - networkx
     - pyvis
     - pytest

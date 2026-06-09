@@ -116,11 +116,16 @@ def main(
         return
 
     logger.info(f"Gefunden: {len(pdf_files)} PDFs. Starte Verarbeitung...")
-
     for pdf_path in pdf_files:
+        target_path = target_dir / f"{pdf_path.stem}.md"
+
+        # Prüfen, ob die Zusammenfassung bereits existiert und aktuell ist
+        if target_path.exists() and target_path.stat().st_mtime >= pdf_path.stat().st_mtime:
+            logger.info(f"Überspringe {pdf_path.name}, da eine aktuelle Zusammenfassung bereits existiert.")
+            continue
+
         summary = summarize_pdf(pdf_path, client, parser, fallback_client=fallback_client)
         if summary:
-            target_path = target_dir / f"{pdf_path.stem}.md"
             with open(target_path, "w", encoding="utf-8") as f:
                 f.write(summary)
             logger.info(f"Zusammenfassung gespeichert in: {target_path}")
