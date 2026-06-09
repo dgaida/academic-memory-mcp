@@ -16,6 +16,7 @@ dependencies:
     - rank_bm25
     - sentence-transformers
     - docling
+    - liteparse
     - extract-msg
     - pdfminer.six
     - python-docx
