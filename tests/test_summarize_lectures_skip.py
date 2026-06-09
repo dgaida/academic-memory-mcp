@@ -1,7 +1,7 @@
 """Tests for the skip logic in summarize_lectures.py."""
 import os
 import time
-from pathlib import Path
+
 from unittest.mock import patch
 
 import pytest
