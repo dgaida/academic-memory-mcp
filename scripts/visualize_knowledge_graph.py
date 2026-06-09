@@ -1,5 +1,4 @@
 import sys
-import os
 from pathlib import Path
 import networkx as nx
 from pyvis.network import Network

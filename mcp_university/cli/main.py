@@ -60,7 +60,7 @@ def graph_build(debug: bool = typer.Option(False, "--debug", "-d", help="Debug-L
                 if changes['new_nodes']:
                     print(f"      Neue Knoten: {', '.join(changes['new_nodes'])}")
                 if changes['new_edges']:
-                    print(f"      Neue Beziehungen:")
+                    print("      Neue Beziehungen:")
                     for edge in changes['new_edges']:
                         print(f"        - {edge}")
 
@@ -75,7 +75,7 @@ def graph_build(debug: bool = typer.Option(False, "--debug", "-d", help="Debug-L
                 if changes['new_nodes']:
                     print(f"      Neue Knoten: {', '.join(changes['new_nodes'])}")
                 if changes['new_edges']:
-                    print(f"      Neue Beziehungen:")
+                    print("      Neue Beziehungen:")
                     for edge in changes['new_edges']:
                         print(f"        - {edge}")
 

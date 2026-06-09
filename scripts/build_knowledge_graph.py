@@ -66,7 +66,7 @@ def main():
                 if changes['new_nodes']:
                     logger.info(f"  New Nodes: {', '.join(changes['new_nodes'])}")
                 if changes['new_edges']:
-                    logger.info(f"  New Edges:")
+                    logger.info("  New Edges:")
                     for edge in changes['new_edges']:
                         logger.info(f"    - {edge}")
             else:
@@ -84,7 +84,7 @@ def main():
                 if changes['new_nodes']:
                     logger.info(f"  New Nodes: {', '.join(changes['new_nodes'])}")
                 if changes['new_edges']:
-                    logger.info(f"  New Edges:")
+                    logger.info("  New Edges:")
                     for edge in changes['new_edges']:
                         logger.info(f"    - {edge}")
             else:
