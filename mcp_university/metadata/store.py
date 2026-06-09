@@ -102,6 +102,15 @@ class MetadataStore:
             ''')
 
             cursor.execute('''
+               CREATE TABLE IF NOT EXISTS aliases (
+                   id INTEGER PRIMARY KEY AUTOINCREMENT,
+                   alias TEXT UNIQUE,
+                   canonical_name TEXT,
+                   category TEXT
+               )
+            ''')
+
+            cursor.execute('''
                 CREATE TABLE IF NOT EXISTS edges (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     source_id INTEGER,
