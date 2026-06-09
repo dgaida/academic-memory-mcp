@@ -1,3 +1,4 @@
+"""Tests für die Parser des MCP University Systems."""
 from unittest.mock import MagicMock, patch
 from mcp_university.parser.pdf_parser import PDFParser
 from mcp_university.parser.mail_parser import MailParser
@@ -51,3 +52,31 @@ def test_mail_parser_eml_fallback_on_decode_error(tmp_path):
     content = parser.parse(eml_file)
     assert content is not None
     assert "Subject: Test" in content
+
+def test_pdf_parser_fallback_to_liteparse(tmp_path):
+    """Testet den Fallback von docling auf liteparse im PDFParser."""
+    cache_dir = tmp_path / "cache"
+
+    with patch("mcp_university.parser.pdf_parser.DocumentConverter") as mock_docling_class, \
+         patch("mcp_university.parser.pdf_parser.LiteParse") as mock_liteparse_class:
+
+        # Docling schlägt fehl
+        mock_docling = mock_docling_class.return_value
+        mock_docling.convert.side_effect = Exception("Docling failure")
+
+        # LiteParse ist erfolgreich
+        mock_lite_parser = mock_liteparse_class.return_value
+        mock_result = MagicMock()
+        mock_result.text = "Parsed liteparse content"
+        mock_lite_parser.parse.return_value = mock_result
+
+        parser = PDFParser(cache_dir)
+        pdf_file = tmp_path / "test_fallback.pdf"
+        pdf_file.touch()
+
+        content = parser.parse(pdf_file)
+        assert content == "Parsed liteparse content"
+
+        # Verifizieren, dass beide aufgerufen wurden
+        mock_docling.convert.assert_called_once()
+        mock_lite_parser.parse.assert_called_once_with(str(pdf_file))

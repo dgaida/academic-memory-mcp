@@ -1,9 +1,19 @@
-"""Modul zum Parsen von PDF-Dokumenten mittels Docling."""
+"""Modul zum Parsen von PDF-Dokumenten mittels Docling mit Fallback auf LiteParse."""
 import logging
 import warnings
 from pathlib import Path
 from typing import Optional
-from docling.document_converter import DocumentConverter
+
+try:
+    from docling.document_converter import DocumentConverter
+except ImportError:
+    DocumentConverter = None
+
+try:
+    from liteparse import LiteParse
+except ImportError:
+    LiteParse = None
+
 from mcp_university.config import get_config
 
 # Suppress torch pin_memory warnings when no accelerator is found
@@ -12,7 +22,7 @@ warnings.filterwarnings("ignore", message=".*pin_memory.*")
 logger = logging.getLogger(__name__)
 
 class PDFParser:
-    """Parser für PDF- und DOCX-Dokumente mittels Docling."""
+    """Parser für PDF- und DOCX-Dokumente mittels Docling und LiteParse."""
 
     def __init__(self, cache_dir: Path):
         """Initialisiert den PDF-Parser.
@@ -31,30 +41,61 @@ class PDFParser:
             os.environ["HF_HUB_OFFLINE"] = "1"
             os.environ["TRANSFORMERS_OFFLINE"] = "1"
 
-        self.converter = DocumentConverter()
+        self.converter = DocumentConverter() if DocumentConverter else None
+        self._lite_parser = None
 
     def parse(self, file_path: Path) -> Optional[str]:
-        """Extrahiert Text aus einer PDF- oder DOCX-Datei mittels Docling.
+        """Extrahiert Text aus einer PDF- oder DOCX-Datei.
+
+        Probiert zuerst Docling, dann LiteParse als Fallback für PDFs.
 
         Args:
             file_path: Pfad zur Datei.
 
         Returns:
-            Extrahierter Text im Markdown-Format.
+            Extrahierter Text im Markdown-Format oder None.
         """
-        logger.info(f"Parsing document with docling: {file_path}")
-        try:
-            # Limit processing to first 3 pages
-            result = self.converter.convert(str(file_path), max_num_pages=3)
+        # 1. Versuch mit Docling
+        if self.converter:
+            logger.info(f"Parsing document with docling: {file_path}")
+            try:
+                # Limit processing to first 3 pages
+                result = self.converter.convert(str(file_path), max_num_pages=3)
+                markdown = result.document.export_to_markdown()
+                if markdown and len(markdown.strip()) > 0:
+                    return markdown
+                logger.warning(f"Docling returned empty content for {file_path}")
+            except Exception as e:
+                logger.error(f"Error parsing document {file_path} with docling: {e}")
 
-            # Some versions might use result.document.export_to_markdown()
-            markdown = result.document.export_to_markdown()
-            return markdown
+        # 2. Fallback für PDFs
+        if file_path.suffix.lower() == ".pdf":
+            return self._parse_with_liteparse(file_path)
+
+        # 3. Fallback für DOCX
+        if file_path.suffix.lower() == ".docx":
+            return self._parse_docx_fallback(file_path)
+
+        return None
+
+    def _parse_with_liteparse(self, file_path: Path) -> Optional[str]:
+        """Extrahiert Text aus einer PDF-Datei mittels LiteParse als Fallback."""
+        if not LiteParse:
+            logger.error("LiteParse is not installed. Cannot use as fallback.")
+            return None
+
+        logger.info(f"Parsing document with liteparse (Fallback): {file_path}")
+        try:
+            if self._lite_parser is None:
+                self._lite_parser = LiteParse()
+
+            result = self._lite_parser.parse(str(file_path))
+            # LiteParse result typically has .text
+            if hasattr(result, "text"):
+                return result.text
+            return str(result)
         except Exception as e:
-            logger.error(f"Error parsing document {file_path} with docling: {e}")
-            # Fallback for docx if docling fails
-            if file_path.suffix.lower() == ".docx":
-                return self._parse_docx_fallback(file_path)
+            logger.error(f"Error parsing document {file_path} with liteparse: {e}")
             return None
 
     def _parse_docx_fallback(self, path: Path) -> Optional[str]:
