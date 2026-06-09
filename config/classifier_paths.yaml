@@ -1,0 +1,2 @@
+class_paths:
+  Inbox: data/mock_emails/inbox

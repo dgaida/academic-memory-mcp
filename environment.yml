@@ -32,6 +32,8 @@ dependencies:
     - xgboost
     - gradio
     - shap
+    - networkx
+    - pyvis
     - pytest
     - pytest-asyncio
     - pytest-mock
