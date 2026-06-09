@@ -1,4 +1,4 @@
-"""Modul zum Parsen von PDF-Dokumenten mittels Docling mit Fallback auf LiteParse."""
+"""Modul zum Parsen von PDF-Dokumenten mittels LiteParse mit Fallback auf Docling."""
 import logging
 import warnings
 from pathlib import Path
@@ -47,7 +47,7 @@ class PDFParser:
     def parse(self, file_path: Path) -> Optional[str]:
         """Extrahiert Text aus einer PDF- oder DOCX-Datei.
 
-        Probiert zuerst Docling, dann LiteParse als Fallback für PDFs.
+        Probiert zuerst LiteParse, dann Docling als Fallback für PDFs.
 
         Args:
             file_path: Pfad zur Datei.
@@ -55,7 +55,13 @@ class PDFParser:
         Returns:
             Extrahierter Text im Markdown-Format oder None.
         """
-        # 1. Versuch mit Docling
+        # 1. Versuch mit LiteParse für PDFs
+        if file_path.suffix.lower() == ".pdf":
+            content = self._parse_with_liteparse(file_path)
+            if content:
+                return content
+
+        # 2. Versuch mit Docling
         if self.converter:
             logger.info(f"Parsing document with docling: {file_path}")
             try:
@@ -67,10 +73,6 @@ class PDFParser:
                 logger.warning(f"Docling returned empty content for {file_path}")
             except Exception as e:
                 logger.error(f"Error parsing document {file_path} with docling: {e}")
-
-        # 2. Fallback für PDFs
-        if file_path.suffix.lower() == ".pdf":
-            return self._parse_with_liteparse(file_path)
 
         # 3. Fallback für DOCX
         if file_path.suffix.lower() == ".docx":

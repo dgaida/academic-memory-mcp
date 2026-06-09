@@ -8,7 +8,7 @@ from typing import Optional, List, Dict, Any, Tuple
 class MetadataStore:
     """Verwaltet die Metadaten-Persistenz in einer SQLite-Datenbank.
 
-    Speichert Informationen über Dateien, Ordner, Studenten, Deadlines und Zusammenfassungen.
+    Speichert Informationen über Dateien, Ordner, Studenten, Deadlines, Zusammenfassungen und Aliase.
     """
 
     def __init__(self, db_path: Path):
@@ -91,7 +91,6 @@ class MetadataStore:
                 )
             ''')
 
-
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS nodes (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -108,153 +107,94 @@ class MetadataStore:
                     target_id INTEGER,
                     relation_type TEXT,
                     properties_json TEXT,
+                    UNIQUE(source_id, target_id, relation_type),
                     FOREIGN KEY(source_id) REFERENCES nodes(id),
-                    FOREIGN KEY(target_id) REFERENCES nodes(id),
-                    UNIQUE(source_id, target_id, relation_type)
+                    FOREIGN KEY(target_id) REFERENCES nodes(id)
                 )
             ''')
 
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS aliases (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    alias TEXT UNIQUE,
+                    canonical_name TEXT,
+                    category TEXT
+                )
+            ''')
             conn.commit()
 
-    def upsert_file(self, path: str, file_hash: str, mtime: float, file_type: str, folder_id: Optional[int] = None) -> int:
-        """Fügt eine Datei hinzu oder aktualisiert sie.
-
-        Args:
-            path (str): Absoluter Pfad zur Datei.
-            file_hash (str): SHA-256 Hash des Inhalts.
-            mtime (float): Letzte Änderungszeit.
-            file_type (str): Dateiendung.
-            folder_id (Optional[int]): ID des übergeordneten Ordners.
-
-        Returns:
-            int: Die ID des Datensatzes.
-        """
+    def upsert_file(self, path: str, file_hash: str, mtime: float, file_type: str, folder_id: int = None) -> int:
+        """Fügt eine Datei hinzu oder aktualisiert sie."""
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('''
-                INSERT INTO files (path, hash, mtime, type, folder_id)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO files (path, hash, mtime, type, last_indexed, folder_id)
+                VALUES (?, ?, ?, ?, ?, ?)
                 ON CONFLICT(path) DO UPDATE SET
                     hash=excluded.hash,
                     mtime=excluded.mtime,
                     type=excluded.type,
-                    folder_id=excluded.folder_id
-            ''', (path, file_hash, mtime, file_type, folder_id))
+                    last_indexed=excluded.last_indexed,
+                    folder_id=COALESCE(excluded.folder_id, files.folder_id)
+            ''', (path, file_hash, mtime, file_type, time.time(), folder_id))
+            conn.commit()
+            cursor.execute('SELECT id FROM files WHERE path = ?', (path,))
+            return cursor.fetchone()[0]
+
+    def upsert_folder(self, path: str, parent_id: int = None, identity: Dict[str, Any] = None) -> int:
+        """Fügt einen Ordner hinzu oder aktualisiert ihn."""
+        identity_json = json.dumps(identity or {})
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO folders (path, parent_id, identity_json)
+                VALUES (?, ?, ?)
+                ON CONFLICT(path) DO UPDATE SET
+                    parent_id=excluded.parent_id,
+                    identity_json=excluded.identity_json
+            ''', (path, parent_id, identity_json))
+            conn.commit()
+            cursor.execute('SELECT id FROM folders WHERE path = ?', (path,))
+            return cursor.fetchone()[0]
+
+    def add_summary(self, item_type: str, item_id: int, content: str) -> int:
+        """Fügt eine neue Zusammenfassung hinzu."""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT MAX(version) FROM summaries WHERE item_type = ? AND item_id = ?', (item_type, item_id))
+            row = cursor.fetchone()
+            version = (row[0] or 0) + 1
+
+            cursor.execute('''
+                INSERT INTO summaries (item_type, item_id, content, version, created_at)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (item_type, item_id, content, version, time.time()))
             conn.commit()
             return cursor.lastrowid
 
-    def get_file(self, path: str) -> Optional[Tuple]:
-        """Ruft Metadaten für eine Datei ab (Legacy-Format: Tuple).
-
-        Args:
-            path (str): Pfad der Datei.
-
-        Returns:
-            Optional[Tuple]: Datensatz der Datei oder None.
-        """
+    def get_file_by_path(self, path: str) -> Optional[Tuple]:
+        """Ruft eine Datei anhand ihres Pfades ab."""
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('SELECT * FROM files WHERE path = ?', (path,))
             return cursor.fetchone()
 
-    def get_all_files(self) -> List[Dict[str, Any]]:
-        """Ruft alle Dateien ab.
-
-        Returns:
-            List[Dict[str, Any]]: Liste aller Dateien als Dictionaries.
-        """
-        with self._get_connection() as conn:
-            conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
-            cursor.execute('SELECT * FROM files')
-            return [dict(row) for row in cursor.fetchall()]
-
-    def upsert_folder(self, path: str, parent_id: Optional[int] = None) -> int:
-        """Fügt einen Ordner hinzu oder aktualisiert ihn.
-
-        Args:
-            path (str): Pfad zum Ordner.
-            parent_id (Optional[int]): ID des übergeordneten Ordners.
-
-        Returns:
-            int: Die ID des Ordners.
-        """
+    def get_folder_by_path(self, path: str) -> Optional[Tuple]:
+        """Ruft einen Ordner anhand seines Pfades ab."""
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute('''
-                INSERT INTO folders (path, parent_id)
-                VALUES (?, ?)
-                ON CONFLICT(path) DO UPDATE SET
-                    parent_id=excluded.parent_id
-            ''', (path, parent_id))
-            conn.commit()
-            cursor.execute('SELECT id FROM folders WHERE path = ?', (path,))
-            return cursor.fetchone()[0]
+            cursor.execute('SELECT * FROM folders WHERE path = ?', (path,))
+            return cursor.fetchone()
 
-    def get_all_folders(self) -> List[Dict[str, Any]]:
-        """Ruft alle Ordner ab.
-
-        Returns:
-            List[Dict[str, Any]]: Liste aller Ordner als Dictionaries.
-        """
-        with self._get_connection() as conn:
-            conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
-            cursor.execute('SELECT * FROM folders')
-            return [dict(row) for row in cursor.fetchall()]
-
-    def add_summary(self, item_type: str, item_id: int, content: str) -> None:
-        """Speichert eine Zusammenfassung für eine Datei oder einen Ordner.
-
-        Args:
-            item_type (str): 'file' oder 'folder'.
-            item_id (int): Die ID des Zielobjekts.
-            content (str): Der Text der Zusammenfassung.
-        """
-        with self._get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('''
-                INSERT INTO summaries (item_type, item_id, content, created_at)
-                VALUES (?, ?, ?, ?)
-            ''', (item_type, item_id, content, time.time()))
-            conn.commit()
-
-    def get_all_summaries(self) -> List[Dict[str, Any]]:
-        """Ruft alle Zusammenfassungen ab.
-
-        Returns:
-            List[Dict[str, Any]]: Liste aller Zusammenfassungen als Dictionaries.
-        """
-        with self._get_connection() as conn:
-            conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
-            cursor.execute('SELECT * FROM summaries')
-            return [dict(row) for row in cursor.fetchall()]
-
-    def get_folder_files(self, folder_id: int) -> List[Tuple]:
-        """Ruft alle Dateien in einem bestimmten Ordner ab (Legacy-Format: Tuple).
-
-        Args:
-            folder_id (int): ID des Ordners.
-
-        Returns:
-            List[Tuple]: Liste der Dateidatensätze.
-        """
+    def get_files_in_folder(self, folder_id: int) -> List[Tuple]:
+        """Ruft alle Dateien in einem Ordner ab."""
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('SELECT * FROM files WHERE folder_id = ?', (folder_id,))
             return cursor.fetchall()
 
     def get_summary(self, item_type: str, item_id: int) -> Optional[str]:
-        """Ruft die aktuellste Zusammenfassung für ein Objekt ab.
-
-        Args:
-            item_type (str): 'file' oder 'folder'.
-            item_id (int): Die ID des Objekts.
-
-        Returns:
-            Optional[str]: Der Inhalt der Zusammenfassung oder None.
-        """
+        """Ruft die aktuellste Zusammenfassung für ein Objekt ab."""
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('''
@@ -266,18 +206,7 @@ class MetadataStore:
             return row[0] if row else None
 
     def upsert_student(self, name: str, email: str = None, topic: str = None, status: str = None, folder_id: int = None) -> int:
-        """Fügt einen Studenten hinzu oder aktualisiert ihn.
-
-        Args:
-            name (str): Name des Studenten.
-            email (str): Email-Adresse.
-            topic (str): Thema der Abschlussarbeit.
-            status (str): Aktueller Status.
-            folder_id (int): ID des zugehörigen Ordners.
-
-        Returns:
-            int: Die ID des Studenten.
-        """
+        """Fügt einen Studenten hinzu oder aktualisiert ihn."""
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
@@ -294,11 +223,7 @@ class MetadataStore:
             return cursor.fetchone()[0]
 
     def get_all_students(self) -> List[Dict[str, Any]]:
-        """Ruft alle Studenten ab.
-
-        Returns:
-            List[Dict[str, Any]]: Liste aller Studenten als Dictionaries.
-        """
+        """Ruft alle Studenten ab."""
         with self._get_connection() as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
@@ -306,11 +231,7 @@ class MetadataStore:
             return [dict(row) for row in cursor.fetchall()]
 
     def get_all_deadlines(self) -> List[Dict[str, Any]]:
-        """Ruft alle Deadlines ab.
-
-        Returns:
-            List[Dict[str, Any]]: Liste aller Deadlines als Dictionaries.
-        """
+        """Ruft alle Deadlines ab."""
         with self._get_connection() as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
@@ -318,11 +239,7 @@ class MetadataStore:
             return [dict(row) for row in cursor.fetchall()]
 
     def delete_file(self, file_id: int) -> None:
-        """Löscht eine Datei und ihre Zusammenfassungen aus der Datenbank.
-
-        Args:
-            file_id (int): ID der Datei.
-        """
+        """Löscht eine Datei."""
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('DELETE FROM summaries WHERE item_type = "file" AND item_id = ?', (file_id,))
@@ -330,84 +247,29 @@ class MetadataStore:
             conn.commit()
 
     def delete_folder(self, folder_id: int) -> None:
-        """Löscht einen Ordner, alle darin enthaltenen Dateien und deren Zusammenfassungen.
-
-        Args:
-            folder_id (int): ID des Ordners.
-        """
+        """Löscht einen Ordner und dessen Inhalte."""
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            # Finde alle Dateien im Ordner
             cursor.execute('SELECT id FROM files WHERE folder_id = ?', (folder_id,))
             file_ids = [row[0] for row in cursor.fetchall()]
 
-            # Lösche alle Dateien (und deren Zusammenfassungen)
             for f_id in file_ids:
                 cursor.execute('DELETE FROM summaries WHERE item_type = "file" AND item_id = ?', (f_id,))
                 cursor.execute('DELETE FROM files WHERE id = ?', (f_id,))
 
-            # Lösche Zusammenfassungen des Ordners
             cursor.execute('DELETE FROM summaries WHERE item_type = "folder" AND item_id = ?', (folder_id,))
-
-            # Lösche den Ordner selbst
             cursor.execute('DELETE FROM folders WHERE id = ?', (folder_id,))
             conn.commit()
 
-    def delete_student(self, student_id: int) -> None:
-        """Löscht einen Studenten aus der Datenbank.
-
-        Args:
-            student_id (int): ID des Studenten.
-        """
-        with self._get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('DELETE FROM students WHERE id = ?', (student_id,))
-            conn.commit()
-
-    def delete_deadline(self, deadline_id: int) -> None:
-        """Löscht eine Deadline aus der Datenbank.
-
-        Args:
-            deadline_id (int): ID der Deadline.
-        """
-        with self._get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('DELETE FROM deadlines WHERE id = ?', (deadline_id,))
-            conn.commit()
-
-    def delete_summary(self, summary_id: int) -> None:
-        """Löscht eine Zusammenfassung aus der Datenbank.
-
-        Args:
-            summary_id (int): ID der Zusammenfassung.
-        """
-        with self._get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('DELETE FROM summaries WHERE id = ?', (summary_id,))
-            conn.commit()
-
     def update_folder_summarized(self, folder_id: int) -> None:
-        """Aktualisiert den Zeitstempel der letzten Zusammenfassung für einen Ordner.
-
-        Args:
-            folder_id (int): ID des Ordners.
-        """
+        """Aktualisiert den Zeitstempel der letzten Zusammenfassung."""
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('UPDATE folders SET last_summarized = ? WHERE id = ?', (time.time(), folder_id))
             conn.commit()
 
     def upsert_node(self, name: str, node_type: str, properties: Dict[str, Any] = None) -> Tuple[int, bool]:
-        """Fügt einen Knoten hinzu oder aktualisiert ihn.
-
-        Args:
-            name (str): Name des Knotens.
-            node_type (str): Typ des Knotens (Person, Modul, Unternehmen).
-            properties (Dict[str, Any]): Zusätzliche Eigenschaften.
-
-        Returns:
-            Tuple[int, bool]: Die ID des Knotens und ob er neu erstellt wurde.
-        """
+        """Fügt einen Knoten hinzu oder aktualisiert ihn."""
         props_json = json.dumps(properties or {})
         with self._get_connection() as conn:
             cursor = conn.cursor()
@@ -424,24 +286,11 @@ class MetadataStore:
             ''', (name, node_type, props_json))
             conn.commit()
 
-            if is_new:
-                cursor.execute('SELECT id FROM nodes WHERE name = ?', (name,))
-                return cursor.fetchone()[0], True
-            else:
-                return row[0], False
+            cursor.execute('SELECT id FROM nodes WHERE name = ?', (name,))
+            return cursor.fetchone()[0], is_new
 
     def upsert_edge(self, source_id: int, target_id: int, relation_type: str, properties: Dict[str, Any] = None) -> Tuple[int, bool]:
-        """Fügt eine Kante hinzu oder aktualisiert sie.
-
-        Args:
-            source_id (int): ID des Startknotens.
-            target_id (int): ID des Zielknotens.
-            relation_type (str): Typ der Beziehung.
-            properties (Dict[str, Any]): Zusätzliche Eigenschaften.
-
-        Returns:
-            Tuple[int, bool]: Die ID der Kante und ob sie neu erstellt wurde.
-        """
+        """Fügt eine Kante hinzu oder aktualisiert sie."""
         props_json = json.dumps(properties or {})
         with self._get_connection() as conn:
             cursor = conn.cursor()
@@ -460,14 +309,11 @@ class MetadataStore:
             ''', (source_id, target_id, relation_type, props_json))
             conn.commit()
 
-            if is_new:
-                cursor.execute('''
-                    SELECT id FROM edges
-                    WHERE source_id = ? AND target_id = ? AND relation_type = ?
-                ''', (source_id, target_id, relation_type))
-                return cursor.fetchone()[0], True
-            else:
-                return row[0], False
+            cursor.execute('''
+                SELECT id FROM edges
+                WHERE source_id = ? AND target_id = ? AND relation_type = ?
+            ''', (source_id, target_id, relation_type))
+            return cursor.fetchone()[0], is_new
 
     def get_all_nodes(self) -> List[Dict[str, Any]]:
         """Ruft alle Knoten ab."""
@@ -483,4 +329,50 @@ class MetadataStore:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
             cursor.execute('SELECT * FROM edges')
+            return [dict(row) for row in cursor.fetchall()]
+
+    def add_alias(self, alias: str, canonical_name: str, category: str) -> None:
+        """Fügt ein Alias für einen kanonischen Namen hinzu.
+
+        Args:
+            alias (str): Die alternative Schreibweise.
+            canonical_name (str): Der bevorzugte/eindeutige Name.
+            category (str): 'Person' oder 'Modul'.
+        """
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO aliases (alias, canonical_name, category)
+                VALUES (?, ?, ?)
+                ON CONFLICT(alias) DO UPDATE SET
+                    canonical_name=excluded.canonical_name,
+                    category=excluded.category
+            ''', (alias, canonical_name, category))
+            conn.commit()
+
+    def resolve_canonical_name(self, name: str, category: str) -> str:
+        """Löst einen Namen über die Aliases-Tabelle auf.
+
+        Args:
+            name (str): Der aufzulösende Name.
+            category (str): Die Kategorie ('Person', 'Modul').
+
+        Returns:
+            str: Der kanonische Name oder der ursprüngliche Name, falls kein Alias existiert.
+        """
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT canonical_name FROM aliases
+                WHERE alias = ? AND category = ?
+            ''', (name, category))
+            row = cursor.fetchone()
+            return row[0] if row else name
+
+    def get_all_aliases(self) -> List[Dict[str, Any]]:
+        """Ruft alle Aliase ab."""
+        with self._get_connection() as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM aliases')
             return [dict(row) for row in cursor.fetchall()]
