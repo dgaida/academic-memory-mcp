@@ -45,7 +45,7 @@ class Config:
     Lädt Einstellungen aus YAML-Dateien im 'config/'-Verzeichnis.
     """
 
-    def __init__(self, config_dir: Path = None):
+    def __init__(self, config_dir: Path = None) -> None:
         """Initialisiert die Konfiguration.
 
         Args:

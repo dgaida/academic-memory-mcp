@@ -30,7 +30,7 @@ def get_store_and_index() -> Tuple[MetadataStore, SearchIndex]:
     return store, idx
 
 @db_app.command("list-files")
-def list_files():
+def list_files() -> None:
     """Listet alle indexierten Dateien in der Datenbank auf."""
     store, _ = get_store_and_index()
     files = store.get_all_files()
@@ -52,7 +52,7 @@ def list_files():
     console.print(table)
 
 @db_app.command("list-folders")
-def list_folders():
+def list_folders() -> None:
     """Listet alle überwachten Ordner auf."""
     store, _ = get_store_and_index()
     folders = store.get_all_folders()
@@ -74,7 +74,7 @@ def list_folders():
 
 
 @db_app.command("sync-students")
-def sync_students(yaml_path: str = typer.Option("students.yaml", help="Pfad zur students.yaml")):
+def sync_students(yaml_path: str = typer.Option("students.yaml", help="Pfad zur students.yaml")) -> None:
     """Synchronisiert Studentendaten aus einer YAML-Datei mit der Datenbank.
 
     Args:
@@ -106,7 +106,7 @@ def sync_students(yaml_path: str = typer.Option("students.yaml", help="Pfad zur 
     console.print(f"[green]{count} Studenten synchronisiert.[/green]")
 
 @db_app.command("list-students")
-def list_students():
+def list_students() -> None:
     """Listet alle Studenten in der Datenbank auf."""
     store, _ = get_store_and_index()
     students = store.get_all_students()
@@ -127,7 +127,7 @@ def list_students():
     console.print(table)
 
 @db_app.command("list-summaries")
-def list_summaries():
+def list_summaries() -> None:
     """Listet alle Zusammenfassungen in der Datenbank auf."""
     store, _ = get_store_and_index()
     summaries = store.get_all_summaries()
@@ -151,7 +151,7 @@ def list_summaries():
     console.print(table)
 
 @db_app.command("list-deadlines")
-def list_deadlines():
+def list_deadlines() -> None:
     """Listet alle Deadlines in der Datenbank auf."""
     store, _ = get_store_and_index()
     deadlines = store.get_all_deadlines()
@@ -173,7 +173,7 @@ def list_deadlines():
     console.print(table)
 
 @db_app.command("delete-file")
-def delete_file(file_ids: List[int] = typer.Argument(..., help="Datei-IDs"), force: bool = typer.Option(False, "--force", "-f", help="Force")):
+def delete_file(file_ids: List[int] = typer.Argument(..., help="Datei-IDs"), force: bool = typer.Option(False, "--force", "-f", help="Force")) -> None:
     """Löscht Dateien aus der Datenbank und dem Suchindex.
 
     Args:
@@ -195,7 +195,7 @@ def delete_file(file_ids: List[int] = typer.Argument(..., help="Datei-IDs"), for
         console.print(f"[green]Datei '{target['path']}' erfolgreich gelöscht.[/green]")
 
 @db_app.command("delete-folder")
-def delete_folder(folder_id: int, force: bool = typer.Option(False, "--force", "-f", help="Ohne Bestätigung löschen")):
+def delete_folder(folder_id: int, force: bool = typer.Option(False, "--force", "-f", help="Ohne Bestätigung löschen")) -> None:
     """Löscht einen Ordner und alle zugehörigen Dateien aus der Datenbank und dem Index.
 
     Args:
@@ -228,7 +228,7 @@ def delete_folder(folder_id: int, force: bool = typer.Option(False, "--force", "
     console.print(f"[green]Ordner '{target_folder['path']}' und zugehörige Daten erfolgreich gelöscht.[/green]")
 
 @db_app.command("delete-student")
-def delete_student(student_id: int, force: bool = typer.Option(False, "--force", "-f", help="Ohne Bestätigung löschen")):
+def delete_student(student_id: int, force: bool = typer.Option(False, "--force", "-f", help="Ohne Bestätigung löschen")) -> None:
     """Löscht einen Studenten aus der Datenbank.
 
     Args:
@@ -253,7 +253,7 @@ def delete_student(student_id: int, force: bool = typer.Option(False, "--force",
     console.print(f"[green]Student '{target['name']}' erfolgreich gelöscht.[/green]")
 
 @db_app.command("delete-summary")
-def delete_summary(summary_id: int, force: bool = typer.Option(False, "--force", "-f", help="Ohne Bestätigung löschen")):
+def delete_summary(summary_id: int, force: bool = typer.Option(False, "--force", "-f", help="Ohne Bestätigung löschen")) -> None:
     """Löscht eine Zusammenfassung aus der Datenbank.
 
     Args:
@@ -278,7 +278,7 @@ def delete_summary(summary_id: int, force: bool = typer.Option(False, "--force",
     console.print(f"[green]Zusammenfassung ID {summary_id} erfolgreich gelöscht.[/green]")
 
 @db_app.command("delete-deadline")
-def delete_deadline(deadline_id: int, force: bool = typer.Option(False, "--force", "-f", help="Ohne Bestätigung löschen")):
+def delete_deadline(deadline_id: int, force: bool = typer.Option(False, "--force", "-f", help="Ohne Bestätigung löschen")) -> None:
     """Löscht eine Deadline aus der Datenbank.
 
     Args:

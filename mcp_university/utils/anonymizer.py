@@ -73,7 +73,7 @@ def anonymize_th_koeln_names(text: str) -> str:
 class Anonymizer:
     """Utility to anonymize and de-anonymize email content using a local LLM."""
 
-    def __init__(self, model: str = None, base_url: str = None):
+    def __init__(self, model: str = None, base_url: str = None) -> None:
         """Initializes the anonymizer.
 
         Args:

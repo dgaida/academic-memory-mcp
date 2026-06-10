@@ -8,7 +8,7 @@ from .mail_parser import MailParser
 class ParserFactory:
     """Factory-Klasse zur Bereitstellung des passenden Parsers für verschiedene Dateitypen."""
 
-    def __init__(self, cache_dir: Path):
+    def __init__(self, cache_dir: Path) -> None:
         """Initialisiert die Factory mit den unterstützten Parsern.
 
         Args:

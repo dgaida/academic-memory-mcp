@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 class KnowledgeGraphEngine:
     """Extrahiert Entitäten und Beziehungen aus Zusammenfassungen für den Wissensgraphen."""
 
-    def __init__(self, store: MetadataStore, summarizer: Summarizer):
+    def __init__(self, store: MetadataStore, summarizer: Summarizer) -> None:
         self.store = store
         self.summarizer = summarizer
 

@@ -101,7 +101,7 @@ class EmailClassifier:
         self._embedding_model = None
 
     @property
-    def embedding_model(self):
+    def embedding_model(self) -> Any:
         """Lädt das Embedding-Modell verzögert (Lazy Loading)."""
         if self._embedding_model is None:
             from sentence_transformers import SentenceTransformer
@@ -335,13 +335,13 @@ class EmailClassifier:
 class EmailTransformerClassifier(nn.Module):
     """Transformer-basiertes Modell zur E-Mail-Klassifizierung."""
 
-    def __init__(self, model_name: str, num_classes: int, token: Optional[str] = None):
+    def __init__(self, model_name: str, num_classes: int, token: Optional[str] = None) -> None:
         super().__init__()
         self.transformer = AutoModel.from_pretrained(model_name, token=token)
         self.dropout = nn.Dropout(0.1)
         self.classifier = nn.Linear(self.transformer.config.hidden_size, num_classes)
 
-    def forward(self, input_ids, attention_mask):
+    def forward(self, input_ids, attention_mask) -> torch.Tensor:
         outputs = self.transformer(input_ids=input_ids, attention_mask=attention_mask)
         # Use [CLS] token (first token)
         cls_output = outputs.last_hidden_state[:, 0, :]

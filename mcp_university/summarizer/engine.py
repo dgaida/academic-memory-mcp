@@ -13,7 +13,7 @@ class Summarizer:
     vordefinierten Prompts für den universitären Kontext.
     """
 
-    def __init__(self, model: str = "gemma2:2b", base_url: str = "http://localhost:11434"):
+    def __init__(self, model: str = "gemma2:2b", base_url: str = "http://localhost:11434") -> None:
         """Initialisiert den Summarizer mit Modellkonfiguration.
 
         Args:

@@ -16,7 +16,7 @@ except ImportError:
 class LLMClientWrapper:
     """Synchronous wrapper for LLM calls, supporting both local Ollama and cloud providers."""
 
-    def __init__(self, provider: str = "ollama", model: str = None, base_url: str = None, api_key: str = None):
+    def __init__(self, provider: str = "ollama", model: str = None, base_url: str = None, api_key: str = None) -> None:
         """Initializes the LLMClientWrapper.
 
         Args:
@@ -89,7 +89,7 @@ class LLMClientWrapper:
                     import nest_asyncio
                     nest_asyncio.apply()
 
-                async def _call():
+                async def _call() -> Any:
                     """Internal async call."""
                     return await self.client.chat(chat_messages)
 

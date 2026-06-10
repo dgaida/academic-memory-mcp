@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 class PDFParser:
     """Parser für PDF- und DOCX-Dokumente mittels Docling und LiteParse."""
 
-    def __init__(self, cache_dir: Path):
+    def __init__(self, cache_dir: Path) -> None:
         """Initialisiert den PDF-Parser.
 
         Args:
