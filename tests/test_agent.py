@@ -10,16 +10,14 @@ sys.modules["win32com.client"] = mock_win32com.client
 from mcp_university.agent import Agent # noqa: E402
 
 @pytest.fixture
-def mock_ollama_client():
-    with patch('ollama.Client') as mock:
+def mock_llm_wrapper():
+    with patch('mcp_university.agent.engine.LLMClientWrapper') as mock:
         yield mock
 
 @pytest.fixture
-def agent(mock_ollama_client):
+def agent(mock_llm_wrapper):
     # Mocking dependencies that Agent initializes
-    with patch('mcp_university.agent.engine.ParserFactory'), \
-         patch('mcp_university.agent.engine.MetadataStore'), \
-         patch('mcp_university.agent.engine.SearchIndex'):
+    with patch('mcp_university.agent.engine.ParserFactory'),          patch('mcp_university.agent.engine.MetadataStore'),          patch('mcp_university.agent.engine.SearchIndex'):
         return Agent(model="test-model", base_url="http://test-url")
 
 def test_agent_initialization(agent):
@@ -30,22 +28,22 @@ def test_agent_initialization(agent):
     assert "get_appointment_slots" in agent.available_tools
     assert "manage_calendar_appointment" in agent.available_tools
 
-def test_agent_chat_no_tools(agent, mock_ollama_client):
-    # Mock Ollama response with no tool calls
+def test_agent_chat_no_tools(agent, mock_llm_wrapper):
+    # Mock LLM response with no tool calls
     mock_response = {
         'message': {
             'role': 'assistant',
             'content': 'Hello! How can I help you?'
         }
     }
-    agent.client.client.chat.return_value = mock_response
+    agent.client.chat.return_value = mock_response
 
     response = agent.chat([{'role': 'user', 'content': 'Hi'}])
 
     assert response == 'Hello! How can I help you?'
-    agent.client.client.chat.assert_called_once()
+    agent.client.chat.assert_called_once()
 
-def test_agent_chat_with_tool_call(agent, mock_ollama_client):
+def test_agent_chat_with_tool_call(agent, mock_llm_wrapper):
     # First response triggers a tool call
     mock_response_1 = {
         'message': {
@@ -67,7 +65,7 @@ def test_agent_chat_with_tool_call(agent, mock_ollama_client):
         }
     }
 
-    agent.client.client.chat.side_effect = [mock_response_1, mock_response_2]
+    agent.client.chat.side_effect = [mock_response_1, mock_response_2]
 
     # Mock the tool execution and update available_tools
     agent._tool_read_file = MagicMock(return_value="Hello World")
@@ -77,7 +75,7 @@ def test_agent_chat_with_tool_call(agent, mock_ollama_client):
 
     assert response == 'The content of the file is: Hello World'
     agent._tool_read_file.assert_called_with(path='test.txt')
-    assert agent.client.client.chat.call_count == 2
+    assert agent.client.chat.call_count == 2
 
 def test_tool_read_file(agent):
     with patch.object(agent.parser_factory, 'parse', return_value="File content"):
@@ -110,11 +108,11 @@ def test_tool_manage_calendar_appointment_import_error(agent):
         assert "pywin32 ist nicht installiert" in result
 
 @patch('mcp_university.agent.engine.Agent._tool_manage_calendar_appointment')
-def test_agent_chat_with_appointment_booked(mock_tool, agent, mock_ollama_client):
+def test_agent_chat_with_appointment_booked(mock_tool, agent, mock_llm_wrapper):
     # Mock the tool to return success
     mock_tool.return_value = "ERFOLG: Termin eingetragen"
 
-    # Mock Ollama to call the tool and then return the signal word
+    # Mock LLM to call the tool and then return the signal word
     mock_response_1 = {
         'message': {
             'role': 'assistant',
@@ -139,14 +137,14 @@ def test_agent_chat_with_appointment_booked(mock_tool, agent, mock_ollama_client
         }
     }
 
-    agent.client.client.chat.side_effect = [mock_response_1, mock_response_2]
+    agent.client.chat.side_effect = [mock_response_1, mock_response_2]
 
     response = agent.chat([{'role': 'user', 'content': 'Bestätige Termin'}])
 
     assert response == "APPOINTMENT_BOOKED"
-    assert agent.client.client.chat.call_count == 2
+    assert agent.client.chat.call_count == 2
 
-def test_agent_chat_with_tool_argument_error(agent, mock_ollama_client):
+def test_agent_chat_with_tool_argument_error(agent, mock_llm_wrapper):
     # Mock tool call with missing arguments
     mock_response_1 = {
         'message': {
@@ -173,13 +171,13 @@ def test_agent_chat_with_tool_argument_error(agent, mock_ollama_client):
         }
     }
 
-    agent.client.client.chat.side_effect = [mock_response_1, mock_response_2]
+    agent.client.chat.side_effect = [mock_response_1, mock_response_2]
 
     # We call agent.chat and verify tool error handling
     agent.chat([{'role': 'user', 'content': 'Book a meeting'}])
 
     # Check if the error message is what we expect
-    second_call_messages = agent.client.client.chat.call_args_list[1][1]['messages']
+    second_call_messages = agent.client.chat.call_args_list[1][1]['messages']
     tool_message = [m for m in second_call_messages if m.get('role') == 'tool'][0]
 
     assert "Fehler" in tool_message['content']
