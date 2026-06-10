@@ -1,29 +1,28 @@
 """KI-basierte Zusammenfassungs-Engine."""
-import ollama
 from typing import Optional, List
 import logging
 from pathlib import Path
+from ..utils.llm_client_wrapper import LLMClientWrapper
 
 logger = logging.getLogger(__name__)
 
 class Summarizer:
     """LLM-basierter Dienst zur Erstellung von Zusammenfassungen für Dateien und Ordner.
 
-    Nutzt Ollama zur Generierung strukturierter Markdown-Zusammenfassungen basierend auf
+    Nutzt LLMClientWrapper zur Generierung strukturierter Markdown-Zusammenfassungen basierend auf
     vordefinierten Prompts für den universitären Kontext.
     """
 
-    def __init__(self, model: str = "gemma2:2b", base_url: str = "http://localhost:11434") -> None:
+    def __init__(self, model: str = None, base_url: str = None) -> None:
         """Initialisiert den Summarizer mit Modellkonfiguration.
 
         Args:
-            model (str): Name des zu verwendenden Ollama-Modells. Defaults to "gemma2:2b".
-            base_url (str): Basis-URL des Ollama-API-Servers. Defaults to "http://localhost:11434".
+            model (str, optional): Name des zu verwendenden Modells.
+            base_url (str, optional): Basis-URL des API-Servers.
         """
-        self.model = model
-        self.base_url = str(base_url)
-        self.client = ollama.Client(host=self.base_url)
-        logger.debug(f"Summarizer initialized with model={model} and base_url={self.base_url}")
+        self.client = LLMClientWrapper(model=model, base_url=base_url)
+        self.model = self.client.model
+        logger.debug(f"Summarizer initialized with model={self.model}")
 
     def _identify_document_type(self, content: str) -> str:
         """Identifiziert den Dokumenttyp basierend auf dem Inhalt des Dokuments (erste Seite/Anfang).
@@ -41,18 +40,12 @@ Antworte NUR mit dem Typ des Dokuments.
 Textanfang:
 {content[:2000]}
 """
-        messages = [
-            {'role': 'system', 'content': system_prompt},
-            {'role': 'user', 'content': user_prompt}
-        ]
-        try:
-            response = self.client.chat(model=self.model, messages=messages, options={"temperature": 0})
-            doc_type = response['message']['content'].strip()
+        doc_type = self._chat_request(system_prompt, user_prompt)
+        if doc_type:
+            doc_type = doc_type.strip()
             logger.debug(f"Identified document type: {doc_type}")
             return doc_type
-        except Exception as e:
-            logger.error(f"Error identifying document type: {e}")
-            return "Unbekannt"
+        return "Unbekannt"
 
     def summarize_file(self, filename: str, content: str) -> Optional[str]:
         """Erstellt eine strukturierte Zusammenfassung einer einzelnen Datei.
@@ -159,22 +152,20 @@ Inhalt:
         return self._chat_request(system_prompt, user_prompt)
 
     def _chat_request(self, system_prompt: str, user_prompt: str) -> Optional[str]:
-        """Hilfsmethode für Ollama-Chat-Anfragen."""
+        """Hilfsmethode für LLM-Chat-Anfragen."""
         messages = [
-            {'role': 'system', 'content': system_prompt},
             {'role': 'user', 'content': user_prompt}
         ]
         try:
             response = self.client.chat(
-                model=self.model,
                 messages=messages,
-                options={"temperature": 0}
+                system_prompt=system_prompt
             )
             return response['message']['content']
         except Exception as e:
             logger.error(f"Error in chat request: {e}")
             if "memory" in str(e).lower():
-                logger.error("Likely Out of Memory error from Ollama.")
+                logger.error("Likely Out of Memory error from LLM.")
             return None
 
     def summarize_folder(self, folder_name: str, item_summaries: List[str]) -> Optional[str]:

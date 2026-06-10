@@ -10,7 +10,7 @@ from mcp_university.agent.mcp_agent import MCPAgent  # noqa: E402
 
 def test_mcp_agent_initialization():
     # Mock Ollama Client
-    with patch('ollama.Client'):
+    with patch('mcp_university.agent.engine.LLMClientWrapper'):
         agent = MCPAgent(model="test-model", base_url="http://localhost:11434")
 
         print("Available tools:", list(agent.available_tools.keys()))
