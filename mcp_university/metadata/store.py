@@ -479,7 +479,11 @@ class MetadataStore:
                 return row[0], False
 
     def get_all_nodes(self) -> List[Dict[str, Any]]:
-        """Ruft alle Knoten ab."""
+        """Ruft alle Knoten ab.
+
+        Returns:
+            List[Dict[str, Any]]: Liste aller Knoten als Dictionaries.
+        """
         with self._get_connection() as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
@@ -527,7 +531,11 @@ class MetadataStore:
             return row[0] if row else name
 
     def get_all_aliases(self) -> List[Dict[str, Any]]:
-        """Ruft alle Aliase ab."""
+        """Ruft alle Aliase ab.
+
+        Returns:
+            List[Dict[str, Any]]: Liste aller Aliase als Dictionaries.
+        """
         with self._get_connection() as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
@@ -535,7 +543,11 @@ class MetadataStore:
             return [dict(row) for row in cursor.fetchall()]
 
     def get_all_edges(self) -> List[Dict[str, Any]]:
-        """Ruft alle Kanten ab."""
+        """Ruft alle Kanten ab.
+
+        Returns:
+            List[Dict[str, Any]]: Liste aller Kanten als Dictionaries.
+        """
         with self._get_connection() as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()

@@ -2,8 +2,8 @@
 import logging
 import re
 from typing import Dict, List, Set
-import ollama
 from ..config import get_config
+from .llm_client_wrapper import LLMClientWrapper
 
 logger = logging.getLogger(__name__)
 
@@ -80,10 +80,8 @@ class Anonymizer:
             model (str, optional): Name of the local LLM model. Defaults to None.
             base_url (str, optional): Base URL of the Ollama server. Defaults to None.
         """
-        cfg = get_config()
-        self.model = model or cfg.llm.model
-        self.base_url = str(base_url or cfg.llm.base_url)
-        self.client = ollama.Client(host=self.base_url)
+        self.client = LLMClientWrapper(model=model, base_url=base_url)
+        self.model = self.client.model
         # Placeholder -> Original
         self.mapping: Dict[str, str] = {}
 
@@ -131,18 +129,14 @@ class Anonymizer:
 
         try:
             response = self.client.chat(
-                model=self.model,
-                messages=[
-                    {'role': 'system', 'content': system_prompt},
-                    {'role': 'user', 'content': text}
-                ],
-                options={"temperature": 0}
+                messages=[{'role': 'user', 'content': text}],
+                system_prompt=system_prompt
             )
             anonymized_text = response['message']['content'].strip()
-            logger.info("Content successfully anonymized via local LLM.")
+            logger.info("Content successfully anonymized via LLM.")
             return anonymized_text
         except Exception as e:
-            logger.error(f"Error during local LLM anonymization: {e}. Using regex/string fallback.")
+            logger.error(f"Error during LLM anonymization: {e}. Using regex/string fallback.")
             # Fallback
             t = text
             t = t.replace(sender_name, std_sender_name)
