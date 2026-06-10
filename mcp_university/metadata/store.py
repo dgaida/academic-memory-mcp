@@ -11,7 +11,7 @@ class MetadataStore:
     Speichert Informationen über Dateien, Ordner, Studenten, Deadlines und Zusammenfassungen.
     """
 
-    def __init__(self, db_path: Path):
+    def __init__(self, db_path: Path) -> None:
         """Initialisiert den MetadataStore und erstellt die Datenbank falls nicht vorhanden.
 
         Args:

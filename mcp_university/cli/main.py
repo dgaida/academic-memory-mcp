@@ -19,7 +19,7 @@ graph_app = typer.Typer(help="Verwaltung des Wissensgraphen")
 
 
 @graph_app.command("build")
-def graph_build(debug: bool = typer.Option(False, "--debug", "-d", help="Debug-Logging aktivieren")):
+def graph_build(debug: bool = typer.Option(False, "--debug", "-d", help="Debug-Logging aktivieren")) -> None:
     """Baut den Wissensgraphen basierend auf den vorhandenen Zusammenfassungen auf."""
     setup_logging(debug)
     cfg = get_config()
@@ -85,7 +85,7 @@ app = typer.Typer(help="MCP University Memory System CLI - Lokales Wissensmanage
 app.add_typer(graph_app, name="graph")
 app.add_typer(db_app, name="db")
 
-def setup_logging(debug: bool):
+def setup_logging(debug: bool) -> None:
     """Konfiguriert das Logging für Konsole und Datei."""
     cfg = get_config()
     log_dir = cfg.log_path

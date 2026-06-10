@@ -28,7 +28,7 @@ class SearchIndex:
     Python-Implementierung als Fallback verwendet.
     """
 
-    def __init__(self, location: str, embedding_model_name: str = "BAAI/bge-m3", store: Any = None):
+    def __init__(self, location: str, embedding_model_name: str = "BAAI/bge-m3", store: Any = None) -> None:
         """Initialisiert den SearchIndex.
 
         Args:
@@ -72,7 +72,7 @@ class SearchIndex:
             return False
 
     @property
-    def model(self):
+    def model(self) -> Any:
         """Gibt das SentenceTransformer-Modell zurück (Lazy Loading)."""
         if self._model is None:
             logger.info(f"Loading SentenceTransformer model: {self.embedding_model_name}")

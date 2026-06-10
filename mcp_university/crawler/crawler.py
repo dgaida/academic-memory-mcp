@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class Crawler:
     """Überwacht konfigurierte Ordner und indexiert neue oder geänderte Dateien."""
 
-    def __init__(self, config: Config, store: MetadataStore, parser: ParserFactory, summarizer: Summarizer, index: SearchIndex):
+    def __init__(self, config: Config, store: MetadataStore, parser: ParserFactory, summarizer: Summarizer, index: SearchIndex) -> None:
         """Initialisiert den Crawler.
 
         Args:

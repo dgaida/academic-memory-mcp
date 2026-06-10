@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class IndexingHandler(FileSystemEventHandler):
     """Handler for indexing."""
-    def __init__(self, crawler: Crawler):
+    def __init__(self, crawler: Crawler) -> None:
         """Init."""
         self.crawler = crawler
 
@@ -32,7 +32,7 @@ class IndexingHandler(FileSystemEventHandler):
 
 class Watcher:
     """Watcher class."""
-    def __init__(self, crawler: Crawler):
+    def __init__(self, crawler: Crawler) -> None:
         """Init."""
         self.crawler = crawler
         self.observer = Observer()

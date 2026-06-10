@@ -18,7 +18,7 @@ class Agent:
     """Agent, der Tool-Calling mittels Ollama unterstützt und optional Cloud-LLMs mit Anonymisierung nutzt."""
 
     def __init__(self, model: str = None, base_url: str = None, use_cloud: bool = False,
-                 cloud_provider: str = "openai", cloud_model: str = "gpt-4o", api_key: str = None):
+                 cloud_provider: str = "openai", cloud_model: str = "gpt-4o", api_key: str = None) -> None:
         """Initialisiert den Agenten.
 
         Args:

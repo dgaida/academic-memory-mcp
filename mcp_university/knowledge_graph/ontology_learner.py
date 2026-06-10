@@ -12,12 +12,12 @@ logger = logging.getLogger(__name__)
 class OntologyLearner:
     """Lernt Alias-Beziehungen für Personen und Module."""
 
-    def __init__(self, store: MetadataStore, summarizer: Summarizer):
+    def __init__(self, store: MetadataStore, summarizer: Summarizer) -> None:
         self.store = store
         self.summarizer = summarizer
         self.mail_parser = MailParser()
 
-    def learn_from_emails(self, base_path: Path):
+    def learn_from_emails(self, base_path: Path) -> None:
         """Scannt E-Mails nach Name-Email-Paaren, um Personen-Aliase zu finden."""
         logger.info(f"Starte Personen-Ontologie-Lernen in {base_path}...")
         email_to_names: Dict[str, Set[str]] = {}
@@ -60,7 +60,7 @@ class OntologyLearner:
                     logger.info(f"Neuer Alias gefunden: {alias} -> {canonical_name} (Email: {email})")
                     self.store.add_alias(alias, canonical_name, "Person")
 
-    def learn_module_aliases(self):
+    def learn_module_aliases(self) -> None:
         """Nutzt das LLM, um Modul-Aliase aus den vorhandenen Knoten zu finden."""
         logger.info("Starte Modul-Ontologie-Lernen mittels LLM...")
         nodes = self.store.get_all_nodes()

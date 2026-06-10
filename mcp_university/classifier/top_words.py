@@ -105,7 +105,7 @@ def get_top_words_per_class(data_dir: Path, top_n: int = 5) -> Dict[str, List[st
         return {}
     return {label: data["top_tfidf"] for label, data in stats["class_stats"].items()}
 
-def main():
+def main() -> None:
     """Main Entry Point."""
     parser = argparse.ArgumentParser(description="Findet die signifikantesten Wörter pro E-Mail-Klasse.")
     parser.add_argument("data_dir", type=str, help="Pfad zum Verzeichnis mit den Daten.")
