@@ -1,6 +1,6 @@
 import pytest
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from mcp_university.crawler.crawler import Crawler
 
 @pytest.fixture
