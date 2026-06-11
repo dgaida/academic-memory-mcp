@@ -2,14 +2,20 @@
 
 The MCP University Memory System provides various interfaces for interacting with your data.
 
+## Core Features
+
+*   **[Indexing in Detail](indexing-details.md)**: Learn exactly how the indexing process works and which files are generated.
+*   **[Email Classification](email-classification.md)**: Training and using the classifier for student inquiries.
+*   **[Database Management](database-management.md)**: Manual management of the SQLite database and search index.
+*   **[Model Context Protocol (MCP)](mcp.md)**: Integration into AI agents like Claude Desktop.
+*   **[Helper Scripts](scripts.md)**: Tools for data cleanup and visualization.
+
 ## Command Line Interface (CLI)
 
-The CLI is the primary way to manage the system and perform manual searches.
+The CLI is the primary way to manage the system.
 
 ### Indexing (`index`)
 This command scans all configured folders, creates summaries, and updates the index.
-- **[Details of the indexing process](indexing-details.md)**
-
 ```bash
 mcp-uni index
 ```
@@ -26,15 +32,6 @@ Starts a background process that responds to file changes and updates the index 
 mcp-uni watch
 ```
 
-## Email Classification
+## Workflows
 
-The system includes a subpackage for the automated classification of student emails (e.g., bachelor's thesis, internship project).
-[Details of the Email Workflow](email-workflow.md)
-
-## Database Management (`db`)
-
-The `db` command group allows direct management of metadata and the search index.
-
-## Model Context Protocol (MCP)
-
-The most powerful way to use the system is via an MCP client (such as Claude Desktop).
+*   **[Email Workflow](email-workflow.md)**: The complete process from email to response draft.
