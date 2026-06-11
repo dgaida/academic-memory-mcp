@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import MagicMock
 from mcp_university.crawler.crawler import Crawler
-from mcp_university.config import Config, FolderConfig
+from mcp_university.config import Config, FolderConfig, UserConfig
 from mcp_university.metadata.store import MetadataStore
 from mcp_university.parser.factory import ParserFactory
 from mcp_university.summarizer.engine import Summarizer
@@ -13,6 +13,7 @@ def mock_deps(tmp_path):
     config.folders = FolderConfig(folders=[str(tmp_path)])
     config.folders.supported_extensions = [".eml", ".msg", ".md"]
     config.folders.exclude_patterns = ["cache", "test.db"]
+    config.user = UserConfig(name="Daniel Gaida", email="daniel.gaida@th-koeln.de")
 
     store = MetadataStore(tmp_path / "test.db")
     parser = ParserFactory(tmp_path / "cache")
@@ -37,16 +38,16 @@ def test_email_conversation_processing(tmp_path, mock_deps):
 
     # Create emails
     mail1 = inbox / "1.eml"
-    mail1.write_text("Date: Mon, 1 Jan 2024 10:00:00 +0000\n\nQuestion")
+    mail1.write_text("Date: Mon, 1 Jan 2024 10:00:00 +0000\nFrom: User <other@example.com>\nTo: Daniel Gaida <daniel.gaida@th-koeln.de>\n\nQuestion")
 
     mail2 = sent / "2.eml"
-    mail2.write_text("Date: Tue, 2 Jan 2024 10:00:00 +0000\n\nAnswer")
+    mail2.write_text("Date: Tue, 2 Jan 2024 10:00:00 +0000\nFrom: Daniel Gaida <daniel.gaida@th-koeln.de>\nTo: User <other@example.com>\n\nAnswer")
 
     crawler = Crawler(config, store, parser, summarizer, index)
     crawler.crawl()
 
-    # Check if summary file exists
-    summary_file = student_dir / ".emails_summary.md"
+    # Check if summary file exists (new filename)
+    summary_file = student_dir / ".Inbox_Sentitems_Summary.md"
     assert summary_file.exists()
     assert summary_file.read_text() == "# Conversation Summary"
 
@@ -63,7 +64,7 @@ def test_email_conversation_processing(tmp_path, mock_deps):
     assert args[0] == str(summary_file)
     assert args[1] == "# Conversation Summary"
     assert args[2]["is_conversation_summary"] == "true"
-    assert args[2]["filename"] == ".emails_summary.md"
+    assert args[2]["filename"] == ".Inbox_Sentitems_Summary.md"
 
 def test_email_sorting(tmp_path, mock_deps):
     config, store, parser, summarizer, index = mock_deps
@@ -77,10 +78,10 @@ def test_email_sorting(tmp_path, mock_deps):
 
     # Create emails out of order
     mail2 = sent / "2.eml"
-    mail2.write_text("Date: Tue, 2 Jan 2024 10:00:00 +0000\n\nLater")
+    mail2.write_text("Date: Tue, 2 Jan 2024 10:00:00 +0000\nFrom: Daniel Gaida <daniel.gaida@th-koeln.de>\nTo: User <other@example.com>\n\nLater")
 
     mail1 = inbox / "1.eml"
-    mail1.write_text("Date: Mon, 1 Jan 2024 10:00:00 +0000\n\nEarlier")
+    mail1.write_text("Date: Mon, 1 Jan 2024 10:00:00 +0000\nFrom: User <other@example.com>\nTo: Daniel Gaida <daniel.gaida@th-koeln.de>\n\nEarlier")
 
     crawler = Crawler(config, store, parser, summarizer, index)
 
@@ -90,9 +91,9 @@ def test_email_sorting(tmp_path, mock_deps):
     args, _ = summarizer.summarize_email_conversation.call_args
     content = args[1]
 
-    # Check order
+    # Check order (should be newest first)
     pos1 = content.find("Earlier")
     pos2 = content.find("Later")
     assert pos1 != -1
     assert pos2 != -1
-    assert pos1 < pos2, "Emails should be sorted chronologically"
+    assert pos2 < pos1, "Emails should be sorted newest to oldest"
