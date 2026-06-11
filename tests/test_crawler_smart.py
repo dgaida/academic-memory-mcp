@@ -29,6 +29,9 @@ def test_folder_summarization_skipped_when_unchanged(tmp_path, mock_deps):
     store.get_file.return_value = (10, str(test_file), "hash", 1.0, ".txt", 1.0, 1)
     store.get_summary.side_effect = ["file summary", "folder summary"] # First for file, then for folder
 
+    # Create the summary file on disk to satisfy the existence check
+    (subdir / ".summary.md").write_text("folder summary")
+
     crawler = Crawler(config, store, parser, summarizer, index)
 
     # Mock _calculate_hash to return the same hash
