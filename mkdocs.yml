@@ -98,6 +98,7 @@ nav:
   - Konfiguration: configuration.md
   - Nutzung:
       - Übersicht: usage/index.md
+      - Indexierung im Detail: usage/indexing-details.md
       - E-Mail Workflow: usage/email-workflow.md
   - API: api/index.md
   - Architektur: architecture/index.md
