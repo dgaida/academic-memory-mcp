@@ -36,11 +36,11 @@ Das leistungsfähigste Skript sortiert E-Mails nicht nur nach Klasse, sondern au
 python3 mcp_university/classifier/sort_emails.py /quell/ordner --config config/class_paths.yaml --model data/email_classifier_xgboost_combined.pkl
 ```
 
-Es erkennt automatisch:
-- **Semester:** Basierend auf dem E-Mail-Datum (SoSe/WS).
-- **Student:** Extrahiert den Nachnamen aus `smail.th-koeln.de` Adressen oder Anzeigenamen.
-- **Richtung:** Sortiert in `Inbox` oder `SentItems` Unterordner.
-- **Bericht:** Erstellt eine `sorted_emails.md` mit einer Übersicht aller verschobenen Mails.
+Es erkennt automatisch:  
+- **Semester:** Basierend auf dem E-Mail-Datum (SoSe/WS).  
+- **Student:** Extrahiert den Nachnamen aus `smail.th-koeln.de` Adressen oder Anzeigenamen.  
+- **Richtung:** Sortiert in `Inbox` oder `SentItems` Unterordner.  
+- **Bericht:** Erstellt eine `sorted_emails.md` mit einer Übersicht aller verschobenen Mails.  
 
 ## Batch-Klassifizierung
 Um einen ganzen Ordner mit E-Mails automatisch zu sortieren (nur Klassifizierung):
@@ -56,27 +56,27 @@ Um die Verteilung der E-Mails pro Klasse (aufgeteilt nach Inbox und SentItems) z
 python3 mcp_university/classifier/plot_data_distribution.py --train-dir D:\\TH_Koeln\\MailTrainingData --test-dir D:\\TH_Koeln\\MailTestData --output-dir data
 ```
 
-Dies erzeugt zwei hochauflösende PNG-Dateien in `data/`:
-- `train_data_distribution.png`
-- `test_data_distribution.png`
+Dies erzeugt zwei hochauflösende PNG-Dateien in `data/`:  
+- `train_data_distribution.png`  
+- `test_data_distribution.png`  
 
 ## Feature-Modellierung (Merkmalsextraktion)
 
 Der `EmailClassifier` unterstützt drei verschiedene Modi für die Merkmalsextraktion:
 
-1.  **TF-IDF (`tfidf`)**:
-    - **Funktionsweise:** Verwendet die Term Frequency-Inverse Document Frequency. Es werden Worthäufigkeiten gezählt und gewichtet.
-    - **Vorteile:** Schnell, gut interpretierbar, effektiv bei klar definierten Fachbegriffen.
-    - **Nachteile:** Ignoriert Wortreihenfolge und Semantik.
+1.  **TF-IDF (`tfidf`)**:  
+    - **Funktionsweise:** Verwendet die Term Frequency-Inverse Document Frequency. Es werden Worthäufigkeiten gezählt und gewichtet.  
+    - **Vorteile:** Schnell, gut interpretierbar, effektiv bei klar definierten Fachbegriffen.  
+    - **Nachteile:** Ignoriert Wortreihenfolge und Semantik.  
 
-2.  **Embeddings (`embedding`)**:
-    - **Funktionsweise:** Verwendet `Sentence-Transformers` (`BAAI/bge-m3`), um den Text in einen hochdimensionalen Vektorraum zu projizieren.
-    - **Vorteile:** Erfasst die semantische Bedeutung und Synonyme.
-    - **Nachteile:** Rechenintensiver, schwerer interpretierbar.
+2.  **Embeddings (`embedding`)**:  
+    - **Funktionsweise:** Verwendet `Sentence-Transformers` (`BAAI/bge-m3`), um den Text in einen hochdimensionalen Vektorraum zu projizieren.  
+    - **Vorteile:** Erfasst die semantische Bedeutung und Synonyme.  
+    - **Nachteile:** Rechenintensiver, schwerer interpretierbar.  
 
-3.  **Kombiniert (`combined`)**:
-    - **Funktionsweise:** Konkateniert die TF-IDF-Vektoren mit den Embedding-Vektoren.
-    - **Vorteile:** Kombiniert Präzision von Schlüsselwörtern mit tiefem semantischen Verständnis. Meist höchste Genauigkeit.
+3.  **Kombiniert (`combined`)**:  
+    - **Funktionsweise:** Konkateniert die TF-IDF-Vektoren mit den Embedding-Vektoren.  
+    - **Vorteile:** Kombiniert Präzision von Schlüsselwörtern mit tiefem semantischen Verständnis. Meist höchste Genauigkeit.  
 
 ### Modell-Benennung
 Beim Training wird die gewählte Methode und der Modus automatisch an den Dateinamen angehängt (z.B. `email_classifier_transformer.pkl`), um eine Verwechslung der Modelle zu vermeiden.

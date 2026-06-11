@@ -4,11 +4,11 @@ The MCP University Memory System provides various interfaces for interacting wit
 
 ## Core Features
 
-*   **[Indexing in Detail](indexing-details.md)**: Learn exactly how the indexing process works and which files are generated.
-*   **[Email Classification](email-classification.md)**: Training and using the classifier for student inquiries.
-*   **[Database Management](database-management.md)**: Manual management of the SQLite database and search index.
-*   **[Model Context Protocol (MCP)](mcp.md)**: Integration into AI agents like Claude Desktop.
-*   **[Helper Scripts](scripts.md)**: Tools for data cleanup and visualization.
+*   **[Indexing in Detail](indexing-details.md)**: Learn exactly how the indexing process works and which files are generated.  
+*   **[Email Classification](email-classification.md)**: Training and using the classifier for student inquiries.  
+*   **[Database Management](database-management.md)**: Manual management of the SQLite database and search index.  
+*   **[Model Context Protocol (MCP)](mcp.md)**: Integration into AI agents like Claude Desktop.  
+*   **[Helper Scripts](scripts.md)**: Tools for data cleanup and visualization.  
 
 ## Command Line Interface (CLI)
 
@@ -34,4 +34,4 @@ mcp-uni watch
 
 ## Workflows
 
-*   **[Email Workflow](email-workflow.md)**: The complete process from email to response draft.
+*   **[Email Workflow](email-workflow.md)**: The complete process from email to response draft.  

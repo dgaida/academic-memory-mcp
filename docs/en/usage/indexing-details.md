@@ -6,43 +6,43 @@ This section describes precisely what happens when the `mcp-uni index` command i
 
 Indexing takes place in several phases:
 
-1.  **Initialization:**
-    - Configuration is loaded from `config/folders.yaml`, `config/user.yaml`, and `config/models.yaml`.
-    - Connections to the SQLite metadata database (`data/metadata/university.db`) and the Qdrant vector index (`data/indexes/qdrant`) are established.
-    - The Parser Factory is initialized (supporting PDF, Docx, Text, Email).
+1.  **Initialization:**  
+    - Configuration is loaded from `config/folders.yaml`, `config/user.yaml`, and `config/models.yaml`.  
+    - Connections to the SQLite metadata database (`data/metadata/university.db`) and the Qdrant vector index (`data/indexes/qdrant`) are established.  
+    - The Parser Factory is initialized (supporting PDF, Docx, Text, Email).  
 
-2.  **Crawling (Folder Scan):**
-    - The crawler recursively traverses all paths defined in `config/folders.yaml`.
-    - For each folder, it checks if it already exists in the database (`folders` table). If not, it is created.
-    - Integration with `qmd` (Quick Markdown): The crawler attempts to add folders as `qmd` collections to speed up file discovery.
+2.  **Crawling (Folder Scan):**  
+    - The crawler recursively traverses all paths defined in `config/folders.yaml`.  
+    - For each folder, it checks if it already exists in the database (`folders` table). If not, it is created.  
+    - Integration with `qmd` (Quick Markdown): The crawler attempts to add folders as `qmd` collections to speed up file discovery.  
 
-3.  **File Processing:**
-    - A SHA-256 hash is calculated for each file.
-    - The hash is compared with the entry in the `files` table.
-    - **Only new or changed files are processed.**
+3.  **File Processing:**  
+    - A SHA-256 hash is calculated for each file.  
+    - The hash is compared with the entry in the `files` table.  
+    - **Only new or changed files are processed.**  
 
-4.  **Parsing & Extraction:**
-    - Depending on the file type, the appropriate parser is called:
-        - `PDFParser`: Uses `liteparse` (primary) or `docling` (fallback) for PDF/Docx.
-        - `MailParser`: Extracts metadata (From, To, Date) and text from `.eml` and `.msg`.
-        - `TextParser`: Reads plaintext from `.md`, `.txt`, `.py`, `.json`, etc.
+4.  **Parsing & Extraction:**  
+    - Depending on the file type, the appropriate parser is called:  
+        - `PDFParser`: Uses `liteparse` (primary) or `docling` (fallback) for PDF/Docx.  
+        - `MailParser`: Extracts metadata (From, To, Date) and text from `.eml` and `.msg`.  
+        - `TextParser`: Reads plaintext from `.md`, `.txt`, `.py`, `.json`, etc.  
 
-5.  **Summarization:**
-    - The extracted text is sent to the configured LLM (defaulting to Ollama).
-    - A structured Markdown summary is created.
+5.  **Summarization:**  
+    - The extracted text is sent to the configured LLM (defaulting to Ollama).  
+    - A structured Markdown summary is created.  
 
-6.  **Special Case: Email Conversations:**
-    - If the crawler detects a structure with `Inbox` and `SentItems` subfolders, it groups emails by conversation partners.
-    - An aggregated summary of the entire communication with a person is created.
-    - This is saved as `.Inbox_Sentitems_Summary.md` in the folder.
+6.  **Special Case: Email Conversations:**  
+    - If the crawler detects a structure with `Inbox` and `SentItems` subfolders, it groups emails by conversation partners.  
+    - An aggregated summary of the entire communication with a person is created.  
+    - This is saved as `.Inbox_Sentitems_Summary.md` in the folder.  
 
-7.  **Special Case: Folder Summaries:**
-    - After all files in a folder have been processed, the LLM creates a summary of the entire folder content based on the individual summaries.
-    - This is saved as a hidden file `.<foldername>_summary.md` in the parent directory.
+7.  **Special Case: Folder Summaries:**  
+    - After all files in a folder have been processed, the LLM creates a summary of the entire folder content based on the individual summaries.  
+    - This is saved as a hidden file `.<foldername>_summary.md` in the parent directory.  
 
-8.  **Storage & Indexing:**
-    - **Metadata:** File paths, hashes, timestamps, and the Markdown summaries are stored in the SQLite database (`summaries` table).
-    - **Vector Search:** The **summaries** (not the full text) are vectorized (defaulting to `BAAI/bge-m3`) and stored in the Qdrant index.
+8.  **Storage & Indexing:**  
+    - **Metadata:** File paths, hashes, timestamps, and the Markdown summaries are stored in the SQLite database (`summaries` table).  
+    - **Vector Search:** The **summaries** (not the full text) are vectorized (defaulting to `BAAI/bge-m3`) and stored in the Qdrant index.  
 
 ## Generated Files and Storage Locations
 

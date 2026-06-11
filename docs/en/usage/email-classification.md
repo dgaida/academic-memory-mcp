@@ -36,11 +36,11 @@ The most powerful script sorts emails not only by class but also by semester and
 python3 mcp_university/classifier/sort_emails.py /source/folder --config config/class_paths.yaml --model data/email_classifier_xgboost_combined.pkl
 ```
 
-It automatically recognizes:
-- **Semester:** Based on the email date (Summer/Winter semester).
-- **Student:** Extracts the last name from `smail.th-koeln.de` addresses or display names.
-- **Direction:** Sorts into `Inbox` or `SentItems` subfolders.
-- **Report:** Creates a `sorted_emails.md` with an overview of all moved emails.
+It automatically recognizes:  
+- **Semester:** Based on the email date (Summer/Winter semester).  
+- **Student:** Extracts the last name from `smail.th-koeln.de` addresses or display names.  
+- **Direction:** Sorts into `Inbox` or `SentItems` subfolders.  
+- **Report:** Creates a `sorted_emails.md` with an overview of all moved emails.  
 
 ## Batch Classification
 To automatically sort an entire folder of emails (classification only):
@@ -56,27 +56,27 @@ To visualize the distribution of emails per class (split into Inbox and SentItem
 python3 mcp_university/classifier/plot_data_distribution.py --train-dir /path/to/train_data --test-dir /path/to/test_data --output-dir data
 ```
 
-This generates two high-resolution PNG files in `data/`:
-- `train_data_distribution.png`
-- `test_data_distribution.png`
+This generates two high-resolution PNG files in `data/`:  
+- `train_data_distribution.png`  
+- `test_data_distribution.png`  
 
 ## Feature Modeling (Feature Extraction)
 
 The `EmailClassifier` supports three different modes for feature extraction:
 
-1.  **TF-IDF (`tfidf`)**:
-    - **Functionality:** Uses Term Frequency-Inverse Document Frequency. Word frequencies are counted and weighted.
-    - **Pros:** Fast, well-interpretable, effective for clearly defined technical terms.
-    - **Cons:** Ignores word order and semantics.
+1.  **TF-IDF (`tfidf`)**:  
+    - **Functionality:** Uses Term Frequency-Inverse Document Frequency. Word frequencies are counted and weighted.  
+    - **Pros:** Fast, well-interpretable, effective for clearly defined technical terms.  
+    - **Cons:** Ignores word order and semantics.  
 
-2.  **Embeddings (`embedding`)**:
-    - **Functionality:** Uses `Sentence-Transformers` (`BAAI/bge-m3`) to project the text into a high-dimensional vector space.
-    - **Pros:** Captures semantic meaning and synonyms.
-    - **Cons:** More computationally intensive, harder to interpret.
+2.  **Embeddings (`embedding`)**:  
+    - **Functionality:** Uses `Sentence-Transformers` (`BAAI/bge-m3`) to project the text into a high-dimensional vector space.  
+    - **Pros:** Captures semantic meaning and synonyms.  
+    - **Cons:** More computationally intensive, harder to interpret.  
 
-3.  **Combined (`combined`)**:
-    - **Functionality:** Concatenates TF-IDF vectors with embedding vectors.
-    - **Pros:** Combines precision of keywords with deep semantic understanding. Usually highest accuracy.
+3.  **Combined (`combined`)**:  
+    - **Functionality:** Concatenates TF-IDF vectors with embedding vectors.  
+    - **Pros:** Combines precision of keywords with deep semantic understanding. Usually highest accuracy.  
 
 ### Model Naming
 During training, the chosen method and mode are automatically appended to the filename (e.g., `email_classifier_transformer.pkl`) to avoid confusion between models.
