@@ -176,10 +176,10 @@ Inhalt:
         system_prompt = "Du bist ein Assistent für universitäres Wissensmanagement. Erstelle Ordner-Zusammenfassungen auf Deutsch."
         user_prompt = f"""
 Erstelle eine Zusammenfassung für den Ordner '{folder_name}' basierend auf den Inhalten.
+Beachte, dass der Name den Pfad relativ zum Hauptverzeichnis darstellt.
 
 Format:
-# Ordner
-{folder_name}
+# Ordner: {folder_name}
 # Typ
 (z.B. Studierendenakte, Kursmaterialien, Forschungsprojekt)
 # Hauptthema
@@ -206,11 +206,12 @@ Inhalte:
 
         system_prompt = "Du bist ein Assistent für universitäres Wissensmanagement. Analysiere den E-Mail-Schriftverkehr auf Deutsch."
         user_prompt = f"""Analysiere den folgenden chronologischen E-Mail-Schriftverkehr aus dem Ordner '{folder_name}'.
+Beachte, dass der Name den Pfad relativ zum Hauptverzeichnis darstellt.
 Ermittle die wichtigsten Informationen und identifiziere noch offene Punkte.
 Beachte dabei besonders, ob offene Punkte aus eingehenden Mails (Inbox) bereits durch Antworten (SentItems) erledigt wurden.
 
 Format:
-# Zusammenfassung des Schriftverkehrs: {folder_name}
+# Ordner: {folder_name} (Zusammenfassung des Schriftverkehrs)
 # Beteiligte Personen
 - Name 1 (Rolle, falls ersichtlich)
 # Hauptthemen & Kontext

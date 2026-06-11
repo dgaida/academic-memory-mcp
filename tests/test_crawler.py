@@ -59,7 +59,8 @@ def test_crawler_folder_summary_file_creation(tmp_path):
     crawler._process_directory(sub_path)
 
     # Verify summary file creation
-    # For a folder named 'subdir' inside 'root', it should create '.subdir_summary.md' in 'root'
-    expected_summary_path = root_path / ".subdir_summary.md"
+    # Since we passed sub_path and no parent_id, it is treated as a root folder.
+    # Thus it should save INSIDE as .summary.md
+    expected_summary_path = sub_path / ".summary.md"
     assert expected_summary_path.exists()
     assert expected_summary_path.read_text() == "folder summary content"
