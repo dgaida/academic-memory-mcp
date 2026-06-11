@@ -67,7 +67,7 @@ class Crawler:
 
         logger.info("Crawl completed.")
 
-    def _process_directory(self, dir_path: Path, parent_id: Optional[int] = None) -> Tuple[Optional[str], bool]:
+    def _process_directory(self, dir_path: Path, parent_id: Optional[int] = None, relative_path: Optional[Path] = None) -> Tuple[Optional[str], bool]:
         """Verarbeitet einen Ordner rekursiv.
 
         Args:
@@ -77,7 +77,9 @@ class Crawler:
         Returns:
             Tuple[Optional[str], bool]: (Zusammenfassung des Ordners, Wurde etwas geändert?)
         """
-        logger.info(f"Scanning directory: {dir_path}")
+        if relative_path is None:
+            relative_path = Path(dir_path.name)
+        logger.info(f"Scanning directory: {dir_path} (relative: {relative_path})")
         folder_id = self.store.upsert_folder(str(dir_path), parent_id)
 
         db_files = self.store.get_folder_files(folder_id)
@@ -91,7 +93,7 @@ class Crawler:
         conv_changed = False
         if "Inbox" in subdirs and "SentItems" in subdirs:
             logger.info(f"Detected email conversation pattern in {dir_path}")
-            conv_summary, conv_changed = self._process_email_conversation(dir_path, folder_id)
+            conv_summary, conv_changed = self._process_email_conversation(dir_path, folder_id, relative_path)
             if conv_summary:
                 item_summaries.append(conv_summary)
             if conv_changed:
@@ -108,7 +110,7 @@ class Crawler:
                 if entry.name in ["Inbox", "SentItems"] and conv_summary is not None:
                     continue
 
-                sub_summary, sub_changed = self._process_directory(entry_path, folder_id)
+                sub_summary, sub_changed = self._process_directory(entry_path, folder_id, relative_path / entry_path.name)
                 if sub_summary:
                     item_summaries.append(sub_summary)
                 if sub_changed:
@@ -137,16 +139,17 @@ class Crawler:
                 any_changed = True
 
         existing_folder_summary = self.store.get_summary("folder", folder_id)
+        summary_path = self._get_summary_path(dir_path, parent_id)
 
         folder_summary = None
         if item_summaries:
-            if any_changed or not existing_folder_summary:
-                logger.info(f"Generating folder summary for: {dir_path.name}")
-                folder_summary = self.summarizer.summarize_folder(dir_path.name, item_summaries)
+            if any_changed or not existing_folder_summary or not summary_path.exists():
+                logger.info(f"Generating folder summary for: {relative_path}")
+                folder_summary = self.summarizer.summarize_folder(str(relative_path), item_summaries)
                 if folder_summary:
                     self.store.add_summary("folder", folder_id, folder_summary)
                     self.store.update_folder_summarized(folder_id)
-                    self._save_summary_to_file(dir_path, folder_summary)
+                    self._save_summary_to_file(dir_path, folder_summary, parent_id)
                     any_changed = True # Folder summary itself changed
             else:
                 logger.info(f"Folder {dir_path.name} unchanged. Skipping re-summarization.")
@@ -154,7 +157,7 @@ class Crawler:
 
         return folder_summary, any_changed
 
-    def _process_email_conversation(self, dir_path: Path, folder_id: int) -> Tuple[Optional[str], bool]:
+    def _process_email_conversation(self, dir_path: Path, folder_id: int, relative_path: Path) -> Tuple[Optional[str], bool]:
         """Verarbeitet eine E-Mail-Konversation (Inbox & SentItems) gruppiert nach Personen."""
         inbox_path = dir_path / "Inbox"
         sent_path = dir_path / "SentItems"
@@ -247,7 +250,7 @@ class Crawler:
                     if parsed:
                         conversation_content += f"\n--- EMAIL VOM {m['date']} ({m['file_path'].name}) ---\n{parsed}\n"
 
-            summary = self.summarizer.summarize_email_conversation(f"Konversation mit {cp}", conversation_content)
+            summary = self.summarizer.summarize_email_conversation(f"{relative_path}: Konversation mit {cp}", conversation_content)
             if summary:
                 all_summaries.append(summary)
         if all_summaries:
@@ -339,16 +342,25 @@ class Crawler:
                 sha256_hash.update(byte_block)
         return sha256_hash.hexdigest()
 
-    def _save_summary_to_file(self, dir_path: Path, summary: str) -> None:
+    def _get_summary_path(self, dir_path: Path, parent_id: Optional[int]) -> Path:
+        """Bestimmt den Pfad für die Ordner-Zusammenfassungsdatei.
+
+        Wurzelordner (parent_id is None) speichern die Zusammenfassung intern als .summary.md.
+        Unterordner speichern sie im Elternverzeichnis als .{name}_summary.md.
+        """
+        if parent_id is None:
+            return dir_path / ".summary.md"
+        else:
+            return dir_path.parent / f".{dir_path.name}_summary.md"
+
+    def _save_summary_to_file(self, dir_path: Path, summary: str, parent_id: Optional[int] = None) -> None:
         """Speichert die Ordner-Zusammenfassung als versteckte Markdown-Datei im Elternverzeichnis.
 
         Args:
             dir_path (Path): Pfad zum zusammengefassten Ordner.
             summary (str): Der Inhalt der Zusammenfassung.
         """
-        parent_dir = dir_path.parent
-        summary_filename = f".{dir_path.name}_summary.md"
-        summary_path = parent_dir / summary_filename
+        summary_path = self._get_summary_path(dir_path, parent_id)
 
         try:
             logger.debug(f"Saving folder summary to: {summary_path}")
