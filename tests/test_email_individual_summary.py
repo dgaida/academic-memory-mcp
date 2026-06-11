@@ -2,7 +2,7 @@ import pytest
 import logging
 from unittest.mock import MagicMock, ANY
 from mcp_university.crawler.crawler import Crawler
-from mcp_university.config import Config, FolderConfig
+from mcp_university.config import Config, FolderConfig, UserConfig
 from mcp_university.metadata.store import MetadataStore
 from mcp_university.parser.factory import ParserFactory
 from mcp_university.summarizer.engine import Summarizer
@@ -15,6 +15,7 @@ def mock_deps(tmp_path):
     config.folders.supported_extensions = [".eml", ".msg", ".md"]
     config.folders.exclude_patterns = ["cache", "test.db"]
     config.folders.summarize_emails_individually = False
+    config.user = UserConfig(name='Daniel Gaida', email='daniel.gaida@th-koeln.de')
 
     store = MetadataStore(tmp_path / "test.db")
     parser = ParserFactory(tmp_path / "cache")
@@ -46,7 +47,7 @@ def test_email_conversation_logging(tmp_path, mock_deps, caplog):
     crawler = Crawler(config, store, parser, summarizer, index)
     crawler.crawl()
 
-    assert "Order of emails for conversation summary:" in caplog.text
+    assert "Order of emails for conversation with Unbekannt:" in caplog.text
     assert "  - a.eml" in caplog.text
     assert "  - b.eml" in caplog.text
 

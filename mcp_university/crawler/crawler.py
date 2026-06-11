@@ -224,18 +224,32 @@ class Crawler:
         all_summaries = []
         for cp, mails in groups.items():
             # Sort mails newest to oldest
-            mails.sort(key=lambda x: x["date"], reverse=True)
+            mails.sort(key=lambda x: x['date'], reverse=True)
 
-            conversation_content = ""
+            # Log for testing/visibility
+            logger.info(f'Order of emails for conversation with {cp}:')
             for m in mails:
-                parsed = self.parser.mail_parser.parse(m['file_path'])
-                if parsed:
-                    conversation_content += f"\n--- EMAIL VOM {m['date']} ({m['file_path'].name}) ---\n{parsed}\n"
+                logger.info(f"  - {m['file_path'].name}")
+
+            conversation_content = ''
+            if self.config.folders.summarize_emails_individually:
+                email_summaries = []
+                for m in mails:
+                    content_parsed = self.parser.mail_parser.parse(m['file_path'])
+                    if content_parsed:
+                        summary = self.summarizer.summarize_file(m['file_path'].name, content_parsed)
+                        if summary:
+                            email_summaries.append(f"--- EMAIL VOM {m['date']} ({m['file_path'].name}) ---\n{summary}")
+                conversation_content = '\n\n'.join(email_summaries)
+            else:
+                for m in mails:
+                    parsed = self.parser.mail_parser.parse(m['file_path'])
+                    if parsed:
+                        conversation_content += f"\n--- EMAIL VOM {m['date']} ({m['file_path'].name}) ---\n{parsed}\n"
 
             summary = self.summarizer.summarize_email_conversation(f"Konversation mit {cp}", conversation_content)
             if summary:
                 all_summaries.append(summary)
-
         if all_summaries:
             combined_summary = "\n\n---\n\n".join(all_summaries)
 
