@@ -65,7 +65,7 @@ class LLMClientWrapper:
                         os.environ[env_key] = self.api_key
 
                 try:
-                    self.client = LLMClient(api_choice=api_choice, llm=self.model)
+                    self.client = LLMClient(api_choice=api_choice, llm=self.model, temperature=self.cfg.llm.temperature)
                 except Exception as e:
                     logger.error(f"Failed to initialize LLMClient for {api_choice}: {e}")
                     logger.warning("Falling back to Ollama.")
@@ -105,7 +105,7 @@ class LLMClientWrapper:
 
             # Ollama's client.chat is synchronous
             response = self.client.chat(
-                model=self.model, messages=all_messages, tools=tools
+                model=self.model, messages=all_messages, tools=tools, options={"temperature": self.cfg.llm.temperature}
             )
             return response
 

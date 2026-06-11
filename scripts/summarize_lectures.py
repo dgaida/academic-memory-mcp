@@ -103,12 +103,12 @@ def main(
 
     # LLM Client initialisieren
     # api_choice in LLMClient erwartet Literal['openai', 'groq', 'gemini', 'ollama']
-    client = LLMClient(api_choice=api_choice, llm=model)
+    client = LLMClient(api_choice=api_choice, llm=model, temperature=0)
 
     # Fallback Client (Ollama) vorbereiten, falls nicht bereits Ollama gewählt wurde
     fallback_client = None
     if api_choice != "ollama":
-        fallback_client = LLMClient(api_choice="ollama")
+        fallback_client = LLMClient(api_choice="ollama", temperature=0)
 
     pdf_files = list(source_dir.glob("*.pdf"))
     if not pdf_files:
