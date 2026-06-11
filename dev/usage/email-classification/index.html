@@ -1407,11 +1407,11 @@
 <p>Das leistungsfähigste Skript sortiert E-Mails nicht nur nach Klasse, sondern auch nach Semester und Student (Nachname):</p>
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python3<span class="w"> </span>mcp_university/classifier/sort_emails.py<span class="w"> </span>/quell/ordner<span class="w"> </span>--config<span class="w"> </span>config/class_paths.yaml<span class="w"> </span>--model<span class="w"> </span>data/email_classifier_xgboost_combined.pkl
 </code></pre></div>
-<p>Es erkennt automatisch:
-- <strong>Semester:</strong> Basierend auf dem E-Mail-Datum (SoSe/WS).
-- <strong>Student:</strong> Extrahiert den Nachnamen aus <code>smail.th-koeln.de</code> Adressen oder Anzeigenamen.
-- <strong>Richtung:</strong> Sortiert in <code>Inbox</code> oder <code>SentItems</code> Unterordner.
-- <strong>Bericht:</strong> Erstellt eine <code>sorted_emails.md</code> mit einer Übersicht aller verschobenen Mails.</p>
+<p>Es erkennt automatisch:<br />
+- <strong>Semester:</strong> Basierend auf dem E-Mail-Datum (SoSe/WS).<br />
+- <strong>Student:</strong> Extrahiert den Nachnamen aus <code>smail.th-koeln.de</code> Adressen oder Anzeigenamen.<br />
+- <strong>Richtung:</strong> Sortiert in <code>Inbox</code> oder <code>SentItems</code> Unterordner.<br />
+- <strong>Bericht:</strong> Erstellt eine <code>sorted_emails.md</code> mit einer Übersicht aller verschobenen Mails.  </p>
 <h2 id="batch-klassifizierung">Batch-Klassifizierung<a class="headerlink" href="#batch-klassifizierung" title="Permanent link">&para;</a></h2>
 <p>Um einen ganzen Ordner mit E-Mails automatisch zu sortieren (nur Klassifizierung):
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python3<span class="w"> </span>mcp_university/classifier/classify_folder.py<span class="w"> </span>/quell/ordner<span class="w"> </span>--model<span class="w"> </span>data/email_classifier_xgboost_combined.pkl
@@ -1421,33 +1421,33 @@ Dies verschiebt die E-Mails in Unterordner, die nach den vorhergesagten Klassen 
 <p>Um die Verteilung der E-Mails pro Klasse (aufgeteilt nach Inbox und SentItems) zu visualisieren, kann folgendes Skript genutzt werden:</p>
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>python3<span class="w"> </span>mcp_university/classifier/plot_data_distribution.py<span class="w"> </span>--train-dir<span class="w"> </span>D:<span class="se">\\</span>TH_Koeln<span class="se">\\</span>MailTrainingData<span class="w"> </span>--test-dir<span class="w"> </span>D:<span class="se">\\</span>TH_Koeln<span class="se">\\</span>MailTestData<span class="w"> </span>--output-dir<span class="w"> </span>data
 </code></pre></div>
-<p>Dies erzeugt zwei hochauflösende PNG-Dateien in <code>data/</code>:
-- <code>train_data_distribution.png</code>
-- <code>test_data_distribution.png</code></p>
+<p>Dies erzeugt zwei hochauflösende PNG-Dateien in <code>data/</code>:<br />
+- <code>train_data_distribution.png</code><br />
+- <code>test_data_distribution.png</code>  </p>
 <h2 id="feature-modellierung-merkmalsextraktion">Feature-Modellierung (Merkmalsextraktion)<a class="headerlink" href="#feature-modellierung-merkmalsextraktion" title="Permanent link">&para;</a></h2>
 <p>Der <code>EmailClassifier</code> unterstützt drei verschiedene Modi für die Merkmalsextraktion:</p>
 <ol>
 <li>
-<p><strong>TF-IDF (<code>tfidf</code>)</strong>:</p>
+<p><strong>TF-IDF (<code>tfidf</code>)</strong>:  </p>
 <ul>
-<li><strong>Funktionsweise:</strong> Verwendet die Term Frequency-Inverse Document Frequency. Es werden Worthäufigkeiten gezählt und gewichtet.</li>
-<li><strong>Vorteile:</strong> Schnell, gut interpretierbar, effektiv bei klar definierten Fachbegriffen.</li>
-<li><strong>Nachteile:</strong> Ignoriert Wortreihenfolge und Semantik.</li>
+<li><strong>Funktionsweise:</strong> Verwendet die Term Frequency-Inverse Document Frequency. Es werden Worthäufigkeiten gezählt und gewichtet.  </li>
+<li><strong>Vorteile:</strong> Schnell, gut interpretierbar, effektiv bei klar definierten Fachbegriffen.  </li>
+<li><strong>Nachteile:</strong> Ignoriert Wortreihenfolge und Semantik.  </li>
 </ul>
 </li>
 <li>
-<p><strong>Embeddings (<code>embedding</code>)</strong>:</p>
+<p><strong>Embeddings (<code>embedding</code>)</strong>:  </p>
 <ul>
-<li><strong>Funktionsweise:</strong> Verwendet <code>Sentence-Transformers</code> (<code>BAAI/bge-m3</code>), um den Text in einen hochdimensionalen Vektorraum zu projizieren.</li>
-<li><strong>Vorteile:</strong> Erfasst die semantische Bedeutung und Synonyme.</li>
-<li><strong>Nachteile:</strong> Rechenintensiver, schwerer interpretierbar.</li>
+<li><strong>Funktionsweise:</strong> Verwendet <code>Sentence-Transformers</code> (<code>BAAI/bge-m3</code>), um den Text in einen hochdimensionalen Vektorraum zu projizieren.  </li>
+<li><strong>Vorteile:</strong> Erfasst die semantische Bedeutung und Synonyme.  </li>
+<li><strong>Nachteile:</strong> Rechenintensiver, schwerer interpretierbar.  </li>
 </ul>
 </li>
 <li>
-<p><strong>Kombiniert (<code>combined</code>)</strong>:</p>
+<p><strong>Kombiniert (<code>combined</code>)</strong>:  </p>
 <ul>
-<li><strong>Funktionsweise:</strong> Konkateniert die TF-IDF-Vektoren mit den Embedding-Vektoren.</li>
-<li><strong>Vorteile:</strong> Kombiniert Präzision von Schlüsselwörtern mit tiefem semantischen Verständnis. Meist höchste Genauigkeit.</li>
+<li><strong>Funktionsweise:</strong> Konkateniert die TF-IDF-Vektoren mit den Embedding-Vektoren.  </li>
+<li><strong>Vorteile:</strong> Kombiniert Präzision von Schlüsselwörtern mit tiefem semantischen Verständnis. Meist höchste Genauigkeit.  </li>
 </ul>
 </li>
 </ol>

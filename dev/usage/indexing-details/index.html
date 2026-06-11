@@ -1270,67 +1270,67 @@
 <p>Die Indexierung erfolgt in mehreren Phasen:</p>
 <ol>
 <li>
-<p><strong>Initialisierung:</strong></p>
+<p><strong>Initialisierung:</strong>  </p>
 <ul>
-<li>Die Konfiguration wird aus <code>config/folders.yaml</code>, <code>config/user.yaml</code> und <code>config/models.yaml</code> geladen.</li>
-<li>Verbindungen zur SQLite-Metadatenbank (<code>data/metadata/university.db</code>) und zum Qdrant-Vektorindex (<code>data/indexes/qdrant</code>) werden hergestellt.</li>
-<li>Die Parser-Fabrik wird initialisiert (unterstützt PDF, Docx, Text, E-Mail).</li>
+<li>Die Konfiguration wird aus <code>config/folders.yaml</code>, <code>config/user.yaml</code> und <code>config/models.yaml</code> geladen.  </li>
+<li>Verbindungen zur SQLite-Metadatenbank (<code>data/metadata/university.db</code>) und zum Qdrant-Vektorindex (<code>data/indexes/qdrant</code>) werden hergestellt.  </li>
+<li>Die Parser-Fabrik wird initialisiert (unterstützt PDF, Docx, Text, E-Mail).  </li>
 </ul>
 </li>
 <li>
-<p><strong>Crawling (Ordner-Scan):</strong></p>
+<p><strong>Crawling (Ordner-Scan):</strong>  </p>
 <ul>
-<li>Der Crawler durchläuft rekursiv alle in <code>config/folders.yaml</code> definierten Pfade.</li>
-<li>Für jeden Ordner wird geprüft, ob er bereits in der Datenbank existiert (Tabelle <code>folders</code>). Falls nicht, wird er neu angelegt.</li>
-<li>Integration mit <code>qmd</code> (Quick Markdown): Der Crawler versucht, die Ordner als <code>qmd</code>-Kollektionen hinzuzufügen, um die Dateisuche zu beschleunigen.</li>
+<li>Der Crawler durchläuft rekursiv alle in <code>config/folders.yaml</code> definierten Pfade.  </li>
+<li>Für jeden Ordner wird geprüft, ob er bereits in der Datenbank existiert (Tabelle <code>folders</code>). Falls nicht, wird er neu angelegt.  </li>
+<li>Integration mit <code>qmd</code> (Quick Markdown): Der Crawler versucht, die Ordner als <code>qmd</code>-Kollektionen hinzuzufügen, um die Dateisuche zu beschleunigen.  </li>
 </ul>
 </li>
 <li>
-<p><strong>Dateiverarbeitung:</strong></p>
+<p><strong>Dateiverarbeitung:</strong>  </p>
 <ul>
-<li>Für jede Datei wird ein SHA-256 Hash berechnet.</li>
-<li>Der Hash wird mit dem Eintrag in der Tabelle <code>files</code> verglichen.</li>
-<li><strong>Nur neue oder geänderte Dateien werden verarbeitet.</strong></li>
+<li>Für jede Datei wird ein SHA-256 Hash berechnet.  </li>
+<li>Der Hash wird mit dem Eintrag in der Tabelle <code>files</code> verglichen.  </li>
+<li><strong>Nur neue oder geänderte Dateien werden verarbeitet.</strong>  </li>
 </ul>
 </li>
 <li>
-<p><strong>Parsing &amp; Extraktion:</strong></p>
+<p><strong>Parsing &amp; Extraktion:</strong>  </p>
 <ul>
-<li>Je nach Dateityp wird der entsprechende Parser aufgerufen:<ul>
-<li><code>PDFParser</code>: Nutzt <code>liteparse</code> (Primär) oder <code>docling</code> (Fallback) für PDF/Docx.</li>
-<li><code>MailParser</code>: Extrahiert Metadaten (Von, An, Datum) und Text aus <code>.eml</code> und <code>.msg</code>.</li>
-<li><code>TextParser</code>: Liest Plaintext aus <code>.md</code>, <code>.txt</code>, <code>.py</code>, <code>.json</code>, etc.</li>
+<li>Je nach Dateityp wird der entsprechende Parser aufgerufen:  <ul>
+<li><code>PDFParser</code>: Nutzt <code>liteparse</code> (Primär) oder <code>docling</code> (Fallback) für PDF/Docx.  </li>
+<li><code>MailParser</code>: Extrahiert Metadaten (Von, An, Datum) und Text aus <code>.eml</code> und <code>.msg</code>.  </li>
+<li><code>TextParser</code>: Liest Plaintext aus <code>.md</code>, <code>.txt</code>, <code>.py</code>, <code>.json</code>, etc.  </li>
 </ul>
 </li>
 </ul>
 </li>
 <li>
-<p><strong>Zusammenfassung (Summarization):</strong></p>
+<p><strong>Zusammenfassung (Summarization):</strong>  </p>
 <ul>
-<li>Der extrahierte Text wird an das konfigurierte LLM (standardmäßig Ollama) gesendet.</li>
-<li>Es wird eine strukturierte Markdown-Zusammenfassung erstellt.</li>
+<li>Der extrahierte Text wird an das konfigurierte LLM (standardmäßig Ollama) gesendet.  </li>
+<li>Es wird eine strukturierte Markdown-Zusammenfassung erstellt.  </li>
 </ul>
 </li>
 <li>
-<p><strong>Spezialfall: E-Mail-Konversationen:</strong></p>
+<p><strong>Spezialfall: E-Mail-Konversationen:</strong>  </p>
 <ul>
-<li>Erkennt der Crawler eine Struktur mit <code>Inbox</code> und <code>SentItems</code> Unterordnern, gruppiert er E-Mails nach Konversationspartnern.</li>
-<li>Es wird eine aggregierte Zusammenfassung der gesamten Kommunikation mit einer Person erstellt.</li>
-<li>Diese wird als <code>.Inbox_Sentitems_Summary.md</code> im Ordner gespeichert.</li>
+<li>Erkennt der Crawler eine Struktur mit <code>Inbox</code> und <code>SentItems</code> Unterordnern, gruppiert er E-Mails nach Konversationspartnern.  </li>
+<li>Es wird eine aggregierte Zusammenfassung der gesamten Kommunikation mit einer Person erstellt.  </li>
+<li>Diese wird als <code>.Inbox_Sentitems_Summary.md</code> im Ordner gespeichert.  </li>
 </ul>
 </li>
 <li>
-<p><strong>Spezialfall: Ordner-Zusammenfassungen:</strong></p>
+<p><strong>Spezialfall: Ordner-Zusammenfassungen:</strong>  </p>
 <ul>
-<li>Nachdem alle Dateien eines Ordners verarbeitet wurden, erstellt das LLM eine Zusammenfassung des gesamten Ordnerinhalts basierend auf den Einzelzusammenfassungen.</li>
-<li>Diese wird als versteckte Datei <code>.&lt;Ordnername&gt;_summary.md</code> im Elternverzeichnis gespeichert.</li>
+<li>Nachdem alle Dateien eines Ordners verarbeitet wurden, erstellt das LLM eine Zusammenfassung des gesamten Ordnerinhalts basierend auf den Einzelzusammenfassungen.  </li>
+<li>Diese wird als versteckte Datei <code>.&lt;Ordnername&gt;_summary.md</code> im Elternverzeichnis gespeichert.  </li>
 </ul>
 </li>
 <li>
-<p><strong>Speicherung &amp; Indexierung:</strong></p>
+<p><strong>Speicherung &amp; Indexierung:</strong>  </p>
 <ul>
-<li><strong>Metadaten:</strong> Dateipfade, Hashes, Zeitstempel und die Markdown-Zusammenfassungen werden in der SQLite-Datenbank (<code>summaries</code> Tabelle) gespeichert.</li>
-<li><strong>Vektorsuche:</strong> Die <strong>Zusammenfassungen</strong> (nicht der Volltext) werden vektorisiert (standardmäßig mit <code>BAAI/bge-m3</code>) und im Qdrant-Index gespeichert.</li>
+<li><strong>Metadaten:</strong> Dateipfade, Hashes, Zeitstempel und die Markdown-Zusammenfassungen werden in der SQLite-Datenbank (<code>summaries</code> Tabelle) gespeichert.  </li>
+<li><strong>Vektorsuche:</strong> Die <strong>Zusammenfassungen</strong> (nicht der Volltext) werden vektorisiert (standardmäßig mit <code>BAAI/bge-m3</code>) und im Qdrant-Index gespeichert.  </li>
 </ul>
 </li>
 </ol>

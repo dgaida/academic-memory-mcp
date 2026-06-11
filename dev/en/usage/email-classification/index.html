@@ -1409,11 +1409,11 @@
 <p>The most powerful script sorts emails not only by class but also by semester and student (last name):</p>
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python3<span class="w"> </span>mcp_university/classifier/sort_emails.py<span class="w"> </span>/source/folder<span class="w"> </span>--config<span class="w"> </span>config/class_paths.yaml<span class="w"> </span>--model<span class="w"> </span>data/email_classifier_xgboost_combined.pkl
 </code></pre></div>
-<p>It automatically recognizes:
-- <strong>Semester:</strong> Based on the email date (Summer/Winter semester).
-- <strong>Student:</strong> Extracts the last name from <code>smail.th-koeln.de</code> addresses or display names.
-- <strong>Direction:</strong> Sorts into <code>Inbox</code> or <code>SentItems</code> subfolders.
-- <strong>Report:</strong> Creates a <code>sorted_emails.md</code> with an overview of all moved emails.</p>
+<p>It automatically recognizes:<br />
+- <strong>Semester:</strong> Based on the email date (Summer/Winter semester).<br />
+- <strong>Student:</strong> Extracts the last name from <code>smail.th-koeln.de</code> addresses or display names.<br />
+- <strong>Direction:</strong> Sorts into <code>Inbox</code> or <code>SentItems</code> subfolders.<br />
+- <strong>Report:</strong> Creates a <code>sorted_emails.md</code> with an overview of all moved emails.  </p>
 <h2 id="batch-classification">Batch Classification<a class="headerlink" href="#batch-classification" title="Permanent link">&para;</a></h2>
 <p>To automatically sort an entire folder of emails (classification only):
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python3<span class="w"> </span>mcp_university/classifier/classify_folder.py<span class="w"> </span>/source/folder<span class="w"> </span>--model<span class="w"> </span>data/email_classifier_xgboost_combined.pkl
@@ -1423,33 +1423,33 @@ This moves the emails into subfolders named after the predicted classes.</p>
 <p>To visualize the distribution of emails per class (split into Inbox and SentItems), the following script can be used:</p>
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>python3<span class="w"> </span>mcp_university/classifier/plot_data_distribution.py<span class="w"> </span>--train-dir<span class="w"> </span>/path/to/train_data<span class="w"> </span>--test-dir<span class="w"> </span>/path/to/test_data<span class="w"> </span>--output-dir<span class="w"> </span>data
 </code></pre></div>
-<p>This generates two high-resolution PNG files in <code>data/</code>:
-- <code>train_data_distribution.png</code>
-- <code>test_data_distribution.png</code></p>
+<p>This generates two high-resolution PNG files in <code>data/</code>:<br />
+- <code>train_data_distribution.png</code><br />
+- <code>test_data_distribution.png</code>  </p>
 <h2 id="feature-modeling-feature-extraction">Feature Modeling (Feature Extraction)<a class="headerlink" href="#feature-modeling-feature-extraction" title="Permanent link">&para;</a></h2>
 <p>The <code>EmailClassifier</code> supports three different modes for feature extraction:</p>
 <ol>
 <li>
-<p><strong>TF-IDF (<code>tfidf</code>)</strong>:</p>
+<p><strong>TF-IDF (<code>tfidf</code>)</strong>:  </p>
 <ul>
-<li><strong>Functionality:</strong> Uses Term Frequency-Inverse Document Frequency. Word frequencies are counted and weighted.</li>
-<li><strong>Pros:</strong> Fast, well-interpretable, effective for clearly defined technical terms.</li>
-<li><strong>Cons:</strong> Ignores word order and semantics.</li>
+<li><strong>Functionality:</strong> Uses Term Frequency-Inverse Document Frequency. Word frequencies are counted and weighted.  </li>
+<li><strong>Pros:</strong> Fast, well-interpretable, effective for clearly defined technical terms.  </li>
+<li><strong>Cons:</strong> Ignores word order and semantics.  </li>
 </ul>
 </li>
 <li>
-<p><strong>Embeddings (<code>embedding</code>)</strong>:</p>
+<p><strong>Embeddings (<code>embedding</code>)</strong>:  </p>
 <ul>
-<li><strong>Functionality:</strong> Uses <code>Sentence-Transformers</code> (<code>BAAI/bge-m3</code>) to project the text into a high-dimensional vector space.</li>
-<li><strong>Pros:</strong> Captures semantic meaning and synonyms.</li>
-<li><strong>Cons:</strong> More computationally intensive, harder to interpret.</li>
+<li><strong>Functionality:</strong> Uses <code>Sentence-Transformers</code> (<code>BAAI/bge-m3</code>) to project the text into a high-dimensional vector space.  </li>
+<li><strong>Pros:</strong> Captures semantic meaning and synonyms.  </li>
+<li><strong>Cons:</strong> More computationally intensive, harder to interpret.  </li>
 </ul>
 </li>
 <li>
-<p><strong>Combined (<code>combined</code>)</strong>:</p>
+<p><strong>Combined (<code>combined</code>)</strong>:  </p>
 <ul>
-<li><strong>Functionality:</strong> Concatenates TF-IDF vectors with embedding vectors.</li>
-<li><strong>Pros:</strong> Combines precision of keywords with deep semantic understanding. Usually highest accuracy.</li>
+<li><strong>Functionality:</strong> Concatenates TF-IDF vectors with embedding vectors.  </li>
+<li><strong>Pros:</strong> Combines precision of keywords with deep semantic understanding. Usually highest accuracy.  </li>
 </ul>
 </li>
 </ol>
