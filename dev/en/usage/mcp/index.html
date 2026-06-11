@@ -12,13 +12,17 @@
         <meta name="author" content="Senior Python Architect">
       
       
-        <link rel="canonical" href="https://dgaida.github.io/academic-memory-mcp/dev/en/architecture/nn_classification/">
+        <link rel="canonical" href="https://dgaida.github.io/academic-memory-mcp/dev/en/usage/mcp/">
       
       
+        <link rel="prev" href="../database-management/">
+      
+      
+        <link rel="next" href="../scripts/">
       
       
         
-          <link rel="alternate" href="../../../architecture/nn_classification/" hreflang="de">
+          <link rel="alternate" href="../../../usage/mcp/" hreflang="de">
         
           <link rel="alternate" href="./" hreflang="en">
         
@@ -29,7 +33,7 @@
     
     
       
-        <title>E-Mail-Klassifizierung mit Neuronalen Netzen (Transformer) - MCP University Memory System</title>
+        <title>MCP Integration - MCP University Memory System</title>
       
     
     
@@ -84,7 +88,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#e-mail-klassifizierung-mit-neuronalen-netzen-transformer" class="md-skip">
+        <a href="#model-context-protocol-mcp" class="md-skip">
           Skip to content
         </a>
       
@@ -122,7 +126,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              E-Mail-Klassifizierung mit Neuronalen Netzen (Transformer)
+              MCP Integration
             
           </span>
         </div>
@@ -169,7 +173,7 @@
       <ul class="md-select__list">
         
           <li class="md-select__item">
-            <a href="../../../architecture/nn_classification/" hreflang="de" class="md-select__link">
+            <a href="../../../usage/mcp/" hreflang="de" class="md-select__link">
               Deutsch
             </a>
           </li>
@@ -328,11 +332,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../usage/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
           
   
   
@@ -369,7 +375,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../" class="md-tabs__link">
+      <a href="../../architecture/" class="md-tabs__link">
         
   
   
@@ -566,28 +572,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
-        
-          
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   
@@ -605,7 +614,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -623,7 +632,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/" class="md-nav__link">
+      <a href="../" class="md-nav__link">
         
   
   
@@ -651,7 +660,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/indexing-details/" class="md-nav__link">
+      <a href="../indexing-details/" class="md-nav__link">
         
   
   
@@ -679,7 +688,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/email-classification/" class="md-nav__link">
+      <a href="../email-classification/" class="md-nav__link">
         
   
   
@@ -707,7 +716,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/database-management/" class="md-nav__link">
+      <a href="../database-management/" class="md-nav__link">
         
   
   
@@ -732,10 +741,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../usage/mcp/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MCP Integration
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -751,6 +787,59 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#starting-the-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Starting the Server
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#available-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Available Tools
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integration
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -763,7 +852,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/scripts/" class="md-nav__link">
+      <a href="../scripts/" class="md-nav__link">
         
   
   
@@ -791,7 +880,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/email-workflow/" class="md-nav__link">
+      <a href="../email-workflow/" class="md-nav__link">
         
   
   
@@ -853,7 +942,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../" class="md-nav__link">
+      <a href="../../architecture/" class="md-nav__link">
         
   
   
@@ -1128,38 +1217,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#architektur" class="md-nav__link">
+  <a href="#starting-the-server" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Architektur
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Architektur">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#datenaufbereitung" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Datenaufbereitung
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#training" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Training
+        Starting the Server
       
     </span>
   </a>
@@ -1167,10 +1228,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#nutzung" class="md-nav__link">
+  <a href="#available-tools" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Nutzung
+        Available Tools
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integration
       
     </span>
   </a>
@@ -1194,25 +1266,31 @@
 
 
 
-<h1 id="e-mail-klassifizierung-mit-neuronalen-netzen-transformer">E-Mail-Klassifizierung mit Neuronalen Netzen (Transformer)<a class="headerlink" href="#e-mail-klassifizierung-mit-neuronalen-netzen-transformer" title="Permanent link">&para;</a></h1>
-<p>Dieses Modul bietet eine Alternative zu klassischen Modellen (XGBoost/Random Forest), indem es direkt auf den (anonymisierten) Rohdaten der E-Mails arbeitet.</p>
-<h2 id="architektur">Architektur<a class="headerlink" href="#architektur" title="Permanent link">&para;</a></h2>
-<p>Die Architektur basiert auf einem <strong>Transformer-Modell</strong> (Standard: <code>sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2</code>), das für die Sequenzklassifizierung feinjustiert wird.</p>
-<h3 id="datenaufbereitung">Datenaufbereitung<a class="headerlink" href="#datenaufbereitung" title="Permanent link">&para;</a></h3>
-<p>Anstatt den Text einfach als flachen String zu übergeben, werden die E-Mail-Komponenten strukturiert:</p>
-<div class="language-text highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>SUBJECT: &lt;Betreff&gt; | ATTACHMENTS: &lt;Datei1.pdf, ...&gt; [SEP] &lt;E-Mail-Body (anonymisiert)&gt;
+<h1 id="model-context-protocol-mcp">Model Context Protocol (MCP)<a class="headerlink" href="#model-context-protocol-mcp" title="Permanent link">&para;</a></h1>
+<p>The most powerful way to use the system is via an MCP client (such as Claude Desktop). This allows AI agents to directly access your university knowledge.</p>
+<h2 id="starting-the-server">Starting the Server<a class="headerlink" href="#starting-the-server" title="Permanent link">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>mcp-uni<span class="w"> </span>serve-mcp
 </code></pre></div>
-<p>Dies ermöglicht es dem Modell, die starke Signalwirkung von Betreffzeilen und Dateinamen explizit zu lernen.</p>
-<h2 id="training">Training<a class="headerlink" href="#training" title="Permanent link">&para;</a></h2>
-<p>Das Modell wird mittels Fine-Tuning trainiert. Dabei werden:<br />
-1.  Die Gewichte des Transformer-Backbones aktualisiert.<br />
-2.  Ein Klassifizierungskopf (Linear Layer) auf den <code>[CLS]</code>-Token angewendet.<br />
-3.  Die E-Mails mit einer maximalen Sequenzlänge von 512 Token verarbeitet.  </p>
-<h2 id="nutzung">Nutzung<a class="headerlink" href="#nutzung" title="Permanent link">&para;</a></h2>
-<p>Um den Transformer-Modus zu nutzen, muss beim Training der Parameter <code>--method transformer</code> übergeben werden:</p>
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>python<span class="w"> </span>-m<span class="w"> </span>mcp_university.classifier.train<span class="w"> </span>&lt;data_dir&gt;<span class="w"> </span>--method<span class="w"> </span>transformer
+<h2 id="available-tools">Available Tools<a class="headerlink" href="#available-tools" title="Permanent link">&para;</a></h2>
+<p>The system provides various specialized tools to agents:</p>
+<ul>
+<li><strong><code>search_documents</code></strong>: Semantic search across all indexed documents (PDFs, emails, scripts).</li>
+<li><strong><code>get_folder_summary</code></strong>: Query aggregated folder information to get a quick overview of a topic or lecture.</li>
+<li><strong><code>get_student_context</code></strong>: Retrieve complete history and status of a student (email history, thesis status).</li>
+<li><strong><code>generate_mail_reply</code></strong>: Draft an email based on the existing context and predefined skills.</li>
+<li><strong><code>get_open_tasks</code></strong>: Extraction of TODOs and open tasks from all documents.</li>
+</ul>
+<h2 id="integration">Integration<a class="headerlink" href="#integration" title="Permanent link">&para;</a></h2>
+<p>To use the server in <strong>Claude Desktop</strong>, add it to your configuration:</p>
+<div class="language-json highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">&quot;mcpServers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="nt">&quot;mcp-university&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">      </span><span class="nt">&quot;command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mcp-uni&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">      </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;serve-mcp&quot;</span><span class="p">]</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="p">}</span>
 </code></pre></div>
-<p>Der Vorteil gegenüber TF-IDF liegt in der Erfassung semantischer Ähnlichkeiten, was besonders bei variierenden Formulierungen in Studenten-E-Mails von Vorteil ist.</p>
 
 
 

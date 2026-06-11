@@ -12,13 +12,17 @@
         <meta name="author" content="Senior Python Architect">
       
       
-        <link rel="canonical" href="https://dgaida.github.io/academic-memory-mcp/dev/en/architecture/nn_classification/">
+        <link rel="canonical" href="https://dgaida.github.io/academic-memory-mcp/dev/en/usage/indexing-details/">
       
       
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../email-classification/">
       
       
         
-          <link rel="alternate" href="../../../architecture/nn_classification/" hreflang="de">
+          <link rel="alternate" href="../../../usage/indexing-details/" hreflang="de">
         
           <link rel="alternate" href="./" hreflang="en">
         
@@ -29,7 +33,7 @@
     
     
       
-        <title>E-Mail-Klassifizierung mit Neuronalen Netzen (Transformer) - MCP University Memory System</title>
+        <title>Indexierung im Detail - MCP University Memory System</title>
       
     
     
@@ -84,7 +88,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#e-mail-klassifizierung-mit-neuronalen-netzen-transformer" class="md-skip">
+        <a href="#indexing-in-detail" class="md-skip">
           Skip to content
         </a>
       
@@ -122,7 +126,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              E-Mail-Klassifizierung mit Neuronalen Netzen (Transformer)
+              Indexierung im Detail
             
           </span>
         </div>
@@ -169,7 +173,7 @@
       <ul class="md-select__list">
         
           <li class="md-select__item">
-            <a href="../../../architecture/nn_classification/" hreflang="de" class="md-select__link">
+            <a href="../../../usage/indexing-details/" hreflang="de" class="md-select__link">
               Deutsch
             </a>
           </li>
@@ -328,11 +332,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../usage/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
           
   
   
@@ -369,7 +375,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../" class="md-tabs__link">
+      <a href="../../architecture/" class="md-tabs__link">
         
   
   
@@ -566,28 +572,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
-        
-          
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   
@@ -605,7 +614,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -623,7 +632,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/" class="md-nav__link">
+      <a href="../" class="md-nav__link">
         
   
   
@@ -648,10 +657,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../usage/indexing-details/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Indexierung im Detail
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -667,6 +703,59 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#process-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Process Workflow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#generated-files-and-storage-locations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Generated Files and Storage Locations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#state-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        State Verification
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -679,7 +768,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/email-classification/" class="md-nav__link">
+      <a href="../email-classification/" class="md-nav__link">
         
   
   
@@ -707,7 +796,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/database-management/" class="md-nav__link">
+      <a href="../database-management/" class="md-nav__link">
         
   
   
@@ -735,7 +824,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/mcp/" class="md-nav__link">
+      <a href="../mcp/" class="md-nav__link">
         
   
   
@@ -763,7 +852,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/scripts/" class="md-nav__link">
+      <a href="../scripts/" class="md-nav__link">
         
   
   
@@ -791,7 +880,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/email-workflow/" class="md-nav__link">
+      <a href="../email-workflow/" class="md-nav__link">
         
   
   
@@ -853,7 +942,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../" class="md-nav__link">
+      <a href="../../architecture/" class="md-nav__link">
         
   
   
@@ -1128,38 +1217,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#architektur" class="md-nav__link">
+  <a href="#process-workflow" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Architektur
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Architektur">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#datenaufbereitung" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Datenaufbereitung
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#training" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Training
+        Process Workflow
       
     </span>
   </a>
@@ -1167,10 +1228,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#nutzung" class="md-nav__link">
+  <a href="#generated-files-and-storage-locations" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Nutzung
+        Generated Files and Storage Locations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#state-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        State Verification
       
     </span>
   </a>
@@ -1194,25 +1266,120 @@
 
 
 
-<h1 id="e-mail-klassifizierung-mit-neuronalen-netzen-transformer">E-Mail-Klassifizierung mit Neuronalen Netzen (Transformer)<a class="headerlink" href="#e-mail-klassifizierung-mit-neuronalen-netzen-transformer" title="Permanent link">&para;</a></h1>
-<p>Dieses Modul bietet eine Alternative zu klassischen Modellen (XGBoost/Random Forest), indem es direkt auf den (anonymisierten) Rohdaten der E-Mails arbeitet.</p>
-<h2 id="architektur">Architektur<a class="headerlink" href="#architektur" title="Permanent link">&para;</a></h2>
-<p>Die Architektur basiert auf einem <strong>Transformer-Modell</strong> (Standard: <code>sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2</code>), das für die Sequenzklassifizierung feinjustiert wird.</p>
-<h3 id="datenaufbereitung">Datenaufbereitung<a class="headerlink" href="#datenaufbereitung" title="Permanent link">&para;</a></h3>
-<p>Anstatt den Text einfach als flachen String zu übergeben, werden die E-Mail-Komponenten strukturiert:</p>
-<div class="language-text highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>SUBJECT: &lt;Betreff&gt; | ATTACHMENTS: &lt;Datei1.pdf, ...&gt; [SEP] &lt;E-Mail-Body (anonymisiert)&gt;
-</code></pre></div>
-<p>Dies ermöglicht es dem Modell, die starke Signalwirkung von Betreffzeilen und Dateinamen explizit zu lernen.</p>
-<h2 id="training">Training<a class="headerlink" href="#training" title="Permanent link">&para;</a></h2>
-<p>Das Modell wird mittels Fine-Tuning trainiert. Dabei werden:<br />
-1.  Die Gewichte des Transformer-Backbones aktualisiert.<br />
-2.  Ein Klassifizierungskopf (Linear Layer) auf den <code>[CLS]</code>-Token angewendet.<br />
-3.  Die E-Mails mit einer maximalen Sequenzlänge von 512 Token verarbeitet.  </p>
-<h2 id="nutzung">Nutzung<a class="headerlink" href="#nutzung" title="Permanent link">&para;</a></h2>
-<p>Um den Transformer-Modus zu nutzen, muss beim Training der Parameter <code>--method transformer</code> übergeben werden:</p>
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>python<span class="w"> </span>-m<span class="w"> </span>mcp_university.classifier.train<span class="w"> </span>&lt;data_dir&gt;<span class="w"> </span>--method<span class="w"> </span>transformer
-</code></pre></div>
-<p>Der Vorteil gegenüber TF-IDF liegt in der Erfassung semantischer Ähnlichkeiten, was besonders bei variierenden Formulierungen in Studenten-E-Mails von Vorteil ist.</p>
+<h1 id="indexing-in-detail">Indexing in Detail<a class="headerlink" href="#indexing-in-detail" title="Permanent link">&para;</a></h1>
+<p>This section describes precisely what happens when the <code>mcp-uni index</code> command is executed.</p>
+<h2 id="process-workflow">Process Workflow<a class="headerlink" href="#process-workflow" title="Permanent link">&para;</a></h2>
+<p>Indexing takes place in several phases:</p>
+<ol>
+<li>
+<p><strong>Initialization:</strong></p>
+<ul>
+<li>Configuration is loaded from <code>config/folders.yaml</code>, <code>config/user.yaml</code>, and <code>config/models.yaml</code>.</li>
+<li>Connections to the SQLite metadata database (<code>data/metadata/university.db</code>) and the Qdrant vector index (<code>data/indexes/qdrant</code>) are established.</li>
+<li>The Parser Factory is initialized (supporting PDF, Docx, Text, Email).</li>
+</ul>
+</li>
+<li>
+<p><strong>Crawling (Folder Scan):</strong></p>
+<ul>
+<li>The crawler recursively traverses all paths defined in <code>config/folders.yaml</code>.</li>
+<li>For each folder, it checks if it already exists in the database (<code>folders</code> table). If not, it is created.</li>
+<li>Integration with <code>qmd</code> (Quick Markdown): The crawler attempts to add folders as <code>qmd</code> collections to speed up file discovery.</li>
+</ul>
+</li>
+<li>
+<p><strong>File Processing:</strong></p>
+<ul>
+<li>A SHA-256 hash is calculated for each file.</li>
+<li>The hash is compared with the entry in the <code>files</code> table.</li>
+<li><strong>Only new or changed files are processed.</strong></li>
+</ul>
+</li>
+<li>
+<p><strong>Parsing &amp; Extraction:</strong></p>
+<ul>
+<li>Depending on the file type, the appropriate parser is called:<ul>
+<li><code>PDFParser</code>: Uses <code>liteparse</code> (primary) or <code>docling</code> (fallback) for PDF/Docx.</li>
+<li><code>MailParser</code>: Extracts metadata (From, To, Date) and text from <code>.eml</code> and <code>.msg</code>.</li>
+<li><code>TextParser</code>: Reads plaintext from <code>.md</code>, <code>.txt</code>, <code>.py</code>, <code>.json</code>, etc.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Summarization:</strong></p>
+<ul>
+<li>The extracted text is sent to the configured LLM (defaulting to Ollama).</li>
+<li>A structured Markdown summary is created.</li>
+</ul>
+</li>
+<li>
+<p><strong>Special Case: Email Conversations:</strong></p>
+<ul>
+<li>If the crawler detects a structure with <code>Inbox</code> and <code>SentItems</code> subfolders, it groups emails by conversation partners.</li>
+<li>An aggregated summary of the entire communication with a person is created.</li>
+<li>This is saved as <code>.Inbox_Sentitems_Summary.md</code> in the folder.</li>
+</ul>
+</li>
+<li>
+<p><strong>Special Case: Folder Summaries:</strong></p>
+<ul>
+<li>After all files in a folder have been processed, the LLM creates a summary of the entire folder content based on the individual summaries.</li>
+<li>This is saved as a hidden file <code>.&lt;foldername&gt;_summary.md</code> in the parent directory.</li>
+</ul>
+</li>
+<li>
+<p><strong>Storage &amp; Indexing:</strong></p>
+<ul>
+<li><strong>Metadata:</strong> File paths, hashes, timestamps, and the Markdown summaries are stored in the SQLite database (<code>summaries</code> table).</li>
+<li><strong>Vector Search:</strong> The <strong>summaries</strong> (not the full text) are vectorized (defaulting to <code>BAAI/bge-m3</code>) and stored in the Qdrant index.</li>
+</ul>
+</li>
+</ol>
+<h2 id="generated-files-and-storage-locations">Generated Files and Storage Locations<a class="headerlink" href="#generated-files-and-storage-locations" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Location</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>SQLite DB</strong></td>
+<td style="text-align: left;"><code>data/metadata/university.db</code></td>
+<td style="text-align: left;">Stores metadata, hashes, paths, and summaries.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Vector Index</strong></td>
+<td style="text-align: left;"><code>data/indexes/qdrant/</code></td>
+<td style="text-align: left;">Binary files of the Qdrant search index.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Folder Summary</strong></td>
+<td style="text-align: left;"><code>./.&lt;foldername&gt;_summary.md</code></td>
+<td style="text-align: left;">Hidden Markdown file with the folder overview.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Email Summary</strong></td>
+<td style="text-align: left;"><code>./.Inbox_Sentitems_Summary.md</code></td>
+<td style="text-align: left;">Aggregated conversation history for emails.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Logs</strong></td>
+<td style="text-align: left;"><code>data/logs/mcp-university.log</code></td>
+<td style="text-align: left;">Detailed logging of the indexing process.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Cache</strong></td>
+<td style="text-align: left;"><code>data/cache/</code></td>
+<td style="text-align: left;">Temporary artifacts from the PDF parser.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="state-verification">State Verification<a class="headerlink" href="#state-verification" title="Permanent link">&para;</a></h2>
+<p>The command is idempotent. Upon subsequent execution, only files whose hash has changed since the last run are processed. Files deleted from the file system are also removed from the database during indexing.</p>
 
 
 

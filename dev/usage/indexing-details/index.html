@@ -1,6 +1,6 @@
 
 <!doctype html>
-<html lang="en" class="no-js">
+<html lang="de" class="no-js">
   <head>
     
       <meta charset="utf-8">
@@ -12,31 +12,35 @@
         <meta name="author" content="Senior Python Architect">
       
       
-        <link rel="canonical" href="https://dgaida.github.io/academic-memory-mcp/dev/en/architecture/nn_classification/">
+        <link rel="canonical" href="https://dgaida.github.io/academic-memory-mcp/dev/usage/indexing-details/">
       
       
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../email-classification/">
       
       
         
-          <link rel="alternate" href="../../../architecture/nn_classification/" hreflang="de">
+          <link rel="alternate" href="./" hreflang="de">
         
-          <link rel="alternate" href="./" hreflang="en">
+          <link rel="alternate" href="../../en/usage/indexing-details/" hreflang="en">
         
       
       
-      <link rel="icon" href="../../../assets/images/favicon.png">
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>E-Mail-Klassifizierung mit Neuronalen Netzen (Transformer) - MCP University Memory System</title>
+        <title>Indexierung im Detail - MCP University Memory System</title>
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -55,11 +59,9 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
-    
-    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -84,8 +86,8 @@
     <div data-md-component="skip">
       
         
-        <a href="#e-mail-klassifizierung-mit-neuronalen-netzen-transformer" class="md-skip">
-          Skip to content
+        <a href="#indexierung-im-detail" class="md-skip">
+          Zum Inhalt
         </a>
       
     </div>
@@ -101,8 +103,8 @@
       
 
 <header class="md-header" data-md-component="header">
-  <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../" title="MCP University Memory System" class="md-header__button md-logo" aria-label="MCP University Memory System" data-md-component="logo">
+  <nav class="md-header__inner md-grid" aria-label="Kopfzeile">
+    <a href="../.." title="MCP University Memory System" class="md-header__button md-logo" aria-label="MCP University Memory System" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -122,7 +124,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              E-Mail-Klassifizierung mit Neuronalen Netzen (Transformer)
+              Indexierung im Detail
             
           </span>
         </div>
@@ -162,20 +164,20 @@
       <div class="md-header__option">
   <div class="md-select">
     
-    <button class="md-header__button md-icon" aria-label="Select language">
+    <button class="md-header__button md-icon" aria-label="Sprache wechseln">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
     </button>
     <div class="md-select__inner">
       <ul class="md-select__list">
         
           <li class="md-select__item">
-            <a href="../../../architecture/nn_classification/" hreflang="de" class="md-select__link">
+            <a href="./" hreflang="de" class="md-select__link">
               Deutsch
             </a>
           </li>
         
           <li class="md-select__item">
-            <a href="./" hreflang="en" class="md-select__link">
+            <a href="../../en/usage/indexing-details/" hreflang="en" class="md-select__link">
               English
             </a>
           </li>
@@ -196,21 +198,21 @@
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <input type="text" class="md-search__input" name="query" aria-label="Suche" placeholder="Suche" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
         
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
         
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
       </label>
-      <nav class="md-search__options" aria-label="Search">
+      <nav class="md-search__options" aria-label="Suche">
         
-          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Teilen" aria-label="Teilen" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
             
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
           </a>
         
-        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+        <button type="reset" class="md-search__icon md-icon" title="Zurücksetzen" aria-label="Zurücksetzen" tabindex="-1">
           
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
         </button>
@@ -223,7 +225,7 @@
       <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
         <div class="md-search-result" data-md-component="search-result">
           <div class="md-search-result__meta">
-            Initializing search
+            Suche wird initialisiert
           </div>
           <ol class="md-search-result__list" role="presentation"></ol>
         </div>
@@ -244,7 +246,7 @@
         
           
             
-<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+<nav class="md-tabs" aria-label="Hauptnavigation" data-md-component="tabs">
   <div class="md-grid">
     <ul class="md-tabs__list">
       
@@ -254,7 +256,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../" class="md-tabs__link">
+      <a href="../.." class="md-tabs__link">
         
   
   
@@ -328,11 +330,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../usage/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
           
   
   
@@ -369,7 +373,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../" class="md-tabs__link">
+      <a href="../../architecture/" class="md-tabs__link">
         
   
   
@@ -443,7 +447,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../" title="MCP University Memory System" class="md-nav__button md-logo" aria-label="MCP University Memory System" data-md-component="logo">
+    <a href="../.." title="MCP University Memory System" class="md-nav__button md-logo" aria-label="MCP University Memory System" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -461,7 +465,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../" class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -566,28 +570,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
-        
-          
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   
@@ -605,7 +612,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -623,7 +630,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/" class="md-nav__link">
+      <a href="../" class="md-nav__link">
         
   
   
@@ -648,10 +655,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../usage/indexing-details/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Indexierung im Detail
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -667,6 +701,59 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Inhaltsverzeichnis">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Inhaltsverzeichnis
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prozessablauf" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prozessablauf
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#erzeugte-dateien-und-speicherorte" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Erzeugte Dateien und Speicherorte
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#zustandsprufung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zustandsprüfung
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -679,7 +766,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/email-classification/" class="md-nav__link">
+      <a href="../email-classification/" class="md-nav__link">
         
   
   
@@ -707,7 +794,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/database-management/" class="md-nav__link">
+      <a href="../database-management/" class="md-nav__link">
         
   
   
@@ -735,7 +822,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/mcp/" class="md-nav__link">
+      <a href="../mcp/" class="md-nav__link">
         
   
   
@@ -763,7 +850,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/scripts/" class="md-nav__link">
+      <a href="../scripts/" class="md-nav__link">
         
   
   
@@ -791,7 +878,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/email-workflow/" class="md-nav__link">
+      <a href="../email-workflow/" class="md-nav__link">
         
   
   
@@ -853,7 +940,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../" class="md-nav__link">
+      <a href="../../architecture/" class="md-nav__link">
         
   
   
@@ -1114,7 +1201,7 @@
                   <div class="md-sidebar__inner">
                     
 
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+<nav class="md-nav md-nav--secondary" aria-label="Inhaltsverzeichnis">
   
   
   
@@ -1123,43 +1210,15 @@
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
-      Table of contents
+      Inhaltsverzeichnis
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#architektur" class="md-nav__link">
+  <a href="#prozessablauf" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Architektur
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Architektur">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#datenaufbereitung" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Datenaufbereitung
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#training" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Training
+        Prozessablauf
       
     </span>
   </a>
@@ -1167,10 +1226,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#nutzung" class="md-nav__link">
+  <a href="#erzeugte-dateien-und-speicherorte" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Nutzung
+        Erzeugte Dateien und Speicherorte
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#zustandsprufung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zustandsprüfung
       
     </span>
   </a>
@@ -1194,25 +1264,120 @@
 
 
 
-<h1 id="e-mail-klassifizierung-mit-neuronalen-netzen-transformer">E-Mail-Klassifizierung mit Neuronalen Netzen (Transformer)<a class="headerlink" href="#e-mail-klassifizierung-mit-neuronalen-netzen-transformer" title="Permanent link">&para;</a></h1>
-<p>Dieses Modul bietet eine Alternative zu klassischen Modellen (XGBoost/Random Forest), indem es direkt auf den (anonymisierten) Rohdaten der E-Mails arbeitet.</p>
-<h2 id="architektur">Architektur<a class="headerlink" href="#architektur" title="Permanent link">&para;</a></h2>
-<p>Die Architektur basiert auf einem <strong>Transformer-Modell</strong> (Standard: <code>sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2</code>), das für die Sequenzklassifizierung feinjustiert wird.</p>
-<h3 id="datenaufbereitung">Datenaufbereitung<a class="headerlink" href="#datenaufbereitung" title="Permanent link">&para;</a></h3>
-<p>Anstatt den Text einfach als flachen String zu übergeben, werden die E-Mail-Komponenten strukturiert:</p>
-<div class="language-text highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>SUBJECT: &lt;Betreff&gt; | ATTACHMENTS: &lt;Datei1.pdf, ...&gt; [SEP] &lt;E-Mail-Body (anonymisiert)&gt;
-</code></pre></div>
-<p>Dies ermöglicht es dem Modell, die starke Signalwirkung von Betreffzeilen und Dateinamen explizit zu lernen.</p>
-<h2 id="training">Training<a class="headerlink" href="#training" title="Permanent link">&para;</a></h2>
-<p>Das Modell wird mittels Fine-Tuning trainiert. Dabei werden:<br />
-1.  Die Gewichte des Transformer-Backbones aktualisiert.<br />
-2.  Ein Klassifizierungskopf (Linear Layer) auf den <code>[CLS]</code>-Token angewendet.<br />
-3.  Die E-Mails mit einer maximalen Sequenzlänge von 512 Token verarbeitet.  </p>
-<h2 id="nutzung">Nutzung<a class="headerlink" href="#nutzung" title="Permanent link">&para;</a></h2>
-<p>Um den Transformer-Modus zu nutzen, muss beim Training der Parameter <code>--method transformer</code> übergeben werden:</p>
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>python<span class="w"> </span>-m<span class="w"> </span>mcp_university.classifier.train<span class="w"> </span>&lt;data_dir&gt;<span class="w"> </span>--method<span class="w"> </span>transformer
-</code></pre></div>
-<p>Der Vorteil gegenüber TF-IDF liegt in der Erfassung semantischer Ähnlichkeiten, was besonders bei variierenden Formulierungen in Studenten-E-Mails von Vorteil ist.</p>
+<h1 id="indexierung-im-detail">Indexierung im Detail<a class="headerlink" href="#indexierung-im-detail" title="Permanent link">&para;</a></h1>
+<p>Dieser Abschnitt beschreibt präzise, was beim Ausführen des Befehls <code>mcp-uni index</code> geschieht.</p>
+<h2 id="prozessablauf">Prozessablauf<a class="headerlink" href="#prozessablauf" title="Permanent link">&para;</a></h2>
+<p>Die Indexierung erfolgt in mehreren Phasen:</p>
+<ol>
+<li>
+<p><strong>Initialisierung:</strong></p>
+<ul>
+<li>Die Konfiguration wird aus <code>config/folders.yaml</code>, <code>config/user.yaml</code> und <code>config/models.yaml</code> geladen.</li>
+<li>Verbindungen zur SQLite-Metadatenbank (<code>data/metadata/university.db</code>) und zum Qdrant-Vektorindex (<code>data/indexes/qdrant</code>) werden hergestellt.</li>
+<li>Die Parser-Fabrik wird initialisiert (unterstützt PDF, Docx, Text, E-Mail).</li>
+</ul>
+</li>
+<li>
+<p><strong>Crawling (Ordner-Scan):</strong></p>
+<ul>
+<li>Der Crawler durchläuft rekursiv alle in <code>config/folders.yaml</code> definierten Pfade.</li>
+<li>Für jeden Ordner wird geprüft, ob er bereits in der Datenbank existiert (Tabelle <code>folders</code>). Falls nicht, wird er neu angelegt.</li>
+<li>Integration mit <code>qmd</code> (Quick Markdown): Der Crawler versucht, die Ordner als <code>qmd</code>-Kollektionen hinzuzufügen, um die Dateisuche zu beschleunigen.</li>
+</ul>
+</li>
+<li>
+<p><strong>Dateiverarbeitung:</strong></p>
+<ul>
+<li>Für jede Datei wird ein SHA-256 Hash berechnet.</li>
+<li>Der Hash wird mit dem Eintrag in der Tabelle <code>files</code> verglichen.</li>
+<li><strong>Nur neue oder geänderte Dateien werden verarbeitet.</strong></li>
+</ul>
+</li>
+<li>
+<p><strong>Parsing &amp; Extraktion:</strong></p>
+<ul>
+<li>Je nach Dateityp wird der entsprechende Parser aufgerufen:<ul>
+<li><code>PDFParser</code>: Nutzt <code>liteparse</code> (Primär) oder <code>docling</code> (Fallback) für PDF/Docx.</li>
+<li><code>MailParser</code>: Extrahiert Metadaten (Von, An, Datum) und Text aus <code>.eml</code> und <code>.msg</code>.</li>
+<li><code>TextParser</code>: Liest Plaintext aus <code>.md</code>, <code>.txt</code>, <code>.py</code>, <code>.json</code>, etc.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Zusammenfassung (Summarization):</strong></p>
+<ul>
+<li>Der extrahierte Text wird an das konfigurierte LLM (standardmäßig Ollama) gesendet.</li>
+<li>Es wird eine strukturierte Markdown-Zusammenfassung erstellt.</li>
+</ul>
+</li>
+<li>
+<p><strong>Spezialfall: E-Mail-Konversationen:</strong></p>
+<ul>
+<li>Erkennt der Crawler eine Struktur mit <code>Inbox</code> und <code>SentItems</code> Unterordnern, gruppiert er E-Mails nach Konversationspartnern.</li>
+<li>Es wird eine aggregierte Zusammenfassung der gesamten Kommunikation mit einer Person erstellt.</li>
+<li>Diese wird als <code>.Inbox_Sentitems_Summary.md</code> im Ordner gespeichert.</li>
+</ul>
+</li>
+<li>
+<p><strong>Spezialfall: Ordner-Zusammenfassungen:</strong></p>
+<ul>
+<li>Nachdem alle Dateien eines Ordners verarbeitet wurden, erstellt das LLM eine Zusammenfassung des gesamten Ordnerinhalts basierend auf den Einzelzusammenfassungen.</li>
+<li>Diese wird als versteckte Datei <code>.&lt;Ordnername&gt;_summary.md</code> im Elternverzeichnis gespeichert.</li>
+</ul>
+</li>
+<li>
+<p><strong>Speicherung &amp; Indexierung:</strong></p>
+<ul>
+<li><strong>Metadaten:</strong> Dateipfade, Hashes, Zeitstempel und die Markdown-Zusammenfassungen werden in der SQLite-Datenbank (<code>summaries</code> Tabelle) gespeichert.</li>
+<li><strong>Vektorsuche:</strong> Die <strong>Zusammenfassungen</strong> (nicht der Volltext) werden vektorisiert (standardmäßig mit <code>BAAI/bge-m3</code>) und im Qdrant-Index gespeichert.</li>
+</ul>
+</li>
+</ol>
+<h2 id="erzeugte-dateien-und-speicherorte">Erzeugte Dateien und Speicherorte<a class="headerlink" href="#erzeugte-dateien-und-speicherorte" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Typ</th>
+<th style="text-align: left;">Ort</th>
+<th style="text-align: left;">Beschreibung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>SQLite DB</strong></td>
+<td style="text-align: left;"><code>data/metadata/university.db</code></td>
+<td style="text-align: left;">Speichert Metadaten, Hashes, Pfade und Zusammenfassungen.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Vektorindex</strong></td>
+<td style="text-align: left;"><code>data/indexes/qdrant/</code></td>
+<td style="text-align: left;">Binäre Dateien des Qdrant-Suchindex.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Ordner-Zusammenfassung</strong></td>
+<td style="text-align: left;"><code>./.&lt;Ordnername&gt;_summary.md</code></td>
+<td style="text-align: left;">Versteckte Markdown-Datei mit der Übersicht des Ordners.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>E-Mail-Zusammenfassung</strong></td>
+<td style="text-align: left;"><code>./.Inbox_Sentitems_Summary.md</code></td>
+<td style="text-align: left;">Aggregierte Konversationshistorie bei E-Mails.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Logs</strong></td>
+<td style="text-align: left;"><code>data/logs/mcp-university.log</code></td>
+<td style="text-align: left;">Detaillierte Protokollierung des Indexierungsprozesses.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Cache</strong></td>
+<td style="text-align: left;"><code>data/cache/</code></td>
+<td style="text-align: left;">Temporäre Artefakte des PDF-Parsers.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="zustandsprufung">Zustandsprüfung<a class="headerlink" href="#zustandsprufung" title="Permanent link">&para;</a></h2>
+<p>Der Befehl ist idempotent. Bei einem erneuten Aufruf werden nur Dateien verarbeitet, deren Hash sich seit der letzten Ausführung geändert hat. Gelöschte Dateien im Dateisystem werden bei der Indexierung auch aus der Datenbank entfernt.</p>
 
 
 
@@ -1238,7 +1403,7 @@
           <button type="button" class="md-top md-icon" data-md-component="top" hidden>
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
-  Back to top
+  Zurück zum Seitenanfang
 </button>
         
       </main>
@@ -1270,10 +1435,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "content.tabs.link", "content.code.annotate", "content.code.copy", "content.tooltips"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "content.tabs.link", "content.code.annotate", "content.code.copy", "content.tooltips"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>
