@@ -1,7 +1,7 @@
 """Parser für E-Mail-Formate."""
 import re
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict, Any
 import logging
 import email
 from email import policy
@@ -255,3 +255,157 @@ class MailParser:
         except Exception as e:
             logger.error(f"Error parsing mail {file_path}: {e}")
             return None
+
+    def get_email_details(self, file_path: Path) -> Dict[str, Any]:
+        """Extrahiert detaillierte Informationen aus einer E-Mail.
+
+        Args:
+            file_path: Pfad zur E-Mail-Datei.
+
+        Returns:
+            Dict[str, Any]: Ein Dictionary mit date, from_email, from_name, to, cc, subject, body.
+        """
+        suffix = file_path.suffix.lower()
+        if suffix == ".msg":
+            return self._get_msg_details(file_path)
+        else:
+            return self._get_eml_details(file_path)
+
+    def _get_msg_details(self, file_path: Path) -> Dict[str, Any]:
+        """Extrahiert Details aus einer .msg Datei.
+
+        Args:
+            file_path: Pfad zur Datei.
+
+        Returns:
+            Dict[str, Any]: Extrahierte Details.
+        """
+        try:
+            import extract_msg
+            with extract_msg.openMsg(str(file_path)) as msg:
+                # Basic info
+                date = msg.date
+                if not isinstance(date, datetime):
+                    date = self.get_email_date(file_path)
+
+                subject = msg.subject or ""
+                body = msg.body or ""
+
+                # Sender
+                from_email = msg.sender
+                from_name = ""
+                if from_email and "<" in from_email:
+                    match = re.search(r"(.*?)\s*<(.*?)>", from_email)
+                    if match:
+                        from_name = match.group(1).strip().strip('"').strip("'")
+                        from_email = match.group(2).strip().lower()
+                else:
+                    from_email = (from_email or "").strip().lower()
+
+                # Recipients
+                to = []
+                cc = []
+                if hasattr(msg, "recipients"):
+                    for rec in msg.recipients:
+                        # Depending on extract-msg version, rec might be an object or a dict
+                        rec_email = getattr(rec, "email", None) or getattr(rec, "email_address", None)
+                        rec_name = getattr(rec, "name", "")
+                        rec_type = str(getattr(rec, "type", "")).lower()
+
+                        rec_dict = {"name": rec_name, "email": rec_email.lower() if rec_email else ""}
+                        if "to" in rec_type:
+                            to.append(rec_dict)
+                        elif "cc" in rec_type:
+                            cc.append(rec_dict)
+
+                return {
+                    "date": date,
+                    "from_email": from_email,
+                    "from_name": from_name,
+                    "to": to,
+                    "cc": cc,
+                    "subject": subject,
+                    "body": body
+                }
+        except Exception as e:
+            logger.error(f"Error getting .msg details {file_path}: {e}")
+            return self._get_eml_details(file_path)
+
+    def _get_eml_details(self, file_path: Path) -> Dict[str, Any]:
+        """Extrahiert Details aus einer .eml Datei.
+
+        Args:
+            file_path: Pfad zur Datei.
+
+        Returns:
+            Dict[str, Any]: Extrahierte Details.
+        """
+        try:
+            with open(file_path, 'rb') as f:
+                msg = email.message_from_binary_file(f, policy=policy.default)
+
+            date_str = msg.get('Date')
+            try:
+                date = parsedate_to_datetime(date_str) if date_str else self.get_email_date(file_path)
+            except Exception:
+                date = self.get_email_date(file_path)
+
+            subject = msg.get('Subject', '')
+
+            # Helper to parse addresses
+            def parse_addr(header_name):
+                addrs = msg.get_all(header_name, [])
+                parsed = []
+                for addr in addrs:
+                    addr_str = str(addr)
+                    # Basic parsing for "Name <email>"
+                    match = re.search(r"(.*?)\s*<(.*?)>", addr_str)
+                    if match:
+                        parsed.append({"name": match.group(1).strip().strip('"').strip("'"), "email": match.group(2).strip().lower()})
+                    else:
+                        parsed.append({"name": "", "email": addr_str.strip().lower()})
+                return parsed
+
+            from_header = str(msg.get('From', ''))
+            from_match = re.search(r"(.*?)\s*<(.*?)>", from_header)
+            if from_match:
+                from_name = from_match.group(1).strip().strip('"').strip("'")
+                from_email = from_match.group(2).strip().lower()
+            else:
+                from_name = ""
+                from_email = from_header.strip().lower()
+
+            body = ""
+            if msg.is_multipart():
+                for part in msg.walk():
+                    if part.get_content_type() == "text/plain":
+                        payload = part.get_payload(decode=True)
+                        if payload:
+                            charset = part.get_content_charset() or 'utf-8'
+                            body += payload.decode(charset, errors='replace')
+            else:
+                payload = msg.get_payload(decode=True)
+                if payload:
+                    charset = msg.get_content_charset() or 'utf-8'
+                    body = payload.decode(charset, errors='replace')
+
+            return {
+                "date": date,
+                "from_email": from_email,
+                "from_name": from_name,
+                "to": parse_addr('To'),
+                "cc": parse_addr('Cc'),
+                "subject": subject,
+                "body": body
+            }
+        except Exception as e:
+            logger.error(f"Error getting .eml details {file_path}: {e}")
+            return {
+                "date": datetime.min,
+                "from_email": "",
+                "from_name": "",
+                "to": [],
+                "cc": [],
+                "subject": "",
+                "body": ""
+            }

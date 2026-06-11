@@ -4,7 +4,7 @@ import logging
 import hashlib
 import subprocess
 from pathlib import Path
-from typing import Tuple, Optional
+from typing import Tuple, Optional, List, Dict, Any
 from ..config import Config
 from ..metadata.store import MetadataStore
 from ..parser.factory import ParserFactory
@@ -117,7 +117,7 @@ class Crawler:
                 suffix = entry_path.suffix.lower()
                 if suffix not in self.config.folders.supported_extensions:
                     continue
-                if entry.name.startswith(".") and (entry.name.endswith("_summary.md") or entry.name.endswith(".emails_summary.md")):
+                if entry.name.startswith(".") and (entry.name.endswith("_summary.md") or entry.name.endswith(".emails_summary.md") or entry.name.endswith(".Inbox_Sentitems_Summary.md")):
                     continue
 
                 current_files.add(str(entry_path))
@@ -155,12 +155,14 @@ class Crawler:
         return folder_summary, any_changed
 
     def _process_email_conversation(self, dir_path: Path, folder_id: int) -> Tuple[Optional[str], bool]:
-        """Verarbeitet eine E-Mail-Konversation (Inbox & SentItems)."""
+        """Verarbeitet eine E-Mail-Konversation (Inbox & SentItems) gruppiert nach Personen."""
+        inbox_path = dir_path / "Inbox"
+        sent_path = dir_path / "SentItems"
+
         email_files = []
-        for sub in ["Inbox", "SentItems"]:
-            sub_path = dir_path / sub
-            if sub_path.exists():
-                for entry in os.scandir(sub_path):
+        for p in [inbox_path, sent_path]:
+            if p.exists():
+                for entry in os.scandir(p):
                     if entry.is_file() and entry.name.lower().endswith((".eml", ".msg")):
                         email_files.append(Path(entry.path))
 
@@ -168,54 +170,89 @@ class Crawler:
             return None, False
 
         # Calculate a combined hash of all emails to detect changes
-        email_files.sort() # Sort by path for consistent hash
+        email_files.sort()
         combined_data = ""
         for f in email_files:
             combined_data += f"{f.name}:{f.stat().st_mtime}:{f.stat().st_size}|"
         combined_hash = hashlib.sha256(combined_data.encode()).hexdigest()
 
-        summary_file_path = dir_path / ".emails_summary.md"
+        summary_file_path = dir_path / ".Inbox_Sentitems_Summary.md"
+        # Compatibility: also check old filename
+        old_summary_path = dir_path / ".emails_summary.md"
 
         db_folder = self.store._get_connection().execute("SELECT identity_json FROM folders WHERE id=?", (folder_id,)).fetchone()
 
-        if db_folder and db_folder[0] == combined_hash and summary_file_path.exists():
+        if db_folder and db_folder[0] == combined_hash and (summary_file_path.exists() or old_summary_path.exists()):
             logger.info(f"Email conversation in {dir_path.name} unchanged.")
-            return summary_file_path.read_text(encoding="utf-8"), False
+            path_to_read = summary_file_path if summary_file_path.exists() else old_summary_path
+            return path_to_read.read_text(encoding="utf-8"), False
 
-        logger.info(f"Processing {len(email_files)} emails for conversation summary in {dir_path.name}")
+        logger.info(f"Processing {len(email_files)} emails for grouped conversation summary in {dir_path.name}")
 
-        # Sort emails chronologically
-        dated_emails = []
+        user_email = self.config.user.email.lower()
+
+        # Group emails by counterpart
+        groups: Dict[str, List[Dict[str, Any]]] = {}
+
         for f in email_files:
-            date = self.parser.mail_parser.get_email_date(f)
-            dated_emails.append((date, f))
+            details = self.parser.mail_parser.get_email_details(f)
+            details["file_path"] = f
 
-        dated_emails.sort(key=lambda x: x[0])
+            counterparts = []
+            if "Inbox" in str(f.parent):
+                # Counterpart is the sender
+                if details["from_email"] and details["from_email"] != user_email:
+                    counterparts.append(details["from_email"])
+                elif details["from_name"]:
+                    counterparts.append(details["from_name"])
+            else:
+                # Counterpart is the recipient (To, Cc)
+                for rec in details["to"] + details["cc"]:
+                    if rec["email"] and rec["email"] != user_email:
+                        counterparts.append(rec["email"])
+                    elif rec["name"]:
+                        counterparts.append(rec["name"])
 
-        # Log email names in chronological order
-        logger.info("Order of emails for conversation summary:")
-        for _, f in dated_emails:
-            logger.info(f"  - {f.name}")
+            if not counterparts:
+                counterparts = ["Unbekannt"]
 
-        conversation_content = ""
-        if self.config.folders.summarize_emails_individually:
-            logger.info("Summarizing emails individually before aggregating.")
-            email_summaries = []
-            for date, f in dated_emails:
-                content = self.parser.mail_parser.parse(f)
-                if content:
-                    summary = self.summarizer.summarize_file(f.name, content)
-                    if summary:
-                        email_summaries.append(f"--- EMAIL VOM {date} ({f.name}) ---\n{summary}")
-            conversation_content = "\n\n".join(email_summaries)
-        else:
-            for date, f in dated_emails:
-                parsed = self.parser.mail_parser.parse(f)
-                if parsed:
-                    conversation_content += f"\n--- EMAIL VOM {date} ---\n{parsed}\n"
+            for cp in set(counterparts):
+                if cp not in groups:
+                    groups[cp] = []
+                groups[cp].append(details)
 
-        summary = self.summarizer.summarize_email_conversation(dir_path.name, conversation_content)
-        if summary:
+        all_summaries = []
+        for cp, mails in groups.items():
+            # Sort mails newest to oldest
+            mails.sort(key=lambda x: x['date'], reverse=True)
+
+            # Log for testing/visibility
+            logger.info(f'Order of emails for conversation with {cp}:')
+            for m in mails:
+                logger.info(f"  - {m['file_path'].name}")
+
+            conversation_content = ''
+            if self.config.folders.summarize_emails_individually:
+                email_summaries = []
+                for m in mails:
+                    content_parsed = self.parser.mail_parser.parse(m['file_path'])
+                    if content_parsed:
+                        summary = self.summarizer.summarize_file(m['file_path'].name, content_parsed)
+                        if summary:
+                            email_summaries.append(f"--- EMAIL VOM {m['date']} ({m['file_path'].name}) ---\n{summary}")
+                conversation_content = '\n\n'.join(email_summaries)
+            else:
+                for m in mails:
+                    parsed = self.parser.mail_parser.parse(m['file_path'])
+                    if parsed:
+                        conversation_content += f"\n--- EMAIL VOM {m['date']} ({m['file_path'].name}) ---\n{parsed}\n"
+
+            summary = self.summarizer.summarize_email_conversation(f"Konversation mit {cp}", conversation_content)
+            if summary:
+                all_summaries.append(summary)
+        if all_summaries:
+            combined_summary = "\n\n---\n\n".join(all_summaries)
+
             # Store hash in identity_json
             with self.store._get_connection() as conn:
                 conn.execute("UPDATE folders SET identity_json = ? WHERE id = ?", (combined_hash, folder_id))
@@ -223,20 +260,23 @@ class Crawler:
 
             # Save to file
             try:
-                summary_file_path.write_text(summary, encoding="utf-8")
+                summary_file_path.write_text(combined_summary, encoding="utf-8")
+                # Delete old summary file if exists
+                if old_summary_path.exists():
+                    old_summary_path.unlink()
             except Exception as e:
                 logger.error(f"Failed to save email summary for {dir_path.name}: {e}")
 
             # Index the summary
-            self.index.add_document(str(summary_file_path), summary, {
+            self.index.add_document(str(summary_file_path), combined_summary, {
                 "path": str(summary_file_path),
                 "folder": str(dir_path),
-                "filename": ".emails_summary.md",
+                "filename": ".Inbox_Sentitems_Summary.md",
                 "type": ".md",
                 "is_conversation_summary": "true"
             })
 
-            return summary, True
+            return combined_summary, True
 
         return None, False
 
