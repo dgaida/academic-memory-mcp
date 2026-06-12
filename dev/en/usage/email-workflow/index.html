@@ -1326,9 +1326,15 @@ The system uses the <code>EmailClassifier</code> to categorize emails by topic (
 <ol>
 <li><strong>Context Analysis:</strong> The system analyzes other emails in the target folder (the previous history) to understand the context of the current request.  </li>
 <li><strong>Appointment Check:</strong> Checks if the student is requesting an appointment. If so, the <code>free_slots.yaml</code> is used to make a suggestion or book the appointment directly.  </li>
-<li><strong>Necessity Check:</strong> An LLM decides whether the email requires a response at all (or if it is just informational, for example).  </li>
-<li><strong>Drafting:</strong> If a response is needed, the agent generates a reply text considering the skill guidelines and the persona (Daniel Gaida).  </li>
-<li><strong>Outlook Integration:</strong> A draft is automatically created in the Outlook folder "Work in Progress". The original email is attached.  </li>
+<li><strong>Final Submission Check:</strong> Automatically recognizes when a student submits their thesis (Bachelor/Master/Project) finally. In this case:<ul>
+<li>A <strong>reminder appointment</strong> is automatically created in the Outlook calendar for one week later.</li>
+<li><strong>Attachments are extracted</strong> and securely saved in the corresponding student folder.</li>
+<li>A confirmation email is prepared as a draft.</li>
+</ul>
+</li>
+<li><strong>Necessity Check:</strong> An LLM decides whether the email requires a response at all (or if it is just informational, for example).</li>
+<li><strong>Drafting:</strong> If a response is needed, the agent generates a reply text considering the skill guidelines and the persona (Daniel Gaida).</li>
+<li><strong>Outlook Integration:</strong> A draft is automatically created in the Outlook folder "Work in Progress". The original email is attached.</li>
 </ol>
 <h2 id="4-verification-gradio-gui">4. Verification (Gradio GUI)<a class="headerlink" href="#4-verification-gradio-gui" title="Permanent link">&para;</a></h2>
 <p>At the end of the process, a Gradio web interface starts automatically. Here you can:<br />
