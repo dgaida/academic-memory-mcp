@@ -167,13 +167,15 @@ class MCPAgent:
         all_messages.extend(processed_messages)
 
         max_iterations = 5
-        for _ in range(max_iterations):
+        for i in range(max_iterations):
+            logger.debug(f"MCP Agent Iteration {i+1}/{max_iterations}")
             response = self.client.chat(
                 messages=all_messages,
                 tools=self.tools_definition
             )
 
             message = response.get('message', {})
+            logger.debug(f"MCP Agent Antwort-Message: {message}")
 
             if self.use_cloud and self.anonymizer:
                 if message.get('content'):
@@ -195,12 +197,15 @@ class MCPAgent:
                 if function_name in self.available_tools:
                     try:
                         tool_result = self.available_tools[function_name](**args)
+                        logger.info(f"MCP Tool Ergebnis ({function_name}): {tool_result}")
                         if function_name == "manage_calendar_appointment" and "ERFOLG" in str(tool_result):
                             self.last_appointment_info = args
                     except Exception as e:
                         tool_result = f"Fehler bei MCP Tool-Ausführung: {e}"
+                        logger.error(tool_result)
                 else:
                     tool_result = f"MCP Tool {function_name} nicht verfügbar."
+                    logger.warning(tool_result)
 
                 if self.use_cloud and self.anonymizer:
                     for placeholder, original in self.anonymizer.mapping.items():

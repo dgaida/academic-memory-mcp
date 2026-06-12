@@ -539,9 +539,8 @@ PFAD ZUR E-MAIL: {mail_path}
 
 WICHTIGE ANWEISUNG:
 1. Falls es eine finale Abgabe ist:
-   - Rufe 'manage_calendar_appointment' für einen Reminder in 1 Woche um 08:00 Uhr auf.
-   - Rufe 'save_email_attachments' auf, um die Arbeit zu speichern.
-   - Verfasse eine Antwort (Empfangsbestätigung).
+   - Du MUSST ZUERST die Tools `manage_calendar_appointment` (für einen Reminder in 1 Woche um 08:00 Uhr) und `save_email_attachments` (um die Arbeit zu speichern) aufrufen.
+   - Erst NACHDEM die Tools aufgerufen wurden, verfasst du eine kurze Antwort (Empfangsbestätigung).
 2. Falls es KEINE finale Abgabe ist, antworte EXAKT mit: NO_FINAL_SUBMISSION_RELEVANCE
 
 Format für die Antwort (falls relevant):
@@ -551,6 +550,7 @@ TEXT:
 [Der Antwort-Text]
 """
         try:
+            logger.debug(f"FinalSubmission Prompt: {final_submission_prompt}")
             final_sub_content = agent.chat(
                 messages=[{"role": "user", "content": final_submission_prompt}],
                 system_prompt=system_prompt,
@@ -558,6 +558,8 @@ TEXT:
                 sender_email=sender_email,
             )
             logger.info(f"Antwort von Agent (FinalSubmission-Check): {final_sub_content}")
+            if agent.last_appointment_info:
+                logger.info(f"Agent hat Termin erstellt: {agent.last_appointment_info}")
 
             if "NO_FINAL_SUBMISSION_RELEVANCE" not in final_sub_content:
                 logger.info("Finale Abgabe erkannt, generiere Bestätigung.")
