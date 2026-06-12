@@ -1,7 +1,7 @@
 """Parser für E-Mail-Formate."""
 import re
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 import logging
 import email
 from email import policy
@@ -409,3 +409,83 @@ class MailParser:
                 "subject": "",
                 "body": ""
             }
+    def save_attachments(self, file_path: Path, target_dir: Path) -> List[Path]:
+        """Extrahiert Anhänge aus einer E-Mail und speichert sie im Zielverzeichnis.
+
+        Achtet darauf, keine vorhandenen Dateien zu überschreiben (fügt _final an).
+
+        Args:
+            file_path: Pfad zur E-Mail.
+            target_dir: Zielverzeichnis.
+
+        Returns:
+            List[Path]: Liste der gespeicherten Dateipfade.
+        """
+        suffix = file_path.suffix.lower()
+        if suffix == ".msg":
+            return self._save_msg_attachments(file_path, target_dir)
+        else:
+            return self._save_eml_attachments(file_path, target_dir)
+
+    def _save_msg_attachments(self, file_path: Path, target_dir: Path) -> List[Path]:
+        saved_paths = []
+        try:
+            import extract_msg
+            with extract_msg.openMsg(str(file_path)) as msg:
+                for att in msg.attachments:
+                    filename = None
+                    if hasattr(att, "getFilename"):
+                        try:
+                            filename = att.getFilename()
+                        except Exception:
+                            pass
+                    if not filename:
+                        filename = getattr(att, "name", None) or getattr(att, "longFilename", None)
+
+                    if filename:
+                        dest = self._get_unique_path(target_dir / filename)
+                        with open(dest, 'wb') as f:
+                            f.write(att.data)
+                        saved_paths.append(dest)
+        except Exception as e:
+            logger.error(f"Error saving .msg attachments: {e}")
+        return saved_paths
+
+    def _save_eml_attachments(self, file_path: Path, target_dir: Path) -> List[Path]:
+        saved_paths = []
+        try:
+            import email
+            from email import policy
+            with open(file_path, 'rb') as f:
+                msg = email.message_from_binary_file(f, policy=policy.default)
+
+            for part in msg.walk():
+                if part.get_content_disposition() == 'attachment':
+                    filename = part.get_filename()
+                    if filename:
+                        dest = self._get_unique_path(target_dir / filename)
+                        payload = part.get_payload(decode=True)
+                        if payload:
+                            with open(dest, 'wb') as f:
+                                f.write(payload)
+                            saved_paths.append(dest)
+        except Exception as e:
+            logger.error(f"Error saving .eml attachments: {e}")
+        return saved_paths
+
+    def _get_unique_path(self, path: Path) -> Path:
+        """Erzeugt einen eindeutigen Pfad, indem _final angehängt wird, falls die Datei existiert."""
+        if not path.exists():
+            return path
+
+        stem = path.stem
+        suffix = path.suffix
+        new_path = path.parent / f"{stem}_final{suffix}"
+
+        # Falls _final auch existiert, hängen wir eine Nummer an oder weiteres _final
+        # Der User sagte "bspw. _final", also machen wir es einfach repetitiv oder mit counter
+        counter = 1
+        while new_path.exists():
+            new_path = path.parent / f"{stem}_final_{counter}{suffix}"
+            counter += 1
+        return new_path

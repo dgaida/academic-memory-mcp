@@ -517,6 +517,64 @@ TEXT:
     except Exception as e:
         logger.error(f"Fehler in Schritt 1 (Appointment): {e}")
 
+
+    # --- SCHRITT 1.2: PRÜFE FINALE ABGABE ---
+    logger.info("Schritt 1.2: Prüfe auf finale Abgabe...")
+    final_submission_skill_path = Path("skills/SKILL_FinalSubmission.md")
+    if not final_submission_skill_path.exists():
+        final_submission_skill_path = Path(__file__).parent / "skills" / "SKILL_FinalSubmission.md"
+
+    if final_submission_skill_path.exists():
+        final_submission_skill_content = final_submission_skill_path.read_text(encoding="utf-8")
+        final_submission_prompt = f"""Prüfe die folgende E-Mail auf eine finale Abgabe basierend auf dem FINALE ABGABE SKILL.
+
+HEUTE IST: {datetime.now(ZoneInfo("Europe/Berlin")).strftime("%A, den %d.%m.%Y %H:%M")}
+
+FINALE ABGABE SKILL:
+{final_submission_skill_content}
+
+AKTUELLE E-MAIL:
+{mail_content}
+PFAD ZUR E-MAIL: {mail_path}
+
+WICHTIGE ANWEISUNG:
+1. Falls es eine finale Abgabe ist:
+   - Rufe 'manage_calendar_appointment' für einen Reminder in 1 Woche um 08:00 Uhr auf.
+   - Rufe 'save_email_attachments' auf, um die Arbeit zu speichern.
+   - Verfasse eine Antwort (Empfangsbestätigung).
+2. Falls es KEINE finale Abgabe ist, antworte EXAKT mit: NO_FINAL_SUBMISSION_RELEVANCE
+
+Format für die Antwort (falls relevant):
+ANHANG: [JA/NEIN]
+BETREFF: [Der Betreff]
+TEXT:
+[Der Antwort-Text]
+"""
+        try:
+            final_sub_content = agent.chat(
+                messages=[{"role": "user", "content": final_submission_prompt}],
+                system_prompt=system_prompt,
+                sender_name=sender_name,
+                sender_email=sender_email,
+            )
+            logger.info(f"Antwort von Agent (FinalSubmission-Check): {final_sub_content}")
+
+            if "NO_FINAL_SUBMISSION_RELEVANCE" not in final_sub_content:
+                logger.info("Finale Abgabe erkannt, generiere Bestätigung.")
+                should_attach = "ANHANG: JA" in final_sub_content
+                reply_subject = ""
+                if "BETREFF:" in final_sub_content:
+                    reply_subject = (
+                        final_sub_content.split("BETREFF:", 1)[1].split("TEXT:", 1)[0].strip()
+                    )
+                reply_text = final_sub_content
+                if "TEXT:" in final_sub_content:
+                    reply_text = final_sub_content.split("TEXT:", 1)[1].strip()
+                return reply_subject, reply_text, should_attach
+
+        except Exception as e:
+            logger.error(f"Fehler in Schritt 1.2 (FinalSubmission): {e}")
+
     # --- SCHRITT 1.5: NOTWENDIGKEITSPRÜFUNG ---
     logger.info("Schritt 1.5: Prüfe, ob eine Antwort notwendig ist...")
     necessity_user_prompt = f"""Prüfe, ob die folgende E-Mail eine Antwort erfordert oder ob es sich lediglich um eine Informationsmail handelt, die keiner Antwort bedarf.
