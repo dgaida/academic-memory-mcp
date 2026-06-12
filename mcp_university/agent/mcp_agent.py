@@ -110,9 +110,24 @@ class MCPAgent:
                             "end_time": {"type": "string", "description": "Ende (YYYY-MM-DD HH:MM)."},
                             "subject": {"type": "string", "description": "Betreff."},
                             "student_email": {"type": "string", "description": "E-Mail."},
-                            "original_mail_date": {"type": "string", "description": "Datum der studentischen Mail (DD.MM.YY)."}
+                            "original_mail_date": {"type": "string", "description": "Datum der studentischen Mail (DD.MM.YY)."},
+                            "body": {"type": "string", "description": "Inhalt des Termins (z.B. Link zur E-Mail)."}
                         },
                         "required": ["start_time", "end_time", "subject", "student_email"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "save_email_attachments",
+                    "description": "Extrahiert Anhänge aus einer E-Mail und speichert sie im Elternordner.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "email_path": {"type": "string", "description": "Pfad zur E-Mail."}
+                        },
+                        "required": ["email_path"]
                     }
                 }
             }

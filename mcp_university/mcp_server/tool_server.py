@@ -117,7 +117,7 @@ def create_tool_server() -> FastMCP:
             return f"Fehler beim Lesen der freien Slots: {e}"
 
     @mcp.tool
-    def manage_calendar_appointment(start_time: str, end_time: str, subject: str, student_email: str, original_mail_date: Optional[str] = None) -> str:
+    def manage_calendar_appointment(start_time: str, end_time: str, subject: str, student_email: str, original_mail_date: Optional[str] = None, body: Optional[str] = None) -> str:
         """Prüft die Verfügbarkeit eines Zeitfensters im Outlook-Kalender und trägt einen neuen Termin ein.
 
         Args:
@@ -176,7 +176,7 @@ def create_tool_server() -> FastMCP:
             appointment.Start = dt_start
             appointment.End = dt_end
             appointment.Location = "Zoom (siehe E-Mail-Signatur)"
-            body_text = f"Terminbestätigung auf Basis Ihrer Mail vom {original_mail_date}" if original_mail_date else "Terminbestätigung via MCP System."
+            body_text = body if body else (f"Terminbestätigung auf Basis Ihrer Mail vom {original_mail_date}" if original_mail_date else "Terminbestätigung via MCP System.")
             appointment.Body = body_text
 
             recipient = appointment.Recipients.Add(student_email)
@@ -189,7 +189,40 @@ def create_tool_server() -> FastMCP:
         except Exception as e:
             return f"Fehler bei der Kalender-Verarbeitung: {e}"
 
+
+    @mcp.tool
+    def save_email_attachments(email_path: str) -> str:
+        """Extrahiert Anhänge aus einer E-Mail und speichert sie im Elternordner des E-Mail-Ordners.
+
+        Args:
+            email_path: Der Pfad zur E-Mail-Datei.
+
+        Returns:
+            str: Erfolgsmeldung oder Fehlermeldung.
+        """
+        try:
+            from ..parser.mail_parser import MailParser
+            p = Path(email_path)
+            if not p.exists():
+                return f"Fehler: Datei {email_path} nicht gefunden."
+
+            target_dir = p.parent.parent
+            if not target_dir.exists():
+                target_dir.mkdir(parents=True, exist_ok=True)
+
+            parser = MailParser()
+            saved_paths = parser.save_attachments(p, target_dir)
+
+            if not saved_paths:
+                return "Keine Anhänge zum Speichern gefunden."
+
+            paths_str = ", ".join([str(p) for p in saved_paths])
+            return f"ERFOLG: Anhänge gespeichert in: {paths_str}"
+        except Exception as e:
+            return f"Fehler beim Speichern der Anhänge: {e}"
+
     return mcp
+
 
 if __name__ == "__main__":
     mcp = create_tool_server()
