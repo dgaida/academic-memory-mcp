@@ -63,10 +63,13 @@ def test_generate_reply_no_appointment_fallback(mock_agent_cls, mock_parser_cls,
     mock_parser.parse.return_value = "Frage zu Thesis."
 
     mock_agent = mock_agent_cls.return_value
-    # Schritt 1 sagt "nicht relevant"
-    # Schritt 2 gibt die reguläre Antwort
+    # Schritt 1: Nicht terminrelevant
+    # Schritt 1.2: Keine finale Abgabe
+    # Schritt 1.5: Antwort erforderlich
+    # Schritt 2: Reguläre Antwort
     mock_agent.chat.side_effect = [
         "NO_APPOINTMENT_RELEVANCE",
+        "NO_FINAL_SUBMISSION_RELEVANCE",
         "REPLY_NEEDED",
         "ANHANG: NEIN\nBETREFF: Thesis\nTEXT:\nHier ist die Antwort."
     ]
@@ -81,7 +84,7 @@ def test_generate_reply_no_appointment_fallback(mock_agent_cls, mock_parser_cls,
 
     assert subject == "Thesis"
     assert reply == "Hier ist die Antwort."
-    assert mock_agent.chat.call_count == 3
+    assert mock_agent.chat.call_count == 4
 
 @patch("process_sorted_emails.OUTLOOK_AVAILABLE", True)
 @patch("process_sorted_emails.is_outlook_open", return_value=True)
@@ -125,9 +128,11 @@ def test_generate_reply_no_reply_needed(mock_agent_cls, mock_parser_cls, tmp_pat
 
     mock_agent = mock_agent_cls.return_value
     # Schritt 1: Nicht terminrelevant
+    # Schritt 1.2: Keine finale Abgabe
     # Schritt 1.5: Keine Antwort erforderlich
     mock_agent.chat.side_effect = [
         "NO_APPOINTMENT_RELEVANCE",
+        "NO_FINAL_SUBMISSION_RELEVANCE",
         "NO_REPLY_NEEDED|Reine Dankesmail ohne Fragen."
     ]
 
@@ -137,4 +142,4 @@ def test_generate_reply_no_reply_needed(mock_agent_cls, mock_parser_cls, tmp_pat
 
     assert subject == "NO_REPLY_NEEDED"
     assert "Reine Dankesmail" in reply
-    assert mock_agent.chat.call_count == 2
+    assert mock_agent.chat.call_count == 3
