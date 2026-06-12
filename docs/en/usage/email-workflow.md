@@ -19,13 +19,13 @@ After sorting, `process_sorted_emails.py` is executed. The script performs the f
 
 1.  **Context Analysis:** The system analyzes other emails in the target folder (the previous history) to understand the context of the current request.  
 2.  **Appointment Check:** Checks if the student is requesting an appointment. If so, the `free_slots.yaml` is used to make a suggestion or book the appointment directly.  
-3.  **Final Submission Check:** Automatically recognizes when a student submits their thesis (Bachelor/Master/Project) finally. In this case:
-    - A **reminder appointment** is automatically created in the Outlook calendar for one week later.
-    - **Attachments are extracted** and securely saved in the corresponding student folder.
-    - A confirmation email is prepared as a draft.
-4.  **Necessity Check:** An LLM decides whether the email requires a response at all (or if it is just informational, for example).
-5.  **Drafting:** If a response is needed, the agent generates a reply text considering the skill guidelines and the persona (Daniel Gaida).
-6.  **Outlook Integration:** A draft is automatically created in the Outlook folder "Work in Progress". The original email is attached.
+3.  **Final Submission Check:** Automatically recognizes when a student submits their thesis (Bachelor/Master/Project) finally. In this case:  
+    - A **reminder appointment** is automatically created in the Outlook calendar for one week later.  
+    - **Attachments are extracted** and securely saved in the corresponding student folder.  
+    - A confirmation email is prepared as a draft.  
+4.  **Necessity Check:** An LLM decides whether the email requires a response at all (or if it is just informational, for example).  
+5.  **Drafting:** If a response is needed, the agent generates a reply text considering the skill guidelines and the persona (Daniel Gaida).  
+6.  **Outlook Integration:** A draft is automatically created in the Outlook folder "Work in Progress". The original email is attached.  
 
 ## 4. Verification (Gradio GUI)
 At the end of the process, a Gradio web interface starts automatically. Here you can:  
