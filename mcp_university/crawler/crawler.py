@@ -179,16 +179,13 @@ class Crawler:
             combined_data += f"{f.name}:{f.stat().st_mtime}:{f.stat().st_size}|"
         combined_hash = hashlib.sha256(combined_data.encode()).hexdigest()
 
-        summary_file_path = dir_path / ".Inbox_Sentitems_Summary.md"
-        # Compatibility: also check old filename
-        old_summary_path = dir_path / ".emails_summary.md"
+        summary_file_path = dir_path / ".emails_summary.md"
 
         db_folder = self.store._get_connection().execute("SELECT identity_json FROM folders WHERE id=?", (folder_id,)).fetchone()
 
-        if db_folder and db_folder[0] == combined_hash and (summary_file_path.exists() or old_summary_path.exists()):
+        if db_folder and db_folder[0] == combined_hash and summary_file_path.exists():
             logger.info(f"Email conversation in {dir_path.name} unchanged.")
-            path_to_read = summary_file_path if summary_file_path.exists() else old_summary_path
-            return path_to_read.read_text(encoding="utf-8"), False
+            return summary_file_path.read_text(encoding="utf-8"), False
 
         logger.info(f"Processing {len(email_files)} emails for grouped conversation summary in {dir_path.name}")
 
@@ -264,9 +261,6 @@ class Crawler:
             # Save to file
             try:
                 summary_file_path.write_text(combined_summary, encoding="utf-8")
-                # Delete old summary file if exists
-                if old_summary_path.exists():
-                    old_summary_path.unlink()
             except Exception as e:
                 logger.error(f"Failed to save email summary for {dir_path.name}: {e}")
 
@@ -274,7 +268,7 @@ class Crawler:
             self.index.add_document(str(summary_file_path), combined_summary, {
                 "path": str(summary_file_path),
                 "folder": str(dir_path),
-                "filename": ".Inbox_Sentitems_Summary.md",
+                "filename": ".emails_summary.md",
                 "type": ".md",
                 "is_conversation_summary": "true"
             })

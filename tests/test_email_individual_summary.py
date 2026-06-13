@@ -1,6 +1,6 @@
 import pytest
 import logging
-from unittest.mock import MagicMock, ANY
+from unittest.mock import MagicMock
 from mcp_university.crawler.crawler import Crawler
 from mcp_university.config import Config, FolderConfig, UserConfig
 from mcp_university.metadata.store import MetadataStore
@@ -68,7 +68,18 @@ def test_individual_email_summarization_option(tmp_path, mock_deps):
     crawler.crawl()
 
     # Verify that summarize_file was called for the email
-    summarizer.summarize_file.assert_called_with("1.eml", ANY)
+    # It might be called multiple times (for the folder and the email)
+    # We check if 1.eml was among the calls
+    found = False
+    for call in summarizer.summarize_file.call_args_list:
+        if call.args[0] == "1.eml":
+            found = True
+            break
+    assert found, "summarize_file was not called for 1.eml"
+
+    # Also verify that it was NOT called for the conversation summary file (which should be skipped)
+    for call in summarizer.summarize_file.call_args_list:
+        assert call.args[0] != ".emails_summary.md"
 
     # Verify content passed to summarize_email_conversation
     args, _ = summarizer.summarize_email_conversation.call_args

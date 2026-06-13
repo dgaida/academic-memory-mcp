@@ -34,7 +34,7 @@ Die Indexierung erfolgt in mehreren Phasen:
 6.  **Spezialfall: E-Mail-Konversationen:**  
     - Erkennt der Crawler eine Struktur mit `Inbox` und `SentItems` Unterordnern, gruppiert er E-Mails nach Konversationspartnern.  
     - Es wird eine aggregierte Zusammenfassung der gesamten Kommunikation mit einer Person erstellt.  
-    - Diese wird als `.Inbox_Sentitems_Summary.md` im Ordner gespeichert.  
+    - Diese wird als `.emails_summary.md` im Ordner gespeichert.
 
 7.  **Spezialfall: Ordner-Zusammenfassungen:**  
     - Nachdem alle Dateien eines Ordners verarbeitet wurden, erstellt das LLM eine Zusammenfassung des gesamten Ordnerinhalts basierend auf den Einzelzusammenfassungen.  
@@ -88,7 +88,7 @@ Vorlesungen/
 | **SQLite DB** | `data/metadata/university.db` | Speichert Metadaten, Hashes, Pfade und Zusammenfassungen. |
 | **Vektorindex** | `data/indexes/qdrant/` | Binäre Dateien des Qdrant-Suchindex. |
 | **Ordner-Zusammenfassung** | `../.<Ordnername>_summary.md` | Versteckte Markdown-Datei im Elternverzeichnis. |
-| **E-Mail-Zusammenfassung**| `./.Inbox_Sentitems_Summary.md` | Aggregierte Konversationshistorie bei E-Mails. |
+| **E-Mail-Zusammenfassung**| `./.emails_summary.md` | Aggregierte Konversationshistorie bei E-Mails. |
 | **Logs** | `data/logs/mcp-university.log` | Detaillierte Protokollierung des Indexierungsprozesses. |
 | **Cache** | `data/cache/` | Temporäre Artefakte des PDF-Parsers. |
 

@@ -34,7 +34,7 @@ Indexing takes place in several phases:
 6.  **Special Case: Email Conversations:**  
     - If the crawler detects a structure with `Inbox` and `SentItems` subfolders, it groups emails by conversation partners.  
     - An aggregated summary of the entire communication with a person is created.  
-    - This is saved as `.Inbox_Sentitems_Summary.md` in the folder.  
+    - This is saved as `.emails_summary.md` in the folder.
 
 7.  **Special Case: Folder Summaries:**  
     - After all files in a folder have been processed, the LLM creates a summary of the entire folder content based on the individual summaries.  
@@ -88,7 +88,7 @@ Lectures/
 | **SQLite DB** | `data/metadata/university.db` | Stores metadata, hashes, paths, and summaries. |
 | **Vector Index** | `data/indexes/qdrant/` | Binary files of the Qdrant search index. |
 | **Folder Summary** | `../.<foldername>_summary.md` | Hidden Markdown file in the parent directory. |
-| **Email Summary** | `./.Inbox_Sentitems_Summary.md` | Aggregated conversation history for emails. |
+| **Email Summary** | `./.emails_summary.md` | Aggregated conversation history for emails. |
 | **Logs** | `data/logs/mcp-university.log` | Detailed logging of the indexing process. |
 | **Cache** | `data/cache/` | Temporary artifacts from the PDF parser. |
 
