@@ -1394,23 +1394,23 @@
 <ul>
 <li>Erkennt der Crawler eine Struktur mit <code>Inbox</code> und <code>SentItems</code> Unterordnern, gruppiert er E-Mails nach Konversationspartnern.  </li>
 <li>Es wird eine aggregierte Zusammenfassung der gesamten Kommunikation mit einer Person erstellt.  </li>
-<li>Diese wird als <code>.emails_summary.md</code> im Ordner gespeichert.</li>
+<li>Diese wird als <code>.emails_summary.md</code> im Ordner gespeichert.  </li>
 </ul>
 </li>
 <li>
 <p><strong>Spezialfall: Ordner-Zusammenfassungen:</strong>  </p>
 <ul>
 <li>Nachdem alle Dateien eines Ordners verarbeitet wurden, erstellt das LLM eine Zusammenfassung des gesamten Ordnerinhalts basierend auf den Einzelzusammenfassungen.  </li>
-<li>Diese wird als versteckte Datei <code>.&lt;Ordnername&gt;_summary.md</code> im <strong>Elternverzeichnis</strong> gespeichert. Dies gilt auch für Wurzelordner (die im selben Verzeichnis wie der Ordner selbst liegen).</li>
+<li>Diese wird als versteckte Datei <code>.&lt;Ordnername&gt;_summary.md</code> im <strong>Elternverzeichnis</strong> gespeichert. Dies gilt auch für Wurzelordner (die im selben Verzeichnis wie der Ordner selbst liegen).  </li>
 </ul>
 </li>
 <li>
 <p><strong>Speicherung &amp; Indexierung:</strong>  </p>
 <ul>
-<li><strong>Metadaten:</strong> Dateipfade, Hashes, Zeitstempel und die Markdown-Zusammenfassungen werden in der SQLite-Datenbank gespeichert:<ul>
-<li>Tabelle <code>files</code>: Pfad, Hash, Mtime, Typ, Ordner-ID.</li>
-<li>Tabelle <code>folders</code>: Pfad, Parent-ID, Hash (für E-Mails), Zeitstempel.</li>
-<li>Tabelle <code>summaries</code>: Die eigentlichen Markdown-Zusammenfassungen für Dateien und Ordner.</li>
+<li><strong>Metadaten:</strong> Dateipfade, Hashes, Zeitstempel und die Markdown-Zusammenfassungen werden in der SQLite-Datenbank gespeichert:  <ul>
+<li>Tabelle <code>files</code>: Pfad, Hash, Mtime, Typ, Ordner-ID.  </li>
+<li>Tabelle <code>folders</code>: Pfad, Parent-ID, Hash (für E-Mails), Zeitstempel.  </li>
+<li>Tabelle <code>summaries</code>: Die eigentlichen Markdown-Zusammenfassungen für Dateien und Ordner.  </li>
 </ul>
 </li>
 <li><strong>Vektorsuche:</strong> Die <strong>Zusammenfassungen</strong> (nicht der Volltext) werden vektorisiert (standardmäßig mit <code>BAAI/bge-m3</code>) und im Qdrant-Index gespeichert.  </li>

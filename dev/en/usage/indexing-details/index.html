@@ -1396,23 +1396,23 @@
 <ul>
 <li>If the crawler detects a structure with <code>Inbox</code> and <code>SentItems</code> subfolders, it groups emails by conversation partners.  </li>
 <li>An aggregated summary of the entire communication with a person is created.  </li>
-<li>This is saved as <code>.emails_summary.md</code> in the folder.</li>
+<li>This is saved as <code>.emails_summary.md</code> in the folder.  </li>
 </ul>
 </li>
 <li>
 <p><strong>Special Case: Folder Summaries:</strong>  </p>
 <ul>
 <li>After all files in a folder have been processed, the LLM creates a summary of the entire folder content based on the individual summaries.  </li>
-<li>This is saved as a hidden file <code>.&lt;foldername&gt;_summary.md</code> in the <strong>parent directory</strong>. This also applies to root folders (which are stored in the same directory as the folder itself).</li>
+<li>This is saved as a hidden file <code>.&lt;foldername&gt;_summary.md</code> in the <strong>parent directory</strong>. This also applies to root folders (which are stored in the same directory as the folder itself).  </li>
 </ul>
 </li>
 <li>
 <p><strong>Storage &amp; Indexing:</strong>  </p>
 <ul>
-<li><strong>Metadata:</strong> File paths, hashes, timestamps, and the Markdown summaries are stored in the SQLite database:<ul>
-<li><code>files</code> table: Path, Hash, Mtime, Type, Folder ID.</li>
-<li><code>folders</code> table: Path, Parent ID, Hash (for emails), Timestamp.</li>
-<li><code>summaries</code> table: The actual Markdown summaries for files and folders.</li>
+<li><strong>Metadata:</strong> File paths, hashes, timestamps, and the Markdown summaries are stored in the SQLite database:  <ul>
+<li><code>files</code> table: Path, Hash, Mtime, Type, Folder ID.  </li>
+<li><code>folders</code> table: Path, Parent ID, Hash (for emails), Timestamp.  </li>
+<li><code>summaries</code> table: The actual Markdown summaries for files and folders.  </li>
 </ul>
 </li>
 <li><strong>Vector Search:</strong> The <strong>summaries</strong> (not the full text) are vectorized (defaulting to <code>BAAI/bge-m3</code>) and stored in the Qdrant index.  </li>
