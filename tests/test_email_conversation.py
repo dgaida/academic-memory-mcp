@@ -21,6 +21,7 @@ def mock_deps(tmp_path):
     index = MagicMock(spec=SearchIndex)
 
     # Default returns to avoid sqlite errors with MagicMocks
+    summarizer.summarize_file.return_value = "# File Summary"
     summarizer.summarize_folder.return_value = "# Folder Summary"
     summarizer.summarize_email_conversation.return_value = "# Conversation Summary"
 
@@ -46,8 +47,8 @@ def test_email_conversation_processing(tmp_path, mock_deps):
     crawler = Crawler(config, store, parser, summarizer, index)
     crawler.crawl()
 
-    # Check if summary file exists (new filename)
-    summary_file = student_dir / ".Inbox_Sentitems_Summary.md"
+    # Check if summary file exists (reverted filename)
+    summary_file = student_dir / ".emails_summary.md"
     assert summary_file.exists()
     assert summary_file.read_text() == "# Conversation Summary"
 
@@ -64,7 +65,7 @@ def test_email_conversation_processing(tmp_path, mock_deps):
     assert args[0] == str(summary_file)
     assert args[1] == "# Conversation Summary"
     assert args[2]["is_conversation_summary"] == "true"
-    assert args[2]["filename"] == ".Inbox_Sentitems_Summary.md"
+    assert args[2]["filename"] == ".emails_summary.md"
 
 def test_email_sorting(tmp_path, mock_deps):
     config, store, parser, summarizer, index = mock_deps

@@ -37,8 +37,8 @@ def test_root_folder_summary_location(tmp_path, mock_components):
     # Process as root (parent_id=None)
     crawler._process_directory(root_dir, parent_id=None)
 
-    # Should be inside root as .summary.md
-    summary_path = root_dir / ".summary.md"
+    # Should be in parent as .my_root_summary.md
+    summary_path = tmp_path / ".my_root_summary.md"
     assert summary_path.exists()
     assert summary_path.read_text() == "folder summary content"
 
@@ -97,7 +97,7 @@ def test_summary_recreation_on_missing_file(tmp_path, mock_components):
     crawler = Crawler(config, store, parser, summarizer, index)
 
     # 1. Run - summary exists in DB but NOT on disk
-    summary_path = root_dir / ".summary.md"
+    summary_path = tmp_path / ".root_summary.md"
     assert not summary_path.exists()
 
     crawler._process_directory(root_dir)

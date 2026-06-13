@@ -119,7 +119,7 @@ class Crawler:
                 suffix = entry_path.suffix.lower()
                 if suffix not in self.config.folders.supported_extensions:
                     continue
-                if entry.name.startswith(".") and (entry.name.endswith("_summary.md") or entry.name.endswith(".emails_summary.md") or entry.name.endswith(".Inbox_Sentitems_Summary.md")):
+                if entry.name.startswith(".") and entry.name.endswith("_summary.md"):
                     continue
 
                 current_files.add(str(entry_path))
@@ -179,16 +179,13 @@ class Crawler:
             combined_data += f"{f.name}:{f.stat().st_mtime}:{f.stat().st_size}|"
         combined_hash = hashlib.sha256(combined_data.encode()).hexdigest()
 
-        summary_file_path = dir_path / ".Inbox_Sentitems_Summary.md"
-        # Compatibility: also check old filename
-        old_summary_path = dir_path / ".emails_summary.md"
+        summary_file_path = dir_path / ".emails_summary.md"
 
         db_folder = self.store._get_connection().execute("SELECT identity_json FROM folders WHERE id=?", (folder_id,)).fetchone()
 
-        if db_folder and db_folder[0] == combined_hash and (summary_file_path.exists() or old_summary_path.exists()):
+        if db_folder and db_folder[0] == combined_hash and summary_file_path.exists():
             logger.info(f"Email conversation in {dir_path.name} unchanged.")
-            path_to_read = summary_file_path if summary_file_path.exists() else old_summary_path
-            return path_to_read.read_text(encoding="utf-8"), False
+            return summary_file_path.read_text(encoding="utf-8"), False
 
         logger.info(f"Processing {len(email_files)} emails for grouped conversation summary in {dir_path.name}")
 
@@ -264,9 +261,6 @@ class Crawler:
             # Save to file
             try:
                 summary_file_path.write_text(combined_summary, encoding="utf-8")
-                # Delete old summary file if exists
-                if old_summary_path.exists():
-                    old_summary_path.unlink()
             except Exception as e:
                 logger.error(f"Failed to save email summary for {dir_path.name}: {e}")
 
@@ -274,7 +268,7 @@ class Crawler:
             self.index.add_document(str(summary_file_path), combined_summary, {
                 "path": str(summary_file_path),
                 "folder": str(dir_path),
-                "filename": ".Inbox_Sentitems_Summary.md",
+                "filename": ".emails_summary.md",
                 "type": ".md",
                 "is_conversation_summary": "true"
             })
@@ -345,13 +339,9 @@ class Crawler:
     def _get_summary_path(self, dir_path: Path, parent_id: Optional[int]) -> Path:
         """Bestimmt den Pfad für die Ordner-Zusammenfassungsdatei.
 
-        Wurzelordner (parent_id is None) speichern die Zusammenfassung intern als .summary.md.
-        Unterordner speichern sie im Elternverzeichnis als .{name}_summary.md.
+        Speichert die Zusammenfassung im Elternverzeichnis als .{name}_summary.md.
         """
-        if parent_id is None:
-            return dir_path / ".summary.md"
-        else:
-            return dir_path.parent / f".{dir_path.name}_summary.md"
+        return dir_path.parent / f".{dir_path.name}_summary.md"
 
     def _save_summary_to_file(self, dir_path: Path, summary: str, parent_id: Optional[int] = None) -> None:
         """Speichert die Ordner-Zusammenfassung als versteckte Markdown-Datei im Elternverzeichnis.
