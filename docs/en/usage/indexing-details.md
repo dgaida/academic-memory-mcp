@@ -38,11 +38,48 @@ Indexing takes place in several phases:
 
 7.  **Special Case: Folder Summaries:**  
     - After all files in a folder have been processed, the LLM creates a summary of the entire folder content based on the individual summaries.  
-    - This is saved as a hidden file `.<foldername>_summary.md` in the parent directory.  
+    - This is saved as a hidden file `.<foldername>_summary.md` in the **parent directory**. This also applies to root folders (which are stored in the same directory as the folder itself).
 
 8.  **Storage & Indexing:**  
-    - **Metadata:** File paths, hashes, timestamps, and the Markdown summaries are stored in the SQLite database (`summaries` table).  
+    - **Metadata:** File paths, hashes, timestamps, and the Markdown summaries are stored in the SQLite database:
+        - `files` table: Path, Hash, Mtime, Type, Folder ID.
+        - `folders` table: Path, Parent ID, Hash (for emails), Timestamp.
+        - `summaries` table: The actual Markdown summaries for files and folders.
     - **Vector Search:** The **summaries** (not the full text) are vectorized (defaulting to `BAAI/bge-m3`) and stored in the Qdrant index.  
+
+## Example: Before and After Indexing
+
+Suppose you have the following structure:
+```text
+Lectures/
+├── AI/
+│   ├── lecture1.pdf
+│   └── script.txt
+└── Math/
+    └── analysis.pdf
+```
+
+After indexing, it looks like this:
+```text
+.Lectures_summary.md
+Lectures/
+├── .AI_summary.md
+├── AI/
+│   ├── lecture1.pdf
+│   └── script.txt
+├── .Math_summary.md
+└── Math/
+    └── analysis.pdf
+```
+
+## Supported File Formats
+
+| Status | Formats |
+| :--- | :--- |
+| **Supported** | `.pdf`, `.docx`, `.md`, `.txt`, `.eml`, `.msg`, `.py`, `.ipynb`, `.json`, `.html` |
+| **Planned / Not Supported** | `.pptx`, `.xlsx`, `.csv`, Image formats (OCR required) |
+
+**Note on Markdown files:** All `.md` files are indexed and summarized, unless they start with a dot (`.`) and end with `_summary.md`. These are skipped as system-internal summaries.
 
 ## Generated Files and Storage Locations
 
@@ -50,7 +87,7 @@ Indexing takes place in several phases:
 | :--- | :--- | :--- |
 | **SQLite DB** | `data/metadata/university.db` | Stores metadata, hashes, paths, and summaries. |
 | **Vector Index** | `data/indexes/qdrant/` | Binary files of the Qdrant search index. |
-| **Folder Summary** | `./.<foldername>_summary.md` | Hidden Markdown file with the folder overview. |
+| **Folder Summary** | `../.<foldername>_summary.md` | Hidden Markdown file in the parent directory. |
 | **Email Summary** | `./.Inbox_Sentitems_Summary.md` | Aggregated conversation history for emails. |
 | **Logs** | `data/logs/mcp-university.log` | Detailed logging of the indexing process. |
 | **Cache** | `data/cache/` | Temporary artifacts from the PDF parser. |

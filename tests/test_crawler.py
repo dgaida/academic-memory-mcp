@@ -60,7 +60,7 @@ def test_crawler_folder_summary_file_creation(tmp_path):
 
     # Verify summary file creation
     # Since we passed sub_path and no parent_id, it is treated as a root folder.
-    # Thus it should save INSIDE as .summary.md
-    expected_summary_path = sub_path / ".summary.md"
+    # It should save in the parent as .subdir_summary.md
+    expected_summary_path = root_path / ".subdir_summary.md"
     assert expected_summary_path.exists()
     assert expected_summary_path.read_text() == "folder summary content"

@@ -38,11 +38,48 @@ Die Indexierung erfolgt in mehreren Phasen:
 
 7.  **Spezialfall: Ordner-Zusammenfassungen:**  
     - Nachdem alle Dateien eines Ordners verarbeitet wurden, erstellt das LLM eine Zusammenfassung des gesamten Ordnerinhalts basierend auf den Einzelzusammenfassungen.  
-    - Diese wird als versteckte Datei `.<Ordnername>_summary.md` im Elternverzeichnis gespeichert.  
+    - Diese wird als versteckte Datei `.<Ordnername>_summary.md` im **Elternverzeichnis** gespeichert. Dies gilt auch für Wurzelordner (die im selben Verzeichnis wie der Ordner selbst liegen).
 
 8.  **Speicherung & Indexierung:**  
-    - **Metadaten:** Dateipfade, Hashes, Zeitstempel und die Markdown-Zusammenfassungen werden in der SQLite-Datenbank (`summaries` Tabelle) gespeichert.  
+    - **Metadaten:** Dateipfade, Hashes, Zeitstempel und die Markdown-Zusammenfassungen werden in der SQLite-Datenbank gespeichert:
+        - Tabelle `files`: Pfad, Hash, Mtime, Typ, Ordner-ID.
+        - Tabelle `folders`: Pfad, Parent-ID, Hash (für E-Mails), Zeitstempel.
+        - Tabelle `summaries`: Die eigentlichen Markdown-Zusammenfassungen für Dateien und Ordner.
     - **Vektorsuche:** Die **Zusammenfassungen** (nicht der Volltext) werden vektorisiert (standardmäßig mit `BAAI/bge-m3`) und im Qdrant-Index gespeichert.  
+
+## Beispiel: Vor und nach der Indexierung
+
+Angenommen, Sie haben folgende Struktur:
+```text
+Vorlesungen/
+├── KI/
+│   ├── vorlesung1.pdf
+│   └── script.txt
+└── Mathe/
+    └── analysis.pdf
+```
+
+Nach der Indexierung sieht es so aus:
+```text
+.Vorlesungen_summary.md
+Vorlesungen/
+├── .KI_summary.md
+├── KI/
+│   ├── vorlesung1.pdf
+│   └── script.txt
+├── .Mathe_summary.md
+└── Mathe/
+    └── analysis.pdf
+```
+
+## Unterstützte Dateiformate
+
+| Status | Formate |
+| :--- | :--- |
+| **Unterstützt** | `.pdf`, `.docx`, `.md`, `.txt`, `.eml`, `.msg`, `.py`, `.ipynb`, `.json`, `.html` |
+| **Geplant / Nicht unterstützt** | `.pptx`, `.xlsx`, `.csv`, Bildformate (OCR erforderlich) |
+
+**Hinweis zu Markdown-Dateien:** Alle `.md` Dateien werden indiziert und zusammengefasst, außer sie starten mit einem Punkt (`.`) und enden auf `_summary.md`. Diese werden als systemeigene Zusammenfassungen übersprungen.
 
 ## Erzeugte Dateien und Speicherorte
 
@@ -50,7 +87,7 @@ Die Indexierung erfolgt in mehreren Phasen:
 | :--- | :--- | :--- |
 | **SQLite DB** | `data/metadata/university.db` | Speichert Metadaten, Hashes, Pfade und Zusammenfassungen. |
 | **Vektorindex** | `data/indexes/qdrant/` | Binäre Dateien des Qdrant-Suchindex. |
-| **Ordner-Zusammenfassung** | `./.<Ordnername>_summary.md` | Versteckte Markdown-Datei mit der Übersicht des Ordners. |
+| **Ordner-Zusammenfassung** | `../.<Ordnername>_summary.md` | Versteckte Markdown-Datei im Elternverzeichnis. |
 | **E-Mail-Zusammenfassung**| `./.Inbox_Sentitems_Summary.md` | Aggregierte Konversationshistorie bei E-Mails. |
 | **Logs** | `data/logs/mcp-university.log` | Detaillierte Protokollierung des Indexierungsprozesses. |
 | **Cache** | `data/cache/` | Temporäre Artefakte des PDF-Parsers. |

@@ -119,7 +119,7 @@ class Crawler:
                 suffix = entry_path.suffix.lower()
                 if suffix not in self.config.folders.supported_extensions:
                     continue
-                if entry.name.startswith(".") and (entry.name.endswith("_summary.md") or entry.name.endswith(".emails_summary.md") or entry.name.endswith(".Inbox_Sentitems_Summary.md")):
+                if entry.name.startswith(".") and entry.name.endswith("_summary.md"):
                     continue
 
                 current_files.add(str(entry_path))
@@ -345,13 +345,9 @@ class Crawler:
     def _get_summary_path(self, dir_path: Path, parent_id: Optional[int]) -> Path:
         """Bestimmt den Pfad für die Ordner-Zusammenfassungsdatei.
 
-        Wurzelordner (parent_id is None) speichern die Zusammenfassung intern als .summary.md.
-        Unterordner speichern sie im Elternverzeichnis als .{name}_summary.md.
+        Speichert die Zusammenfassung im Elternverzeichnis als .{name}_summary.md.
         """
-        if parent_id is None:
-            return dir_path / ".summary.md"
-        else:
-            return dir_path.parent / f".{dir_path.name}_summary.md"
+        return dir_path.parent / f".{dir_path.name}_summary.md"
 
     def _save_summary_to_file(self, dir_path: Path, summary: str, parent_id: Optional[int] = None) -> None:
         """Speichert die Ordner-Zusammenfassung als versteckte Markdown-Datei im Elternverzeichnis.
