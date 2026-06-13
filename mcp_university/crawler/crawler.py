@@ -151,6 +151,8 @@ class Crawler:
                     self.store.update_folder_summarized(folder_id)
                     self._save_summary_to_file(dir_path, folder_summary, parent_id)
                     any_changed = True # Folder summary itself changed
+                else:
+                    logger.error(f"Failed to generate folder summary for: {relative_path}")
             else:
                 logger.info(f"Folder {dir_path.name} unchanged. Skipping re-summarization.")
                 folder_summary = existing_folder_summary
@@ -353,7 +355,11 @@ class Crawler:
         summary_path = self._get_summary_path(dir_path, parent_id)
 
         try:
-            logger.debug(f"Saving folder summary to: {summary_path}")
+            logger.info(f"Saving folder summary to: {summary_path}")
             summary_path.write_text(summary, encoding="utf-8")
+            if summary_path.exists():
+                logger.info(f"Successfully verified existence of summary file: {summary_path}")
+            else:
+                logger.error(f"Summary file missing after write attempt: {summary_path}")
         except Exception as e:
             logger.error(f"Failed to save folder summary for {dir_path.name}: {e}")
