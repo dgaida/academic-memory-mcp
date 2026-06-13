@@ -729,6 +729,45 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#beispiel-vor-und-nach-der-indexierung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Beispiel: Vor und nach der Indexierung
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Beispiel: Vor und nach der Indexierung">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#beispiel-e-mail-strukturen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Beispiel: E-Mail-Strukturen
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#unterstutzte-dateiformate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unterstützte Dateiformate
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#erzeugte-dateien-und-speicherorte" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1226,6 +1265,45 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#beispiel-vor-und-nach-der-indexierung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Beispiel: Vor und nach der Indexierung
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Beispiel: Vor und nach der Indexierung">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#beispiel-e-mail-strukturen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Beispiel: E-Mail-Strukturen
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#unterstutzte-dateiformate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unterstützte Dateiformate
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#erzeugte-dateien-und-speicherorte" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1316,24 +1394,114 @@
 <ul>
 <li>Erkennt der Crawler eine Struktur mit <code>Inbox</code> und <code>SentItems</code> Unterordnern, gruppiert er E-Mails nach Konversationspartnern.  </li>
 <li>Es wird eine aggregierte Zusammenfassung der gesamten Kommunikation mit einer Person erstellt.  </li>
-<li>Diese wird als <code>.Inbox_Sentitems_Summary.md</code> im Ordner gespeichert.  </li>
+<li>Diese wird als <code>.emails_summary.md</code> im Ordner gespeichert.</li>
 </ul>
 </li>
 <li>
 <p><strong>Spezialfall: Ordner-Zusammenfassungen:</strong>  </p>
 <ul>
 <li>Nachdem alle Dateien eines Ordners verarbeitet wurden, erstellt das LLM eine Zusammenfassung des gesamten Ordnerinhalts basierend auf den Einzelzusammenfassungen.  </li>
-<li>Diese wird als versteckte Datei <code>.&lt;Ordnername&gt;_summary.md</code> im Elternverzeichnis gespeichert.  </li>
+<li>Diese wird als versteckte Datei <code>.&lt;Ordnername&gt;_summary.md</code> im <strong>Elternverzeichnis</strong> gespeichert. Dies gilt auch für Wurzelordner (die im selben Verzeichnis wie der Ordner selbst liegen).</li>
 </ul>
 </li>
 <li>
 <p><strong>Speicherung &amp; Indexierung:</strong>  </p>
 <ul>
-<li><strong>Metadaten:</strong> Dateipfade, Hashes, Zeitstempel und die Markdown-Zusammenfassungen werden in der SQLite-Datenbank (<code>summaries</code> Tabelle) gespeichert.  </li>
+<li><strong>Metadaten:</strong> Dateipfade, Hashes, Zeitstempel und die Markdown-Zusammenfassungen werden in der SQLite-Datenbank gespeichert:<ul>
+<li>Tabelle <code>files</code>: Pfad, Hash, Mtime, Typ, Ordner-ID.</li>
+<li>Tabelle <code>folders</code>: Pfad, Parent-ID, Hash (für E-Mails), Zeitstempel.</li>
+<li>Tabelle <code>summaries</code>: Die eigentlichen Markdown-Zusammenfassungen für Dateien und Ordner.</li>
+</ul>
+</li>
 <li><strong>Vektorsuche:</strong> Die <strong>Zusammenfassungen</strong> (nicht der Volltext) werden vektorisiert (standardmäßig mit <code>BAAI/bge-m3</code>) und im Qdrant-Index gespeichert.  </li>
 </ul>
 </li>
 </ol>
+<h2 id="beispiel-vor-und-nach-der-indexierung">Beispiel: Vor und nach der Indexierung<a class="headerlink" href="#beispiel-vor-und-nach-der-indexierung" title="Permanent link">&para;</a></h2>
+<p>Angenommen, Sie haben folgende Struktur:
+<div class="language-text highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Vorlesungen/
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>├── KI/
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│   ├── vorlesung1.pdf
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│   └── script.txt
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>└── Mathe/
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    └── analysis.pdf
+</code></pre></div></p>
+<p>Nach der Indexierung sieht es so aus:
+<div class="language-text highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>.Vorlesungen_summary.md
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>Vorlesungen/
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>├── .KI_summary.md
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>├── KI/
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>│   ├── vorlesung1.pdf
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>│   └── script.txt
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>├── .Mathe_summary.md
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>└── Mathe/
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    └── analysis.pdf
+</code></pre></div></p>
+<h3 id="beispiel-e-mail-strukturen">Beispiel: E-Mail-Strukturen<a class="headerlink" href="#beispiel-e-mail-strukturen" title="Permanent link">&para;</a></h3>
+<p><strong>Fall 1: Nur ein Posteingang (Standardverarbeitung)</strong>
+Vorher:
+<div class="language-text highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Student_A/
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>└── Inbox/
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    └── frage.msg
+</code></pre></div>
+Nachher:
+<div class="language-text highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>.Student_A_summary.md
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>Student_A/
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>├── .Inbox_summary.md
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>└── Inbox/
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    └── frage.msg
+</code></pre></div></p>
+<p><strong>Fall 2: Nur ein "Gesendete Objekte" Ordner (Standardverarbeitung)</strong>
+Vorher:
+<div class="language-text highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Student_B/
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>└── SentItems/
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    └── antwort.msg
+</code></pre></div>
+Nachher:
+<div class="language-text highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>.Student_B_summary.md
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>Student_B/
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>├── .SentItems_summary.md
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>└── SentItems/
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    └── antwort.msg
+</code></pre></div></p>
+<p><strong>Fall 3: Kombinierte E-Mail-Konversation (Spezialfall)</strong>
+Wenn sowohl <code>Inbox</code> als auch <code>SentItems</code> vorhanden sind, erkennt der Crawler dies als Konversation und erstellt eine gemeinsame Zusammenfassung (<code>.emails_summary.md</code>). Die Einzelordner erhalten dann keine eigenen <code>.Inbox_summary.md</code> Dateien mehr, da sie in der Konversation aufgehen.</p>
+<p>Vorher:
+<div class="language-text highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Student_C/
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>├── Inbox/
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>│   └── frage.msg
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>└── SentItems/
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    └── antwort.msg
+</code></pre></div>
+Nachher:
+<div class="language-text highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>.Student_C_summary.md
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>Student_C/
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>├── .emails_summary.md
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>├── Inbox/
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>│   └── frage.msg
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>└── SentItems/
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>    └── antwort.msg
+</code></pre></div></p>
+<h2 id="unterstutzte-dateiformate">Unterstützte Dateiformate<a class="headerlink" href="#unterstutzte-dateiformate" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Status</th>
+<th style="text-align: left;">Formate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Unterstützt</strong></td>
+<td style="text-align: left;"><code>.pdf</code>, <code>.docx</code>, <code>.md</code>, <code>.txt</code>, <code>.eml</code>, <code>.msg</code>, <code>.py</code>, <code>.ipynb</code>, <code>.json</code>, <code>.html</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Geplant / Nicht unterstützt</strong></td>
+<td style="text-align: left;"><code>.pptx</code>, <code>.xlsx</code>, <code>.csv</code>, Bildformate (OCR erforderlich)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Hinweis zu Markdown-Dateien:</strong> Alle <code>.md</code> Dateien werden indiziert und zusammengefasst, außer sie starten mit einem Punkt (<code>.</code>) und enden auf <code>_summary.md</code>. Diese werden als systemeigene Zusammenfassungen übersprungen.</p>
 <h2 id="erzeugte-dateien-und-speicherorte">Erzeugte Dateien und Speicherorte<a class="headerlink" href="#erzeugte-dateien-und-speicherorte" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1356,12 +1524,12 @@
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Ordner-Zusammenfassung</strong></td>
-<td style="text-align: left;"><code>./.&lt;Ordnername&gt;_summary.md</code></td>
-<td style="text-align: left;">Versteckte Markdown-Datei mit der Übersicht des Ordners.</td>
+<td style="text-align: left;"><code>../.&lt;Ordnername&gt;_summary.md</code></td>
+<td style="text-align: left;">Versteckte Markdown-Datei im Elternverzeichnis.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>E-Mail-Zusammenfassung</strong></td>
-<td style="text-align: left;"><code>./.Inbox_Sentitems_Summary.md</code></td>
+<td style="text-align: left;"><code>./.emails_summary.md</code></td>
 <td style="text-align: left;">Aggregierte Konversationshistorie bei E-Mails.</td>
 </tr>
 <tr>

@@ -731,6 +731,45 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#example-before-and-after-indexing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Before and After Indexing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Example: Before and After Indexing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-email-structures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Email Structures
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#supported-file-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Supported File Formats
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#generated-files-and-storage-locations" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1228,6 +1267,45 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#example-before-and-after-indexing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Before and After Indexing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Example: Before and After Indexing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-email-structures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Email Structures
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#supported-file-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Supported File Formats
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#generated-files-and-storage-locations" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1318,24 +1396,114 @@
 <ul>
 <li>If the crawler detects a structure with <code>Inbox</code> and <code>SentItems</code> subfolders, it groups emails by conversation partners.  </li>
 <li>An aggregated summary of the entire communication with a person is created.  </li>
-<li>This is saved as <code>.Inbox_Sentitems_Summary.md</code> in the folder.  </li>
+<li>This is saved as <code>.emails_summary.md</code> in the folder.</li>
 </ul>
 </li>
 <li>
 <p><strong>Special Case: Folder Summaries:</strong>  </p>
 <ul>
 <li>After all files in a folder have been processed, the LLM creates a summary of the entire folder content based on the individual summaries.  </li>
-<li>This is saved as a hidden file <code>.&lt;foldername&gt;_summary.md</code> in the parent directory.  </li>
+<li>This is saved as a hidden file <code>.&lt;foldername&gt;_summary.md</code> in the <strong>parent directory</strong>. This also applies to root folders (which are stored in the same directory as the folder itself).</li>
 </ul>
 </li>
 <li>
 <p><strong>Storage &amp; Indexing:</strong>  </p>
 <ul>
-<li><strong>Metadata:</strong> File paths, hashes, timestamps, and the Markdown summaries are stored in the SQLite database (<code>summaries</code> table).  </li>
+<li><strong>Metadata:</strong> File paths, hashes, timestamps, and the Markdown summaries are stored in the SQLite database:<ul>
+<li><code>files</code> table: Path, Hash, Mtime, Type, Folder ID.</li>
+<li><code>folders</code> table: Path, Parent ID, Hash (for emails), Timestamp.</li>
+<li><code>summaries</code> table: The actual Markdown summaries for files and folders.</li>
+</ul>
+</li>
 <li><strong>Vector Search:</strong> The <strong>summaries</strong> (not the full text) are vectorized (defaulting to <code>BAAI/bge-m3</code>) and stored in the Qdrant index.  </li>
 </ul>
 </li>
 </ol>
+<h2 id="example-before-and-after-indexing">Example: Before and After Indexing<a class="headerlink" href="#example-before-and-after-indexing" title="Permanent link">&para;</a></h2>
+<p>Suppose you have the following structure:
+<div class="language-text highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Lectures/
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>├── AI/
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│   ├── lecture1.pdf
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│   └── script.txt
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>└── Math/
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    └── analysis.pdf
+</code></pre></div></p>
+<p>After indexing, it looks like this:
+<div class="language-text highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>.Lectures_summary.md
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>Lectures/
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>├── .AI_summary.md
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>├── AI/
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>│   ├── lecture1.pdf
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>│   └── script.txt
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>├── .Math_summary.md
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>└── Math/
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    └── analysis.pdf
+</code></pre></div></p>
+<h3 id="example-email-structures">Example: Email Structures<a class="headerlink" href="#example-email-structures" title="Permanent link">&para;</a></h3>
+<p><strong>Case 1: Inbox only (Standard Processing)</strong>
+Before:
+<div class="language-text highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Student_A/
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>└── Inbox/
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    └── question.msg
+</code></pre></div>
+After:
+<div class="language-text highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>.Student_A_summary.md
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>Student_A/
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>├── .Inbox_summary.md
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>└── Inbox/
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    └── question.msg
+</code></pre></div></p>
+<p><strong>Case 2: SentItems only (Standard Processing)</strong>
+Before:
+<div class="language-text highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Student_B/
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>└── SentItems/
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    └── answer.msg
+</code></pre></div>
+After:
+<div class="language-text highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>.Student_B_summary.md
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>Student_B/
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>├── .SentItems_summary.md
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>└── SentItems/
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    └── answer.msg
+</code></pre></div></p>
+<p><strong>Case 3: Combined Email Conversation (Special Case)</strong>
+If both <code>Inbox</code> and <code>SentItems</code> are present, the crawler recognizes this as a conversation and creates a combined summary (<code>.emails_summary.md</code>). The individual folders then no longer receive their own <code>.Inbox_summary.md</code> files, as they are merged into the conversation.</p>
+<p>Before:
+<div class="language-text highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Student_C/
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>├── Inbox/
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>│   └── question.msg
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>└── SentItems/
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    └── answer.msg
+</code></pre></div>
+After:
+<div class="language-text highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>.Student_C_summary.md
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>Student_C/
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>├── .emails_summary.md
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>├── Inbox/
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>│   └── question.msg
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>└── SentItems/
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>    └── answer.msg
+</code></pre></div></p>
+<h2 id="supported-file-formats">Supported File Formats<a class="headerlink" href="#supported-file-formats" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Status</th>
+<th style="text-align: left;">Formats</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Supported</strong></td>
+<td style="text-align: left;"><code>.pdf</code>, <code>.docx</code>, <code>.md</code>, <code>.txt</code>, <code>.eml</code>, <code>.msg</code>, <code>.py</code>, <code>.ipynb</code>, <code>.json</code>, <code>.html</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Planned / Not Supported</strong></td>
+<td style="text-align: left;"><code>.pptx</code>, <code>.xlsx</code>, <code>.csv</code>, Image formats (OCR required)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Note on Markdown files:</strong> All <code>.md</code> files are indexed and summarized, unless they start with a dot (<code>.</code>) and end with <code>_summary.md</code>. These are skipped as system-internal summaries.</p>
 <h2 id="generated-files-and-storage-locations">Generated Files and Storage Locations<a class="headerlink" href="#generated-files-and-storage-locations" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1358,12 +1526,12 @@
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Folder Summary</strong></td>
-<td style="text-align: left;"><code>./.&lt;foldername&gt;_summary.md</code></td>
-<td style="text-align: left;">Hidden Markdown file with the folder overview.</td>
+<td style="text-align: left;"><code>../.&lt;foldername&gt;_summary.md</code></td>
+<td style="text-align: left;">Hidden Markdown file in the parent directory.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Email Summary</strong></td>
-<td style="text-align: left;"><code>./.Inbox_Sentitems_Summary.md</code></td>
+<td style="text-align: left;"><code>./.emails_summary.md</code></td>
 <td style="text-align: left;">Aggregated conversation history for emails.</td>
 </tr>
 <tr>
