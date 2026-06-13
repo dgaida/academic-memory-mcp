@@ -72,6 +72,62 @@ Vorlesungen/
     └── analysis.pdf
 ```
 
+### Beispiel: E-Mail-Strukturen
+
+**Fall 1: Nur ein Posteingang (Standardverarbeitung)**
+Vorher:
+```text
+Student_A/
+└── Inbox/
+    └── frage.msg
+```
+Nachher:
+```text
+.Student_A_summary.md
+Student_A/
+├── .Inbox_summary.md
+└── Inbox/
+    └── frage.msg
+```
+
+**Fall 2: Nur ein "Gesendete Objekte" Ordner (Standardverarbeitung)**
+Vorher:
+```text
+Student_B/
+└── SentItems/
+    └── antwort.msg
+```
+Nachher:
+```text
+.Student_B_summary.md
+Student_B/
+├── .SentItems_summary.md
+└── SentItems/
+    └── antwort.msg
+```
+
+**Fall 3: Kombinierte E-Mail-Konversation (Spezialfall)**
+Wenn sowohl `Inbox` als auch `SentItems` vorhanden sind, erkennt der Crawler dies als Konversation und erstellt eine gemeinsame Zusammenfassung (`.emails_summary.md`). Die Einzelordner erhalten dann keine eigenen `.Inbox_summary.md` Dateien mehr, da sie in der Konversation aufgehen.
+
+Vorher:
+```text
+Student_C/
+├── Inbox/
+│   └── frage.msg
+└── SentItems/
+    └── antwort.msg
+```
+Nachher:
+```text
+.Student_C_summary.md
+Student_C/
+├── .emails_summary.md
+├── Inbox/
+│   └── frage.msg
+└── SentItems/
+    └── antwort.msg
+```
+
 ## Unterstützte Dateiformate
 
 | Status | Formate |

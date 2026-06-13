@@ -72,6 +72,62 @@ Lectures/
     └── analysis.pdf
 ```
 
+### Example: Email Structures
+
+**Case 1: Inbox only (Standard Processing)**
+Before:
+```text
+Student_A/
+└── Inbox/
+    └── question.msg
+```
+After:
+```text
+.Student_A_summary.md
+Student_A/
+├── .Inbox_summary.md
+└── Inbox/
+    └── question.msg
+```
+
+**Case 2: SentItems only (Standard Processing)**
+Before:
+```text
+Student_B/
+└── SentItems/
+    └── answer.msg
+```
+After:
+```text
+.Student_B_summary.md
+Student_B/
+├── .SentItems_summary.md
+└── SentItems/
+    └── answer.msg
+```
+
+**Case 3: Combined Email Conversation (Special Case)**
+If both `Inbox` and `SentItems` are present, the crawler recognizes this as a conversation and creates a combined summary (`.emails_summary.md`). The individual folders then no longer receive their own `.Inbox_summary.md` files, as they are merged into the conversation.
+
+Before:
+```text
+Student_C/
+├── Inbox/
+│   └── question.msg
+└── SentItems/
+    └── answer.msg
+```
+After:
+```text
+.Student_C_summary.md
+Student_C/
+├── .emails_summary.md
+├── Inbox/
+│   └── question.msg
+└── SentItems/
+    └── answer.msg
+```
+
 ## Supported File Formats
 
 | Status | Formats |
