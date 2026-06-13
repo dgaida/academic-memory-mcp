@@ -40,6 +40,7 @@ class OntologyConfig(BaseModel):
     """Konfiguration für die Wissensgraph-Ontologie."""
     node_types: List[str] = ["Person", "Modul", "Unternehmen"]
     edge_types: List[str] = ["lehrt", "besucht"]
+    edge_priorities: Dict[str, List[str]] = {}
 
 class UserConfig(BaseModel):
     """Konfiguration für den Nutzer des Tools."""

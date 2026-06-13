@@ -16,3 +16,16 @@ edge_types:
   - hat Projektarbeit abgeschlossen
   - hat Nachteilsausgleich beantragt
   - hat PO-Wechsel beantragt
+edge_priorities:
+  Bachelorarbeit:
+    - hat Bachelorarbeit angefragt
+    - schreibt Bachelorarbeit
+    - hat Bachelorarbeit abgeschlossen
+  Masterarbeit:
+    - hat Masterarbeit angefragt
+    - schreibt Masterarbeit
+    - hat Masterarbeit abgeschlossen
+  Projektarbeit:
+    - hat Projektarbeit angefragt
+    - schreibt Projektarbeit
+    - hat Projektarbeit abgeschlossen
