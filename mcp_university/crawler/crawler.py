@@ -146,13 +146,35 @@ class Crawler:
             if any_changed or not existing_folder_summary or not summary_path.exists():
                 logger.info(f"Generating folder summary for: {relative_path}")
                 folder_summary = self.summarizer.summarize_folder(str(relative_path), item_summaries)
+
+                if not folder_summary:
+                    logger.error(f"Failed to generate folder summary for: {relative_path}. Retrying with enhanced logging and debug files...")
+
+                    # Enhanced debugging: Write items to debug files
+                    items_debug_path = dir_path / ".folder_summary_items_debug.txt"
+                    combined_debug_path = dir_path / ".folder_summary_combined_debug.txt"
+
+                    combined_content = "\n-----ITEM-BOUNDARY-----\n".join(item_summaries)
+
+                    try:
+                        items_debug_path.write_text("\n\n".join(item_summaries), encoding="utf-8")
+                        combined_debug_path.write_text(combined_content, encoding="utf-8")
+                        logger.info(f"Debug files written to: {dir_path}")
+                    except Exception as e:
+                        logger.warning(f"Failed to write debug files: {e}")
+
+                    logger.info(f"Folder summary debug info: {len(item_summaries)} items, total length: {len(combined_content)} chars")
+
+                    # Retry
+                    folder_summary = self.summarizer.summarize_folder(str(relative_path), item_summaries)
+
                 if folder_summary:
                     self.store.add_summary("folder", folder_id, folder_summary)
                     self.store.update_folder_summarized(folder_id)
                     self._save_summary_to_file(dir_path, folder_summary, parent_id)
                     any_changed = True # Folder summary itself changed
                 else:
-                    logger.error(f"Failed to generate folder summary for: {relative_path}")
+                    logger.error(f"Final failure to generate folder summary for: {relative_path} after retry.")
             else:
                 logger.info(f"Folder {dir_path.name} unchanged. Skipping re-summarization.")
                 folder_summary = existing_folder_summary
