@@ -6,9 +6,9 @@ profile pages to extract their faculty and institute information.
 The results are saved in a Markdown table and in the university metadata database.
 """
 
+import argparse
 import html
 import random
-import sys
 import time
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -130,6 +130,9 @@ class THKoelnCrawler:
         """
         all_data = []
         for char in chars:
+            char = char.strip().upper()
+            if not char:
+                continue
             print(f"Crawling character: {char}")
             persons = self.get_persons_from_char(char)
             for person in persons:
@@ -208,29 +211,59 @@ def save_to_database(data: List[Dict[str, str]], db_path: Path) -> None:
 
 def main() -> None:
     """Main entry point for the script."""
-    crawler = THKoelnCrawler()
+    parser = argparse.ArgumentParser(
+        description="Crawl person data from TH Köln website.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python scripts/crawl_th_koeln_persons.py A
+  python scripts/crawl_th_koeln_persons.py "A, B"
+  python scripts/crawl_th_koeln_persons.py A B C
+        """
+    )
+    parser.add_argument(
+        "chars",
+        nargs="*",
+        help="Characters to crawl (e.g. A B or 'A, B'). If multiple characters are provided in one string separated by commas, they will be split."
+    )
+    parser.add_argument(
+        "--db",
+        type=Path,
+        default=Path("data/metadata/university.db"),
+        help="Path to the university metadata database (default: data/metadata/university.db)."
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        default="th_koeln_persons.md",
+        help="Path to the output Markdown file (default: th_koeln_persons.md)."
+    )
 
-    # If a character is passed as argument, crawl only that.
-    # Otherwise, crawl a small subset for demonstration if not specified.
-    if len(sys.argv) > 1:
-        chars_to_crawl = sys.argv[1].split(",")
-    else:
+    args = parser.parse_args()
+
+    # Process characters: handle space-separated args and comma-separated strings
+    chars_to_crawl = []
+    for arg in args.chars:
+        if "," in arg:
+            chars_to_crawl.extend([c.strip() for c in arg.split(",")])
+        else:
+            chars_to_crawl.append(arg.strip())
+
+    if not chars_to_crawl:
         # Default to A for demonstration if no args
+        print("No characters specified, defaulting to 'A'.")
         chars_to_crawl = ["A"]
 
+    crawler = THKoelnCrawler()
     data = crawler.crawl(chars_to_crawl)
 
     # Save to Markdown
-    save_to_markdown(data, "th_koeln_persons.md")
-    print(f"Saved {len(data)} persons to th_koeln_persons.md")
+    save_to_markdown(data, args.output)
+    print(f"Saved {len(data)} persons to {args.output}")
 
     # Save to Database
-    db_path = Path("data/metadata/university.db")
-    if db_path.exists():
-        save_to_database(data, db_path)
-        print(f"Updated database at {db_path}")
-    else:
-        print(f"Database not found at {db_path}, skipping DB update.")
+    save_to_database(data, args.db)
+    print(f"Updated database at {args.db}")
 
 
 if __name__ == "__main__":
