@@ -34,17 +34,17 @@ Indexing takes place in several phases:
 6.  **Special Case: Email Conversations:**  
     - If the crawler detects a structure with `Inbox` and `SentItems` subfolders, it groups emails by conversation partners.  
     - An aggregated summary of the entire communication with a person is created.  
-    - This is saved as `.emails_summary.md` in the folder.
+    - This is saved as `.emails_summary.md` in the folder.  
 
 7.  **Special Case: Folder Summaries:**  
     - After all files in a folder have been processed, the LLM creates a summary of the entire folder content based on the individual summaries.  
-    - This is saved as a hidden file `.<foldername>_summary.md` in the **parent directory**. This also applies to root folders (which are stored in the same directory as the folder itself).
+    - This is saved as a hidden file `.<foldername>_summary.md` in the **parent directory**. This also applies to root folders (which are stored in the same directory as the folder itself).  
 
 8.  **Storage & Indexing:**  
-    - **Metadata:** File paths, hashes, timestamps, and the Markdown summaries are stored in the SQLite database:
-        - `files` table: Path, Hash, Mtime, Type, Folder ID.
-        - `folders` table: Path, Parent ID, Hash (for emails), Timestamp.
-        - `summaries` table: The actual Markdown summaries for files and folders.
+    - **Metadata:** File paths, hashes, timestamps, and the Markdown summaries are stored in the SQLite database:  
+        - `files` table: Path, Hash, Mtime, Type, Folder ID.  
+        - `folders` table: Path, Parent ID, Hash (for emails), Timestamp.  
+        - `summaries` table: The actual Markdown summaries for files and folders.  
     - **Vector Search:** The **summaries** (not the full text) are vectorized (defaulting to `BAAI/bge-m3`) and stored in the Qdrant index.  
 
 ## Example: Before and After Indexing

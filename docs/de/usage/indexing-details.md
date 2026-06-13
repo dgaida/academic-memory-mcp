@@ -34,17 +34,17 @@ Die Indexierung erfolgt in mehreren Phasen:
 6.  **Spezialfall: E-Mail-Konversationen:**  
     - Erkennt der Crawler eine Struktur mit `Inbox` und `SentItems` Unterordnern, gruppiert er E-Mails nach Konversationspartnern.  
     - Es wird eine aggregierte Zusammenfassung der gesamten Kommunikation mit einer Person erstellt.  
-    - Diese wird als `.emails_summary.md` im Ordner gespeichert.
+    - Diese wird als `.emails_summary.md` im Ordner gespeichert.  
 
 7.  **Spezialfall: Ordner-Zusammenfassungen:**  
     - Nachdem alle Dateien eines Ordners verarbeitet wurden, erstellt das LLM eine Zusammenfassung des gesamten Ordnerinhalts basierend auf den Einzelzusammenfassungen.  
-    - Diese wird als versteckte Datei `.<Ordnername>_summary.md` im **Elternverzeichnis** gespeichert. Dies gilt auch für Wurzelordner (die im selben Verzeichnis wie der Ordner selbst liegen).
+    - Diese wird als versteckte Datei `.<Ordnername>_summary.md` im **Elternverzeichnis** gespeichert. Dies gilt auch für Wurzelordner (die im selben Verzeichnis wie der Ordner selbst liegen).  
 
 8.  **Speicherung & Indexierung:**  
-    - **Metadaten:** Dateipfade, Hashes, Zeitstempel und die Markdown-Zusammenfassungen werden in der SQLite-Datenbank gespeichert:
-        - Tabelle `files`: Pfad, Hash, Mtime, Typ, Ordner-ID.
-        - Tabelle `folders`: Pfad, Parent-ID, Hash (für E-Mails), Zeitstempel.
-        - Tabelle `summaries`: Die eigentlichen Markdown-Zusammenfassungen für Dateien und Ordner.
+    - **Metadaten:** Dateipfade, Hashes, Zeitstempel und die Markdown-Zusammenfassungen werden in der SQLite-Datenbank gespeichert:  
+        - Tabelle `files`: Pfad, Hash, Mtime, Typ, Ordner-ID.  
+        - Tabelle `folders`: Pfad, Parent-ID, Hash (für E-Mails), Zeitstempel.  
+        - Tabelle `summaries`: Die eigentlichen Markdown-Zusammenfassungen für Dateien und Ordner.  
     - **Vektorsuche:** Die **Zusammenfassungen** (nicht der Volltext) werden vektorisiert (standardmäßig mit `BAAI/bge-m3`) und im Qdrant-Index gespeichert.  
 
 ## Beispiel: Vor und nach der Indexierung
