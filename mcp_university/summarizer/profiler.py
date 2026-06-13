@@ -1,7 +1,7 @@
 import logging
 import yaml
 from pathlib import Path
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any, Optional
 from datetime import datetime
 from mcp_university.config import get_config
 from mcp_university.parser.mail_parser import MailParser
@@ -218,8 +218,9 @@ Hier sind die neuen E-Mails:
 Erstelle einen strukturierten Steckbrief in Markdown mit folgenden Punkten:
 1. Name und E-Mailadresse
 2. Rolle (z.B. Studierende, Lehrende, Mitarbeiter, Professor, externer Partner, ...)
-3. Datum des ersten Kontakts
-4. Wichtige Stationen/Ereignisse:
+3. Bevorzugte Anrede (Du oder Sie? Analyse basierend auf dem Ton der E-Mails)
+4. Datum des ersten Kontakts
+5. Wichtige Stationen/Ereignisse:
    - Bei Mitarbeitern: Wichtige Aufgaben, Projekte, Zuständigkeiten.
    - Bei Professoren: Gelesene Module, Forschungsprojekte, Gremienarbeit.
    - Bei Studierenden: Abgeschlossene Projektarbeiten/Thesen, Wechsel der Prüfungsordnung, Praktika, etc.

@@ -1,6 +1,5 @@
 import argparse
 import logging
-import sys
 from pathlib import Path
 from mcp_university.summarizer.profiler import PersonProfiler
 

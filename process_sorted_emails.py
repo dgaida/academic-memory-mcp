@@ -792,7 +792,7 @@ def main() -> None:
     for email in emails:
         mail_path = Path(email["path"])
         is_ba_ma = email["class"].startswith(("BA_", "MA_"))
-        person_profile = profiler.get_profile(student_email) if student_email else None
+
         if is_ba_ma:
             identifier = (email["class"], email["semester"], email["lastname"])
             # BA/MA logic to find latest mail
@@ -894,6 +894,7 @@ def main() -> None:
 
         student_email = ""
         sender_name = ""
+        student_email = ""
         try:
             with extract_msg.openMsg(str(latest_mail)) as msg:
                 student_email = msg.sender
@@ -902,6 +903,8 @@ def main() -> None:
             pass
 
         person_profile = profiler.get_profile(student_email) if student_email else None
+
+
         if is_ba_ma:
             semester_folder = email["semester_folder"]
             student_emails = email["student_emails"]
@@ -938,6 +941,10 @@ def main() -> None:
             except Exception:
                 pass
 
+            skill_path = Path(f"skills/SKILL_{email['class']}.md")
+            if not skill_path.exists():
+                skill_path = Path(__file__).parent / "skills" / f"SKILL_{email['class']}.md"
+
             # Gender Determination und Salutation
             first_name = "Unknown"
             try:
@@ -945,6 +952,7 @@ def main() -> None:
                     first_name = extract_firstname(msg.sender)
             except Exception:
                 pass
+
             gender_salutation = summarizer.determine_gender(first_name)
             salutation = f"Guten Tag {gender_salutation} {email['lastname']}"
             additional_context = f"Anrede: {salutation}\n"
@@ -1104,6 +1112,10 @@ def main() -> None:
             except Exception:
                 pass
 
+            skill_path = Path(f"skills/SKILL_{email['class']}.md")
+            if not skill_path.exists():
+                skill_path = Path(__file__).parent / "skills" / f"SKILL_{email['class']}.md"
+
             # Gender Determination und Salutation
             first_name = "Unknown"
             try:
@@ -1111,6 +1123,7 @@ def main() -> None:
                     first_name = extract_firstname(msg.sender)
             except Exception:
                 pass
+
             gender_salutation = summarizer.determine_gender(first_name)
             salutation = f"Guten Tag {gender_salutation} {email['lastname']}"
             additional_context = f"Anrede: {salutation}\n"
