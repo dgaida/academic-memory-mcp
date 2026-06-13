@@ -1,0 +1,18 @@
+node_types:
+  - Person
+  - Modul
+  - Unternehmen
+edge_types:
+  - lehrt
+  - besucht
+  - schreibt Bachelorarbeit
+  - hat Bachelorarbeit angefragt
+  - hat Bachelorarbeit abgeschlossen
+  - schreibt Masterarbeit
+  - hat Masterarbeit angefragt
+  - hat Masterarbeit abgeschlossen
+  - schreibt Projektarbeit
+  - hat Projektarbeit angefragt
+  - hat Projektarbeit abgeschlossen
+  - hat Nachteilsausgleich beantragt
+  - hat PO-Wechsel beantragt

@@ -36,6 +36,11 @@ class FolderConfig(BaseModel):
     summarize_emails_individually: bool = False
 
 
+class OntologyConfig(BaseModel):
+    """Konfiguration für die Wissensgraph-Ontologie."""
+    node_types: List[str] = ["Person", "Modul", "Unternehmen"]
+    edge_types: List[str] = ["lehrt", "besucht"]
+
 class UserConfig(BaseModel):
     """Konfiguration für den Nutzer des Tools."""
     name: str = "Daniel Gaida"
@@ -64,6 +69,7 @@ class Config:
         load_dotenv(self.config_dir / "secrets.env")
         self.folders = self._load_yaml(config_dir / "folders.yaml", FolderConfig)
         self.user = self._load_yaml(config_dir / "user.yaml", UserConfig)
+        self.ontology = self._load_yaml(config_dir / "ontology.yaml", OntologyConfig)
 
         models_data = self._load_raw_yaml(config_dir / "models.yaml")
         self.calendar = CalendarConfig(**models_data.get("calendar", {}))
