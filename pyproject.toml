@@ -1,6 +1,6 @@
 [project]
 name = "mcp-university"
-version = "1.1.0"
+version = "1.1.1"
 description = "Agentic University Memory System with MCP"
 dependencies = [
     "fastmcp",
