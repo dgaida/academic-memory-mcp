@@ -682,6 +682,25 @@ TEXT:
         return "", "Fehler bei der Generierung der Antwort.", False
 
 
+def valid_date(s: str) -> datetime:
+    """Parses a date string in YYYY-MM-DD format.
+
+    Args:
+        s (str): Date string.
+
+    Returns:
+        datetime: Parsed datetime object.
+
+    Raises:
+        argparse.ArgumentTypeError: If the date format is invalid.
+    """
+    try:
+        return datetime.strptime(s, "%Y-%m-%d")
+    except ValueError:
+        msg = f"Invalid date format: '{s}'. Expected format: YYYY-MM-DD."
+        raise argparse.ArgumentTypeError(msg)
+
+
 def main() -> None:
     """Haupteinstiegspunkt des Skripts."""
     config = get_config()
@@ -742,6 +761,11 @@ def main() -> None:
         "--mode",
         default="combined",
         help="Merkmalsextraktion (tfidf, embedding, combined)",
+    )
+    parser.add_argument(
+        "--cutoff-date",
+        type=valid_date,
+        help="E-Mails älter als dieses Datum (YYYY-MM-DD) werden nur einsortiert, aber nicht beantwortet.",
     )
     args = parser.parse_args()
 
@@ -891,6 +915,24 @@ def main() -> None:
         latest_mail = email["latest_mail"]
         latest_date = email["latest_date"]
         is_ba_ma = email["class"].startswith(("BA_", "MA_"))
+        # Prüfung auf Cutoff-Datum
+        if args.cutoff_date:
+            # Vergleiche naiv mit naiv
+            cutoff = args.cutoff_date.replace(tzinfo=None)
+            mail_date = latest_date.replace(tzinfo=None)
+            if mail_date < cutoff:
+                logger.info(
+                    f"E-Mail von {email['lastname']} vom {mail_date} ist älter als Cutoff {cutoff}. Wird nur einsortiert."
+                )
+                processed_results.append(
+                    {
+                        "lastname": email["lastname"],
+                        "subject": latest_mail.stem,
+                        "status": "Übersprungen (vor Cutoff-Datum)",
+                    }
+                )
+                continue
+
 
         student_email = ""
         sender_name = ""
