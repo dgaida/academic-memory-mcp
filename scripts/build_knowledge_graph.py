@@ -30,7 +30,7 @@ def main() -> None:
     qdrant_path = config.qdrant_path
     qdrant_path.parent.mkdir(parents=True, exist_ok=True)
 
-    graph_engine = KnowledgeGraphEngine(store, summarizer)
+    graph_engine = KnowledgeGraphEngine(store, summarizer, config.ontology)
     ontology_learner = OntologyLearner(store, summarizer)
 
     # 1. Initialize User Node

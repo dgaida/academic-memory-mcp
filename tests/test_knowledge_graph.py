@@ -68,3 +68,22 @@ def test_upsert_node_properties(temp_db):
     temp_db.upsert_node("Test Person", "Person", {"role": ["Studierender", "SHK"]})
     node = temp_db.get_all_nodes()[0]
     assert json.loads(node['properties_json']) == {"role": ["Studierender", "SHK"]}
+
+def test_dynamic_ontology_prompt(temp_db, mock_summarizer):
+    from mcp_university.config import OntologyConfig
+    custom_ontology = OntologyConfig(
+        node_types=["CustomNode"],
+        edge_types=["CustomRelation"]
+    )
+    engine = KnowledgeGraphEngine(temp_db, mock_summarizer, ontology=custom_ontology)
+
+    mock_summarizer._chat_request.return_value = "[]"
+    engine.process_summary("Dummy", 1)
+
+    # Get the system prompt passed to the summarizer
+    args, kwargs = mock_summarizer._chat_request.call_args
+    system_prompt = args[0]
+
+    assert "Knotentypen: CustomNode" in system_prompt
+    assert "Beziehungstypen: CustomRelation" in system_prompt
+    assert "Nutze NUR die folgenden Knotentypen und Beziehungstypen" in system_prompt

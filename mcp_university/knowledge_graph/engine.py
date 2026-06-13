@@ -1,18 +1,20 @@
 """Engine zur Erstellung und Verwaltung des Wissensgraphen."""
 import logging
 import json
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from mcp_university.metadata.store import MetadataStore
 from mcp_university.summarizer.engine import Summarizer
+from mcp_university.config import get_config, OntologyConfig
 
 logger = logging.getLogger(__name__)
 
 class KnowledgeGraphEngine:
     """Extrahiert Entitäten und Beziehungen aus Zusammenfassungen für den Wissensgraphen."""
 
-    def __init__(self, store: MetadataStore, summarizer: Summarizer) -> None:
+    def __init__(self, store: MetadataStore, summarizer: Summarizer, ontology: Optional[OntologyConfig] = None) -> None:
         self.store = store
         self.summarizer = summarizer
+        self.ontology = ontology or get_config().ontology
 
     def process_summary(self, summary_content: str, user_node_id: int) -> Dict[str, List[str]]:
         """Analysiert eine Zusammenfassung und aktualisiert den Graphen.
@@ -68,9 +70,16 @@ class KnowledgeGraphEngine:
 
     def _extract_triplets(self, content: str) -> List[Dict[str, Any]]:
         """Nutzt das LLM, um Triplets aus dem Inhalt zu extrahieren."""
-        system_prompt = """Du bist ein Experte für Wissensextraktion. Deine Aufgabe ist es, Informationen aus E-Mail-Zusammenfassungen in ein strukturiertes Format (Triplets) zu überführen.
-Knotentypen: Person, Modul, Unternehmen.
-Beziehungstypen: lehrt, besucht, schreibt Bachelorarbeit, hat Bachelorarbeit angefragt, hat Bachelorarbeit abgeschlossen, schreibt Masterarbeit, hat Masterarbeit angefragt, hat Masterarbeit abgeschlossen, schreibt Projektarbeit, hat Projektarbeit angefragt, hat Projektarbeit abgeschlossen, hat Nachteilsausgleich beantragt, hat PO-Wechsel beantragt.
+        node_types_str = ", ".join(self.ontology.node_types)
+        edge_types_str = ", ".join(self.ontology.edge_types)
+
+        system_prompt = f"""Du bist ein Experte für Wissensextraktion. Deine Aufgabe ist es, Informationen aus E-Mail-Zusammenfassungen in ein strukturiertes Format (Triplets) zu überführen.
+
+Nutze NUR die folgenden Knotentypen und Beziehungstypen. Erfinde keine neuen Typen.
+
+Knotentypen: {node_types_str}.
+Beziehungstypen: {edge_types_str}.
+
 Knoten-Eigenschaften: Für Personen 'Rolle' (z.B. Professor, Studierender, Prüfungsausschussvorsitzender).
 
 Antworte NUR mit einer JSON-Liste von Objekten mit den Schlüsseln: source, target, relation, source_type, target_type, properties.
