@@ -105,7 +105,7 @@ class LLMClientWrapper:
 
             # Ollama's client.chat is synchronous
             response = self.client.chat(
-                model=self.model, messages=all_messages, tools=tools, options={"temperature": self.cfg.llm.temperature}
+                model=self.model, messages=all_messages, tools=tools, options={"temperature": self.cfg.llm.temperature, "num_ctx": self.cfg.llm.num_ctx, "num_predict": self.cfg.llm.num_predict}
             )
             return response
 
