@@ -3,17 +3,20 @@
 This script fetches a list of persons from the TH Köln personnel page,
 extracts their names and email addresses, and then visits their individual
 profile pages to extract their faculty and institute information.
-The results are saved in a Markdown table.
+The results are saved in a Markdown table and in the university metadata database.
 """
 
 import html
 import random
 import sys
 import time
+from pathlib import Path
 from typing import Dict, List, Optional
 
 import requests
 from bs4 import BeautifulSoup
+
+from mcp_university.metadata.store import MetadataStore
 
 
 class THKoelnCrawler:
@@ -150,7 +153,7 @@ def save_to_markdown(data: List[Dict[str, str]], filename: str) -> None:
     """
     with open(filename, "w", encoding="utf-8") as f:
         f.write("# Personen TH Köln\n\n")
-        f.write("| Name | E-Mail | Fakultät | Institut |\n")
+        f.write("| Name | E-Mail | Fakultät oder Einrichtung | Institut |\n")
         f.write("| --- | --- | --- | --- |\n")
         for person in data:
             name = person.get("name") or ""
@@ -158,6 +161,49 @@ def save_to_markdown(data: List[Dict[str, str]], filename: str) -> None:
             faculty = person.get("faculty") or ""
             institute = person.get("institute") or ""
             f.write(f"| {name} | {email} | {faculty} | {institute} |\n")
+
+
+def save_to_database(data: List[Dict[str, str]], db_path: Path) -> None:
+    """Saves the crawled data to the metadata database.
+
+    Args:
+        data: The list of person dictionaries.
+        db_path: Path to the SQLite database.
+    """
+    store = MetadataStore(db_path)
+
+    for person in data:
+        name = person.get("name")
+        email = person.get("email")
+        faculty = person.get("faculty")
+        institute = person.get("institute")
+
+        if not name:
+            continue
+
+        # Create person node
+        person_id, _ = store.upsert_node(name, "Person", {"email": email})
+
+        if faculty:
+            # Create faculty/einrichtung node
+            fac_node_type = "Fakultät" if "Fakultät" in faculty else "Einrichtung"
+            fac_id, _ = store.upsert_node(faculty, fac_node_type)
+
+            # Special logic for F10
+            is_f10 = "Fakultät für Informatik und Ingenieurwissenschaften" in faculty
+
+            if is_f10 and institute:
+                # Create institute node
+                inst_id, _ = store.upsert_node(institute, "Institut")
+
+                # Edge: Institute -> Faculty
+                store.upsert_edge(inst_id, fac_id, "ist Element von")
+
+                # Edge: Person -> Institute
+                store.upsert_edge(person_id, inst_id, "ist Element von")
+            else:
+                # Edge: Person -> Faculty/Einrichtung
+                store.upsert_edge(person_id, fac_id, "ist Element von")
 
 
 def main() -> None:
@@ -173,8 +219,18 @@ def main() -> None:
         chars_to_crawl = ["A"]
 
     data = crawler.crawl(chars_to_crawl)
+
+    # Save to Markdown
     save_to_markdown(data, "th_koeln_persons.md")
     print(f"Saved {len(data)} persons to th_koeln_persons.md")
+
+    # Save to Database
+    db_path = Path("data/metadata/university.db")
+    if db_path.exists():
+        save_to_database(data, db_path)
+        print(f"Updated database at {db_path}")
+    else:
+        print(f"Database not found at {db_path}, skipping DB update.")
 
 
 if __name__ == "__main__":
