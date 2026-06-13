@@ -5,7 +5,7 @@ from typing import Optional, Dict, Any, List
 import logging
 import email
 from email import policy
-from email.utils import parsedate_to_datetime
+from email.utils import parsedate_to_datetime, getaddresses
 from datetime import datetime
 from ..config import get_config
 logging.getLogger("extract_msg").setLevel(logging.ERROR)
@@ -271,15 +271,21 @@ class MailParser:
         else:
             return self._get_eml_details(file_path)
 
+    def _parse_address_list(self, address_str: Optional[str]) -> List[Dict[str, str]]:
+        """Hilfsfunktion zum Parsen von Adress-Strings in Listen von {name, email}."""
+        if not address_str:
+            return []
+
+        parsed = []
+        for name, addr in getaddresses([address_str]):
+            # Falls getaddresses scheitert oder leere Ergebnisse liefert
+            if not addr and not name:
+                continue
+            parsed.append({"name": name.strip().strip('"').strip("'"), "email": addr.strip().lower()})
+        return parsed
+
     def _get_msg_details(self, file_path: Path) -> Dict[str, Any]:
-        """Extrahiert Details aus einer .msg Datei.
-
-        Args:
-            file_path: Pfad zur Datei.
-
-        Returns:
-            Dict[str, Any]: Extrahierte Details.
-        """
+        """Extrahiert Details aus einer .msg Datei."""
         try:
             import extract_msg
             with extract_msg.openMsg(str(file_path)) as msg:
@@ -292,31 +298,49 @@ class MailParser:
                 body = msg.body or ""
 
                 # Sender
-                from_email = msg.sender
-                from_name = ""
-                if from_email and "<" in from_email:
-                    match = re.search(r"(.*?)\s*<(.*?)>", from_email)
-                    if match:
-                        from_name = match.group(1).strip().strip('"').strip("'")
-                        from_email = match.group(2).strip().lower()
+                sender_raw = msg.sender or ""
+                if not sender_raw and msg.header:
+                    sender_raw = str(msg.header.get('From', ''))
+
+                from_info = self._parse_address_list(sender_raw)
+                if from_info:
+                    from_name = from_info[0]["name"]
+                    from_email = from_info[0]["email"]
                 else:
-                    from_email = (from_email or "").strip().lower()
+                    from_name = ""
+                    from_email = sender_raw.strip().lower()
 
                 # Recipients
                 to = []
                 cc = []
+
+                # Method 1: Iterating over recipients list (most accurate if filled)
                 if hasattr(msg, "recipients"):
                     for rec in msg.recipients:
-                        # Depending on extract-msg version, rec might be an object or a dict
-                        rec_email = getattr(rec, "email", None) or getattr(rec, "email_address", None)
+                        # Try multiple properties for email address
+                        rec_email = (getattr(rec, "smtpAddress", None) or
+                                    getattr(rec, "email", None) or
+                                    getattr(rec, "email_address", None))
                         rec_name = getattr(rec, "name", "")
                         rec_type = str(getattr(rec, "type", "")).lower()
 
-                        rec_dict = {"name": rec_name, "email": rec_email.lower() if rec_email else ""}
+                        rec_dict = {"name": rec_name, "email": (rec_email.lower() if rec_email else "")}
                         if "to" in rec_type:
                             to.append(rec_dict)
                         elif "cc" in rec_type:
                             cc.append(rec_dict)
+
+                # Method 2: Fallback to msg.to / msg.cc strings if lists are empty
+                if not to and hasattr(msg, "to") and msg.to:
+                    to = self._parse_address_list(msg.to)
+                if not cc and hasattr(msg, "cc") and msg.cc:
+                    cc = self._parse_address_list(msg.cc)
+
+                # Method 3: Final fallback to raw headers
+                if not to and msg.header:
+                    to = self._parse_address_list(str(msg.header.get('To', '')))
+                if not cc and msg.header:
+                    cc = self._parse_address_list(str(msg.header.get('Cc', '')))
 
                 return {
                     "date": date,
@@ -358,19 +382,18 @@ class MailParser:
                 parsed = []
                 for addr in addrs:
                     addr_str = str(addr)
-                    # Basic parsing for "Name <email>"
-                    match = re.search(r"(.*?)\s*<(.*?)>", addr_str)
-                    if match:
-                        parsed.append({"name": match.group(1).strip().strip('"').strip("'"), "email": match.group(2).strip().lower()})
-                    else:
-                        parsed.append({"name": "", "email": addr_str.strip().lower()})
+                    # Use standard library for parsing
+                    for name, email_addr in getaddresses([addr_str]):
+                        if not email_addr and not name:
+                            continue
+                        parsed.append({"name": name.strip().strip('"').strip("'"), "email": email_addr.strip().lower()})
                 return parsed
 
             from_header = str(msg.get('From', ''))
-            from_match = re.search(r"(.*?)\s*<(.*?)>", from_header)
-            if from_match:
-                from_name = from_match.group(1).strip().strip('"').strip("'")
-                from_email = from_match.group(2).strip().lower()
+            from_info = self._parse_address_list(from_header)
+            if from_info:
+                from_name = from_info[0]["name"]
+                from_email = from_info[0]["email"]
             else:
                 from_name = ""
                 from_email = from_header.strip().lower()
