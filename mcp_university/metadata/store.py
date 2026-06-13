@@ -553,3 +553,38 @@ class MetadataStore:
             cursor = conn.cursor()
             cursor.execute('SELECT * FROM edges')
             return [dict(row) for row in cursor.fetchall()]
+
+    def get_edges_between_nodes(self, source_id: int, target_id: int) -> List[Dict[str, Any]]:
+        """Ruft alle Kanten zwischen zwei Knoten ab.
+
+        Args:
+            source_id (int): ID des Startknotens.
+            target_id (int): ID des Zielknotens.
+
+        Returns:
+            List[Dict[str, Any]]: Liste der Kanten als Dictionaries.
+        """
+        with self._get_connection() as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT * FROM edges
+                WHERE source_id = ? AND target_id = ?
+            ''', (source_id, target_id))
+            return [dict(row) for row in cursor.fetchall()]
+
+    def delete_edge(self, source_id: int, target_id: int, relation_type: str) -> None:
+        """Löscht eine spezifische Kante zwischen zwei Knoten.
+
+        Args:
+            source_id (int): ID des Startknotens.
+            target_id (int): ID des Zielknotens.
+            relation_type (str): Typ der Beziehung.
+        """
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                DELETE FROM edges
+                WHERE source_id = ? AND target_id = ? AND relation_type = ?
+            ''', (source_id, target_id, relation_type))
+            conn.commit()

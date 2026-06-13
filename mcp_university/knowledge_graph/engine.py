@@ -55,6 +55,11 @@ class KnowledgeGraphEngine:
             else:
                 changes["updated_nodes"].append(canonical_target)
 
+            # Kanten-Prioritäten prüfen (Ersetzung)
+            should_add = self._handle_edge_priorities(source_id, target_id, relation)
+            if not should_add:
+                continue
+
             edge_id, e_new = self.store.upsert_edge(source_id, target_id, relation, properties)
             edge_desc = f"{canonical_source} --[{relation}]--> {canonical_target}"
             if e_new:
@@ -67,6 +72,46 @@ class KnowledgeGraphEngine:
             changes[key] = list(set(changes[key]))
 
         return changes
+
+    def _handle_edge_priorities(self, source_id: int, target_id: int, new_relation: str) -> bool:
+        """Prüft Kanten-Prioritäten und löscht ggf. unterlegene Kanten.
+
+        Args:
+            source_id (int): Startknoten.
+            target_id (int): Zielknoten.
+            new_relation (str): Die neue Beziehung.
+
+        Returns:
+            bool: Ob die neue Kante hinzugefügt werden soll.
+        """
+        if not self.ontology.edge_priorities:
+            return True
+
+        for category, priority_list in self.ontology.edge_priorities.items():
+            if new_relation not in priority_list:
+                continue
+
+            new_priority = priority_list.index(new_relation)
+            existing_edges = self.store.get_edges_between_nodes(source_id, target_id)
+
+            for edge in existing_edges:
+                rel = edge["relation_type"]
+                if rel in priority_list:
+                    old_priority = priority_list.index(rel)
+                    if new_priority >= old_priority:
+                        # Neue Kante hat höhere oder gleiche Priorität -> alte löschen
+                        # (Gleiche Priorität wird durch upsert_edge sowieso aktualisiert, aber
+                        #  hier löschen wir sie explizit, falls es ein anderer Name ist aber in derselben Liste)
+                        # Hinweis: upsert_edge nutzt (source_id, target_id, relation_type) als UNIQUE.
+                        # Wenn relation_type unterschiedlich ist, gäbe es sonst zwei Kanten.
+                        if rel != new_relation:
+                            self.store.delete_edge(source_id, target_id, rel)
+                            logger.info(f"Kante '{rel}' durch '{new_relation}' ersetzt.")
+                    else:
+                        # Bestehende Kante hat höhere Priorität -> neue ignorieren
+                        logger.info(f"Kante '{new_relation}' ignoriert, da '{rel}' höhere Priorität hat.")
+                        return False
+        return True
 
     def _extract_triplets(self, content: str) -> List[Dict[str, Any]]:
         """Nutzt das LLM, um Triplets aus dem Inhalt zu extrahieren."""
