@@ -179,6 +179,13 @@ class MailParser:
         """Parsen einer Outlook .msg Datei mit extract-msg."""
         try:
             import extract_msg
+            try:
+                from extract_msg.exceptions import StandardViolationError
+            except ImportError:
+                class StandardViolationError(Exception):
+                    """Internal exception class."""
+                    pass
+
             with extract_msg.openMsg(str(file_path)) as msg:
                 subject = msg.subject or '(No Subject)'
                 sender = msg.sender or '(No Sender)'
@@ -207,8 +214,11 @@ class MailParser:
         except ImportError:
             logger.warning("extract-msg not installed. Falling back to basic email parser for .msg file.")
             return self._parse_eml(file_path)
-        except Exception as e:
-            logger.error(f"Error parsing .msg mail {file_path}: {e}")
+        except (StandardViolationError, Exception) as e:
+            if "StandardViolationError" in str(type(e)):
+                logger.warning(f"Likely signed/encrypted .msg file detected (StandardViolationError) {file_path}: {e}. Falling back to basic parser.")
+            else:
+                logger.error(f"Error parsing .msg mail {file_path}: {e}")
             # Try fallback to standard email parser as a last resort
             return self._parse_eml(file_path)
 
@@ -288,6 +298,13 @@ class MailParser:
         """Extrahiert Details aus einer .msg Datei."""
         try:
             import extract_msg
+            try:
+                from extract_msg.exceptions import StandardViolationError
+            except ImportError:
+                class StandardViolationError(Exception):
+                    """Internal exception class."""
+                    pass
+
             with extract_msg.openMsg(str(file_path)) as msg:
                 # Basic info
                 date = msg.date
@@ -351,8 +368,11 @@ class MailParser:
                     "subject": subject,
                     "body": body
                 }
-        except Exception as e:
-            logger.error(f"Error getting .msg details {file_path}: {e}")
+        except (StandardViolationError, Exception) as e:
+            if "StandardViolationError" in str(type(e)):
+                logger.warning(f"Likely signed/encrypted .msg file detected (StandardViolationError) {file_path}: {e}. Falling back to basic parser.")
+            else:
+                logger.error(f"Error getting .msg details {file_path}: {e}")
             return self._get_eml_details(file_path)
 
     def _get_eml_details(self, file_path: Path) -> Dict[str, Any]:
@@ -378,6 +398,7 @@ class MailParser:
 
             # Helper to parse addresses
             def parse_addr(header_name):
+                """Parses an address header."""
                 addrs = msg.get_all(header_name, [])
                 parsed = []
                 for addr in addrs:
@@ -451,9 +472,17 @@ class MailParser:
             return self._save_eml_attachments(file_path, target_dir)
 
     def _save_msg_attachments(self, file_path: Path, target_dir: Path) -> List[Path]:
+        """Saves attachments from a .msg file."""
         saved_paths = []
         try:
             import extract_msg
+            try:
+                from extract_msg.exceptions import StandardViolationError
+            except ImportError:
+                class StandardViolationError(Exception):
+                    """Internal exception class."""
+                    pass
+
             with extract_msg.openMsg(str(file_path)) as msg:
                 for att in msg.attachments:
                     filename = None
@@ -470,11 +499,15 @@ class MailParser:
                         with open(dest, 'wb') as f:
                             f.write(att.data)
                         saved_paths.append(dest)
-        except Exception as e:
-            logger.error(f"Error saving .msg attachments: {e}")
+        except (StandardViolationError, Exception) as e:
+            if "StandardViolationError" in str(type(e)):
+                logger.warning(f"Likely signed/encrypted .msg file detected (StandardViolationError) {file_path}: {e}. Cannot extract attachments via extract-msg.")
+            else:
+                logger.error(f"Error saving .msg attachments: {e}")
         return saved_paths
 
     def _save_eml_attachments(self, file_path: Path, target_dir: Path) -> List[Path]:
+        """Saves attachments from an .eml file."""
         saved_paths = []
         try:
             import email
