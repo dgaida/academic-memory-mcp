@@ -90,7 +90,7 @@ Format:
 - YYYY-MM-DD: Beschreibung
 
 Inhalt:
-{content[:5000]}
+{content[:10000]}
 """
         return self._chat_request(system_prompt, user_prompt)
 
@@ -115,7 +115,7 @@ Format:
 - ...
 
 Dokumentinhalt:
-{content[:10000]}
+{content[:20000]}
 """
         return self._chat_request(system_prompt, user_prompt)
 
@@ -147,7 +147,7 @@ Format:
 (Warum ist dieses Dokument wichtig?)
 
 Inhalt:
-{content[:15000]}
+{content[:30000]}
 """
         return self._chat_request(system_prompt, user_prompt)
 
@@ -196,7 +196,7 @@ Format:
 (High-level Zusammenfassung)
 
 Inhalte:
-{items_combined[:15000]}
+{items_combined[:40000]}
 """
         return self._chat_request(system_prompt, user_prompt)
 
@@ -226,7 +226,7 @@ Format:
 - YYYY-MM-DD: Beschreibung
 
 Schriftverkehr:
-{conversation_content[:20000]}
+{conversation_content[:50000]}
 """
         return self._chat_request(system_prompt, user_prompt)
 

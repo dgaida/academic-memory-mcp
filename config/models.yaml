@@ -2,6 +2,8 @@ llm:
   model: "gemma4:e2b"
   temperature: 0
   base_url: "http://localhost:11434"
+  num_ctx: 32768
+  num_predict: 4096
 
 embeddings:
   model: "BAAI/bge-m3"

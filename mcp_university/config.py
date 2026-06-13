@@ -13,6 +13,8 @@ class LLMConfig(BaseModel):
     model: str = "gemma2:2b"
     temperature: float = 0.0
     base_url: str = "http://localhost:11434"
+    num_ctx: int = 8192
+    num_predict: int = 2048
 
 class EmbeddingConfig(BaseModel):
     """Konfiguration für das Embedding-Modell."""
