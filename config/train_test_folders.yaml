@@ -1,0 +1,2 @@
+train_path: data/classifier/train
+test_path: data/classifier/test

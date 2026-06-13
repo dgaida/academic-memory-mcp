@@ -33,6 +33,7 @@ except ImportError:
 from mcp_university.config import get_config
 from mcp_university.summarizer.engine import Summarizer
 from mcp_university.parser.mail_parser import MailParser
+from mcp_university.summarizer.profiler import PersonProfiler
 from mcp_university.agent import Agent
 from mcp_university.agent.mcp_agent import MCPAgent
 from mcp_university.classifier.engine import resolve_model_path
@@ -778,6 +779,7 @@ def main() -> None:
         agent = Agent(**agent_args)
 
     mail_parser = MailParser()
+    profiler = PersonProfiler()
 
     # Wir tracken verarbeitete student_folders, um Mehrfachverarbeitung zu vermeiden
     processed_results = []
@@ -790,6 +792,7 @@ def main() -> None:
     for email in emails:
         mail_path = Path(email["path"])
         is_ba_ma = email["class"].startswith(("BA_", "MA_"))
+        person_profile = profiler.get_profile(student_email) if student_email else None
         if is_ba_ma:
             identifier = (email["class"], email["semester"], email["lastname"])
             # BA/MA logic to find latest mail
@@ -898,6 +901,7 @@ def main() -> None:
         except Exception:
             pass
 
+        person_profile = profiler.get_profile(student_email) if student_email else None
         if is_ba_ma:
             semester_folder = email["semester_folder"]
             student_emails = email["student_emails"]
@@ -905,6 +909,7 @@ def main() -> None:
             logger.info(
                 f"Verarbeite BA/MA E-Mails für {email['lastname']} in {email['class']}"
             )
+
 
             threshold_date = latest_date - timedelta(days=14)
             recent_emails = [e for e in student_emails if e[0] >= threshold_date]
@@ -942,16 +947,9 @@ def main() -> None:
                 pass
             gender_salutation = summarizer.determine_gender(first_name)
             salutation = f"Guten Tag {gender_salutation} {email['lastname']}"
-
-            skill_path = Path(f"skills/SKILL_{email['class']}.md")
-            if not skill_path.exists():
-                # Fallback to script directory
-                skill_path = (
-                    Path(__file__).parent / "skills" / f"SKILL_{email['class']}.md"
-                )
-
-            # Zusätzlicher Kontext (z.B. PO-Wechsel)
             additional_context = f"Anrede: {salutation}\n"
+            if person_profile:
+                additional_context += f"\nPersonen-Steckbrief:\n{person_profile}\n"
             additional_context += f"Studenten-E-Mail: {student_email}\n"
             attachments = []
             if email["class"] == "PO-Wechsel":
@@ -1115,15 +1113,9 @@ def main() -> None:
                 pass
             gender_salutation = summarizer.determine_gender(first_name)
             salutation = f"Guten Tag {gender_salutation} {email['lastname']}"
-
-            skill_path = Path(f"skills/SKILL_{email['class']}.md")
-            if not skill_path.exists():
-                # Fallback to script directory
-                skill_path = (
-                    Path(__file__).parent / "skills" / f"SKILL_{email['class']}.md"
-                )
-
             additional_context = f"Anrede: {salutation}\n"
+            if person_profile:
+                additional_context += f"\nPersonen-Steckbrief:\n{person_profile}\n"
             additional_context += f"Studenten-E-Mail: {student_email}\n"
             attachments = []
             if email["class"] == "PO-Wechsel":

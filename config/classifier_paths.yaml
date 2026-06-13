@@ -1,2 +1,2 @@
 class_paths:
-  Inbox: data/mock_emails/inbox
+  Inbox: temp_emails/inbox
