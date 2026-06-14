@@ -235,7 +235,7 @@ Examples:
     parser.add_argument(
         "--output",
         type=str,
-        default="th_koeln_persons.md",
+        default="data/th_koeln_persons.md",
         help="Path to the output Markdown file (default: th_koeln_persons.md)."
     )
 
