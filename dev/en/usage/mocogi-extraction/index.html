@@ -15,7 +15,7 @@
         <link rel="canonical" href="https://dgaida.github.io/academic-memory-mcp/dev/en/usage/mocogi-extraction/">
       
       
-        <link rel="prev" href="../scripts/">
+        <link rel="prev" href="../database-processes/">
       
       
         <link rel="next" href="../email-workflow/">
@@ -797,6 +797,34 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../database-processes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Datenbank-Prozesse
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -1319,15 +1347,15 @@
 <h1 id="mocogi-data-extraction">MOCOGI Data Extraction<a class="headerlink" href="#mocogi-data-extraction" title="Permanent link">&para;</a></h1>
 <p>This script allows exporting module information from the TH Köln MOCOGI API into a structured Markdown file.</p>
 <h2 id="purpose">Purpose<a class="headerlink" href="#purpose" title="Permanent link">&para;</a></h2>
-<p>The script <code>scripts/extract_mocogi_data.py</code> iterates through all active study programs and their examination regulations (POs). For each module, the following information is extracted:
-* Module Name
-* Module Coordinator (full names)
-* First Examiner
-* Second Examiner</p>
+<p>The script <code>scripts/extract_mocogi_data.py</code> iterates through all active study programs and their examination regulations (POs). For each module, the following information is extracted:<br />
+<em> Module Name<br />
+</em> Module Coordinator (full names)<br />
+<em> First Examiner<br />
+</em> Second Examiner  </p>
 <p>The data is saved in tabular form grouped by study program and PO in the file <code>mocogi_modules.md</code>.</p>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
 <ul>
-<li>A valid <code>MOCOGI_API_TOKEN</code> must be stored in a <code>.env</code> or <code>secrets.env</code> file in the root directory or the <code>config/</code> folder.</li>
+<li>A valid <code>MOCOGI_API_TOKEN</code> must be stored in a <code>.env</code> or <code>secrets.env</code> file in the root directory or the <code>config/</code> folder.  </li>
 </ul>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
 <p>Run the script from the project's root directory:</p>

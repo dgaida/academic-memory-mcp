@@ -120,6 +120,13 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/deven/usage/database-management/"/>
     </url>
     <url>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/usage/database-processes/</loc>
+        <lastmod>2026-06-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/dev/usage/database-processes/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/deven/usage/database-processes/"/>
+    </url>
+    <url>
         <loc>https://dgaida.github.io/academic-memory-mcp/dev/usage/email-classification/</loc>
         <lastmod>2026-06-14</lastmod>
         <changefreq>daily</changefreq>
@@ -279,6 +286,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/dev/en/usage/database-management/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/devusage/database-management/"/>
+    </url>
+    <url>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/en/usage/database-processes/</loc>
+        <lastmod>2026-06-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/dev/en/usage/database-processes/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/devusage/database-processes/"/>
     </url>
     <url>
         <loc>https://dgaida.github.io/academic-memory-mcp/dev/en/usage/email-classification/</loc>

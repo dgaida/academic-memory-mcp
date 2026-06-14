@@ -15,7 +15,7 @@
         <link rel="canonical" href="https://dgaida.github.io/academic-memory-mcp/dev/usage/mocogi-extraction/">
       
       
-        <link rel="prev" href="../scripts/">
+        <link rel="prev" href="../database-processes/">
       
       
         <link rel="next" href="../email-workflow/">
@@ -795,6 +795,34 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../database-processes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Datenbank-Prozesse
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -1317,15 +1345,15 @@
 <h1 id="mocogi-datenextraktion">MOCOGI Datenextraktion<a class="headerlink" href="#mocogi-datenextraktion" title="Permanent link">&para;</a></h1>
 <p>Dieses Skript ermöglicht den Export von Modulinformationen aus der MOCOGI-API der TH Köln in eine strukturierte Markdown-Datei.</p>
 <h2 id="zweck">Zweck<a class="headerlink" href="#zweck" title="Permanent link">&para;</a></h2>
-<p>Das Skript <code>scripts/extract_mocogi_data.py</code> durchläuft alle aktiven Studiengänge und deren Prüfungsordnungen (POs). Für jedes Modul werden die folgenden Informationen extrahiert:
-* Modulname
-* Modulverantwortliche(r) (volle Namen)
-* Erstprüfer(in)
-* Zweitprüfer(in)</p>
+<p>Das Skript <code>scripts/extract_mocogi_data.py</code> durchläuft alle aktiven Studiengänge und deren Prüfungsordnungen (POs). Für jedes Modul werden die folgenden Informationen extrahiert:<br />
+<em> Modulname<br />
+</em> Modulverantwortliche(r) (volle Namen)<br />
+<em> Erstprüfer(in)<br />
+</em> Zweitprüfer(in)  </p>
 <p>Die Daten werden in Tabellenform gruppiert nach Studiengang und PO in der Datei <code>mocogi_modules.md</code> gespeichert.</p>
 <h2 id="voraussetzungen">Voraussetzungen<a class="headerlink" href="#voraussetzungen" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Ein gültiger <code>MOCOGI_API_TOKEN</code> muss in einer <code>.env</code> oder <code>secrets.env</code> Datei im Hauptverzeichnis oder im <code>config/</code> Ordner hinterlegt sein.</li>
+<li>Ein gültiger <code>MOCOGI_API_TOKEN</code> muss in einer <code>.env</code> oder <code>secrets.env</code> Datei im Hauptverzeichnis oder im <code>config/</code> Ordner hinterlegt sein.  </li>
 </ul>
 <h2 id="nutzung">Nutzung<a class="headerlink" href="#nutzung" title="Permanent link">&para;</a></h2>
 <p>Führen Sie das Skript aus dem Hauptverzeichnis des Projekts aus:</p>
