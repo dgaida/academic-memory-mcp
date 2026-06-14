@@ -12,7 +12,7 @@ import pathlib
 import sys
 import urllib.request
 import urllib.error
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, Optional
 
 # Logging-Konfiguration
 logging.basicConfig(
