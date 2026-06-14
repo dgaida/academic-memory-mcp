@@ -869,15 +869,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#wissensgraph" class="md-nav__link">
+  <a href="#wissensgraph-personen" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Wissensgraph
+        Wissensgraph &amp; Personen
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Wissensgraph">
+    <nav class="md-nav" aria-label="Wissensgraph &amp; Personen">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -885,6 +885,39 @@
     <span class="md-ellipsis">
       
         Wissensgraph visualisieren
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#th-koln-personen-crawler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TH Köln Personen-Crawler
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#personen-steckbriefe-erstellen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Personen-Steckbriefe erstellen
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mocogi-datenextraktion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MOCOGI Datenextraktion
       
     </span>
   </a>
@@ -1004,6 +1037,34 @@
     
   
     E-Mail Workflow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ontology-learning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ontology & Aliase
   
 
     
@@ -1372,15 +1433,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#wissensgraph" class="md-nav__link">
+  <a href="#wissensgraph-personen" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Wissensgraph
+        Wissensgraph &amp; Personen
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Wissensgraph">
+    <nav class="md-nav" aria-label="Wissensgraph &amp; Personen">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1388,6 +1449,39 @@
     <span class="md-ellipsis">
       
         Wissensgraph visualisieren
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#th-koln-personen-crawler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TH Köln Personen-Crawler
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#personen-steckbriefe-erstellen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Personen-Steckbriefe erstellen
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mocogi-datenextraktion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MOCOGI Datenextraktion
       
     </span>
   </a>
@@ -1455,17 +1549,31 @@
 <p>Flacht eine Ordnerstruktur ab, indem alle Dateien in das Wurzelverzeichnis verschoben werden (inkl. automatischer Namenskollisionsprüfung).
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>python<span class="w"> </span>scripts/flatten_directory.py<span class="w"> </span>/pfad/zu/daten
 </code></pre></div></p>
-<h2 id="wissensgraph">Wissensgraph<a class="headerlink" href="#wissensgraph" title="Permanent link">&para;</a></h2>
+<h2 id="wissensgraph-personen">Wissensgraph &amp; Personen<a class="headerlink" href="#wissensgraph-personen" title="Permanent link">&para;</a></h2>
 <h3 id="wissensgraph-visualisieren">Wissensgraph visualisieren<a class="headerlink" href="#wissensgraph-visualisieren" title="Permanent link">&para;</a></h3>
 <p>Generiert eine interaktive HTML-Visualisierung des Wissensgraphen.
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>python<span class="w"> </span>scripts/visualize_knowledge_graph.py
 </code></pre></div>
 Die Ausgabe erfolgt in <code>knowledge_graph.html</code>.</p>
+<h3 id="th-koln-personen-crawler">TH Köln Personen-Crawler<a class="headerlink" href="#th-koln-personen-crawler" title="Permanent link">&para;</a></h3>
+<p>Crawlt das Personenverzeichnis der TH Köln nach Namen, E-Mails, Fakultäten und Instituten.
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python<span class="w"> </span>scripts/crawl_th_koeln_persons.py<span class="w"> </span>A<span class="w"> </span>B<span class="w"> </span>C
+</code></pre></div>
+Unterstützt mehrere Anfangsbuchstaben als Argumente.</p>
+<h3 id="personen-steckbriefe-erstellen">Personen-Steckbriefe erstellen<a class="headerlink" href="#personen-steckbriefe-erstellen" title="Permanent link">&para;</a></h3>
+<p>Erstellt manuell einen Steckbrief für eine bestimmte E-Mail-Adresse basierend auf vorhandenen E-Mails.
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python<span class="w"> </span>scripts/create_person_profiles.py<span class="w"> </span>student@smail.th-koeln.de
+</code></pre></div></p>
+<h3 id="mocogi-datenextraktion">MOCOGI Datenextraktion<a class="headerlink" href="#mocogi-datenextraktion" title="Permanent link">&para;</a></h3>
+<p>Extrahiert Modulinformationen (Verantwortliche, Prüfer) aus der MOCOGI-API und verknüpft diese im Wissensgraphen.
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>python<span class="w"> </span>scripts/extract_mocogi_data.py
+</code></pre></div></p>
 <h2 id="vorlesungen-lehre">Vorlesungen &amp; Lehre<a class="headerlink" href="#vorlesungen-lehre" title="Permanent link">&para;</a></h2>
 <h3 id="vorlesungsskripte-zusammenfassen">Vorlesungsskripte zusammenfassen<a class="headerlink" href="#vorlesungsskripte-zusammenfassen" title="Permanent link">&para;</a></h3>
-<p>Sucht nach PDFs in einem Ordner und generiert kompakte Markdown-Zusammenfassungen. Überspringt Dateien, die bereits verarbeitet wurden.
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python<span class="w"> </span>scripts/summarize_lectures.py<span class="w"> </span>/pfad/zu/vorlesungen
-</code></pre></div></p>
+<p>Sucht nach PDFs in einem Ordner und generiert kompakte Markdown-Zusammenfassungen. Überspringt Dateien, die bereits verarbeitet wurden (Mtime-Check).
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>python<span class="w"> </span>scripts/summarize_lectures.py<span class="w"> </span>/pfad/zu/vorlesungen
+</code></pre></div>
+Nutzt primär <code>liteparse</code> und einen LLM-Fallback bei Fehlern.</p>
 
 
 

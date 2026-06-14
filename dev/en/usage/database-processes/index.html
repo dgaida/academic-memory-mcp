@@ -949,10 +949,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#7-ontology-learner" class="md-nav__link">
+  <a href="#7-ontology-learner-mcp_universityknowledge_graphontology_learnerpy" class="md-nav__link">
     <span class="md-ellipsis">
       
-        7. Ontology Learner
+        7. Ontology Learner (mcp_university/knowledge_graph/ontology_learner.py)
       
     </span>
   </a>
@@ -1055,6 +1055,34 @@
     
   
     E-Mail Workflow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ontology-learning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ontology & Aliase
   
 
     
@@ -1473,10 +1501,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#7-ontology-learner" class="md-nav__link">
+  <a href="#7-ontology-learner-mcp_universityknowledge_graphontology_learnerpy" class="md-nav__link">
     <span class="md-ellipsis">
       
-        7. Ontology Learner
+        7. Ontology Learner (mcp_university/knowledge_graph/ontology_learner.py)
       
     </span>
   </a>
@@ -1549,46 +1577,51 @@
 <h2 id="lesende-prozesse">Lesende Prozesse<a class="headerlink" href="#lesende-prozesse" title="Permanent link">&para;</a></h2>
 <p>Mehrere Komponenten greifen lesend auf die Datenbank zu, um Informationen bereitzustellen oder darauf basierend Entscheidungen zu treffen:</p>
 <ul>
-<li><strong>CLI (mcp-uni db list-*):</strong> Die Befehle zum Auflisten von Dateien, Ordnern, Studenten usw. lesen direkt aus den entsprechenden Tabellen.</li>
-<li><strong>Search Index:</strong> Bei der Suche werden Metadaten aus der SQLite-Datenbank gelesen, um die Suchergebnisse aus dem Vektorindex (Qdrant) mit Kontextinformationen (wie Dateipfaden) anzureichern.</li>
-<li><strong>MCP Agent / FastMCP Server:</strong> Agenten lesen über den Server Informationen aus der Datenbank, um Fragen zu beantworten oder den Status von Projekten/Thesen zu prüfen.</li>
-<li><strong>Knowledge Graph Visualisierung:</strong> Das Skript <code>visualize_knowledge_graph.py</code> liest alle Knoten und Kanten aus, um die interaktive HTML-Grafik zu generieren.</li>
-<li><strong>Person Profiler:</strong> Durchsucht Metadaten von E-Mails, um relevante Korrespondenzen für eine bestimmte Person zu finden.</li>
+<li><strong>CLI (mcp-uni db list-*):</strong> Die Befehle zum Auflisten von Dateien, Ordnern, Studenten usw. lesen direkt aus den entsprechenden Tabellen.  </li>
+<li><strong>Search Index:</strong> Bei der Suche werden Metadaten aus der SQLite-Datenbank gelesen, um die Suchergebnisse aus dem Vektorindex (Qdrant) mit Kontextinformationen (wie Dateipfaden) anzureichern.  </li>
+<li><strong>MCP Agent / FastMCP Server:</strong> Agenten lesen über den Server Informationen aus der Datenbank, um Fragen zu beantworten oder den Status von Projekten/Thesen zu prüfen.  </li>
+<li><strong>Knowledge Graph Visualisierung:</strong> Das Skript <code>visualize_knowledge_graph.py</code> liest alle Knoten und Kanten aus, um die interaktive HTML-Grafik zu generieren.  </li>
+<li><strong>Person Profiler:</strong> Durchsucht Metadaten von E-Mails, um relevante Korrespondenzen für eine bestimmte Person zu finden.  </li>
 </ul>
 <h2 id="schreibende-prozesse">Schreibende Prozesse<a class="headerlink" href="#schreibende-prozesse" title="Permanent link">&para;</a></h2>
 <p>Die folgenden Prozesse modifizieren den Zustand der Datenbank. Dies geschieht typischerweise während der Indexierung oder durch explizite Management-Befehle.</p>
 <h3 id="1-crawler-mcp-uni-index">1. Crawler (<code>mcp-uni index</code>)<a class="headerlink" href="#1-crawler-mcp-uni-index" title="Permanent link">&para;</a></h3>
-<p>Der Crawler ist der primäre Schreibprozess. Er führt folgende Aktionen aus:
-*   <strong>Dateimetadaten:</strong> Speichert Pfad, Hash, Änderungszeitpunkt und Typ jeder gefundenen Datei.
-*   <strong>Ordnerstruktur:</strong> Erfasst die Hierarchie der gescannten Verzeichnisse.
-*   <strong>Zusammenfassungen:</strong> Speichert die durch das LLM generierten Zusammenfassungen für Dateien und Ordner.
-*   <strong>E-Mail-Konversationen:</strong> Gruppiert E-Mails zu Konversationen und speichert aggregierte Zusammenfassungen.</p>
+<p>Der Crawler ist der primäre Schreibprozess. Er führt folgende Aktionen aus:<br />
+<em>   </em><em>Dateimetadaten:</em><em> Speichert Pfad, Hash, Änderungszeitpunkt und Typ jeder gefundenen Datei.<br />
+</em>   <strong>Ordnerstruktur:</strong> Erfasst die Hierarchie der gescannten Verzeichnisse.<br />
+<em>   </em><em>Zusammenfassungen:</em><em> Speichert die durch das LLM generierten Zusammenfassungen für Dateien und Ordner.<br />
+</em>   <strong>E-Mail-Konversationen:</strong> Gruppiert E-Mails zu Konversationen und speichert aggregierte Zusammenfassungen.  </p>
 <h3 id="2-watcher-mcp-uni-watch">2. Watcher (<code>mcp-uni watch</code>)<a class="headerlink" href="#2-watcher-mcp-uni-watch" title="Permanent link">&para;</a></h3>
 <p>Der Watcher überwacht das Dateisystem in Echtzeit. Bei Änderungen führt er dieselben Schreiboperationen wie der Crawler für die betroffenen Dateien aus, um die Datenbank synchron zu halten.</p>
 <h3 id="3-knowledge-graph-engine">3. Knowledge Graph Engine<a class="headerlink" href="#3-knowledge-graph-engine" title="Permanent link">&para;</a></h3>
-<p>Während der Indexierung extrahiert die Engine Entitäten und Beziehungen aus den Zusammenfassungen der Dokumente und speichert diese als Knoten und Kanten in der Graph-Struktur der Datenbank. Hierbei werden bestehende Beziehungen ggf. nach Priorität aktualisiert.</p>
+<p>Während der Indexierung extrahiert die Engine Entitäten und Beziehungen aus den Zusammenfassungen der Dokumente und speichert diese als Knoten und Kanten in der Graph-Struktur der Datenbank.
+* <strong>Namensauflösung:</strong> Knotennamen werden vor dem Speichern über die Alias-Tabelle zu ihrer kanonischen Form aufgelöst, um Duplikate zu vermeiden.
+* <strong>Kanten-Prioritäten:</strong> Basierend auf <code>ontology.yaml</code> implementiert die Engine eine Prioritätslogik. Neue Beziehungen können bestehende Beziehungen derselben Kategorie zwischen zwei Knoten ersetzen, wenn sie eine höhere Priorität haben.</p>
 <h3 id="4-person-crawler-scriptscrawl_th_koeln_personspy">4. Person Crawler (<code>scripts/crawl_th_koeln_persons.py</code>)<a class="headerlink" href="#4-person-crawler-scriptscrawl_th_koeln_personspy" title="Permanent link">&para;</a></h3>
-<p>Dieses Skript crawlt die offizielle Personenseite der TH Köln und schreibt:
-*   <strong>Personen-Knoten:</strong> Name und E-Mail-Adresse.
-*   <strong>Organisationseinheiten:</strong> Fakultäten und Institute als Knoten.
-*   <strong>Beziehungen:</strong> Verknüpft Personen mit ihren jeweiligen Fakultäten/Instituten ("ist Element von").</p>
+<p>Dieses Skript crawlt die offizielle Personenseite der TH Köln und schreibt:<br />
+<em>   </em><em>Personen-Knoten:</em><em> Name und E-Mail-Adresse.<br />
+</em>   <strong>Organisationseinheiten:</strong> Fakultäten und Institute als Knoten.<br />
+<em>   </em><em>Beziehungen:</em>* Verknüpft Personen mit ihren jeweiligen Fakultäten/Instituten ("ist Element von").  </p>
 <h3 id="5-mocogi-extraktor-scriptsextract_mocogi_datapy">5. MOCOGI Extraktor (<code>scripts/extract_mocogi_data.py</code>)<a class="headerlink" href="#5-mocogi-extraktor-scriptsextract_mocogi_datapy" title="Permanent link">&para;</a></h3>
-<p>Extrahiert Modulinformationen aus der MOCOGI-API und schreibt:
-*   <strong>Studienangebote:</strong> Studiengänge und Prüfungsordnungen.
-*   <strong>Module:</strong> Alle Module einer Prüfungsordnung.
-*   <strong>Verantwortlichkeiten:</strong> Verknüpft (gematchte) Personen mit Modulen ("ist Modulverantwortlicher", "ist Erstprüfer", "ist Zweitprüfer").</p>
+<p>Extrahiert Modulinformationen aus der MOCOGI-API und schreibt:<br />
+<em>   </em><em>Studienangebote:</em><em> Studiengänge und Prüfungsordnungen.<br />
+</em>   <strong>Module:</strong> Alle Module einer Prüfungsordnung.<br />
+<em>   </em><em>Verantwortlichkeiten:</em>* Verknüpft (gematchte) Personen mit Modulen ("ist Modulverantwortlicher", "ist Erstprüfer", "ist Zweitprüfer"). Nutzt Word-Set-Comparison für robustes Namens-Matching.</p>
 <h3 id="6-student-sync-mcp-uni-db-sync-students">6. Student Sync (<code>mcp-uni db sync-students</code>)<a class="headerlink" href="#6-student-sync-mcp-uni-db-sync-students" title="Permanent link">&para;</a></h3>
 <p>Liest eine lokale <code>students.yaml</code> Datei und schreibt die darin enthaltenen Informationen über Studierende, deren Status und Abschlussarbeitsthemen in die Datenbank.</p>
-<h3 id="7-ontology-learner">7. Ontology Learner<a class="headerlink" href="#7-ontology-learner" title="Permanent link">&para;</a></h3>
-<p>Analysiert E-Mail-Header und bestehende Graph-Knoten, um Alias-Namen (z.B. Abkürzungen von Modulen oder Namen-E-Mail-Paare) zu identifizieren und in der Alias-Tabelle zu speichern.</p>
+<h3 id="7-ontology-learner-mcp_universityknowledge_graphontology_learnerpy">7. Ontology Learner (<code>mcp_university/knowledge_graph/ontology_learner.py</code>)<a class="headerlink" href="#7-ontology-learner-mcp_universityknowledge_graphontology_learnerpy" title="Permanent link">&para;</a></h3>
+<p>Automatisiert das Lernen von Aliasen:
+* Extrahiert Name-Email Paare aus E-Mail-Headern.
+* Analysiert bestehende Wissensgraph-Knoten via LLM auf Modulnamen-Variationen (z.B. "KI" vs "Künstliche Intelligenz").
+* Speichert die Ergebnisse in der <code>aliases</code> Tabelle der <code>MetadataStore</code>.</p>
 <h2 id="loschen-von-daten">Löschen von Daten<a class="headerlink" href="#loschen-von-daten" title="Permanent link">&para;</a></h2>
 <h3 id="automatisches-loschen">Automatisches Löschen<a class="headerlink" href="#automatisches-loschen" title="Permanent link">&para;</a></h3>
 <p>Der <strong>Crawler</strong> erkennt während eines Scans, wenn Dateien, die in der Datenbank registriert sind, nicht mehr auf dem Dateisystem existieren. In diesem Fall werden die entsprechenden Einträge in der <code>files</code>-Tabelle automatisch gelöscht.</p>
 <h3 id="manuelles-loschen">Manuelles Löschen<a class="headerlink" href="#manuelles-loschen" title="Permanent link">&para;</a></h3>
-<p>Über die CLI-Befehlsgruppe <code>mcp-uni db delete-*</code> können gezielt Einträge entfernt werden:
-*   <strong>Dateien/Ordner:</strong> Löscht Metadaten und (im Falle von Ordnern rekursiv) alle enthaltenen Dateireferenzen.
-*   <strong>Studenten/Deadlines:</strong> Entfernt spezifische Datensätze aus den Verwaltungstabellen.
-*   <strong>Kanten:</strong> Ermöglicht das Entfernen von Beziehungen im Wissensgraphen.</p>
+<p>Über die CLI-Befehlsgruppe <code>mcp-uni db delete-*</code> können gezielt Einträge entfernt werden:<br />
+<em>   </em><em>Dateien/Ordner:</em><em> Löscht Metadaten und (im Falle von Ordnern rekursiv) alle enthaltenen Dateireferenzen.<br />
+</em>   <strong>Studenten/Deadlines:</strong> Entfernt spezifische Datensätze aus den Verwaltungstabellen.<br />
+<em>   </em><em>Kanten:</em>* Ermöglicht das Entfernen von Beziehungen im Wissensgraphen.  </p>
 <p>Beim Löschen eines Knotens oder einer Datei bleiben die verknüpften Zusammenfassungen unter Umständen als verwaiste Einträge bestehen, bis eine Bereinigung durchgeführt wird (Cleanup-Prozess).</p>
 
 

@@ -994,6 +994,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ontology-learning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ontology & Aliase
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1431,8 +1459,8 @@
 <p><strong>Parsing &amp; Extraktion:</strong>  </p>
 <ul>
 <li>Je nach Dateityp wird der entsprechende Parser aufgerufen:  <ul>
-<li><code>PDFParser</code>: Nutzt <code>liteparse</code> (Primär) oder <code>docling</code> (Fallback) für PDF/Docx.  </li>
-<li><code>MailParser</code>: Extrahiert Metadaten (Von, An, Datum) und Text aus <code>.eml</code> und <code>.msg</code>.  </li>
+<li><code>PDFParser</code>: Nutzt primär <code>liteparse</code> zur schnellen Extraktion. Schlägt dies fehl, wird <code>docling</code> als robusterer Fallback verwendet.</li>
+<li><code>MailParser</code>: Extrahiert Metadaten (Von, An, Datum) und Text aus <code>.eml</code> und <code>.msg</code>. Behandelt auch signierte E-Mails (<code>SignedAttachment</code>) sicher.</li>
 <li><code>TextParser</code>: Liest Plaintext aus <code>.md</code>, <code>.txt</code>, <code>.py</code>, <code>.json</code>, etc.  </li>
 </ul>
 </li>
@@ -1457,18 +1485,15 @@
 <p><strong>Spezialfall: Ordner-Zusammenfassungen:</strong>  </p>
 <ul>
 <li>Nachdem alle Dateien eines Ordners verarbeitet wurden, erstellt das LLM eine Zusammenfassung des gesamten Ordnerinhalts basierend auf den Einzelzusammenfassungen.  </li>
+<li>Schlägt die Zusammenfassung fehl, wird automatisch ein <strong>Retry-Mechanismus</strong> ausgelöst, der Debug-Informationen in <code>.folder_summary_items_debug.txt</code> und <code>.folder_summary_combined_debug.txt</code> schreibt.</li>
 <li>Diese wird als versteckte Datei <code>.&lt;Ordnername&gt;_summary.md</code> im <strong>Elternverzeichnis</strong> gespeichert. Dies gilt auch für Wurzelordner (die im selben Verzeichnis wie der Ordner selbst liegen).  </li>
+<li>Der Crawler erzwingt eine Neu-Summarisierung, falls die Datei auf der Festplatte fehlt, selbst wenn die Datenbank sie als aktuell markiert.</li>
 </ul>
 </li>
 <li>
 <p><strong>Speicherung &amp; Indexierung:</strong>  </p>
 <ul>
-<li><strong>Metadaten:</strong> Dateipfade, Hashes, Zeitstempel und die Markdown-Zusammenfassungen werden in der SQLite-Datenbank gespeichert:  <ul>
-<li>Tabelle <code>files</code>: Pfad, Hash, Mtime, Typ, Ordner-ID.  </li>
-<li>Tabelle <code>folders</code>: Pfad, Parent-ID, Hash (für E-Mails), Zeitstempel.  </li>
-<li>Tabelle <code>summaries</code>: Die eigentlichen Markdown-Zusammenfassungen für Dateien und Ordner.  </li>
-</ul>
-</li>
+<li><strong>Metadaten:</strong> Dateipfade, Hashes, Zeitstempel und die Markdown-Zusammenfassungen werden in der SQLite-Datenbank gespeichert.</li>
 <li><strong>Vektorsuche:</strong> Die <strong>Zusammenfassungen</strong> (nicht der Volltext) werden vektorisiert (standardmäßig mit <code>BAAI/bge-m3</code>) und im Qdrant-Index gespeichert.  </li>
 </ul>
 </li>
@@ -1521,7 +1546,7 @@ Nachher:
 <a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    └── antwort.msg
 </code></pre></div></p>
 <p><strong>Fall 3: Kombinierte E-Mail-Konversation (Spezialfall)</strong>
-Wenn sowohl <code>Inbox</code> als auch <code>SentItems</code> vorhanden sind, erkennt der Crawler dies als Konversation und erstellt eine gemeinsame Zusammenfassung (<code>.emails_summary.md</code>). Die Einzelordner erhalten dann keine eigenen <code>.Inbox_summary.md</code> Dateien mehr, da sie in der Konversation aufgehen.</p>
+Wenn sowohl <code>Inbox</code> und <code>SentItems</code> vorhanden sind, erkennt der Crawler dies als Konversation und erstellt eine gemeinsame Zusammenfassung (<code>.emails_summary.md</code>). Die Einzelordner erhalten dann keine eigenen <code>.Inbox_summary.md</code> Dateien mehr, da sie in der Konversation aufgehen.</p>
 <p>Vorher:
 <div class="language-text highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Student_C/
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>├── Inbox/

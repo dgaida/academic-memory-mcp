@@ -18,7 +18,7 @@
         <link rel="prev" href="../mocogi-extraction/">
       
       
-        <link rel="next" href="../../api/">
+        <link rel="next" href="../ontology-learning/">
       
       
         
@@ -977,6 +977,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ontology-learning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ontology & Aliase
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1379,21 +1407,23 @@ Das System nutzt den <code>EmailClassifier</code>, um die Mails nach Themen (z.B
 <p>Nach der Sortierung wird <code>process_sorted_emails.py</code> ausgeführt. Das Skript führt folgende Schritte für jede E-Mail durch:</p>
 <ol>
 <li><strong>Kontext-Analyse:</strong> Das System analysiert andere E-Mails im Zielordner (den bisherigen Verlauf), um den Kontext der aktuellen Anfrage zu verstehen.  </li>
-<li><strong>Termin-Check:</strong> Prüft, ob der Student um einen Termin bittet. Falls ja, werden die <code>free_slots.yaml</code> genutzt, um einen Vorschlag zu machen oder den Termin direkt zu buchen.  </li>
-<li><strong>Check für finale Abgabe:</strong> Erkennt automatisch, wenn ein Student seine Abschlussarbeit (Bachelor/Master/Projekt) final einreicht. In diesem Fall:  <ul>
-<li>Wird automatisch ein <strong>Erinnerungstermin</strong> im Outlook-Kalender für in einer Woche erstellt.  </li>
+<li><strong>Stichtags-Regelung (<code>--cutoff-date</code>):</strong> Mit dem Parameter <code>--cutoff-date YYYY-MM-DD</code> können ältere E-Mails von der LLM-Verarbeitung (Antwort-Generierung, Terminbuchung) ausgeschlossen werden. Sie werden lediglich sortiert.</li>
+<li><strong>Termin-Check:</strong> Prüft, ob der Student um einen Termin bittet. Falls ja, werden die <code>free_slots.yaml</code> genutzt, um einen Vorschlag zu machen oder den Termin direkt zu buchen.</li>
+<li><strong>Check für finale Abgabe:</strong> Erkennt automatisch, wenn ein Student seine Abschlussarbeit (Bachelor/Master/Projekt) final einreicht. In diesem Fall:<ul>
+<li>Wird automatisch ein <strong>Erinnerungstermin</strong> im Outlook-Kalender für in 7 Tagen (08:00 Uhr) erstellt.</li>
 <li>Werden die <strong>Anhänge extrahiert</strong> und sicher im entsprechenden Studenten-Ordner gespeichert.  </li>
 <li>Wird eine Bestätigungsmail als Entwurf vorbereitet.  </li>
 </ul>
 </li>
-<li><strong>Notwendigkeits-Check (Necessity Check):</strong> Ein LLM entscheidet, ob die E-Mail überhaupt eine Antwort erfordert (oder ob es sich z.B. nur um eine Information handelt).  </li>
-<li><strong>Entwurf schreiben:</strong> Falls eine Antwort nötig ist, generiert der Agent unter Berücksichtigung der Skill-Vorgaben und der Persona (Daniel Gaida) einen Antworttext.  </li>
-<li><strong>Outlook Integration:</strong> Es wird automatisch ein Entwurf ("Draft") im Outlook-Ordner "Work in Progress" erstellt. Die Original-Mail wird als Anhang beigefügt.  </li>
+<li><strong>Personen-Kontext:</strong> Bezieht vorhandene Personen-Steckbriefe (erstellt durch den Indexer oder <code>create_person_profiles.py</code>) in die Antwortgenerierung mit ein.</li>
+<li><strong>Notwendigkeits-Check (Necessity Check):</strong> Ein LLM entscheidet, ob die E-Mail überhaupt eine Antwort erfordert (oder ob es sich z.B. nur um eine Information handelt).</li>
+<li><strong>Entwurf schreiben:</strong> Falls eine Antwort nötig ist, generiert der Agent unter Berücksichtigung der Skill-Vorgaben und der Persona (Daniel Gaida) einen Antworttext.</li>
+<li><strong>Outlook Integration:</strong> Es wird automatisch ein Entwurf ("Draft") im Outlook-Ordner "Work in Progress" erstellt. Die Original-Mail wird als Anhang beigefügt.</li>
 </ol>
 <h2 id="4-uberprufung-gradio-gui">4. Überprüfung (Gradio GUI)<a class="headerlink" href="#4-uberprufung-gradio-gui" title="Permanent link">&para;</a></h2>
 <p>Am Ende des Prozesses startet automatisch eine Gradio-Weboberfläche. Hier können Sie:<br />
 - Die getroffenen Klassifizierungen überprüfen.<br />
-- Mails bei Bedarf manuell in andere Kategorien verschieben.<br />
+- Mails bei Bedarf manuell in andere Kategorien verschieben. Das System verschiebt dabei automatisch auch die zugehörige <code>.emails_summary.md</code>.
 - Den Status der verarbeiteten Mails einsehen.  </p>
 <h2 id="5-abschlussbericht">5. Abschlussbericht<a class="headerlink" href="#5-abschlussbericht" title="Permanent link">&para;</a></h2>
 <p>Das Skript erstellt eine Datei <code>processed_emails.md</code>, die eine tabellarische Übersicht über alle verarbeiteten Mails und deren Status (z.B. "Entwurf erstellt", "Termin gebucht", "Keine Antwort nötig") enthält.</p>
