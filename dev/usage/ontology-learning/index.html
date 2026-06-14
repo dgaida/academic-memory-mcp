@@ -1355,9 +1355,9 @@
 <h2 id="ontology-learner">Ontology Learner<a class="headerlink" href="#ontology-learner" title="Permanent link">&para;</a></h2>
 <p>Das Modul <code>mcp_university/knowledge_graph/ontology_learner.py</code> automatisiert diesen Prozess:</p>
 <ol>
-<li><strong>E-Mail-Header Analyse:</strong> Es extrahiert Name-E-Mail-Paare aus den Headern verarbeiteter E-Mails. Dies hilft dabei, Personen eindeutig zu identifizieren, auch wenn sie unterschiedliche Anzeigenamen verwenden.</li>
-<li><strong>LLM-basierte Konsolidierung:</strong> Bestehende Knoten im Wissensgraph werden durch ein LLM analysiert, um semantische Variationen zu finden (z.B. Abkürzungen von Modulen).</li>
-<li><strong>Kanonisierung:</strong> Bevor ein neuer Knoten in den Wissensgraph eingefügt wird, prüft das System, ob für diesen Namen ein kanonischer Alias existiert und verwendet diesen bevorzugt.</li>
+<li><strong>E-Mail-Header Analyse:</strong> Es extrahiert Name-E-Mail-Paare aus den Headern verarbeiteter E-Mails. Dies hilft dabei, Personen eindeutig zu identifizieren, auch wenn sie unterschiedliche Anzeigenamen verwenden.  </li>
+<li><strong>LLM-basierte Konsolidierung:</strong> Bestehende Knoten im Wissensgraph werden durch ein LLM analysiert, um semantische Variationen zu finden (z.B. Abkürzungen von Modulen).  </li>
+<li><strong>Kanonisierung:</strong> Bevor ein neuer Knoten in den Wissensgraph eingefügt wird, prüft das System, ob für diesen Namen ein kanonischer Alias existiert und verwendet diesen bevorzugt.  </li>
 </ol>
 <h2 id="kanten-prioritaten">Kanten-Prioritäten<a class="headerlink" href="#kanten-prioritaten" title="Permanent link">&para;</a></h2>
 <p>In der <code>ontology.yaml</code> können Prioritäten für verschiedene Beziehungstypen definiert werden. Wenn die <code>KnowledgeGraphEngine</code> eine neue Beziehung zwischen zwei Knoten findet, die bereits verknüpft sind, entscheidet die Priorität, ob die alte Beziehung ersetzt wird. Dies stellt sicher, dass qualitativ hochwertigere Informationen (z.B. aus MOCOGI) weniger präzise Informationen (z.B. aus einer E-Mail-Extraktion) überschreiben.</p>

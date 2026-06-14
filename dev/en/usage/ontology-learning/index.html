@@ -1357,9 +1357,9 @@
 <h2 id="ontology-learner">Ontology Learner<a class="headerlink" href="#ontology-learner" title="Permanent link">&para;</a></h2>
 <p>The <code>mcp_university/knowledge_graph/ontology_learner.py</code> module automates this process:</p>
 <ol>
-<li><strong>Email Header Analysis:</strong> It extracts name-email pairs from the headers of processed emails. This helps to uniquely identify persons, even if they use different display names.</li>
-<li><strong>LLM-based Consolidation:</strong> Existing nodes in the knowledge graph are analyzed by an LLM to find semantic variations (e.g., module abbreviations).</li>
-<li><strong>Canonization:</strong> Before a new node is inserted into the knowledge graph, the system checks if a canonical alias exists for that name and uses it preferentially.</li>
+<li><strong>Email Header Analysis:</strong> It extracts name-email pairs from the headers of processed emails. This helps to uniquely identify persons, even if they use different display names.  </li>
+<li><strong>LLM-based Consolidation:</strong> Existing nodes in the knowledge graph are analyzed by an LLM to find semantic variations (e.g., module abbreviations).  </li>
+<li><strong>Canonization:</strong> Before a new node is inserted into the knowledge graph, the system checks if a canonical alias exists for that name and uses it preferentially.  </li>
 </ol>
 <h2 id="edge-priorities">Edge Priorities<a class="headerlink" href="#edge-priorities" title="Permanent link">&para;</a></h2>
 <p>In <code>ontology.yaml</code>, priorities can be defined for different relationship types. When the <code>KnowledgeGraphEngine</code> finds a new relationship between two nodes that are already linked, the priority decides whether the old relationship is replaced. This ensures that higher-quality information (e.g., from MOCOGI) overwrites less precise information (e.g., from an email extraction).</p>

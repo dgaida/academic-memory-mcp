@@ -1461,8 +1461,8 @@
 <p><strong>Parsing &amp; Extraction:</strong>  </p>
 <ul>
 <li>Depending on the file type, the appropriate parser is called:  <ul>
-<li><code>PDFParser</code>: Primarily uses <code>liteparse</code> for fast extraction. If this fails, <code>docling</code> is used as a more robust fallback.</li>
-<li><code>MailParser</code>: Extracts metadata (From, To, Date) and text from <code>.eml</code> and <code>.msg</code>. Safely handles signed emails (<code>SignedAttachment</code>).</li>
+<li><code>PDFParser</code>: Primarily uses <code>liteparse</code> for fast extraction. If this fails, <code>docling</code> is used as a more robust fallback.  </li>
+<li><code>MailParser</code>: Extracts metadata (From, To, Date) and text from <code>.eml</code> and <code>.msg</code>. Safely handles signed emails (<code>SignedAttachment</code>).  </li>
 <li><code>TextParser</code>: Reads plaintext from <code>.md</code>, <code>.txt</code>, <code>.py</code>, <code>.json</code>, etc.  </li>
 </ul>
 </li>
@@ -1487,15 +1487,15 @@
 <p><strong>Special Case: Folder Summaries:</strong>  </p>
 <ul>
 <li>After all files in a folder have been processed, the LLM creates a summary of the entire folder content based on the individual summaries.  </li>
-<li>If summarization fails, a <strong>retry mechanism</strong> is automatically triggered, writing debug info to <code>.folder_summary_items_debug.txt</code> and <code>.folder_summary_combined_debug.txt</code>.</li>
+<li>If summarization fails, a <strong>retry mechanism</strong> is automatically triggered, writing debug info to <code>.folder_summary_items_debug.txt</code> and <code>.folder_summary_combined_debug.txt</code>.  </li>
 <li>This is saved as a hidden file <code>.&lt;foldername&gt;_summary.md</code> in the <strong>parent directory</strong>. This also applies to root folders (which are stored in the same directory as the folder itself).  </li>
-<li>The crawler forces a re-summarization if the file is missing from disk, even if the database marks it as up-to-date.</li>
+<li>The crawler forces a re-summarization if the file is missing from disk, even if the database marks it as up-to-date.  </li>
 </ul>
 </li>
 <li>
 <p><strong>Storage &amp; Indexing:</strong>  </p>
 <ul>
-<li><strong>Metadata:</strong> File paths, hashes, timestamps, and the Markdown summaries are stored in the SQLite database.</li>
+<li><strong>Metadata:</strong> File paths, hashes, timestamps, and the Markdown summaries are stored in the SQLite database.  </li>
 <li><strong>Vector Search:</strong> The <strong>summaries</strong> (not the full text) are vectorized (defaulting to <code>BAAI/bge-m3</code>) and stored in the Qdrant index.  </li>
 </ul>
 </li>

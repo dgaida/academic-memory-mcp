@@ -1594,9 +1594,9 @@
 <h3 id="2-watcher-mcp-uni-watch">2. Watcher (<code>mcp-uni watch</code>)<a class="headerlink" href="#2-watcher-mcp-uni-watch" title="Permanent link">&para;</a></h3>
 <p>Der Watcher überwacht das Dateisystem in Echtzeit. Bei Änderungen führt er dieselben Schreiboperationen wie der Crawler für die betroffenen Dateien aus, um die Datenbank synchron zu halten.</p>
 <h3 id="3-knowledge-graph-engine">3. Knowledge Graph Engine<a class="headerlink" href="#3-knowledge-graph-engine" title="Permanent link">&para;</a></h3>
-<p>Während der Indexierung extrahiert die Engine Entitäten und Beziehungen aus den Zusammenfassungen der Dokumente und speichert diese als Knoten und Kanten in der Graph-Struktur der Datenbank.
-* <strong>Namensauflösung:</strong> Knotennamen werden vor dem Speichern über die Alias-Tabelle zu ihrer kanonischen Form aufgelöst, um Duplikate zu vermeiden.
-* <strong>Kanten-Prioritäten:</strong> Basierend auf <code>ontology.yaml</code> implementiert die Engine eine Prioritätslogik. Neue Beziehungen können bestehende Beziehungen derselben Kategorie zwischen zwei Knoten ersetzen, wenn sie eine höhere Priorität haben.</p>
+<p>Während der Indexierung extrahiert die Engine Entitäten und Beziehungen aus den Zusammenfassungen der Dokumente und speichert diese als Knoten und Kanten in der Graph-Struktur der Datenbank.<br />
+<em> </em><em>Namensauflösung:</em><em> Knotennamen werden vor dem Speichern über die Alias-Tabelle zu ihrer kanonischen Form aufgelöst, um Duplikate zu vermeiden.<br />
+</em> <strong>Kanten-Prioritäten:</strong> Basierend auf <code>ontology.yaml</code> implementiert die Engine eine Prioritätslogik. Neue Beziehungen können bestehende Beziehungen derselben Kategorie zwischen zwei Knoten ersetzen, wenn sie eine höhere Priorität haben.  </p>
 <h3 id="4-person-crawler-scriptscrawl_th_koeln_personspy">4. Person Crawler (<code>scripts/crawl_th_koeln_persons.py</code>)<a class="headerlink" href="#4-person-crawler-scriptscrawl_th_koeln_personspy" title="Permanent link">&para;</a></h3>
 <p>Dieses Skript crawlt die offizielle Personenseite der TH Köln und schreibt:<br />
 <em>   </em><em>Personen-Knoten:</em><em> Name und E-Mail-Adresse.<br />
@@ -1606,14 +1606,14 @@
 <p>Extrahiert Modulinformationen aus der MOCOGI-API und schreibt:<br />
 <em>   </em><em>Studienangebote:</em><em> Studiengänge und Prüfungsordnungen.<br />
 </em>   <strong>Module:</strong> Alle Module einer Prüfungsordnung.<br />
-<em>   </em><em>Verantwortlichkeiten:</em>* Verknüpft (gematchte) Personen mit Modulen ("ist Modulverantwortlicher", "ist Erstprüfer", "ist Zweitprüfer"). Nutzt Word-Set-Comparison für robustes Namens-Matching.</p>
+<em>   </em><em>Verantwortlichkeiten:</em>* Verknüpft (gematchte) Personen mit Modulen ("ist Modulverantwortlicher", "ist Erstprüfer", "ist Zweitprüfer"). Nutzt Word-Set-Comparison für robustes Namens-Matching.  </p>
 <h3 id="6-student-sync-mcp-uni-db-sync-students">6. Student Sync (<code>mcp-uni db sync-students</code>)<a class="headerlink" href="#6-student-sync-mcp-uni-db-sync-students" title="Permanent link">&para;</a></h3>
 <p>Liest eine lokale <code>students.yaml</code> Datei und schreibt die darin enthaltenen Informationen über Studierende, deren Status und Abschlussarbeitsthemen in die Datenbank.</p>
 <h3 id="7-ontology-learner-mcp_universityknowledge_graphontology_learnerpy">7. Ontology Learner (<code>mcp_university/knowledge_graph/ontology_learner.py</code>)<a class="headerlink" href="#7-ontology-learner-mcp_universityknowledge_graphontology_learnerpy" title="Permanent link">&para;</a></h3>
-<p>Automatisiert das Lernen von Aliasen:
-* Extrahiert Name-Email Paare aus E-Mail-Headern.
-* Analysiert bestehende Wissensgraph-Knoten via LLM auf Modulnamen-Variationen (z.B. "KI" vs "Künstliche Intelligenz").
-* Speichert die Ergebnisse in der <code>aliases</code> Tabelle der <code>MetadataStore</code>.</p>
+<p>Automatisiert das Lernen von Aliasen:<br />
+<em> Extrahiert Name-Email Paare aus E-Mail-Headern.<br />
+</em> Analysiert bestehende Wissensgraph-Knoten via LLM auf Modulnamen-Variationen (z.B. "KI" vs "Künstliche Intelligenz").<br />
+* Speichert die Ergebnisse in der <code>aliases</code> Tabelle der <code>MetadataStore</code>.  </p>
 <h2 id="loschen-von-daten">Löschen von Daten<a class="headerlink" href="#loschen-von-daten" title="Permanent link">&para;</a></h2>
 <h3 id="automatisches-loschen">Automatisches Löschen<a class="headerlink" href="#automatisches-loschen" title="Permanent link">&para;</a></h3>
 <p>Der <strong>Crawler</strong> erkennt während eines Scans, wenn Dateien, die in der Datenbank registriert sind, nicht mehr auf dem Dateisystem existieren. In diesem Fall werden die entsprechenden Einträge in der <code>files</code>-Tabelle automatisch gelöscht.</p>
