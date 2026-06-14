@@ -682,6 +682,25 @@ TEXT:
         return "", "Fehler bei der Generierung der Antwort.", False
 
 
+def valid_date(s: str) -> datetime:
+    """Parses a date string in YYYY-MM-DD format.
+
+    Args:
+        s (str): Date string.
+
+    Returns:
+        datetime: Parsed datetime object.
+
+    Raises:
+        argparse.ArgumentTypeError: If the date format is invalid.
+    """
+    try:
+        return datetime.strptime(s, "%Y-%m-%d")
+    except ValueError:
+        msg = f"Invalid date format: '{s}'. Expected format: YYYY-MM-DD."
+        raise argparse.ArgumentTypeError(msg)
+
+
 def main() -> None:
     """Haupteinstiegspunkt des Skripts."""
     config = get_config()
