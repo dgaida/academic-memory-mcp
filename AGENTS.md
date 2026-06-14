@@ -7,13 +7,13 @@ MCP University is an offline-first system for managing academic data (students, 
 
 ### Core Components  
 1. **Crawler (`mcp_university/crawler/`)**: Indexes the filesystem, detects changes (SHA-256), and manages metadata.  
-   - **Retry Logic:** Folder summarization has a one-time retry with debug output (`.folder_summary_items_debug.txt`).
-   - **Persistence:** Verifies file existence after writing folder summaries.
+   - **Retry Logic:** Folder summarization has a one-time retry with debug output (`.folder_summary_items_debug.txt`).  
+   - **Persistence:** Verifies file existence after writing folder summaries.  
 2. **Parser (`mcp_university/parser/`)**:  
-   - Supports PDF (via `liteparse` > `docling`), DOCX, EML, and MSG (via `extract-msg`).
+   - Supports PDF (via `liteparse` > `docling`), DOCX, EML, and MSG (via `extract-msg`).  
    - Analyzes only the first 3 pages of documents to save resources.  
    - Suppresses noisy `extract-msg` warnings.  
-   - **Attachment Handling:** `_parse_msg` safely handles `SignedAttachment` objects.
+   - **Attachment Handling:** `_parse_msg` safely handles `SignedAttachment` objects.  
 3. **Classifier (`mcp_university/classifier/`)**:  
    - Classifies emails using XGBoost, RandomForest, or **Transformer** models.  
    - **Transformer Architecture:** Uses PyTorch-based `EmailTransformerClassifier` (e.g., MiniLM).  
@@ -24,16 +24,16 @@ MCP University is an offline-first system for managing academic data (students, 
    - **Remapping:** Initial classifications of 'Other' are automatically remapped to 'Others'.  
 4. **Retrieval (`mcp_university/retrieval/`)**:  
    - Hybrid search using Qdrant (vector) and BM25 (text).  
-   - **Embedding Loading:** Always attempt `local_files_only=True` first. Log `ERFOLG: Modell ... wurde LOKAL geladen.` on success.
+   - **Embedding Loading:** Always attempt `local_files_only=True` first. Log `ERFOLG: Modell ... wurde LOKAL geladen.` on success.  
 5. **Summarizer (`mcp_university/summarizer/`)**:  
-   - German-localized summarization and Q&A using Ollama via `LLMClientWrapper`.
+   - German-localized summarization and Q&A using Ollama via `LLMClientWrapper`.  
    - **Persona:** Daniel Gaida, Professor at TH Köln. Signature: 'Viele Grüße, Daniel Gaida'.  
-   - **Person Profiler:** Generates Markdown profiles (`Steckbriefe`) in `D:\Steckbriefe\<email>.md` based on email history.
+   - **Person Profiler:** Generates Markdown profiles (`Steckbriefe`) in `D:\Steckbriefe\<email>.md` based on email history.  
 6. **Metadata Store (`mcp_university/metadata/`)**:  
    - SQLite database for file metadata, student info, and folder summaries.  
-   - **Knowledge Graph:** Implements ontology via an `aliases` table. Resolves names to canonical versions before upsert.
-   - **Ontology Learner:** Automates alias learning (Name-Email pairs, module variations).
-   - **Edge Priorities:** Configured in `ontology.yaml`, allows higher-priority relations to replace existing ones.
+   - **Knowledge Graph:** Implements ontology via an `aliases` table. Resolves names to canonical versions before upsert.  
+   - **Ontology Learner:** Automates alias learning (Name-Email pairs, module variations).  
+   - **Edge Priorities:** Configured in `ontology.yaml`, allows higher-priority relations to replace existing ones.  
 7. **Outlook Integration (`outlook_macro/`)**:  
    - VBA macros for sorting and archiving. Hardcoded account: `daniel.gaida@th-koeln.de`.  
    - Format: `YYYYMMDD_HHMMSS - Subject.msg`.  
@@ -60,10 +60,10 @@ MCP University is an offline-first system for managing academic data (students, 
 
 ### Coding Standards  
 - **Docstrings:** Google-style required for ALL classes and methods. MUST include `Args:` and `Returns:`.  
-- **Type Hints:** Explicit return type hints are mandatory (including `__init__`).
+- **Type Hints:** Explicit return type hints are mandatory (including `__init__`).  
 - **Linting:** Run `ruff check . --fix` before submitting. No E741, E402, F401, F541.  
 - **Coverage:** Minimum 95% docstring coverage (interrogate).  
-- **Tests:** Use `pytest`. Run with `PYTHONPATH=.` from the root directory.
+- **Tests:** Use `pytest`. Run with `PYTHONPATH=.` from the root directory.  
   - **Mocking:** Mock `SentenceTransformer.encode` to return a dummy vector (size 384).  
   - **Mocking Outlook:** Use 1-based indexing for collections.  
   - **Mocking extract_msg:** Use `side_effect` for sequential calls to `openMsg`.  
@@ -89,20 +89,20 @@ Delete all temporary files before submission:
 
 ## Outlook Macro Maintenance  
 - Keep VBA documentation in Google-style (`''' Args:`, `''' Returns:`).  
-- **Item Creation:** Use `target_folder.Items.Add(0)` instead of `mail.Move()` to avoid specific Outlook errors.
+- **Item Creation:** Use `target_folder.Items.Add(0)` instead of `mail.Move()` to avoid specific Outlook errors.  
 
 ## Appointment Management Rules  
 - **Timezone:** All appointments must be created in the `Europe/Berlin` timezone.  
-- **Default Duration:** 30 minutes.
-- **Tool Usage:** Always use the `manage_calendar_appointment` tool for bookings.
+- **Default Duration:** 30 minutes.  
+- **Tool Usage:** Always use the `manage_calendar_appointment` tool for bookings.  
 
-## Final Submission Skill
-- Automatically triggers `manage_calendar_appointment` (reminder 7 days later at 08:00 AM) and `save_email_attachments` (to email's parent folder) BEFORE generating the final response.
+## Final Submission Skill  
+- Automatically triggers `manage_calendar_appointment` (reminder 7 days later at 08:00 AM) and `save_email_attachments` (to email's parent folder) BEFORE generating the final response.  
 
 ## Email Anonymization & Cloud LLMs
 When using cloud-based LLMs (e.g., OpenAI via the `--use-cloud` flag), student data MUST be anonymized before being sent to the cloud.  
-- **Requirement:** Use the local Ollama model (via `Anonymizer`) for replacement.
-- **Bi-directional:** The agent must de-anonymize data locally before executing tools.
+- **Requirement:** Use the local Ollama model (via `Anonymizer`) for replacement.  
+- **Bi-directional:** The agent must de-anonymize data locally before executing tools.  
 
 # Configuration System  
 - Loads from `config/user.yaml` and `.env`/`secrets.env`.  

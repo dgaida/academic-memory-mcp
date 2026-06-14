@@ -27,9 +27,9 @@ Der Crawler ist der primäre Schreibprozess. Er führt folgende Aktionen aus:
 Der Watcher überwacht das Dateisystem in Echtzeit. Bei Änderungen führt er dieselben Schreiboperationen wie der Crawler für die betroffenen Dateien aus, um die Datenbank synchron zu halten.
 
 ### 3. Knowledge Graph Engine
-Während der Indexierung extrahiert die Engine Entitäten und Beziehungen aus den Zusammenfassungen der Dokumente und speichert diese als Knoten und Kanten in der Graph-Struktur der Datenbank.
-* **Namensauflösung:** Knotennamen werden vor dem Speichern über die Alias-Tabelle zu ihrer kanonischen Form aufgelöst, um Duplikate zu vermeiden.
-* **Kanten-Prioritäten:** Basierend auf `ontology.yaml` implementiert die Engine eine Prioritätslogik. Neue Beziehungen können bestehende Beziehungen derselben Kategorie zwischen zwei Knoten ersetzen, wenn sie eine höhere Priorität haben.
+Während der Indexierung extrahiert die Engine Entitäten und Beziehungen aus den Zusammenfassungen der Dokumente und speichert diese als Knoten und Kanten in der Graph-Struktur der Datenbank.  
+* **Namensauflösung:** Knotennamen werden vor dem Speichern über die Alias-Tabelle zu ihrer kanonischen Form aufgelöst, um Duplikate zu vermeiden.  
+* **Kanten-Prioritäten:** Basierend auf `ontology.yaml` implementiert die Engine eine Prioritätslogik. Neue Beziehungen können bestehende Beziehungen derselben Kategorie zwischen zwei Knoten ersetzen, wenn sie eine höhere Priorität haben.  
 
 ### 4. Person Crawler (`scripts/crawl_th_koeln_persons.py`)
 Dieses Skript crawlt die offizielle Personenseite der TH Köln und schreibt:  
@@ -41,16 +41,16 @@ Dieses Skript crawlt die offizielle Personenseite der TH Köln und schreibt:
 Extrahiert Modulinformationen aus der MOCOGI-API und schreibt:  
 *   **Studienangebote:** Studiengänge und Prüfungsordnungen.  
 *   **Module:** Alle Module einer Prüfungsordnung.  
-*   **Verantwortlichkeiten:** Verknüpft (gematchte) Personen mit Modulen ("ist Modulverantwortlicher", "ist Erstprüfer", "ist Zweitprüfer"). Nutzt Word-Set-Comparison für robustes Namens-Matching.
+*   **Verantwortlichkeiten:** Verknüpft (gematchte) Personen mit Modulen ("ist Modulverantwortlicher", "ist Erstprüfer", "ist Zweitprüfer"). Nutzt Word-Set-Comparison für robustes Namens-Matching.  
 
 ### 6. Student Sync (`mcp-uni db sync-students`)
 Liest eine lokale `students.yaml` Datei und schreibt die darin enthaltenen Informationen über Studierende, deren Status und Abschlussarbeitsthemen in die Datenbank.
 
 ### 7. Ontology Learner (`mcp_university/knowledge_graph/ontology_learner.py`)
-Automatisiert das Lernen von Aliasen:
-* Extrahiert Name-Email Paare aus E-Mail-Headern.
-* Analysiert bestehende Wissensgraph-Knoten via LLM auf Modulnamen-Variationen (z.B. "KI" vs "Künstliche Intelligenz").
-* Speichert die Ergebnisse in der `aliases` Tabelle der `MetadataStore`.
+Automatisiert das Lernen von Aliasen:  
+* Extrahiert Name-Email Paare aus E-Mail-Headern.  
+* Analysiert bestehende Wissensgraph-Knoten via LLM auf Modulnamen-Variationen (z.B. "KI" vs "Künstliche Intelligenz").  
+* Speichert die Ergebnisse in der `aliases` Tabelle der `MetadataStore`.  
 
 ## Löschen von Daten
 

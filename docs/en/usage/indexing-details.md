@@ -23,8 +23,8 @@ Indexing takes place in several phases:
 
 4.  **Parsing & Extraction:**  
     - Depending on the file type, the appropriate parser is called:  
-        - `PDFParser`: Primarily uses `liteparse` for fast extraction. If this fails, `docling` is used as a more robust fallback.
-        - `MailParser`: Extracts metadata (From, To, Date) and text from `.eml` and `.msg`. Safely handles signed emails (`SignedAttachment`).
+        - `PDFParser`: Primarily uses `liteparse` for fast extraction. If this fails, `docling` is used as a more robust fallback.  
+        - `MailParser`: Extracts metadata (From, To, Date) and text from `.eml` and `.msg`. Safely handles signed emails (`SignedAttachment`).  
         - `TextParser`: Reads plaintext from `.md`, `.txt`, `.py`, `.json`, etc.  
 
 5.  **Summarization:**  
@@ -38,12 +38,12 @@ Indexing takes place in several phases:
 
 7.  **Special Case: Folder Summaries:**  
     - After all files in a folder have been processed, the LLM creates a summary of the entire folder content based on the individual summaries.  
-    - If summarization fails, a **retry mechanism** is automatically triggered, writing debug info to `.folder_summary_items_debug.txt` and `.folder_summary_combined_debug.txt`.
+    - If summarization fails, a **retry mechanism** is automatically triggered, writing debug info to `.folder_summary_items_debug.txt` and `.folder_summary_combined_debug.txt`.  
     - This is saved as a hidden file `.<foldername>_summary.md` in the **parent directory**. This also applies to root folders (which are stored in the same directory as the folder itself).  
-    - The crawler forces a re-summarization if the file is missing from disk, even if the database marks it as up-to-date.
+    - The crawler forces a re-summarization if the file is missing from disk, even if the database marks it as up-to-date.  
 
 8.  **Storage & Indexing:**  
-    - **Metadata:** File paths, hashes, timestamps, and the Markdown summaries are stored in the SQLite database.
+    - **Metadata:** File paths, hashes, timestamps, and the Markdown summaries are stored in the SQLite database.  
     - **Vector Search:** The **summaries** (not the full text) are vectorized (defaulting to `BAAI/bge-m3`) and stored in the Qdrant index.  
 
 ## Example: Before and After Indexing

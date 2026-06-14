@@ -23,8 +23,8 @@ Die Indexierung erfolgt in mehreren Phasen:
 
 4.  **Parsing & Extraktion:**  
     - Je nach Dateityp wird der entsprechende Parser aufgerufen:  
-        - `PDFParser`: Nutzt primär `liteparse` zur schnellen Extraktion. Schlägt dies fehl, wird `docling` als robusterer Fallback verwendet.
-        - `MailParser`: Extrahiert Metadaten (Von, An, Datum) und Text aus `.eml` und `.msg`. Behandelt auch signierte E-Mails (`SignedAttachment`) sicher.
+        - `PDFParser`: Nutzt primär `liteparse` zur schnellen Extraktion. Schlägt dies fehl, wird `docling` als robusterer Fallback verwendet.  
+        - `MailParser`: Extrahiert Metadaten (Von, An, Datum) und Text aus `.eml` und `.msg`. Behandelt auch signierte E-Mails (`SignedAttachment`) sicher.  
         - `TextParser`: Liest Plaintext aus `.md`, `.txt`, `.py`, `.json`, etc.  
 
 5.  **Zusammenfassung (Summarization):**  
@@ -38,12 +38,12 @@ Die Indexierung erfolgt in mehreren Phasen:
 
 7.  **Spezialfall: Ordner-Zusammenfassungen:**  
     - Nachdem alle Dateien eines Ordners verarbeitet wurden, erstellt das LLM eine Zusammenfassung des gesamten Ordnerinhalts basierend auf den Einzelzusammenfassungen.  
-    - Schlägt die Zusammenfassung fehl, wird automatisch ein **Retry-Mechanismus** ausgelöst, der Debug-Informationen in `.folder_summary_items_debug.txt` und `.folder_summary_combined_debug.txt` schreibt.
+    - Schlägt die Zusammenfassung fehl, wird automatisch ein **Retry-Mechanismus** ausgelöst, der Debug-Informationen in `.folder_summary_items_debug.txt` und `.folder_summary_combined_debug.txt` schreibt.  
     - Diese wird als versteckte Datei `.<Ordnername>_summary.md` im **Elternverzeichnis** gespeichert. Dies gilt auch für Wurzelordner (die im selben Verzeichnis wie der Ordner selbst liegen).  
-    - Der Crawler erzwingt eine Neu-Summarisierung, falls die Datei auf der Festplatte fehlt, selbst wenn die Datenbank sie als aktuell markiert.
+    - Der Crawler erzwingt eine Neu-Summarisierung, falls die Datei auf der Festplatte fehlt, selbst wenn die Datenbank sie als aktuell markiert.  
 
 8.  **Speicherung & Indexierung:**  
-    - **Metadaten:** Dateipfade, Hashes, Zeitstempel und die Markdown-Zusammenfassungen werden in der SQLite-Datenbank gespeichert.
+    - **Metadaten:** Dateipfade, Hashes, Zeitstempel und die Markdown-Zusammenfassungen werden in der SQLite-Datenbank gespeichert.  
     - **Vektorsuche:** Die **Zusammenfassungen** (nicht der Volltext) werden vektorisiert (standardmäßig mit `BAAI/bge-m3`) und im Qdrant-Index gespeichert.  
 
 ## Beispiel: Vor und nach der Indexierung
