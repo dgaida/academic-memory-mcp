@@ -190,6 +190,7 @@ def extract_data() -> None:
                 elif "po" in sp_summary:
                     pos = [sp_summary["po"]]
 
+                # Wenn keine POs da sind, versuchen wir es mit den Details
                 if not pos:
                     try:
                         sp_details = api_call(f"{base_url}/studyPrograms/{sp_id}")
@@ -200,6 +201,7 @@ def extract_data() -> None:
                         logger.warning(f"Konnte Details für {sp_id} nicht laden: {e}")
 
                 if not pos:
+                    logger.warning(f"Keine POs für Studiengang {sp_id} gefunden.")
                     continue
 
                 f.write(f"## {sp_name}\n\n")
