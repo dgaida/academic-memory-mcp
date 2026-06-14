@@ -14,7 +14,7 @@ import sys
 import urllib.request
 import urllib.error
 import re
-from typing import Dict, Any, Optional, List, Set
+from typing import Dict, Any, Optional
 
 from mcp_university.metadata.store import MetadataStore
 from mcp_university.config import get_config
