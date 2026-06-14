@@ -207,25 +207,36 @@ def relocate_emails(email_changes: List[Dict], config: Dict):
                 dest.unlink()
             shutil.move(str(f), str(dest))
 
-        # Aufräumen und Zusammenfassung verschieben
+        # Aufräumen und Zusammenfassung verschieben (nur wenn keine Mails mehr übrig sind)
         old_folder = old_path.parent
         old_student_folder = old_folder.parent
         target_student_folder = target_dir.parent
 
-        # Die Zusammenfassung liegt normalerweise im Studenten-Ordner (Parent von Inbox/SentItems)
-        summary_file = old_student_folder / ".emails_summary.md"
-        # Fallback: falls sie doch im Inbox/SentItems Ordner liegt
-        if not summary_file.exists():
-            summary_file = old_folder / ".emails_summary.md"
+        def has_emails(student_folder: Path):
+            for sub in ["Inbox", "SentItems"]:
+                p = student_folder / sub
+                if p.exists() and p.is_dir():
+                    # Suche nach .msg oder .eml Dateien
+                    if any(p.glob("*.msg")) or any(p.glob("*.eml")):
+                        return True
+            return False
 
-        if summary_file.exists():
-            dest_summary = target_student_folder / ".emails_summary.md"
-            if not dest_summary.exists():
-                logger.info(f"Verschiebe Zusammenfassung nach {dest_summary}")
-                shutil.move(str(summary_file), str(dest_summary))
-            else:
-                logger.info(f"Zusammenfassung im Ziel existiert bereits. Lösche {summary_file}")
-                summary_file.unlink()
+        if not has_emails(old_student_folder):
+            # Die Zusammenfassung liegt normalerweise im Studenten-Ordner (Parent von Inbox/SentItems)
+            summary_file = old_student_folder / ".emails_summary.md"
+            # Fallback: falls sie doch im Inbox/SentItems Ordner liegt
+            if not summary_file.exists():
+                summary_file = old_folder / ".emails_summary.md"
+
+            if summary_file.exists():
+                dest_summary = target_student_folder / ".emails_summary.md"
+                if not dest_summary.exists():
+                    logger.info(f"Verschiebe Zusammenfassung nach {dest_summary}")
+                    shutil.move(str(summary_file), str(dest_summary))
+                else:
+                    logger.info(f"Zusammenfassung im Ziel existiert bereits. Lösche {summary_file}")
+                    summary_file.unlink()
+
         def delete_if_empty(folder: Path):
             if folder.exists() and folder.is_dir():
                 items = list(folder.iterdir())
