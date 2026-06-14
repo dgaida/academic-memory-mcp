@@ -16,7 +16,7 @@ Flacht eine Ordnerstruktur ab, indem alle Dateien in das Wurzelverzeichnis versc
 python scripts/flatten_directory.py /pfad/zu/daten
 ```
 
-## Wissensgraph
+## Wissensgraph & Personen
 
 ### Wissensgraph visualisieren
 Generiert eine interaktive HTML-Visualisierung des Wissensgraphen.
@@ -25,10 +25,30 @@ python scripts/visualize_knowledge_graph.py
 ```
 Die Ausgabe erfolgt in `knowledge_graph.html`.
 
+### TH Köln Personen-Crawler
+Crawlt das Personenverzeichnis der TH Köln nach Namen, E-Mails, Fakultäten und Instituten.
+```bash
+python scripts/crawl_th_koeln_persons.py A B C
+```
+Unterstützt mehrere Anfangsbuchstaben als Argumente.
+
+### Personen-Steckbriefe erstellen
+Erstellt manuell einen Steckbrief für eine bestimmte E-Mail-Adresse basierend auf vorhandenen E-Mails.
+```bash
+python scripts/create_person_profiles.py student@smail.th-koeln.de
+```
+
+### MOCOGI Datenextraktion
+Extrahiert Modulinformationen (Verantwortliche, Prüfer) aus der MOCOGI-API und verknüpft diese im Wissensgraphen.
+```bash
+python scripts/extract_mocogi_data.py
+```
+
 ## Vorlesungen & Lehre
 
 ### Vorlesungsskripte zusammenfassen
-Sucht nach PDFs in einem Ordner und generiert kompakte Markdown-Zusammenfassungen. Überspringt Dateien, die bereits verarbeitet wurden.
+Sucht nach PDFs in einem Ordner und generiert kompakte Markdown-Zusammenfassungen. Überspringt Dateien, die bereits verarbeitet wurden (Mtime-Check).
 ```bash
 python scripts/summarize_lectures.py /pfad/zu/vorlesungen
 ```
+Nutzt primär `liteparse` und einen LLM-Fallback bei Fehlern.

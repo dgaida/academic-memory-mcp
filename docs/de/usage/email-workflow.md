@@ -18,19 +18,21 @@ Das System nutzt den `EmailClassifier`, um die Mails nach Themen (z.B. Bachelor 
 Nach der Sortierung wird `process_sorted_emails.py` ausgeführt. Das Skript führt folgende Schritte für jede E-Mail durch:
 
 1.  **Kontext-Analyse:** Das System analysiert andere E-Mails im Zielordner (den bisherigen Verlauf), um den Kontext der aktuellen Anfrage zu verstehen.  
-2.  **Termin-Check:** Prüft, ob der Student um einen Termin bittet. Falls ja, werden die `free_slots.yaml` genutzt, um einen Vorschlag zu machen oder den Termin direkt zu buchen.  
-3.  **Check für finale Abgabe:** Erkennt automatisch, wenn ein Student seine Abschlussarbeit (Bachelor/Master/Projekt) final einreicht. In diesem Fall:  
-    - Wird automatisch ein **Erinnerungstermin** im Outlook-Kalender für in einer Woche erstellt.  
+2.  **Stichtags-Regelung (`--cutoff-date`):** Mit dem Parameter `--cutoff-date YYYY-MM-DD` können ältere E-Mails von der LLM-Verarbeitung (Antwort-Generierung, Terminbuchung) ausgeschlossen werden. Sie werden lediglich sortiert.
+3.  **Termin-Check:** Prüft, ob der Student um einen Termin bittet. Falls ja, werden die `free_slots.yaml` genutzt, um einen Vorschlag zu machen oder den Termin direkt zu buchen.
+4.  **Check für finale Abgabe:** Erkennt automatisch, wenn ein Student seine Abschlussarbeit (Bachelor/Master/Projekt) final einreicht. In diesem Fall:
+    - Wird automatisch ein **Erinnerungstermin** im Outlook-Kalender für in 7 Tagen (08:00 Uhr) erstellt.
     - Werden die **Anhänge extrahiert** und sicher im entsprechenden Studenten-Ordner gespeichert.  
     - Wird eine Bestätigungsmail als Entwurf vorbereitet.  
-4.  **Notwendigkeits-Check (Necessity Check):** Ein LLM entscheidet, ob die E-Mail überhaupt eine Antwort erfordert (oder ob es sich z.B. nur um eine Information handelt).  
-5.  **Entwurf schreiben:** Falls eine Antwort nötig ist, generiert der Agent unter Berücksichtigung der Skill-Vorgaben und der Persona (Daniel Gaida) einen Antworttext.  
-6.  **Outlook Integration:** Es wird automatisch ein Entwurf ("Draft") im Outlook-Ordner "Work in Progress" erstellt. Die Original-Mail wird als Anhang beigefügt.  
+5.  **Personen-Kontext:** Bezieht vorhandene Personen-Steckbriefe (erstellt durch den Indexer oder `create_person_profiles.py`) in die Antwortgenerierung mit ein.
+6.  **Notwendigkeits-Check (Necessity Check):** Ein LLM entscheidet, ob die E-Mail überhaupt eine Antwort erfordert (oder ob es sich z.B. nur um eine Information handelt).
+7.  **Entwurf schreiben:** Falls eine Antwort nötig ist, generiert der Agent unter Berücksichtigung der Skill-Vorgaben und der Persona (Daniel Gaida) einen Antworttext.
+8.  **Outlook Integration:** Es wird automatisch ein Entwurf ("Draft") im Outlook-Ordner "Work in Progress" erstellt. Die Original-Mail wird als Anhang beigefügt.
 
 ## 4. Überprüfung (Gradio GUI)
 Am Ende des Prozesses startet automatisch eine Gradio-Weboberfläche. Hier können Sie:  
 - Die getroffenen Klassifizierungen überprüfen.  
-- Mails bei Bedarf manuell in andere Kategorien verschieben.  
+- Mails bei Bedarf manuell in andere Kategorien verschieben. Das System verschiebt dabei automatisch auch die zugehörige `.emails_summary.md`.
 - Den Status der verarbeiteten Mails einsehen.  
 
 ## 5. Abschlussbericht
