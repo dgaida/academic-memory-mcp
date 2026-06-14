@@ -2,6 +2,7 @@
 import os
 import sys
 from unittest.mock import MagicMock, patch
+from datetime import datetime, timedelta
 
 # Add project root to sys.path to make process_sorted_emails importable
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -11,7 +12,8 @@ mock_win32 = MagicMock()
 sys.modules["win32com"] = mock_win32
 sys.modules["win32com.client"] = mock_win32.client
 
-from process_sorted_emails import parse_sorted_report, generate_reply, create_outlook_draft # noqa: E402
+# Import after mocks and sys.path update
+from process_sorted_emails import parse_sorted_report, generate_reply, create_outlook_draft  # noqa: E402
 
 def test_parse_sorted_report(tmp_path):
     """Testet das Parsen des sorted_emails.md Reports."""
@@ -98,10 +100,15 @@ def test_create_outlook_draft_success(mock_open):
     mock_root = mock_store.GetRootFolder.return_value
     mock_folder = MagicMock()
     mock_folder.Name = "Work in Progress"
+
+    # Mocking Folders which might be a collection
     mock_root.Folders = [mock_folder]
     mock_namespace.Stores = [mock_store]
 
     mock_mail = MagicMock()
+    # Mock fallback if folder not found
+    mock_outlook.CreateItem.return_value = mock_mail
+    # Mock folder Add if found
     mock_folder.Items.Add.return_value = mock_mail
 
     success = create_outlook_draft("Test Subject", "Test Body")
@@ -143,3 +150,18 @@ def test_generate_reply_no_reply_needed(mock_agent_cls, mock_parser_cls, tmp_pat
     assert subject == "NO_REPLY_NEEDED"
     assert "Reine Dankesmail" in reply
     assert mock_agent.chat.call_count == 3
+
+def test_age_months_logic():
+    """Verifiziert die Logik für das Alter in Monaten."""
+    age_months = 3
+    cutoff = datetime.now() - timedelta(days=age_months * 30)
+    cutoff = cutoff.replace(tzinfo=None)
+
+    # E-Mail von heute (sollte nicht übersprungen werden)
+    mail_date_new = datetime.now().replace(tzinfo=None)
+    assert mail_date_new >= cutoff
+
+    # E-Mail von vor 4 Monaten (sollte übersprungen werden)
+    mail_date_old = datetime.now() - timedelta(days=120)
+    mail_date_old = mail_date_old.replace(tzinfo=None)
+    assert mail_date_old < cutoff

@@ -743,6 +743,11 @@ def main() -> None:
         default="combined",
         help="Merkmalsextraktion (tfidf, embedding, combined)",
     )
+    parser.add_argument(
+        "--age-months",
+        type=int,
+        help="E-Mails älter als diese Anzahl an Monaten werden nur einsortiert, aber nicht beantwortet.",
+    )
     args = parser.parse_args()
 
     source_dir = Path(args.source_dir)
@@ -891,6 +896,24 @@ def main() -> None:
         latest_mail = email["latest_mail"]
         latest_date = email["latest_date"]
         is_ba_ma = email["class"].startswith(("BA_", "MA_"))
+        # Prüfung auf Alter in Monaten
+        if args.age_months:
+            cutoff = datetime.now() - timedelta(days=args.age_months * 30)
+            cutoff = cutoff.replace(tzinfo=None)
+            mail_date = latest_date.replace(tzinfo=None)
+            if mail_date < cutoff:
+                logger.info(
+                    f"E-Mail von {email['lastname']} vom {mail_date} ist älter als {args.age_months} Monate. Wird nur einsortiert."
+                )
+                processed_results.append(
+                    {
+                        "lastname": email["lastname"],
+                        "subject": latest_mail.stem,
+                        "status": f"Übersprungen (> {args.age_months} Monate)",
+                    }
+                )
+                continue
+
 
         student_email = ""
         sender_name = ""
