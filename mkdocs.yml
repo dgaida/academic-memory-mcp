@@ -103,6 +103,7 @@ nav:
       - Datenbank-Management: usage/database-management.md
       - MCP Integration: usage/mcp.md
       - Hilfsskripte: usage/scripts.md
+      - Datenbank-Prozesse: usage/database-processes.md
       - MOCOGI Extraktion: usage/mocogi-extraction.md
       - E-Mail Workflow: usage/email-workflow.md
   - API: api/index.md

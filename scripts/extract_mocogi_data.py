@@ -2,8 +2,8 @@
 
 This script iterates through all study programs and their examination regulations (POs),
 fetches all modules for each PO, and extracts the module coordinator,
-first examiner, and second examiner. The results are saved in a Markdown file.
-Abbreviations are resolved to full names using the /identities endpoint.
+first examiner, and second examiner. The results are saved in a Markdown file
+and integrated into the university knowledge graph.
 """
 
 import json
@@ -13,7 +13,11 @@ import pathlib
 import sys
 import urllib.request
 import urllib.error
-from typing import Dict, Any, Optional
+import re
+from typing import Dict, Any, Optional, List, Set
+
+from mcp_university.metadata.store import MetadataStore
+from mcp_university.config import get_config
 
 # Logging-Konfiguration
 logging.basicConfig(
@@ -24,12 +28,17 @@ logging.basicConfig(
 logger = logging.getLogger("mocogi_extractor")
 
 class PersonResolver:
-    """Resolves person IDs or abbreviations to full names."""
+    """Resolves person IDs or abbreviations to full names and handles title stripping."""
 
     def __init__(self, base_url: str) -> None:
         self.base_url = base_url
         self.identity_map: Dict[str, str] = {}
         self.loaded = False
+        # Extended list of titles and abbreviations to remove
+        self.titles = [
+            "Prof", "Dr", "M.Sc", "B.Sc", "B.Eng", "Dipl.-Ing", "Dipl",
+            "h.c", "mult", "rer", "nat", "pol", "inf", "Ing", "PD", "M.A", "B.A", "Dipl-Ing"
+        ]
 
     def load_identities(self) -> None:
         """Fetches all identities and builds a mapping."""
@@ -73,11 +82,9 @@ class PersonResolver:
             return ", ".join([i for i in items if i != "-"]) or "-"
 
         if isinstance(person_id, str):
-            # Check if it's already a resolved object from details (legacy fallback)
             return self.identity_map.get(person_id, person_id)
 
         if isinstance(person_id, dict):
-            # Handle cases where the API might already return an object
             first_name = person_id.get("firstName") or person_id.get("firstname") or ""
             last_name = person_id.get("lastName") or person_id.get("lastname") or ""
             title = person_id.get("title") or ""
@@ -85,6 +92,32 @@ class PersonResolver:
             return " ".join(parts).strip() or "-"
 
         return str(person_id)
+
+    def strip_titles(self, name: str) -> str:
+        """Removes academic titles from a name string."""
+        if not name or name == "-":
+            return ""
+
+        # Split by comma if multiple people are listed
+        names = [n.strip() for n in name.split(",")]
+        stripped_names = []
+
+        for n in names:
+            current = n
+            # Remove common titles and their combinations
+            # We look for the title followed by a dot and/or space, or just as a word
+            sorted_titles = sorted(self.titles, key=len, reverse=True)
+            for title in sorted_titles:
+                escaped_title = re.escape(title)
+                # Match title, optional dot, then space or end of string
+                current = re.sub(rf'\b{escaped_title}\.?\s*', '', current, flags=re.IGNORECASE)
+
+            # Clean up double spaces and leading/trailing whitespace
+            current = re.sub(r'\s+', ' ', current).strip()
+            if current:
+                stripped_names.append(current)
+
+        return ", ".join(stripped_names)
 
 def load_env_manual() -> None:
     """Lädt Umgebungsvariablen aus .env oder secrets.env manuell."""
@@ -159,16 +192,33 @@ def api_call(
         logger.error(f"Unerwarteter Fehler beim API-Call: {e}")
         raise
 
+def match_person(store: MetadataStore, name: str) -> Optional[int]:
+    """Finds a person node by name (fuzzy match: handles Lastname, Firstname vs Firstname Lastname)."""
+    all_nodes = store.get_all_nodes()
+    name_clean = name.lower().replace(",", " ").split()
+    name_clean_set = set(name_clean)
+
+    for node in all_nodes:
+        if node["type"] == "Person":
+            node_name_clean = node["name"].lower().replace(",", " ").split()
+            node_name_clean_set = set(node_name_clean)
+            if name_clean_set == node_name_clean_set:
+                return node["id"]
+    return None
+
 def extract_data() -> None:
-    """Extrahiert alle Studiengänge, POs und Module."""
+    """Extrahiert alle Studiengänge, POs und Module und integriert sie in den Graphen."""
     load_env_manual()
+    cfg = get_config()
+    store = MetadataStore(cfg.sqlite_path)
+
     base_url = "https://module.gm.th-koeln.de/api"
     output_file = "mocogi_modules.md"
 
     resolver = PersonResolver(base_url)
     resolver.load_identities()
 
-    logger.info("Starte Datenextraktion...")
+    logger.info("Starte Datenextraktion und Graph-Integration...")
 
     try:
         # 1. Hole Studiengänge
@@ -182,26 +232,23 @@ def extract_data() -> None:
                 sp_id = sp_summary.get("id")
                 sp_name = sp_summary.get("deLabel") or sp_summary.get("name") or sp_id
 
-                logger.info(f"Verarbeite Studiengang: {sp_name} ({sp_id})")
+                logger.info(f"Verarbeite Studiengang: {sp_name}")
+                sp_node_id, _ = store.upsert_node(sp_name, "Studiengang")
 
-                pos = []
-                if "pos" in sp_summary:
-                    pos = sp_summary["pos"]
-                elif "po" in sp_summary:
+                pos = sp_summary.get("pos") or []
+                if not pos and "po" in sp_summary:
                     pos = [sp_summary["po"]]
 
-                # Wenn keine POs da sind, versuchen wir es mit den Details
                 if not pos:
                     try:
                         sp_details = api_call(f"{base_url}/studyPrograms/{sp_id}")
                         pos = sp_details.get("pos") or []
                         if not pos and "po" in sp_details:
                             pos = [sp_details["po"]]
-                    except Exception as e:
-                        logger.warning(f"Konnte Details für {sp_id} nicht laden: {e}")
+                    except Exception:
+                        pass
 
                 if not pos:
-                    logger.warning(f"Keine POs für Studiengang {sp_id} gefunden.")
                     continue
 
                 f.write(f"## {sp_name}\n\n")
@@ -209,9 +256,12 @@ def extract_data() -> None:
                 for po in pos:
                     po_id = po.get("id")
                     po_version = po.get("version")
-                    po_name = f"PO {po_version}" if po_version else po_id
+                    po_name = f"{sp_name} (PO {po_version})" if po_version else f"{sp_name} ({po_id})"
 
-                    logger.info(f"  Lade Module für PO: {po_name} ({po_id})")
+                    logger.info(f"  Verarbeite PO: {po_name}")
+                    po_node_id, _ = store.upsert_node(po_name, "Prüfungsordnung")
+                    store.upsert_edge(po_node_id, sp_node_id, "ist Element von")
+
                     f.write(f"### {po_name}\n\n")
                     f.write("| Modulname | Modulverantwortlich | Erstprüfer | Zweitprüfer |\n")
                     f.write("| :--- | :--- | :--- | :--- |\n")
@@ -219,7 +269,6 @@ def extract_data() -> None:
                     # 2. Hole Module für PO
                     modules_url = f"{base_url}/modules?po={po_id}&active=true&select=metadata"
                     modules_list = api_call(modules_url)
-
                     modules = modules_list if isinstance(modules_list, list) else modules_list.get('module', [])
 
                     if not modules:
@@ -229,24 +278,46 @@ def extract_data() -> None:
                     for m_item in modules:
                         m_basic = m_item.get('module') if isinstance(m_item, dict) and 'module' in m_item else m_item
                         m_meta = m_basic.get('metadata') if isinstance(m_basic, dict) and 'metadata' in m_basic else m_basic
-
                         m_title = m_meta.get('title', 'Unbekannt')
 
+                        module_node_id, _ = store.upsert_node(m_title, "Modul")
+                        store.upsert_edge(module_node_id, po_node_id, "ist Element von")
+
                         # Extrahiere Verantwortliche und Prüfer
-                        manager = resolver.resolve(m_meta.get("moduleManagement") or m_meta.get("management"))
-
+                        manager_raw = resolver.resolve(m_meta.get("moduleManagement") or m_meta.get("management"))
                         examiner = m_meta.get("examiner") or {}
-                        first_examiner = resolver.resolve(examiner.get("first"))
-                        second_examiner = resolver.resolve(examiner.get("second"))
+                        first_raw = resolver.resolve(examiner.get("first"))
+                        second_raw = resolver.resolve(examiner.get("second"))
 
-                        f.write(f"| {m_title} | {manager} | {first_examiner} | {second_examiner} |\n")
+                        # Role mapping
+                        roles = {
+                            "ist Modulverantwortlicher": manager_raw,
+                            "ist Erstprüfer": first_raw,
+                            "ist Zweitprüfer": second_raw
+                        }
+
+                        for role_name, raw_name in roles.items():
+                            if raw_name and raw_name != "-":
+                                stripped_names_str = resolver.strip_titles(raw_name)
+                                for s_name in stripped_names_str.split(","):
+                                    s_name = s_name.strip()
+                                    if not s_name:
+                                        continue
+                                    person_id = match_person(store, s_name)
+                                    if person_id:
+                                        logger.info(f"    Match gefunden: {s_name} -> {role_name} für {m_title}")
+                                        store.upsert_edge(person_id, module_node_id, role_name)
+
+                        f.write(f"| {m_title} | {manager_raw} | {first_raw} | {second_raw} |\n")
 
                     f.write("\n")
 
-        logger.info(f"Extraktion abgeschlossen. Ergebnisse in {output_file}")
+        logger.info(f"Extraktion und Graph-Integration abgeschlossen. Ergebnisse in {output_file}")
 
     except Exception as e:
         logger.error(f"Kritischer Fehler bei der Extraktion: {e}")
+        import traceback
+        traceback.print_exc()
         sys.exit(1)
 
 if __name__ == "__main__":
