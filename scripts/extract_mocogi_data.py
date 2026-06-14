@@ -3,6 +3,7 @@
 This script iterates through all study programs and their examination regulations (POs),
 fetches all modules for each PO, and extracts the module coordinator,
 first examiner, and second examiner. The results are saved in a Markdown file.
+Abbreviations are resolved to full names using the /identities endpoint.
 """
 
 import json
@@ -21,6 +22,69 @@ logging.basicConfig(
     stream=sys.stderr
 )
 logger = logging.getLogger("mocogi_extractor")
+
+class PersonResolver:
+    """Resolves person IDs or abbreviations to full names."""
+
+    def __init__(self, base_url: str) -> None:
+        self.base_url = base_url
+        self.identity_map: Dict[str, str] = {}
+        self.loaded = False
+
+    def load_identities(self) -> None:
+        """Fetches all identities and builds a mapping."""
+        if self.loaded:
+            return
+
+        logger.info("Lade Personen-Mapping von /identities...")
+        try:
+            identities = api_call(f"{self.base_url}/identities")
+            if not isinstance(identities, list):
+                logger.warning("Unerwartetes Format für /identities")
+                return
+
+            for item in identities:
+                item_id = item.get("id")
+                if not item_id:
+                    continue
+
+                if item.get("kind") == "person":
+                    first_name = item.get("firstname") or ""
+                    last_name = item.get("lastname") or ""
+                    title = item.get("title") or ""
+                    parts = [p for p in [title, first_name, last_name] if p]
+                    full_name = " ".join(parts).strip()
+                    self.identity_map[item_id] = full_name
+                elif item.get("kind") == "group":
+                    self.identity_map[item_id] = item.get("label") or item_id
+
+            self.loaded = True
+            logger.info(f"{len(self.identity_map)} Identitäten geladen.")
+        except Exception as e:
+            logger.error(f"Fehler beim Laden der Identitäten: {e}")
+
+    def resolve(self, person_id: Any) -> str:
+        """Resolves a person ID or a list of IDs to a name string."""
+        if not person_id:
+            return "-"
+
+        if isinstance(person_id, list):
+            items = [self.resolve(p) for p in person_id if p]
+            return ", ".join([i for i in items if i != "-"]) or "-"
+
+        if isinstance(person_id, str):
+            # Check if it's already a resolved object from details (legacy fallback)
+            return self.identity_map.get(person_id, person_id)
+
+        if isinstance(person_id, dict):
+            # Handle cases where the API might already return an object
+            first_name = person_id.get("firstName") or person_id.get("firstname") or ""
+            last_name = person_id.get("lastName") or person_id.get("lastname") or ""
+            title = person_id.get("title") or ""
+            parts = [p for p in [title, first_name, last_name] if p]
+            return " ".join(parts).strip() or "-"
+
+        return str(person_id)
 
 def load_env_manual() -> None:
     """Lädt Umgebungsvariablen aus .env oder secrets.env manuell."""
@@ -95,30 +159,14 @@ def api_call(
         logger.error(f"Unerwarteter Fehler beim API-Call: {e}")
         raise
 
-def format_person(person: Any) -> str:
-    """Formatiert ein Personen-Objekt oder eine Liste von Personen zu einem String."""
-    if not person:
-        return "-"
-
-    if isinstance(person, list):
-        items = [format_person(p) for p in person if p]
-        return ", ".join([i for i in items if i != "-"]) or "-"
-
-    if isinstance(person, dict):
-        first_name = person.get("firstName") or person.get("firstname") or ""
-        last_name = person.get("lastName") or person.get("lastname") or ""
-        title = person.get("title") or ""
-
-        parts = [p for p in [title, first_name, last_name] if p]
-        return " ".join(parts).strip() or "-"
-
-    return str(person)
-
 def extract_data() -> None:
     """Extrahiert alle Studiengänge, POs und Module."""
     load_env_manual()
     base_url = "https://module.gm.th-koeln.de/api"
     output_file = "mocogi_modules.md"
+
+    resolver = PersonResolver(base_url)
+    resolver.load_identities()
 
     logger.info("Starte Datenextraktion...")
 
@@ -136,8 +184,6 @@ def extract_data() -> None:
 
                 logger.info(f"Verarbeite Studiengang: {sp_name} ({sp_id})")
 
-                # In der Liste sind die POs oft direkt unter 'po' (einzeln)
-                # oder wir müssen nach 'pos' schauen.
                 pos = []
                 if "pos" in sp_summary:
                     pos = sp_summary["pos"]
@@ -183,25 +229,17 @@ def extract_data() -> None:
                     for m_item in modules:
                         m_basic = m_item.get('module') if isinstance(m_item, dict) and 'module' in m_item else m_item
                         m_meta = m_basic.get('metadata') if isinstance(m_basic, dict) and 'metadata' in m_basic else m_basic
-                        m_id = m_basic.get('id') or m_meta.get('id')
+
                         m_title = m_meta.get('title', 'Unbekannt')
 
-                        try:
-                            # 3. Hole Moduldetails
-                            m_details = api_call(f"{base_url}/modules/{m_id}")
-                            m_det_meta = m_details.get('metadata') or m_details
+                        # Extrahiere Verantwortliche und Prüfer
+                        manager = resolver.resolve(m_meta.get("moduleManagement") or m_meta.get("management"))
 
-                            manager = format_person(m_det_meta.get("moduleManagement") or m_det_meta.get("management"))
+                        examiner = m_meta.get("examiner") or {}
+                        first_examiner = resolver.resolve(examiner.get("first"))
+                        second_examiner = resolver.resolve(examiner.get("second"))
 
-                            examiner = m_det_meta.get("examiner") or {}
-                            first_examiner = format_person(examiner.get("first"))
-                            second_examiner = format_person(examiner.get("second"))
-
-                            f.write(f"| {m_title} | {manager} | {first_examiner} | {second_examiner} |\n")
-
-                        except Exception as e:
-                            logger.error(f"      Fehler bei Modul {m_title} ({m_id}): {e}")
-                            f.write(f"| {m_title} | Fehler | Fehler | Fehler |\n")
+                        f.write(f"| {m_title} | {manager} | {first_examiner} | {second_examiner} |\n")
 
                     f.write("\n")
 
