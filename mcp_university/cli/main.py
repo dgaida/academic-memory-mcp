@@ -8,12 +8,15 @@ from ..config import get_config
 from ..metadata.store import MetadataStore
 from ..parser.factory import ParserFactory
 from ..summarizer.engine import Summarizer
+from ..summarizer.profiler import PersonProfiler
 from ..retrieval.index import SearchIndex
 from ..mcp_server.server import create_server
 from ..knowledge_graph.engine import KnowledgeGraphEngine
 import yaml
 from .db import db_app
 
+
+logger = logging.getLogger(__name__)
 
 graph_app = typer.Typer(help="Verwaltung des Wissensgraphen")
 
@@ -123,10 +126,25 @@ def setup_logging(debug: bool) -> None:
     logger.addHandler(file_handler)
 
 @app.command()
-def index(debug: bool = typer.Option(False, "--debug", "-d", help="Debug-Logging aktivieren")) -> None:
-    """Startet den vollständigen Indexierungsprozess aller konfigurierten Ordner."""
+def index(
+    debug: bool = typer.Option(False, "--debug", "-d", help="Debug-Logging aktivieren"),
+    profile: str = typer.Option(None, "--profile", "-p", help="Erstellt einen Steckbrief für die angegebene E-Mail-Adresse anstatt zu indexieren.")
+) -> None:
+    """Startet den vollständigen Indexierungsprozess aller konfigurierten Ordner oder erstellt einen Personen-Steckbrief."""
     setup_logging(debug)
     cfg = get_config()
+
+    if profile:
+        logger.info(f"Erstelle Personen-Steckbrief für {profile}...")
+        profiler = PersonProfiler()
+        result = profiler.generate_profile(profile)
+        if result:
+            print(f"\nSteckbrief für {profile} erfolgreich erstellt.")
+            print(f"Gespeichert unter: {profiler.storage_path / f'{profile}.md'}")
+        else:
+            print(f"\nFehler: Steckbrief für {profile} konnte nicht erstellt werden (keine E-Mails gefunden?).")
+        return
+
     store = MetadataStore(cfg.sqlite_path)
     parser = ParserFactory(cfg.data_dir / "cache")
     summarizer = Summarizer(cfg.llm.model, cfg.llm.base_url)
