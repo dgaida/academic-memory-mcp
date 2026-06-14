@@ -23,8 +23,8 @@ Die Indexierung erfolgt in mehreren Phasen:
 
 4.  **Parsing & Extraktion:**  
     - Je nach Dateityp wird der entsprechende Parser aufgerufen:  
-        - `PDFParser`: Nutzt `liteparse` (Primär) oder `docling` (Fallback) für PDF/Docx.  
-        - `MailParser`: Extrahiert Metadaten (Von, An, Datum) und Text aus `.eml` und `.msg`.  
+        - `PDFParser`: Nutzt primär `liteparse` zur schnellen Extraktion. Schlägt dies fehl, wird `docling` als robusterer Fallback verwendet.
+        - `MailParser`: Extrahiert Metadaten (Von, An, Datum) und Text aus `.eml` und `.msg`. Behandelt auch signierte E-Mails (`SignedAttachment`) sicher.
         - `TextParser`: Liest Plaintext aus `.md`, `.txt`, `.py`, `.json`, etc.  
 
 5.  **Zusammenfassung (Summarization):**  
@@ -38,13 +38,12 @@ Die Indexierung erfolgt in mehreren Phasen:
 
 7.  **Spezialfall: Ordner-Zusammenfassungen:**  
     - Nachdem alle Dateien eines Ordners verarbeitet wurden, erstellt das LLM eine Zusammenfassung des gesamten Ordnerinhalts basierend auf den Einzelzusammenfassungen.  
+    - Schlägt die Zusammenfassung fehl, wird automatisch ein **Retry-Mechanismus** ausgelöst, der Debug-Informationen in `.folder_summary_items_debug.txt` und `.folder_summary_combined_debug.txt` schreibt.
     - Diese wird als versteckte Datei `.<Ordnername>_summary.md` im **Elternverzeichnis** gespeichert. Dies gilt auch für Wurzelordner (die im selben Verzeichnis wie der Ordner selbst liegen).  
+    - Der Crawler erzwingt eine Neu-Summarisierung, falls die Datei auf der Festplatte fehlt, selbst wenn die Datenbank sie als aktuell markiert.
 
 8.  **Speicherung & Indexierung:**  
-    - **Metadaten:** Dateipfade, Hashes, Zeitstempel und die Markdown-Zusammenfassungen werden in der SQLite-Datenbank gespeichert:  
-        - Tabelle `files`: Pfad, Hash, Mtime, Typ, Ordner-ID.  
-        - Tabelle `folders`: Pfad, Parent-ID, Hash (für E-Mails), Zeitstempel.  
-        - Tabelle `summaries`: Die eigentlichen Markdown-Zusammenfassungen für Dateien und Ordner.  
+    - **Metadaten:** Dateipfade, Hashes, Zeitstempel und die Markdown-Zusammenfassungen werden in der SQLite-Datenbank gespeichert.
     - **Vektorsuche:** Die **Zusammenfassungen** (nicht der Volltext) werden vektorisiert (standardmäßig mit `BAAI/bge-m3`) und im Qdrant-Index gespeichert.  
 
 ## Beispiel: Vor und nach der Indexierung
@@ -107,7 +106,7 @@ Student_B/
 ```
 
 **Fall 3: Kombinierte E-Mail-Konversation (Spezialfall)**
-Wenn sowohl `Inbox` als auch `SentItems` vorhanden sind, erkennt der Crawler dies als Konversation und erstellt eine gemeinsame Zusammenfassung (`.emails_summary.md`). Die Einzelordner erhalten dann keine eigenen `.Inbox_summary.md` Dateien mehr, da sie in der Konversation aufgehen.
+Wenn sowohl `Inbox` und `SentItems` vorhanden sind, erkennt der Crawler dies als Konversation und erstellt eine gemeinsame Zusammenfassung (`.emails_summary.md`). Die Einzelordner erhalten dann keine eigenen `.Inbox_summary.md` Dateien mehr, da sie in der Konversation aufgehen.
 
 Vorher:
 ```text
