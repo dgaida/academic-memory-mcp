@@ -106,6 +106,7 @@ nav:
       - Datenbank-Prozesse: usage/database-processes.md
       - MOCOGI Extraktion: usage/mocogi-extraction.md
       - E-Mail Workflow: usage/email-workflow.md
+      - Ontology & Aliase: usage/ontology-learning.md
   - API: api/index.md
   - Architektur: architecture/index.md
   - Entwicklung:
