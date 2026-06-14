@@ -1,0 +1,215 @@
+"""Script to extract all modules and their examiners from the MOCOGI API.
+
+This script iterates through all study programs and their examination regulations (POs),
+fetches all modules for each PO, and extracts the module coordinator,
+first examiner, and second examiner. The results are saved in a Markdown file.
+"""
+
+import json
+import logging
+import os
+import pathlib
+import sys
+import urllib.request
+import urllib.error
+from typing import Dict, Any, Optional
+
+# Logging-Konfiguration
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    stream=sys.stderr
+)
+logger = logging.getLogger("mocogi_extractor")
+
+def load_env_manual() -> None:
+    """Lädt Umgebungsvariablen aus .env oder secrets.env manuell."""
+    possible_paths = [
+        pathlib.Path.cwd() / "secrets.env",
+        pathlib.Path.cwd() / ".env",
+        pathlib.Path(__file__).resolve().parent.parent / "secrets.env",
+        pathlib.Path(__file__).resolve().parent.parent / ".env",
+        pathlib.Path(__file__).resolve().parent.parent / "config" / "secrets.env",
+    ]
+
+    found = False
+    for path in possible_paths:
+        if path.exists():
+            logger.info(f"Lade Umgebungsvariablen aus {path}")
+            with open(path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    if "=" in line:
+                        parts = line.split("=", 1)
+                        if len(parts) == 2:
+                            key, value = parts
+                            key = key.strip()
+                            if key.lower().startswith("export "):
+                                key = key[7:].strip()
+                            value = value.strip().strip("'").strip('"')
+                            os.environ[key] = value
+            found = True
+            break
+
+    if not found:
+        logger.warning("Keine .env oder secrets.env Datei gefunden.")
+
+    if not os.getenv("MOCOGI_API_TOKEN") and os.getenv("MOCOGI_API_KEY"):
+        os.environ["MOCOGI_API_TOKEN"] = os.environ["MOCOGI_API_KEY"]
+
+def api_call(
+    url: str,
+    method: str = "GET",
+    data: Optional[Dict[str, Any]] = None,
+    extra_headers: Optional[Dict[str, str]] = None
+) -> Dict[str, Any]:
+    """Führt einen API-Call mit urllib aus."""
+    headers = {"User-Agent": "Mocogi-Extractor-Script/1.0"}
+    token = os.getenv("MOCOGI_API_TOKEN")
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+
+    if extra_headers:
+        headers.update(extra_headers)
+
+    payload = None
+    if data:
+        payload = json.dumps(data).encode("utf-8")
+        if "Content-Type" not in headers:
+            headers["Content-Type"] = "application/json"
+
+    req = urllib.request.Request(url, data=payload, headers=headers, method=method)
+
+    try:
+        with urllib.request.urlopen(req) as response:
+            body = response.read().decode("utf-8")
+            if body:
+                return json.loads(body)
+            return {}
+    except urllib.error.HTTPError as e:
+        logger.error(f"HTTP Fehler: {e.code} - {e.reason} bei {url}")
+        raise
+    except Exception as e:
+        logger.error(f"Unerwarteter Fehler beim API-Call: {e}")
+        raise
+
+def format_person(person: Any) -> str:
+    """Formatiert ein Personen-Objekt oder eine Liste von Personen zu einem String."""
+    if not person:
+        return "-"
+
+    if isinstance(person, list):
+        items = [format_person(p) for p in person if p]
+        return ", ".join([i for i in items if i != "-"]) or "-"
+
+    if isinstance(person, dict):
+        first_name = person.get("firstName") or person.get("firstname") or ""
+        last_name = person.get("lastName") or person.get("lastname") or ""
+        title = person.get("title") or ""
+
+        parts = [p for p in [title, first_name, last_name] if p]
+        return " ".join(parts).strip() or "-"
+
+    return str(person)
+
+def extract_data() -> None:
+    """Extrahiert alle Studiengänge, POs und Module."""
+    load_env_manual()
+    base_url = "https://module.gm.th-koeln.de/api"
+    output_file = "mocogi_modules.md"
+
+    logger.info("Starte Datenextraktion...")
+
+    try:
+        # 1. Hole Studiengänge
+        study_programs_list = api_call(f"{base_url}/studyPrograms?filter=not-expired")
+        logger.info(f"{len(study_programs_list)} Studiengänge gefunden.")
+
+        with open(output_file, "w", encoding="utf-8") as f:
+            f.write("# MOCOGI Modulübersicht\n\n")
+
+            for sp_summary in study_programs_list:
+                sp_id = sp_summary.get("id")
+                sp_name = sp_summary.get("deLabel") or sp_summary.get("name") or sp_id
+
+                logger.info(f"Verarbeite Studiengang: {sp_name} ({sp_id})")
+
+                # In der Liste sind die POs oft direkt unter 'po' (einzeln)
+                # oder wir müssen nach 'pos' schauen.
+                pos = []
+                if "pos" in sp_summary:
+                    pos = sp_summary["pos"]
+                elif "po" in sp_summary:
+                    pos = [sp_summary["po"]]
+
+                # Wenn keine POs da sind, versuchen wir es mit den Details
+                if not pos:
+                    try:
+                        sp_details = api_call(f"{base_url}/studyPrograms/{sp_id}")
+                        pos = sp_details.get("pos") or []
+                        if not pos and "po" in sp_details:
+                            pos = [sp_details["po"]]
+                    except Exception as e:
+                        logger.warning(f"Konnte Details für {sp_id} nicht laden: {e}")
+
+                if not pos:
+                    logger.warning(f"Keine POs für Studiengang {sp_id} gefunden.")
+                    continue
+
+                f.write(f"## {sp_name}\n\n")
+
+                for po in pos:
+                    po_id = po.get("id")
+                    po_version = po.get("version")
+                    po_name = f"PO {po_version}" if po_version else po_id
+
+                    logger.info(f"  Lade Module für PO: {po_name} ({po_id})")
+                    f.write(f"### {po_name}\n\n")
+                    f.write("| Modulname | Modulverantwortlich | Erstprüfer | Zweitprüfer |\n")
+                    f.write("| :--- | :--- | :--- | :--- |\n")
+
+                    # 2. Hole Module für PO
+                    modules_url = f"{base_url}/modules?po={po_id}&active=true&select=metadata"
+                    modules_list = api_call(modules_url)
+
+                    modules = modules_list if isinstance(modules_list, list) else modules_list.get('module', [])
+
+                    if not modules:
+                        f.write("| - | - | - | - |\n\n")
+                        continue
+
+                    for m_item in modules:
+                        m_basic = m_item.get('module') if isinstance(m_item, dict) and 'module' in m_item else m_item
+                        m_meta = m_basic.get('metadata') if isinstance(m_basic, dict) and 'metadata' in m_basic else m_basic
+                        m_id = m_basic.get('id') or m_meta.get('id')
+                        m_title = m_meta.get('title', 'Unbekannt')
+
+                        try:
+                            # 3. Hole Moduldetails
+                            m_details = api_call(f"{base_url}/modules/{m_id}")
+                            m_det_meta = m_details.get('metadata') or m_details
+
+                            manager = format_person(m_det_meta.get("moduleManagement") or m_det_meta.get("management"))
+
+                            examiner = m_det_meta.get("examiner") or {}
+                            first_examiner = format_person(examiner.get("first"))
+                            second_examiner = format_person(examiner.get("second"))
+
+                            f.write(f"| {m_title} | {manager} | {first_examiner} | {second_examiner} |\n")
+
+                        except Exception as e:
+                            logger.error(f"      Fehler bei Modul {m_title} ({m_id}): {e}")
+                            f.write(f"| {m_title} | Fehler | Fehler | Fehler |\n")
+
+                    f.write("\n")
+
+        logger.info(f"Extraktion abgeschlossen. Ergebnisse in {output_file}")
+
+    except Exception as e:
+        logger.error(f"Kritischer Fehler bei der Extraktion: {e}")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    extract_data()
