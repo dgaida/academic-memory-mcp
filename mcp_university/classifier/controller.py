@@ -8,7 +8,7 @@ import extract_msg
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional, Any
+from typing import Dict, List, Tuple, Optional
 
 from mcp_university.config import get_config
 from mcp_university.summarizer.engine import Summarizer
@@ -412,8 +412,10 @@ TEXT:
                 inbox_folder = semester_folder / "Inbox"
                 sent_folder = semester_folder / "SentItems"
                 all_files = []
-                if inbox_folder.exists(): all_files.extend(list(inbox_folder.glob("*.msg")) + list(inbox_folder.glob("*.eml")))
-                if sent_folder.exists(): all_files.extend(list(sent_folder.glob("*.msg")) + list(sent_folder.glob("*.eml")))
+                if inbox_folder.exists():
+                    all_files.extend(list(inbox_folder.glob("*.msg")) + list(inbox_folder.glob("*.eml")))
+                if sent_folder.exists():
+                    all_files.extend(list(sent_folder.glob("*.msg")) + list(sent_folder.glob("*.eml")))
 
                 student_emails = []
                 for f in all_files:
@@ -423,25 +425,40 @@ TEXT:
                             rec_lastname = extract_lastname(msg.recipients[0].name or msg.recipients[0].email) if msg.recipients else "None"
                             if sender_lastname == email["lastname"] or rec_lastname == email["lastname"]:
                                 student_emails.append((self.mail_parser.get_email_date(f), f))
-                    except Exception: continue
+                    except Exception:
+                        continue
 
-                if not student_emails: continue
+                if not student_emails:
+                    continue
                 student_emails.sort(key=lambda x: x[0])
                 latest_date, latest_mail = student_emails[-1]
                 needs_answer = "Inbox" in latest_mail.parts
-                email.update({"latest_date": latest_date, "latest_mail": latest_mail, "student_emails": student_emails, "semester_folder": semester_folder})
+                email.update({
+                    "latest_date": latest_date,
+                    "latest_mail": latest_mail,
+                    "student_emails": student_emails,
+                    "semester_folder": semester_folder
+                })
             else:
                 identifier = mail_path.parent.parent
                 email_files = list(identifier.rglob("*.msg")) + list(identifier.rglob("*.eml"))
-                if not email_files: continue
+                if not email_files:
+                    continue
                 dated_emails = []
                 for f in email_files:
-                    try: dated_emails.append((self.mail_parser.get_email_date(f), f))
-                    except Exception: dated_emails.append((datetime.min, f))
+                    try:
+                        dated_emails.append((self.mail_parser.get_email_date(f), f))
+                    except Exception:
+                        dated_emails.append((datetime.min, f))
                 dated_emails.sort(key=lambda x: x[0])
                 latest_date, latest_mail = dated_emails[-1]
                 needs_answer = "Inbox" in latest_mail.parts and "SentItems" not in latest_mail.parts
-                email.update({"latest_date": latest_date, "latest_mail": latest_mail, "dated_emails": dated_emails, "identifier_path": identifier})
+                email.update({
+                    "latest_date": latest_date,
+                    "latest_mail": latest_mail,
+                    "dated_emails": dated_emails,
+                    "identifier_path": identifier
+                })
 
             if needs_answer and identifier not in temp_folders:
                 temp_folders.add(identifier)
@@ -465,7 +482,11 @@ TEXT:
             if age_months:
                 cutoff = (datetime.now() - timedelta(days=age_months * 30)).replace(tzinfo=None)
                 if latest_date.replace(tzinfo=None) < cutoff:
-                    processed_results.append({"lastname": email["lastname"], "subject": latest_mail.stem, "status": f"Übersprungen (> {age_months} Monate)"})
+                    processed_results.append({
+                        "lastname": email["lastname"],
+                        "subject": latest_mail.stem,
+                        "status": f"Übersprungen (> {age_months} Monate)"
+                    })
                     continue
 
             student_email = ""
@@ -474,7 +495,8 @@ TEXT:
                 with extract_msg.openMsg(str(latest_mail)) as msg:
                     student_email = msg.sender
                     sender_name = msg.senderName or email["lastname"]
-            except Exception: pass
+            except Exception:
+                pass
 
             person_profile = self.profiler.get_profile(student_email) if student_email else None
             cc_list = []
@@ -485,19 +507,24 @@ TEXT:
                             rec_email = rec.email or rec.name
                             if rec_email and self.config.user.email not in rec_email.lower() and rec_email.lower() != student_email.lower():
                                 cc_list.append(rec_email)
-            except Exception: pass
+            except Exception:
+                pass
 
             skill_path = Path(f"skills/SKILL_{email['class']}.md")
-            if not skill_path.exists(): skill_path = Path(__file__).parent.parent / "skills" / f"SKILL_{email['class']}.md"
+            if not skill_path.exists():
+                skill_path = Path(__file__).parent.parent / "skills" / f"SKILL_{email['class']}.md"
 
             first_name = "Unknown"
             try:
-                with extract_msg.openMsg(str(latest_mail)) as msg: first_name = extract_firstname(msg.sender)
-            except Exception: pass
+                with extract_msg.openMsg(str(latest_mail)) as msg:
+                    first_name = extract_firstname(msg.sender)
+            except Exception:
+                pass
 
             salutation = f"Guten Tag {self.summarizer.determine_gender(first_name)} {email['lastname']}"
             add_ctx = f"Anrede: {salutation}\n"
-            if person_profile: add_ctx += f"\nPersonen-Steckbrief:\n{person_profile}\n"
+            if person_profile:
+                add_ctx += f"\nPersonen-Steckbrief:\n{person_profile}\n"
             add_ctx += f"Studenten-E-Mail: {student_email}\n"
 
             if email["class"] == "PO-Wechsel":
@@ -512,16 +539,19 @@ TEXT:
                 for d, f in email["student_emails"]:
                     if f != latest_mail and d >= threshold:
                         p = self.mail_parser.parse(f)
-                        if p: conv_content += f"\n--- EMAIL VOM {d} ---\n{p}\n"
+                        if p:
+                            conv_content += f"\n--- EMAIL VOM {d} ---\n{p}\n"
             else:
                 summary_file = email["identifier_path"] / ".emails_summary.md"
                 if not summary_file.exists() or latest_date > datetime.fromtimestamp(summary_file.stat().st_mtime):
                     c_content = ""
                     for d, f in email["dated_emails"]:
                         p = self.mail_parser.parse(f)
-                        if p: c_content += f"\n--- EMAIL VOM {d} ---\n{p}\n"
+                        if p:
+                            c_content += f"\n--- EMAIL VOM {d} ---\n{p}\n"
                     summary_content = self.summarizer.summarize_email_conversation(email["identifier_path"].name, c_content)
-                    if summary_content: summary_file.write_text(summary_content, encoding="utf-8")
+                    if summary_content:
+                        summary_file.write_text(summary_content, encoding="utf-8")
                 else:
                     summary_content = summary_file.read_text(encoding="utf-8")
 
@@ -530,19 +560,28 @@ TEXT:
             )
 
             if reply_subject == "NO_REPLY_NEEDED":
-                processed_results.append({"lastname": email["lastname"], "subject": latest_mail.stem, "status": f"Keine Antwort erforderlich ({reply})"})
+                processed_results.append({
+                    "lastname": email["lastname"],
+                    "subject": latest_mail.stem,
+                    "status": f"Keine Antwort erforderlich ({reply})"
+                })
                 continue
 
             if reply.startswith("APPOINTMENT_BOOKED"):
                 apt_info = self.agent.last_appointment_info
                 status = f"Termin gebucht ({apt_info['start_time']})" if apt_info and "start_time" in apt_info else "Termin gebucht"
-                processed_results.append({"lastname": email["lastname"], "subject": latest_mail.stem, "status": status})
+                processed_results.append({
+                    "lastname": email["lastname"],
+                    "subject": latest_mail.stem,
+                    "status": status
+                })
                 continue
 
             attachments = [latest_mail]
             if should_attach and email["class"] == "PO-Wechsel":
                 pdf = Path(r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf")
-                if pdf.exists(): attachments.append(pdf)
+                if pdf.exists():
+                    attachments.append(pdf)
 
             success = create_outlook_draft(reply_subject or latest_mail.stem, reply, recipient=student_email, cc=cc_list, attachments=attachments)
             if success:
@@ -552,11 +591,16 @@ TEXT:
                 r_path.write_text(reply, encoding="utf-8")
                 res_status = f"Datei: {r_path}"
 
-            processed_results.append({"lastname": email["lastname"], "subject": latest_mail.stem, "status": res_status})
+            processed_results.append({
+                "lastname": email["lastname"],
+                "subject": latest_mail.stem,
+                "status": res_status
+            })
 
         if processed_results:
             with open(source_dir / "processed_emails.md", "w", encoding="utf-8") as f:
                 f.write("# Verarbeitete E-Mails\n\n| Student | Betreff | Status |\n| :--- | :--- | :--- |\n")
-                for res in processed_results: f.write(f"| {res['lastname']} | {res['subject']} | {res['status']} |\n")
+                for res in processed_results:
+                    f.write(f"| {res['lastname']} | {res['subject']} | {res['status']} |\n")
 
         return processed_results

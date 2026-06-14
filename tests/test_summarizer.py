@@ -1,4 +1,3 @@
-import pytest
 from mcp_university.summarizer.engine import Summarizer
 
 def test_answer_question(mock_llm_client_wrapper):

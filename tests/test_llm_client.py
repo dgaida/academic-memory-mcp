@@ -1,5 +1,3 @@
-import pytest
-from mcp_university.utils.llm_client_wrapper import LLMClientWrapper
 
 def test_llm_client_wrapper_chat(mock_llm_client_wrapper):
     # Setup mock behavior

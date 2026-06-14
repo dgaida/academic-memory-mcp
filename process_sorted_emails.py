@@ -3,7 +3,6 @@
 import argparse
 import logging
 import sys
-import yaml
 import gradio as gr
 from pathlib import Path
 from datetime import datetime

@@ -2,7 +2,6 @@
 import os
 import sys
 from unittest.mock import MagicMock, patch
-from pathlib import Path
 
 # Add project root to sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -72,7 +71,6 @@ def test_create_outlook_draft_success():
         mock_mail = MagicMock()
         mock_outlook.CreateItem.return_value = mock_mail
 
-        from mcp_university.config import get_config
         with patch('mcp_university.utils.outlook.get_config') as mock_cfg:
             mock_cfg.return_value.user.email = "test@example.com"
             success = create_outlook_draft("S", "B")
