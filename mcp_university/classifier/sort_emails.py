@@ -91,12 +91,14 @@ def extract_firstname(name_str: str) -> str:
         # Format: Lastname, Firstname
         parts = clean_name.split(",")
         if len(parts) > 1:
-            return parts[1].strip().split()[0]
+            res = parts[1].strip().split()[0]
+            return res.strip("'\"")
     else:
         # Format: Firstname Lastname
         parts = clean_name.split()
         if parts:
-            return parts[0]
+            res = parts[0]
+            return res.strip("'\"")
 
     return "Unknown"
 
