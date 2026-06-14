@@ -763,9 +763,9 @@ def main() -> None:
         help="Merkmalsextraktion (tfidf, embedding, combined)",
     )
     parser.add_argument(
-        "--cutoff-date",
-        type=valid_date,
-        help="E-Mails älter als dieses Datum (YYYY-MM-DD) werden nur einsortiert, aber nicht beantwortet.",
+        "--age-months",
+        type=int,
+        help="E-Mails älter als diese Anzahl an Monaten werden nur einsortiert, aber nicht beantwortet.",
     )
     args = parser.parse_args()
 
@@ -915,20 +915,20 @@ def main() -> None:
         latest_mail = email["latest_mail"]
         latest_date = email["latest_date"]
         is_ba_ma = email["class"].startswith(("BA_", "MA_"))
-        # Prüfung auf Cutoff-Datum
-        if args.cutoff_date:
-            # Vergleiche naiv mit naiv
-            cutoff = args.cutoff_date.replace(tzinfo=None)
+        # Prüfung auf Alter in Monaten
+        if args.age_months:
+            cutoff = datetime.now() - timedelta(days=args.age_months * 30)
+            cutoff = cutoff.replace(tzinfo=None)
             mail_date = latest_date.replace(tzinfo=None)
             if mail_date < cutoff:
                 logger.info(
-                    f"E-Mail von {email['lastname']} vom {mail_date} ist älter als Cutoff {cutoff}. Wird nur einsortiert."
+                    f"E-Mail von {email['lastname']} vom {mail_date} ist älter als {args.age_months} Monate. Wird nur einsortiert."
                 )
                 processed_results.append(
                     {
                         "lastname": email["lastname"],
                         "subject": latest_mail.stem,
-                        "status": "Übersprungen (vor Cutoff-Datum)",
+                        "status": f"Übersprungen (> {args.age_months} Monate)",
                     }
                 )
                 continue

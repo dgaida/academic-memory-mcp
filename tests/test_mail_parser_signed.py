@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from pathlib import Path
 from mcp_university.parser.mail_parser import MailParser
 from extract_msg.exceptions import StandardViolationError

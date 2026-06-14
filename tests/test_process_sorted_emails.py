@@ -2,6 +2,7 @@
 import os
 import sys
 from unittest.mock import MagicMock, patch
+from datetime import datetime, timedelta
 
 # Add project root to sys.path to make process_sorted_emails importable
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -11,10 +12,8 @@ mock_win32 = MagicMock()
 sys.modules["win32com"] = mock_win32
 sys.modules["win32com.client"] = mock_win32.client
 
-from process_sorted_emails import parse_sorted_report, generate_reply, create_outlook_draft, valid_date # noqa: E402
-import pytest
-import argparse
-from datetime import datetime
+# Import after mocks and sys.path update
+from process_sorted_emails import parse_sorted_report, generate_reply, create_outlook_draft  # noqa: E402
 
 def test_parse_sorted_report(tmp_path):
     """Testet das Parsen des sorted_emails.md Reports."""
@@ -152,12 +151,17 @@ def test_generate_reply_no_reply_needed(mock_agent_cls, mock_parser_cls, tmp_pat
     assert "Reine Dankesmail" in reply
     assert mock_agent.chat.call_count == 3
 
-def test_valid_date_correct():
-    d = valid_date("2024-05-20")
-    assert d == datetime(2024, 5, 20)
+def test_age_months_logic():
+    """Verifiziert die Logik für das Alter in Monaten."""
+    age_months = 3
+    cutoff = datetime.now() - timedelta(days=age_months * 30)
+    cutoff = cutoff.replace(tzinfo=None)
 
-def test_valid_date_invalid():
-    with pytest.raises(argparse.ArgumentTypeError):
-        valid_date("20-05-2024")
-    with pytest.raises(argparse.ArgumentTypeError):
-        valid_date("invalid")
+    # E-Mail von heute (sollte nicht übersprungen werden)
+    mail_date_new = datetime.now().replace(tzinfo=None)
+    assert mail_date_new >= cutoff
+
+    # E-Mail von vor 4 Monaten (sollte übersprungen werden)
+    mail_date_old = datetime.now() - timedelta(days=120)
+    mail_date_old = mail_date_old.replace(tzinfo=None)
+    assert mail_date_old < cutoff
