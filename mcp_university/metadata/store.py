@@ -478,6 +478,39 @@ class MetadataStore:
             else:
                 return row[0], False
 
+    def get_node_by_id(self, node_id: int) -> Optional[Dict[str, Any]]:
+        """Ruft einen Knoten anhand seiner ID ab.
+
+        Args:
+            node_id (int): Die ID des Knotens.
+
+        Returns:
+            Optional[Dict[str, Any]]: Der Knoten als Dictionary oder None.
+        """
+        with self._get_connection() as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM nodes WHERE id = ?', (node_id,))
+            row = cursor.fetchone()
+            return dict(row) if row else None
+
+    def get_node_by_property(self, key: str, value: Any) -> Optional[Dict[str, Any]]:
+        """Sucht einen Knoten basierend auf einer Eigenschaft in properties_json.
+
+        Args:
+            key (str): Der Schlüssel in properties_json.
+            value (Any): Der gesuchte Wert.
+
+        Returns:
+            Optional[Dict[str, Any]]: Der erste gefundene Knoten oder None.
+        """
+        all_nodes = self.get_all_nodes()
+        for node in all_nodes:
+            props = json.loads(node.get('properties_json', '{}'))
+            if props.get(key) == value:
+                return node
+        return None
+
     def get_all_nodes(self) -> List[Dict[str, Any]]:
         """Ruft alle Knoten ab.
 
@@ -540,6 +573,21 @@ class MetadataStore:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
             cursor.execute('SELECT * FROM aliases')
+            return [dict(row) for row in cursor.fetchall()]
+
+    def get_outgoing_edges(self, node_id: int) -> List[Dict[str, Any]]:
+        """Ruft alle ausgehenden Kanten eines Knotens ab.
+
+        Args:
+            node_id (int): Die ID des Startknotens.
+
+        Returns:
+            List[Dict[str, Any]]: Liste der Kanten als Dictionaries.
+        """
+        with self._get_connection() as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM edges WHERE source_id = ?', (node_id,))
             return [dict(row) for row in cursor.fetchall()]
 
     def get_all_edges(self) -> List[Dict[str, Any]]:
