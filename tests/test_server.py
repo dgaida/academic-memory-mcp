@@ -2,9 +2,9 @@ import pytest
 from unittest.mock import patch
 
 @pytest.mark.asyncio
-async def test_server_tools():
+async def test_server_tools(mock_llm_client_wrapper):
     # Mock models to avoid downloads and external calls
-    with patch("mcp_university.retrieval.index.SentenceTransformer"),          patch("mcp_university.retrieval.index.QdrantClient"),          patch("mcp_university.summarizer.engine.LLMClientWrapper"):
+    with patch("mcp_university.retrieval.index.SentenceTransformer"),          patch("mcp_university.retrieval.index.QdrantClient"):
 
         from mcp_university.mcp_server.server import create_server
         mcp = create_server()

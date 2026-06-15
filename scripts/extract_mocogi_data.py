@@ -213,7 +213,7 @@ def extract_data() -> None:
     store = MetadataStore(cfg.sqlite_path)
 
     base_url = "https://module.gm.th-koeln.de/api"
-    output_file = "mocogi_modules.md"
+    output_file = "data/mocogi_modules.md"
 
     resolver = PersonResolver(base_url)
     resolver.load_identities()

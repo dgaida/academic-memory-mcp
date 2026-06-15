@@ -1,0 +1,606 @@
+"""Controller für die Verarbeitung und Beantwortung von E-Mails."""
+
+import logging
+import re
+import shutil
+import yaml
+import extract_msg
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+from pathlib import Path
+from typing import Dict, List, Tuple, Optional
+
+from mcp_university.config import get_config
+from mcp_university.summarizer.engine import Summarizer
+from mcp_university.parser.mail_parser import MailParser
+from mcp_university.summarizer.profiler import PersonProfiler
+from mcp_university.agent.engine import Agent
+from mcp_university.agent.mcp_agent import MCPAgent
+from mcp_university.classifier.engine import resolve_model_path
+from mcp_university.classifier.sort_emails import (
+    process_emails,
+    write_report,
+    extract_lastname,
+    extract_firstname,
+    get_semester,
+    find_student_folder,
+)
+from mcp_university.utils.outlook import create_outlook_draft
+
+logger = logging.getLogger(__name__)
+
+class EmailController:
+    """Steuert den Prozess der E-Mail-Verarbeitung, Klassifizierungskorrektur und Antwortgenerierung."""
+
+    def __init__(
+        self,
+        config_path: str = "config/folders.yaml",
+        use_mcp: bool = False,
+        use_cloud: bool = False,
+        cloud_provider: str = "openai",
+        cloud_model: str = "gpt-4o",
+        api_key: str = None,
+        debug: bool = True
+    ) -> None:
+        """Initialisiert den EmailController.
+
+        Args:
+            config_path (str): Pfad zur Konfigurationsdatei.
+            use_mcp (bool): Nutzt den MCP Server für Tools.
+            use_cloud (bool): Nutzt ein Cloud-LLM.
+            cloud_provider (str): Cloud-LLM Provider.
+            cloud_model (str): Cloud-LLM Modell.
+            api_key (str): Cloud-LLM API-Key.
+            debug (bool): Speichert LLM Prompts als Markdown.
+        """
+        self.config = get_config()
+        self.config_path = config_path
+        self.debug = debug
+        self.mail_parser = MailParser()
+        self.summarizer = Summarizer(model=self.config.llm.model, base_url=self.config.llm.base_url)
+        self.profiler = PersonProfiler()
+
+        agent_args = {
+            "model": self.config.llm.model,
+            "base_url": self.config.llm.base_url,
+            "use_cloud": use_cloud,
+            "cloud_provider": cloud_provider,
+            "cloud_model": cloud_model,
+            "api_key": api_key,
+        }
+
+        if use_mcp:
+            logger.info("Nutze MCP Agent.")
+            self.agent = MCPAgent(**agent_args)
+        else:
+            self.agent = Agent(**agent_args)
+
+        with open(config_path, "r", encoding="utf-8") as f:
+            full_config = yaml.safe_load(f)
+        self.class_paths = full_config.get("class_paths", full_config)
+
+    def run_sort(self, source_dir: str, method: str = "transformer", mode: str = "combined") -> None:
+        """Sortiert E-Mails basierend auf Klassifizierung."""
+        logger.info(f"Sortiere E-Mails in {source_dir}...")
+        source_root = Path(source_dir)
+        model_path = resolve_model_path("data/email_classifier.pkl", method, mode)
+
+        if not model_path.exists():
+            raise FileNotFoundError(f"Modell-Datei nicht gefunden: {model_path}")
+
+        moved_emails = process_emails(source_root, model_path, self.class_paths)
+        write_report(source_root, moved_emails)
+
+    def parse_report(self, report_path: Path) -> List[Dict]:
+        """Parst die sorted_emails.md Datei."""
+        emails = []
+        if not report_path.exists():
+            logger.warning(f"Report {report_path} existiert nicht.")
+            return emails
+
+        current_class = None
+        with open(report_path, "r", encoding="utf-8") as f:
+            for line in f:
+                class_match = re.match(r"## (.*)", line)
+                if class_match:
+                    current_class = class_match.group(1).strip()
+                    continue
+
+                mail_match = re.search(r"- \*\*(.*?)\*\* \| (.*?) \| (.*?): `(.*?)`", line)
+                if mail_match:
+                    emails.append({
+                        "class": current_class,
+                        "semester": mail_match.group(1),
+                        "lastname": mail_match.group(2),
+                        "folder": mail_match.group(3),
+                        "path": Path(mail_match.group(4)),
+                    })
+        return emails
+
+    def relocate_emails(self, email_changes: List[Dict]):
+        """Verschiebt E-Mails in neue Ordner basierend auf Benutzerkorrektur."""
+        for change in email_changes:
+            old_path = Path(change["path"])
+            new_class = change["new_class"]
+            old_class = change["class"]
+
+            if new_class == old_class:
+                continue
+
+            lastname = change["lastname"]
+            logger.info(f"Relocating {old_path.name} from {old_class} to {new_class}")
+
+            try:
+                date = self.mail_parser.get_email_date(old_path)
+            except Exception:
+                date = datetime.now()
+            semester = get_semester(date)
+
+            if new_class == "Others":
+                if change["folder"] == "Inbox":
+                    target_dir = Path(r"D:\TH_Koeln\StudentMails2\manuell beantworten")
+                elif change["folder"] == "SentItems":
+                    target_dir = Path(r"D:\TH_Koeln\StudentMails2\manuell beantwortet")
+                else:
+                    target_dir = Path(r"D:\TH_Koeln\MailTrainingDataFuture\Others")
+            else:
+                if new_class not in self.class_paths:
+                    logger.error(f"Klasse {new_class} nicht in Konfiguration gefunden.")
+                    continue
+                class_base_path = Path(self.class_paths[new_class])
+
+                if new_class.startswith(("BA_", "MA_")):
+                    target_dir = class_base_path / semester / change["folder"]
+                else:
+                    student_dir = find_student_folder(class_base_path, lastname)
+                    if not student_dir:
+                        student_dir = class_base_path / semester / lastname
+                    target_dir = student_dir / change["folder"]
+
+            target_dir.mkdir(parents=True, exist_ok=True)
+
+            match = re.match(r"(\d{8}_\d{6})", old_path.name)
+            files_to_process = [old_path]
+            if match:
+                date_prefix = match.group(1)
+                for md_file in old_path.parent.glob(f"{date_prefix}*.md"):
+                    if md_file != old_path:
+                        files_to_process.append(md_file)
+
+            for f in files_to_process:
+                dest = target_dir / f.name
+                logger.info(f"Verschiebe {f.name} nach {dest}")
+                if dest.exists():
+                    dest.unlink()
+                shutil.move(str(f), str(dest))
+
+            old_folder = old_path.parent
+            old_student_folder = old_folder.parent
+            target_student_folder = target_dir.parent
+
+            def has_emails(student_folder: Path):
+                for sub in ["Inbox", "SentItems"]:
+                    p = student_folder / sub
+                    if p.exists() and p.is_dir():
+                        if any(p.glob("*.msg")) or any(p.glob("*.eml")):
+                            return True
+                return False
+
+            if not has_emails(old_student_folder):
+                summary_file = old_student_folder / ".emails_summary.md"
+                if not summary_file.exists():
+                    summary_file = old_folder / ".emails_summary.md"
+
+                if summary_file.exists():
+                    dest_summary = target_student_folder / ".emails_summary.md"
+                    if not dest_summary.exists():
+                        logger.info(f"Verschiebe Zusammenfassung nach {dest_summary}")
+                        shutil.move(str(summary_file), str(dest_summary))
+                    else:
+                        logger.info(f"Zusammenfassung im Ziel existiert bereits. Lösche {summary_file}")
+                        summary_file.unlink()
+
+            def delete_if_empty(folder: Path):
+                if folder.exists() and folder.is_dir():
+                    items = list(folder.iterdir())
+                    if not items:
+                        logger.info(f"Lösche leeren Ordner {folder}")
+                        folder.rmdir()
+                        return True
+                return False
+
+            if delete_if_empty(old_folder):
+                parent_folder = old_folder.parent
+                if parent_folder.name == lastname:
+                    delete_if_empty(parent_folder)
+
+    def generate_reply(
+        self,
+        mail_path: Path,
+        summary_content: str = "",
+        skill_path: Path = None,
+        conversation_content: str = "",
+        persona_path: Path = None,
+        additional_context: str = "",
+        appointment_skill_path: Path = None,
+        sender_name: str = None,
+        sender_email: str = None,
+    ) -> Tuple[str, str, bool]:
+        """Generiert eine Antwortmail mit dem LLM in mehreren Schritten."""
+        mail_content = self.mail_parser.parse(mail_path)
+        mail_content = self.mail_parser.extract_latest_message(mail_content)
+
+        if self.debug:
+            extracted_file = mail_path.parent / f"{mail_path.stem}_extracted.md"
+            extracted_file.write_text(mail_content, encoding="utf-8")
+            if self.agent.use_cloud and self.agent.anonymizer and sender_name and sender_email:
+                anonymized_content = self.agent.anonymizer.anonymize(mail_content, sender_name, sender_email)
+                anon_file = mail_path.parent / f"{mail_path.stem}_anonymized.md"
+                anon_file.write_text(anonymized_content, encoding="utf-8")
+
+        appointment_skill_content = ""
+        if appointment_skill_path and appointment_skill_path.exists():
+            appointment_skill_content = appointment_skill_path.read_text(encoding="utf-8")
+
+        persona_content = ""
+        if persona_path and persona_path.exists():
+            persona_content = persona_path.read_text(encoding="utf-8")
+
+        system_prompt = "Du bist ein hilfreicher Assistent an der TH Köln. Verfasse eine Antwort-E-Mail auf Deutsch."
+
+        # STEP 1: APPOINTMENT
+        logger.info("Schritt 1: Prüfe Terminrelevanz...")
+        appointment_user_prompt = f"""Prüfe die folgende E-Mail auf Terminrelevanz (Anfrage oder Bestätigung) basierend auf dem TERMINVERWALTUNG SKILL.
+
+HEUTE IST: {datetime.now(ZoneInfo("Europe/Berlin")).strftime("%A, den %d.%m.%Y %H:%M")}
+
+PERSONA:
+{persona_content}
+
+TERMINVERWALTUNG SKILL:
+{appointment_skill_content}
+
+ZUSÄTZLICHER KONTEXT (Anrede etc.):
+{additional_context}
+
+AKTUELLE E-MAIL:
+{mail_content}
+
+WICHTIGE ANWEISUNG:
+1. Falls die E-Mail EINEN TERMIN BESTÄTIGT: RUFE ZWINGEND das Tool 'manage_calendar_appointment' auf. Du MUSST ALLE erforderlichen Parameter (start_time, end_time, subject, student_email) übergeben. Achte auf das korrekte JAHR (2026). Bei Kolloquien muss die Dauer 60 Minuten betragen. Erst wenn das Tool 'ERFOLG' zurückgibt, antworte EXAKT mit 'APPOINTMENT_BOOKED'. Antworte NIEMALS mit 'APPOINTMENT_BOOKED' ohne vorher das Tool erfolgreich aufgerufen zu haben!
+2. Falls die E-Mail EINEN TERMIN ANFRAGT: Du MUSST ZWINGEND das Tool 'get_appointment_slots' aufrufen, um die verfügbaren Terminvorschläge zu erhalten und diese in die Antwort einzubinden. Antworte erst, nachdem du das Tool aufgerufen und die Daten erhalten hast.
+3. Falls die E-Mail KEINERLEI Bezug zu einer Terminbuchung oder -anfrage hat, antworte EXAKT mit: NO_APPOINTMENT_RELEVANCE
+
+Format für Terminantworten (falls relevant):
+ANHANG: [JA/NEIN]
+BETREFF: [Der Betreff]
+TEXT:
+[Der Antwort-Text]
+"""
+        if self.debug:
+            prompt_file = mail_path.parent / f"{mail_path.stem}_appointment_prompt.md"
+            prompt_file.write_text(f"# System Prompt\n{system_prompt}\n\n# User Prompt\n{appointment_user_prompt}", encoding="utf-8")
+
+        try:
+            content = self.agent.chat(messages=[{"role": "user", "content": appointment_user_prompt}], system_prompt=system_prompt, sender_name=sender_name, sender_email=sender_email)
+            if "APPOINTMENT_BOOKED" in content:
+                apt_info = self.agent.last_appointment_info
+                apt_text = "APPOINTMENT_BOOKED"
+                if apt_info and "start_time" in apt_info:
+                    apt_text = f"APPOINTMENT_BOOKED|{apt_info['start_time']}"
+                return "APPOINTMENT_BOOKED", apt_text, False
+
+            if "NO_APPOINTMENT_RELEVANCE" not in content:
+                logger.info("Terminrelevanz erkannt, generiere Termin-Antwort.")
+                should_attach = "ANHANG: JA" in content
+                reply_subject = content.split("BETREFF:", 1)[1].split("TEXT:", 1)[0].strip() if "BETREFF:" in content else ""
+                reply_text = content.split("TEXT:", 1)[1].strip() if "TEXT:" in content else content
+                return reply_subject, reply_text, should_attach
+        except Exception as e:
+            logger.error(f"Fehler in Schritt 1 (Appointment): {e}")
+
+        # STEP 1.2: FINAL SUBMISSION
+        logger.info("Schritt 1.2: Prüfe auf finale Abgabe...")
+        fs_skill_path = Path("skills/SKILL_FinalSubmission.md")
+        if not fs_skill_path.exists():
+             fs_skill_path = Path(__file__).parent.parent / "skills" / "SKILL_FinalSubmission.md"
+
+        if fs_skill_path.exists():
+            fs_content = fs_skill_path.read_text(encoding="utf-8")
+            fs_prompt = f"""Prüfe die folgende E-Mail auf eine finale Abgabe basierend auf dem FINALE ABGABE SKILL.
+
+HEUTE IST: {datetime.now(ZoneInfo("Europe/Berlin")).strftime("%A, den %d.%m.%Y %H:%M")}
+
+FINALE ABGABE SKILL:
+{fs_content}
+
+AKTUELLE E-MAIL:
+{mail_content}
+PFAD ZUR E-MAIL: {mail_path}
+
+WICHTIGE ANWEISUNG:
+1. Falls es eine finale Abgabe ist:
+   - Du MUSST ZUERST die Tools `manage_calendar_appointment` (für einen Reminder in 1 week um 08:00) und `save_email_attachments` aufrufen.
+   - Erst NACHDEM die Tools aufgerufen wurden, verfasst du eine kurze Antwort.
+2. Falls es KEINE finale Abgabe ist, antworte EXAKT mit: NO_FINAL_SUBMISSION_RELEVANCE
+
+Format für die Antwort (falls relevant):
+ANHANG: [JA/NEIN]
+BETREFF: [Der Betreff]
+TEXT:
+[Der Antwort-Text]
+"""
+            try:
+                content = self.agent.chat(messages=[{"role": "user", "content": fs_prompt}], system_prompt=system_prompt, sender_name=sender_name, sender_email=sender_email)
+                if "NO_FINAL_SUBMISSION_RELEVANCE" not in content:
+                    logger.info("Finale Abgabe erkannt.")
+                    should_attach = "ANHANG: JA" in content
+                    reply_subject = content.split("BETREFF:", 1)[1].split("TEXT:", 1)[0].strip() if "BETREFF:" in content else ""
+                    reply_text = content.split("TEXT:", 1)[1].strip() if "TEXT:" in content else content
+                    return reply_subject, reply_text, should_attach
+            except Exception as e:
+                logger.error(f"Fehler in Schritt 1.2 (FinalSubmission): {e}")
+
+        # STEP 1.5: NECESSITY
+        logger.info("Schritt 1.5: Prüfe Notwendigkeit...")
+        nec_prompt = f"""Prüfe, ob die E-Mail eine Antwort erfordert.
+PERSONA: {persona_content}
+KONTEXT: {additional_context}
+E-MAIL: {mail_content}
+- Falls KEINE Antwort nötig, antworte EXAKT: NO_REPLY_NEEDED|BEGRÜNDUNG
+- Sonst: REPLY_NEEDED
+"""
+        try:
+            content = self.agent.chat(messages=[{"role": "user", "content": nec_prompt}], system_prompt=system_prompt, sender_name=sender_name, sender_email=sender_email)
+            if content.startswith("NO_REPLY_NEEDED"):
+                return "NO_REPLY_NEEDED", content.split("|", 1)[1] if "|" in content else "Keine Begründung", False
+        except Exception as e:
+            logger.error(f"Fehler in Schritt 1.5: {e}")
+
+        # STEP 2: REGULAR
+        logger.info("Schritt 2: Generiere reguläre Antwort...")
+        skill_content = skill_path.read_text(encoding="utf-8") if skill_path and skill_path.exists() else "Keine spezifischen Anweisungen."
+        context_label = "SCHRIFTVERKEHR DER LETZTEN 2 WOCHEN" if conversation_content else "ZUSAMMENFASSUNG DES SCHRIFTVERKEHRS"
+        context_body = conversation_content if conversation_content else summary_content
+
+        reg_prompt = f"""Verfasse eine professionelle Antwort.
+HEUTE IST: {datetime.now(ZoneInfo("Europe/Berlin")).strftime("%A, den %d.%m.%Y %H:%M")}
+PERSONA: {persona_content}
+SKILL ANWEISUNGEN: {skill_content}
+ZUSÄTZLICHER KONTEXT: {additional_context}
+{context_label}:
+{context_body}
+AKTUELLE E-MAIL:
+{mail_content}
+
+Format:
+ANHANG: [JA/NEIN]
+BETREFF: [Der Betreff]
+TEXT:
+[Der Antwort-Text]
+"""
+        if self.debug:
+            prompt_file = mail_path.parent / f"{mail_path.stem}_regular_prompt.md"
+            prompt_file.write_text(f"# System Prompt\n{system_prompt}\n\n# User Prompt\n{reg_prompt}", encoding="utf-8")
+
+        try:
+            content = self.agent.chat(messages=[{"role": "user", "content": reg_prompt}], system_prompt=system_prompt, sender_name=sender_name, sender_email=sender_email)
+            should_attach = "ANHANG: JA" in content
+            reply_subject = content.split("BETREFF:", 1)[1].split("TEXT:", 1)[0].strip() if "BETREFF:" in content else ""
+            reply_text = content.split("TEXT:", 1)[1].strip() if "TEXT:" in content else content
+            return reply_subject, reply_text, should_attach
+        except Exception as e:
+            logger.error(f"Fehler in Schritt 2: {e}")
+            return "", "Fehler bei der Generierung.", False
+
+    def process_all_emails(self, source_dir: Path, age_months: Optional[int] = None) -> List[Dict]:
+        """Verarbeitet alle sortierten E-Mails im Quellverzeichnis."""
+        report_path = source_dir / "sorted_emails.md"
+        emails = self.parse_report(report_path)
+        logger.info(f"{len(emails)} sortierte E-Mails gefunden.")
+
+        unique_emails_to_process = []
+        temp_folders = set()
+
+        for email in emails:
+            mail_path = Path(email["path"])
+            is_ba_ma = email["class"].startswith(("BA_", "MA_"))
+
+            if is_ba_ma:
+                identifier = (email["class"], email["semester"], email["lastname"])
+                semester_folder = mail_path.parent.parent
+                inbox_folder = semester_folder / "Inbox"
+                sent_folder = semester_folder / "SentItems"
+                all_files = []
+                if inbox_folder.exists():
+                    all_files.extend(list(inbox_folder.glob("*.msg")) + list(inbox_folder.glob("*.eml")))
+                if sent_folder.exists():
+                    all_files.extend(list(sent_folder.glob("*.msg")) + list(sent_folder.glob("*.eml")))
+
+                student_emails = []
+                for f in all_files:
+                    try:
+                        with extract_msg.openMsg(str(f)) as msg:
+                            sender_lastname = extract_lastname(msg.sender)
+                            rec_lastname = extract_lastname(msg.recipients[0].name or msg.recipients[0].email) if msg.recipients else "None"
+                            if sender_lastname == email["lastname"] or rec_lastname == email["lastname"]:
+                                student_emails.append((self.mail_parser.get_email_date(f), f))
+                    except Exception:
+                        continue
+
+                if not student_emails:
+                    continue
+                student_emails.sort(key=lambda x: x[0])
+                latest_date, latest_mail = student_emails[-1]
+                needs_answer = "Inbox" in latest_mail.parts
+                email.update({
+                    "latest_date": latest_date,
+                    "latest_mail": latest_mail,
+                    "student_emails": student_emails,
+                    "semester_folder": semester_folder
+                })
+            else:
+                identifier = mail_path.parent.parent
+                email_files = list(identifier.rglob("*.msg")) + list(identifier.rglob("*.eml"))
+                if not email_files:
+                    continue
+                dated_emails = []
+                for f in email_files:
+                    try:
+                        dated_emails.append((self.mail_parser.get_email_date(f), f))
+                    except Exception:
+                        dated_emails.append((datetime.min, f))
+                dated_emails.sort(key=lambda x: x[0])
+                latest_date, latest_mail = dated_emails[-1]
+                needs_answer = "Inbox" in latest_mail.parts and "SentItems" not in latest_mail.parts
+                email.update({
+                    "latest_date": latest_date,
+                    "latest_mail": latest_mail,
+                    "dated_emails": dated_emails,
+                    "identifier_path": identifier
+                })
+
+            if needs_answer and identifier not in temp_folders:
+                temp_folders.add(identifier)
+                unique_emails_to_process.append(email)
+
+        emails_to_process_path = source_dir / "emails_to_process.md"
+        with open(emails_to_process_path, "w", encoding="utf-8") as f:
+            f.write("# Zu beantwortende E-Mails\n\n| Student | Klasse | Semester |\n| :--- | :--- | :--- |\n")
+            for email in unique_emails_to_process:
+                f.write(f"| {email['lastname']} | {email['class']} | {email['semester']} |\n")
+
+        processed_results = []
+        persona_path = Path("skills/SKILL_persona.md")
+        apt_skill_path = Path("skills/SKILL_Appointment.md")
+
+        for email in unique_emails_to_process:
+            latest_mail = email["latest_mail"]
+            latest_date = email["latest_date"]
+            is_ba_ma = email["class"].startswith(("BA_", "MA_"))
+
+            if age_months:
+                cutoff = (datetime.now() - timedelta(days=age_months * 30)).replace(tzinfo=None)
+                if latest_date.replace(tzinfo=None) < cutoff:
+                    processed_results.append({
+                        "lastname": email["lastname"],
+                        "subject": latest_mail.stem,
+                        "status": f"Übersprungen (> {age_months} Monate)"
+                    })
+                    continue
+
+            student_email = ""
+            sender_name = ""
+            try:
+                with extract_msg.openMsg(str(latest_mail)) as msg:
+                    student_email = msg.sender
+                    sender_name = msg.senderName or email["lastname"]
+            except Exception:
+                pass
+
+            person_profile = self.profiler.get_profile(student_email) if student_email else None
+            cc_list = []
+            try:
+                with extract_msg.openMsg(str(latest_mail)) as msg:
+                    if msg.recipients:
+                        for rec in msg.recipients:
+                            rec_email = rec.email or rec.name
+                            if rec_email and self.config.user.email not in rec_email.lower() and rec_email.lower() != student_email.lower():
+                                cc_list.append(rec_email)
+            except Exception:
+                pass
+
+            skill_path = Path(f"skills/SKILL_{email['class']}.md")
+            if not skill_path.exists():
+                skill_path = Path(__file__).parent.parent / "skills" / f"SKILL_{email['class']}.md"
+
+            first_name = "Unknown"
+            try:
+                with extract_msg.openMsg(str(latest_mail)) as msg:
+                    first_name = extract_firstname(msg.sender)
+            except Exception:
+                pass
+
+            salutation = f"Guten Tag {self.summarizer.determine_gender(first_name)} {email['lastname']}"
+            add_ctx = f"Anrede: {salutation}\n"
+            if person_profile:
+                add_ctx += f"\nPersonen-Steckbrief:\n{person_profile}\n"
+            add_ctx += f"Studenten-E-Mail: {student_email}\n"
+
+            if email["class"] == "PO-Wechsel":
+                pdf_path = Path(r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf")
+                if pdf_path.exists():
+                    add_ctx += f"\nDu kannst bei Bedarf Details aus der Datei '{pdf_path}' mittels des read_file Tools auslesen.\n"
+
+            conv_content = ""
+            summary_content = ""
+            if is_ba_ma:
+                threshold = latest_date - timedelta(days=14)
+                for d, f in email["student_emails"]:
+                    if f != latest_mail and d >= threshold:
+                        p = self.mail_parser.parse(f)
+                        if p:
+                            conv_content += f"\n--- EMAIL VOM {d} ---\n{p}\n"
+            else:
+                summary_file = email["identifier_path"] / ".emails_summary.md"
+                if not summary_file.exists() or latest_date > datetime.fromtimestamp(summary_file.stat().st_mtime):
+                    c_content = ""
+                    for d, f in email["dated_emails"]:
+                        p = self.mail_parser.parse(f)
+                        if p:
+                            c_content += f"\n--- EMAIL VOM {d} ---\n{p}\n"
+                    summary_content = self.summarizer.summarize_email_conversation(email["identifier_path"].name, c_content)
+                    if summary_content:
+                        summary_file.write_text(summary_content, encoding="utf-8")
+                else:
+                    summary_content = summary_file.read_text(encoding="utf-8")
+
+            reply_subject, reply, should_attach = self.generate_reply(
+                latest_mail, summary_content, skill_path, conv_content, persona_path, add_ctx, apt_skill_path, sender_name, student_email
+            )
+
+            if reply_subject == "NO_REPLY_NEEDED":
+                processed_results.append({
+                    "lastname": email["lastname"],
+                    "subject": latest_mail.stem,
+                    "status": f"Keine Antwort erforderlich ({reply})"
+                })
+                continue
+
+            if reply.startswith("APPOINTMENT_BOOKED"):
+                apt_info = self.agent.last_appointment_info
+                status = f"Termin gebucht ({apt_info['start_time']})" if apt_info and "start_time" in apt_info else "Termin gebucht"
+                processed_results.append({
+                    "lastname": email["lastname"],
+                    "subject": latest_mail.stem,
+                    "status": status
+                })
+                continue
+
+            attachments = [latest_mail]
+            if should_attach and email["class"] == "PO-Wechsel":
+                pdf = Path(r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf")
+                if pdf.exists():
+                    attachments.append(pdf)
+
+            success = create_outlook_draft(reply_subject or latest_mail.stem, reply, recipient=student_email, cc=cc_list, attachments=attachments)
+            if success:
+                res_status = "Outlook Entwurf (Work in Progress)"
+            else:
+                r_path = (email["semester_folder"] if is_ba_ma else email["identifier_path"]) / f"{latest_mail.stem}_reply.md"
+                r_path.write_text(reply, encoding="utf-8")
+                res_status = f"Datei: {r_path}"
+
+            processed_results.append({
+                "lastname": email["lastname"],
+                "subject": latest_mail.stem,
+                "status": res_status
+            })
+
+        if processed_results:
+            with open(source_dir / "processed_emails.md", "w", encoding="utf-8") as f:
+                f.write("# Verarbeitete E-Mails\n\n| Student | Betreff | Status |\n| :--- | :--- | :--- |\n")
+                for res in processed_results:
+                    f.write(f"| {res['lastname']} | {res['subject']} | {res['status']} |\n")
+
+        return processed_results
