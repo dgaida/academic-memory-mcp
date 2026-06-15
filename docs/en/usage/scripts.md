@@ -21,11 +21,15 @@ python scripts/flatten_directory.py /path/to/data
 ### Visualize Knowledge Graph
 Generates an interactive HTML visualization of the knowledge graph.
 ```bash
+mcp-uni graph visualize
+```
+Alternatively, the script can be called directly:
+```bash
 python scripts/visualize_knowledge_graph.py
 ```
 The output is generated in `knowledge_graph.html`.
 
-Supports the `--filter <name>` parameter to restrict the graph to a specific node and its context. This includes all "parent structures" (incoming edges, e.g., a person's institute or faculty) as well as all subgraphs originating from those structures (outgoing edges, e.g., all members of that institute or the person's modules).
+Supports the `--filter <name>` parameter (or `-f` in the CLI) to restrict the graph to a specific node and its context. This includes all "parent structures" (incoming edges, e.g., a person's institute or faculty) as well as all subgraphs originating from those structures (outgoing edges, e.g., all members of that institute or the person's modules).
 
 ### TH Köln Person Crawler
 Crawls the TH Köln personnel directory for names, emails, faculties, and institutes.
