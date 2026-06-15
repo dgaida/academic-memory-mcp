@@ -9,6 +9,7 @@ The results are saved in a Markdown table and in the university metadata databas
 import argparse
 import html
 import random
+import string
 import time
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -45,16 +46,25 @@ class THKoelnCrawler:
         """Wait for a random duration to avoid being blocked."""
         time.sleep(random.uniform(*self.delay_range))
 
-    def get_persons_from_char(self, char: str) -> List[Dict[str, str]]:
-        """Fetches persons starting with a specific character.
+    def get_persons(self, char: Optional[str] = None, faculty: Optional[str] = None, institution: Optional[str] = None) -> List[Dict[str, str]]:
+        """Fetches persons based on character, faculty or institution.
 
         Args:
             char: The first character of the surname.
+            faculty: The faculty name.
+            institution: The institution name.
 
         Returns:
             A list of dictionaries containing name, email, and profile_url.
         """
-        params = {"pse_surname_first_char[]": char}
+        params = {}
+        if char:
+            params["pse_surname_first_char[]"] = char
+        if faculty:
+            params["faculty_de[]"] = faculty
+        if institution:
+            params["other_institution_de[]"] = institution
+
         response = self.session.get(self.PERSONS_LIST_URL, params=params)
         response.raise_for_status()
 
@@ -119,31 +129,44 @@ class THKoelnCrawler:
 
         return details
 
-    def crawl(self, chars: List[str]) -> List[Dict[str, str]]:
-        """Crawls persons for a list of characters.
+    def crawl(self, chars: List[str], faculty: Optional[str] = None, institution: Optional[str] = None) -> List[Dict[str, str]]:
+        """Crawls persons for a list of characters and/or faculty/institution.
 
         Args:
             chars: List of characters to crawl.
+            faculty: Optional faculty to filter by.
+            institution: Optional institution to filter by.
 
         Returns:
             A list of dictionaries with full person details.
         """
         all_data = []
-        for char in chars:
-            char = char.strip().upper()
-            if not char:
-                continue
-            print(f"Crawling character: {char}")
-            persons = self.get_persons_from_char(char)
-            for person in persons:
-                print(f"  Fetching details for: {person['name']}")
-                try:
-                    details = self.get_person_details(person["profile_url"])
-                    person.update(details)
-                    all_data.append(person)
-                except Exception as e:
-                    print(f"    Error fetching details for {person['name']}: {e}")
-            self._wait()
+
+        if not chars and (faculty or institution):
+            items_to_process = [(None, faculty, institution)]
+        else:
+            items_to_process = [(char.strip().upper(), faculty, institution) for char in chars if char.strip()]
+
+        for char, fac, inst in items_to_process:
+            if char:
+                print(f"Crawling character: {char}" + (f" (Faculty: {fac})" if fac else "") + (f" (Institution: {inst})" if inst else ""))
+            else:
+                print(f"Crawling" + (f" Faculty: {fac}" if fac else "") + (f" Institution: {inst}" if inst else ""))
+
+            try:
+                persons = self.get_persons(char=char, faculty=fac, institution=inst)
+                for person in persons:
+                    print(f"  Fetching details for: {person['name']}")
+                    try:
+                        details = self.get_person_details(person["profile_url"])
+                        person.update(details)
+                        all_data.append(person)
+                    except Exception as e:
+                        print(f"    Error fetching details for {person['name']}: {e}")
+                self._wait()
+            except Exception as e:
+                print(f"  Error crawling: {e}")
+
         return all_data
 
 
@@ -217,7 +240,8 @@ def main() -> None:
         epilog="""
 Examples:
   python scripts/crawl_th_koeln_persons.py A
-  python scripts/crawl_th_koeln_persons.py "A, B"
+  python scripts/crawl_th_koeln_persons.py --faculty "Informatik und Ingenieurwissenschaften"
+  python scripts/crawl_th_koeln_persons.py --institution "Campus IT"
   python scripts/crawl_th_koeln_persons.py A B C
         """
     )
@@ -225,6 +249,16 @@ Examples:
         "chars",
         nargs="*",
         help="Characters to crawl (e.g. A B or 'A, B'). If multiple characters are provided in one string separated by commas, they will be split."
+    )
+    parser.add_argument(
+        "--faculty",
+        type=str,
+        help="Faculty to crawl (e.g. 'Informatik und Ingenieurwissenschaften')."
+    )
+    parser.add_argument(
+        "--institution",
+        type=str,
+        help="Institution to crawl (e.g. 'Campus IT')."
     )
     parser.add_argument(
         "--db",
@@ -249,13 +283,12 @@ Examples:
         else:
             chars_to_crawl.append(arg.strip())
 
-    if not chars_to_crawl:
-        # Default to A for demonstration if no args
-        print("No characters specified, defaulting to 'A'.")
-        chars_to_crawl = ["A"]
+    if not chars_to_crawl and not args.faculty and not args.institution:
+        print("No filters specified, crawling entire TH (A-Z).")
+        chars_to_crawl = list(string.ascii_uppercase)
 
     crawler = THKoelnCrawler()
-    data = crawler.crawl(chars_to_crawl)
+    data = crawler.crawl(chars_to_crawl, faculty=args.faculty, institution=args.institution)
 
     # Save to Markdown
     save_to_markdown(data, args.output)
