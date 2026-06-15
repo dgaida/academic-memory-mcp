@@ -151,7 +151,7 @@ class THKoelnCrawler:
             if char:
                 print(f"Crawling character: {char}" + (f" (Faculty: {fac})" if fac else "") + (f" (Institution: {inst})" if inst else ""))
             else:
-                print(f"Crawling" + (f" Faculty: {fac}" if fac else "") + (f" Institution: {inst}" if inst else ""))
+                print("Crawling" + (f" Faculty: {fac}" if fac else "") + (f" Institution: {inst}" if inst else ""))
 
             try:
                 persons = self.get_persons(char=char, faculty=fac, institution=inst)
