@@ -25,3 +25,17 @@ Entries can be deleted by their ID. With the `--force` or `-f` option, the confi
 *   **Delete student:** `mcp-uni db delete-student <ID>`  
 *   **Delete summary:** `mcp-uni db delete-summary <ID>`  
 *   **Delete deadline:** `mcp-uni db delete-deadline <ID>`  
+
+## Knowledge Graph Management
+You can directly manage the nodes and edges of the Knowledge Graph:
+
+*   **List nodes:** `mcp-uni db list-nodes`
+*   **List edges:** `mcp-uni db list-edges`
+*   **Delete node:** `mcp-uni db delete-node <ID>` (also removes all associated edges)
+*   **Delete edge:** `mcp-uni db delete-edge <ID>`
+
+## Manual Troubleshooting
+For complex manual corrections or direct editing of the database, we recommend external tools such as:
+*   **[DB Browser for SQLite](https://sqlitebrowser.org/)**: A user-friendly open-source tool for viewing, editing, and querying SQLite databases.
+
+Simply open the `.db` file specified in your configuration (default: `data/university.db`) in DB Browser for SQLite.

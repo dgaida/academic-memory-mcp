@@ -1,9 +1,12 @@
+import logging
 """Metadaten-Speicherung und Verwaltung."""
 import sqlite3
 import json
 import time
 from pathlib import Path
 from typing import Optional, List, Dict, Any, Tuple
+
+logger = logging.getLogger(__name__)
 
 class MetadataStore:
     """Verwaltet die Metadaten-Persistenz in einer SQLite-Datenbank.
@@ -92,21 +95,66 @@ class MetadataStore:
             ''')
 
 
+
+            # Migration: nodes table
+            cursor.execute("PRAGMA table_info(nodes)")
+            cols = [c[1] for c in cursor.fetchall()]
+            if cols:
+                cursor.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='nodes'")
+                res = cursor.fetchone()
+                if res and "UNIQUE(name, type)" not in res[0]:
+                    logger.info("Migrating nodes table to composite unique constraint...")
+                    cursor.execute("ALTER TABLE nodes RENAME TO nodes_old")
+                    cursor.execute('''
+                        CREATE TABLE nodes (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            name TEXT,
+                            type TEXT,
+                            properties_json TEXT,
+                            UNIQUE(name, type)
+                        )
+                    ''')
+                    cursor.execute("INSERT INTO nodes (id, name, type, properties_json) SELECT id, name, type, properties_json FROM nodes_old")
+                    cursor.execute("DROP TABLE nodes_old")
+
+            # Migration: aliases table
+            cursor.execute("PRAGMA table_info(aliases)")
+            cols = [c[1] for c in cursor.fetchall()]
+            if cols:
+                cursor.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='aliases'")
+                res = cursor.fetchone()
+                if res and "UNIQUE(alias, category)" not in res[0]:
+                    logger.info("Migrating aliases table to composite unique constraint...")
+                    cursor.execute("ALTER TABLE aliases RENAME TO aliases_old")
+                    cursor.execute('''
+                       CREATE TABLE aliases (
+                           id INTEGER PRIMARY KEY AUTOINCREMENT,
+                           alias TEXT,
+                           canonical_name TEXT,
+                           category TEXT,
+                           UNIQUE(alias, category)
+                       )
+                    ''')
+                    cursor.execute("INSERT INTO aliases (id, alias, canonical_name, category) SELECT id, alias, canonical_name, category FROM aliases_old")
+                    cursor.execute("DROP TABLE aliases_old")
+
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS nodes (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT UNIQUE,
+                    name TEXT,
                     type TEXT,
-                    properties_json TEXT
+                    properties_json TEXT,
+                    UNIQUE(name, type)
                 )
             ''')
 
             cursor.execute('''
                CREATE TABLE IF NOT EXISTS aliases (
                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                   alias TEXT UNIQUE,
+                   alias TEXT,
                    canonical_name TEXT,
-                   category TEXT
+                   category TEXT,
+                   UNIQUE(alias, category)
                )
             ''')
 
@@ -420,21 +468,21 @@ class MetadataStore:
         props_json = json.dumps(properties or {})
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute('SELECT id FROM nodes WHERE name = ?', (name,))
+            cursor.execute('SELECT id FROM nodes WHERE name = ? AND type = ?', (name, node_type))
             row = cursor.fetchone()
             is_new = row is None
 
             cursor.execute('''
                 INSERT INTO nodes (name, type, properties_json)
                 VALUES (?, ?, ?)
-                ON CONFLICT(name) DO UPDATE SET
+                ON CONFLICT(name, type) DO UPDATE SET
                     type=excluded.type,
                     properties_json=excluded.properties_json
             ''', (name, node_type, props_json))
             conn.commit()
 
             if is_new:
-                cursor.execute('SELECT id FROM nodes WHERE name = ?', (name,))
+                cursor.execute('SELECT id FROM nodes WHERE name = ? AND type = ?', (name, node_type))
                 return cursor.fetchone()[0], True
             else:
                 return row[0], False
@@ -535,7 +583,7 @@ class MetadataStore:
             cursor = conn.cursor()
             cursor.execute('''
                            INSERT INTO aliases (alias, canonical_name, category)
-                           VALUES (?, ?, ?) ON CONFLICT(alias) DO
+                           VALUES (?, ?, ?) ON CONFLICT(alias, category) DO
                            UPDATE SET
                                canonical_name=excluded.canonical_name,
                                category=excluded.category
@@ -620,6 +668,33 @@ class MetadataStore:
                 WHERE source_id = ? AND target_id = ?
             ''', (source_id, target_id))
             return [dict(row) for row in cursor.fetchall()]
+
+
+    def delete_node(self, node_id: int) -> None:
+        """Löscht einen Knoten und alle zugehörigen Kanten.
+
+        Args:
+            node_id (int): Die ID des Knotens.
+        """
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            # Kanten löschen
+            cursor.execute('DELETE FROM edges WHERE source_id = ? OR target_id = ?', (node_id, node_id))
+            # Knoten löschen
+            cursor.execute('DELETE FROM nodes WHERE id = ?', (node_id,))
+            conn.commit()
+
+
+    def delete_edge_by_id(self, edge_id: int) -> None:
+        """Löscht eine Kante anhand ihrer ID.
+
+        Args:
+            edge_id (int): Die ID der Kante.
+        """
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('DELETE FROM edges WHERE id = ?', (edge_id,))
+            conn.commit()
 
     def delete_edge(self, source_id: int, target_id: int, relation_type: str) -> None:
         """Löscht eine spezifische Kante zwischen zwei Knoten.

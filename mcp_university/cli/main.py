@@ -84,6 +84,28 @@ def graph_build(debug: bool = typer.Option(False, "--debug", "-d", help="Debug-L
 
     print("Wissensgraph erfolgreich aktualisiert.")
 
+
+@graph_app.command("visualize")
+def graph_visualize(
+    filter: str = typer.Option(None, "--filter", "-f", help="Filtert den Graphen nach einem Knotennamen."),
+    debug: bool = typer.Option(False, "--debug", "-d", help="Debug-Logging aktivieren")
+) -> None:
+    """Generiert eine interaktive HTML-Visualisierung des Wissensgraphen."""
+    setup_logging(debug)
+    from scripts.visualize_knowledge_graph import main as run_viz
+
+    import sys
+    original_argv = sys.argv
+    sys.argv = ["visualize_knowledge_graph.py"]
+    if filter:
+        sys.argv.extend(["--filter", filter])
+
+    try:
+        run_viz()
+    finally:
+        sys.argv = original_argv
+
+
 app = typer.Typer(help="MCP University Memory System CLI - Lokales Wissensmanagement für die Universität")
 app.add_typer(graph_app, name="graph")
 app.add_typer(db_app, name="db")

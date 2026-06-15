@@ -301,3 +301,98 @@ def delete_deadline(deadline_id: int, force: bool = typer.Option(False, "--force
 
     store.delete_deadline(deadline_id)
     console.print(f"[green]Deadline '{target['title']}' erfolgreich gelöscht.[/green]")
+
+@db_app.command("list-nodes")
+def list_nodes() -> None:
+    """Listet alle Knoten im Wissensgraphen auf."""
+    store, _ = get_store_and_index()
+    nodes = store.get_all_nodes()
+
+    if not nodes:
+        console.print("[yellow]Keine Knoten im Graphen gefunden.[/yellow]")
+        return
+
+    table = Table(title="Knoten im Wissensgraphen")
+    table.add_column("ID", style="cyan")
+    table.add_column("Name", style="green")
+    table.add_column("Typ", style="magenta")
+    table.add_column("Eigenschaften", style="white")
+
+    for n in nodes:
+        props = n.get('properties_json', '{}')
+        table.add_row(str(n['id']), n['name'], n['type'], props)
+
+    console.print(table)
+
+@db_app.command("list-edges")
+def list_edges() -> None:
+    """Listet alle Kanten im Wissensgraphen auf."""
+    store, _ = get_store_and_index()
+    edges = store.get_all_edges()
+    nodes = {n['id']: n for n in store.get_all_nodes()}
+
+    if not edges:
+        console.print("[yellow]Keine Kanten im Graphen gefunden.[/yellow]")
+        return
+
+    table = Table(title="Kanten im Wissensgraphen")
+    table.add_column("ID", style="cyan")
+    table.add_column("Von (ID)", style="green")
+    table.add_column("Typ", style="magenta")
+    table.add_column("Nach (ID)", style="blue")
+    table.add_column("Eigenschaften", style="white")
+
+    for e in edges:
+        source = nodes.get(e['source_id'], {}).get('name', f"ID {e['source_id']}")
+        target = nodes.get(e['target_id'], {}).get('name', f"ID {e['target_id']}")
+        props = e.get('properties_json', '{}')
+        table.add_row(
+            str(e['id']),
+            f"{source} ({e['source_id']})",
+            e['relation_type'],
+            f"{target} ({e['target_id']})",
+            props
+        )
+
+    console.print(table)
+
+@db_app.command("delete-node")
+def delete_node(node_id: int, force: bool = typer.Option(False, "--force", "-f", help="Ohne Bestätigung löschen")) -> None:
+    """Löscht einen Knoten und alle zugehörigen Kanten aus dem Graphen.
+
+    Args:
+        node_id (int): ID des zu löschenden Knotens.
+        force (bool): Wenn True, wird ohne Bestätigung gelöscht.
+    """
+    store, _ = get_store_and_index()
+    node = store.get_node_by_id(node_id)
+
+    if not node:
+        console.print(f"[red]Knoten mit ID {node_id} nicht gefunden.[/red]")
+        return
+
+    if not force:
+        confirm = typer.confirm(f"Möchten Sie den Knoten '{node['name']}' ({node['type']}) und alle zugehörigen Kanten wirklich löschen?")
+        if not confirm:
+            return
+
+    store.delete_node(node_id)
+    console.print(f"[green]Knoten '{node['name']}' erfolgreich gelöscht.[/green]")
+
+@db_app.command("delete-edge")
+def delete_edge(edge_id: int, force: bool = typer.Option(False, "--force", "-f", help="Ohne Bestätigung löschen")) -> None:
+    """Löscht eine spezifische Kante aus dem Graphen.
+
+    Args:
+        edge_id (int): ID der zu löschenden Kante.
+        force (bool): Wenn True, wird ohne Bestätigung gelöscht.
+    """
+    store, _ = get_store_and_index()
+
+    if not force:
+        confirm = typer.confirm(f"Möchten Sie die Kante mit ID {edge_id} wirklich löschen?")
+        if not confirm:
+            return
+
+    store.delete_edge_by_id(edge_id)
+    console.print(f"[green]Kante mit ID {edge_id} erfolgreich gelöscht.[/green]")
