@@ -29,15 +29,20 @@ def test_get_knowledge_graph_context(profiler, mock_store):
     mock_store.get_node_by_property.side_effect = lambda k, v: person_node if k == "email" and v == email else None
 
     def get_node_by_id(node_id):
-        if node_id == 1: return person_node
-        if node_id == 2: return inst_node
-        if node_id == 3: return fac_node
+        if node_id == 1:
+            return person_node
+        if node_id == 2:
+            return inst_node
+        if node_id == 3:
+            return fac_node
         return None
     mock_store.get_node_by_id.side_effect = get_node_by_id
 
     def get_outgoing_edges(node_id):
-        if node_id == 1: return [{"target_id": 2, "relation_type": "ist Element von"}]
-        if node_id == 2: return [{"target_id": 3, "relation_type": "ist Element von"}]
+        if node_id == 1:
+            return [{"target_id": 2, "relation_type": "ist Element von"}]
+        if node_id == 2:
+            return [{"target_id": 3, "relation_type": "ist Element von"}]
         return []
     mock_store.get_outgoing_edges.side_effect = get_outgoing_edges
 
