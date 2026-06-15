@@ -22,7 +22,7 @@ def main() -> None:
     interaktive Pyvis-Visualisierung.
     """
     parser = argparse.ArgumentParser(description="Visualisierung des Wissensgraphen.")
-    parser.add_argument("--filter", type=str, help="Filtert den Graphen nach einem Knotenamen (zeigt die verbundene Komponente).")
+    parser.add_argument("--filter", type=str, help="Filtert den Graphen nach einem Knotenamen. Zeigt den Knoten, seine Eltern-Strukturen (eingehende Kanten) und alle davon ausgehenden Teilgraphen.")
     args = parser.parse_args()
 
     config = get_config()
@@ -80,10 +80,20 @@ def main() -> None:
                 break
 
         if target_node_id is not None:
-            # Find connected component in undirected version
-            UG = G.to_undirected()
-            connected_nodes = nx.node_connected_component(UG, target_node_id)
-            G = G.subgraph(connected_nodes).copy()
+            # Find all ancestors (nodes that have a path to target_node_id)
+            # This follows incoming edges to find parent structures (e.g., Institute, Faculty)
+            ancestors = nx.ancestors(G, target_node_id)
+            nodes_to_expand = ancestors | {target_node_id}
+
+            # Find all descendants of all ancestors (and the target node itself)
+            # This ensures we see the "higher-level" structures and everything they contain
+            # (e.g., all persons in the same institute/faculty)
+            result_nodes = set()
+            for node in nodes_to_expand:
+                result_nodes.add(node)
+                result_nodes.update(nx.descendants(G, node))
+
+            G = G.subgraph(result_nodes).copy()
             logger.info(f"Graph auf {len(G.nodes)} Knoten und {len(G.edges)} Kanten gefiltert.")
         else:
             logger.warning(f"Kein Knoten mit dem Namen '{args.filter}' gefunden.")

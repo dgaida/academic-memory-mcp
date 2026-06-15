@@ -25,6 +25,8 @@ python scripts/visualize_knowledge_graph.py
 ```
 Die Ausgabe erfolgt in `knowledge_graph.html`.
 
+Unterstützt den Parameter `--filter <Name>`, um den Graphen auf einen bestimmten Knoten und seinen Kontext zu beschränken. Dabei werden alle "Eltern-Strukturen" (eingehende Kanten, z.B. Institut oder Fakultät einer Person) sowie alle von diesen Strukturen ausgehenden Teilgraphen (ausgehende Kanten, z.B. alle Mitglieder des Instituts oder Module einer Person) einbezogen.
+
 ### TH Köln Personen-Crawler
 Crawlt das Personenverzeichnis der TH Köln nach Namen, E-Mails, Fakultäten und Instituten.
 ```bash
