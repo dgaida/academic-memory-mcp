@@ -1,3 +1,4 @@
+import json
 import logging
 import yaml
 from pathlib import Path
@@ -6,6 +7,7 @@ from datetime import datetime
 from mcp_university.config import get_config
 from mcp_university.parser.mail_parser import MailParser
 from mcp_university.utils.llm_client_wrapper import LLMClientWrapper
+from mcp_university.metadata.store import MetadataStore
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +24,7 @@ class PersonProfiler:
         self.config = get_config()
         self.mail_parser = MailParser()
         self.llm = LLMClientWrapper()
+        self.store = MetadataStore(self.config.sqlite_path)
 
         # Sicherstellen, dass das Speicherverzeichnis existiert
         try:
@@ -150,6 +153,59 @@ class PersonProfiler:
 
         return batches
 
+
+
+    def _get_knowledge_graph_context(self, email_address: str) -> str:
+        """Sucht im Wissensgraphen nach Informationen über die Person.
+
+        Verfolgt ausgehende Kanten mittels Tiefensuche (DFS), um Fakultät, Institut etc. zu finden.
+
+        Args:
+            email_address (str): E-Mail-Adresse der Person.
+
+        Returns:
+            str: Formatierte Informationen aus dem Wissensgraphen.
+        """
+        person_node = self.store.get_node_by_property("email", email_address)
+        if not person_node:
+            return ""
+
+        context_parts = []
+        visited_nodes = set()
+        to_visit = [(person_node["id"], 0)]  # (node_id, depth)
+
+        while to_visit:
+            node_id, depth = to_visit.pop()
+            if node_id in visited_nodes or depth > 3:
+                continue
+
+            visited_nodes.add(node_id)
+            node = self.store.get_node_by_id(node_id)
+            if not node:
+                continue
+
+            node_name = node["name"]
+            node_type = node["type"]
+            props = json.loads(node.get("properties_json", "{}"))
+
+            info = f"- {node_name} ({node_type})"
+            if props:
+                prop_str = ", ".join([f"{k}: {v}" for k, v in props.items()])
+                info += f" [Eigenschaften: {prop_str}]"
+
+            context_parts.append("  " * depth + info)
+
+            # Nachbarn finden (ausgehende Kanten)
+            edges = self.store.get_outgoing_edges(node_id)
+            for edge in edges:
+                target_node_id = edge["target_id"]
+                to_visit.append((target_node_id, depth + 1))
+
+        if not context_parts:
+            return ""
+
+        return "\nInformationen aus dem Wissensgraphen:\n" + "\n".join(context_parts)
+
     def generate_profile(self, email_address: str, force_update: bool = False) -> Optional[str]:
         """Erstellt oder aktualisiert einen Steckbrief für die angegebene Adresse.
 
@@ -171,6 +227,7 @@ class PersonProfiler:
             logger.warning(f"Keine E-Mails für {email_address} gefunden.")
             return None
 
+        kg_context = self._get_knowledge_graph_context(email_address)
         batches = self.create_batches(emails)
         current_profile = ""
 
@@ -183,7 +240,7 @@ class PersonProfiler:
                 batch_content += f"Betreff: {details['subject']}\n"
                 batch_content += f"Inhalt: {details['body'][:1000]}...\n"
 
-            prompt = self._get_profiling_prompt(email_address, batch_content, current_profile)
+            prompt = self._get_profiling_prompt(email_address, batch_content, current_profile, kg_context)
             response = self.llm.chat([{"role": "user", "content": prompt}])
             current_profile = response["message"]["content"]
 
@@ -191,13 +248,14 @@ class PersonProfiler:
         profile_file.write_text(current_profile, encoding="utf-8")
         return current_profile
 
-    def _get_profiling_prompt(self, email: str, new_content: str, existing_profile: str) -> str:
+    def _get_profiling_prompt(self, email: str, new_content: str, existing_profile: str, kg_context: str = "") -> str:
         """Erstellt den Prompt für das LLM.
 
         Args:
             email (str): E-Mail-Adresse.
             new_content (str): Neuer E-Mail-Inhalt (Batch).
             existing_profile (str): Bisheriger Steckbrief.
+            kg_context (str): Informationen aus dem Wissensgraphen.
 
         Returns:
             str: Der formatierte Prompt.
@@ -207,11 +265,13 @@ class PersonProfiler:
         else:
             context = f"Bisheriger Steckbrief:\n\n{existing_profile}\n\nAktualisiere diesen Steckbrief mit den folgenden neuen Informationen."
 
+        kg_info = f"\n{kg_context}\n" if kg_context else ""
         return f"""Du bist ein Assistent, der Personen-Steckbriefe aus E-Mails erstellt.
 Die Zielperson hat die E-Mail-Adresse: {email}
 
 {context}
 
+{kg_info}
 Hier sind die neuen E-Mails:
 {new_content}
 
