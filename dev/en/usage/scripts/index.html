@@ -1557,6 +1557,7 @@
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>python<span class="w"> </span>scripts/visualize_knowledge_graph.py
 </code></pre></div>
 The output is generated in <code>knowledge_graph.html</code>.</p>
+<p>Supports the <code>--filter &lt;name&gt;</code> parameter to restrict the graph to a specific node and its context. This includes all "parent structures" (incoming edges, e.g., a person's institute or faculty) as well as all subgraphs originating from those structures (outgoing edges, e.g., all members of that institute or the person's modules).</p>
 <h3 id="th-koln-person-crawler">TH Köln Person Crawler<a class="headerlink" href="#th-koln-person-crawler" title="Permanent link">&para;</a></h3>
 <p>Crawls the TH Köln personnel directory for names, emails, faculties, and institutes.
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python<span class="w"> </span>scripts/crawl_th_koeln_persons.py<span class="w"> </span>A<span class="w"> </span>B<span class="w"> </span>C

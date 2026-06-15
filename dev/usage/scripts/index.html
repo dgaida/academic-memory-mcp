@@ -1555,6 +1555,7 @@
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>python<span class="w"> </span>scripts/visualize_knowledge_graph.py
 </code></pre></div>
 Die Ausgabe erfolgt in <code>knowledge_graph.html</code>.</p>
+<p>Unterstützt den Parameter <code>--filter &lt;Name&gt;</code>, um den Graphen auf einen bestimmten Knoten und seinen Kontext zu beschränken. Dabei werden alle "Eltern-Strukturen" (eingehende Kanten, z.B. Institut oder Fakultät einer Person) sowie alle von diesen Strukturen ausgehenden Teilgraphen (ausgehende Kanten, z.B. alle Mitglieder des Instituts oder Module einer Person) einbezogen.</p>
 <h3 id="th-koln-personen-crawler">TH Köln Personen-Crawler<a class="headerlink" href="#th-koln-personen-crawler" title="Permanent link">&para;</a></h3>
 <p>Crawlt das Personenverzeichnis der TH Köln nach Namen, E-Mails, Fakultäten und Instituten.
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python<span class="w"> </span>scripts/crawl_th_koeln_persons.py<span class="w"> </span>A<span class="w"> </span>B<span class="w"> </span>C
