@@ -1,10 +1,24 @@
 node_types:
-  - Person
+  - Person an TH Köln
+  - Person extern
+  - Studierende
+  - Institut
+  - Fakultät
+  - Dekanat
+  - Präsidium
+  - Prüfungsausschuss
   - Modul
   - Unternehmen
+  - Forschungsprojekt
+  - Prüfungsordnung
+  - Studiengang
 edge_types:
-  - lehrt
-  - besucht
+  - ist Modulverantwortlicher
+  - ist Erstprüfer
+  - ist Zweitprüfer
+  - ist Element von
+  - schreibt Forschungsantrag
+  - arbeitet in Forschungsprojekt
   - schreibt Bachelorarbeit
   - hat Bachelorarbeit angefragt
   - hat Bachelorarbeit abgeschlossen
@@ -15,7 +29,11 @@ edge_types:
   - hat Projektarbeit angefragt
   - hat Projektarbeit abgeschlossen
   - hat Nachteilsausgleich beantragt
+  - hat Nachteilsausgleich erhalten
   - hat PO-Wechsel beantragt
+  - arbeitet in Unternehmen
+  - macht Praxissemester
+  - hat Praxissemester abgeschlossen
 edge_priorities:
   Bachelorarbeit:
     - hat Bachelorarbeit angefragt
@@ -29,3 +47,12 @@ edge_priorities:
     - hat Projektarbeit angefragt
     - schreibt Projektarbeit
     - hat Projektarbeit abgeschlossen
+  Forschungsprojekt:
+    - schreibt Forschungsantrag
+    - arbeitet in Forschungsprojekt
+  Nachteilsausgleich:
+    - hat Nachteilsausgleich beantragt
+    - hat Nachteilsausgleich erhalten
+  Praxissemester:
+    - macht Praxissemester
+    - hat Praxissemester abgeschlossen
