@@ -1554,27 +1554,30 @@
 <h2 id="knowledge-graph-persons">Knowledge Graph &amp; Persons<a class="headerlink" href="#knowledge-graph-persons" title="Permanent link">&para;</a></h2>
 <h3 id="visualize-knowledge-graph">Visualize Knowledge Graph<a class="headerlink" href="#visualize-knowledge-graph" title="Permanent link">&para;</a></h3>
 <p>Generates an interactive HTML visualization of the knowledge graph.
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>python<span class="w"> </span>scripts/visualize_knowledge_graph.py
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>mcp-uni<span class="w"> </span>graph<span class="w"> </span>visualize
+</code></pre></div>
+Alternatively, the script can be called directly:
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python<span class="w"> </span>scripts/visualize_knowledge_graph.py
 </code></pre></div>
 The output is generated in <code>knowledge_graph.html</code>.</p>
-<p>Supports the <code>--filter &lt;name&gt;</code> parameter to restrict the graph to a specific node and its context. This includes all "parent structures" (incoming edges, e.g., a person's institute or faculty) as well as all subgraphs originating from those structures (outgoing edges, e.g., all members of that institute or the person's modules).</p>
+<p>Supports the <code>--filter &lt;name&gt;</code> parameter (or <code>-f</code> in the CLI) to restrict the graph to a specific node and its context. This includes all "parent structures" (incoming edges, e.g., a person's institute or faculty) as well as all subgraphs originating from those structures (outgoing edges, e.g., all members of that institute or the person's modules).</p>
 <h3 id="th-koln-person-crawler">TH Köln Person Crawler<a class="headerlink" href="#th-koln-person-crawler" title="Permanent link">&para;</a></h3>
 <p>Crawls the TH Köln personnel directory for names, emails, faculties, and institutes.
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python<span class="w"> </span>scripts/crawl_th_koeln_persons.py<span class="w"> </span>A<span class="w"> </span>B<span class="w"> </span>C
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python<span class="w"> </span>scripts/crawl_th_koeln_persons.py<span class="w"> </span>A<span class="w"> </span>B<span class="w"> </span>C
 </code></pre></div>
 Supports multiple initial characters as arguments.</p>
 <h3 id="create-person-profiles">Create Person Profiles<a class="headerlink" href="#create-person-profiles" title="Permanent link">&para;</a></h3>
 <p>Manually creates a profile (Steckbrief) for a specific email address based on existing emails.
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python<span class="w"> </span>scripts/create_person_profiles.py<span class="w"> </span>student@smail.th-koeln.de
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>python<span class="w"> </span>scripts/create_person_profiles.py<span class="w"> </span>student@smail.th-koeln.de
 </code></pre></div></p>
 <h3 id="mocogi-data-extraction">MOCOGI Data Extraction<a class="headerlink" href="#mocogi-data-extraction" title="Permanent link">&para;</a></h3>
 <p>Extracts module information (coordinators, examiners) from the MOCOGI API and links them in the knowledge graph.
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>python<span class="w"> </span>scripts/extract_mocogi_data.py
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>python<span class="w"> </span>scripts/extract_mocogi_data.py
 </code></pre></div></p>
 <h2 id="lectures-teaching">Lectures &amp; Teaching<a class="headerlink" href="#lectures-teaching" title="Permanent link">&para;</a></h2>
 <h3 id="summarize-lecture-slides">Summarize Lecture Slides<a class="headerlink" href="#summarize-lecture-slides" title="Permanent link">&para;</a></h3>
 <p>Searches for PDFs in a folder and generates compact Markdown summaries. Skips files that have already been processed (mtime check).
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>python<span class="w"> </span>scripts/summarize_lectures.py<span class="w"> </span>/path/to/lectures
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>python<span class="w"> </span>scripts/summarize_lectures.py<span class="w"> </span>/path/to/lectures
 </code></pre></div>
 Primarily uses <code>liteparse</code> with an LLM fallback on failure.</p>
 
