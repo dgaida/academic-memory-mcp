@@ -106,8 +106,11 @@ def extract_firstname(name_str: str) -> str:
 def extract_lastname(name_str: str) -> str:
     """Extrahiert den Nachnamen aus einem Namensstring oder einer E-Mail-Adresse.
 
-    Unterstützt das Format vorname.nachname@smail.th-koeln.de (auch mit mehreren Teilen)
-    sowie 'Max Mustermann' oder 'Mustermann, Max'.
+    Folgt den spezifischen Regeln: Mailadresse bei "@" trennen.
+    Falls "." im lokalen Teil vorhanden, dann ist Nachname nach dem ersten ".".
+    Falls kein "." vorhanden, dann alles vor dem "@".
+    Doppelnamen bei "_" oder "." werden getrennt, Teile groß geschrieben und mit "_" verbunden.
+    Normalisiert Umlaute. Priorisiert Display-Namen wenn die E-Mail keinen Punkt enthält.
 
     Args:
         name_str: Der zu parsende Name oder die E-Mail-Adresse.
@@ -118,35 +121,49 @@ def extract_lastname(name_str: str) -> str:
     if not name_str or name_str == "(No Sender)" or name_str == "(No Receiver)":
         return "Unknown"
 
-    # Suche nach E-Mail-Adresse (in < > oder direkt)
+    # Suche nach E-Mail-Adresse
     email_match = re.search(r"[\w\.-]+@[\w\.-]+", name_str)
+
+    # Extrahiere Anzeige-Namen (alles vor der ersten <)
+    display_name = name_str.split("<")[0].strip().strip("'\"")
+
     if email_match:
         email = email_match.group(0)
-        if email.lower().endswith(("@smail.th-koeln.de", "@smail.fh-koeln.de")):
-            local_part = email.split("@")[0]
-            if "." in local_part:
-                # Alles nach dem ersten Punkt ist der Nachname
-                lastname_part = local_part.split(".", 1)[1]
-                # Teile nach Unterstrich und schreibe jeden Teil groß
-                parts = lastname_part.split("_")
-                res = "_".join(p[0].upper() + p[1:] for p in parts if p)
-                return normalize_name(res)
+        local_part = email.split("@")[0]
 
-    # Fallback für Namen ohne (Smail-)Adresse
-    # Entferne E-Mail Adresse in Klammern falls vorhanden
-    clean_name = name_str.split("<")[0].strip()
-
-    if "," in clean_name:
-        # Format: Lastname, Firstname
-        res = clean_name.split(",")[0].strip()
-        res = res.strip("'\"")
-        return normalize_name(res)
-    else:
-        # Format: Firstname Lastname
-        parts = clean_name.split()
-        if parts:
-            res = parts[-1].strip("'\"")
+        # Falls Punkt im lokalen Teil: Immer diese Regel anwenden (z.B. vorname.nachname)
+        if "." in local_part:
+            lastname_part = local_part.split(".", 1)[1]
+            parts = re.split(r'[._]', lastname_part)
+            res = "_".join(p[0].upper() + p[1:] for p in parts if p)
             return normalize_name(res)
+
+        # Falls kein Punkt im lokalen Teil, aber wir haben einen validen Anzeige-Namen
+        # (mit Leerzeichen oder Komma), dann ist dieser meist besser als die Mail-Adresse.
+        if display_name and (" " in display_name or "," in display_name):
+            pass # Weiter zum Display name parsing
+        else:
+            # Ansonsten Regel: Alles vor dem @
+            lastname_part = local_part
+            parts = re.split(r'[._]', lastname_part)
+            res = "_".join(p[0].upper() + p[1:] for p in parts if p)
+            return normalize_name(res)
+
+    # Display name parsing (Fallback oder wenn Mail-Adresse unergiebig)
+    if display_name:
+        if "," in display_name:
+            # Format: Lastname, Firstname
+            res = display_name.split(",")[0].strip()
+            return normalize_name(res)
+        elif " " in display_name:
+            # Format: Firstname Lastname
+            parts = display_name.split()
+            res = parts[-1].strip()
+            return normalize_name(res)
+        else:
+            # Nur ein Wort
+            return normalize_name(display_name)
+
     return "Unknown"
 
 
