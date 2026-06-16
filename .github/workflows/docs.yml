@@ -29,7 +29,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install .
-          pip install pytest pytest-asyncio mkdocs-material mkdocs-static-i18n mkdocstrings[python] mkdocs-mermaid2-plugin interrogate git-cliff mike
+          pip install pytest pytest-asyncio tzlocal<5.0 liteparse networkx pyvis mkdocs-material mkdocs-static-i18n mkdocstrings[python] mkdocs-mermaid2-plugin interrogate git-cliff mike
           npm install -g markdownlint-cli
 
       - name: Run Tests
