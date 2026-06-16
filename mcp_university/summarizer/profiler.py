@@ -8,6 +8,7 @@ from mcp_university.config import get_config
 from mcp_university.parser.mail_parser import MailParser
 from mcp_university.utils.llm_client_wrapper import LLMClientWrapper
 from mcp_university.metadata.store import MetadataStore
+from mcp_university.metadata.profile_store import ProfileStore
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +26,7 @@ class PersonProfiler:
         self.mail_parser = MailParser()
         self.llm = LLMClientWrapper()
         self.store = MetadataStore(self.config.sqlite_path)
+        self.profile_store = ProfileStore(self.config.data_dir / "profiles_tracking.db")
 
         # Sicherstellen, dass das Speicherverzeichnis existiert
         try:
@@ -38,7 +40,7 @@ class PersonProfiler:
         """Gibt alle zu durchsuchenden Pfade aus der Konfiguration zurück.
 
         Returns:
-            List[Path]: Liste der zu durchsuchenden Pfade.
+            List[Path]: Liste der Pfade.
         """
         paths = []
 
@@ -246,7 +248,84 @@ class PersonProfiler:
 
         # Speichern
         profile_file.write_text(current_profile, encoding="utf-8")
+        
+        # Tracking aktualisieren
+        filenames = [m["path"].name for m in emails]
+        self.profile_store.add_processed_emails(email_address, filenames)
+        
         return current_profile
+
+    def update_profile(self, email_address: str) -> Optional[str]:
+        """Aktualisiert den Steckbrief einer Person, falls neue E-Mails vorhanden sind.
+
+        Args:
+            email_address (str): E-Mail-Adresse der Person.
+
+        Returns:
+            Optional[str]: Der aktualisierte (oder bestehende) Steckbrief.
+        """
+        profile_file = self.storage_path / f"{email_address}.md"
+        if not profile_file.exists():
+            return self.generate_profile(email_address)
+
+        existing_profile = profile_file.read_text(encoding="utf-8")
+        processed_files = self.profile_store.get_processed_filenames(email_address)
+        
+        all_emails = self.find_emails_for_address(email_address)
+        new_emails = [m for m in all_emails if m["path"].name not in processed_files]
+
+        if not new_emails:
+            logger.info(f"Keine neuen E-Mails für {email_address} gefunden.")
+            return existing_profile
+
+        logger.info(f"{len(new_emails)} neue E-Mails für {email_address} gefunden. Aktualisiere Steckbrief...")
+        
+        kg_context = self._get_knowledge_graph_context(email_address)
+        batches = self.create_batches(new_emails)
+        current_profile = existing_profile
+
+        for i, batch in enumerate(batches):
+            logger.info(f"Verarbeite Update-Batch {i+1}/{len(batches)} für {email_address}")
+            batch_content = ""
+            for mail in batch:
+                details = mail["details"]
+                batch_content += f"\n--- Datum: {details['date']} ---\n"
+                batch_content += f"Betreff: {details['subject']}\n"
+                batch_content += f"Inhalt: {details['body'][:1000]}...\n"
+
+            prompt = self._get_profiling_prompt(email_address, batch_content, current_profile, kg_context)
+            response = self.llm.chat([{"role": "user", "content": prompt}])
+            current_profile = response["message"]["content"]
+
+        # Speichern und Tracking aktualisieren
+        profile_file.write_text(current_profile, encoding="utf-8")
+        new_filenames = [m["path"].name for m in new_emails]
+        self.profile_store.add_processed_emails(email_address, new_filenames)
+        
+        return current_profile
+
+    def update_all_profiles(self) -> None:
+        """Aktualisiert alle existierenden Steckbriefe."""
+        if not self.storage_path.exists():
+            return
+
+        for profile_file in self.storage_path.glob("*.md"):
+            email_address = profile_file.stem
+            # Einfache Validierung ob es eine E-Mail ist
+            if "@" in email_address:
+                logger.info(f"Prüfe Update für {email_address}...")
+                self.update_profile(email_address)
+
+    def get_profile(self, email_address: str) -> Optional[str]:
+        """Gibt den Steckbrief zurück (und aktualisiert ihn ggf.).
+
+        Args:
+            email_address (str): E-Mail-Adresse.
+
+        Returns:
+            Optional[str]: Steckbrief-Inhalt.
+        """
+        return self.update_profile(email_address)
 
     def _get_profiling_prompt(self, email: str, new_content: str, existing_profile: str, kg_context: str = "") -> str:
         """Erstellt den Prompt für das LLM.
@@ -288,18 +367,3 @@ Erstelle einen strukturierten Steckbrief in Markdown mit folgenden Punkten:
 
 Verhalte dich objektiv und sachlich. Antworte NUR mit dem Markdown-Inhalt des Steckbriefs.
 """
-
-    def get_profile(self, email_address: str) -> Optional[str]:
-        """Gibt den vorhandenen Steckbrief zurück oder erstellt einen neuen.
-
-        Args:
-            email_address (str): E-Mail-Adresse.
-
-        Returns:
-            Optional[str]: Steckbrief-Inhalt.
-        """
-        profile_file = self.storage_path / f"{email_address}.md"
-        if profile_file.exists():
-            return profile_file.read_text(encoding="utf-8")
-
-        return self.generate_profile(email_address)

@@ -12,6 +12,7 @@ import yaml
 from mcp_university.classifier.engine import EmailClassifier
 from mcp_university.parser.mail_parser import MailParser
 from mcp_university.config import get_config
+from mcp_university.utils.encoding import decode_mime_header
 
 # Logging konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
@@ -20,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 def get_semester(date: datetime) -> str:
     """Bestimmt den Semester-Ordnernamen basierend auf dem Datum.
+from mcp_university.utils.encoding import decode_mime_header
 
     SoSe: 01.04. - 30.09. -> YYYY_SoSe
     WS: 01.10. - 31.03. -> YYYY_YY+1_WS
@@ -125,7 +127,7 @@ def extract_lastname(name_str: str) -> str:
     email_match = re.search(r"[\w\.-]+@[\w\.-]+", name_str)
 
     # Extrahiere Anzeige-Namen (alles vor der ersten <)
-    display_name = name_str.split("<")[0].strip().strip("'\"")
+    display_name = decode_mime_header(name_str).split("<")[0].strip()
 
     if email_match:
         email = email_match.group(0)

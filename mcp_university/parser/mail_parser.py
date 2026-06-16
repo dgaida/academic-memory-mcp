@@ -1,4 +1,5 @@
 """Parser für E-Mail-Formate."""
+from mcp_university.utils.encoding import decode_mime_header
 import re
 from pathlib import Path
 from typing import Optional, Dict, Any, List
@@ -291,7 +292,7 @@ class MailParser:
             # Falls getaddresses scheitert oder leere Ergebnisse liefert
             if not addr and not name:
                 continue
-            parsed.append({"name": name.strip().strip('"').strip("'"), "email": addr.strip().lower()})
+            parsed.append({"name": decode_mime_header(name).strip(), "email": addr.strip().lower()})
         return parsed
 
     def _get_msg_details(self, file_path: Path) -> Dict[str, Any]:

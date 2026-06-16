@@ -15,6 +15,25 @@ from ..knowledge_graph.engine import KnowledgeGraphEngine
 import yaml
 from .db import db_app
 
+profiles_app = typer.Typer(help="Verwaltung von Personen-Steckbriefen")
+
+@profiles_app.command("update")
+def profiles_update(
+    email: str = typer.Option(None, "--email", "-e", help="E-Mail-Adresse der zu aktualisierenden Person."),
+    debug: bool = typer.Option(False, "--debug", "-d", help="Debug-Logging aktivieren")
+) -> None:
+    """Aktualisiert Personen-Steckbriefe."""
+    setup_logging(debug)
+    profiler = PersonProfiler()
+    if email:
+        print(f"Aktualisiere Steckbrief für {email}...")
+        profiler.update_profile(email)
+    else:
+        print("Aktualisiere alle Steckbriefe...")
+        profiler.update_all_profiles()
+    print("Fertig.")
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -109,6 +128,7 @@ def graph_visualize(
 app = typer.Typer(help="MCP University Memory System CLI - Lokales Wissensmanagement für die Universität")
 app.add_typer(graph_app, name="graph")
 app.add_typer(db_app, name="db")
+app.add_typer(profiles_app, name="profiles")
 
 def setup_logging(debug: bool) -> None:
     """Konfiguriert das Logging für Konsole und Datei."""
