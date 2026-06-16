@@ -51,10 +51,14 @@ def run_gradio_gui(controller: EmailController, report_path: Path):
                         # Summary
                         summary = controller.generate_short_summary(mail_path)
 
+                        # Similarity Info
+                        similarity_info = controller.get_similarity_info(mail_path, mail['lastname'])
+
                         gr.Markdown(
                             f"**Student:** {mail['lastname']} ({mail['semester']}) | **Ordner:** {mail['folder']}\n"
                             f"**Datei:** `{mail_path.name}`\n\n"
-                            f"*Zusammenfassung:* {summary}"
+                            f"*Zusammenfassung:* {summary}\n\n"
+                            f"{similarity_info}"
                         )
 
                         with gr.Row():
