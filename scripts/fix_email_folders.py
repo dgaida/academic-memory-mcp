@@ -3,7 +3,6 @@ import logging
 import shutil
 import re
 from pathlib import Path
-from typing import Dict  # type: ignore
 from mcp_university.classifier.sort_emails import extract_lastname
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
