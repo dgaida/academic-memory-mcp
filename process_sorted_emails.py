@@ -166,16 +166,20 @@ def run_gradio_gui(controller: EmailController, report_path: Path, emails_to_pro
 
             try:
                 # 1. Relocate
+                logger.info(f"Verschiebe {len(changes)} E-Mails...")
                 controller.relocate_emails(changes)
 
                 # 2. Execute Actions
                 action_results = []
                 if controller.use_action_classifier:
+                    logger.info(f"Führe {len(changes)} Aktionen aus...")
                     for i, (m, action_str) in enumerate(zip(changes, selected_actions)):
                         action_idx = controller.ACTION_OPTIONS.index(action_str)
                         # Use the new path if it was moved
                         current_mail_path = m.get("new_path") or m["latest_mail"]
+                        logger.info(f"Verarbeite E-Mail von {m['lastname']} (Aktion: {action_str})")
                         res = controller.execute_action(action_idx, current_mail_path, m)
+                        logger.info(f"Ergebnis für {m['lastname']}: {res}")
                         action_results.append(f"{m['lastname']}: {res}")
 
                 res_msg = "Verarbeitung abgeschlossen. Mails wurden ggf. verschoben."
