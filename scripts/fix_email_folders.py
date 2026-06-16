@@ -4,7 +4,7 @@ import logging
 import shutil
 import re
 from pathlib import Path
-from mcp_university.classifier.sort_emails import extract_lastname, get_semester
+from mcp_university.classifier.sort_emails import extract_lastname, get_semester, find_student_folder
 from mcp_university.config import get_config
 from mcp_university.parser.mail_parser import MailParser
 
@@ -82,7 +82,12 @@ def fix_folders(config_path: Path) -> None:
                         folder_name = "Inbox"
                         lastname = extract_lastname(details.get("from_name") or details.get("from_email"))
 
-                target_dir = base_path / semester / lastname / folder_name
+                # Ziel-Pfad bestimmen (Favorisiere existierenden Ordner)
+                student_dir = find_student_folder(base_path, lastname)
+                if not student_dir:
+                    student_dir = base_path / semester / lastname
+
+                target_dir = student_dir / folder_name
                 target_path = target_dir / email_file.name
 
                 if email_file.resolve() == target_path.resolve():
