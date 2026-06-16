@@ -787,6 +787,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="E-Mail Sortierung (Studenten-Ordner)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#maintenance-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Maintenance Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1401,6 +1418,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="E-Mail Sortierung (Studenten-Ordner)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#maintenance-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Maintenance Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1494,8 +1528,10 @@
 <p>Es erkennt automatisch:<br />
 - <strong>Semester:</strong> Basierend auf dem E-Mail-Datum (SoSe/WS).<br />
 - <strong>Student:</strong> Extrahiert den Nachnamen aus <code>smail.th-koeln.de</code> Adressen oder Anzeigenamen.<br />
-- <strong>Richtung:</strong> Sortiert in <code>Inbox</code> oder <code>SentItems</code> Unterordner.<br />
+- <strong>Richtung:</strong> Sortiert in <code>lastname/Inbox</code> oder <code>lastname/SentItems</code> Unterordner (einheitlich für alle Klassen).
 - <strong>Bericht:</strong> Erstellt eine <code>sorted_emails.md</code> mit einer Übersicht aller verschobenen Mails.  </p>
+<h3 id="maintenance-script">Maintenance Script<a class="headerlink" href="#maintenance-script" title="Permanent link">&para;</a></h3>
+<p>Mit <code>scripts/fix_email_folders.py</code> können bestehende E-Mail-Strukturen, die noch nicht dem <code>lastname/Folder</code> Schema entsprechen, automatisch migriert werden.</p>
 <h2 id="batch-klassifizierung">Batch-Klassifizierung<a class="headerlink" href="#batch-klassifizierung" title="Permanent link">&para;</a></h2>
 <p>Um einen ganzen Ordner mit E-Mails automatisch zu sortieren (nur Klassifizierung):
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python3<span class="w"> </span>mcp_university/classifier/classify_folder.py<span class="w"> </span>/quell/ordner<span class="w"> </span>--model<span class="w"> </span>data/email_classifier_xgboost_combined.pkl

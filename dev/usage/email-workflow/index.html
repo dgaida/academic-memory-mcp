@@ -1422,9 +1422,11 @@ Das System nutzt den <code>EmailClassifier</code>, um die Mails nach Themen (z.B
 </ol>
 <h2 id="4-uberprufung-gradio-gui">4. Überprüfung (Gradio GUI)<a class="headerlink" href="#4-uberprufung-gradio-gui" title="Permanent link">&para;</a></h2>
 <p>Am Ende des Prozesses startet automatisch eine Gradio-Weboberfläche. Hier können Sie:<br />
-- Die getroffenen Klassifizierungen überprüfen.<br />
-- Mails bei Bedarf manuell in andere Kategorien verschieben. Das System verschiebt dabei automatisch auch die zugehörige <code>.emails_summary.md</code>.<br />
-- Den Status der verarbeiteten Mails einsehen.  </p>
+- <strong>Klassifizierung prüfen:</strong> Die automatisch getroffenen Zuordnungen kontrollieren und korrigieren.
+- <strong>Quick Links:</strong> Den E-Mail-Ordner oder die E-Mail-Datei direkt aus dem Browser öffnen.
+- <strong>Kurzzusammenfassung:</strong> Jede E-Mail wird durch das LLM in zwei Sätzen zusammengefasst.
+- <strong>Anhänge speichern:</strong> Über eine Checkbox können Anhänge direkt in den Zielordner extrahiert werden.
+- <strong>Relokation:</strong> Mails bei Bedarf manuell in andere Kategorien verschieben. Das System verschiebt dabei automatisch auch alle zugehörigen <code>.md</code> und <code>.txt</code> Dateien sowie die <code>.emails_summary.md</code>.</p>
 <h2 id="5-abschlussbericht">5. Abschlussbericht<a class="headerlink" href="#5-abschlussbericht" title="Permanent link">&para;</a></h2>
 <p>Das Skript erstellt eine Datei <code>processed_emails.md</code>, die eine tabellarische Übersicht über alle verarbeiteten Mails und deren Status (z.B. "Entwurf erstellt", "Termin gebucht", "Keine Antwort nötig") enthält.</p>
 
