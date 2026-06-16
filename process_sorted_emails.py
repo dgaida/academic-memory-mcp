@@ -18,14 +18,15 @@ logger = logging.getLogger(__name__)
 
 DEBUG = True
 
-def run_gradio_gui(controller: EmailController, report_path: Path):
+def run_gradio_gui(controller: EmailController, report_path: Path, emails_to_process: list = None):
     """Startet die Gradio GUI zur Korrektur der Einsortierung.
 
     Args:
         controller: EmailController Instanz.
         report_path: Pfad zum sorted_emails.md Report.
+        emails_to_process: Liste der bereits analysierten E-Mails.
     """
-    emails = controller.parse_report(report_path)
+    emails = emails_to_process if emails_to_process is not None else controller.parse_report(report_path)
     if not emails:
         logger.info("Keine E-Mails zum Anzeigen im Gradio GUI.")
         return
@@ -121,35 +122,73 @@ def run_gradio_gui(controller: EmailController, report_path: Path):
                             label="Korrektes Ziel",
                         )
                         dropdowns.append(dd)
-                        email_data.append((mail, att_cb))
+
+                        action_dd = None
+                        if controller.use_action_classifier and "suggested_action" in mail:
+                            action_dd = gr.Dropdown(
+                                choices=controller.ACTION_OPTIONS,
+                                value=controller.ACTION_OPTIONS[mail["suggested_action"]],
+                                label="Aktion"
+                            )
+                        else:
+                            action_dd = gr.Dropdown(
+                                choices=controller.ACTION_OPTIONS,
+                                value=controller.ACTION_OPTIONS[0],
+                                label="Aktion",
+                                visible=controller.use_action_classifier
+                            )
+
+                        email_data.append((mail, att_cb, action_dd))
 
         with gr.Row():
             btn = gr.Button("Mails neu einsortieren", variant="primary")
             status_out = gr.Textbox(label="Ergebnis")
 
         def handle_click(*inputs):
-            # Inputs are dropdown values followed by checkbox values
+            # Inputs are class_dropdowns, action_dropdowns (if present), then checkboxes
             num_mails = len(email_data)
             selected_classes = inputs[:num_mails]
-            attachment_flags = inputs[num_mails:]
+
+            offset = num_mails
+            selected_actions = []
+            if controller.use_action_classifier:
+                selected_actions = inputs[offset:offset+num_mails]
+                offset += num_mails
+
+            attachment_flags = inputs[offset:]
 
             changes = []
-            for i, ((mail, _), new_class) in enumerate(zip(email_data, selected_classes)):
+            for i, ((mail, _, _), new_class) in enumerate(zip(email_data, selected_classes)):
                 m = mail.copy()
                 m["new_class"] = new_class
                 m["save_attachments"] = attachment_flags[i]
                 changes.append(m)
 
             try:
-                # Relocate and save attachments (handled internally by relocate_emails)
+                # 1. Relocate
                 controller.relocate_emails(changes)
-                return "Verarbeitung abgeschlossen. Mails wurden ggf. verschoben, Anhänge gespeichert und Ordner bereinigt."
+
+                # 2. Execute Actions
+                action_results = []
+                if controller.use_action_classifier:
+                    for i, (m, action_str) in enumerate(zip(changes, selected_actions)):
+                        action_idx = controller.ACTION_OPTIONS.index(action_str)
+                        # Use the new path if it was moved
+                        current_mail_path = m.get("new_path") or m["latest_mail"]
+                        res = controller.execute_action(action_idx, current_mail_path, m)
+                        action_results.append(f"{m['lastname']}: {res}")
+
+                res_msg = "Verarbeitung abgeschlossen. Mails wurden ggf. verschoben."
+                if action_results:
+                    res_msg += "\n\nAktionen:\n" + "\n".join(action_results)
+                return res_msg
             except Exception as e:
-                logger.exception("Fehler bei Relokation")
+                logger.exception("Fehler bei Verarbeitung")
                 return f"Fehler: {str(e)}"
 
         # Combine dropdowns and checkboxes
-        inputs = dropdowns + [mail[1] for mail in email_data]
+        action_dropdowns = [mail[2] for mail in email_data if mail[2] is not None]
+        inputs = dropdowns + action_dropdowns + [mail[1] for mail in email_data]
         btn.click(handle_click, inputs=inputs, outputs=status_out)
 
     demo.launch(inbrowser=True)
@@ -190,6 +229,7 @@ def main() -> None:
     parser.add_argument("--api-key", help="Cloud-LLM API-Key")
     parser.add_argument("--method", default="transformer", help="Klassifizierungsmethode")
     parser.add_argument("--mode", default="combined", help="Merkmalsextraktion")
+    parser.add_argument("--no-action-classifier", action="store_false", dest="use_action_classifier", default=True, help="Deaktiviert den neuen Aktions-Klassifizierer")
     parser.add_argument("--age-months", type=int, help="E-Mails älter als X Monate werden nur einsortiert.")
     args = parser.parse_args()
 
@@ -202,7 +242,7 @@ def main() -> None:
         cloud_provider=args.cloud_provider,
         cloud_model=args.cloud_model,
         api_key=args.api_key,
-        debug=args.debug
+        debug=args.debug, use_action_classifier=args.use_action_classifier
     )
 
     # 1. Sortieren
@@ -213,11 +253,11 @@ def main() -> None:
         sys.exit(1)
 
     # 2. Verarbeiten
-    controller.process_all_emails(source_dir, age_months=args.age_months)
+    emails_to_process = controller.process_all_emails(source_dir, age_months=args.age_months)
 
     # 3. Gradio GUI
     try:
-        run_gradio_gui(controller, source_dir / "sorted_emails.md")
+        run_gradio_gui(controller, source_dir / "sorted_emails.md", emails_to_process=emails_to_process)
     except Exception as e:
         logger.error(f"Fehler beim Starten der Gradio GUI: {e}")
 

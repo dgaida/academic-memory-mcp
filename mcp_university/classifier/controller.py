@@ -33,6 +33,15 @@ logger = logging.getLogger(__name__)
 class EmailController:
     """Steuert den Prozess der E-Mail-Verarbeitung, Klassifizierungskorrektur und Antwortgenerierung."""
 
+    ACTION_OPTIONS = [
+        "1) Antwort schreiben.",
+        "2) Antwort schreiben mit einem Terminvorschlag.",
+        "3) Termin im Kalender anlegen und Person dazu einladen.",
+        "4) E-Mail nur archivieren.",
+        "5) Aufgabe im Kalender anlegen zum Lesen des Anhangs.",
+        "6) Termin für Kolloquium in Kalender anlegen."
+    ]
+
     def __init__(
         self,
         config_path: str = "config/folders.yaml",
@@ -41,7 +50,8 @@ class EmailController:
         cloud_provider: str = "openai",
         cloud_model: str = "gpt-4o",
         api_key: str = None,
-        debug: bool = True
+        debug: bool = True,
+        use_action_classifier: bool = True
     ) -> None:
         """Initialisiert den EmailController.
 
@@ -57,6 +67,7 @@ class EmailController:
         self.config = get_config()
         self.config_path = config_path
         self.debug = debug
+        self.use_action_classifier = use_action_classifier
         self.mail_parser = MailParser()
         self.summarizer = Summarizer(model=self.config.llm.model, base_url=self.config.llm.base_url)
         self.profiler = PersonProfiler()
@@ -83,6 +94,127 @@ class EmailController:
         else:
             logger.warning(f"Config {config_path} not found. Using empty class_paths.")
             self.class_paths = {}
+    def classify_action(self, mail_path: Path, additional_context: str = "") -> int:
+        """Klassifiziert die E-Mail in eine von 6 Aktions-Optionen."""
+        mail_content = self.mail_parser.parse(mail_path)
+        mail_content = self.mail_parser.extract_latest_message(mail_content)
+
+        options_str = "\n".join(self.ACTION_OPTIONS)
+
+        system_prompt = "Du bist ein erfahrener Assistent an der TH Köln, der E-Mails effizient verarbeitet."
+        user_prompt = f"""Analysiere die folgende E-Mail und wähle GENAU EINE der folgenden Optionen für die weitere Bearbeitung aus:
+
+{options_str}
+
+E-MAIL INHALT:
+{mail_content}
+
+ZUSÄTZLICHER KONTEXT:
+{additional_context}
+
+WICHTIGE ANWEISUNG:
+Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärung.
+"""
+
+        try:
+            response = self.agent.chat(
+                messages=[{"role": "user", "content": user_prompt}],
+                system_prompt=system_prompt
+            )
+            match = re.search(r"([1-6])", response)
+            if match:
+                return int(match.group(1)) - 1
+        except Exception as e:
+            logger.error(f"Fehler bei Aktions-Klassifizierung: {e}")
+
+        return 0 # Default: Antwort schreiben
+    def execute_action(self, action_idx: int, mail_path: Path, email_data: dict) -> str:
+        """Führt die gewählte Aktion für eine E-Mail aus."""
+        latest_mail = mail_path
+
+        student_email = ""
+        sender_name = ""
+        try:
+            with extract_msg.openMsg(str(latest_mail)) as msg:
+                student_email = msg.sender
+                sender_name = msg.senderName or email_data.get("lastname", "Unbekannt")
+        except Exception:
+            pass
+
+        person_profile = self.profiler.get_profile(student_email) if student_email else None
+
+        first_name = "Unknown"
+        try:
+            with extract_msg.openMsg(str(latest_mail)) as msg:
+                from mcp_university.classifier.sort_emails import extract_firstname
+                first_name = extract_firstname(msg.sender)
+        except Exception:
+            pass
+
+        salutation = f"Guten Tag {self.summarizer.determine_gender(first_name)} {email_data.get('lastname', '')}"
+        add_ctx = f"Anrede: {salutation}\n"
+        if person_profile:
+            add_ctx += f"\nPersonen-Steckbrief:\n{person_profile}\n"
+        add_ctx += f"Studenten-E-Mail: {student_email}\n"
+
+        persona_path = Path("skills/SKILL_persona.md")
+        apt_skill_path = Path("skills/SKILL_Appointment.md")
+        skill_path = Path(f"skills/SKILL_{email_data.get('class', 'Other')}.md")
+        if not skill_path.exists():
+            skill_path = Path(__file__).parent.parent / "skills" / f"SKILL_{email_data.get('class', 'Other')}.md"
+
+        # Action Logic Mapping
+        reply_subject = ""
+        reply = ""
+        should_attach = False
+
+        if action_idx == 3: # 4) Nur archivieren
+            return "E-Mail archiviert."
+
+        reply_subject, reply, should_attach = self.generate_reply(
+            latest_mail, "", skill_path, "", persona_path, add_ctx, apt_skill_path, sender_name, student_email, action_idx=action_idx
+        )
+
+        if reply_subject == "NO_REPLY_NEEDED":
+            return f"Keine Antwort erforderlich ({reply})"
+
+        if reply.startswith("APPOINTMENT_BOOKED"):
+            apt_info = self.agent.last_appointment_info
+            return f"Termin gebucht ({apt_info['start_time']})" if apt_info and "start_time" in apt_info else "Termin gebucht"
+
+        # Entwurf erstellen
+        cc_list = []
+        try:
+            with extract_msg.openMsg(str(latest_mail)) as msg:
+                if msg.recipients:
+                    for rec in msg.recipients:
+                        rec_email = rec.email or rec.name
+                        if rec_email and self.config.user.email not in rec_email.lower() and rec_email.lower() != student_email.lower():
+                            cc_list.append(rec_email)
+        except Exception:
+            pass
+
+        attachments = [latest_mail]
+        if should_attach and email_data.get("class") == "PO-Wechsel":
+            pdf = Path(r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf")
+            if pdf.exists():
+                attachments.append(pdf)
+
+        from mcp_university.utils.outlook import create_outlook_draft
+        success = create_outlook_draft(reply_subject or latest_mail.stem, reply, recipient=student_email, cc=cc_list, attachments=attachments)
+        if success:
+            return "Outlook Entwurf erstellt"
+        else:
+            identifier_path = email_data.get("new_identifier_path") or email_data.get("identifier_path") or latest_mail.parent
+            r_path = identifier_path / f"{latest_mail.stem}_reply.md"
+            r_path.write_text(reply, encoding="utf-8")
+            return f"Datei erstellt: {r_path.name}"
+
+
+
+
+
+
 
     def run_sort(self, source_dir: str, method: str = "transformer", mode: str = "combined") -> None:
         """Sortiert E-Mails basierend auf Klassifizierung."""
@@ -182,6 +314,9 @@ class EmailController:
                 if dest.exists():
                     dest.unlink()
                 shutil.move(str(f), str(dest))
+                if f == old_path:
+                    change["new_path"] = dest
+                    change["new_identifier_path"] = target_dir.parent
             old_folder = old_path.parent
             old_student_folder = old_folder.parent
             target_student_folder = target_dir.parent
@@ -235,6 +370,7 @@ class EmailController:
         appointment_skill_path: Path = None,
         sender_name: str = None,
         sender_email: str = None,
+        action_idx: int = None,
     ) -> Tuple[str, str, bool]:
         """Generiert eine Antwortmail mit dem LLM in mehreren Schritten."""
         mail_content = self.mail_parser.parse(mail_path)
@@ -243,10 +379,6 @@ class EmailController:
         if self.debug:
             extracted_file = mail_path.parent / f"{mail_path.stem}_extracted.md"
             extracted_file.write_text(mail_content, encoding="utf-8")
-            if self.agent.use_cloud and self.agent.anonymizer and sender_name and sender_email:
-                anonymized_content = self.agent.anonymizer.anonymize(mail_content, sender_name, sender_email)
-                anon_file = mail_path.parent / f"{mail_path.stem}_anonymized.md"
-                anon_file.write_text(anonymized_content, encoding="utf-8")
 
         appointment_skill_content = ""
         if appointment_skill_path and appointment_skill_path.exists():
@@ -258,9 +390,46 @@ class EmailController:
 
         system_prompt = "Du bist ein hilfreicher Assistent an der TH Köln. Verfasse eine Antwort-E-Mail auf Deutsch."
 
+        # Action-specific flags
+        skip_step1 = False
+        force_appointment_slots = False
+        force_calendar_booking = False
+        force_colloquium = False
+        skip_step12 = False
+        force_final_submission = False
+
+        if action_idx is not None:
+            if action_idx == 0: # 1) Antwort schreiben
+                skip_step1 = True
+                skip_step12 = True
+            elif action_idx == 1: # 2) Antwort schreiben mit Terminvorschlag
+                force_appointment_slots = True
+                skip_step12 = True
+            elif action_idx == 2: # 3) Termin im Kalender anlegen
+                force_calendar_booking = True
+                skip_step12 = True
+            elif action_idx == 3: # 4) E-Mail nur archivieren
+                return "NO_REPLY_NEEDED", "Archivieren", False
+            elif action_idx == 4: # 5) Aufgabe im Kalender / Finale Abgabe
+                skip_step1 = True
+                force_final_submission = True
+            elif action_idx == 5: # 6) Termin für Kolloquium
+                force_colloquium = True
+                skip_step12 = True
+
         # STEP 1: APPOINTMENT
-        logger.info("Schritt 1: Prüfe Terminrelevanz...")
-        appointment_user_prompt = f"""Prüfe die folgende E-Mail auf Terminrelevanz (Anfrage oder Bestätigung) basierend auf dem TERMINVERWALTUNG SKILL.
+        if not skip_step1:
+            logger.info("Schritt 1: Prüfe Terminrelevanz...")
+
+            forced_instr = ""
+            if force_appointment_slots:
+                forced_instr = "\nERZWUNGENE AKTION: Diese E-Mail ist eine Terminanfrage. Du MUSST ZWINGEND get_appointment_slots aufrufen."
+            elif force_calendar_booking:
+                forced_instr = "\nERZWUNGENE AKTION: Diese E-Mail bestätigt einen Termin. Du MUSST ZWINGEND manage_calendar_appointment aufrufen."
+            elif force_colloquium:
+                forced_instr = "\nERZWUNGENE AKTION: Diese E-Mail bestätigt ein Kolloquium (60 Min). Du MUSST ZWINGEND manage_calendar_appointment aufrufen."
+
+            appointment_user_prompt = f"""Prüfe die folgende E-Mail auf Terminrelevanz (Anfrage oder Bestätigung) basierend auf dem TERMINVERWALTUNG SKILL.
 
 HEUTE IST: {datetime.now(ZoneInfo("Europe/Berlin")).strftime("%A, den %d.%m.%Y %H:%M")}
 
@@ -274,49 +443,42 @@ ZUSÄTZLICHER KONTEXT (Anrede etc.):
 {additional_context}
 
 AKTUELLE E-MAIL:
-{mail_content}
+{mail_content}{forced_instr}
 
 WICHTIGE ANWEISUNG:
-1. Falls die E-Mail EINEN TERMIN BESTÄTIGT: RUFE ZWINGEND das Tool 'manage_calendar_appointment' auf. Du MUSST ALLE erforderlichen Parameter (start_time, end_time, subject, student_email) übergeben. Achte auf das korrekte JAHR (2026). Bei Kolloquien muss die Dauer 60 Minuten betragen. Erst wenn das Tool 'ERFOLG' zurückgibt, antworte EXAKT mit 'APPOINTMENT_BOOKED'. Antworte NIEMALS mit 'APPOINTMENT_BOOKED' ohne vorher das Tool erfolgreich aufgerufen zu haben!
-2. Falls die E-Mail EINEN TERMIN ANFRAGT: Du MUSST ZWINGEND das Tool 'get_appointment_slots' aufrufen, um die verfügbaren Terminvorschläge zu erhalten und diese in die Antwort einzubinden. Antworte erst, nachdem du das Tool aufgerufen und die Daten erhalten hast.
+1. Falls die E-Mail EINEN TERMIN BESTÄTIGT: RUFE ZWINGEND das Tool 'manage_calendar_appointment' auf. Du MUSST ALLE erforderlichen Parameter (start_time, end_time, subject, student_email) übergeben. Achte auf das korrekte JAHR (2026). Bei Kolloquien muss die Dauer 60 Minuten betragen. Erst wenn das Tool 'ERFOLG' zurückgibt, antworte EXAKT mit 'APPOINTMENT_BOOKED'.
+2. Falls die E-Mail EINEN TERMIN ANFRAGT: Du MUSST ZWINGEND das Tool 'get_appointment_slots' aufrufen.
 3. Falls die E-Mail KEINERLEI Bezug zu einer Terminbuchung oder -anfrage hat, antworte EXAKT mit: NO_APPOINTMENT_RELEVANCE
-
-Format für Terminantworten (falls relevant):
-ANHANG: [JA/NEIN]
-BETREFF: [Der Betreff]
-TEXT:
-[Der Antwort-Text]
 """
-        if self.debug:
-            prompt_file = mail_path.parent / f"{mail_path.stem}_appointment_prompt.md"
-            prompt_file.write_text(f"# System Prompt\n{system_prompt}\n\n# User Prompt\n{appointment_user_prompt}", encoding="utf-8")
-
-        try:
-            content = self.agent.chat(messages=[{"role": "user", "content": appointment_user_prompt}], system_prompt=system_prompt, sender_name=sender_name, sender_email=sender_email)
-            if "APPOINTMENT_BOOKED" in content:
-                apt_info = self.agent.last_appointment_info
-                apt_text = "APPOINTMENT_BOOKED"
-                if apt_info and "start_time" in apt_info:
-                    apt_text = f"APPOINTMENT_BOOKED|{apt_info['start_time']}"
-                return "APPOINTMENT_BOOKED", apt_text, False
-
-            if "NO_APPOINTMENT_RELEVANCE" not in content:
-                logger.info("Terminrelevanz erkannt, generiere Termin-Antwort.")
-                should_attach = "ANHANG: JA" in content
-                reply_subject = content.split("BETREFF:", 1)[1].split("TEXT:", 1)[0].strip() if "BETREFF:" in content else ""
-                reply_text = content.split("TEXT:", 1)[1].strip() if "TEXT:" in content else content
-                return reply_subject, reply_text, should_attach
-        except Exception as e:
-            logger.error(f"Fehler in Schritt 1 (Appointment): {e}")
+            try:
+                content = self.agent.chat(messages=[{"role": "user", "content": appointment_user_prompt}], system_prompt=system_prompt, sender_name=sender_name, sender_email=sender_email)
+                if "APPOINTMENT_BOOKED" in content:
+                    apt_info = self.agent.last_appointment_info
+                    apt_text = "APPOINTMENT_BOOKED"
+                    if apt_info and "start_time" in apt_info:
+                        apt_text = f"APPOINTMENT_BOOKED|{apt_info['start_time']}"
+                    return "APPOINTMENT_BOOKED", apt_text, False
+                if "NO_APPOINTMENT_RELEVANCE" not in content:
+                    should_attach = "ANHANG: JA" in content
+                    reply_subject = content.split("BETREFF:", 1)[1].split("TEXT:", 1)[0].strip() if "BETREFF:" in content else ""
+                    reply_text = content.split("TEXT:", 1)[1].strip() if "TEXT:" in content else content
+                    return reply_subject, reply_text, should_attach
+            except Exception as e:
+                logger.error(f"Fehler in Schritt 1 (Appointment): {e}")
 
         # STEP 1.2: FINAL SUBMISSION
-        logger.info("Schritt 1.2: Prüfe auf finale Abgabe...")
         fs_skill_path = Path("skills/SKILL_FinalSubmission.md")
         if not fs_skill_path.exists():
              fs_skill_path = Path(__file__).parent.parent / "skills" / "SKILL_FinalSubmission.md"
 
-        if fs_skill_path.exists():
+        if not skip_step12 and fs_skill_path.exists():
+            logger.info("Schritt 1.2: Prüfe auf finale Abgabe...")
             fs_content = fs_skill_path.read_text(encoding="utf-8")
+
+            forced_instr = ""
+            if force_final_submission:
+                forced_instr = "\nERZWUNGENE AKTION: Dies ist eine finale Abgabe. Du MUSST ZWINGEND manage_calendar_appointment und save_email_attachments aufrufen."
+
             fs_prompt = f"""Prüfe die folgende E-Mail auf eine finale Abgabe basierend auf dem FINALE ABGABE SKILL.
 
 HEUTE IST: {datetime.now(ZoneInfo("Europe/Berlin")).strftime("%A, den %d.%m.%Y %H:%M")}
@@ -326,24 +488,15 @@ FINALE ABGABE SKILL:
 
 AKTUELLE E-MAIL:
 {mail_content}
-PFAD ZUR E-MAIL: {mail_path}
+PFAD ZUR E-MAIL: {mail_path}{forced_instr}
 
 WICHTIGE ANWEISUNG:
-1. Falls es eine finale Abgabe ist:
-   - Du MUSST ZUERST die Tools `manage_calendar_appointment` (für einen Reminder in 1 week um 08:00) und `save_email_attachments` aufrufen.
-   - Erst NACHDEM die Tools aufgerufen wurden, verfasst du eine kurze Antwort.
+1. Falls es eine finale Abgabe ist: Rufe ZUERST die Tools `manage_calendar_appointment` und `save_email_attachments` auf.
 2. Falls es KEINE finale Abgabe ist, antworte EXAKT mit: NO_FINAL_SUBMISSION_RELEVANCE
-
-Format für die Antwort (falls relevant):
-ANHANG: [JA/NEIN]
-BETREFF: [Der Betreff]
-TEXT:
-[Der Antwort-Text]
 """
             try:
                 content = self.agent.chat(messages=[{"role": "user", "content": fs_prompt}], system_prompt=system_prompt, sender_name=sender_name, sender_email=sender_email)
                 if "NO_FINAL_SUBMISSION_RELEVANCE" not in content:
-                    logger.info("Finale Abgabe erkannt.")
                     should_attach = "ANHANG: JA" in content
                     reply_subject = content.split("BETREFF:", 1)[1].split("TEXT:", 1)[0].strip() if "BETREFF:" in content else ""
                     reply_text = content.split("TEXT:", 1)[1].strip() if "TEXT:" in content else content
@@ -351,48 +504,48 @@ TEXT:
             except Exception as e:
                 logger.error(f"Fehler in Schritt 1.2 (FinalSubmission): {e}")
 
-        # STEP 1.5: NECESSITY
-        logger.info("Schritt 1.5: Prüfe Notwendigkeit...")
-        nec_prompt = f"""Prüfe, ob die E-Mail eine Antwort erfordert.
+        # STEP 1.5: NECESSITY (only if not forced)
+        if action_idx is None:
+            logger.info("Schritt 1.5: Prüfe Notwendigkeit...")
+            nec_prompt = f"""Prüfe, ob die E-Mail eine Antwort erfordert.
 PERSONA: {persona_content}
 KONTEXT: {additional_context}
 E-MAIL: {mail_content}
 - Falls KEINE Antwort nötig, antworte EXAKT: NO_REPLY_NEEDED|BEGRÜNDUNG
 - Sonst: REPLY_NEEDED
 """
-        try:
-            content = self.agent.chat(messages=[{"role": "user", "content": nec_prompt}], system_prompt=system_prompt, sender_name=sender_name, sender_email=sender_email)
-            if content.startswith("NO_REPLY_NEEDED"):
-                return "NO_REPLY_NEEDED", content.split("|", 1)[1] if "|" in content else "Keine Begründung", False
-        except Exception as e:
-            logger.error(f"Fehler in Schritt 1.5: {e}")
+            try:
+                content = self.agent.chat(messages=[{"role": "user", "content": nec_prompt}], system_prompt=system_prompt, sender_name=sender_name, sender_email=sender_email)
+                if content.startswith("NO_REPLY_NEEDED"):
+                    return "NO_REPLY_NEEDED", content.split("|", 1)[1] if "|" in content else "Keine Begründung", False
+            except Exception:
+                pass
 
-        # STEP 2: REGULAR
+        # STEP 2: REGULAR REPLY
         logger.info("Schritt 2: Generiere reguläre Antwort...")
-        skill_content = skill_path.read_text(encoding="utf-8") if skill_path and skill_path.exists() else "Keine spezifischen Anweisungen."
-        context_label = "SCHRIFTVERKEHR DER LETZTEN 2 WOCHEN" if conversation_content else "ZUSAMMENFASSUNG DES SCHRIFTVERKEHRS"
-        context_body = conversation_content if conversation_content else summary_content
+        skill_content = skill_path.read_text(encoding="utf-8") if skill_path and skill_path.exists() else ""
+        reg_prompt = f"""Verfasse eine Antwort auf die folgende E-Mail basierend auf der PERSONA und dem SKILL.
 
-        reg_prompt = f"""Verfasse eine professionelle Antwort.
-HEUTE IST: {datetime.now(ZoneInfo("Europe/Berlin")).strftime("%A, den %d.%m.%Y %H:%M")}
-PERSONA: {persona_content}
-SKILL ANWEISUNGEN: {skill_content}
-ZUSÄTZLICHER KONTEXT: {additional_context}
-{context_label}:
-{context_body}
+PERSONA:
+{persona_content}
+
+SKILL:
+{skill_content}
+
+KONTEXT:
+{additional_context}
+{summary_content}
+
 AKTUELLE E-MAIL:
 {mail_content}
 
-Format:
+WICHTIGE ANWEISUNGEN:
+- Formatiere die Antwort im folgenden Format:
 ANHANG: [JA/NEIN]
-BETREFF: [Der Betreff]
+BETREFF: [Passender Betreff]
 TEXT:
-[Der Antwort-Text]
+[Der Antworttext]
 """
-        if self.debug:
-            prompt_file = mail_path.parent / f"{mail_path.stem}_regular_prompt.md"
-            prompt_file.write_text(f"# System Prompt\n{system_prompt}\n\n# User Prompt\n{reg_prompt}", encoding="utf-8")
-
         try:
             content = self.agent.chat(messages=[{"role": "user", "content": reg_prompt}], system_prompt=system_prompt, sender_name=sender_name, sender_email=sender_email)
             should_attach = "ANHANG: JA" in content
@@ -402,6 +555,7 @@ TEXT:
         except Exception as e:
             logger.error(f"Fehler in Schritt 2: {e}")
             return "", "Fehler bei der Generierung.", False
+
 
     def process_all_emails(self, source_dir: Path, age_months: Optional[int] = None) -> List[Dict]:
         """Verarbeitet alle sortierten E-Mails im Quellverzeichnis."""
@@ -451,6 +605,10 @@ TEXT:
         for email in unique_emails_to_process:
             latest_mail = email["latest_mail"]
             latest_date = email["latest_date"]
+
+            if self.use_action_classifier:
+                email["suggested_action"] = self.classify_action(latest_mail)
+                continue
 
 
             if age_months:
@@ -562,6 +720,9 @@ TEXT:
                 "subject": latest_mail.stem,
                 "status": res_status
             })
+
+        if self.use_action_classifier:
+            return unique_emails_to_process
 
         if processed_results:
             with open(source_dir / "processed_emails.md", "w", encoding="utf-8") as f:

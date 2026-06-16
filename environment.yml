@@ -18,6 +18,7 @@ dependencies:
     - docling
     - liteparse
     - extract-msg
+    - tzlocal
     - pdfminer.six
     - python-docx
     - beautifulsoup4
