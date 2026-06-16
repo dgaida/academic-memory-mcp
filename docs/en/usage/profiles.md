@@ -4,11 +4,11 @@ The system enables the automatic creation and update of person profiles (Steckbr
 
 ## Overview
 
-A profile summarizes key information about a person, such as:
-- Role (Students, Faculty, etc.)
-- Preferred salutation
-- First contact date
-- Relevant projects, theses, or tasks
+A profile summarizes key information about a person, such as:  
+- Role (Students, Faculty, etc.)  
+- Preferred salutation  
+- First contact date  
+- Relevant projects, theses, or tasks  
 
 These profiles are saved in Markdown format and serve as additional context for the LLM when responding to an email.
 
@@ -44,6 +44,6 @@ mcp-uni index --profile student@example.com
 
 The system features robust decoding for MIME headers (RFC 2047). This prevents errors when processing names with umlauts (e.g., `=?utf-8?Q?'Heike_Fr=C3=B6lin'?=`), which are common in Outlook. If you still encounter issues during folder creation, ensure that your filesystem supports UTF-8.
 
-## File Paths
-- **Profiles:** By default under `D:\Steckbriefe\` (configurable).
-- **Tracking Database:** `data/profiles_tracking.db`.
+## File Paths  
+- **Profiles:** By default under `D:\Steckbriefe\` (configurable).  
+- **Tracking Database:** `data/profiles_tracking.db`.  

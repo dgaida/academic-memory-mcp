@@ -4,11 +4,11 @@ Das System ermöglicht die automatische Erstellung und Aktualisierung von Person
 
 ## Übersicht
 
-Ein Steckbrief (Profil) fasst wichtige Informationen über eine Person zusammen, wie z.B.:
-- Rolle (Studierende, Lehrende, etc.)
-- Bevorzugte Anrede
-- Erster Kontakt
-- Relevante Projekte, Thesen oder Aufgaben
+Ein Steckbrief (Profil) fasst wichtige Informationen über eine Person zusammen, wie z.B.:  
+- Rolle (Studierende, Lehrende, etc.)  
+- Bevorzugte Anrede  
+- Erster Kontakt  
+- Relevante Projekte, Thesen oder Aufgaben  
 
 Diese Steckbriefe werden im Markdown-Format gespeichert und dienen als zusätzlicher Kontext für das LLM, wenn eine E-Mail beantwortet werden soll.
 
@@ -44,6 +44,6 @@ mcp-uni index --profile student@example.com
 
 Das System verfügt über eine robuste Dekodierung für MIME-Header (RFC 2047). Dies verhindert Fehler bei der Verarbeitung von Namen mit Umlauten (z.B. `=?utf-8?Q?'Heike_Fr=C3=B6lin'?=`), die in Outlook oft vorkommen. Falls dennoch Probleme bei der Ordnererstellung auftreten, stellen Sie sicher, dass Ihr Dateisystem UTF-8 unterstützt.
 
-## Dateipfade
-- **Steckbriefe:** Standardmäßig unter `D:\Steckbriefe\` (konfigurierbar).
-- **Tracking-Datenbank:** `data/profiles_tracking.db`.
+## Dateipfade  
+- **Steckbriefe:** Standardmäßig unter `D:\Steckbriefe\` (konfigurierbar).  
+- **Tracking-Datenbank:** `data/profiles_tracking.db`.  
