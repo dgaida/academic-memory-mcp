@@ -58,13 +58,13 @@ def fix_folders(config_path: Path) -> None:
                     found_student = False
                     for rec in recipients:
                         rec_email = rec.get("email", "").lower()
-                        if "@smail.th-koeln.de" in rec_email or "@smail.fh-koeln.de" in rec_email:
+                        if any(domain in rec_email for domain in ["@smail.th-koeln.de", "@smail.fh-koeln.de", "@th-koeln.de", "@fh-koeln.de"]):
                             lastname = extract_lastname(rec.get("name") or rec.get("email"))
                             found_student = True
                             break
                     if not found_student and recipients:
                         lastname = extract_lastname(recipients[0].get("name") or recipients[0].get("email"))
-                elif "@smail.th-koeln.de" in sender or "@smail.fh-koeln.de" in sender:
+                elif any(domain in sender for domain in ["@smail.th-koeln.de", "@smail.fh-koeln.de", "@th-koeln.de", "@fh-koeln.de"]):
                     folder_name = "Inbox"
                     lastname = extract_lastname(details.get("from_name") or details.get("from_email"))
                 else:
@@ -73,7 +73,7 @@ def fix_folders(config_path: Path) -> None:
                     found_student = False
                     for rec in recipients:
                         rec_email = rec.get("email", "").lower()
-                        if "@smail.th-koeln.de" in rec_email or "@smail.fh-koeln.de" in rec_email:
+                        if any(domain in rec_email for domain in ["@smail.th-koeln.de", "@smail.fh-koeln.de", "@th-koeln.de", "@fh-koeln.de"]):
                             folder_name = "SentItems"
                             lastname = extract_lastname(rec.get("name") or rec.get("email"))
                             found_student = True

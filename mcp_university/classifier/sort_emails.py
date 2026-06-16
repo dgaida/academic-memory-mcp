@@ -63,7 +63,7 @@ def normalize_name(name: str) -> str:
 def extract_firstname(name_str: str) -> str:
     """Extrahiert den Vornamen aus einem Namensstring oder einer E-Mail-Adresse.
 
-    Unterstützt das Format vorname.nachname@smail.th-koeln.de
+    Unterstützt das Format vorname.nachname@(smail.)th-koeln.de
     sowie 'Max Mustermann' oder 'Mustermann, Max'.
 
     Args:
@@ -79,7 +79,7 @@ def extract_firstname(name_str: str) -> str:
     email_match = re.search(r"[\w\.-]+@[\w\.-]+", name_str)
     if email_match:
         email = email_match.group(0)
-        if email.lower().endswith(("@smail.th-koeln.de", "@smail.fh-koeln.de")):
+        if email.lower().endswith(("@smail.th-koeln.de", "@smail.fh-koeln.de", "@th-koeln.de", "@fh-koeln.de")):
             local_part = email.split("@")[0]
             if "." in local_part:
                 return local_part.split(".")[0].capitalize()
@@ -245,17 +245,14 @@ def process_emails(
                         found_student = False
                         for rec in recipients:
                             rec_email = (rec.email or "").lower()
-                            if "@smail.th-koeln.de" in rec_email or "@smail.fh-koeln.de" in rec_email:
+                            if any(domain in rec_email for domain in ["@smail.th-koeln.de", "@smail.fh-koeln.de", "@th-koeln.de", "@fh-koeln.de"]):
                                 lastname = extract_lastname(rec.name or rec.email)
                                 found_student = True
                                 break
                         if not found_student:
                             # Fallback falls kein Student in Empfängern
                             lastname = extract_lastname(recipients[0].name or recipients[0].email)
-                elif (
-                    "@smail.th-koeln.de" in sender
-                    or "@smail.fh-koeln.de" in sender
-                ):
+                elif any(domain in sender for domain in ["@smail.th-koeln.de", "@smail.fh-koeln.de", "@th-koeln.de", "@fh-koeln.de"]):
                     target_folder = "Inbox"
                     lastname = extract_lastname(msg.sender)
                 else:
@@ -266,7 +263,7 @@ def process_emails(
                     if recipients:
                         for rec in recipients:
                             rec_email = (rec.email or "").lower()
-                            if "@smail.th-koeln.de" in rec_email or "@smail.fh-koeln.de" in rec_email:
+                            if any(domain in rec_email for domain in ["@smail.th-koeln.de", "@smail.fh-koeln.de", "@th-koeln.de", "@fh-koeln.de"]):
                                 target_folder = "SentItems"
                                 lastname = extract_lastname(rec.name or rec.email)
                                 found_student = True
