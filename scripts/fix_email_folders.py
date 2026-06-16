@@ -1,9 +1,12 @@
+"""Modul zum Korrigieren der E-Mail-Ordnerstruktur."""
 import yaml
 import logging
 import shutil
 import re
 from pathlib import Path
-from mcp_university.classifier.sort_emails import extract_lastname
+from mcp_university.classifier.sort_emails import extract_lastname, get_semester
+from mcp_university.config import get_config
+from mcp_university.parser.mail_parser import MailParser
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -20,6 +23,9 @@ def fix_folders(config_path: Path) -> None:
     if "class_paths" in config:
         config = config["class_paths"]
 
+    parser = MailParser()
+    user_email = get_config().user.email
+
     for email_class, base_path_str in config.items():
         base_path = Path(base_path_str)
         if not base_path.exists():
@@ -27,53 +33,59 @@ def fix_folders(config_path: Path) -> None:
 
         logger.info(f"Processing class {email_class} in {base_path}")
 
-        # Iterate over semester folders
-        for semester_dir in base_path.iterdir():
-            if not semester_dir.is_dir():
-                continue
+        # Find all email files recursively in the base_path
+        email_files = list(base_path.rglob("*.msg")) + list(base_path.rglob("*.eml"))
 
-            logger.info(f"Processing semester {semester_dir.name}")
-
-            # Find all email files recursively in the semester folder
-            email_files = list(semester_dir.rglob("*.msg")) + list(semester_dir.rglob("*.eml"))
-
-            for email_file in email_files:
-                # Determine current folder (Inbox or SentItems)
-                # Look for "Inbox" or "SentItems" in the path relative to semester_dir
-                rel_path = email_file.relative_to(semester_dir)
-                folder_name = "Inbox" # Default
-                for part in rel_path.parts:
-                    if part in ["Inbox", "SentItems"]:
-                        folder_name = part
-                        break
-
-                lastname = "Unknown"
-                import extract_msg
-                try:
-                    if email_file.suffix.lower() == ".msg":
-                        with extract_msg.openMsg(str(email_file)) as msg:
-                            if folder_name == "Inbox":
-                                lastname = extract_lastname(msg.sender)
-                            else:
-                                if msg.recipients:
-                                    lastname = extract_lastname(msg.recipients[0].name or msg.recipients[0].email)
-                    else:
-                        import email
-                        from email import policy
-                        with open(email_file, 'rb') as f:
-                            msg = email.message_from_binary_file(f, policy=policy.default)
-                            if folder_name == "Inbox":
-                                lastname = extract_lastname(msg.get('From', ''))
-                            else:
-                                lastname = extract_lastname(msg.get('To', ''))
-                except Exception as e:
-                    logger.error(f"Error parsing {email_file}: {e}")
+        for email_file in email_files:
+            try:
+                details = parser.get_email_details(email_file)
+                if not details or not details.get("date"):
+                    logger.warning(f"Could not get details for {email_file}, skipping.")
                     continue
 
-                target_dir = semester_dir / lastname / folder_name
+                semester = get_semester(details["date"])
+
+                # Determine folder (Inbox or SentItems) and lastname
+                # Logic from sort_emails.py
+                sender = details.get("from_email", "").lower()
+                lastname = "Unknown"
+                folder_name = "Inbox"
+
+                if user_email in sender:
+                    folder_name = "SentItems"
+                    # Try to find student in recipients
+                    recipients = details.get("to", []) + details.get("cc", [])
+                    found_student = False
+                    for rec in recipients:
+                        rec_email = rec.get("email", "").lower()
+                        if "@smail.th-koeln.de" in rec_email or "@smail.fh-koeln.de" in rec_email:
+                            lastname = extract_lastname(rec.get("name") or rec.get("email"))
+                            found_student = True
+                            break
+                    if not found_student and recipients:
+                        lastname = extract_lastname(recipients[0].get("name") or recipients[0].get("email"))
+                elif "@smail.th-koeln.de" in sender or "@smail.fh-koeln.de" in sender:
+                    folder_name = "Inbox"
+                    lastname = extract_lastname(details.get("from_name") or details.get("from_email"))
+                else:
+                    # Fallback
+                    recipients = details.get("to", []) + details.get("cc", [])
+                    found_student = False
+                    for rec in recipients:
+                        rec_email = rec.get("email", "").lower()
+                        if "@smail.th-koeln.de" in rec_email or "@smail.fh-koeln.de" in rec_email:
+                            folder_name = "SentItems"
+                            lastname = extract_lastname(rec.get("name") or rec.get("email"))
+                            found_student = True
+                            break
+                    if not found_student:
+                        folder_name = "Inbox"
+                        lastname = extract_lastname(details.get("from_name") or details.get("from_email"))
+
+                target_dir = base_path / semester / lastname / folder_name
                 target_path = target_dir / email_file.name
 
-                if email_file == target_path:
+                if email_file.resolve() == target_path.resolve():
                     continue
 
                 target_dir.mkdir(parents=True, exist_ok=True)
@@ -90,27 +102,28 @@ def fix_folders(config_path: Path) -> None:
 
                 for f in files_to_move:
                     dest = target_dir / f.name
-                    if dest.exists() and dest != f:
+                    if dest.exists() and dest.resolve() != f.resolve():
                         logger.warning(f"Destination {dest} already exists, skipping move of {f}.")
                         continue
-                    if dest != f:
+                    if dest.resolve() != f.resolve():
                         logger.info(f"Moving {f} to {dest}")
                         shutil.move(str(f), str(dest))
 
-        # Cleanup: Remove empty directories (bottom-up)
-        for semester_dir in base_path.iterdir():
-            if not semester_dir.is_dir():
+            except Exception as e:
+                logger.error(f"Error processing {email_file}: {e}")
                 continue
-            for root, dirs, files in walk_bottom_up(semester_dir):
-                curr_path = Path(root)
-                # Don't remove the semester_dir itself, but its children if empty
-                if curr_path == semester_dir:
-                    continue
-                if not any(curr_path.iterdir()):
-                    logger.info(f"Removing empty directory {curr_path}")
-                    curr_path.rmdir()
+
+        # Cleanup: Remove empty directories (bottom-up)
+        for root, dirs, files in walk_bottom_up(base_path):
+            curr_path = Path(root)
+            if curr_path == base_path:
+                continue
+            if not any(curr_path.iterdir()):
+                logger.info(f"Removing empty directory {curr_path}")
+                curr_path.rmdir()
 
 def walk_bottom_up(path: Path):
+    """Reziproke Iteration über Ordner von unten nach oben."""
     import os
     for root, dirs, files in os.walk(path, topdown=False):
         yield root, dirs, files
