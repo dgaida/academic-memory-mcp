@@ -122,15 +122,18 @@ def extract_lastname(name_str: str) -> str:
     email_match = re.search(r"[\w\.-]+@[\w\.-]+", name_str)
     if email_match:
         email = email_match.group(0)
-        if email.lower().endswith(("@smail.th-koeln.de", "@smail.fh-koeln.de")):
-            local_part = email.split("@")[0]
-            if "." in local_part:
-                # Alles nach dem ersten Punkt ist der Nachname
-                lastname_part = local_part.split(".", 1)[1]
-                # Teile nach Unterstrich und schreibe jeden Teil groß
-                parts = lastname_part.split("_")
-                res = "_".join(p[0].upper() + p[1:] for p in parts if p)
-                return normalize_name(res)
+        local_part = email.split("@")[0]
+        if "." in local_part:
+            # Nachname ist nach dem ersten Punkt
+            lastname_part = local_part.split(".", 1)[1]
+        else:
+            # Falls kein Punkt vorhanden, alles vor dem @
+            lastname_part = local_part
+
+        # Teile nach Unterstrich oder Punkt und schreibe jeden Teil groß (Doppelnamen)
+        parts = re.split(r'[._]', lastname_part)
+        res = "_".join(p[0].upper() + p[1:] for p in parts if p)
+        return normalize_name(res)
 
     # Fallback für Namen ohne (Smail-)Adresse
     # Entferne E-Mail Adresse in Klammern falls vorhanden
