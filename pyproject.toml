@@ -3,6 +3,10 @@ name = "mcp-university"
 version = "1.4.0"
 description = "Agentic University Memory System with MCP"
 dependencies = [
+    "tzlocal",
+    "liteparse",
+    "networkx",
+    "pyvis",
     "fastmcp",
     "ollama",
     "qdrant-client",
