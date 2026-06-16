@@ -1,6 +1,8 @@
 """Controller für die Verarbeitung und Beantwortung von E-Mails."""
 
 import logging
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
 import re
 import shutil
 import yaml
@@ -593,3 +595,80 @@ TEXT:
         except Exception as e:
             logger.error(f"Fehler bei der Kurzzusammenfassung: {e}")
             return "Fehler bei Zusammenfassung."
+
+    def get_similarity_info(self, mail_path: Path, lastname: str) -> str:
+        """Findet die ähnlichsten E-Mails desselben Studenten in den konfigurierten Pfaden.
+
+        Args:
+            mail_path: Pfad zur aktuellen E-Mail.
+            lastname: Nachname des Studenten.
+
+        Returns:
+            str: Markdown-formatierte Information über die ähnlichste E-Mails.
+        """
+        try:
+            # 1. Details der aktuellen Mail
+            current_details = self.mail_parser.get_email_details(mail_path)
+            current_subject = current_details.get("subject", "")
+            if not current_subject:
+                return "Kein Betreff in aktueller Mail gefunden."
+
+            # 2. Alle relevanten Mails des Studenten in allen Klassen-Pfaden suchen
+            all_mails = []
+            seen_paths = set()
+
+            for class_name, base_path_str in self.class_paths.items():
+                base_path = Path(base_path_str)
+                student_dir = find_student_folder(base_path, lastname)
+                if student_dir:
+                    for ext in ["*.msg", "*.eml"]:
+                        for f in student_dir.rglob(ext):
+                            resolved_f = f.resolve()
+                            if resolved_f == mail_path.resolve() or resolved_f in seen_paths:
+                                continue
+                            try:
+                                date = self.mail_parser.get_email_date(f)
+                                details = self.mail_parser.get_email_details(f)
+                                if details.get("subject"):
+                                    all_mails.append({
+                                        "path": f,
+                                        "date": date,
+                                        "subject": details.get("subject")
+                                    })
+                                    seen_paths.add(resolved_f)
+                            except Exception:
+                                continue
+
+            if not all_mails:
+                return "Keine anderen E-Mails des Studenten in den Archiv-Ordnern gefunden."
+
+            # 3. Die 3 neuesten nehmen
+            all_mails.sort(key=lambda x: x["date"], reverse=True)
+            newest_mails = all_mails[:3]
+
+            # 4. Embeddings und Similarity
+            from sentence_transformers import SentenceTransformer
+            model_name = self.config.embeddings.model
+
+            # Lazy load similarity model on controller
+            if not hasattr(self, "_similarity_model"):
+                logger.info(f"Lade Embedding-Modell für Similarity: {model_name}")
+                self._similarity_model = SentenceTransformer(model_name)
+
+            subjects = [m["subject"] for m in newest_mails]
+
+            curr_emb = self._similarity_model.encode([current_subject])
+            other_embs = self._similarity_model.encode(subjects)
+
+            similarities = cosine_similarity(curr_emb, other_embs)[0]
+            best_idx = int(np.argmax(similarities))
+            best_score = float(similarities[best_idx])
+            best_mail = newest_mails[best_idx]
+
+            return (f"**Ähnlichste Mail (Top 3 neuere):** {best_mail['subject']}\n\n"
+                    f"**Pfad:** `{best_mail['path']}`\n\n"
+                    f"**Cosine Similarity:** {best_score:.4f}")
+
+        except Exception as e:
+            logger.error(f"Fehler bei Similarity-Suche für {lastname}: {e}")
+            return f"*Fehler bei Similarity-Suche: {str(e)}*"
