@@ -261,15 +261,10 @@ def process_emails(
                          lastname = extract_lastname(msg.sender)
 
             # Ziel-Pfad bestimmen
-            if email_class.startswith(("BA_", "MA_")):
-                # Für BA/MA Klassen alle Mails gesammelt in Inbox/SentItems speichern
-                target_dir = class_base_path / semester / target_folder
-            else:
-                student_dir = find_student_folder(class_base_path, lastname)
-                if not student_dir:
-                    student_dir = class_base_path / semester / lastname
-                target_dir = student_dir / target_folder
-
+            student_dir = find_student_folder(class_base_path, lastname)
+            if not student_dir:
+                student_dir = class_base_path / semester / lastname
+            target_dir = student_dir / target_folder
             target_dir.mkdir(parents=True, exist_ok=True)
             target_path = target_dir / msg_file.name
 

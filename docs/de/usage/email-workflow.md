@@ -31,9 +31,11 @@ Nach der Sortierung wird `process_sorted_emails.py` ausgeführt. Das Skript füh
 
 ## 4. Überprüfung (Gradio GUI)
 Am Ende des Prozesses startet automatisch eine Gradio-Weboberfläche. Hier können Sie:  
-- Die getroffenen Klassifizierungen überprüfen.  
-- Mails bei Bedarf manuell in andere Kategorien verschieben. Das System verschiebt dabei automatisch auch die zugehörige `.emails_summary.md`.  
-- Den Status der verarbeiteten Mails einsehen.  
+- **Klassifizierung prüfen:** Die automatisch getroffenen Zuordnungen kontrollieren und korrigieren.
+- **Quick Links:** Den E-Mail-Ordner oder die E-Mail-Datei direkt aus dem Browser öffnen.
+- **Kurzzusammenfassung:** Jede E-Mail wird durch das LLM in zwei Sätzen zusammengefasst.
+- **Anhänge speichern:** Über eine Checkbox können Anhänge direkt in den Zielordner extrahiert werden.
+- **Relokation:** Mails bei Bedarf manuell in andere Kategorien verschieben. Das System verschiebt dabei automatisch auch alle zugehörigen `.md` und `.txt` Dateien sowie die `.emails_summary.md`.
 
 ## 5. Abschlussbericht
 Das Skript erstellt eine Datei `processed_emails.md`, die eine tabellarische Übersicht über alle verarbeiteten Mails und deren Status (z.B. "Entwurf erstellt", "Termin gebucht", "Keine Antwort nötig") enthält.

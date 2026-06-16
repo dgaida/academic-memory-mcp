@@ -1,6 +1,9 @@
 """Skript zur Verarbeitung sortierter E-Mails und Generierung von Antworten."""
 
 import argparse
+import os
+import subprocess
+import platform
 import logging
 import sys
 import gradio as gr
@@ -42,9 +45,67 @@ def run_gradio_gui(controller: EmailController, report_path: Path):
             with gr.Group():
                 with gr.Row():
                     with gr.Column(scale=4):
+                        mail_path = mail['path']
+                        folder_path = mail_path.parent
+
+                        # Summary
+                        summary = controller.generate_short_summary(mail_path)
+
                         gr.Markdown(
-                            f"**Student:** {mail['lastname']} ({mail['semester']}) | **Ordner:** {mail['folder']}\n**Datei:** `{mail['path'].name}`"
+                            f"**Student:** {mail['lastname']} ({mail['semester']}) | **Ordner:** {mail['folder']}\n"
+                            f"**Datei:** `{mail_path.name}`\n\n"
+                            f"*Zusammenfassung:* {summary}"
                         )
+
+                        with gr.Row():
+                            open_folder_btn = gr.Button("📁 Ordner öffnen", size="sm")
+                            open_mail_btn = gr.Button("✉️ Mail öffnen", size="sm")
+
+                            def open_folder(p=str(folder_path)):
+                                try:
+                                    if platform.system() == "Windows":
+                                        os.startfile(p)
+                                    elif platform.system() == "Darwin":
+                                        subprocess.Popen(["open", p])
+                                    else:
+                                        subprocess.Popen(["xdg-open", p])
+                                except Exception as e:
+                                    print(f"Error opening folder: {e}")
+
+                            def open_mail(p=str(mail_path)):
+                                try:
+                                    if platform.system() == "Windows":
+                                        os.startfile(p)
+                                    elif platform.system() == "Darwin":
+                                        subprocess.Popen(["open", p])
+                                    else:
+                                        subprocess.Popen(["xdg-open", p])
+                                except Exception as e:
+                                    print(f"Error opening mail: {e}")
+
+                            open_folder_btn.click(open_folder)
+                            open_mail_btn.click(open_mail)
+
+                        # Attachment Checkbox
+                        has_attachments = False
+                        try:
+                            import extract_msg
+                            if mail_path.suffix.lower() == ".msg":
+                                with extract_msg.openMsg(str(mail_path)) as msg:
+                                    if msg.attachments:
+                                        has_attachments = True
+                            # For .eml we could also check, but msg is primary
+                        except:
+                            pass
+
+                        att_cb = None
+                        if has_attachments:
+                            att_cb = gr.Checkbox(label="Anhang speichern", value=False)
+                        else:
+                            # Dummy component to keep indices consistent if needed,
+                            # but we can handle it in the click function
+                            att_cb = gr.Checkbox(label="Kein Anhang", value=False, visible=False)
+
                     with gr.Column(scale=1):
                         initial_value = mail["class"]
                         if initial_value == "Other":
@@ -56,27 +117,42 @@ def run_gradio_gui(controller: EmailController, report_path: Path):
                             label="Korrektes Ziel",
                         )
                         dropdowns.append(dd)
-                        email_data.append(mail)
+                        email_data.append((mail, att_cb))
 
         with gr.Row():
             btn = gr.Button("Mails neu einsortieren", variant="primary")
             status_out = gr.Textbox(label="Ergebnis")
 
-        def handle_click(*selected_classes):
+        def handle_click(*inputs):
+            # Inputs are dropdown values followed by checkbox values
+            num_mails = len(email_data)
+            selected_classes = inputs[:num_mails]
+            attachment_flags = inputs[num_mails:]
+
             changes = []
-            for mail, new_class in zip(email_data, selected_classes):
+            for i, ((mail, _), new_class) in enumerate(zip(email_data, selected_classes)):
                 m = mail.copy()
                 m["new_class"] = new_class
+                m["save_attachments"] = attachment_flags[i]
                 changes.append(m)
 
             try:
+                # 1. Save attachments if requested
+                for change in changes:
+                    if change.get("save_attachments"):
+                        mail_path = Path(change["path"])
+                        controller.mail_parser.save_attachments(mail_path, mail_path.parent)
+
+                # 2. Relocate if class changed
                 controller.relocate_emails(changes)
-                return "Verarbeitung abgeschlossen. Mails wurden ggf. verschoben und Ordner bereinigt."
+                return "Verarbeitung abgeschlossen. Mails wurden ggf. verschoben, Anhänge gespeichert und Ordner bereinigt."
             except Exception as e:
                 logger.exception("Fehler bei Relokation")
                 return f"Fehler: {str(e)}"
 
-        btn.click(handle_click, inputs=dropdowns, outputs=status_out)
+        # Combine dropdowns and checkboxes
+        inputs = dropdowns + [mail[1] for mail in email_data]
+        btn.click(handle_click, inputs=inputs, outputs=status_out)
 
     demo.launch(inbrowser=True)
 

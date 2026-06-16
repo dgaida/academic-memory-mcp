@@ -149,13 +149,10 @@ class EmailController:
                     continue
                 class_base_path = Path(self.class_paths[new_class])
 
-                if new_class.startswith(("BA_", "MA_")):
-                    target_dir = class_base_path / semester / change["folder"]
-                else:
-                    student_dir = find_student_folder(class_base_path, lastname)
-                    if not student_dir:
-                        student_dir = class_base_path / semester / lastname
-                    target_dir = student_dir / change["folder"]
+                student_dir = find_student_folder(class_base_path, lastname)
+                if not student_dir:
+                    student_dir = class_base_path / semester / lastname
+                target_dir = student_dir / change["folder"]
 
             target_dir.mkdir(parents=True, exist_ok=True)
 
@@ -404,61 +401,25 @@ TEXT:
 
         for email in emails:
             mail_path = Path(email["path"])
-            is_ba_ma = email["class"].startswith(("BA_", "MA_"))
-
-            if is_ba_ma:
-                identifier = (email["class"], email["semester"], email["lastname"])
-                semester_folder = mail_path.parent.parent
-                inbox_folder = semester_folder / "Inbox"
-                sent_folder = semester_folder / "SentItems"
-                all_files = []
-                if inbox_folder.exists():
-                    all_files.extend(list(inbox_folder.glob("*.msg")) + list(inbox_folder.glob("*.eml")))
-                if sent_folder.exists():
-                    all_files.extend(list(sent_folder.glob("*.msg")) + list(sent_folder.glob("*.eml")))
-
-                student_emails = []
-                for f in all_files:
-                    try:
-                        with extract_msg.openMsg(str(f)) as msg:
-                            sender_lastname = extract_lastname(msg.sender)
-                            rec_lastname = extract_lastname(msg.recipients[0].name or msg.recipients[0].email) if msg.recipients else "None"
-                            if sender_lastname == email["lastname"] or rec_lastname == email["lastname"]:
-                                student_emails.append((self.mail_parser.get_email_date(f), f))
-                    except Exception:
-                        continue
-
-                if not student_emails:
-                    continue
-                student_emails.sort(key=lambda x: x[0])
-                latest_date, latest_mail = student_emails[-1]
-                needs_answer = "Inbox" in latest_mail.parts
-                email.update({
-                    "latest_date": latest_date,
-                    "latest_mail": latest_mail,
-                    "student_emails": student_emails,
-                    "semester_folder": semester_folder
-                })
-            else:
-                identifier = mail_path.parent.parent
-                email_files = list(identifier.rglob("*.msg")) + list(identifier.rglob("*.eml"))
-                if not email_files:
-                    continue
-                dated_emails = []
-                for f in email_files:
-                    try:
-                        dated_emails.append((self.mail_parser.get_email_date(f), f))
-                    except Exception:
-                        dated_emails.append((datetime.min, f))
-                dated_emails.sort(key=lambda x: x[0])
-                latest_date, latest_mail = dated_emails[-1]
-                needs_answer = "Inbox" in latest_mail.parts and "SentItems" not in latest_mail.parts
-                email.update({
-                    "latest_date": latest_date,
-                    "latest_mail": latest_mail,
-                    "dated_emails": dated_emails,
-                    "identifier_path": identifier
-                })
+            identifier = mail_path.parent.parent
+            email_files = list(identifier.rglob("*.msg")) + list(identifier.rglob("*.eml"))
+            if not email_files:
+                continue
+            dated_emails = []
+            for f in email_files:
+                try:
+                    dated_emails.append((self.mail_parser.get_email_date(f), f))
+                except Exception:
+                    dated_emails.append((datetime.min, f))
+            dated_emails.sort(key=lambda x: x[0])
+            latest_date, latest_mail = dated_emails[-1]
+            needs_answer = "Inbox" in latest_mail.parts and "SentItems" not in latest_mail.parts
+            email.update({
+                "latest_date": latest_date,
+                "latest_mail": latest_mail,
+                "dated_emails": dated_emails,
+                "identifier_path": identifier
+            })
 
             if needs_answer and identifier not in temp_folders:
                 temp_folders.add(identifier)
@@ -477,7 +438,7 @@ TEXT:
         for email in unique_emails_to_process:
             latest_mail = email["latest_mail"]
             latest_date = email["latest_date"]
-            is_ba_ma = email["class"].startswith(("BA_", "MA_"))
+
 
             if age_months:
                 cutoff = (datetime.now() - timedelta(days=age_months * 30)).replace(tzinfo=None)
@@ -534,26 +495,18 @@ TEXT:
 
             conv_content = ""
             summary_content = ""
-            if is_ba_ma:
-                threshold = latest_date - timedelta(days=14)
-                for d, f in email["student_emails"]:
-                    if f != latest_mail and d >= threshold:
-                        p = self.mail_parser.parse(f)
-                        if p:
-                            conv_content += f"\n--- EMAIL VOM {d} ---\n{p}\n"
+            summary_file = email["identifier_path"] / ".emails_summary.md"
+            if not summary_file.exists() or latest_date > datetime.fromtimestamp(summary_file.stat().st_mtime):
+                c_content = ""
+                for d, f in email["dated_emails"]:
+                    p = self.mail_parser.parse(f)
+                    if p:
+                        c_content += f"\n--- EMAIL VOM {d} ---\n{p}\n"
+                summary_content = self.summarizer.summarize_email_conversation(email["identifier_path"].name, c_content)
+                if summary_content:
+                    summary_file.write_text(summary_content, encoding="utf-8")
             else:
-                summary_file = email["identifier_path"] / ".emails_summary.md"
-                if not summary_file.exists() or latest_date > datetime.fromtimestamp(summary_file.stat().st_mtime):
-                    c_content = ""
-                    for d, f in email["dated_emails"]:
-                        p = self.mail_parser.parse(f)
-                        if p:
-                            c_content += f"\n--- EMAIL VOM {d} ---\n{p}\n"
-                    summary_content = self.summarizer.summarize_email_conversation(email["identifier_path"].name, c_content)
-                    if summary_content:
-                        summary_file.write_text(summary_content, encoding="utf-8")
-                else:
-                    summary_content = summary_file.read_text(encoding="utf-8")
+                summary_content = summary_file.read_text(encoding="utf-8")
 
             reply_subject, reply, should_attach = self.generate_reply(
                 latest_mail, summary_content, skill_path, conv_content, persona_path, add_ctx, apt_skill_path, sender_name, student_email
@@ -587,7 +540,7 @@ TEXT:
             if success:
                 res_status = "Outlook Entwurf (Work in Progress)"
             else:
-                r_path = (email["semester_folder"] if is_ba_ma else email["identifier_path"]) / f"{latest_mail.stem}_reply.md"
+                r_path = email["identifier_path"] / f"{latest_mail.stem}_reply.md"
                 r_path.write_text(reply, encoding="utf-8")
                 res_status = f"Datei: {r_path}"
 
@@ -604,3 +557,28 @@ TEXT:
                     f.write(f"| {res['lastname']} | {res['subject']} | {res['status']} |\n")
 
         return processed_results
+    def generate_short_summary(self, mail_path: Path) -> str:
+        """Generiert eine kurze Zusammenfassung (2 Sätze) einer E-Mail."""
+        try:
+            parsed = self.mail_parser.parse(mail_path)
+            if not parsed:
+                return "Keine Zusammenfassung möglich."
+
+            prompt = f"Fasse die folgende E-Mail in genau 2 prägnanten Sätzen zusammen:\n\n{parsed}"
+
+            # Using LLMClientWrapper via summarizer
+            # Since summarizer.summarize_email_conversation exists, we can use a similar pattern
+            # but with a specific prompt.
+            # However, summarizer doesn't have a generic call exposed easily without more logic.
+            # Let's use the wrapper directly if possible or call a simple summary.
+
+            response = self.summarizer.client.call_llm(
+                system_prompt="Du bist ein hilfreicher Assistent, der E-Mails kurz zusammenfasst.",
+                user_prompt=prompt
+            )
+
+            content = response.get('message', {}).get('content', '')
+            return content.strip() or "Zusammenfassung fehlgeschlagen."
+        except Exception as e:
+            logger.error(f"Fehler bei der Kurzzusammenfassung: {e}")
+            return "Fehler bei Zusammenfassung."
