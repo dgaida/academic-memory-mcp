@@ -39,8 +39,11 @@ python3 mcp_university/classifier/sort_emails.py /quell/ordner --config config/c
 Es erkennt automatisch:  
 - **Semester:** Basierend auf dem E-Mail-Datum (SoSe/WS).  
 - **Student:** Extrahiert den Nachnamen aus `smail.th-koeln.de` Adressen oder Anzeigenamen.  
-- **Richtung:** Sortiert in `Inbox` oder `SentItems` Unterordner.  
+- **Richtung:** Sortiert in `lastname/Inbox` oder `lastname/SentItems` Unterordner (einheitlich für alle Klassen).
 - **Bericht:** Erstellt eine `sorted_emails.md` mit einer Übersicht aller verschobenen Mails.  
+
+### Maintenance Script
+Mit `scripts/fix_email_folders.py` können bestehende E-Mail-Strukturen, die noch nicht dem `lastname/Folder` Schema entsprechen, automatisch migriert werden.
 
 ## Batch-Klassifizierung
 Um einen ganzen Ordner mit E-Mails automatisch zu sortieren (nur Klassifizierung):
