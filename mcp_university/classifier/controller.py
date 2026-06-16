@@ -127,12 +127,7 @@ class EmailController:
             new_class = change["new_class"]
             old_class = change["class"]
 
-            if new_class == old_class:
-                continue
-
             lastname = change["lastname"]
-            logger.info(f"Relocating {old_path.name} from {old_class} to {new_class}")
-
             try:
                 date = self.mail_parser.get_email_date(old_path)
             except Exception:
@@ -159,6 +154,18 @@ class EmailController:
 
             target_dir.mkdir(parents=True, exist_ok=True)
 
+            # 1. Save attachments if requested (BEFORE moving the email, but using target info)
+            if change.get("save_attachments"):
+                # Save to the parent of the target folder (student folder)
+                attachment_target = target_dir.parent
+                logger.info(f"Speichere Anhänge von {old_path.name} in {attachment_target}")
+                self.mail_parser.save_attachments(old_path, attachment_target)
+
+            if new_class == old_class:
+                continue
+
+            logger.info(f"Relocating {old_path.name} from {old_class} to {new_class}")
+
             match = re.match(r"(\d{8}_\d{6})", old_path.name)
             files_to_process = [old_path]
             if match:
@@ -173,12 +180,12 @@ class EmailController:
                 if dest.exists():
                     dest.unlink()
                 shutil.move(str(f), str(dest))
-
             old_folder = old_path.parent
             old_student_folder = old_folder.parent
             target_student_folder = target_dir.parent
 
             def has_emails(student_folder: Path):
+                """Prüft, ob der Student-Ordner noch E-Mails enthält."""
                 for sub in ["Inbox", "SentItems"]:
                     p = student_folder / sub
                     if p.exists() and p.is_dir():
@@ -201,6 +208,7 @@ class EmailController:
                         summary_file.unlink()
 
             def delete_if_empty(folder: Path):
+                """Löscht einen Ordner, wenn er leer ist."""
                 if folder.exists() and folder.is_dir():
                     items = list(folder.iterdir())
                     if not items:

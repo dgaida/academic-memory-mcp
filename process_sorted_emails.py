@@ -137,13 +137,7 @@ def run_gradio_gui(controller: EmailController, report_path: Path):
                 changes.append(m)
 
             try:
-                # 1. Save attachments if requested
-                for change in changes:
-                    if change.get("save_attachments"):
-                        mail_path = Path(change["path"])
-                        controller.mail_parser.save_attachments(mail_path, mail_path.parent)
-
-                # 2. Relocate if class changed
+                # Relocate and save attachments (handled internally by relocate_emails)
                 controller.relocate_emails(changes)
                 return "Verarbeitung abgeschlossen. Mails wurden ggf. verschoben, Anhänge gespeichert und Ordner bereinigt."
             except Exception as e:
