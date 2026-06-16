@@ -3,8 +3,8 @@ import logging
 import shutil
 import re
 from pathlib import Path
-from typing import Dict, List, Any
-from mcp_university.classifier.sort_emails import extract_lastname, get_semester
+from typing import Dict  # type: ignore
+from mcp_university.classifier.sort_emails import extract_lastname
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)

@@ -20,7 +20,6 @@ from mcp_university.classifier.engine import resolve_model_path
 from mcp_university.classifier.sort_emails import (
     process_emails,
     write_report,
-    extract_lastname,
     extract_firstname,
     get_semester,
     find_student_folder,
@@ -75,9 +74,13 @@ class EmailController:
         else:
             self.agent = Agent(**agent_args)
 
-        with open(config_path, "r", encoding="utf-8") as f:
-            full_config = yaml.safe_load(f)
-        self.class_paths = full_config.get("class_paths", full_config)
+        if Path(config_path).exists():
+            with open(config_path, "r", encoding="utf-8") as f:
+                full_config = yaml.safe_load(f)
+            self.class_paths = full_config.get("class_paths", full_config)
+        else:
+            logger.warning(f"Config {config_path} not found. Using empty class_paths.")
+            self.class_paths = {}
 
     def run_sort(self, source_dir: str, method: str = "transformer", mode: str = "combined") -> None:
         """Sortiert E-Mails basierend auf Klassifizierung."""

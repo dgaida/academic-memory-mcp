@@ -1,5 +1,5 @@
-import logging
 """Metadaten-Speicherung und Verwaltung."""
+import logging
 import sqlite3
 import json
 import time

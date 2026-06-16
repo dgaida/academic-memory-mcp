@@ -95,7 +95,7 @@ def run_gradio_gui(controller: EmailController, report_path: Path):
                                     if msg.attachments:
                                         has_attachments = True
                             # For .eml we could also check, but msg is primary
-                        except:
+                        except Exception:
                             pass
 
                         att_cb = None
