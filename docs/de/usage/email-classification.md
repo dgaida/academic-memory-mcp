@@ -39,7 +39,7 @@ python3 mcp_university/classifier/sort_emails.py /quell/ordner --config config/c
 Es erkennt automatisch:  
 - **Semester:** Basierend auf dem E-Mail-Datum (SoSe/WS).  
 - **Student:** Extrahiert den Nachnamen aus `smail.th-koeln.de` Adressen oder Anzeigenamen.  
-- **Richtung:** Sortiert in `lastname/Inbox` oder `lastname/SentItems` Unterordner (einheitlich für alle Klassen).
+- **Richtung:** Sortiert in `lastname/Inbox` oder `lastname/SentItems` Unterordner (einheitlich für alle Klassen).  
 - **Bericht:** Erstellt eine `sorted_emails.md` mit einer Übersicht aller verschobenen Mails.  
 
 ### Maintenance Script
