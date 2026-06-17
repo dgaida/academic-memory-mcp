@@ -35,6 +35,17 @@ Unterstützt den Parameter `--filter <Name>` (oder `-f` in der CLI), um den Grap
 Crawlt das Personenverzeichnis der TH Köln nach Namen, E-Mails, Fakultäten und Instituten.
 ```bash
 python scripts/crawl_th_koeln_persons.py A B C
+
+Unterstützt Filter nach Fakultät oder Einrichtung:
+```bash
+python scripts/crawl_th_koeln_persons.py --institution "Präsidium"
+python scripts/crawl_th_koeln_persons.py --faculty "Informatik und Ingenieurwissenschaften"
+```
+
+Mit `--list-institutions` oder `--list-faculties` können alle verfügbaren Optionen angezeigt werden. Für einen vollständigen Crawl aller Bereiche:
+```bash
+python scripts/crawl_th_koeln_persons.py --crawl-all both
+```
 ```
 Unterstützt mehrere Anfangsbuchstaben als Argumente.
 

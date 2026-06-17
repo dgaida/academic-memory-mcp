@@ -35,6 +35,17 @@ Supports the `--filter <name>` parameter (or `-f` in the CLI) to restrict the gr
 Crawls the TH Köln personnel directory for names, emails, faculties, and institutes.
 ```bash
 python scripts/crawl_th_koeln_persons.py A B C
+
+Supports filters by faculty or institution:
+```bash
+python scripts/crawl_th_koeln_persons.py --institution "Präsidium"
+python scripts/crawl_th_koeln_persons.py --faculty "Informatik und Ingenieurwissenschaften"
+```
+
+Use `--list-institutions` or `--list-faculties` to see all available options. For a full crawl of all areas:
+```bash
+python scripts/crawl_th_koeln_persons.py --crawl-all both
+```
 ```
 Supports multiple initial characters as arguments.
 

@@ -3,13 +3,16 @@
 This script fetches a list of persons from the TH Köln personnel page,
 extracts their names and email addresses, and then visits their individual
 profile pages to extract their faculty and institute information.
-The results are saved in a Markdown table and in the university metadata database.
+The results are saved in Markdown files (one per faculty/institution)
+and in the university metadata database.
 """
 
 import argparse
 import html
+import os
 import random
 import string
+import sys
 import time
 import re
 from pathlib import Path
@@ -20,6 +23,17 @@ from bs4 import BeautifulSoup
 
 from mcp_university.metadata.store import MetadataStore
 
+# Try to reconfigure stdout/stdin for UTF-8 (mainly for Windows)
+if hasattr(sys.stdout, 'reconfigure'):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+    except Exception:
+        pass
+if hasattr(sys.stdin, 'reconfigure'):
+    try:
+        sys.stdin.reconfigure(encoding='utf-8')
+    except Exception:
+        pass
 
 class THKoelnCrawler:
     """Crawler for TH Köln personnel pages."""
@@ -46,6 +60,34 @@ class THKoelnCrawler:
     def _wait(self) -> None:
         """Wait for a random duration to avoid being blocked."""
         time.sleep(random.uniform(*self.delay_range))
+
+    def get_filter_options(self) -> Dict[str, List[str]]:
+        """Fetches available faculties and institutions from the website.
+
+        Returns:
+            A dictionary with 'faculties' and 'institutions' lists.
+        """
+        response = self.session.get(self.PERSONS_LIST_URL)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        options = {"faculties": [], "institutions": []}
+
+        # Faculties (faculty_de[])
+        fac_inputs = soup.find_all("input", {"name": "faculty_de[]"})
+        for inp in fac_inputs:
+            val = inp.get("value")
+            if val:
+                options["faculties"].append(val)
+
+        # Institutions (other_institution_de[])
+        inst_inputs = soup.find_all("input", {"name": "other_institution_de[]"})
+        for inp in inst_inputs:
+            val = inp.get("value")
+            if val:
+                options["institutions"].append(val)
+
+        return options
 
     def get_persons(self, char: Optional[str] = None, faculty: Optional[str] = None, institution: Optional[str] = None) -> List[Dict[str, str]]:
         """Fetches persons based on character, faculty or institution.
@@ -98,15 +140,14 @@ class THKoelnCrawler:
         return persons
 
     def get_person_details(self, profile_url: str) -> Dict[str, Any]:
-        """Fetches faculty, institute and functions from a person's profile page.
+        """Fetches additional details for a person from their profile page.
 
         Args:
-            profile_url: The URL of the person's profile page.
+            profile_url: The URL of the person's profile.
 
         Returns:
-            A dictionary containing 'faculty', 'institute', and function flags.
+            A dictionary containing faculty and institute.
         """
-        self._wait()
         response = self.session.get(profile_url)
         response.raise_for_status()
 
@@ -205,6 +246,7 @@ def save_to_markdown(data: List[Dict[str, Any]], filename: str) -> None:
         data: The list of person dictionaries.
         filename: The output filename.
     """
+    os.makedirs(os.path.dirname(os.path.abspath(filename)), exist_ok=True)
     with open(filename, "w", encoding="utf-8") as f:
         f.write("# Personen TH Köln\n\n")
         f.write("| Name | E-Mail | Fakultät oder Einrichtung | Institut | PA-Vorsitz | DekanIn | Senat | InstitutsdirektorIn | Präsidiumsmitglied |\n")
@@ -229,6 +271,7 @@ def save_to_database(data: List[Dict[str, Any]], db_path: Path) -> None:
         data: The list of person dictionaries.
         db_path: Path to the SQLite database.
     """
+    os.makedirs(db_path.parent, exist_ok=True)
     store = MetadataStore(db_path)
 
     for person in data:
@@ -285,7 +328,7 @@ Examples:
   python scripts/crawl_th_koeln_persons.py A
   python scripts/crawl_th_koeln_persons.py --faculty "Informatik und Ingenieurwissenschaften"
   python scripts/crawl_th_koeln_persons.py --institution "Campus IT"
-  python scripts/crawl_th_koeln_persons.py A B C
+  python scripts/crawl_th_koeln_persons.py --crawl-all both
         """
     )
     parser.add_argument(
@@ -304,49 +347,93 @@ Examples:
         help="Institution to crawl (e.g. 'Campus IT')."
     )
     parser.add_argument(
+        "--crawl-all",
+        choices=["faculties", "institutions", "both"],
+        help="Crawl all persons for all faculties, institutions or both."
+    )
+    parser.add_argument(
+        "--list-faculties",
+        action="store_true",
+        help="List all available faculties and exit."
+    )
+    parser.add_argument(
+        "--list-institutions",
+        action="store_true",
+        help="List all available institutions and exit."
+    )
+    parser.add_argument(
         "--db",
         type=Path,
         default=Path("data/metadata/university.db"),
         help="Path to the university metadata database (default: data/metadata/university.db)."
     )
-    parser.add_argument(
-        "--output",
-        type=str,
-        default="data/th_koeln_persons.md",
-        help="Path to the output Markdown file (default: th_koeln_persons.md)."
-    )
 
     args = parser.parse_args()
 
-    # Process characters: handle space-separated args and comma-separated strings
-    chars_to_crawl = []
-    for arg in args.chars:
-        if "," in arg:
-            chars_to_crawl.extend([c.strip() for c in arg.split(",")])
-        else:
-            chars_to_crawl.append(arg.strip())
-
-    if not chars_to_crawl and (args.faculty or args.institution):
-        print("Filter specified, crawling A-Z for this filter.")
-        chars_to_crawl = list(string.ascii_uppercase)
-    elif not chars_to_crawl:
-        print("No filters specified, crawling entire TH (A-Z).")
-        chars_to_crawl = list(string.ascii_uppercase)
-
     crawler = THKoelnCrawler()
-    data = crawler.crawl(chars_to_crawl, faculty=args.faculty, institution=args.institution)
 
-    # Save to Markdown
-    save_to_markdown(data, args.output)
-    print(f"Saved {len(data)} persons to {args.output}")
+    if args.list_faculties or args.list_institutions:
+        options = crawler.get_filter_options()
+        if args.list_faculties:
+            print("Available Faculties:")
+            for fac in options["faculties"]:
+                print(f"  - {fac}")
+        if args.list_institutions:
+            print("Available Institutions:")
+            for inst in options["institutions"]:
+                print(f"  - {inst}")
+        return
+
+    all_data = []
+    az_chars = list(string.ascii_uppercase)
+
+    if args.crawl_all:
+        options = crawler.get_filter_options()
+        categories = []
+        if args.crawl_all in ["faculties", "both"]:
+            for f in options["faculties"]:
+                categories.append({"faculty": f})
+        if args.crawl_all in ["institutions", "both"]:
+            for i in options["institutions"]:
+                categories.append({"institution": i})
+
+        for cat in categories:
+            faculty = cat.get("faculty")
+            institution = cat.get("institution")
+            data = crawler.crawl(az_chars, faculty=faculty, institution=institution)
+            all_data.extend(data)
+    else:
+        # Process characters: handle space-separated args and comma-separated strings
+        chars_to_crawl = []
+        for arg in args.chars:
+            if "," in arg:
+                chars_to_crawl.extend([c.strip() for c in arg.split(",")])
+            else:
+                chars_to_crawl.append(arg.strip())
+
+        if not chars_to_crawl and (args.faculty or args.institution):
+            print("Filter specified, crawling A-Z for this filter.")
+            chars_to_crawl = az_chars
+        elif not chars_to_crawl:
+            print("No filters specified, crawling entire TH (A-Z).")
+            chars_to_crawl = az_chars
+
+        all_data = crawler.crawl(chars_to_crawl, faculty=args.faculty, institution=args.institution)
+
+    if not all_data:
+        print("No persons found.")
+        return
 
     # Save separate files by faculty/institution
     by_faculty = {}
-    for person in data:
+    for person in all_data:
         fac = person.get("faculty") or "Unbekannt"
         if fac not in by_faculty:
             by_faculty[fac] = []
-        by_faculty[fac].append(person)
+
+        # Avoid duplicates in the same file if person found multiple times
+        if person not in by_faculty[fac]:
+            by_faculty[fac].append(person)
 
     for fac, fac_data in by_faculty.items():
         # Sanitize filename
@@ -356,7 +443,7 @@ Examples:
         print(f"Saved {len(fac_data)} persons for {fac} to {fac_filename}")
 
     # Save to Database
-    save_to_database(data, args.db)
+    save_to_database(all_data, args.db)
     print(f"Updated database at {args.db}")
 
 
