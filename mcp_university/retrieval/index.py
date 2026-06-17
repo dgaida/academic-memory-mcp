@@ -197,6 +197,54 @@ class SearchIndex:
             json.dump(self.corpus, f, ensure_ascii=False, indent=2)
         self._rebuild_bm25()
 
+
+    def add_documents(self, documents: List[Dict[str, Any]]) -> None:
+        """Fügt mehrere Dokumente zum Index hinzu.
+
+        Args:
+            documents (List[Dict[str, Any]]): Liste von Dokumenten mit 'doc_id', 'content' und 'metadata'.
+        """
+        if not NATIVE_AVAILABLE or not documents:
+            return
+
+        logger.info(f"Adding {len(documents)} documents to native index")
+
+        contents = [doc["content"] for doc in documents]
+        vectors = self.model.encode(contents).tolist()
+
+        points = []
+        new_corpus_entries = []
+        doc_ids_to_remove = set()
+
+        for doc, vector in zip(documents, vectors):
+            doc_id = doc["doc_id"]
+            content = doc["content"]
+            metadata = doc.get("metadata", {})
+            doc_hash = int(hashlib.md5(doc_id.encode()).hexdigest(), 16) % (2**63 - 1)
+
+            points.append(models.PointStruct(
+                id=doc_hash,
+                vector=vector,
+                payload={"doc_id": doc_id, "content": content, **metadata}
+            ))
+
+            doc_ids_to_remove.add(doc_id)
+            new_corpus_entries.append({"doc_id": doc_id, "content": content, "metadata": metadata})
+
+        # Batch Upsert in Qdrant
+        self.client.upsert(
+            collection_name=self.collection_name,
+            points=points
+        )
+
+        # Update local corpus
+        self.corpus = [doc for doc in self.corpus if doc["doc_id"] not in doc_ids_to_remove]
+        self.corpus.extend(new_corpus_entries)
+
+        with open(self.corpus_path, "w", encoding="utf-8") as f:
+            json.dump(self.corpus, f, ensure_ascii=False, indent=2)
+
+        self._rebuild_bm25()
     def search(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
         """Führt eine Suche aus, bevorzugt via qmd."""
         logger.info(f"Searching for: '{query}' (top_k={top_k})")
