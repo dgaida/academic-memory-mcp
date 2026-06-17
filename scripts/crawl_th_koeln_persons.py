@@ -117,7 +117,8 @@ class THKoelnCrawler:
             "is_pa_vorsitz": False,
             "is_dekan": False,
             "is_senat": False,
-            "is_institutsdirektor": False
+            "is_institutsdirektor": False,
+            "is_praesidium": False
         }
 
         intro_div = soup.find("div", class_="introduction-personal")
@@ -151,6 +152,8 @@ class THKoelnCrawler:
                         details["is_senat"] = True
                     if "InstitutsdirektorIn" in text:
                         details["is_institutsdirektor"] = True
+                    if any(term in text for term in ["Vizepräsident", "Vizepräsidentin", "Präsident", "Präsidentin"]) and "Ehemalig" not in text:
+                        details["is_praesidium"] = True
 
         return details
 
@@ -204,8 +207,8 @@ def save_to_markdown(data: List[Dict[str, Any]], filename: str) -> None:
     """
     with open(filename, "w", encoding="utf-8") as f:
         f.write("# Personen TH Köln\n\n")
-        f.write("| Name | E-Mail | Fakultät oder Einrichtung | Institut | PA-Vorsitz | DekanIn | Senat | InstitutsdirektorIn |\n")
-        f.write("| --- | --- | --- | --- | --- | --- | --- | --- |\n")
+        f.write("| Name | E-Mail | Fakultät oder Einrichtung | Institut | PA-Vorsitz | DekanIn | Senat | InstitutsdirektorIn | Präsidiumsmitglied |\n")
+        f.write("| --- | --- | --- | --- | --- | --- | --- | --- | --- |\n")
         for person in data:
             name = person.get("name") or ""
             email = person.get("email") or ""
@@ -215,7 +218,8 @@ def save_to_markdown(data: List[Dict[str, Any]], filename: str) -> None:
             dekan = "X" if person.get("is_dekan") else ""
             senat = "X" if person.get("is_senat") else ""
             inst_dir = "X" if person.get("is_institutsdirektor") else ""
-            f.write(f"| {name} | {email} | {faculty} | {institute} | {pa} | {dekan} | {senat} | {inst_dir} |\n")
+            praesidium = "X" if person.get("is_praesidium") else ""
+            f.write(f"| {name} | {email} | {faculty} | {institute} | {pa} | {dekan} | {senat} | {inst_dir} | {praesidium} |\n")
 
 
 def save_to_database(data: List[Dict[str, Any]], db_path: Path) -> None:
@@ -242,7 +246,8 @@ def save_to_database(data: List[Dict[str, Any]], db_path: Path) -> None:
             "is_pa_vorsitz": person.get("is_pa_vorsitz", False),
             "is_dekan": person.get("is_dekan", False),
             "is_senat": person.get("is_senat", False),
-            "is_institutsdirektor": person.get("is_institutsdirektor", False)
+            "is_institutsdirektor": person.get("is_institutsdirektor", False),
+            "Präsidumsmitglied": person.get("is_praesidium", False)
         }
 
         # Create person node
