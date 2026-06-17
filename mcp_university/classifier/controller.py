@@ -142,6 +142,7 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
             pass
 
         person_profile = self.profiler.get_profile(student_email) if student_email else None
+        user_profile = self.profiler.get_profile(self.config.user.email)
 
         first_name = "Unknown"
         try:
@@ -153,8 +154,10 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
 
         salutation = f"Guten Tag {self.summarizer.determine_gender(first_name)} {email_data.get('lastname', '')}"
         add_ctx = f"Anrede: {salutation}\n"
+        if user_profile:
+            add_ctx += f"\nDein eigener Steckbrief (Nutzer des Tools):\n{user_profile}\n"
         if person_profile:
-            add_ctx += f"\nPersonen-Steckbrief:\n{person_profile}\n"
+            add_ctx += f"\nPersonen-Steckbrief (Student):\n{person_profile}\n"
         add_ctx += f"Studenten-E-Mail: {student_email}\n"
 
         persona_path = Path("skills/SKILL_persona.md")
@@ -642,6 +645,7 @@ TEXT:
                 pass
 
             person_profile = self.profiler.get_profile(student_email) if student_email else None
+            user_profile = self.profiler.get_profile(self.config.user.email)
             cc_list = []
             try:
                 with extract_msg.openMsg(str(latest_mail)) as msg:
@@ -666,8 +670,10 @@ TEXT:
 
             salutation = f"Guten Tag {self.summarizer.determine_gender(first_name)} {email['lastname']}"
             add_ctx = f"Anrede: {salutation}\n"
+            if user_profile:
+                add_ctx += f"\nDein eigener Steckbrief (Nutzer des Tools):\n{user_profile}\n"
             if person_profile:
-                add_ctx += f"\nPersonen-Steckbrief:\n{person_profile}\n"
+                add_ctx += f"\nPersonen-Steckbrief (Student):\n{person_profile}\n"
             add_ctx += f"Studenten-E-Mail: {student_email}\n"
 
             if email["class"] == "PO-Wechsel":

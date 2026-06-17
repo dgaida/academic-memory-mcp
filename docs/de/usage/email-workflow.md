@@ -24,7 +24,7 @@ Nach der Sortierung wird `process_sorted_emails.py` ausgeführt. Das Skript füh
     - Wird automatisch ein **Erinnerungstermin** im Outlook-Kalender für in 7 Tagen (08:00 Uhr) erstellt.  
     - Werden die **Anhänge extrahiert** und sicher im entsprechenden Studenten-Ordner gespeichert.  
     - Wird eine Bestätigungsmail als Entwurf vorbereitet.  
-5.  **Personen-Kontext:** Bezieht vorhandene Personen-Steckbriefe (erstellt durch den Indexer oder `create_person_profiles.py`) in die Antwortgenerierung mit ein.  
+5.  **Personen-Kontext:** Bezieht vorhandene Personen-Steckbriefe des Absenders sowie den eigenen Steckbrief des Nutzers (erstellt durch den Indexer oder `create_person_profiles.py`) in die Antwortgenerierung mit ein.
 6.  **Notwendigkeits-Check (Necessity Check):** Ein LLM entscheidet, ob die E-Mail überhaupt eine Antwort erfordert (oder ob es sich z.B. nur um eine Information handelt).  
 7.  **Entwurf schreiben:** Falls eine Antwort nötig ist, generiert der Agent unter Berücksichtigung der Skill-Vorgaben und der Persona (Daniel Gaida) einen Antworttext.  
 8.  **Outlook Integration:** Es wird automatisch ein Entwurf ("Draft") im Outlook-Ordner "Work in Progress" erstellt. Die Original-Mail wird als Anhang beigefügt.  

@@ -224,13 +224,19 @@ class PersonProfiler:
             logger.info(f"Steckbrief für {email_address} existiert bereits.")
             return profile_file.read_text(encoding="utf-8")
 
-        emails = self.find_emails_for_address(email_address)
-        if not emails:
-            logger.warning(f"Keine E-Mails für {email_address} gefunden.")
+        is_tool_user = email_address.lower() == self.config.user.email.lower()
+        emails = [] if is_tool_user else self.find_emails_for_address(email_address)
+        kg_context = self._get_knowledge_graph_context(email_address)
+
+        if is_tool_user:
+            user_info = f"Informationen aus der Konfiguration (user.yaml):\n- Name: {self.config.user.name}\n- E-Mail: {self.config.user.email}\n"
+            kg_context = user_info + kg_context
+
+        if not emails and not kg_context:
+            logger.warning(f"Keine E-Mails und keine Wissensgraph-Infos für {email_address} gefunden.")
             return None
 
-        kg_context = self._get_knowledge_graph_context(email_address)
-        batches = self.create_batches(emails)
+        batches = self.create_batches(emails) if emails else [[]]
         current_profile = ""
 
         for i, batch in enumerate(batches):
@@ -250,13 +256,17 @@ class PersonProfiler:
         profile_file.write_text(current_profile, encoding="utf-8")
         
         # Tracking aktualisieren
-        filenames = [m["path"].name for m in emails]
-        self.profile_store.add_processed_emails(email_address, filenames)
-        
+        if emails:
+            filenames = [m["path"].name for m in emails]
+            self.profile_store.add_processed_emails(email_address, filenames)
+
         return current_profile
 
     def update_profile(self, email_address: str) -> Optional[str]:
         """Aktualisiert den Steckbrief einer Person, falls neue E-Mails vorhanden sind.
+
+        Für den Tool-Nutzer (user.yaml) wird der Steckbrief nur aus dem Wissensgraphen
+        und der Konfiguration aktualisiert, nicht aus E-Mails.
 
         Args:
             email_address (str): E-Mail-Adresse der Person.
@@ -267,6 +277,11 @@ class PersonProfiler:
         profile_file = self.storage_path / f"{email_address}.md"
         if not profile_file.exists():
             return self.generate_profile(email_address)
+
+        is_tool_user = email_address.lower() == self.config.user.email.lower()
+        if is_tool_user:
+            # Für den Tool-Nutzer aktualisieren wir immer aus dem KG (einfach neu generieren)
+            return self.generate_profile(email_address, force_update=True)
 
         existing_profile = profile_file.read_text(encoding="utf-8")
         processed_files = self.profile_store.get_processed_filenames(email_address)
@@ -345,15 +360,14 @@ class PersonProfiler:
             context = f"Bisheriger Steckbrief:\n\n{existing_profile}\n\nAktualisiere diesen Steckbrief mit den folgenden neuen Informationen."
 
         kg_info = f"\n{kg_context}\n" if kg_context else ""
-        return f"""Du bist ein Assistent, der Personen-Steckbriefe aus E-Mails erstellt.
+        email_info = f"\nHier sind die neuen E-Mails:\n{new_content}\n" if new_content else ""
+
+        return f"""Du bist ein Assistent, der Personen-Steckbriefe aus E-Mails und Informationen aus einem Wissensgraphen erstellt.
 Die Zielperson hat die E-Mail-Adresse: {email}
 
 {context}
 
-{kg_info}
-Hier sind die neuen E-Mails:
-{new_content}
-
+{kg_info}{email_info}
 Erstelle einen strukturierten Steckbrief in Markdown mit folgenden Punkten:
 1. Name und E-Mailadresse
 2. Rolle (z.B. Studierende, Lehrende, Mitarbeiter, Professor, externer Partner, ...)
