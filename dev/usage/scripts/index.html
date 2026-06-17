@@ -1574,22 +1574,24 @@ Die Ausgabe erfolgt in <code>knowledge_graph.html</code>.</p>
 <a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>python<span class="w"> </span>scripts/crawl_th_koeln_persons.py<span class="w"> </span>--institution<span class="w"> </span><span class="s2">&quot;Präsidium&quot;</span>
 <a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>python<span class="w"> </span>scripts/crawl_th_koeln_persons.py<span class="w"> </span>--faculty<span class="w"> </span><span class="s2">&quot;Informatik und Ingenieurwissenschaften&quot;</span>
 </code></pre></div></p>
-<p>Mit <code>--list-institutions</code> oder <code>--list-faculties</code> können alle verfügbaren Optionen angezeigt werden.
-<div class="language-text highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Unterstützt mehrere Anfangsbuchstaben als Argumente.
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>### Personen-Steckbriefe erstellen
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>Erstellt manuell einen Steckbrief für eine bestimmte E-Mail-Adresse basierend auf vorhandenen E-Mails.
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>```bash
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>python scripts/create_person_profiles.py student@smail.th-koeln.de
+<p>Mit <code>--list-institutions</code> oder <code>--list-faculties</code> können alle verfügbaren Optionen angezeigt werden. Für einen vollständigen Crawl aller Bereiche:
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>python<span class="w"> </span>scripts/crawl_th_koeln_persons.py<span class="w"> </span>--crawl-all<span class="w"> </span>both
+</code></pre></div>
+<div class="language-text highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Unterstützt mehrere Anfangsbuchstaben als Argumente.
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>### Personen-Steckbriefe erstellen
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>Erstellt manuell einen Steckbrief für eine bestimmte E-Mail-Adresse basierend auf vorhandenen E-Mails.
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>```bash
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>python scripts/create_person_profiles.py student@smail.th-koeln.de
 </code></pre></div></p>
 <h3 id="mocogi-datenextraktion">MOCOGI Datenextraktion<a class="headerlink" href="#mocogi-datenextraktion" title="Permanent link">&para;</a></h3>
 <p>Extrahiert Modulinformationen (Verantwortliche, Prüfer) aus der MOCOGI-API und verknüpft diese im Wissensgraphen.
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>python<span class="w"> </span>scripts/extract_mocogi_data.py
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>python<span class="w"> </span>scripts/extract_mocogi_data.py
 </code></pre></div></p>
 <h2 id="vorlesungen-lehre">Vorlesungen &amp; Lehre<a class="headerlink" href="#vorlesungen-lehre" title="Permanent link">&para;</a></h2>
 <h3 id="vorlesungsskripte-zusammenfassen">Vorlesungsskripte zusammenfassen<a class="headerlink" href="#vorlesungsskripte-zusammenfassen" title="Permanent link">&para;</a></h3>
 <p>Sucht nach PDFs in einem Ordner und generiert kompakte Markdown-Zusammenfassungen. Überspringt Dateien, die bereits verarbeitet wurden (Mtime-Check).
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>python<span class="w"> </span>scripts/summarize_lectures.py<span class="w"> </span>/pfad/zu/vorlesungen
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>python<span class="w"> </span>scripts/summarize_lectures.py<span class="w"> </span>/pfad/zu/vorlesungen
 </code></pre></div>
 Nutzt primär <code>liteparse</code> und einen LLM-Fallback bei Fehlern.</p>
 
