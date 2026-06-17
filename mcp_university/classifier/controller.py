@@ -26,6 +26,7 @@ from mcp_university.classifier.sort_emails import (
     get_semester,
     find_student_folder,
 )
+from mcp_university.retrieval.index import SearchIndex
 from mcp_university.utils.outlook import create_outlook_draft
 
 logger = logging.getLogger(__name__)
@@ -93,11 +94,91 @@ class EmailController:
             self.class_paths = full_config.get("class_paths", full_config)
         else:
             logger.warning(f"Config {config_path} not found. Using empty class_paths.")
+
             self.class_paths = {}
-    def classify_action(self, mail_path: Path, additional_context: str = "") -> int:
+
+        # Load memory paths
+        memory_config_path = Path("config/classifier_memory_paths.yaml")
+        self.memory_paths = {}
+        if memory_config_path.exists():
+            with open(memory_config_path, "r", encoding="utf-8") as f:
+                memory_config = yaml.safe_load(f)
+                self.memory_paths = memory_config.get("class_paths", {})
+
+
+    def _get_memory_context(self, mail_content: str, email_class: str) -> str:
+        """Generiert Suchanfragen aus der E-Mail und holt relevante Chunks aus der Vektordatenbank."""
+        if email_class not in self.memory_paths:
+            logger.debug(f"Keine Vektordatenbank für Klasse {email_class} konfiguriert.")
+            return ""
+
+        index_dir = self.config.data_dir / "memory" / email_class
+        if not index_dir.exists():
+            logger.debug(f"Vektordatenbank-Verzeichnis {index_dir} existiert nicht.")
+            return ""
+
+        logger.info(f"Generiere Suchanfragen für Klasse {email_class}...")
+
+        prompt = f"""Basierend auf der folgenden E-Mail eines Studierenden, erstelle 3 präzise Fragen, die helfen würden, die Anfrage zu beantworten.
+Nutze dabei Informationen aus der Mail. Die Fragen sollen dazu dienen, in einer Wissensdatenbank nach passenden Antworten zu suchen.
+
+E-MAIL:
+{mail_content}
+
+ANTWORTE NUR MIT DEN 3 FRAGEN, EINE PRO ZEILE, OHNE NUMMERIERUNG."""
+
+        try:
+            response = self.summarizer.client.chat(
+                system_prompt="Du bist ein hilfreicher Assistent, der Suchanfragen für eine Wissensdatenbank erstellt.",
+                messages=[{"role": "user", "content": prompt}]
+            )
+            questions_text = response.get('message', {}).get('content', '')
+            questions = [q.strip() for q in questions_text.strip().split('\n') if q.strip()][:3]
+
+            if not questions:
+                logger.warning("Keine Suchanfragen generiert.")
+                return ""
+
+            logger.info(f"Suchanfragen: {questions}")
+
+            index = SearchIndex(location=index_dir)
+            all_results = []
+            for query in questions:
+                results = index.search(query, top_k=3)
+                all_results.extend(results)
+
+            # Top 3 eindeutige Chunks basierend auf Score
+            all_results.sort(key=lambda x: x.get('score', 0), reverse=True)
+            unique_chunks = []
+            seen_content = set()
+            for res in all_results:
+                if res['content'] not in seen_content:
+                    unique_chunks.append(res['content'])
+                    seen_content.add(res['content'])
+                if len(unique_chunks) >= 3:
+                    break
+
+            if not unique_chunks:
+                return ""
+
+            context = "\n\n--- RELEVANTE INFORMATIONEN AUS DER DATENBANK ---\n"
+            context += "\n\n".join(unique_chunks)
+            context += "\n-------------------------------------------------\n"
+            return context
+
+        except Exception as e:
+            logger.error(f"Fehler bei der Retrieval-Context-Generierung: {e}")
+            return ""
+    def classify_action(self, mail_path: Path, additional_context: str = "", email_class: str = None) -> int:
         """Klassifiziert die E-Mail in eine von 6 Aktions-Optionen."""
         mail_content = self.mail_parser.parse(mail_path)
         mail_content = self.mail_parser.extract_latest_message(mail_content)
+
+        # Retrieval memory logic
+        if email_class:
+            retrieved_context = self._get_memory_context(mail_content, email_class)
+            if retrieved_context:
+                additional_context += retrieved_context
 
         options_str = "\n".join(self.ACTION_OPTIONS)
 
@@ -175,7 +256,8 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
             return "E-Mail archiviert."
 
         reply_subject, reply, should_attach = self.generate_reply(
-            latest_mail, "", skill_path, "", persona_path, add_ctx, apt_skill_path, sender_name, student_email, action_idx=action_idx
+            latest_mail, "", skill_path, "", persona_path, add_ctx, apt_skill_path, sender_name, student_email,
+            action_idx=action_idx, email_class=email_data.get('class')
         )
 
         if reply_subject == "NO_REPLY_NEEDED":
@@ -374,6 +456,7 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
         sender_name: str = None,
         sender_email: str = None,
         action_idx: int = None,
+        email_class: str = None,
     ) -> Tuple[str, str, bool]:
         """Generiert eine Antwortmail mit dem LLM in mehreren Schritten."""
         mail_content = self.mail_parser.parse(mail_path)
@@ -382,6 +465,12 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
         if self.debug:
             extracted_file = mail_path.parent / f"{mail_path.stem}_extracted.md"
             extracted_file.write_text(mail_content, encoding="utf-8")
+
+        # Retrieval memory logic
+        if email_class:
+            retrieved_context = self._get_memory_context(mail_content, email_class)
+            if retrieved_context:
+                additional_context += retrieved_context
 
         appointment_skill_content = ""
         if appointment_skill_path and appointment_skill_path.exists():
@@ -624,7 +713,7 @@ TEXT:
                     logger.info(f"E-Mail von {email['lastname']} ist {reason}. Automatische Aktion: Archivieren.")
                     email["suggested_action"] = 3 # index for "4) E-Mail nur archivieren"
                 else:
-                    email["suggested_action"] = self.classify_action(latest_mail)
+                    email["suggested_action"] = self.classify_action(latest_mail, email_class=email["class"])
                 continue
 
             if is_old:
@@ -697,7 +786,8 @@ TEXT:
                 summary_content = summary_file.read_text(encoding="utf-8")
 
             reply_subject, reply, should_attach = self.generate_reply(
-                latest_mail, summary_content, skill_path, conv_content, persona_path, add_ctx, apt_skill_path, sender_name, student_email
+                latest_mail, summary_content, skill_path, conv_content, persona_path, add_ctx, apt_skill_path, sender_name, student_email,
+                email_class=email["class"]
             )
 
             if reply_subject == "NO_REPLY_NEEDED":
