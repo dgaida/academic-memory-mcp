@@ -12,6 +12,7 @@ dependencies = [
     "qdrant-client",
     "watchdog",
     "pydantic",
+    "requests",
     "pyyaml",
     "python-dotenv",
 
