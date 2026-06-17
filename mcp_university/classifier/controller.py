@@ -585,10 +585,11 @@ TEXT:
                 "latest_date": latest_date,
                 "latest_mail": latest_mail,
                 "dated_emails": dated_emails,
-                "identifier_path": identifier
+                "identifier_path": identifier,
+                "needs_answer": needs_answer
             })
 
-            if needs_answer and identifier not in temp_folders:
+            if identifier not in temp_folders:
                 temp_folders.add(identifier)
                 unique_emails_to_process.append(email)
 
@@ -606,20 +607,30 @@ TEXT:
             latest_mail = email["latest_mail"]
             latest_date = email["latest_date"]
 
-            if self.use_action_classifier:
-                email["suggested_action"] = self.classify_action(latest_mail)
-                continue
-
-
+            # Check if email is old
+            is_old = False
             if age_months:
                 cutoff = (datetime.now() - timedelta(days=age_months * 30)).replace(tzinfo=None)
                 if latest_date.replace(tzinfo=None) < cutoff:
-                    processed_results.append({
-                        "lastname": email["lastname"],
-                        "subject": latest_mail.stem,
-                        "status": f"Übersprungen (> {age_months} Monate)"
-                    })
-                    continue
+                    is_old = True
+
+            if self.use_action_classifier:
+                # If old or already answered, default to Archive
+                if is_old or not email.get("needs_answer", True):
+                    reason = "alt" if is_old else "bereits beantwortet"
+                    logger.info(f"E-Mail von {email['lastname']} ist {reason}. Automatische Aktion: Archivieren.")
+                    email["suggested_action"] = 3 # index for "4) E-Mail nur archivieren"
+                else:
+                    email["suggested_action"] = self.classify_action(latest_mail)
+                continue
+
+            if is_old:
+                processed_results.append({
+                    "lastname": email["lastname"],
+                    "subject": latest_mail.stem,
+                    "status": f"Übersprungen (> {age_months} Monate)"
+                })
+                continue
 
             student_email = ""
             sender_name = ""
@@ -746,9 +757,9 @@ TEXT:
             # However, summarizer doesn't have a generic call exposed easily without more logic.
             # Let's use the wrapper directly if possible or call a simple summary.
 
-            response = self.summarizer.client.call_llm(
+            response = self.summarizer.client.chat(
                 system_prompt="Du bist ein hilfreicher Assistent, der E-Mails kurz zusammenfasst.",
-                user_prompt=prompt
+                messages=[{"role": "user", "content": prompt}]
             )
 
             content = response.get('message', {}).get('content', '')
