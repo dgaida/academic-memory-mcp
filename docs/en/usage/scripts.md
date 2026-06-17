@@ -42,7 +42,10 @@ python scripts/crawl_th_koeln_persons.py --institution "Präsidium"
 python scripts/crawl_th_koeln_persons.py --faculty "Informatik und Ingenieurwissenschaften"
 ```
 
-Use `--list-institutions` or `--list-faculties` to see all available options.
+Use `--list-institutions` or `--list-faculties` to see all available options. For a full crawl of all areas:
+```bash
+python scripts/crawl_th_koeln_persons.py --crawl-all both
+```
 ```
 Supports multiple initial characters as arguments.
 
