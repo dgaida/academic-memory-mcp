@@ -290,11 +290,35 @@ def save_to_database(data: List[Dict[str, Any]], db_path: Path) -> None:
             "is_dekan": person.get("is_dekan", False),
             "is_senat": person.get("is_senat", False),
             "is_institutsdirektor": person.get("is_institutsdirektor", False),
-            "Präsidumsmitglied": person.get("is_praesidium", False)
+            "is_praesidium": person.get("is_praesidium", False)
         }
 
         # Create person node
         person_id, _ = store.upsert_node(name, "Person", properties)
+
+        # Create role nodes and edges
+        if person.get("is_dekan"):
+            role_id, _ = store.upsert_node("DekanIn", "DekanIn")
+            store.upsert_edge(person_id, role_id, "hat Funktion")
+            # Link to Dekanat if it exists
+            dekanat_id, _ = store.upsert_node("Dekanat", "Dekanat")
+            store.upsert_edge(role_id, dekanat_id, "ist Element von")
+
+        if person.get("is_pa_vorsitz"):
+            role_id, _ = store.upsert_node("Prüfungsausschussvorsitz", "Prüfungsausschussvorsitz")
+            store.upsert_edge(person_id, role_id, "hat Funktion")
+
+        if person.get("is_institutsdirektor"):
+            role_id, _ = store.upsert_node("InstitutsdirektorIn", "InstitutsdirektorIn")
+            store.upsert_edge(person_id, role_id, "hat Funktion")
+
+        if person.get("is_senat"):
+            role_id, _ = store.upsert_node("Senat", "Senat")
+            store.upsert_edge(person_id, role_id, "ist Element von")
+
+        if person.get("is_praesidium"):
+            role_id, _ = store.upsert_node("Präsidium", "Präsidium")
+            store.upsert_edge(person_id, role_id, "ist Element von")
 
         if faculty:
             # Create faculty/einrichtung node

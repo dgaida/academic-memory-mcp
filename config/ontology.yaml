@@ -1,22 +1,27 @@
 node_types:
-  - Person an TH Köln
+  - Person
   - Person extern
   - Studierende
   - Institut
   - Fakultät
   - Dekanat
   - Präsidium
-  - Prüfungsausschuss
+  - Prüfungsausschussvorsitz
+  - DekanIn
+  - InstitutsdirektorIn
+  - Senat
   - Modul
   - Unternehmen
   - Forschungsprojekt
   - Prüfungsordnung
   - Studiengang
+  - Prüfungsausschuss
 edge_types:
   - ist Modulverantwortlicher
   - ist Erstprüfer
   - ist Zweitprüfer
   - ist Element von
+  - hat Funktion
   - schreibt Forschungsantrag
   - arbeitet in Forschungsprojekt
   - schreibt Bachelorarbeit
