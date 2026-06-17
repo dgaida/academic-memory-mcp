@@ -11,8 +11,9 @@ import html
 import random
 import string
 import time
+import re
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 
 import requests
 from bs4 import BeautifulSoup
@@ -96,21 +97,28 @@ class THKoelnCrawler:
 
         return persons
 
-    def get_person_details(self, profile_url: str) -> Dict[str, Optional[str]]:
-        """Fetches faculty and institute from a person's profile page.
+    def get_person_details(self, profile_url: str) -> Dict[str, Any]:
+        """Fetches faculty, institute and functions from a person's profile page.
 
         Args:
             profile_url: The URL of the person's profile page.
 
         Returns:
-            A dictionary containing 'faculty' and 'institute'.
+            A dictionary containing 'faculty', 'institute', and function flags.
         """
         self._wait()
         response = self.session.get(profile_url)
         response.raise_for_status()
 
         soup = BeautifulSoup(response.text, "html.parser")
-        details = {"faculty": None, "institute": None}
+        details = {
+            "faculty": None,
+            "institute": None,
+            "is_pa_vorsitz": False,
+            "is_dekan": False,
+            "is_senat": False,
+            "is_institutsdirektor": False
+        }
 
         intro_div = soup.find("div", class_="introduction-personal")
         if intro_div:
@@ -127,9 +135,26 @@ class THKoelnCrawler:
                     details["institute"] = text
                     break
 
+        # Extract functions
+        functions_header = soup.find("h2", string=lambda t: t and "Funktionen" in t)
+        if functions_header:
+            functions_div = functions_header.find_next_sibling("div", class_="richtext-personal")
+            if functions_div:
+                function_items = functions_div.find_all("span")
+                for item in function_items:
+                    text = item.get_text(strip=True)
+                    if "Prüfungsausschussvorsitzende/r" in text:
+                        details["is_pa_vorsitz"] = True
+                    if "DekanIn" in text:
+                        details["is_dekan"] = True
+                    if "Senatsmitglied" in text:
+                        details["is_senat"] = True
+                    if "InstitutsdirektorIn" in text:
+                        details["is_institutsdirektor"] = True
+
         return details
 
-    def crawl(self, chars: List[str], faculty: Optional[str] = None, institution: Optional[str] = None) -> List[Dict[str, str]]:
+    def crawl(self, chars: List[str], faculty: Optional[str] = None, institution: Optional[str] = None) -> List[Dict[str, Any]]:
         """Crawls persons for a list of characters and/or faculty/institution.
 
         Args:
@@ -170,7 +195,7 @@ class THKoelnCrawler:
         return all_data
 
 
-def save_to_markdown(data: List[Dict[str, str]], filename: str) -> None:
+def save_to_markdown(data: List[Dict[str, Any]], filename: str) -> None:
     """Saves the crawled data to a Markdown file.
 
     Args:
@@ -179,17 +204,21 @@ def save_to_markdown(data: List[Dict[str, str]], filename: str) -> None:
     """
     with open(filename, "w", encoding="utf-8") as f:
         f.write("# Personen TH Köln\n\n")
-        f.write("| Name | E-Mail | Fakultät oder Einrichtung | Institut |\n")
-        f.write("| --- | --- | --- | --- |\n")
+        f.write("| Name | E-Mail | Fakultät oder Einrichtung | Institut | PA-Vorsitz | DekanIn | Senat | InstitutsdirektorIn |\n")
+        f.write("| --- | --- | --- | --- | --- | --- | --- | --- |\n")
         for person in data:
             name = person.get("name") or ""
             email = person.get("email") or ""
             faculty = person.get("faculty") or ""
             institute = person.get("institute") or ""
-            f.write(f"| {name} | {email} | {faculty} | {institute} |\n")
+            pa = "X" if person.get("is_pa_vorsitz") else ""
+            dekan = "X" if person.get("is_dekan") else ""
+            senat = "X" if person.get("is_senat") else ""
+            inst_dir = "X" if person.get("is_institutsdirektor") else ""
+            f.write(f"| {name} | {email} | {faculty} | {institute} | {pa} | {dekan} | {senat} | {inst_dir} |\n")
 
 
-def save_to_database(data: List[Dict[str, str]], db_path: Path) -> None:
+def save_to_database(data: List[Dict[str, Any]], db_path: Path) -> None:
     """Saves the crawled data to the metadata database.
 
     Args:
@@ -207,8 +236,17 @@ def save_to_database(data: List[Dict[str, str]], db_path: Path) -> None:
         if not name:
             continue
 
+        # Properties for person node
+        properties = {
+            "email": email,
+            "is_pa_vorsitz": person.get("is_pa_vorsitz", False),
+            "is_dekan": person.get("is_dekan", False),
+            "is_senat": person.get("is_senat", False),
+            "is_institutsdirektor": person.get("is_institutsdirektor", False)
+        }
+
         # Create person node
-        person_id, _ = store.upsert_node(name, "Person", {"email": email})
+        person_id, _ = store.upsert_node(name, "Person", properties)
 
         if faculty:
             # Create faculty/einrichtung node
@@ -283,7 +321,10 @@ Examples:
         else:
             chars_to_crawl.append(arg.strip())
 
-    if not chars_to_crawl and not args.faculty and not args.institution:
+    if not chars_to_crawl and (args.faculty or args.institution):
+        print("Filter specified, crawling A-Z for this filter.")
+        chars_to_crawl = list(string.ascii_uppercase)
+    elif not chars_to_crawl:
         print("No filters specified, crawling entire TH (A-Z).")
         chars_to_crawl = list(string.ascii_uppercase)
 
@@ -293,6 +334,21 @@ Examples:
     # Save to Markdown
     save_to_markdown(data, args.output)
     print(f"Saved {len(data)} persons to {args.output}")
+
+    # Save separate files by faculty/institution
+    by_faculty = {}
+    for person in data:
+        fac = person.get("faculty") or "Unbekannt"
+        if fac not in by_faculty:
+            by_faculty[fac] = []
+        by_faculty[fac].append(person)
+
+    for fac, fac_data in by_faculty.items():
+        # Sanitize filename
+        safe_fac = re.sub(r'[^a-zA-Z0-9]', '_', fac)
+        fac_filename = f"data/persons_{safe_fac}.md"
+        save_to_markdown(fac_data, fac_filename)
+        print(f"Saved {len(fac_data)} persons for {fac} to {fac_filename}")
 
     # Save to Database
     save_to_database(data, args.db)
