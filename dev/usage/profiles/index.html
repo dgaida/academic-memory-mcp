@@ -1540,10 +1540,10 @@
 - Bevorzugte Anrede<br />
 - Erster Kontakt<br />
 - Relevante Projekte, Thesen oder Aufgaben  </p>
-<p>Diese Steckbriefe werden im Markdown-Format gespeichert und dienen als zusätzlicher Kontext für das LLM, wenn eine E-Mail beantwortet werden soll.</p>
+<p>Diese Steckbriefe werden im Markdown-Format gespeichert und dienen als zusätzlicher Kontext für das LLM, wenn eine E-Mail beantwortet werden soll. Dabei wird nicht nur der Steckbrief des Absenders (z.B. Student), sondern auch der Steckbrief des Nutzers des Tools (wie in <code>config/user.yaml</code> definiert) an das LLM übergeben, um eine konsistente Tonalität und korrekten Kontext zu gewährleisten.</p>
 <h2 id="funktionsweise">Funktionsweise<a class="headerlink" href="#funktionsweise" title="Permanent link">&para;</a></h2>
 <h3 id="erstellung">Erstellung<a class="headerlink" href="#erstellung" title="Permanent link">&para;</a></h3>
-<p>Wenn für eine E-Mail-Adresse noch kein Steckbrief existiert, wird dieser beim Versuch, eine E-Mail zu beantworten (oder manuell via CLI), automatisch erstellt. Dabei werden alle verfügbaren E-Mails dieser Person analysiert.</p>
+<p>Wenn für eine E-Mail-Adresse noch kein Steckbrief existiert, wird dieser beim Versuch, eine E-Mail zu beantworten (oder manuell via CLI), automatisch erstellt. Dabei werden alle verfügbaren E-Mails dieser Person analysiert sowie Informationen aus dem Wissensgraphen einbezogen. Ein Steckbrief kann auch dann erstellt werden, wenn noch keine E-Mails vorhanden sind, sofern Informationen im Wissensgraphen vorliegen.</p>
 <h3 id="automatische-aktualisierung">Automatische Aktualisierung<a class="headerlink" href="#automatische-aktualisierung" title="Permanent link">&para;</a></h3>
 <p>Steckbriefe sind dynamisch. Das System verfolgt in einer separaten Datenbank (<code>profiles_tracking.db</code>), welche E-Mails bereits für die Erstellung eines Steckbriefs verwendet wurden. </p>
 <p>Wenn neue E-Mails für eine Person im System gefunden werden, wird der bestehende Steckbrief automatisch durch das LLM aktualisiert, wobei das alte Profil als Basis dient und nur die neuen Informationen integriert werden.</p>

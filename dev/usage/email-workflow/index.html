@@ -1443,7 +1443,7 @@ Das System nutzt den <code>EmailClassifier</code>, um die Mails nach Themen (z.B
 <li>Wird eine Bestätigungsmail als Entwurf vorbereitet.  </li>
 </ul>
 </li>
-<li><strong>Personen-Kontext:</strong> Bezieht vorhandene Personen-Steckbriefe (erstellt durch den Indexer oder <code>create_person_profiles.py</code>) in die Antwortgenerierung mit ein.  </li>
+<li><strong>Personen-Kontext:</strong> Bezieht vorhandene Personen-Steckbriefe des Absenders sowie den eigenen Steckbrief des Nutzers (erstellt durch den Indexer oder <code>create_person_profiles.py</code>) in die Antwortgenerierung mit ein.</li>
 <li><strong>Notwendigkeits-Check (Necessity Check):</strong> Ein LLM entscheidet, ob die E-Mail überhaupt eine Antwort erfordert (oder ob es sich z.B. nur um eine Information handelt).  </li>
 <li><strong>Entwurf schreiben:</strong> Falls eine Antwort nötig ist, generiert der Agent unter Berücksichtigung der Skill-Vorgaben und der Persona (Daniel Gaida) einen Antworttext.  </li>
 <li><strong>Outlook Integration:</strong> Es wird automatisch ein Entwurf ("Draft") im Outlook-Ordner "Work in Progress" erstellt. Die Original-Mail wird als Anhang beigefügt.  </li>
