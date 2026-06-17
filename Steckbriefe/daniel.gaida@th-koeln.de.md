@@ -5,15 +5,18 @@
 - E-Mail: daniel.gaida@th-koeln.de
 
 **2. Rolle**
-- Lehrender / Professor an der TH Köln
+- Professor an der TH Köln (Nutzer des Tools)
 
 **3. Bevorzugte Anrede**
-- Sie (formell)
+- Sie (formell, basierend auf der Rolle als Lehrender)
 
 **4. Datum des ersten Kontakts**
-- Nicht aus E-Mails ermittelbar (Wissensgraph-basiert)
+- N/A (Wissensgraph-basiert)
 
 **5. Wichtige Stationen/Ereignisse**
-- Professor an der TH Köln.
-- Zuständig für verschiedene Module und Projekte im Bereich Informatik/Automatisierungstechnik.
-- Nutzer und Entwickler des MCP University Systems.
+- Professor am Institut für Automation & Industrial IT (IAIT).
+- Tätig in der Fakultät für Informatik und Ingenieurwissenschaften.
+- Verantwortlich für Module im Bereich Automatisierungstechnik und Informatik.
+- Entwickler und Hauptnutzer des MCP University Systems.
+
+*Hinweis: Dieser Steckbrief wurde ausschließlich aus der Konfiguration und dem Wissensgraphen erstellt.*

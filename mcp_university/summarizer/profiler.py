@@ -224,8 +224,13 @@ class PersonProfiler:
             logger.info(f"Steckbrief für {email_address} existiert bereits.")
             return profile_file.read_text(encoding="utf-8")
 
-        emails = self.find_emails_for_address(email_address)
+        is_tool_user = email_address.lower() == self.config.user.email.lower()
+        emails = [] if is_tool_user else self.find_emails_for_address(email_address)
         kg_context = self._get_knowledge_graph_context(email_address)
+
+        if is_tool_user:
+            user_info = f"Informationen aus der Konfiguration (user.yaml):\n- Name: {self.config.user.name}\n- E-Mail: {self.config.user.email}\n"
+            kg_context = user_info + kg_context
 
         if not emails and not kg_context:
             logger.warning(f"Keine E-Mails und keine Wissensgraph-Infos für {email_address} gefunden.")
@@ -260,6 +265,9 @@ class PersonProfiler:
     def update_profile(self, email_address: str) -> Optional[str]:
         """Aktualisiert den Steckbrief einer Person, falls neue E-Mails vorhanden sind.
 
+        Für den Tool-Nutzer (user.yaml) wird der Steckbrief nur aus dem Wissensgraphen
+        und der Konfiguration aktualisiert, nicht aus E-Mails.
+
         Args:
             email_address (str): E-Mail-Adresse der Person.
 
@@ -269,6 +277,11 @@ class PersonProfiler:
         profile_file = self.storage_path / f"{email_address}.md"
         if not profile_file.exists():
             return self.generate_profile(email_address)
+
+        is_tool_user = email_address.lower() == self.config.user.email.lower()
+        if is_tool_user:
+            # Für den Tool-Nutzer aktualisieren wir immer aus dem KG (einfach neu generieren)
+            return self.generate_profile(email_address, force_update=True)
 
         existing_profile = profile_file.read_text(encoding="utf-8")
         processed_files = self.profile_store.get_processed_filenames(email_address)
