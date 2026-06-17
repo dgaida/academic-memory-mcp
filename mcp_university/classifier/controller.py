@@ -169,7 +169,7 @@ ANTWORTE NUR MIT DEN 3 FRAGEN, EINE PRO ZEILE, OHNE NUMMERIERUNG."""
         except Exception as e:
             logger.error(f"Fehler bei der Retrieval-Context-Generierung: {e}")
             return ""
-    def classify_action(self, mail_path: Path, additional_context: str = "") -> int:
+    def classify_action(self, mail_path: Path, additional_context: str = "", email_class: str = None) -> int:
         """Klassifiziert die E-Mail in eine von 6 Aktions-Optionen."""
         mail_content = self.mail_parser.parse(mail_path)
         mail_content = self.mail_parser.extract_latest_message(mail_content)
@@ -713,7 +713,7 @@ TEXT:
                     logger.info(f"E-Mail von {email['lastname']} ist {reason}. Automatische Aktion: Archivieren.")
                     email["suggested_action"] = 3 # index for "4) E-Mail nur archivieren"
                 else:
-                    email["suggested_action"] = self.classify_action(latest_mail)
+                    email["suggested_action"] = self.classify_action(latest_mail, email_class=email["class"])
                 continue
 
             if is_old:

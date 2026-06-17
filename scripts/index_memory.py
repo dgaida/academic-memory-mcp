@@ -2,7 +2,7 @@ import yaml
 import argparse
 import logging
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import List, Any
 from tqdm import tqdm
 from transformers import AutoTokenizer
 
