@@ -10,12 +10,12 @@ Ein Steckbrief (Profil) fasst wichtige Informationen über eine Person zusammen,
 - Erster Kontakt  
 - Relevante Projekte, Thesen oder Aufgaben  
 
-Diese Steckbriefe werden im Markdown-Format gespeichert und dienen als zusätzlicher Kontext für das LLM, wenn eine E-Mail beantwortet werden soll.
+Diese Steckbriefe werden im Markdown-Format gespeichert und dienen als zusätzlicher Kontext für das LLM, wenn eine E-Mail beantwortet werden soll. Dabei wird nicht nur der Steckbrief des Absenders (z.B. Student), sondern auch der Steckbrief des Nutzers des Tools (wie in `config/user.yaml` definiert) an das LLM übergeben, um eine konsistente Tonalität und korrekten Kontext zu gewährleisten.
 
 ## Funktionsweise
 
 ### Erstellung
-Wenn für eine E-Mail-Adresse noch kein Steckbrief existiert, wird dieser beim Versuch, eine E-Mail zu beantworten (oder manuell via CLI), automatisch erstellt. Dabei werden alle verfügbaren E-Mails dieser Person analysiert.
+Wenn für eine E-Mail-Adresse noch kein Steckbrief existiert, wird dieser beim Versuch, eine E-Mail zu beantworten (oder manuell via CLI), automatisch erstellt. Dabei werden alle verfügbaren E-Mails dieser Person analysiert sowie Informationen aus dem Wissensgraphen einbezogen. Ein Steckbrief kann auch dann erstellt werden, wenn noch keine E-Mails vorhanden sind, sofern Informationen im Wissensgraphen vorliegen.
 
 ### Automatische Aktualisierung
 Steckbriefe sind dynamisch. Das System verfolgt in einer separaten Datenbank (`profiles_tracking.db`), welche E-Mails bereits für die Erstellung eines Steckbriefs verwendet wurden. 

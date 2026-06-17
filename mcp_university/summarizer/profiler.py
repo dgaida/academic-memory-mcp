@@ -225,12 +225,13 @@ class PersonProfiler:
             return profile_file.read_text(encoding="utf-8")
 
         emails = self.find_emails_for_address(email_address)
-        if not emails:
-            logger.warning(f"Keine E-Mails für {email_address} gefunden.")
+        kg_context = self._get_knowledge_graph_context(email_address)
+
+        if not emails and not kg_context:
+            logger.warning(f"Keine E-Mails und keine Wissensgraph-Infos für {email_address} gefunden.")
             return None
 
-        kg_context = self._get_knowledge_graph_context(email_address)
-        batches = self.create_batches(emails)
+        batches = self.create_batches(emails) if emails else [[]]
         current_profile = ""
 
         for i, batch in enumerate(batches):
@@ -250,9 +251,10 @@ class PersonProfiler:
         profile_file.write_text(current_profile, encoding="utf-8")
         
         # Tracking aktualisieren
-        filenames = [m["path"].name for m in emails]
-        self.profile_store.add_processed_emails(email_address, filenames)
-        
+        if emails:
+            filenames = [m["path"].name for m in emails]
+            self.profile_store.add_processed_emails(email_address, filenames)
+
         return current_profile
 
     def update_profile(self, email_address: str) -> Optional[str]:
@@ -345,15 +347,14 @@ class PersonProfiler:
             context = f"Bisheriger Steckbrief:\n\n{existing_profile}\n\nAktualisiere diesen Steckbrief mit den folgenden neuen Informationen."
 
         kg_info = f"\n{kg_context}\n" if kg_context else ""
-        return f"""Du bist ein Assistent, der Personen-Steckbriefe aus E-Mails erstellt.
+        email_info = f"\nHier sind die neuen E-Mails:\n{new_content}\n" if new_content else ""
+
+        return f"""Du bist ein Assistent, der Personen-Steckbriefe aus E-Mails und Informationen aus einem Wissensgraphen erstellt.
 Die Zielperson hat die E-Mail-Adresse: {email}
 
 {context}
 
-{kg_info}
-Hier sind die neuen E-Mails:
-{new_content}
-
+{kg_info}{email_info}
 Erstelle einen strukturierten Steckbrief in Markdown mit folgenden Punkten:
 1. Name und E-Mailadresse
 2. Rolle (z.B. Studierende, Lehrende, Mitarbeiter, Professor, externer Partner, ...)
