@@ -903,17 +903,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#personen-steckbriefe-erstellen" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Personen-Steckbriefe erstellen
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#mocogi-datenextraktion" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1495,17 +1484,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#personen-steckbriefe-erstellen" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Personen-Steckbriefe erstellen
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#mocogi-datenextraktion" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1590,11 +1568,19 @@ Die Ausgabe erfolgt in <code>knowledge_graph.html</code>.</p>
 <h3 id="th-koln-personen-crawler">TH Köln Personen-Crawler<a class="headerlink" href="#th-koln-personen-crawler" title="Permanent link">&para;</a></h3>
 <p>Crawlt das Personenverzeichnis der TH Köln nach Namen, E-Mails, Fakultäten und Instituten.
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python<span class="w"> </span>scripts/crawl_th_koeln_persons.py<span class="w"> </span>A<span class="w"> </span>B<span class="w"> </span>C
-</code></pre></div>
-Unterstützt mehrere Anfangsbuchstaben als Argumente.</p>
-<h3 id="personen-steckbriefe-erstellen">Personen-Steckbriefe erstellen<a class="headerlink" href="#personen-steckbriefe-erstellen" title="Permanent link">&para;</a></h3>
-<p>Erstellt manuell einen Steckbrief für eine bestimmte E-Mail-Adresse basierend auf vorhandenen E-Mails.
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>python<span class="w"> </span>scripts/create_person_profiles.py<span class="w"> </span>student@smail.th-koeln.de
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>Unterstützt<span class="w"> </span>Filter<span class="w"> </span>nach<span class="w"> </span>Fakultät<span class="w"> </span>oder<span class="w"> </span>Einrichtung:
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="sb">```</span>bash
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>python<span class="w"> </span>scripts/crawl_th_koeln_persons.py<span class="w"> </span>--institution<span class="w"> </span><span class="s2">&quot;Präsidium&quot;</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>python<span class="w"> </span>scripts/crawl_th_koeln_persons.py<span class="w"> </span>--faculty<span class="w"> </span><span class="s2">&quot;Informatik und Ingenieurwissenschaften&quot;</span>
+</code></pre></div></p>
+<p>Mit <code>--list-institutions</code> oder <code>--list-faculties</code> können alle verfügbaren Optionen angezeigt werden.
+<div class="language-text highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Unterstützt mehrere Anfangsbuchstaben als Argumente.
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>### Personen-Steckbriefe erstellen
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>Erstellt manuell einen Steckbrief für eine bestimmte E-Mail-Adresse basierend auf vorhandenen E-Mails.
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>```bash
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>python scripts/create_person_profiles.py student@smail.th-koeln.de
 </code></pre></div></p>
 <h3 id="mocogi-datenextraktion">MOCOGI Datenextraktion<a class="headerlink" href="#mocogi-datenextraktion" title="Permanent link">&para;</a></h3>
 <p>Extrahiert Modulinformationen (Verantwortliche, Prüfer) aus der MOCOGI-API und verknüpft diese im Wissensgraphen.

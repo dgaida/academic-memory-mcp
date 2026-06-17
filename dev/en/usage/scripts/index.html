@@ -905,17 +905,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#create-person-profiles" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Create Person Profiles
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#mocogi-data-extraction" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1497,17 +1486,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#create-person-profiles" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Create Person Profiles
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#mocogi-data-extraction" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1592,11 +1570,19 @@ The output is generated in <code>knowledge_graph.html</code>.</p>
 <h3 id="th-koln-person-crawler">TH Köln Person Crawler<a class="headerlink" href="#th-koln-person-crawler" title="Permanent link">&para;</a></h3>
 <p>Crawls the TH Köln personnel directory for names, emails, faculties, and institutes.
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python<span class="w"> </span>scripts/crawl_th_koeln_persons.py<span class="w"> </span>A<span class="w"> </span>B<span class="w"> </span>C
-</code></pre></div>
-Supports multiple initial characters as arguments.</p>
-<h3 id="create-person-profiles">Create Person Profiles<a class="headerlink" href="#create-person-profiles" title="Permanent link">&para;</a></h3>
-<p>Manually creates a profile (Steckbrief) for a specific email address based on existing emails.
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>python<span class="w"> </span>scripts/create_person_profiles.py<span class="w"> </span>student@smail.th-koeln.de
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>Supports<span class="w"> </span>filters<span class="w"> </span>by<span class="w"> </span>faculty<span class="w"> </span>or<span class="w"> </span>institution:
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="sb">```</span>bash
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>python<span class="w"> </span>scripts/crawl_th_koeln_persons.py<span class="w"> </span>--institution<span class="w"> </span><span class="s2">&quot;Präsidium&quot;</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>python<span class="w"> </span>scripts/crawl_th_koeln_persons.py<span class="w"> </span>--faculty<span class="w"> </span><span class="s2">&quot;Informatik und Ingenieurwissenschaften&quot;</span>
+</code></pre></div></p>
+<p>Use <code>--list-institutions</code> or <code>--list-faculties</code> to see all available options.
+<div class="language-text highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Supports multiple initial characters as arguments.
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>### Create Person Profiles
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>Manually creates a profile (Steckbrief) for a specific email address based on existing emails.
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>```bash
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>python scripts/create_person_profiles.py student@smail.th-koeln.de
 </code></pre></div></p>
 <h3 id="mocogi-data-extraction">MOCOGI Data Extraction<a class="headerlink" href="#mocogi-data-extraction" title="Permanent link">&para;</a></h3>
 <p>Extracts module information (coordinators, examiners) from the MOCOGI API and links them in the knowledge graph.
