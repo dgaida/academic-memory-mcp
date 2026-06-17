@@ -120,7 +120,7 @@ In `process_sorted_emails.py` muss bei der Verarbeitung des `APPOINTMENT_BOOKED`
 Achte auf f-string Kompatibilität mit Python 3.10 (vermeide verschachtelte Anführungszeichen gleichen Typs).
 
 ## Personnel Crawling (TH Köln)
-The script `scripts/crawl_th_koeln_persons.py` is used to fetch personnel data.
-- **Encoding:** When filtering by institution or faculty with umlauts (e.g., "Präsidium"), ensure the environment handles UTF-8 correctly. The script attempts to reconfigure `sys.stdout` and `sys.stdin` to UTF-8.
-- **Discovery:** Use `--list-institutions` and `--list-faculties` to see the exact strings required for filtering.
-- **Output:** The script ensures that the `data/` directory and subdirectories are created automatically.
+The script `scripts/crawl_th_koeln_persons.py` is used to fetch personnel data.  
+- **Encoding:** When filtering by institution or faculty with umlauts (e.g., "Präsidium"), ensure the environment handles UTF-8 correctly. The script attempts to reconfigure `sys.stdout` and `sys.stdin` to UTF-8.  
+- **Discovery:** Use `--list-institutions` and `--list-faculties` to see the exact strings required for filtering.  
+- **Output:** The script ensures that the `data/` directory and subdirectories are created automatically.  
