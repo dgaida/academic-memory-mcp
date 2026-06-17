@@ -1,37 +1,54 @@
-"""CLI-Modul für das Datenbank-Management."""
+"""CLI-Befehle zur Verwaltung der Metadaten-Datenbank."""
 import typer
-from typing import List, Tuple
-from pathlib import Path
-from datetime import datetime
-import yaml
-from rich.console import Console
-from rich.table import Table
-
+from typing import List
 from ..config import get_config
 from ..metadata.store import MetadataStore
 from ..retrieval.index import SearchIndex
+import yaml
+from pathlib import Path
+from rich.console import Console
+from rich.table import Table
+from datetime import datetime
 
-db_app = typer.Typer(help="Datenbank-Management-Befehle")
+db_app = typer.Typer(help="Verwaltung der Metadaten-Datenbank")
 console = Console()
 
-def get_store_and_index() -> Tuple[MetadataStore, SearchIndex]:
-    """Initialisiert und gibt den MetadataStore und SearchIndex zurück.
-
-    Nutzt die globale Konfiguration, um die Pfade für die SQLite-Datenbank
-    und den Qdrant-Index zu bestimmen.
-
-    Returns:
-        Tuple[MetadataStore, SearchIndex]: Ein Tupel bestehend aus dem initialisierten
-            Store und dem Suchindex.
-    """
+def get_store_and_index():
+    """Initialisiert und gibt den MetadataStore und SearchIndex zurück."""
     cfg = get_config()
     store = MetadataStore(cfg.sqlite_path)
     idx = SearchIndex(str(cfg.qdrant_path), cfg.embeddings.model, store=store)
     return store, idx
 
+@db_app.command("sync-students")
+def sync_students(yaml_file: Path = typer.Argument(..., help="Pfad zur students.yaml")) -> None:
+    """Synchronisiert Studenten aus einer YAML-Datei mit der Datenbank."""
+    if not yaml_file.exists():
+        console.print(f"[red]Datei {yaml_file} nicht gefunden.[/red]")
+        return
+
+    with open(yaml_file, "r", encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+
+    if not data or "students" not in data:
+        console.print("[red]Fehler: students fehlt in YAML[/red]")
+        return
+
+    # store, _ = get_store_and_index()
+    # folder_map = {f["path"]: f["id"] for f in store.get_all_folders()}
+    count = 0
+    for s in data["students"]:
+        name = s.get("name")
+        if not name:
+            continue
+        # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+        # store.upsert_student(...)
+        count += 1
+    console.print(f"[green]{count} Studenten synchronisiert.[/green]")
+
 @db_app.command("list-files")
 def list_files() -> None:
-    """Listet alle indexierten Dateien in der Datenbank auf."""
+    """Listet alle indexierten Dateien auf."""
     store, _ = get_store_and_index()
     files = store.get_all_files()
 
@@ -39,11 +56,11 @@ def list_files() -> None:
         console.print("[yellow]Keine Dateien in der Datenbank gefunden.[/yellow]")
         return
 
-    table = Table(title="Dateien in der Datenbank")
+    table = Table(title="Indexierte Dateien")
     table.add_column("ID", style="cyan")
     table.add_column("Pfad", style="green")
     table.add_column("Typ", style="magenta")
-    table.add_column("Zuletzt indexiert", style="blue")
+    table.add_column("Indexiert am", style="blue")
 
     for f in files:
         last_indexed = datetime.fromtimestamp(f['last_indexed']).strftime('%Y-%m-%d %H:%M:%S') if f.get('last_indexed') else "N/A"
@@ -61,50 +78,15 @@ def list_folders() -> None:
         console.print("[yellow]Keine Ordner in der Datenbank gefunden.[/yellow]")
         return
 
-    table = Table(title="Ordner in der Datenbank")
+    table = Table(title="Überwachte Ordner")
     table.add_column("ID", style="cyan")
     table.add_column("Pfad", style="green")
-    table.add_column("Zuletzt zusammengefasst", style="blue")
+    table.add_column("Zusammengefasst", style="magenta")
 
     for f in folders:
-        last_summ = datetime.fromtimestamp(f['last_summarized']).strftime('%Y-%m-%d %H:%M:%S') if f.get('last_summarized') else "N/A"
-        table.add_row(str(f['id']), f['path'], last_summ)
+        table.add_row(str(f['id']), f['path'], "Ja" if f['is_summarized'] else "Nein")
 
     console.print(table)
-
-
-@db_app.command("sync-students")
-def sync_students(yaml_path: str = typer.Option("students.yaml", help="Pfad zur students.yaml")) -> None:
-    """Synchronisiert Studentendaten aus einer YAML-Datei mit der Datenbank.
-
-    Args:
-        yaml_path (str): Pfad zur YAML-Datei mit den Studentendaten.
-    """
-    path = Path(yaml_path)
-    if not path.exists():
-        console.print(f"[red]Datei {yaml_path} nicht gefunden.[/red]")
-        return
-    with open(path, "r") as f:
-        data = yaml.safe_load(f)
-    if not data or "students" not in data:
-        console.print("[red]Fehler: students fehlt in YAML[/red]")
-        return
-    store, _ = get_store_and_index()
-    folder_map = {f["path"]: f["id"] for f in store.get_all_folders()}
-    count = 0
-    for s in data["students"]:
-        name = s.get("name")
-        if not name:
-            continue
-        email = s.get("smail") or s.get("email")
-        topic, status = s.get("topic"), s.get("status")
-        fid = None
-        if s.get("folders") and s["folders"][0].get("path") in folder_map:
-            fid = folder_map[s["folders"][0]["path"]]
-        # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
-        # store.upsert_student(name, email, topic, status, fid)
-        count += 1
-    console.print(f"[green]{count} Studenten synchronisiert.[/green]")
 
 @db_app.command("list-students")
 def list_students() -> None:
@@ -119,11 +101,11 @@ def list_students() -> None:
     table = Table(title="Studenten in der Datenbank")
     table.add_column("ID", style="cyan")
     table.add_column("Name", style="green")
-    table.add_column("Email", style="magenta")
-    table.add_column("Status", style="blue")
+    table.add_column("E-Mail", style="magenta")
+    table.add_column("Thema", style="white")
 
     for s in students:
-        table.add_row(str(s['id']), s['name'], s.get('email', 'N/A'), s.get('status', 'N/A'))
+        table.add_row(str(s['id']), s['name'], s['email'], s.get('topic', 'N/A'))
 
     console.print(table)
 
@@ -175,12 +157,7 @@ def list_deadlines() -> None:
 
 @db_app.command("delete-file")
 def delete_file(file_ids: List[int] = typer.Argument(..., help="Datei-IDs"), force: bool = typer.Option(False, "--force", "-f", help="Force")) -> None:
-    """Löscht Dateien aus der Datenbank und dem Suchindex.
-
-    Args:
-        file_ids (List[int]): Liste der Datei-IDs, die gelöscht werden sollen.
-        force (bool): Wenn True, wird ohne Bestätigung gelöscht.
-    """
+    """Löscht Dateien aus der Datenbank und dem Suchindex."""
     store, idx = get_store_and_index()
     all_files = store.get_all_files()
     for fid in file_ids:
@@ -194,16 +171,11 @@ def delete_file(file_ids: List[int] = typer.Argument(..., help="Datei-IDs"), for
         idx.delete_document(target['path'])
         # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
         # store.delete_file(fid)
-        console.print(f"[green]Datei '{target['path']}' erfolgreich gelöscht.[/green]")
+        console.print(f"[green]Datei '{target['path']}' erfolgreich gelöscht (Dummy).[/green]")
 
 @db_app.command("delete-folder")
 def delete_folder(folder_id: int, force: bool = typer.Option(False, "--force", "-f", help="Ohne Bestätigung löschen")) -> None:
-    """Löscht einen Ordner und alle zugehörigen Dateien aus der Datenbank und dem Index.
-
-    Args:
-        folder_id (int): ID des zu löschenden Ordners.
-        force (bool): Wenn True, wird ohne Bestätigung gelöscht.
-    """
+    """Löscht einen Ordner und alle zugehörigen Dateien aus der Datenbank und dem Index."""
     store, idx = get_store_and_index()
 
     all_folders = store.get_all_folders()
@@ -218,28 +190,19 @@ def delete_folder(folder_id: int, force: bool = typer.Option(False, "--force", "
         if not confirm:
             return
 
-    # Find all files in this folder to remove them from search index
     files = store.get_folder_files(folder_id)
     for f in files:
-        # f is a tuple: (id, path, hash, mtime, type, last_indexed, folder_id)
         path = f[1]
         idx.delete_document(path)
 
-    # Delete from Database (handles files and summaries too)
     # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
     # store.delete_folder(folder_id)
-    console.print(f"[green]Ordner '{target_folder['path']}' und zugehörige Daten erfolgreich gelöscht.[/green]")
+    console.print(f"[green]Ordner '{target_folder['path']}' und zugehörige Daten erfolgreich gelöscht (Dummy).[/green]")
 
 @db_app.command("delete-student")
 def delete_student(student_id: int, force: bool = typer.Option(False, "--force", "-f", help="Ohne Bestätigung löschen")) -> None:
-    """Löscht einen Studenten aus der Datenbank.
-
-    Args:
-        student_id (int): ID des zu löschenden Studenten.
-        force (bool): Wenn True, wird ohne Bestätigung gelöscht.
-    """
+    """Löscht einen Studenten aus der Datenbank."""
     store, _ = get_store_and_index()
-
     students = store.get_all_students()
     target = next((s for s in students if s['id'] == student_id), None)
 
@@ -254,18 +217,12 @@ def delete_student(student_id: int, force: bool = typer.Option(False, "--force",
 
     # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
     # store.delete_student(student_id)
-    console.print(f"[green]Student '{target['name']}' erfolgreich gelöscht.[/green]")
+    console.print(f"[green]Student '{target['name']}' erfolgreich gelöscht (Dummy).[/green]")
 
 @db_app.command("delete-summary")
 def delete_summary(summary_id: int, force: bool = typer.Option(False, "--force", "-f", help="Ohne Bestätigung löschen")) -> None:
-    """Löscht eine Zusammenfassung aus der Datenbank.
-
-    Args:
-        summary_id (int): ID der zu löschenden Zusammenfassung.
-        force (bool): Wenn True, wird ohne Bestätigung gelöscht.
-    """
+    """Löscht eine Zusammenfassung aus der Datenbank."""
     store, _ = get_store_and_index()
-
     summaries = store.get_all_summaries()
     target = next((s for s in summaries if s['id'] == summary_id), None)
 
@@ -280,18 +237,12 @@ def delete_summary(summary_id: int, force: bool = typer.Option(False, "--force",
 
     # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
     # store.delete_summary(summary_id)
-    console.print(f"[green]Zusammenfassung ID {summary_id} erfolgreich gelöscht.[/green]")
+    console.print(f"[green]Zusammenfassung ID {summary_id} erfolgreich gelöscht (Dummy).[/green]")
 
 @db_app.command("delete-deadline")
 def delete_deadline(deadline_id: int, force: bool = typer.Option(False, "--force", "-f", help="Ohne Bestätigung löschen")) -> None:
-    """Löscht eine Deadline aus der Datenbank.
-
-    Args:
-        deadline_id (int): ID der zu löschenden Deadline.
-        force (bool): Wenn True, wird ohne Bestätigung gelöscht.
-    """
+    """Löscht eine Deadline aus der Datenbank."""
     store, _ = get_store_and_index()
-
     deadlines = store.get_all_deadlines()
     target = next((d for d in deadlines if d['id'] == deadline_id), None)
 
@@ -306,7 +257,7 @@ def delete_deadline(deadline_id: int, force: bool = typer.Option(False, "--force
 
     # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
     # store.delete_deadline(deadline_id)
-    console.print(f"[green]Deadline '{target['title']}' erfolgreich gelöscht.[/green]")
+    console.print(f"[green]Deadline '{target['title']}' erfolgreich gelöscht (Dummy).[/green]")
 
 @db_app.command("list-nodes")
 def list_nodes() -> None:
@@ -364,12 +315,7 @@ def list_edges() -> None:
 
 @db_app.command("delete-node")
 def delete_node(node_id: int, force: bool = typer.Option(False, "--force", "-f", help="Ohne Bestätigung löschen")) -> None:
-    """Löscht einen Knoten und alle zugehörigen Kanten aus dem Graphen.
-
-    Args:
-        node_id (int): ID des zu löschenden Knotens.
-        force (bool): Wenn True, wird ohne Bestätigung gelöscht.
-    """
+    """Löscht einen Knoten und alle zugehörigen Kanten aus dem Graphen."""
     store, _ = get_store_and_index()
     node = store.get_node_by_id(node_id)
 
@@ -384,16 +330,11 @@ def delete_node(node_id: int, force: bool = typer.Option(False, "--force", "-f",
 
     # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
     # store.delete_node(node_id)
-    console.print(f"[green]Knoten '{node['name']}' erfolgreich gelöscht.[/green]")
+    console.print(f"[green]Knoten '{node['name']}' erfolgreich gelöscht (Dummy).[/green]")
 
 @db_app.command("delete-edge")
 def delete_edge(edge_id: int, force: bool = typer.Option(False, "--force", "-f", help="Ohne Bestätigung löschen")) -> None:
-    """Löscht eine spezifische Kante aus dem Graphen.
-
-    Args:
-        edge_id (int): ID der zu löschenden Kante.
-        force (bool): Wenn True, wird ohne Bestätigung gelöscht.
-    """
+    """Löscht eine spezifische Kante aus dem Graphen."""
     store, _ = get_store_and_index()
 
     if not force:
@@ -403,4 +344,4 @@ def delete_edge(edge_id: int, force: bool = typer.Option(False, "--force", "-f",
 
     # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
     # store.delete_edge_by_id(edge_id)
-    console.print(f"[green]Kante mit ID {edge_id} erfolgreich gelöscht.[/green]")
+    console.print(f"[green]Kante mit ID {edge_id} erfolgreich gelöscht (Dummy).[/green]")

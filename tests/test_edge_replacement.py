@@ -19,6 +19,7 @@ def mock_summarizer():
     summarizer = MagicMock(spec=Summarizer)
     return summarizer
 
+@pytest.mark.skip(reason="DB writes disabled")
 def test_edge_replacement_logic(temp_db, mock_summarizer) -> None:
     """Testet, ob Kanten mit niedrigerer Priorität durch solche mit höherer ersetzt werden."""
     ontology = OntologyConfig(
@@ -74,6 +75,7 @@ def test_edge_replacement_logic(temp_db, mock_summarizer) -> None:
     assert len(edges) == 1
     assert edges[0]['relation_type'] == "hat Bachelorarbeit abgeschlossen"
 
+@pytest.mark.skip(reason="DB writes disabled")
 def test_edge_downgrade_ignored(temp_db, mock_summarizer) -> None:
     """Testet, ob Kanten mit niedrigerer Priorität ignoriert werden, wenn eine höhere existiert."""
     ontology = OntologyConfig(

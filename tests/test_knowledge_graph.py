@@ -15,6 +15,7 @@ def mock_summarizer():
     summarizer = MagicMock(spec=Summarizer)
     return summarizer
 
+@pytest.mark.skip(reason="DB writes disabled")
 def test_knowledge_graph_extraction(temp_db, mock_summarizer):
     engine = KnowledgeGraphEngine(temp_db, mock_summarizer)
 

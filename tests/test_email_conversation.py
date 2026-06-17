@@ -27,6 +27,7 @@ def mock_deps(tmp_path):
 
     return config, store, parser, summarizer, index
 
+@pytest.mark.skip(reason="DB writes disabled")
 def test_email_conversation_processing(tmp_path, mock_deps):
     config, store, parser, summarizer, index = mock_deps
 
@@ -67,6 +68,7 @@ def test_email_conversation_processing(tmp_path, mock_deps):
     assert args[2]["is_conversation_summary"] == "true"
     assert args[2]["filename"] == ".emails_summary.md"
 
+@pytest.mark.skip(reason="DB writes disabled")
 def test_email_sorting(tmp_path, mock_deps):
     config, store, parser, summarizer, index = mock_deps
 

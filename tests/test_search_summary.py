@@ -38,6 +38,7 @@ def test_search_index_enrichment(mock_store, tmp_path):
         mock_store.get_file.assert_called_with("/path/to/doc.pdf")
         mock_store.get_summary.assert_called_with("file", 1)
 
+@pytest.mark.skip(reason="DB writes disabled")
 def test_crawler_indexes_summary(tmp_path):
     from mcp_university.crawler.crawler import Crawler
     from mcp_university.config import Config

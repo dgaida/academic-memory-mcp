@@ -3,9 +3,8 @@ import os
 from pathlib import Path
 import json
 import logging
-import re
 import argparse
-from typing import List, Dict, Any, Optional
+from typing import Optional
 
 # Add project root to sys.path
 sys.path.append(str(Path(__file__).resolve().parent.parent))
@@ -18,7 +17,6 @@ logger = logging.getLogger(__name__)
 
 def normalize_person_name(name: str) -> str:
     """Normalisiert Personennamen (Titel entfernen, etc)."""
-    # Entferne akademische Titel
     titles = ["Prof.", "Dr.", "h.c.", "phil.", "rer.", "nat.", "techn.", "ing."]
     for title in titles:
         name = name.replace(title, "")
@@ -29,7 +27,6 @@ def match_person(store: MetadataStore, name: str) -> Optional[int]:
     normalized_name = normalize_person_name(name)
     nodes = store.get_all_nodes()
 
-    # Heuristik: Wort-Set Vergleich
     search_words = set(normalized_name.lower().replace(",", " ").split())
 
     for node in nodes:

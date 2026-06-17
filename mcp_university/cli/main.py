@@ -3,15 +3,9 @@ from pathlib import Path
 import typer
 import logging
 from logging.handlers import RotatingFileHandler
-from ..crawler.crawler import Crawler
 from ..config import get_config
 from ..metadata.store import MetadataStore
-from ..parser.factory import ParserFactory
-from ..summarizer.engine import Summarizer
 from ..summarizer.profiler import PersonProfiler
-from ..retrieval.index import SearchIndex
-from ..mcp_server.server import create_server
-from ..knowledge_graph.engine import KnowledgeGraphEngine
 import yaml
 from .db import db_app
 
@@ -45,9 +39,9 @@ def graph_build(debug: bool = typer.Option(False, "--debug", "-d", help="Debug-L
     """Baut den Wissensgraphen basierend auf den vorhandenen Zusammenfassungen auf."""
     setup_logging(debug)
     cfg = get_config()
-    store = MetadataStore(cfg.sqlite_path)
-    summarizer = Summarizer(cfg.llm.model, cfg.llm.base_url)
-    graph_engine = KnowledgeGraphEngine(store, summarizer)
+    # store = MetadataStore(cfg.sqlite_path)
+    # summarizer = Summarizer(cfg.llm.model, cfg.llm.base_url)
+    # graph_engine = KnowledgeGraphEngine(store, summarizer)
 
     # User-Knoten sicherstellen
     # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
@@ -76,14 +70,15 @@ def graph_build(debug: bool = typer.Option(False, "--debug", "-d", help="Debug-L
         print(f"Verarbeite Klasse: {class_name}")
         for summary_file in base_path.rglob(".emails_summary.md"):
             print(f"  Analysiere {summary_file}")
-            content = summary_file.read_text(encoding='utf-8')
+            # content = summary_file.read_text(encoding='utf-8')
+            changes = {}
             # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
             # changes = graph_engine.process_summary(content, user_node_id)
             if any(changes.values()):
                 print(f"    Änderungen aus {summary_file.name}:")
-                if changes['new_nodes']:
+                if changes.get('new_nodes'):
                     print(f"      Neue Knoten: {', '.join(changes['new_nodes'])}")
-                if changes['new_edges']:
+                if changes.get('new_edges'):
                     print("      Neue Beziehungen:")
                     for edge in changes['new_edges']:
                         print(f"        - {edge}")
@@ -92,14 +87,15 @@ def graph_build(debug: bool = typer.Option(False, "--debug", "-d", help="Debug-L
             if summary_file.name == ".emails_summary.md":
                 continue
             print(f"  Analysiere Ordner-Zusammenfassung {summary_file}")
-            content = summary_file.read_text(encoding='utf-8')
+            # content = summary_file.read_text(encoding='utf-8')
+            changes = {}
             # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
             # changes = graph_engine.process_summary(content, user_node_id)
             if any(changes.values()):
                 print(f"    Änderungen aus {summary_file.name}:")
-                if changes['new_nodes']:
+                if changes.get('new_nodes'):
                     print(f"      Neue Knoten: {', '.join(changes['new_nodes'])}")
-                if changes['new_edges']:
+                if changes.get('new_edges'):
                     print("      Neue Beziehungen:")
                     for edge in changes['new_edges']:
                         print(f"        - {edge}")
@@ -177,7 +173,6 @@ def index(
 ) -> None:
     """Startet den vollständigen Indexierungsprozess aller konfigurierten Ordner oder erstellt einen Personen-Steckbrief."""
     setup_logging(debug)
-    cfg = get_config()
 
     if profile:
         logger.info(f"Erstelle Personen-Steckbrief für {profile}...")
@@ -190,27 +185,19 @@ def index(
             print(f"\nFehler: Steckbrief für {profile} konnte nicht erstellt werden (keine E-Mails gefunden?).")
         return
 
-    store = MetadataStore(cfg.sqlite_path)
-    parser = ParserFactory(cfg.data_dir / "cache")
-    summarizer = Summarizer(cfg.llm.model, cfg.llm.base_url)
-    idx = SearchIndex(str(cfg.qdrant_path), cfg.embeddings.model, store=store)
-
-    crawler = Crawler(cfg, store, parser, summarizer, idx)
     # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
-    # crawler.crawl()
+    print("Indexierung aktuell deaktiviert (Migration zu neuer DB-Logik erforderlich).")
 
 @app.command()
 def search(
     query: str,
     debug: bool = typer.Option(False, "--debug", "-d", help="Debug-Logging aktivieren")
 ) -> None:
-    """Führt eine hybride Suche über die indexierten Dokumente aus und generiert eine Antwort.
-
-    Args:
-        query: Der Suchbegriff oder die Frage.
-    """
+    """Führt eine hybride Suche über die indexierten Dokumente aus und generiert eine Antwort."""
     setup_logging(debug)
     cfg = get_config()
+    from ..retrieval.index import SearchIndex
+    from ..summarizer.engine import Summarizer
     store = MetadataStore(cfg.sqlite_path)
     idx = SearchIndex(str(cfg.qdrant_path), cfg.embeddings.model, store=store)
     results = idx.search(query)
@@ -246,21 +233,14 @@ def search(
 def watch(debug: bool = typer.Option(False, "--debug", "-d", help="Debug-Logging aktivieren")) -> None:
     """Startet den Watchdog zur Echtzeit-Überwachung von Ordnern."""
     setup_logging(debug)
-    from ..crawler.watcher import Watcher
-    cfg = get_config()
-    store = MetadataStore(cfg.sqlite_path)
-    parser = ParserFactory(cfg.data_dir / "cache")
-    summarizer = Summarizer(cfg.llm.model, cfg.llm.base_url)
-    idx = SearchIndex(str(cfg.qdrant_path), cfg.embeddings.model, store=store)
-
-    crawler = Crawler(cfg, store, parser, summarizer, idx)
-    watcher = Watcher(crawler)
-    watcher.start()
+    # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+    print("Watch-Modus aktuell deaktiviert.")
 
 @app.command()
 def serve_mcp(debug: bool = typer.Option(False, "--debug", "-d", help="Debug-Logging aktivieren")) -> None:
     """Startet den FastMCP-Server zur Integration in KI-Agenten."""
     setup_logging(debug)
+    from ..mcp_server.server import create_server
     server = create_server()
     server.run()
 

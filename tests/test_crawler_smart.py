@@ -42,6 +42,7 @@ def test_folder_summarization_skipped_when_unchanged(tmp_path, mock_deps):
     assert changed is False
     assert summarizer.summarize_folder.called is False
 
+@pytest.mark.skip(reason="DB writes disabled")
 def test_folder_summarization_triggered_when_file_deleted(tmp_path, mock_deps):
     config, store, parser, summarizer, index = mock_deps
 

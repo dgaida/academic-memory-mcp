@@ -17,15 +17,7 @@ class KnowledgeGraphEngine:
         self.ontology = ontology or get_config().ontology
 
     def process_summary(self, summary_content: str, user_node_id: int) -> Dict[str, List[str]]:
-        """Analysiert eine Zusammenfassung und aktualisiert den Graphen.
-
-        Args:
-            summary_content (str): Der Text der Zusammenfassung (.emails_summary.md).
-            user_node_id (int): Die ID des Benutzer-Knotens (Zentrum).
-
-        Returns:
-            Dict[str, List[str]]: Zusammenfassung der Änderungen (neue/aktualisierte Knoten/Kanten).
-        """
+        """Analysiert eine Zusammenfassung und aktualisiert den Graphen."""
         changes = {"new_nodes": [], "updated_nodes": [], "new_edges": [], "updated_edges": []}
         triplets = self._extract_triplets(summary_content)
         for triplet in triplets:
@@ -34,7 +26,6 @@ class KnowledgeGraphEngine:
             relation = triplet.get("relation")
             source_type = triplet.get("source_type", "Person")
             target_type = triplet.get("target_type", "Person")
-            properties = triplet.get("properties", {})
 
             if not source_name or not target_name or not relation:
                 continue
@@ -44,15 +35,12 @@ class KnowledgeGraphEngine:
             canonical_target = self.store.resolve_canonical_name(target_name, target_type)
 
             # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
-            # source_id, s_new = self.store.upsert_node(canonical_source, source_type)
             source_id, s_new = 0, False # Dummy
             if s_new:
                 changes["new_nodes"].append(f"{canonical_source} ({source_type})")
             else:
                 changes["updated_nodes"].append(canonical_source)
 
-            # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
-            # target_id, t_new = self.store.upsert_node(canonical_target, target_type)
             target_id, t_new = 0, False # Dummy
             if t_new:
                 changes["new_nodes"].append(f"{canonical_target} ({target_type})")
@@ -65,8 +53,7 @@ class KnowledgeGraphEngine:
                 continue
 
             # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
-            # edge_id, e_new = self.store.upsert_edge(source_id, target_id, relation, properties)
-            edge_id, e_new = 0, False # Dummy
+            e_new = False # Dummy
             edge_desc = f"{canonical_source} --[{relation}]--> {canonical_target}"
             if e_new:
                 changes["new_edges"].append(edge_desc)
@@ -80,26 +67,16 @@ class KnowledgeGraphEngine:
         return changes
 
     def _handle_edge_priorities(self, source_id: int, target_id: int, new_relation: str) -> bool:
-        """Prüft Kanten-Prioritäten und löscht ggf. unterlegene Kanten.
-
-        Args:
-            source_id (int): Startknoten.
-            target_id (int): Zielknoten.
-            new_relation (str): Die neue Beziehung.
-
-        Returns:
-            bool: Ob die neue Kante hinzugefügt werden soll.
-        """
+        """Prüft Kanten-Prioritäten und löscht ggf. unterlegene Kanten."""
         if not self.ontology.edge_priorities:
             return True
 
-        for category, priority_list in self.ontology.edge_priorities.items():
+        for priority_list in self.ontology.edge_priorities.values():
             if new_relation not in priority_list:
                 continue
 
             new_priority = priority_list.index(new_relation)
             # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
-            # existing_edges = self.store.get_edges_between_nodes(source_id, target_id)
             existing_edges = []
 
             for edge in existing_edges:
@@ -107,13 +84,10 @@ class KnowledgeGraphEngine:
                 if rel in priority_list:
                     old_priority = priority_list.index(rel)
                     if new_priority >= old_priority:
-                        # Neue Kante hat höhere oder gleiche Priorität -> alte löschen
                         if rel != new_relation:
                             # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
-                            # self.store.delete_edge(source_id, target_id, rel)
                             logger.info(f"Kante '{rel}' durch '{new_relation}' ersetzt.")
                     else:
-                        # Bestehende Kante hat höhere Priorität -> neue ignorieren
                         logger.info(f"Kante '{new_relation}' ignoriert, da '{rel}' höhere Priorität hat.")
                         return False
         return True
@@ -143,7 +117,6 @@ Antworte NUR mit einer JSON-Liste von Objekten mit den Schlüsseln: source, targ
             return []
 
         try:
-            # Versuche JSON zu finden, falls das LLM Text drumherum baut
             start_idx = response.find('[')
             end_idx = response.rfind(']') + 1
             if start_idx != -1 and end_idx != -1:

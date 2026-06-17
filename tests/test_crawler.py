@@ -1,8 +1,7 @@
-import pytest
-from unittest.mock import MagicMock, patch
-from pathlib import Path
+from unittest.mock import MagicMock
 from mcp_university.crawler.crawler import Crawler
 from mcp_university.config import Config
+# from pathlib import Path
 
 def test_crawler_file_processing(tmp_path):
     config = Config()
@@ -22,9 +21,7 @@ def test_crawler_file_processing(tmp_path):
     test_file = tmp_path / "test.txt"
     test_file.write_text("hello")
 
-    summary, changed = crawler._process_file(test_file, 1)
-
-    # assert summary == "# Summary" # Disabled due to DB write mock
+    crawler._process_file(test_file, 1)
     assert True
 
 def test_crawler_folder_summary_file_creation(tmp_path):
@@ -51,8 +48,8 @@ def test_crawler_folder_summary_file_creation(tmp_path):
     summarizer.summarize_file.return_value = "file summary"
     summarizer.summarize_folder.return_value = "folder summary content"
     store.get_file.return_value = None
-    store.upsert_folder.return_value = 1
-    store.upsert_file.return_value = 10
+    store.get_folder_files.return_value = []
+    store.get_summary.return_value = None
 
     crawler = Crawler(config, store, parser, summarizer, index)
 

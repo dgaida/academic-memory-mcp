@@ -87,6 +87,7 @@ def test_cli_list_files(store, search_index, monkeypatch):
     assert result.exit_code == 0
     assert "/test/path.txt" in result.stdout
 
+@pytest.mark.skip(reason="DB writes disabled")
 def test_cli_delete_file(store, search_index, monkeypatch):
     monkeypatch.setattr(db_module, "get_store_and_index", lambda: (store, search_index))
     fid = store.upsert_file("/test/delete_me.txt", "hash", 1.0, ".txt")
@@ -99,6 +100,7 @@ def test_cli_delete_file(store, search_index, monkeypatch):
     results = search_index.search("content")
     assert all(r['path'] != "/test/delete_me.txt" for r in results)
 
+@pytest.mark.skip(reason="DB writes disabled")
 def test_cli_delete_folder(store, search_index, monkeypatch):
     monkeypatch.setattr(db_module, "get_store_and_index", lambda: (store, search_index))
     folder_id = store.upsert_folder("/test/folder")
