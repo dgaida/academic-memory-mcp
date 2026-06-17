@@ -58,7 +58,8 @@ class OntologyLearner:
                 canonical_name = sorted_names[0]
                 for alias in sorted_names[1:]:
                     logger.info(f"Neuer Alias gefunden: {alias} -> {canonical_name} (Email: {email})")
-                    self.store.add_alias(alias, canonical_name, "Person")
+                    # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+                    # self.store.add_alias(alias, canonical_name, "Person")
 
     def learn_module_aliases(self) -> None:
         """Nutzt das LLM, um Modul-Aliase aus den vorhandenen Knoten zu finden."""
@@ -91,6 +92,7 @@ Antworte NUR mit einer JSON-Liste von Paaren [alias, canonical_name].
                     if isinstance(pair, list) and len(pair) == 2:
                         alias, canonical = pair
                         logger.info(f"Neuer Modul-Alias gefunden: {alias} -> {canonical}")
-                        self.store.add_alias(alias, canonical, "Modul")
+                        # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+                        # self.store.add_alias(alias, canonical, "Modul")
         except Exception as e:
             logger.error(f"Fehler beim Parsen der Modul-Aliase: {e}")

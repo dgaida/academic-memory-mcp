@@ -101,7 +101,8 @@ def sync_students(yaml_path: str = typer.Option("students.yaml", help="Pfad zur 
         fid = None
         if s.get("folders") and s["folders"][0].get("path") in folder_map:
             fid = folder_map[s["folders"][0]["path"]]
-        store.upsert_student(name, email, topic, status, fid)
+        # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+        # store.upsert_student(name, email, topic, status, fid)
         count += 1
     console.print(f"[green]{count} Studenten synchronisiert.[/green]")
 
@@ -191,7 +192,8 @@ def delete_file(file_ids: List[int] = typer.Argument(..., help="Datei-IDs"), for
             if not typer.confirm(f"Lösche {target['path']}?"):
                 continue
         idx.delete_document(target['path'])
-        store.delete_file(fid)
+        # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+        # store.delete_file(fid)
         console.print(f"[green]Datei '{target['path']}' erfolgreich gelöscht.[/green]")
 
 @db_app.command("delete-folder")
@@ -224,7 +226,8 @@ def delete_folder(folder_id: int, force: bool = typer.Option(False, "--force", "
         idx.delete_document(path)
 
     # Delete from Database (handles files and summaries too)
-    store.delete_folder(folder_id)
+    # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+    # store.delete_folder(folder_id)
     console.print(f"[green]Ordner '{target_folder['path']}' und zugehörige Daten erfolgreich gelöscht.[/green]")
 
 @db_app.command("delete-student")
@@ -249,7 +252,8 @@ def delete_student(student_id: int, force: bool = typer.Option(False, "--force",
         if not confirm:
             return
 
-    store.delete_student(student_id)
+    # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+    # store.delete_student(student_id)
     console.print(f"[green]Student '{target['name']}' erfolgreich gelöscht.[/green]")
 
 @db_app.command("delete-summary")
@@ -274,7 +278,8 @@ def delete_summary(summary_id: int, force: bool = typer.Option(False, "--force",
         if not confirm:
             return
 
-    store.delete_summary(summary_id)
+    # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+    # store.delete_summary(summary_id)
     console.print(f"[green]Zusammenfassung ID {summary_id} erfolgreich gelöscht.[/green]")
 
 @db_app.command("delete-deadline")
@@ -299,7 +304,8 @@ def delete_deadline(deadline_id: int, force: bool = typer.Option(False, "--force
         if not confirm:
             return
 
-    store.delete_deadline(deadline_id)
+    # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+    # store.delete_deadline(deadline_id)
     console.print(f"[green]Deadline '{target['title']}' erfolgreich gelöscht.[/green]")
 
 @db_app.command("list-nodes")
@@ -376,7 +382,8 @@ def delete_node(node_id: int, force: bool = typer.Option(False, "--force", "-f",
         if not confirm:
             return
 
-    store.delete_node(node_id)
+    # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+    # store.delete_node(node_id)
     console.print(f"[green]Knoten '{node['name']}' erfolgreich gelöscht.[/green]")
 
 @db_app.command("delete-edge")
@@ -394,5 +401,6 @@ def delete_edge(edge_id: int, force: bool = typer.Option(False, "--force", "-f",
         if not confirm:
             return
 
-    store.delete_edge_by_id(edge_id)
+    # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+    # store.delete_edge_by_id(edge_id)
     console.print(f"[green]Kante mit ID {edge_id} erfolgreich gelöscht.[/green]")

@@ -50,7 +50,8 @@ def graph_build(debug: bool = typer.Option(False, "--debug", "-d", help="Debug-L
     graph_engine = KnowledgeGraphEngine(store, summarizer)
 
     # User-Knoten sicherstellen
-    user_node_id, _ = store.upsert_node(cfg.user.name, "Person", {"email": cfg.user.email, "role": ["User"]})
+    # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+    # user_node_id, _ = store.upsert_node(cfg.user.name, "Person", {"email": cfg.user.email, "role": ["User"]})
     print(f"Benutzer-Knoten initialisiert: {cfg.user.name}")
 
     # classifier_paths.yaml laden
@@ -76,7 +77,8 @@ def graph_build(debug: bool = typer.Option(False, "--debug", "-d", help="Debug-L
         for summary_file in base_path.rglob(".emails_summary.md"):
             print(f"  Analysiere {summary_file}")
             content = summary_file.read_text(encoding='utf-8')
-            changes = graph_engine.process_summary(content, user_node_id)
+            # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+            # changes = graph_engine.process_summary(content, user_node_id)
             if any(changes.values()):
                 print(f"    Änderungen aus {summary_file.name}:")
                 if changes['new_nodes']:
@@ -91,7 +93,8 @@ def graph_build(debug: bool = typer.Option(False, "--debug", "-d", help="Debug-L
                 continue
             print(f"  Analysiere Ordner-Zusammenfassung {summary_file}")
             content = summary_file.read_text(encoding='utf-8')
-            changes = graph_engine.process_summary(content, user_node_id)
+            # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+            # changes = graph_engine.process_summary(content, user_node_id)
             if any(changes.values()):
                 print(f"    Änderungen aus {summary_file.name}:")
                 if changes['new_nodes']:
@@ -193,7 +196,8 @@ def index(
     idx = SearchIndex(str(cfg.qdrant_path), cfg.embeddings.model, store=store)
 
     crawler = Crawler(cfg, store, parser, summarizer, idx)
-    crawler.crawl()
+    # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+    # crawler.crawl()
 
 @app.command()
 def search(

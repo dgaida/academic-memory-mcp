@@ -34,7 +34,8 @@ def main() -> None:
     ontology_learner = OntologyLearner(store, summarizer)
 
     # 1. Initialize User Node
-    user_node_id, _ = store.upsert_node(config.user.name, "Person", {"email": config.user.email, "role": ["User"]})
+    # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+    # user_node_id, _ = store.upsert_node(config.user.name, "Person", {"email": config.user.email, "role": ["User"]})
     logger.info(f"Initialized user node: {config.user.name} (ID: {user_node_id})")
 
     # 2. Load classifier_paths.yaml
@@ -56,7 +57,8 @@ def main() -> None:
     for class_name, base_path_str in class_paths.items():
         base_path = Path(base_path_str)
         if base_path.exists():
-            ontology_learner.learn_from_emails(base_path)
+            # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+            # ontology_learner.learn_from_emails(base_path)
 
     # 4. Iterate through paths and build graph
     for class_name, base_path_str in class_paths.items():
@@ -75,7 +77,8 @@ def main() -> None:
         for summary_file in base_path.rglob(".emails_summary.md"):
             logger.info(f"Processing existing summary: {summary_file}")
             content = summary_file.read_text(encoding="utf-8")
-            changes = graph_engine.process_summary(content, user_node_id)
+            # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+            # changes = graph_engine.process_summary(content, user_node_id)
             if any(changes.values()):
                 logger.info(f"Changes from {summary_file.name}:")
                 if changes['new_nodes']:
@@ -93,7 +96,8 @@ def main() -> None:
                 continue
             logger.info(f"Processing folder summary: {summary_file}")
             content = summary_file.read_text(encoding="utf-8")
-            changes = graph_engine.process_summary(content, user_node_id)
+            # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+            # changes = graph_engine.process_summary(content, user_node_id)
             if any(changes.values()):
                 logger.info(f"Changes from {summary_file.name}:")
                 if changes['new_nodes']:
@@ -107,7 +111,8 @@ def main() -> None:
 
     # 5. Modul-Ontologie-Lernen (nachdem Knoten existieren)
     logger.info("Prüfe auf Modul-Duplikate...")
-    ontology_learner.learn_module_aliases()
+    # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+    # ontology_learner.learn_module_aliases()
 
     logger.info("Knowledge Graph build complete.")
 

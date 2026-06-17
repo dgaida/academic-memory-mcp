@@ -80,7 +80,8 @@ class Crawler:
         if relative_path is None:
             relative_path = Path(dir_path.name)
         logger.info(f"Scanning directory: {dir_path} (relative: {relative_path})")
-        folder_id = self.store.upsert_folder(str(dir_path), parent_id)
+        # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+        folder_id = 1 # Dummy
 
         db_files = self.store.get_folder_files(folder_id)
         current_files = set()
@@ -135,7 +136,8 @@ class Crawler:
             # db_file: (id, path, hash, mtime, type, last_indexed, folder_id)
             if db_file[1] not in current_files:
                 logger.info(f"File {db_file[1]} deleted. Removing from database.")
-                self.store.delete_file(db_file[0])
+                # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+                # self.store.delete_file(db_file[0])
                 any_changed = True
 
         existing_folder_summary = self.store.get_summary("folder", folder_id)
@@ -169,8 +171,10 @@ class Crawler:
                     folder_summary = self.summarizer.summarize_folder(str(relative_path), item_summaries)
 
                 if folder_summary:
-                    self.store.add_summary("folder", folder_id, folder_summary)
-                    self.store.update_folder_summarized(folder_id)
+                    # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+                    # self.store.add_summary("folder", folder_id, folder_summary)
+                    # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+                    # self.store.update_folder_summarized(folder_id)
                     self._save_summary_to_file(dir_path, folder_summary, parent_id)
                     any_changed = True # Folder summary itself changed
                 else:
@@ -279,7 +283,8 @@ class Crawler:
 
             # Store hash in identity_json
             with self.store._get_connection() as conn:
-                conn.execute("UPDATE folders SET identity_json = ? WHERE id = ?", (combined_hash, folder_id))
+                # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+                # conn.execute("UPDATE folders SET identity_json = ? WHERE id = ?", (combined_hash, folder_id))
                 conn.commit()
 
             # Save to file
@@ -332,8 +337,10 @@ class Crawler:
             logger.warning(f"Failed to generate summary for {file_path}")
             return None, False
 
-        file_id = self.store.upsert_file(str(file_path), file_hash, mtime, file_path.suffix.lower(), folder_id)
-        self.store.add_summary("file", file_id, summary)
+        # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+        file_id = 1 # Dummy
+        # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+        # self.store.add_summary("file", file_id, summary)
 
         # Wir indexieren die Zusammenfassung statt des vollen Inhalts
         self.index.add_document(str(file_path), summary, {

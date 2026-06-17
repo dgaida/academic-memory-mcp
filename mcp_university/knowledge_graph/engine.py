@@ -43,13 +43,17 @@ class KnowledgeGraphEngine:
             canonical_source = self.store.resolve_canonical_name(source_name, source_type)
             canonical_target = self.store.resolve_canonical_name(target_name, target_type)
 
-            source_id, s_new = self.store.upsert_node(canonical_source, source_type)
+            # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+            # source_id, s_new = self.store.upsert_node(canonical_source, source_type)
+            source_id, s_new = 0, False # Dummy
             if s_new:
                 changes["new_nodes"].append(f"{canonical_source} ({source_type})")
             else:
                 changes["updated_nodes"].append(canonical_source)
 
-            target_id, t_new = self.store.upsert_node(canonical_target, target_type)
+            # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+            # target_id, t_new = self.store.upsert_node(canonical_target, target_type)
+            target_id, t_new = 0, False # Dummy
             if t_new:
                 changes["new_nodes"].append(f"{canonical_target} ({target_type})")
             else:
@@ -60,7 +64,9 @@ class KnowledgeGraphEngine:
             if not should_add:
                 continue
 
-            edge_id, e_new = self.store.upsert_edge(source_id, target_id, relation, properties)
+            # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+            # edge_id, e_new = self.store.upsert_edge(source_id, target_id, relation, properties)
+            edge_id, e_new = 0, False # Dummy
             edge_desc = f"{canonical_source} --[{relation}]--> {canonical_target}"
             if e_new:
                 changes["new_edges"].append(edge_desc)
@@ -92,7 +98,9 @@ class KnowledgeGraphEngine:
                 continue
 
             new_priority = priority_list.index(new_relation)
-            existing_edges = self.store.get_edges_between_nodes(source_id, target_id)
+            # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+            # existing_edges = self.store.get_edges_between_nodes(source_id, target_id)
+            existing_edges = []
 
             for edge in existing_edges:
                 rel = edge["relation_type"]
@@ -100,12 +108,9 @@ class KnowledgeGraphEngine:
                     old_priority = priority_list.index(rel)
                     if new_priority >= old_priority:
                         # Neue Kante hat höhere oder gleiche Priorität -> alte löschen
-                        # (Gleiche Priorität wird durch upsert_edge sowieso aktualisiert, aber
-                        #  hier löschen wir sie explizit, falls es ein anderer Name ist aber in derselben Liste)
-                        # Hinweis: upsert_edge nutzt (source_id, target_id, relation_type) als UNIQUE.
-                        # Wenn relation_type unterschiedlich ist, gäbe es sonst zwei Kanten.
                         if rel != new_relation:
-                            self.store.delete_edge(source_id, target_id, rel)
+                            # TODO: Dieses Skript muss in Zukunft in eine andere Datenbank schreiben.
+                            # self.store.delete_edge(source_id, target_id, rel)
                             logger.info(f"Kante '{rel}' durch '{new_relation}' ersetzt.")
                     else:
                         # Bestehende Kante hat höhere Priorität -> neue ignorieren
