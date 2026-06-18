@@ -1,4 +1,15 @@
-"""Skript zur interaktiven Visualisierung des Wissensgraphen mittels Pyvis."""
+"""Skript zur interaktiven Visualisierung des Wissensgraphen mittels Pyvis.
+
+Beispiele:
+    # Gesamten Graphen anzeigen
+    python scripts/visualize_knowledge_graph.py
+
+    # Nach einem Knoten filtern (inkl. Eltern-Strukturen und Teilgraphen)
+    python scripts/visualize_knowledge_graph.py --filter "Mustermann"
+
+    # Nach mehreren Knoten filtern
+    python scripts/visualize_knowledge_graph.py --filter "Mustermann" "Informatik"
+"""
 import sys
 import argparse
 from pathlib import Path
@@ -22,7 +33,7 @@ def main() -> None:
     interaktive Pyvis-Visualisierung.
     """
     parser = argparse.ArgumentParser(description="Visualisierung des Wissensgraphen.")
-    parser.add_argument("--filter", type=str, help="Filtert den Graphen nach einem Knotenamen. Zeigt den Knoten, seine Eltern-Strukturen (eingehende Kanten) und alle davon ausgehenden Teilgraphen.")
+    parser.add_argument("--filter", type=str, nargs="+", help="Filtert den Graphen nach einem oder mehreren Knotennamen. Zeigt die Knoten, ihre Eltern-Strukturen (eingehende Kanten) und alle davon ausgehenden Teilgraphen.")
     args = parser.parse_args()
 
     config = get_config()
@@ -72,22 +83,22 @@ def main() -> None:
     # Filtering logic
     if args.filter:
         logger.info(f"Filtere Graph nach: {args.filter}")
-        target_node_id = None
-        filter_lower = args.filter.lower()
+        target_node_ids = set()
+        filters_lower = [f.lower() for f in args.filter]
+
         for node_id, data in G.nodes(data=True):
-            if filter_lower in data.get("label", "").lower():
-                target_node_id = node_id
-                break
+            label_lower = data.get("label", "").lower()
+            if any(f in label_lower for f in filters_lower):
+                target_node_ids.add(node_id)
 
-        if target_node_id is not None:
-            # Find all ancestors (nodes that have a path to target_node_id)
-            # This follows incoming edges to find parent structures (e.g., Institute, Faculty)
-            ancestors = nx.ancestors(G, target_node_id)
-            nodes_to_expand = ancestors | {target_node_id}
+        if target_node_ids:
+            # Find all ancestors for all target nodes
+            nodes_to_expand = set()
+            for tid in target_node_ids:
+                nodes_to_expand.add(tid)
+                nodes_to_expand.update(nx.ancestors(G, tid))
 
-            # Find all descendants of all ancestors (and the target node itself)
-            # This ensures we see the "higher-level" structures and everything they contain
-            # (e.g., all persons in the same institute/faculty)
+            # Find all descendants of all ancestors (and the target nodes themselves)
             result_nodes = set()
             for node in nodes_to_expand:
                 result_nodes.add(node)
@@ -96,7 +107,7 @@ def main() -> None:
             G = G.subgraph(result_nodes).copy()
             logger.info(f"Graph auf {len(G.nodes)} Knoten und {len(G.edges)} Kanten gefiltert.")
         else:
-            logger.warning(f"Kein Knoten mit dem Namen '{args.filter}' gefunden.")
+            logger.warning(f"Keine Knoten mit den Namen {args.filter} gefunden.")
 
     # Create Pyvis network
     net = Network(height="750px", width="100%", bgcolor="#ffffff", font_color="black", directed=True)
