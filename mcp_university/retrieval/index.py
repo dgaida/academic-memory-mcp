@@ -21,6 +21,28 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+_MODEL_CACHE = {}
+
+def get_model(model_name: str, offline: bool = False) -> Any:
+    """Gibt ein SentenceTransformer-Modell aus dem Cache zurück oder lädt es."""
+    if model_name in _MODEL_CACHE:
+        return _MODEL_CACHE[model_name]
+
+    logger.info(f"Loading SentenceTransformer model: {model_name}")
+    try:
+        logger.info(f"Versuche Embedding-Modell lokal zu laden: {model_name}")
+        model = SentenceTransformer(model_name, local_files_only=True)
+        logger.info(f"ERFOLG: Modell {model_name} wurde LOKAL geladen.")
+    except Exception as e:
+        if offline:
+            logger.error(f"Modell {model_name} nicht lokal gefunden und Offline-Modus ist aktiv: {e}")
+            raise
+        logger.info(f"Modell nicht lokal gefunden. Lade von Hugging Face: {model_name}")
+        model = SentenceTransformer(model_name)
+
+    _MODEL_CACHE[model_name] = model
+    return model
+
 class SearchIndex:
     """Schnittstelle zum Suchindex.
 
@@ -74,23 +96,8 @@ class SearchIndex:
     @property
     def model(self) -> Any:
         """Gibt das SentenceTransformer-Modell zurück (Lazy Loading)."""
-        if self._model is None:
-            logger.info(f"Loading SentenceTransformer model: {self.embedding_model_name}")
-            config = get_config()
-            try:
-                # Versuch 1: Nur lokale Dateien (verhindert HEAD-Requests an HF)
-                logger.info(f"Versuche Embedding-Modell lokal zu laden: {self.embedding_model_name}")
-                self._model = SentenceTransformer(self.embedding_model_name, local_files_only=True)
-                logger.info(f"ERFOLG: Modell {self.embedding_model_name} wurde LOKAL geladen.")
-            except Exception as e:
-                if config.offline:
-                    logger.error(f"Modell {self.embedding_model_name} nicht lokal gefunden und Offline-Modus ist aktiv: {e}")
-                    raise
-
-                # Versuch 2: Normales Laden (erlaubt Download), falls nicht im strikten Offline-Modus
-                logger.info(f"Modell nicht lokal gefunden. Lade von Hugging Face: {self.embedding_model_name}")
-                self._model = SentenceTransformer(self.embedding_model_name)
-        return self._model
+        config = get_config()
+        return get_model(self.embedding_model_name, offline=config.offline)
 
     def _init_native(self) -> None:
         """Initialisiert die native Fallback-Suche."""
