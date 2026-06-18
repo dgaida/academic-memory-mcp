@@ -1,41 +1,80 @@
 # E-Mail Management Workflow
 
-Dieser Workflow beschreibt den Prozess vom Erhalt einer E-Mail bis zur Erstellung eines Antwort-Entwurfs in Outlook.
+Dieser Workflow beschreibt den vollständigen Prozess von der Erfassung einer E-Mail in Microsoft Outlook bis hin zur automatisierten Analyse, Klassifizierung und der Erstellung von Antwort-Entwürfen oder Kalendereinträgen. Das System ist darauf ausgelegt, die Kommunikation mit Studierenden effizient zu gestalten und administrative Aufgaben (wie Terminbuchungen oder das Speichern von Abschlussarbeiten) zu automatisieren.
 
-## 1. Export aus Outlook
-Der Prozess beginnt in Outlook. Verwenden Sie die bereitgestellten VBA-Makros, um relevante Daten zu exportieren:  
-- **Studenten-E-Mails:** Exportiert E-Mails von Studenten-Domains als `.msg` Dateien.  
-- **Freie Termine:** Exportiert freie Zeitfenster aus Ihrem Kalender in eine YAML-Datei (`free_slots.yaml`).  
+---
 
-## 2. Klassifizierung und Sortierung
+## 1. Phase: Daten-Export und Vorbereitung
+Der Prozess beginnt direkt in Microsoft Outlook. Da das System lokal auf exportierten Daten arbeitet, müssen zunächst die relevanten Informationen bereitgestellt werden.
+
+### Export aus Outlook
+Verwenden Sie die im Projekt bereitgestellten VBA-Makros, um Daten in den `inbox`-Ordner zu exportieren:
+- **E-Mails:** Exportiert E-Mails (meist von Studierenden) als `.msg` Dateien. Das System erkennt dabei automatisch Absender, Datum und Betreff.
+- **Kalenderdaten:** Exportiert freie Zeitfenster aus Ihrem Outlook-Kalender in eine Datei namens `free_slots.yaml`. Diese dient als Grundlage für automatisierte Terminvorschläge.
+
+---
+
+## 2. Phase: Klassifizierung und Sortierung
+Bevor eine inhaltliche Analyse stattfindet, werden die E-Mails nach Themen sortiert.
+
+### Automatisches Einsortieren
 Führen Sie das Sortier-Skript aus:
 ```bash
 python -m mcp_university.classifier.sort_emails --source ./inbox --target ./sorted_mails
 ```
-Das System nutzt den `EmailClassifier`, um die Mails nach Themen (z.B. Bachelor Thesis, Projekt) zu kategorisieren und in entsprechende Unterordner zu verschieben.
 
-## 3. Analyse und Antwort-Generierung
-Nach der Sortierung wird `process_sorted_emails.py` ausgeführt. Das Skript führt folgende Schritte für jede E-Mail durch:
+**Was passiert hier?**
+1. **Themen-Erkennung:** Der [EmailClassifier](email-classification.md) nutzt ein Machine-Learning-Modell (Transformer-basiert), um den Inhalt der Mail einer Kategorie zuzuordnen (z.B. *Bachelor Thesis*, *Projekt*, *PO-Wechsel*).
+2. **Dateisystem-Struktur:** Die E-Mails werden in eine dreistufige Hierarchie verschoben: `Semester (z.B. 2023_24_WS) / Nachname_Vorname / (Inbox oder SentItems)`.
+3. **Normalisierung:** Namen werden normalisiert (Umlaute ersetzt, Sonderzeichen bereinigt), um Kompatibilität mit dem Dateisystem zu gewährleisten.
 
-1.  **Kontext-Analyse:** Das System analysiert andere E-Mails im Zielordner (den bisherigen Verlauf), um den Kontext der aktuellen Anfrage zu verstehen.  
-2.  **Stichtags-Regelung (`--cutoff-date`):** Mit dem Parameter `--cutoff-date YYYY-MM-DD` können ältere E-Mails von der LLM-Verarbeitung (Antwort-Generierung, Terminbuchung) ausgeschlossen werden. Sie werden lediglich sortiert.  
-3.  **Termin-Check:** Prüft, ob der Student um einen Termin bittet. Falls ja, werden die `free_slots.yaml` genutzt, um einen Vorschlag zu machen oder den Termin direkt zu buchen.  
-4.  **Check für finale Abgabe:** Erkennt automatisch, wenn ein Student seine Abschlussarbeit (Bachelor/Master/Projekt) final einreicht. In diesem Fall:  
-    - Wird automatisch ein **Erinnerungstermin** im Outlook-Kalender für in 7 Tagen (08:00 Uhr) erstellt.  
-    - Werden die **Anhänge extrahiert** und sicher im entsprechenden Studenten-Ordner gespeichert.  
-    - Wird eine Bestätigungsmail als Entwurf vorbereitet.  
-5.  **Personen-Kontext:** Bezieht vorhandene Personen-Steckbriefe des Absenders sowie den eigenen Steckbrief des Nutzers (erstellt durch den Indexer oder `create_person_profiles.py`) in die Antwortgenerierung mit ein.  
-6.  **Notwendigkeits-Check (Necessity Check):** Ein LLM entscheidet, ob die E-Mail überhaupt eine Antwort erfordert (oder ob es sich z.B. nur um eine Information handelt).  
-7.  **Entwurf schreiben:** Falls eine Antwort nötig ist, generiert der Agent unter Berücksichtigung der Skill-Vorgaben und der Persona (Daniel Gaida) einen Antworttext.  
-8.  **Outlook Integration:** Es wird automatisch ein Entwurf ("Draft") im Outlook-Ordner "Work in Progress" erstellt. Die Original-Mail wird als Anhang beigefügt.  
+---
 
-## 4. Überprüfung (Gradio GUI)
-Am Ende des Prozesses startet automatisch eine Gradio-Weboberfläche. Hier können Sie:  
-- **Klassifizierung prüfen:** Die automatisch getroffenen Zuordnungen kontrollieren und korrigieren.  
-- **Quick Links:** Den E-Mail-Ordner oder die E-Mail-Datei direkt aus dem Browser öffnen.  
-- **Kurzzusammenfassung:** Jede E-Mail wird durch das LLM in zwei Sätzen zusammengefasst.  
-- **Anhänge speichern:** Über eine Checkbox können Anhänge direkt in den Zielordner extrahiert werden.  
-- **Relokation:** Mails bei Bedarf manuell in andere Kategorien verschieben. Das System verschiebt dabei automatisch auch alle zugehörigen `.md` und `.txt` Dateien sowie die `.emails_summary.md`.  
+## 3. Phase: KI-gestützte Analyse (LLM)
+Nachdem die Mails sortiert sind, erfolgt die eigentliche Intelligenz-Arbeit durch `process_sorted_emails.py`. Das LLM (Large Language Model) analysiert jede E-Mail im Detail.
 
-## 5. Abschlussbericht
-Das Skript erstellt eine Datei `processed_emails.md`, die eine tabellarische Übersicht über alle verarbeiteten Mails und deren Status (z.B. "Entwurf erstellt", "Termin gebucht", "Keine Antwort nötig") enthält.
+### Informationen, die dem LLM übergeben werden:
+Um eine hochqualitative und kontextsensitive Antwort zu generieren, erhält das LLM eine Vielzahl an Informationen:
+- **Aktueller E-Mail-Inhalt:** Der Text der neuesten Nachricht in der Konversation.
+- **Konversationsverlauf:** Vorherige E-Mails im selben Ordner werden einbezogen, um den Kontext zu wahren.
+- **Personen-Steckbriefe:**
+    - **Studenten-Steckbrief:** Informationen über den Absender (Rolle, bisherige Themen). Details dazu finden Sie unter [Personen-Steckbriefe](profiles.md).
+    - **Eigener Steckbrief:** Ihre eigene Persona (Name, Rolle, Tonalität), definiert in der `config/user.yaml`.
+- **Skills (Fähigkeiten):** Für jede E-Mail-Klasse existiert eine Markdown-Datei (z.B. `SKILL_Bachelor_Thesis.md`), die spezifische Anweisungen und Fachwissen für dieses Thema enthält.
+- **RAG-Kontext (Retrieval Augmented Generation):** Das System durchsucht eine Vektordatenbank nach ähnlichen Fällen oder Dokumenten, die in [Memory-Pfaden](email-classification.md#memory-index) konfiguriert sind.
+- **Ähnlichkeits-Suche:** Das System sucht nach den 3 neuesten, thematisch ähnlichsten E-Mails desselben Studenten aus dem Archiv, um konsistente Antworten zu gewährleisten.
+
+---
+
+## 4. Phase: Aktionen und Automatisierung
+Basierend auf der Analyse schlägt das System eine von sechs Aktionen vor. In der [Gradio-Oberfläche](#5-phase-uberprufung-gradio-gui) können Sie diese Auswahl bestätigen oder ändern.
+
+### Liste der Aktionen
+
+| Aktion | Beschreibung | Technische Konsequenz |
+| :--- | :--- | :--- |
+| **1) Antwort schreiben** | Erstellt eine Standard-Antwort basierend auf dem Thema. | Generiert einen Textentwurf in Outlook. |
+| **2) Antwort mit Terminvorschlag** | Sucht freie Slots in der `free_slots.yaml`. | Fügt konkrete Zeitvorschläge in den Antwortentwurf ein. |
+| **3) Termin direkt buchen** | Erkennt eine Terminbestätigung des Studenten. | Ruft `manage_calendar_appointment` auf und erstellt einen echten Kalendereintrag in Outlook. |
+| **4) Nur archivieren** | Keine Antwort nötig (z.B. reine Information). | Markiert die Mail als erledigt ohne weitere Aktion. |
+| **5) Aufgabe "Anhang lesen"** | Speziell für finale Abgaben von Abschlussarbeiten. | Erstellt eine Outlook-Aufgabe/Termin für in 7 Tagen zur Korrektur und speichert Anhänge. |
+| **6) Kolloquium-Termin** | Spezielle Buchung für Abschlussvorträge. | Erstellt einen 60-minütigen Kalendereintrag in Outlook. |
+
+---
+
+## 5. Phase: Überprüfung (Gradio GUI)
+Der Prozess endet in einer interaktiven Web-Oberfläche. Hier behält der Mensch die volle Kontrolle (Human-in-the-loop).
+
+**Funktionen der GUI:**
+- **Korrektur der Klassifizierung:** Falls eine Mail falsch einsortiert wurde, können Sie die Klasse via Dropdown ändern. Das System verschiebt die Dateien beim Speichern automatisch physisch auf der Festplatte.
+- **Aktions-Review:** Überprüfen Sie, welche Aktion das LLM vorschlägt und ändern Sie diese bei Bedarf.
+- **Anhänge extrahieren:** Über eine Checkbox können Sie entscheiden, ob Anhänge der Mail direkt im Studentenordner gespeichert werden sollen.
+- **Quick-Links:** Öffnen Sie den entsprechenden Windows-Ordner oder die E-Mail-Datei mit einem Klick direkt aus dem Browser.
+- **Zusammenfassungen:** Jede Mail wird kurz zusammengefasst, um das schnelle Scannen der Inbox zu ermöglichen.
+
+---
+
+## Weiterführende Links
+- [Datenbank-Prozesse](database-processes.md): Erfahren Sie mehr über die Verwaltung der `profiles_tracking.db` und des Wissensgraphen.
+- [E-Mail Klassifizierung](email-classification.md): Details zu den Machine-Learning Modellen und Memory-Indizes.
+- [Konfiguration](../configuration.md): So passen Sie Pfade und LLM-Einstellungen an.
