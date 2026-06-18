@@ -46,6 +46,7 @@ class UserConfig(BaseModel):
     """Konfiguration für den Nutzer des Tools."""
     name: str = "Daniel Gaida"
     email: str = "daniel.gaida@th-koeln.de"
+    emails: List[str] = []
 
 class Config:
     """Zentrale Konfigurationsklasse für das MCP University System.
@@ -70,6 +71,8 @@ class Config:
         load_dotenv(self.config_dir / "secrets.env")
         self.folders = self._load_yaml(config_dir / "folders.yaml", FolderConfig)
         self.user = self._load_yaml(config_dir / "user.yaml", UserConfig)
+        if not self.user.emails:
+            self.user.emails = [self.user.email]
         self.ontology = self._load_yaml(config_dir / "ontology.yaml", OntologyConfig)
 
         models_data = self._load_raw_yaml(config_dir / "models.yaml")

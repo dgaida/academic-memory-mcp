@@ -117,7 +117,11 @@ class PersonProfiler:
                     except Exception as e:
                         logger.error(f"Fehler beim Parsen von {file_path}: {e}")
 
-        # Sortieren nach Datum aufsteigend
+        # Sortieren nach Datum absteigend, um die neuesten 100 zu nehmen
+        found_emails.sort(key=lambda x: x["date"], reverse=True)
+        found_emails = found_emails[:100]
+
+        # Zurück-Sortieren nach Datum aufsteigend für die Batch-Verarbeitung
         found_emails.sort(key=lambda x: x["date"])
         return found_emails
 
@@ -224,7 +228,7 @@ class PersonProfiler:
             logger.info(f"Steckbrief für {email_address} existiert bereits.")
             return profile_file.read_text(encoding="utf-8")
 
-        is_tool_user = email_address.lower() == self.config.user.email.lower()
+        is_tool_user = email_address.lower() in [e.lower() for e in self.config.user.emails]
         emails = [] if is_tool_user else self.find_emails_for_address(email_address)
         kg_context = self._get_knowledge_graph_context(email_address)
 
@@ -278,7 +282,7 @@ class PersonProfiler:
         if not profile_file.exists():
             return self.generate_profile(email_address)
 
-        is_tool_user = email_address.lower() == self.config.user.email.lower()
+        is_tool_user = email_address.lower() in [e.lower() for e in self.config.user.emails]
         if is_tool_user:
             # Für den Tool-Nutzer aktualisieren wir immer aus dem KG (einfach neu generieren)
             return self.generate_profile(email_address, force_update=True)
