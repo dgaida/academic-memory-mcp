@@ -27,6 +27,7 @@ from mcp_university.classifier.sort_emails import (
     find_student_folder,
 )
 from mcp_university.retrieval.index import SearchIndex
+from mcp_university.utils.memory import resolve_memory_index_names
 from mcp_university.utils.outlook import create_outlook_draft
 
 logger = logging.getLogger(__name__)
@@ -100,19 +101,22 @@ class EmailController:
         # Load memory paths
         memory_config_path = Path("config/classifier_memory_paths.yaml")
         self.memory_paths = {}
+        self.class_to_memory_index = {}
         if memory_config_path.exists():
             with open(memory_config_path, "r", encoding="utf-8") as f:
                 memory_config = yaml.safe_load(f)
                 self.memory_paths = memory_config.get("class_paths", {})
+                self.class_to_memory_index = resolve_memory_index_names(self.memory_paths)
 
 
     def _get_memory_context(self, mail_content: str, email_class: str) -> str:
         """Generiert Suchanfragen aus der E-Mail und holt relevante Chunks aus der Vektordatenbank."""
-        if email_class not in self.memory_paths:
+        if email_class not in self.class_to_memory_index:
             logger.debug(f"Keine Vektordatenbank für Klasse {email_class} konfiguriert.")
             return ""
 
-        index_dir = self.config.data_dir / "memory" / email_class
+        index_name = self.class_to_memory_index[email_class]
+        index_dir = self.config.data_dir / "memory" / index_name
         if not index_dir.exists():
             logger.debug(f"Vektordatenbank-Verzeichnis {index_dir} existiert nicht.")
             return ""

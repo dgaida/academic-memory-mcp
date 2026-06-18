@@ -9,6 +9,7 @@ from transformers import AutoTokenizer
 from mcp_university.retrieval.index import SearchIndex
 from mcp_university.parser.factory import ParserFactory
 from mcp_university.config import get_config
+from mcp_university.utils.memory import resolve_memory_index_names
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -25,9 +26,9 @@ def chunk_text(text: str, tokenizer: Any, chunk_size: int = 512, overlap: int = 
             break
     return chunks
 
-def process_class_folder(class_name: str, base_path: Path, index: SearchIndex, parser_factory: ParserFactory, tokenizer: Any):
+def process_memory_folder(index_name: str, base_path: Path, index: SearchIndex, parser_factory: ParserFactory, tokenizer: Any):
     """Traverses a folder, parses files, chunks them and adds to the index."""
-    logger.info(f"Processing class '{class_name}' from path: {base_path}")
+    logger.info(f"Processing memory index '{index_name}' from path: {base_path}")
 
     supported_extensions = [".pdf", ".docx", ".md", ".txt", ".eml", ".msg", ".py", ".ipynb", ".json", ".html"]
 
@@ -40,7 +41,7 @@ def process_class_folder(class_name: str, base_path: Path, index: SearchIndex, p
         return
 
     all_chunks = []
-    for file_path in tqdm(files_to_process, desc=f"Parsing {class_name}"):
+    for file_path in tqdm(files_to_process, desc=f"Parsing {index_name}"):
         try:
             content = parser_factory.parse(file_path)
             if not content:
@@ -55,7 +56,7 @@ def process_class_folder(class_name: str, base_path: Path, index: SearchIndex, p
                     "content": chunk,
                     "metadata": {
                         "source_file": str(file_path),
-                        "class": class_name,
+                        "memory_index": index_name,
                         "chunk_index": i
                     }
                 })
@@ -63,13 +64,13 @@ def process_class_folder(class_name: str, base_path: Path, index: SearchIndex, p
             logger.error(f"Failed to process {file_path}: {e}")
 
     if all_chunks:
-        logger.info(f"Indexing {len(all_chunks)} chunks for {class_name}...")
+        logger.info(f"Indexing {len(all_chunks)} chunks for {index_name}...")
         # Index in batches to avoid overhead
         batch_size = 100
         for i in range(0, len(all_chunks), batch_size):
             index.add_documents(all_chunks[i:i + batch_size])
     else:
-        logger.warning(f"No content extracted for {class_name}")
+        logger.warning(f"No content extracted for {index_name}")
 
 def main():
     parser = argparse.ArgumentParser(description="Index memory files into vector databases.")
@@ -89,6 +90,16 @@ def main():
         logger.error("No class_paths found in config.")
         return
 
+    # Resolve shared index names
+    class_to_index = resolve_memory_index_names(class_paths)
+
+    # Map index names to unique paths
+    index_to_path = {}
+    for class_name, path_str in class_paths.items():
+        index_name = class_to_index[class_name]
+        if index_name not in index_to_path:
+            index_to_path[index_name] = Path(path_str)
+
     global_config = get_config()
     tokenizer = AutoTokenizer.from_pretrained(global_config.embeddings.model)
     parser_factory = ParserFactory(cache_dir=global_config.data_dir / "cache")
@@ -96,16 +107,15 @@ def main():
     memory_base_dir = global_config.data_dir / "memory"
     memory_base_dir.mkdir(parents=True, exist_ok=True)
 
-    for class_name, path_str in class_paths.items():
-        base_path = Path(path_str)
+    for index_name, base_path in index_to_path.items():
         if not base_path.exists():
-            logger.warning(f"Path {base_path} for class {class_name} does not exist. Skipping.")
+            logger.warning(f"Path {base_path} for index {index_name} does not exist. Skipping.")
             continue
 
-        index_dir = memory_base_dir / class_name
+        index_dir = memory_base_dir / index_name
         index = SearchIndex(location=index_dir)
 
-        process_class_folder(class_name, base_path, index, parser_factory, tokenizer)
+        process_memory_folder(index_name, base_path, index, parser_factory, tokenizer)
 
 if __name__ == "__main__":
     main()
