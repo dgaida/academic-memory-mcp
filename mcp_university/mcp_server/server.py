@@ -23,7 +23,6 @@ def create_server() -> FastMCP:
     kg_store = KnowledgeGraphStore(cfg.kg_db_path)
 
     idx = SearchIndex(str(cfg.qdrant_path), cfg.embeddings.model, store=store)
-    Summarizer(cfg.llm.model, cfg.llm.base_url)
 
     @mcp.tool()
     def search_documents(query: str, top_k: int = 5) -> str:
@@ -54,5 +53,23 @@ def create_server() -> FastMCP:
         if node:
             return str(node)
         return "Keine TH Köln Information gefunden."
+
+    @mcp.tool()
+    def get_folder_summary(path: str) -> str:
+        """Holt die Zusammenfassung eines Ordners."""
+        folders = store.get_all_folders()
+        folder_id = next((f['id'] for f in folders if path in f['path']), None)
+        if folder_id:
+            summary = store.get_summary("folder", folder_id)
+            return summary or "Keine Zusammenfassung gefunden."
+        return "Ordner nicht gefunden."
+
+    @mcp.tool()
+    def get_student_context(email: str) -> str:
+        """Holt den Wissensgraph-Kontext eines Studenten."""
+        node = store.get_node_by_property("email", email)
+        if node:
+            return str(store.get_outgoing_edges(node['id']))
+        return "Kein Kontext gefunden."
 
     return mcp
