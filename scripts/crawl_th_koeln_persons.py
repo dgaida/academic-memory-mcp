@@ -11,10 +11,11 @@ import argparse
 import html
 import os
 import random
+import re
 import string
 import sys
 import time
-import re
+import glob
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 
@@ -264,6 +265,41 @@ def save_to_markdown(data: List[Dict[str, Any]], filename: str) -> None:
             f.write(f"| {name} | {email} | {faculty} | {institute} | {pa} | {dekan} | {senat} | {inst_dir} | {praesidium} |\n")
 
 
+def parse_markdown_files(directory: Path) -> List[Dict[str, Any]]:
+    """Parses Markdown files in the directory to extract person data.
+
+    Args:
+        directory: Path to the directory containing Markdown files.
+
+    Returns:
+        A list of person dictionaries.
+    """
+    all_persons = []
+    md_files = glob.glob(str(directory / "*.md"))
+
+    for md_file in md_files:
+        with open(md_file, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+
+        for line in lines:
+            if line.startswith("| ") and "Name" not in line and "---" not in line:
+                parts = [p.strip() for p in line.split("|")]
+                if len(parts) >= 10:
+                    person = {
+                        "name": parts[1],
+                        "email": parts[2],
+                        "faculty": parts[3] if parts[3] != "None" and parts[3] != "" else None,
+                        "institute": parts[4] if parts[4] != "None" and parts[4] != "" else None,
+                        "is_pa_vorsitz": parts[5] == "X",
+                        "is_dekan": parts[6] == "X",
+                        "is_senat": parts[7] == "X",
+                        "is_institutsdirektor": parts[8] == "X",
+                        "is_praesidium": parts[9] == "X"
+                    }
+                    all_persons.append(person)
+    return all_persons
+
+
 def save_to_database(data: List[Dict[str, Any]], db_path: Path) -> None:
     """Saves the crawled data to the metadata database.
 
@@ -290,11 +326,35 @@ def save_to_database(data: List[Dict[str, Any]], db_path: Path) -> None:
             "is_dekan": person.get("is_dekan", False),
             "is_senat": person.get("is_senat", False),
             "is_institutsdirektor": person.get("is_institutsdirektor", False),
-            "Präsidumsmitglied": person.get("is_praesidium", False)
+            "is_praesidium": person.get("is_praesidium", False)
         }
 
         # Create person node
         person_id, _ = store.upsert_node(name, "Person", properties)
+
+        # Create role nodes and edges
+        if person.get("is_dekan"):
+            role_id, _ = store.upsert_node("DekanIn", "DekanIn")
+            store.upsert_edge(person_id, role_id, "hat Funktion")
+            # Link to Dekanat if it exists
+            dekanat_id, _ = store.upsert_node("Dekanat", "Dekanat")
+            store.upsert_edge(role_id, dekanat_id, "ist Element von")
+
+        if person.get("is_pa_vorsitz"):
+            role_id, _ = store.upsert_node("Prüfungsausschussvorsitz", "Prüfungsausschussvorsitz")
+            store.upsert_edge(person_id, role_id, "hat Funktion")
+
+        if person.get("is_institutsdirektor"):
+            role_id, _ = store.upsert_node("InstitutsdirektorIn", "InstitutsdirektorIn")
+            store.upsert_edge(person_id, role_id, "hat Funktion")
+
+        if person.get("is_senat"):
+            role_id, _ = store.upsert_node("Senat", "Senat")
+            store.upsert_edge(person_id, role_id, "ist Element von")
+
+        if person.get("is_praesidium"):
+            role_id, _ = store.upsert_node("Präsidium", "Präsidium")
+            store.upsert_edge(person_id, role_id, "ist Element von")
 
         if faculty:
             # Create faculty/einrichtung node
@@ -329,6 +389,7 @@ Examples:
   python scripts/crawl_th_koeln_persons.py --faculty "Informatik und Ingenieurwissenschaften"
   python scripts/crawl_th_koeln_persons.py --institution "Campus IT"
   python scripts/crawl_th_koeln_persons.py --crawl-all both
+  python scripts/crawl_th_koeln_persons.py --rebuild
         """
     )
     parser.add_argument(
@@ -362,6 +423,11 @@ Examples:
         help="List all available institutions and exit."
     )
     parser.add_argument(
+        "--rebuild",
+        action="store_true",
+        help="Rebuild the database from existing Markdown files in data/th_koeln/."
+    )
+    parser.add_argument(
         "--db",
         type=Path,
         default=Path("data/metadata/university.db"),
@@ -369,6 +435,22 @@ Examples:
     )
 
     args = parser.parse_args()
+
+    if args.rebuild:
+        md_dir = Path("data/th_koeln")
+        if not md_dir.exists():
+            print(f"Error: Directory {md_dir} does not exist.")
+            return
+
+        print(f"Rebuilding database from Markdown files in {md_dir}...")
+        all_data = parse_markdown_files(md_dir)
+        if not all_data:
+            print("No person data found in Markdown files.")
+            return
+
+        save_to_database(all_data, args.db)
+        print(f"Successfully rebuilt database with {len(all_data)} persons.")
+        return
 
     crawler = THKoelnCrawler()
 
@@ -438,7 +520,7 @@ Examples:
     for fac, fac_data in by_faculty.items():
         # Sanitize filename
         safe_fac = re.sub(r'[^a-zA-Z0-9]', '_', fac)
-        fac_filename = f"data/persons_{safe_fac}.md"
+        fac_filename = f"data/th_koeln/persons_{safe_fac}.md"
         save_to_markdown(fac_data, fac_filename)
         print(f"Saved {len(fac_data)} persons for {fac} to {fac_filename}")
 

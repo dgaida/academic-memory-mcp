@@ -5,8 +5,12 @@ node_types:
   - Institut
   - Fakultät
   - Dekanat
+  - DekanIn
   - Präsidium
+  - Prüfungsausschussvorsitz
   - Prüfungsausschuss
+  - InstitutsdirektorIn
+  - Senat
   - Modul
   - Unternehmen
   - Forschungsprojekt
@@ -17,6 +21,7 @@ edge_types:
   - ist Erstprüfer
   - ist Zweitprüfer
   - ist Element von
+  - hat Funktion
   - schreibt Forschungsantrag
   - arbeitet in Forschungsprojekt
   - schreibt Bachelorarbeit
