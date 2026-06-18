@@ -2,9 +2,9 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-from typing import List, Dict, Any, Type, TypeVar
+from typing import List, Dict, Any, Type, TypeVar, Union
 import yaml
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -45,8 +45,20 @@ class OntologyConfig(BaseModel):
 class UserConfig(BaseModel):
     """Konfiguration für den Nutzer des Tools."""
     name: str = "Daniel Gaida"
-    email: str = "daniel.gaida@th-koeln.de"
+    email: Union[str, List[str]] = "daniel.gaida@th-koeln.de"
     emails: List[str] = []
+
+    @model_validator(mode="before")
+    @classmethod
+    def handle_email_list(cls, data: Any) -> Any:
+        """Behandelt den Fall, dass 'email' als Liste angegeben wurde."""
+        if isinstance(data, dict):
+            email_val = data.get("email")
+            if isinstance(email_val, list):
+                if not data.get("emails"):
+                    data["emails"] = email_val
+                data["email"] = email_val[0] if email_val else ""
+        return data
 
 class Config:
     """Zentrale Konfigurationsklasse für das MCP University System.
