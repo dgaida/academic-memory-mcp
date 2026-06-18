@@ -8,7 +8,7 @@ from zoneinfo import ZoneInfo
 from ..config import get_config
 from ..parser.factory import ParserFactory
 from ..retrieval.index import SearchIndex
-from ..metadata.store import MetadataStore
+from ..metadata.kg_store import KnowledgeGraphStore as MetadataStore
 from ..utils.llm_client_wrapper import LLMClientWrapper
 from ..utils.anonymizer import Anonymizer
 
@@ -42,7 +42,7 @@ class Agent:
             self.anonymizer = None
 
         self.parser_factory = ParserFactory(self.cfg.data_dir / "cache")
-        self.store = MetadataStore(self.cfg.sqlite_path)
+        self.store = MetadataStore(self.cfg.kg_db_path)
         self.index = SearchIndex(str(self.cfg.qdrant_path), self.cfg.embeddings.model, store=self.store)
         self.last_appointment_info = None
 

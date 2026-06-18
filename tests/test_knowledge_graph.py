@@ -1,13 +1,13 @@
 import pytest
 from unittest.mock import MagicMock
 import json
-from mcp_university.metadata.store import MetadataStore
+from mcp_university.metadata.kg_store import KnowledgeGraphStore as MetadataStore
 from mcp_university.knowledge_graph.engine import KnowledgeGraphEngine
 from mcp_university.summarizer.engine import Summarizer
 
 @pytest.fixture
 def temp_db(tmp_path):
-    db_path = tmp_path / "test_university.db"
+    db_path = tmp_path / "test_knowledge_graph.db"
     return MetadataStore(db_path)
 
 @pytest.fixture

@@ -9,7 +9,7 @@ import mcp_university.cli.db as db_module
 
 @pytest.fixture
 def db_path(tmp_path):
-    return tmp_path / "test_university.db"
+    return tmp_path / "test_metadata.db"
 
 @pytest.fixture
 def store(db_path):

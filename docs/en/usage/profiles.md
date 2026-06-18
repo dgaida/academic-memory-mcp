@@ -18,7 +18,7 @@ These profiles are saved in Markdown format and serve as additional context for 
 If no profile exists for an email address, it is automatically created when attempting to reply to an email (or manually via CLI). All available emails for this person are analyzed.
 
 ### Automatic Updates
-Profiles are dynamic. The system tracks which emails have already been used for profile generation in a separate database (`profiles_tracking.db`).
+Profiles are dynamic. The system tracks which emails have already been used for profile generation in a separate database (`profiles.db`).
 
 When new emails for a person are found in the system, the existing profile is automatically updated by the LLM, using the old profile as a base and integrating only the new information.
 
@@ -46,4 +46,4 @@ The system features robust decoding for MIME headers (RFC 2047). This prevents e
 
 ## File Paths  
 - **Profiles:** By default under `D:\Steckbriefe\` (configurable).  
-- **Tracking Database:** `data/profiles_tracking.db`.  
+- **Tracking Database:** `data/profiles.db`.

@@ -6,6 +6,7 @@ from logging.handlers import RotatingFileHandler
 from ..crawler.crawler import Crawler
 from ..config import get_config
 from ..metadata.store import MetadataStore
+from ..metadata.kg_store import KnowledgeGraphStore
 from ..parser.factory import ParserFactory
 from ..summarizer.engine import Summarizer
 from ..summarizer.profiler import PersonProfiler
@@ -45,7 +46,7 @@ def graph_build(debug: bool = typer.Option(False, "--debug", "-d", help="Debug-L
     """Baut den Wissensgraphen basierend auf den vorhandenen Zusammenfassungen auf."""
     setup_logging(debug)
     cfg = get_config()
-    store = MetadataStore(cfg.sqlite_path)
+    store = KnowledgeGraphStore(cfg.kg_db_path)
     summarizer = Summarizer(cfg.llm.model, cfg.llm.base_url)
     graph_engine = KnowledgeGraphEngine(store, summarizer)
 

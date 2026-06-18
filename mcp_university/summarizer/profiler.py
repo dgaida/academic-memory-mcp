@@ -8,6 +8,7 @@ from mcp_university.config import get_config
 from mcp_university.parser.mail_parser import MailParser
 from mcp_university.utils.llm_client_wrapper import LLMClientWrapper
 from mcp_university.metadata.store import MetadataStore
+from mcp_university.metadata.kg_store import KnowledgeGraphStore
 from mcp_university.metadata.profile_store import ProfileStore
 
 logger = logging.getLogger(__name__)
@@ -25,8 +26,8 @@ class PersonProfiler:
         self.config = get_config()
         self.mail_parser = MailParser()
         self.llm = LLMClientWrapper()
-        self.store = MetadataStore(self.config.sqlite_path)
-        self.profile_store = ProfileStore(self.config.data_dir / "profiles_tracking.db")
+        self.store = KnowledgeGraphStore(self.config.kg_db_path)
+        self.profile_store = ProfileStore(self.config.profiles_db_path)
 
         # Sicherstellen, dass das Speicherverzeichnis existiert
         try:

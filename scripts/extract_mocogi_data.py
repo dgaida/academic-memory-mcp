@@ -16,7 +16,7 @@ import urllib.error
 import re
 from typing import Dict, Any, Optional
 
-from mcp_university.metadata.store import MetadataStore
+from mcp_university.metadata.kg_store import KnowledgeGraphStore as MetadataStore
 from mcp_university.config import get_config
 
 # Logging-Konfiguration
@@ -210,7 +210,7 @@ def extract_data() -> None:
     """Extrahiert alle Studiengänge, POs und Module und integriert sie in den Graphen."""
     load_env_manual()
     cfg = get_config()
-    store = MetadataStore(cfg.sqlite_path)
+    store = MetadataStore(cfg.kg_db_path)
 
     base_url = "https://module.gm.th-koeln.de/api"
     output_file = "data/mocogi_modules.md"

@@ -8,6 +8,7 @@ from fastmcp import FastMCP
 
 from ..config import get_config
 from ..metadata.store import MetadataStore
+from ..metadata.kg_store import KnowledgeGraphStore
 from ..retrieval.index import SearchIndex
 from ..parser.factory import ParserFactory
 
@@ -21,7 +22,7 @@ def create_tool_server() -> FastMCP:
     # Lazy initialization for components
     # These are initialized inside the tools or as global-ish within the factory to avoid startup overhead
     # but here we follow the pattern of the existing server.py
-    store = MetadataStore(cfg.sqlite_path)
+    store = KnowledgeGraphStore(cfg.kg_db_path)
     index = SearchIndex(str(cfg.qdrant_path), cfg.embeddings.model, store=store)
     parser_factory = ParserFactory(cfg.data_dir / "cache")
 
