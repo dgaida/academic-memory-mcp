@@ -239,7 +239,7 @@ def process_emails(
             with extract_msg.openMsg(str(msg_file)) as msg:
                 sender = (msg.sender.lower() if msg.sender else "").strip()
 
-                if get_config().user.email in sender:
+                if any(e.lower() in sender for e in get_config().user.emails):
                     target_folder = "SentItems"
                     # Suche in Empfängern nach Student
                     recipients = msg.recipients

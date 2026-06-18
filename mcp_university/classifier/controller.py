@@ -227,7 +227,7 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
             pass
 
         person_profile = self.profiler.get_profile(student_email) if student_email else None
-        user_profile = self.profiler.get_profile(self.config.user.email)
+        user_profile = self.profiler.get_profile(self.config.user.emails[0])
 
         first_name = "Unknown"
         try:
@@ -278,7 +278,7 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
                 if msg.recipients:
                     for rec in msg.recipients:
                         rec_email = rec.email or rec.name
-                        if rec_email and self.config.user.email not in rec_email.lower() and rec_email.lower() != student_email.lower():
+                        if rec_email and all(e.lower() not in rec_email.lower() for e in self.config.user.emails) and rec_email.lower() != student_email.lower():
                             cc_list.append(rec_email)
         except Exception:
             pass
@@ -738,14 +738,14 @@ TEXT:
                 pass
 
             person_profile = self.profiler.get_profile(student_email) if student_email else None
-            user_profile = self.profiler.get_profile(self.config.user.email)
+            user_profile = self.profiler.get_profile(self.config.user.emails[0])
             cc_list = []
             try:
                 with extract_msg.openMsg(str(latest_mail)) as msg:
                     if msg.recipients:
                         for rec in msg.recipients:
                             rec_email = rec.email or rec.name
-                            if rec_email and self.config.user.email not in rec_email.lower() and rec_email.lower() != student_email.lower():
+                            if rec_email and all(e.lower() not in rec_email.lower() for e in self.config.user.emails) and rec_email.lower() != student_email.lower():
                                 cc_list.append(rec_email)
             except Exception:
                 pass
