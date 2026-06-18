@@ -1,5 +1,4 @@
 """Tests for the configuration loading logic."""
-import pytest
 from mcp_university.config import UserConfig
 
 def test_user_config_single_email():
