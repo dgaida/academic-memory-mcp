@@ -128,21 +128,41 @@ class Config:
 
     @property
     def metadata_db_path(self) -> Path:
-        """Gibt den Pfad zur Metadaten-Datenbank zurück."""
+        """Gibt den Pfad zur Metadaten-Datenbank zurück.
+
+        Enthält Datei-Metadaten, Zusammenfassungen, Studenten-Informationen
+        und den Graph der studentischen Verbindungen.
+
+        Returns:
+            Path: Pfad zur metadata.db
+        """
         return self.data_dir / "metadata" / "metadata.db"
 
     @property
     def kg_db_path(self) -> Path:
-        """Gibt den Pfad zur Wissensgraph-Datenbank zurück."""
+        """Gibt den Pfad zur Wissensgraph-Datenbank zurück.
+
+        Enthält Daten über TH Köln Personal, Module und Studiengänge.
+
+        Returns:
+            Path: Pfad zur knowledge_graph.db
+        """
         return self.data_dir / "metadata" / "knowledge_graph.db"
 
     @property
     def profiles_db_path(self) -> Path:
-        """Gibt den Pfad zur Steckbrief-Tracking-Datenbank zurück."""
+        """Gibt den Pfad zur Steckbrief-Tracking-Datenbank zurück.
+
+        Trackt bereits verarbeitete E-Mails für Personen-Steckbriefe.
+
+        Returns:
+            Path: Pfad zur profiles.db
+        """
         return self.data_dir / "metadata" / "profiles.db"
 
+    @property
     def sqlite_path(self) -> Path:
-        """Gibt den Pfad zur SQLite-Datenbank zurück.
+        """Gibt den primären SQLite-Pfad zurück (Alias für metadata_db_path).
 
         Returns:
             Path: DB-Pfad.
@@ -161,9 +181,6 @@ class Config:
     @property
     def offline(self) -> bool:
         """Prüft, ob das System im Offline-Modus betrieben wird.
-
-        Wird über die Umgebungsvariable 'MCP_UNIVERSITY_OFFLINE' gesteuert.
-        Falls True, werden auch HF_HUB_OFFLINE und TRANSFORMERS_OFFLINE gesetzt.
 
         Returns:
             bool: True, wenn Offline-Modus aktiv.

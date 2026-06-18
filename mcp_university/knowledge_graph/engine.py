@@ -1,149 +1,74 @@
-"""Engine zur Erstellung und Verwaltung des Wissensgraphen."""
-import logging
+"""Engine zur Extraktion von Wissen aus Zusammenfassungen."""
 import json
-from typing import List, Dict, Any, Optional
-from mcp_university.metadata.kg_store import KnowledgeGraphStore as MetadataStore
+import logging
+from typing import Dict, Any, Optional, List
 from mcp_university.summarizer.engine import Summarizer
-from mcp_university.config import get_config, OntologyConfig
+from mcp_university.config import OntologyConfig
 
 logger = logging.getLogger(__name__)
 
 class KnowledgeGraphEngine:
-    """Extrahiert Entitäten und Beziehungen aus Zusammenfassungen für den Wissensgraphen."""
+    """Extrahiert Entitäten und Beziehungen aus Texten."""
 
-    def __init__(self, store: MetadataStore, summarizer: Summarizer, ontology: Optional[OntologyConfig] = None) -> None:
+    def __init__(self, store: Any, summarizer: Summarizer, ontology: Optional[OntologyConfig] = None) -> None:
+        """Initialisiert die Engine."""
         self.store = store
         self.summarizer = summarizer
-        self.ontology = ontology or get_config().ontology
+        self.ontology = ontology
 
-    def process_summary(self, summary_content: str, user_node_id: int) -> Dict[str, List[str]]:
-        """Analysiert eine Zusammenfassung und aktualisiert den Graphen.
+    def process_summary(self, content: str, user_node_id: int) -> Dict[str, List[str]]:
+        """Verarbeitet eine Zusammenfassung."""
+        ontology_info = ""
+        if self.ontology:
+            ontology_info = f"Knotentypen: {', '.join(self.ontology.node_types)}\nBeziehungstypen: {', '.join(self.ontology.edge_types)}\nNutze NUR die folgenden Knotentypen und Beziehungstypen."
 
-        Args:
-            summary_content (str): Der Text der Zusammenfassung (.emails_summary.md).
-            user_node_id (int): Die ID des Benutzer-Knotens (Zentrum).
+        prompt = f"{ontology_info}\nExtrahiere Wissen als JSON-Liste von Triplets: {content}"
 
-        Returns:
-            Dict[str, List[str]]: Zusammenfassung der Änderungen (neue/aktualisierte Knoten/Kanten).
-        """
-        changes = {"new_nodes": [], "updated_nodes": [], "new_edges": [], "updated_edges": []}
-        triplets = self._extract_triplets(summary_content)
-        for triplet in triplets:
-            source_name = triplet.get("source")
-            target_name = triplet.get("target")
-            relation = triplet.get("relation")
-            source_type = triplet.get("source_type", "Person")
-            target_type = triplet.get("target_type", "Person")
-            properties = triplet.get("properties", {})
+        try:
+            response = self.summarizer._chat_request(prompt)
+            triplets = json.loads(response)
+        except Exception as e:
+            logger.error(f"Extraktionsfehler: {e}")
+            return {"new_nodes": [], "new_edges": []}
 
-            if not source_name or not target_name or not relation:
-                continue
+        new_nodes = []
+        new_edges = []
 
-            # Alias-Auflösung
-            canonical_source = self.store.resolve_canonical_name(source_name, source_type)
-            canonical_target = self.store.resolve_canonical_name(target_name, target_type)
+        for t in triplets:
+            source_type = t.get("source_type", "Person")
+            target_type = t.get("target_type", "Modul")
 
-            source_id, s_new = self.store.upsert_node(canonical_source, source_type)
+            s_id, s_new = self.store.upsert_node(t["source"], source_type, t.get("properties", {}))
             if s_new:
-                changes["new_nodes"].append(f"{canonical_source} ({source_type})")
-            else:
-                changes["updated_nodes"].append(canonical_source)
+                new_nodes.append(t["source"])
 
-            target_id, t_new = self.store.upsert_node(canonical_target, target_type)
+            t_id, t_new = self.store.upsert_node(t["target"], target_type, {})
             if t_new:
-                changes["new_nodes"].append(f"{canonical_target} ({target_type})")
-            else:
-                changes["updated_nodes"].append(canonical_target)
+                new_nodes.append(t["target"])
 
-            # Kanten-Prioritäten prüfen (Ersetzung)
-            should_add = self._handle_edge_priorities(source_id, target_id, relation)
-            if not should_add:
-                continue
+            if self._should_upsert_edge(s_id, t_id, t["relation"]):
+                _, e_new = self.store.upsert_edge(s_id, t_id, t["relation"], t.get("properties", {}))
+                if e_new:
+                    new_edges.append(f"{t['source']} --{t['relation']}--> {t['target']}")
 
-            edge_id, e_new = self.store.upsert_edge(source_id, target_id, relation, properties)
-            edge_desc = f"{canonical_source} --[{relation}]--> {canonical_target}"
-            if e_new:
-                changes["new_edges"].append(edge_desc)
-            else:
-                changes["updated_edges"].append(edge_desc)
+        return {"new_nodes": new_nodes, "new_edges": new_edges}
 
-        # Dubletten entfernen
-        for key in changes:
-            changes[key] = list(set(changes[key]))
-
-        return changes
-
-    def _handle_edge_priorities(self, source_id: int, target_id: int, new_relation: str) -> bool:
-        """Prüft Kanten-Prioritäten und löscht ggf. unterlegene Kanten.
-
-        Args:
-            source_id (int): Startknoten.
-            target_id (int): Zielknoten.
-            new_relation (str): Die neue Beziehung.
-
-        Returns:
-            bool: Ob die neue Kante hinzugefügt werden soll.
-        """
-        if not self.ontology.edge_priorities:
+    def _should_upsert_edge(self, source_id: int, target_id: int, relation: str) -> bool:
+        """Prüft Prioritäten."""
+        if not self.ontology or not self.ontology.edge_priorities:
             return True
 
-        for category, priority_list in self.ontology.edge_priorities.items():
-            if new_relation not in priority_list:
+        for priority_list in self.ontology.edge_priorities.values():
+            if relation not in priority_list:
                 continue
 
-            new_priority = priority_list.index(new_relation)
+            current_prio = priority_list.index(relation)
             existing_edges = self.store.get_edges_between_nodes(source_id, target_id)
 
             for edge in existing_edges:
-                rel = edge["relation_type"]
-                if rel in priority_list:
-                    old_priority = priority_list.index(rel)
-                    if new_priority >= old_priority:
-                        # Neue Kante hat höhere oder gleiche Priorität -> alte löschen
-                        # (Gleiche Priorität wird durch upsert_edge sowieso aktualisiert, aber
-                        #  hier löschen wir sie explizit, falls es ein anderer Name ist aber in derselben Liste)
-                        # Hinweis: upsert_edge nutzt (source_id, target_id, relation_type) als UNIQUE.
-                        # Wenn relation_type unterschiedlich ist, gäbe es sonst zwei Kanten.
-                        if rel != new_relation:
-                            self.store.delete_edge(source_id, target_id, rel)
-                            logger.info(f"Kante '{rel}' durch '{new_relation}' ersetzt.")
-                    else:
-                        # Bestehende Kante hat höhere Priorität -> neue ignorieren
-                        logger.info(f"Kante '{new_relation}' ignoriert, da '{rel}' höhere Priorität hat.")
+                if edge['relation_type'] in priority_list:
+                    existing_prio = priority_list.index(edge['relation_type'])
+                    if current_prio < existing_prio:
                         return False
+                    self.store.delete_edge(source_id, target_id, edge['relation_type'])
         return True
-
-    def _extract_triplets(self, content: str) -> List[Dict[str, Any]]:
-        """Nutzt das LLM, um Triplets aus dem Inhalt zu extrahieren."""
-        node_types_str = ", ".join(self.ontology.node_types)
-        edge_types_str = ", ".join(self.ontology.edge_types)
-
-        system_prompt = f"""Du bist ein Experte für Wissensextraktion. Deine Aufgabe ist es, Informationen aus E-Mail-Zusammenfassungen in ein strukturiertes Format (Triplets) zu überführen.
-
-Nutze NUR die folgenden Knotentypen und Beziehungstypen. Erfinde keine neuen Typen.
-
-Knotentypen: {node_types_str}.
-Beziehungstypen: {edge_types_str}.
-
-Knoten-Eigenschaften: Für Personen 'Rolle' (z.B. Professor, Studierender, Prüfungsausschussvorsitzender).
-
-Antworte NUR mit einer JSON-Liste von Objekten mit den Schlüsseln: source, target, relation, source_type, target_type, properties.
-"""
-        user_prompt = f"""Extrahiere Triplets aus der folgenden Zusammenfassung:
-
-{content}
-"""
-        response = self.summarizer._chat_request(system_prompt, user_prompt)
-        if not response:
-            return []
-
-        try:
-            # Versuche JSON zu finden, falls das LLM Text drumherum baut
-            start_idx = response.find('[')
-            end_idx = response.rfind(']') + 1
-            if start_idx != -1 and end_idx != -1:
-                return json.loads(response[start_idx:end_idx])
-            return []
-        except Exception as e:
-            logger.error(f"Fehler beim Parsen der Triplets: {e}")
-            return []

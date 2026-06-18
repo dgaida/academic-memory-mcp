@@ -22,7 +22,7 @@ from typing import Dict, List, Optional, Any
 import requests
 from bs4 import BeautifulSoup
 
-from mcp_university.metadata.store import MetadataStore
+from mcp_university.metadata.kg_store import KnowledgeGraphStore
 
 # Try to reconfigure stdout/stdin for UTF-8 (mainly for Windows)
 if hasattr(sys.stdout, 'reconfigure'):
@@ -308,7 +308,7 @@ def save_to_database(data: List[Dict[str, Any]], db_path: Path) -> None:
         db_path: Path to the SQLite database.
     """
     os.makedirs(db_path.parent, exist_ok=True)
-    store = MetadataStore(db_path)
+    store = KnowledgeGraphStore(db_path)
 
     for person in data:
         name = person.get("name")
@@ -434,12 +434,12 @@ Examples:
         help="Path to the university metadata database (default: data/metadata/knowledge_graph.db)."
     )
 
+    args = parser.parse_args()
+
     from mcp_university.config import get_config
     cfg = get_config()
     if not getattr(args, "db", None):
         args.db = cfg.kg_db_path
-
-    args = parser.parse_args()
 
     if args.rebuild:
         md_dir = Path("data/th_koeln")
