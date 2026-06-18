@@ -10,7 +10,7 @@ import logging
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from mcp_university.config import get_config
-from mcp_university.metadata.store import MetadataStore
+from mcp_university.metadata.kg_store import KnowledgeGraphStore as MetadataStore
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -26,7 +26,7 @@ def main() -> None:
     args = parser.parse_args()
 
     config = get_config()
-    store = MetadataStore(config.sqlite_path)
+    store = MetadataStore(config.kg_db_path)
 
     nodes = store.get_all_nodes()
     edges = store.get_all_edges()

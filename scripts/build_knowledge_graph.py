@@ -8,7 +8,7 @@ import logging
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from mcp_university.config import get_config
-from mcp_university.metadata.store import MetadataStore
+from mcp_university.metadata.kg_store import KnowledgeGraphStore as MetadataStore
 from mcp_university.summarizer.engine import Summarizer
 from mcp_university.knowledge_graph.engine import KnowledgeGraphEngine
 from mcp_university.knowledge_graph.ontology_learner import OntologyLearner
@@ -23,7 +23,7 @@ def main() -> None:
     Zusammenfassungsdateien in den konfigurierten Pfaden.
     """
     config = get_config()
-    store = MetadataStore(config.sqlite_path)
+    store = MetadataStore(config.kg_db_path)
     summarizer = Summarizer(model=config.llm.model, base_url=config.llm.base_url)
 
     # Check if Qdrant path exists

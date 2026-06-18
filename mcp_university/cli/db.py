@@ -9,10 +9,15 @@ from rich.table import Table
 
 from ..config import get_config
 from ..metadata.store import MetadataStore
+from ..metadata.kg_store import KnowledgeGraphStore
 from ..retrieval.index import SearchIndex
 
 db_app = typer.Typer(help="Datenbank-Management-Befehle")
 console = Console()
+
+def get_kg_store() -> KnowledgeGraphStore:
+    cfg = get_config()
+    return KnowledgeGraphStore(cfg.kg_db_path)
 
 def get_store_and_index() -> Tuple[MetadataStore, SearchIndex]:
     """Initialisiert und gibt den MetadataStore und SearchIndex zurück.
@@ -305,7 +310,7 @@ def delete_deadline(deadline_id: int, force: bool = typer.Option(False, "--force
 @db_app.command("list-nodes")
 def list_nodes() -> None:
     """Listet alle Knoten im Wissensgraphen auf."""
-    store, _ = get_store_and_index()
+    store = get_kg_store()
     nodes = store.get_all_nodes()
 
     if not nodes:
@@ -364,7 +369,7 @@ def delete_node(node_id: int, force: bool = typer.Option(False, "--force", "-f",
         node_id (int): ID des zu löschenden Knotens.
         force (bool): Wenn True, wird ohne Bestätigung gelöscht.
     """
-    store, _ = get_store_and_index()
+    store = get_kg_store()
     node = store.get_node_by_id(node_id)
 
     if not node:
@@ -387,7 +392,7 @@ def delete_edge(edge_id: int, force: bool = typer.Option(False, "--force", "-f",
         edge_id (int): ID der zu löschenden Kante.
         force (bool): Wenn True, wird ohne Bestätigung gelöscht.
     """
-    store, _ = get_store_and_index()
+    store = get_kg_store()
 
     if not force:
         confirm = typer.confirm(f"Möchten Sie die Kante mit ID {edge_id} wirklich löschen?")

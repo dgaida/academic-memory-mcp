@@ -3,7 +3,7 @@ import logging
 import re
 from pathlib import Path
 from typing import Dict, Set
-from mcp_university.metadata.store import MetadataStore
+from mcp_university.metadata.kg_store import KnowledgeGraphStore as MetadataStore
 from mcp_university.parser.mail_parser import MailParser
 from mcp_university.summarizer.engine import Summarizer
 

@@ -38,4 +38,4 @@ Sie können die Knoten und Kanten des Wissensgraphen direkt verwalten:
 Für komplexe manuelle Korrekturen oder zur direkten Bearbeitung der Datenbank empfehlen wir externe Tools wie:  
 *   **[DB Browser for SQLite](https://sqlitebrowser.org/)**: Ein benutzerfreundliches Open-Source-Tool zum Anzeigen, Bearbeiten und Abfragen von SQLite-Datenbanken.  
 
-Öffnen Sie einfach die in der Konfiguration angegebene `.db` Datei (Standard: `data/university.db`) in DB Browser for SQLite.
+Öffnen Sie einfach die in der Konfiguration angegebene `.db` Datei (Standard: `data/metadata.db`) in DB Browser for SQLite.

@@ -430,9 +430,14 @@ Examples:
     parser.add_argument(
         "--db",
         type=Path,
-        default=Path("data/metadata/university.db"),
-        help="Path to the university metadata database (default: data/metadata/university.db)."
+        default=None,
+        help="Path to the university metadata database (default: data/metadata/knowledge_graph.db)."
     )
+
+    from mcp_university.config import get_config
+    cfg = get_config()
+    if not getattr(args, "db", None):
+        args.db = cfg.kg_db_path
 
     args = parser.parse_args()
 

@@ -2,7 +2,7 @@
 import logging
 import json
 from typing import List, Dict, Any, Optional
-from mcp_university.metadata.store import MetadataStore
+from mcp_university.metadata.kg_store import KnowledgeGraphStore as MetadataStore
 from mcp_university.summarizer.engine import Summarizer
 from mcp_university.config import get_config, OntologyConfig
 

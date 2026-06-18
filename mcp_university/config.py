@@ -127,13 +127,27 @@ class Config:
         return self.data_dir / "logs"
 
     @property
+    def metadata_db_path(self) -> Path:
+        """Gibt den Pfad zur Metadaten-Datenbank zurück."""
+        return self.data_dir / "metadata" / "metadata.db"
+
+    @property
+    def kg_db_path(self) -> Path:
+        """Gibt den Pfad zur Wissensgraph-Datenbank zurück."""
+        return self.data_dir / "metadata" / "knowledge_graph.db"
+
+    @property
+    def profiles_db_path(self) -> Path:
+        """Gibt den Pfad zur Steckbrief-Tracking-Datenbank zurück."""
+        return self.data_dir / "metadata" / "profiles.db"
+
     def sqlite_path(self) -> Path:
         """Gibt den Pfad zur SQLite-Datenbank zurück.
 
         Returns:
             Path: DB-Pfad.
         """
-        return self.data_dir / "metadata" / "university.db"
+        return self.metadata_db_path
 
     @property
     def qdrant_path(self) -> Path:

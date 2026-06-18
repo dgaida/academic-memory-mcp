@@ -11,7 +11,7 @@ def mock_store():
 
 @pytest.fixture
 def profiler(mock_store):
-    with patch('mcp_university.summarizer.profiler.MetadataStore', return_value=mock_store):
+    with patch('mcp_university.summarizer.profiler.KnowledgeGraphStore', return_value=mock_store):
         with patch('mcp_university.summarizer.profiler.LLMClientWrapper'):
             with patch('mcp_university.summarizer.profiler.MailParser'):
                 p = PersonProfiler(storage_path=Path("test_profiles"))

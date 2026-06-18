@@ -8,6 +8,7 @@ from pathlib import Path
 
 from ..config import get_config
 from ..metadata.store import MetadataStore
+from ..metadata.kg_store import KnowledgeGraphStore
 from ..retrieval.index import SearchIndex
 from ..summarizer.engine import Summarizer
 
@@ -25,7 +26,7 @@ def create_server() -> FastMCP:
     mcp = FastMCP("University Memory System", instructions="I am your university research and student management assistant.")
 
     # Lazy init components
-    store = MetadataStore(cfg.sqlite_path)
+    store = KnowledgeGraphStore(cfg.kg_db_path)
     index = SearchIndex(str(cfg.qdrant_path), cfg.embeddings.model, store=store)
     summarizer = Summarizer(cfg.llm.model, cfg.llm.base_url)
     use_shell = os.name == 'nt'

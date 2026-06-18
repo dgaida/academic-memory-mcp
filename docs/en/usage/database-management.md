@@ -38,4 +38,4 @@ You can directly manage the nodes and edges of the Knowledge Graph:
 For complex manual corrections or direct editing of the database, we recommend external tools such as:  
 *   **[DB Browser for SQLite](https://sqlitebrowser.org/)**: A user-friendly open-source tool for viewing, editing, and querying SQLite databases.  
 
-Simply open the `.db` file specified in your configuration (default: `data/university.db`) in DB Browser for SQLite.
+Simply open the `.db` file specified in your configuration (default: `data/metadata.db`) in DB Browser for SQLite.

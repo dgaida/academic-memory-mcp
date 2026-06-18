@@ -8,7 +8,7 @@ Indexing takes place in several phases:
 
 1.  **Initialization:**  
     - Configuration is loaded from `config/folders.yaml`, `config/user.yaml`, and `config/models.yaml`.  
-    - Connections to the SQLite metadata database (`data/metadata/university.db`) and the Qdrant vector index (`data/indexes/qdrant`) are established.  
+    - Connections to the SQLite metadata database (`data/metadata/metadata.db`) and the Qdrant vector index (`data/indexes/qdrant`) are established.
     - The Parser Factory is initialized (supporting PDF, Docx, Text, Email).  
 
 2.  **Crawling (Folder Scan):**  
@@ -140,7 +140,7 @@ Student_C/
 
 | Type | Location | Description |
 | :--- | :--- | :--- |
-| **SQLite DB** | `data/metadata/university.db` | Stores metadata, hashes, paths, and summaries. |
+| **SQLite DB** | `data/metadata/metadata.db` | Stores metadata, hashes, paths, and summaries. |
 | **Vector Index** | `data/indexes/qdrant/` | Binary files of the Qdrant search index. |
 | **Folder Summary** | `../.<foldername>_summary.md` | Hidden Markdown file in the parent directory. |
 | **Email Summary** | `./.emails_summary.md` | Aggregated conversation history for emails. |

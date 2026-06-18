@@ -18,7 +18,7 @@ Diese Steckbriefe werden im Markdown-Format gespeichert und dienen als zusätzli
 Wenn für eine E-Mail-Adresse noch kein Steckbrief existiert, wird dieser beim Versuch, eine E-Mail zu beantworten (oder manuell via CLI), automatisch erstellt. Dabei werden alle verfügbaren E-Mails dieser Person analysiert sowie Informationen aus dem Wissensgraphen einbezogen. Ein Steckbrief kann auch dann erstellt werden, wenn noch keine E-Mails vorhanden sind, sofern Informationen im Wissensgraphen vorliegen.
 
 ### Automatische Aktualisierung
-Steckbriefe sind dynamisch. Das System verfolgt in einer separaten Datenbank (`profiles_tracking.db`), welche E-Mails bereits für die Erstellung eines Steckbriefs verwendet wurden. 
+Steckbriefe sind dynamisch. Das System verfolgt in einer separaten Datenbank (`profiles.db`), welche E-Mails bereits für die Erstellung eines Steckbriefs verwendet wurden.
 
 Wenn neue E-Mails für eine Person im System gefunden werden, wird der bestehende Steckbrief automatisch durch das LLM aktualisiert, wobei das alte Profil als Basis dient und nur die neuen Informationen integriert werden.
 
@@ -46,4 +46,4 @@ Das System verfügt über eine robuste Dekodierung für MIME-Header (RFC 2047). 
 
 ## Dateipfade  
 - **Steckbriefe:** Standardmäßig unter `D:\Steckbriefe\` (konfigurierbar).  
-- **Tracking-Datenbank:** `data/profiles_tracking.db`.  
+- **Tracking-Datenbank:** `data/profiles.db`.
