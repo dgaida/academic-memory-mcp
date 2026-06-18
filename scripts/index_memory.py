@@ -113,7 +113,7 @@ def main():
             continue
 
         index_dir = memory_base_dir / index_name
-        index = SearchIndex(location=index_dir)
+        index = SearchIndex(location=index_dir, embedding_model_name=global_config.embeddings.model)
 
         process_memory_folder(index_name, base_path, index, parser_factory, tokenizer)
 

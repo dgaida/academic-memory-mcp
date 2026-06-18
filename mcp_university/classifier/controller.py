@@ -26,7 +26,7 @@ from mcp_university.classifier.sort_emails import (
     get_semester,
     find_student_folder,
 )
-from mcp_university.retrieval.index import SearchIndex
+from mcp_university.retrieval.index import SearchIndex, get_model
 from mcp_university.utils.memory import resolve_memory_index_names
 from mcp_university.utils.outlook import create_outlook_draft
 
@@ -919,13 +919,12 @@ TEXT:
             newest_mails = all_mails[:3]
 
             # 4. Embeddings und Similarity
-            from sentence_transformers import SentenceTransformer
+
             model_name = self.config.embeddings.model
 
-            # Lazy load similarity model on controller
+            # Lazy load similarity model on controller using shared cache
             if not hasattr(self, "_similarity_model"):
-                logger.info(f"Lade Embedding-Modell für Similarity: {model_name}")
-                self._similarity_model = SentenceTransformer(model_name)
+                self._similarity_model = get_model(model_name, offline=self.config.offline)
 
             subjects = [m["subject"] for m in newest_mails]
 
