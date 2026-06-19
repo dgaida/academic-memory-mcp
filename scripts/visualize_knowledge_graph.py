@@ -110,7 +110,7 @@ def main() -> None:
             logger.warning(f"Keine Knoten mit den Namen {args.filter} gefunden.")
 
     # Create Pyvis network
-    net = Network(height="750px", width="100%", bgcolor="#ffffff", font_color="black", directed=True)
+    net = Network(height="750px", width="100%", bgcolor="#ffffff", font_color="black", directed=True, cdn_resources="in_line")
 
     # Configure physics for better layout
     net.force_atlas_2based()

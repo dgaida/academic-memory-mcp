@@ -29,12 +29,17 @@ python scripts/visualize_knowledge_graph.py
 ```
 Die Ausgabe erfolgt in `knowledge_graph.html`.
 
+**Offline-Unterstützung:**
+Standardmäßig benötigt die von Pyvis generierte HTML-Datei eine Internetverbindung, um die benötigten JavaScript- und CSS-Bibliotheken (vis-network) von einem CDN (Content Delivery Network) zu laden.
+Das Skript wurde so konfiguriert, dass diese Ressourcen nun direkt "in-line" in die HTML-Datei eingebettet werden (`cdn_resources='in_line'`). Dadurch ist die Visualisierung vollständig offline-fähig, führt jedoch zu einer größeren Dateigröße.
+
 Unterstützt den Parameter `--filter <Name>` (oder `-f` in der CLI), um den Graphen auf einen bestimmten Knoten und seinen Kontext zu beschränken. Dabei werden alle "Eltern-Strukturen" (eingehende Kanten, z.B. Institut oder Fakultät einer Person) sowie alle von diesen Strukturen ausgehenden Teilgraphen (ausgehende Kanten, z.B. alle Mitglieder des Instituts oder Module einer Person) einbezogen.
 
 ### TH Köln Personen-Crawler
 Crawlt das Personenverzeichnis der TH Köln nach Namen, E-Mails, Fakultäten und Instituten.
 ```bash
 python scripts/crawl_th_koeln_persons.py A B C
+```
 
 Unterstützt Filter nach Fakultät oder Einrichtung:
 ```bash
@@ -46,7 +51,7 @@ Mit `--list-institutions` oder `--list-faculties` können alle verfügbaren Opti
 ```bash
 python scripts/crawl_th_koeln_persons.py --crawl-all both
 ```
-```
+
 Unterstützt mehrere Anfangsbuchstaben als Argumente.
 
 ### Personen-Steckbriefe erstellen
