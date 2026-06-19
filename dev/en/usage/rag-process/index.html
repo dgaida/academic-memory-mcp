@@ -1,6 +1,6 @@
 
 <!doctype html>
-<html lang="de" class="no-js">
+<html lang="en" class="no-js">
   <head>
     
       <meta charset="utf-8">
@@ -12,35 +12,35 @@
         <meta name="author" content="Senior Python Architect">
       
       
-        <link rel="canonical" href="https://dgaida.github.io/academic-memory-mcp/dev/usage/mocogi-extraction/">
+        <link rel="canonical" href="https://dgaida.github.io/academic-memory-mcp/dev/en/usage/rag-process/">
       
       
-        <link rel="prev" href="../database-processes/">
+        <link rel="prev" href="../email-workflow/">
       
       
-        <link rel="next" href="../email-workflow/">
+        <link rel="next" href="../outlook-macros/">
       
       
         
-          <link rel="alternate" href="./" hreflang="de">
+          <link rel="alternate" href="../../../usage/rag-process/" hreflang="de">
         
-          <link rel="alternate" href="../../en/usage/mocogi-extraction/" hreflang="en">
+          <link rel="alternate" href="./" hreflang="en">
         
       
       
-      <link rel="icon" href="../../assets/images/favicon.png">
+      <link rel="icon" href="../../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>MOCOGI Extraktion - MCP University Memory System</title>
+        <title>RAG Prozess - MCP University Memory System</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -59,9 +59,11 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -86,8 +88,8 @@
     <div data-md-component="skip">
       
         
-        <a href="#mocogi-datenextraktion" class="md-skip">
-          Zum Inhalt
+        <a href="#rag-process-retrieval-augmented-generation" class="md-skip">
+          Skip to content
         </a>
       
     </div>
@@ -103,8 +105,8 @@
       
 
 <header class="md-header" data-md-component="header">
-  <nav class="md-header__inner md-grid" aria-label="Kopfzeile">
-    <a href="../.." title="MCP University Memory System" class="md-header__button md-logo" aria-label="MCP University Memory System" data-md-component="logo">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../" title="MCP University Memory System" class="md-header__button md-logo" aria-label="MCP University Memory System" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -124,7 +126,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              MOCOGI Extraktion
+              RAG Prozess
             
           </span>
         </div>
@@ -164,20 +166,20 @@
       <div class="md-header__option">
   <div class="md-select">
     
-    <button class="md-header__button md-icon" aria-label="Sprache wechseln">
+    <button class="md-header__button md-icon" aria-label="Select language">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
     </button>
     <div class="md-select__inner">
       <ul class="md-select__list">
         
           <li class="md-select__item">
-            <a href="./" hreflang="de" class="md-select__link">
+            <a href="../../../usage/rag-process/" hreflang="de" class="md-select__link">
               Deutsch
             </a>
           </li>
         
           <li class="md-select__item">
-            <a href="../../en/usage/mocogi-extraction/" hreflang="en" class="md-select__link">
+            <a href="./" hreflang="en" class="md-select__link">
               English
             </a>
           </li>
@@ -198,21 +200,21 @@
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="Suche" placeholder="Suche" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
         
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
         
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
       </label>
-      <nav class="md-search__options" aria-label="Suche">
+      <nav class="md-search__options" aria-label="Search">
         
-          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Teilen" aria-label="Teilen" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
             
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
           </a>
         
-        <button type="reset" class="md-search__icon md-icon" title="Zurücksetzen" aria-label="Zurücksetzen" tabindex="-1">
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
           
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
         </button>
@@ -225,7 +227,7 @@
       <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
         <div class="md-search-result" data-md-component="search-result">
           <div class="md-search-result__meta">
-            Suche wird initialisiert
+            Initializing search
           </div>
           <ol class="md-search-result__list" role="presentation"></ol>
         </div>
@@ -246,7 +248,7 @@
         
           
             
-<nav class="md-tabs" aria-label="Hauptnavigation" data-md-component="tabs">
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
   <div class="md-grid">
     <ul class="md-tabs__list">
       
@@ -256,7 +258,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../.." class="md-tabs__link">
+      <a href="../../" class="md-tabs__link">
         
   
   
@@ -447,7 +449,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="MCP University Memory System" class="md-nav__button md-logo" aria-label="MCP University Memory System" data-md-component="logo">
+    <a href="../../" title="MCP University Memory System" class="md-nav__button md-logo" aria-label="MCP University Memory System" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -465,7 +467,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href="../../" class="md-nav__link">
         
   
   
@@ -823,37 +825,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    MOCOGI Extraktion
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../mocogi-extraction/" class="md-nav__link">
         
   
   
@@ -869,70 +844,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Inhaltsverzeichnis">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Inhaltsverzeichnis
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#zweck" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Zweck
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#voraussetzungen" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Voraussetzungen
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#nutzung" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Nutzung
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#ausgabeformat" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Ausgabeformat
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -970,10 +881,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../rag-process/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RAG Prozess
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -989,6 +927,87 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#process-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Process Flow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Process Flow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-search-query-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Search Query Generation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-vector-search-retrieval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Vector Search (Retrieval)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-context-injection-augmentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Context Injection (Augmentation)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advantages-of-this-approach" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Advantages of this Approach
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1380,7 +1399,7 @@
                   <div class="md-sidebar__inner">
                     
 
-<nav class="md-nav md-nav--secondary" aria-label="Inhaltsverzeichnis">
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
   
@@ -1389,48 +1408,65 @@
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
-      Inhaltsverzeichnis
+      Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#zweck" class="md-nav__link">
+  <a href="#process-flow" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Zweck
+        Process Flow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Process Flow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-search-query-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Search Query Generation
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#voraussetzungen" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#2-vector-search-retrieval" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Voraussetzungen
+        2. Vector Search (Retrieval)
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#nutzung" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#3-context-injection-augmentation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Nutzung
+        3. Context Injection (Augmentation)
       
     </span>
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#ausgabeformat" class="md-nav__link">
+  <a href="#advantages-of-this-approach" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Ausgabeformat
+        Advantages of this Approach
       
     </span>
   </a>
@@ -1454,36 +1490,33 @@
 
 
 
-<h1 id="mocogi-datenextraktion">MOCOGI Datenextraktion<a class="headerlink" href="#mocogi-datenextraktion" title="Permanent link">&para;</a></h1>
-<p>Dieses Skript ermöglicht den Export von Modulinformationen aus der MOCOGI-API der TH Köln in eine strukturierte Markdown-Datei.</p>
-<h2 id="zweck">Zweck<a class="headerlink" href="#zweck" title="Permanent link">&para;</a></h2>
-<p>Das Skript <code>scripts/extract_mocogi_data.py</code> durchläuft alle aktiven Studiengänge und deren Prüfungsordnungen (POs). Für jedes Modul werden die folgenden Informationen extrahiert:<br />
-<em> Modulname<br />
-</em> Modulverantwortliche(r) (volle Namen)<br />
-<em> Erstprüfer(in)<br />
-</em> Zweitprüfer(in)  </p>
-<p>Die Daten werden in Tabellenform gruppiert nach Studiengang und PO in der Datei <code>mocogi_modules.md</code> gespeichert.</p>
-<h2 id="voraussetzungen">Voraussetzungen<a class="headerlink" href="#voraussetzungen" title="Permanent link">&para;</a></h2>
+<h1 id="rag-process-retrieval-augmented-generation">RAG Process (Retrieval Augmented Generation)<a class="headerlink" href="#rag-process-retrieval-augmented-generation" title="Permanent link">&para;</a></h1>
+<p>To answer emails professionally and contextually, the system uses a multi-stage RAG process. This process ensures that the LLM has access to specific knowledge (such as examination regulations or module descriptions) stored in the vector databases of the respective email classes.</p>
+<h2 id="process-flow">Process Flow<a class="headerlink" href="#process-flow" title="Permanent link">&para;</a></h2>
+<p>The process in <code>EmailController</code> follows three main steps:</p>
+<h3 id="1-search-query-generation">1. Search Query Generation<a class="headerlink" href="#1-search-query-generation" title="Permanent link">&para;</a></h3>
+<p>Instead of using the entire email text directly for the search, the system first has the LLM generate <strong>3 precise search queries (questions)</strong>.
+- The LLM analyzes the incoming email.
+- It formulates questions aimed at extracting the necessary information to answer the request from a knowledge base.</p>
+<h3 id="2-vector-search-retrieval">2. Vector Search (Retrieval)<a class="headerlink" href="#2-vector-search-retrieval" title="Permanent link">&para;</a></h3>
+<p>The generated questions are used to search for relevant text sections (chunks) in the vector database of the associated email class (e.g., <code>Bachelor_Thesis</code> or <code>PAV</code>).
+- For each of the 3 questions, the most relevant results are retrieved.
+- The system uses the <code>SearchIndex</code> for this, which is based on the embedded documents in the folder <code>data/memory/&lt;Class&gt;</code>.</p>
+<h3 id="3-context-injection-augmentation">3. Context Injection (Augmentation)<a class="headerlink" href="#3-context-injection-augmentation" title="Permanent link">&para;</a></h3>
+<p>The found information is filtered and prepared:
+- The <strong>Top 3 unique chunks</strong> are selected (based on their similarity score).
+- These chunks are inserted as "Additional Context" into the prompt for the final response generation.</p>
+<h2 id="advantages-of-this-approach">Advantages of this Approach<a class="headerlink" href="#advantages-of-this-approach" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Ein gültiger <code>MOCOGI_API_TOKEN</code> muss in einer <code>.env</code> oder <code>secrets.env</code> Datei im Hauptverzeichnis oder im <code>config/</code> Ordner hinterlegt sein.  </li>
+<li><strong>Precision:</strong> Generating specific questions reduces the noise that could arise from a search with the raw email text.</li>
+<li><strong>Recency:</strong> The system always accesses the current state of the documents indexed in the <code>memory</code> folder.</li>
+<li><strong>Transparency:</strong> In the debug logs and prompts, it is exactly traceable which information was used as context.</li>
 </ul>
-<h2 id="nutzung">Nutzung<a class="headerlink" href="#nutzung" title="Permanent link">&para;</a></h2>
-<p>Führen Sie das Skript aus dem Hauptverzeichnis des Projekts aus:</p>
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nv">PYTHONPATH</span><span class="o">=</span>.<span class="w"> </span>python3<span class="w"> </span>scripts/extract_mocogi_data.py
-</code></pre></div>
-<h2 id="ausgabeformat">Ausgabeformat<a class="headerlink" href="#ausgabeformat" title="Permanent link">&para;</a></h2>
-<p>Die generierte Datei <code>mocogi_modules.md</code> folgt diesem Schema:</p>
-<div class="language-markdown highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="gh"># MOCOGI Modulübersicht</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="gu">## [Studiengang Name]</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="gu">### PO [Version]</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>| Modulname | Modulverantwortlich | Erstprüfer | Zweitprüfer |
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>| :--- | :--- | :--- | :--- |
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>| Algorithmik | Max Mustermann | Max Mustermann | Erika Musterfrau |
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>...
-</code></pre></div>
+<hr />
+<p>See also:
+- <a href="../email-classification/">Email Classification</a>
+- <a href="../indexing-details/">Document Indexing</a>
+- <a href="../../configuration/">Configuration</a></p>
 
 
 
@@ -1509,7 +1542,7 @@
           <button type="button" class="md-top md-icon" data-md-component="top" hidden>
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
-  Zurück zum Seitenanfang
+  Back to top
 </button>
         
       </main>
@@ -1541,10 +1574,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "content.tabs.link", "content.code.annotate", "content.code.copy", "content.tooltips"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "content.tabs.link", "content.code.annotate", "content.code.copy", "content.tooltips"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>

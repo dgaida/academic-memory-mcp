@@ -18,7 +18,7 @@
         <link rel="prev" href="../mocogi-extraction/">
       
       
-        <link rel="next" href="../outlook-macros/">
+        <link rel="next" href="../rag-process/">
       
       
         
@@ -992,7 +992,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#5-phase-uberprufung-gradio-gui" class="md-nav__link">
+  <a href="#gradio-gui" class="md-nav__link">
     <span class="md-ellipsis">
       
         5. Phase: Überprüfung (Gradio GUI)
@@ -1117,6 +1117,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rag-process/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RAG Prozess
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1600,7 +1628,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#5-phase-uberprufung-gradio-gui" class="md-nav__link">
+  <a href="#gradio-gui" class="md-nav__link">
     <span class="md-ellipsis">
       
         5. Phase: Überprüfung (Gradio GUI)
@@ -1758,15 +1786,21 @@
 </code></pre></div></p>
 <p><strong>Was passiert hier?</strong><br />
 1. <strong>Themen-Erkennung:</strong> Der <a href="../email-classification/">EmailClassifier</a> nutzt ein Machine-Learning-Modell (Transformer-basiert), um den Inhalt der Mail einer Kategorie zuzuordnen (z.B. <em>Bachelor Thesis</em>, <em>Projekt</em>, <em>PO-Wechsel</em>).<br />
-2. <strong>Dateisystem-Struktur:</strong> Die E-Mails werden in eine dreistufige Hierarchie verschoben: <code>Semester (z.B. 2023_24_WS) / Nachname_Vorname / (Inbox oder SentItems)</code>.<br />
-3. <strong>Normalisierung:</strong> Namen werden normalisiert (Umlaute ersetzt, Sonderzeichen bereinigt), um Kompatibilität mit dem Dateisystem zu gewährleisten.  </p>
+2. <strong>Dateisystem-Struktur:</strong> Die E-Mails werden in eine dreistufige Hierarchie verschoben: <code>Semester (z.B. 2023_24_WS) / Nachname / (Inbox oder SentItems)</code>.
+3. <strong>Extraktion des Nachnamens:</strong> Der Nachname wird automatisch aus der E-Mail-Adresse oder dem Anzeigenamen ermittelt.
+    - <em>Beispiel 1:</em> <code>max.mustermann@th-koeln.de</code> -&gt; Ordner: <code>Mustermann</code>
+    - <em>Beispiel 2:</em> <code>mustermann@stud.th-koeln.de</code> -&gt; Ordner: <code>Mustermann</code>
+    - <em>Beispiel 3:</em> <code>Mustermann-Schmidt, Erika &lt;erika.mustermann@...&gt;</code> -&gt; Ordner: <code>Mustermann_Schmidt</code>
+4. <strong>Normalisierung:</strong> Namen werden normalisiert (Umlaute ersetzt, Sonderzeichen bereinigt), um Kompatibilität mit dem Dateisystem zu gewährleisten.</p>
 <hr />
 <h2 id="3-phase-ki-gestutzte-analyse-analyse-kontext">3. Phase: KI-gestützte Analyse (Analyse &amp; Kontext)<a class="headerlink" href="#3-phase-ki-gestutzte-analyse-analyse-kontext" title="Permanent link">&para;</a></h2>
 <p>Nachdem die Mails sortiert sind, erfolgt die Analyse durch <code>process_sorted_emails.py</code>. In dieser Phase wird der notwendige Kontext für eine spätere Bearbeitung gesammelt.</p>
-<p><strong>Inhalte dieser Phase:</strong><br />
-- <strong>Zusammenfassung:</strong> Das System erstellt eine prägnante Zusammenfassung des bisherigen Konversationsverlaufs im Studentenordner (<code>.emails_summary.md</code>).<br />
-- <strong>RAG-Kontext (Retrieval Augmented Generation):</strong> Das System durchsucht eine Vektordatenbank nach thematisch passenden Informationen (z.B. Prüfungsordnungen), basierend auf dem Inhalt der aktuellen Mail.<br />
-- <strong>Ähnlichkeits-Suche:</strong> Es wird nach den 3 neuesten, thematisch ähnlichsten E-Mails desselben Studenten im Archiv gesucht, um eine konsistente Historie zu gewährleisten.<br />
+<p><strong>Inhalte dieser Phase:</strong>
+- <strong>Zusammenfassung:</strong> Das System erstellt eine prägnante Zusammenfassung des bisherigen Konversationsverlaufs im Studentenordner (<code>.emails_summary.md</code>). Diese dient dazu, dem Nutzer in der <a href="#gradio-gui">Gradio GUI</a> einen schnellen Überblick über den Stand der Kommunikation zu geben, ohne alle E-Mails einzeln lesen zu müssen.
+    - Ein Beispiel für die resultierende Struktur finden Sie unter <a href="../indexing-details/#beispiel-e-mail-strukturen">Beispiel E-Mail-Strukturen</a>.
+    - Falls eine E-Mail in der GUI umklassifiziert wird, wird die <code>.emails_summary.md</code> automatisch in den neuen Zielordner mitverschoben.
+- <strong>RAG-Kontext (Retrieval Augmented Generation):</strong> Das System durchsucht eine Vektordatenbank nach thematisch passenden Informationen (z.B. Prüfungsordnungen), basierend auf dem Inhalt der aktuellen Mail. Details zu diesem mehrstufigen Prozess finden Sie unter <a href="../rag-process/">RAG-Prozess</a>.
+- <strong>Ähnlichkeits-Suche:</strong> Es wird nach den 3 neuesten, thematisch ähnlichsten E-Mails desselben Studenten im Archiv gesucht, um eine konsistente Historie zu gewährleisten.
 - <strong>Aktions-Klassifizierung:</strong> Das LLM entscheidet vorab, welche der 6 möglichen Aktionen am besten zur E-Mail passt.  </p>
 <hr />
 <h2 id="4-phase-aktions-vorschlag">4. Phase: Aktions-Vorschlag<a class="headerlink" href="#4-phase-aktions-vorschlag" title="Permanent link">&para;</a></h2>
@@ -1806,7 +1840,7 @@
 </tbody>
 </table>
 <hr />
-<h2 id="5-phase-uberprufung-gradio-gui">5. Phase: Überprüfung (Gradio GUI)<a class="headerlink" href="#5-phase-uberprufung-gradio-gui" title="Permanent link">&para;</a></h2>
+<h2 id="gradio-gui">5. Phase: Überprüfung (Gradio GUI)<a class="headerlink" href="#gradio-gui" title="Permanent link">&para;</a></h2>
 <p>Der Prozess wird in einer interaktiven Web-Oberfläche kontrolliert (Human-in-the-loop).</p>
 <p><strong>Funktionen der GUI:</strong><br />
 - <strong>Korrektur der Klassifizierung:</strong> Ändern der E-Mail-Klasse via Dropdown (physische Verschiebung beim Speichern).<br />
@@ -1818,7 +1852,7 @@
 <p>Sobald Sie in der GUI auf "Speichern &amp; Ausführen" klicken, wird die gewählte Aktion technisch umgesetzt. Hierbei werden nun auch die <strong>Personen-Steckbriefe</strong> (Student &amp; Eigene Persona) sowie die <strong>Skills</strong> (Fachwissen-Dateien) einbezogen.</p>
 <h3 id="detail-logik-der-aktionen">Detail-Logik der Aktionen:<a class="headerlink" href="#detail-logik-der-aktionen" title="Permanent link">&para;</a></h3>
 <h4 id="1-antwort-schreiben">1) Antwort schreiben<a class="headerlink" href="#1-antwort-schreiben" title="Permanent link">&para;</a></h4>
-<p>Das LLM generiert einen Antworttext unter Berücksichtigung Ihres <strong>Personen-Steckbriefs</strong> (Tonalität, Rolle) und des <strong>Studenten-Steckbriefs</strong>. Es wird automatisch ein Entwurf in Outlook erstellt, der die Original-Mail als Anhang enthält.</p>
+<p>Das LLM generiert einen Antworttext unter Berücksichtigung Ihres eigenen <strong>Personen-Steckbriefs</strong> (Tonalität, Rolle) und des <strong>Studenten-Steckbriefs</strong>. Details zur Erstellung und Nutzung der Steckbriefe finden Sie unter <a href="../profiles/">Personen-Profile</a>. Es wird automatisch ein Entwurf in Outlook erstellt, der die Original-Mail als Anhang enthält.</p>
 <h4 id="2-antwort-schreiben-mit-einem-terminvorschlag">2) Antwort schreiben mit einem Terminvorschlag<a class="headerlink" href="#2-antwort-schreiben-mit-einem-terminvorschlag" title="Permanent link">&para;</a></h4>
 <p>Das System ruft das Tool <code>get_appointment_slots</code> auf, welches die <code>free_slots.md</code> ausliest. Die gefundenen Zeiten werden formatiert in den Antwortentwurf integriert.</p>
 <h4 id="3-termin-im-kalender-anlegen">3) Termin im Kalender anlegen<a class="headerlink" href="#3-termin-im-kalender-anlegen" title="Permanent link">&para;</a></h4>

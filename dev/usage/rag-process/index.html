@@ -12,19 +12,19 @@
         <meta name="author" content="Senior Python Architect">
       
       
-        <link rel="canonical" href="https://dgaida.github.io/academic-memory-mcp/dev/usage/mocogi-extraction/">
+        <link rel="canonical" href="https://dgaida.github.io/academic-memory-mcp/dev/usage/rag-process/">
       
       
-        <link rel="prev" href="../database-processes/">
+        <link rel="prev" href="../email-workflow/">
       
       
-        <link rel="next" href="../email-workflow/">
+        <link rel="next" href="../outlook-macros/">
       
       
         
           <link rel="alternate" href="./" hreflang="de">
         
-          <link rel="alternate" href="../../en/usage/mocogi-extraction/" hreflang="en">
+          <link rel="alternate" href="../../en/usage/rag-process/" hreflang="en">
         
       
       
@@ -33,7 +33,7 @@
     
     
       
-        <title>MOCOGI Extraktion - MCP University Memory System</title>
+        <title>RAG Prozess - MCP University Memory System</title>
       
     
     
@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#mocogi-datenextraktion" class="md-skip">
+        <a href="#rag-prozess-retrieval-augmented-generation" class="md-skip">
           Zum Inhalt
         </a>
       
@@ -124,7 +124,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              MOCOGI Extraktion
+              RAG Prozess
             
           </span>
         </div>
@@ -177,7 +177,7 @@
           </li>
         
           <li class="md-select__item">
-            <a href="../../en/usage/mocogi-extraction/" hreflang="en" class="md-select__link">
+            <a href="../../en/usage/rag-process/" hreflang="en" class="md-select__link">
               English
             </a>
           </li>
@@ -823,37 +823,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    MOCOGI Extraktion
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../mocogi-extraction/" class="md-nav__link">
         
   
   
@@ -869,70 +842,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Inhaltsverzeichnis">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Inhaltsverzeichnis
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#zweck" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Zweck
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#voraussetzungen" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Voraussetzungen
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#nutzung" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Nutzung
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#ausgabeformat" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Ausgabeformat
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -970,10 +879,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../rag-process/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RAG Prozess
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -989,6 +925,87 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Inhaltsverzeichnis">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Inhaltsverzeichnis
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#ablauf-des-prozesses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ablauf des Prozesses
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Ablauf des Prozesses">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-generierung-von-suchanfragen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Generierung von Suchanfragen
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-vektorsuche-retrieval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Vektorsuche (Retrieval)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-kontext-injektion-augmentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Kontext-Injektion (Augmentation)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vorteile-dieses-ansatzes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vorteile dieses Ansatzes
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1394,43 +1411,60 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#zweck" class="md-nav__link">
+  <a href="#ablauf-des-prozesses" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Zweck
+        Ablauf des Prozesses
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Ablauf des Prozesses">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-generierung-von-suchanfragen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Generierung von Suchanfragen
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#voraussetzungen" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#2-vektorsuche-retrieval" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Voraussetzungen
+        2. Vektorsuche (Retrieval)
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#nutzung" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#3-kontext-injektion-augmentation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Nutzung
+        3. Kontext-Injektion (Augmentation)
       
     </span>
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#ausgabeformat" class="md-nav__link">
+  <a href="#vorteile-dieses-ansatzes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Ausgabeformat
+        Vorteile dieses Ansatzes
       
     </span>
   </a>
@@ -1454,36 +1488,33 @@
 
 
 
-<h1 id="mocogi-datenextraktion">MOCOGI Datenextraktion<a class="headerlink" href="#mocogi-datenextraktion" title="Permanent link">&para;</a></h1>
-<p>Dieses Skript ermöglicht den Export von Modulinformationen aus der MOCOGI-API der TH Köln in eine strukturierte Markdown-Datei.</p>
-<h2 id="zweck">Zweck<a class="headerlink" href="#zweck" title="Permanent link">&para;</a></h2>
-<p>Das Skript <code>scripts/extract_mocogi_data.py</code> durchläuft alle aktiven Studiengänge und deren Prüfungsordnungen (POs). Für jedes Modul werden die folgenden Informationen extrahiert:<br />
-<em> Modulname<br />
-</em> Modulverantwortliche(r) (volle Namen)<br />
-<em> Erstprüfer(in)<br />
-</em> Zweitprüfer(in)  </p>
-<p>Die Daten werden in Tabellenform gruppiert nach Studiengang und PO in der Datei <code>mocogi_modules.md</code> gespeichert.</p>
-<h2 id="voraussetzungen">Voraussetzungen<a class="headerlink" href="#voraussetzungen" title="Permanent link">&para;</a></h2>
+<h1 id="rag-prozess-retrieval-augmented-generation">RAG-Prozess (Retrieval Augmented Generation)<a class="headerlink" href="#rag-prozess-retrieval-augmented-generation" title="Permanent link">&para;</a></h1>
+<p>Um E-Mails fachlich korrekt und kontextbezogen zu beantworten, nutzt das System einen mehrstufigen RAG-Prozess. Dieser Prozess stellt sicher, dass das LLM Zugriff auf spezifisches Wissen (wie Prüfungsordnungen oder Modulbeschreibungen) hat, das in den Vektordatenbanken der jeweiligen E-Mail-Klassen gespeichert ist.</p>
+<h2 id="ablauf-des-prozesses">Ablauf des Prozesses<a class="headerlink" href="#ablauf-des-prozesses" title="Permanent link">&para;</a></h2>
+<p>Der Prozess in <code>EmailController</code> läuft in drei Hauptschritten ab:</p>
+<h3 id="1-generierung-von-suchanfragen">1. Generierung von Suchanfragen<a class="headerlink" href="#1-generierung-von-suchanfragen" title="Permanent link">&para;</a></h3>
+<p>Anstatt den gesamten E-Mail-Text direkt für die Suche zu verwenden, lässt das System das LLM zunächst <strong>3 präzise Suchanfragen (Fragen)</strong> generieren.
+- Das LLM analysiert die eingehende E-Mail.
+- Es formuliert Fragen, die darauf abzielen, die notwendigen Informationen zur Beantwortung der Anfrage aus einer Wissensdatenbank zu extrahieren.</p>
+<h3 id="2-vektorsuche-retrieval">2. Vektorsuche (Retrieval)<a class="headerlink" href="#2-vektorsuche-retrieval" title="Permanent link">&para;</a></h3>
+<p>Die generierten Fragen werden genutzt, um in der Vektordatenbank der zugehörigen E-Mail-Klasse (z.B. <code>Bachelor_Thesis</code> oder <code>PAV</code>) nach relevanten Textabschnitten (Chunks) zu suchen.
+- Für jede der 3 Fragen werden die jeweils passendsten Ergebnisse abgerufen.
+- Das System nutzt hierfür den <code>SearchIndex</code>, der auf den eingebetteten Dokumenten im Ordner <code>data/memory/&lt;Klasse&gt;</code> basiert.</p>
+<h3 id="3-kontext-injektion-augmentation">3. Kontext-Injektion (Augmentation)<a class="headerlink" href="#3-kontext-injektion-augmentation" title="Permanent link">&para;</a></h3>
+<p>Die gefundenen Informationen werden gefiltert und aufbereitet:
+- Es werden die <strong>Top 3 eindeutigen Chunks</strong> ausgewählt (basierend auf ihrem Ähnlichkeits-Score).
+- Diese Chunks werden als "Zusätzlicher Kontext" in den Prompt für die finale Antwortgenerierung eingefügt.</p>
+<h2 id="vorteile-dieses-ansatzes">Vorteile dieses Ansatzes<a class="headerlink" href="#vorteile-dieses-ansatzes" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Ein gültiger <code>MOCOGI_API_TOKEN</code> muss in einer <code>.env</code> oder <code>secrets.env</code> Datei im Hauptverzeichnis oder im <code>config/</code> Ordner hinterlegt sein.  </li>
+<li><strong>Präzision:</strong> Durch die Generierung gezielter Fragen wird das Rauschen reduziert, das bei einer Suche mit dem rohen E-Mail-Text entstehen könnte.</li>
+<li><strong>Aktualität:</strong> Das System greift immer auf den aktuellen Stand der im <code>memory</code>-Ordner indexierten Dokumente zu.</li>
+<li><strong>Transparenz:</strong> In den Debug-Logs und Prompts ist genau nachvollziehbar, welche Informationen als Kontext herangezogen wurden.</li>
 </ul>
-<h2 id="nutzung">Nutzung<a class="headerlink" href="#nutzung" title="Permanent link">&para;</a></h2>
-<p>Führen Sie das Skript aus dem Hauptverzeichnis des Projekts aus:</p>
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nv">PYTHONPATH</span><span class="o">=</span>.<span class="w"> </span>python3<span class="w"> </span>scripts/extract_mocogi_data.py
-</code></pre></div>
-<h2 id="ausgabeformat">Ausgabeformat<a class="headerlink" href="#ausgabeformat" title="Permanent link">&para;</a></h2>
-<p>Die generierte Datei <code>mocogi_modules.md</code> folgt diesem Schema:</p>
-<div class="language-markdown highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="gh"># MOCOGI Modulübersicht</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="gu">## [Studiengang Name]</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="gu">### PO [Version]</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>| Modulname | Modulverantwortlich | Erstprüfer | Zweitprüfer |
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>| :--- | :--- | :--- | :--- |
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>| Algorithmik | Max Mustermann | Max Mustermann | Erika Musterfrau |
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>...
-</code></pre></div>
+<hr />
+<p>Siehe auch:
+- <a href="../email-classification/">E-Mail Klassifizierung</a>
+- <a href="../indexing-details/">Indizierung von Dokumenten</a>
+- <a href="../../configuration/">Konfiguration</a></p>
 
 
 
