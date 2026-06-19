@@ -26,24 +26,24 @@ python -m mcp_university.classifier.sort_emails --source ./inbox --target ./sort
 
 **Was passiert hier?**  
 1. **Themen-Erkennung:** Der [EmailClassifier](email-classification.md) nutzt ein Machine-Learning-Modell (Transformer-basiert), um den Inhalt der Mail einer Kategorie zuzuordnen (z.B. *Bachelor Thesis*, *Projekt*, *PO-Wechsel*).  
-2. **Dateisystem-Struktur:** Die E-Mails werden in eine dreistufige Hierarchie verschoben: `Semester (z.B. 2023_24_WS) / Nachname / (Inbox oder SentItems)`.
-3. **Extraktion des Nachnamens:** Der Nachname wird automatisch aus der E-Mail-Adresse oder dem Anzeigenamen ermittelt.
-    - *Beispiel 1:* `max.mustermann@th-koeln.de` -> Ordner: `Mustermann`
-    - *Beispiel 2:* `mustermann@stud.th-koeln.de` -> Ordner: `Mustermann`
-    - *Beispiel 3:* `Mustermann-Schmidt, Erika <erika.mustermann@...>` -> Ordner: `Mustermann_Schmidt`
-4. **Normalisierung:** Namen werden normalisiert (Umlaute ersetzt, Sonderzeichen bereinigt), um Kompatibilität mit dem Dateisystem zu gewährleisten.
+2. **Dateisystem-Struktur:** Die E-Mails werden in eine dreistufige Hierarchie verschoben: `Semester (z.B. 2023_24_WS) / Nachname / (Inbox oder SentItems)`.  
+3. **Extraktion des Nachnamens:** Der Nachname wird automatisch aus der E-Mail-Adresse oder dem Anzeigenamen ermittelt.  
+    - *Beispiel 1:* `max.mustermann@th-koeln.de` -> Ordner: `Mustermann`  
+    - *Beispiel 2:* `mustermann@stud.th-koeln.de` -> Ordner: `Mustermann`  
+    - *Beispiel 3:* `Mustermann-Schmidt, Erika <erika.mustermann@...>` -> Ordner: `Mustermann_Schmidt`  
+4. **Normalisierung:** Namen werden normalisiert (Umlaute ersetzt, Sonderzeichen bereinigt), um Kompatibilität mit dem Dateisystem zu gewährleisten.  
 
 ---
 
 ## 3. Phase: KI-gestützte Analyse (Analyse & Kontext)
 Nachdem die Mails sortiert sind, erfolgt die Analyse durch `process_sorted_emails.py`. In dieser Phase wird der notwendige Kontext für eine spätere Bearbeitung gesammelt.
 
-**Inhalte dieser Phase:**
-- **Zusammenfassung:** Das System erstellt eine prägnante Zusammenfassung des bisherigen Konversationsverlaufs im Studentenordner (`.emails_summary.md`). Diese dient dazu, dem Nutzer in der [Gradio GUI](#gradio-gui) einen schnellen Überblick über den Stand der Kommunikation zu geben, ohne alle E-Mails einzeln lesen zu müssen.
-    - Ein Beispiel für die resultierende Struktur finden Sie unter [Beispiel E-Mail-Strukturen](indexing-details.md#beispiel-e-mail-strukturen).
-    - Falls eine E-Mail in der GUI umklassifiziert wird, wird die `.emails_summary.md` automatisch in den neuen Zielordner mitverschoben.
-- **RAG-Kontext (Retrieval Augmented Generation):** Das System durchsucht eine Vektordatenbank nach thematisch passenden Informationen (z.B. Prüfungsordnungen), basierend auf dem Inhalt der aktuellen Mail. Details zu diesem mehrstufigen Prozess finden Sie unter [RAG-Prozess](rag-process.md).
-- **Ähnlichkeits-Suche:** Es wird nach den 3 neuesten, thematisch ähnlichsten E-Mails desselben Studenten im Archiv gesucht, um eine konsistente Historie zu gewährleisten.
+**Inhalte dieser Phase:**  
+- **Zusammenfassung:** Das System erstellt eine prägnante Zusammenfassung des bisherigen Konversationsverlaufs im Studentenordner (`.emails_summary.md`). Diese dient dazu, dem Nutzer in der [Gradio GUI](#gradio-gui) einen schnellen Überblick über den Stand der Kommunikation zu geben, ohne alle E-Mails einzeln lesen zu müssen.  
+    - Ein Beispiel für die resultierende Struktur finden Sie unter [Beispiel E-Mail-Strukturen](indexing-details.md#beispiel-e-mail-strukturen).  
+    - Falls eine E-Mail in der GUI umklassifiziert wird, wird die `.emails_summary.md` automatisch in den neuen Zielordner mitverschoben.  
+- **RAG-Kontext (Retrieval Augmented Generation):** Das System durchsucht eine Vektordatenbank nach thematisch passenden Informationen (z.B. Prüfungsordnungen), basierend auf dem Inhalt der aktuellen Mail. Details zu diesem mehrstufigen Prozess finden Sie unter [RAG-Prozess](rag-process.md).  
+- **Ähnlichkeits-Suche:** Es wird nach den 3 neuesten, thematisch ähnlichsten E-Mails desselben Studenten im Archiv gesucht, um eine konsistente Historie zu gewährleisten.  
 - **Aktions-Klassifizierung:** Das LLM entscheidet vorab, welche der 6 möglichen Aktionen am besten zur E-Mail passt.  
 
 ---
