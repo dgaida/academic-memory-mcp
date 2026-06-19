@@ -1747,7 +1747,7 @@
 <p>Verwenden Sie die im Projekt bereitgestellten VBA-Makros, um Daten in den <code>inbox</code>-Ordner zu exportieren. Eine detaillierte Beschreibung aller verfügbaren Makros und deren Installation finden Sie unter <a href="../outlook-macros/">Outlook VBA-Makros</a>.</p>
 <ul>
 <li><strong>E-Mails:</strong> Exportiert E-Mails (meist von Studierenden) als <code>.msg</code> Dateien. Das System erkennt dabei automatisch Absender, Datum und Betreff.  </li>
-<li><strong>Kalenderdaten:</strong> Exportiert freie Zeitfenster aus Ihrem Outlook-Kalender in eine Datei namens <code>free_slots.md</code>. Diese dient als Grundlage für automatisierte Terminvorschläge.</li>
+<li><strong>Kalenderdaten:</strong> Exportiert freie Zeitfenster aus Ihrem Outlook-Kalender in eine Datei namens <code>free_slots.md</code>. Diese dient als Grundlage für automatisierte Terminvorschläge.  </li>
 </ul>
 <hr />
 <h2 id="2-phase-klassifizierung-und-sortierung">2. Phase: Klassifizierung und Sortierung<a class="headerlink" href="#2-phase-klassifizierung-und-sortierung" title="Permanent link">&para;</a></h2>
@@ -1763,11 +1763,11 @@
 <hr />
 <h2 id="3-phase-ki-gestutzte-analyse-analyse-kontext">3. Phase: KI-gestützte Analyse (Analyse &amp; Kontext)<a class="headerlink" href="#3-phase-ki-gestutzte-analyse-analyse-kontext" title="Permanent link">&para;</a></h2>
 <p>Nachdem die Mails sortiert sind, erfolgt die Analyse durch <code>process_sorted_emails.py</code>. In dieser Phase wird der notwendige Kontext für eine spätere Bearbeitung gesammelt.</p>
-<p><strong>Inhalte dieser Phase:</strong>
-- <strong>Zusammenfassung:</strong> Das System erstellt eine prägnante Zusammenfassung des bisherigen Konversationsverlaufs im Studentenordner (<code>.emails_summary.md</code>).
-- <strong>RAG-Kontext (Retrieval Augmented Generation):</strong> Das System durchsucht eine Vektordatenbank nach thematisch passenden Informationen (z.B. Prüfungsordnungen), basierend auf dem Inhalt der aktuellen Mail.
-- <strong>Ähnlichkeits-Suche:</strong> Es wird nach den 3 neuesten, thematisch ähnlichsten E-Mails desselben Studenten im Archiv gesucht, um eine konsistente Historie zu gewährleisten.
-- <strong>Aktions-Klassifizierung:</strong> Das LLM entscheidet vorab, welche der 6 möglichen Aktionen am besten zur E-Mail passt.</p>
+<p><strong>Inhalte dieser Phase:</strong><br />
+- <strong>Zusammenfassung:</strong> Das System erstellt eine prägnante Zusammenfassung des bisherigen Konversationsverlaufs im Studentenordner (<code>.emails_summary.md</code>).<br />
+- <strong>RAG-Kontext (Retrieval Augmented Generation):</strong> Das System durchsucht eine Vektordatenbank nach thematisch passenden Informationen (z.B. Prüfungsordnungen), basierend auf dem Inhalt der aktuellen Mail.<br />
+- <strong>Ähnlichkeits-Suche:</strong> Es wird nach den 3 neuesten, thematisch ähnlichsten E-Mails desselben Studenten im Archiv gesucht, um eine konsistente Historie zu gewährleisten.<br />
+- <strong>Aktions-Klassifizierung:</strong> Das LLM entscheidet vorab, welche der 6 möglichen Aktionen am besten zur E-Mail passt.  </p>
 <hr />
 <h2 id="4-phase-aktions-vorschlag">4. Phase: Aktions-Vorschlag<a class="headerlink" href="#4-phase-aktions-vorschlag" title="Permanent link">&para;</a></h2>
 <p>Basierend auf der Analyse schlägt das System eine von sechs Aktionen vor. Diese Auswahl wird in der GUI vorselektiert.</p>
@@ -1809,10 +1809,10 @@
 <h2 id="5-phase-uberprufung-gradio-gui">5. Phase: Überprüfung (Gradio GUI)<a class="headerlink" href="#5-phase-uberprufung-gradio-gui" title="Permanent link">&para;</a></h2>
 <p>Der Prozess wird in einer interaktiven Web-Oberfläche kontrolliert (Human-in-the-loop).</p>
 <p><strong>Funktionen der GUI:</strong><br />
-- <strong>Korrektur der Klassifizierung:</strong> Ändern der E-Mail-Klasse via Dropdown (physische Verschiebung beim Speichern).
-- <strong>Aktions-Review:</strong> Überprüfung und ggf. Änderung der vorgeschlagenen Aktion.
-- <strong>Anhänge extrahieren:</strong> Checkbox zum automatischen Speichern von Anhängen im Studentenordner.
-- <strong>Quick-Links:</strong> Direktes Öffnen des Windows-Ordners oder der E-Mail-Datei.</p>
+- <strong>Korrektur der Klassifizierung:</strong> Ändern der E-Mail-Klasse via Dropdown (physische Verschiebung beim Speichern).<br />
+- <strong>Aktions-Review:</strong> Überprüfung und ggf. Änderung der vorgeschlagenen Aktion.<br />
+- <strong>Anhänge extrahieren:</strong> Checkbox zum automatischen Speichern von Anhängen im Studentenordner.<br />
+- <strong>Quick-Links:</strong> Direktes Öffnen des Windows-Ordners oder der E-Mail-Datei.  </p>
 <hr />
 <h2 id="6-phase-ausfuhrung-der-aktionen-details">6. Phase: Ausführung der Aktionen (Details)<a class="headerlink" href="#6-phase-ausfuhrung-der-aktionen-details" title="Permanent link">&para;</a></h2>
 <p>Sobald Sie in der GUI auf "Speichern &amp; Ausführen" klicken, wird die gewählte Aktion technisch umgesetzt. Hierbei werden nun auch die <strong>Personen-Steckbriefe</strong> (Student &amp; Eigene Persona) sowie die <strong>Skills</strong> (Fachwissen-Dateien) einbezogen.</p>
@@ -1826,18 +1826,18 @@
 <h4 id="4-e-mail-nur-archivieren">4) E-Mail nur archivieren<a class="headerlink" href="#4-e-mail-nur-archivieren" title="Permanent link">&para;</a></h4>
 <p>Die E-Mail wird als bearbeitet markiert. Es erfolgt keine weitere technische Aktion in Outlook.</p>
 <h4 id="5-aufgabe-im-kalender-anlegen-finale-abgabe">5) Aufgabe im Kalender anlegen (Finale Abgabe)<a class="headerlink" href="#5-aufgabe-im-kalender-anlegen-finale-abgabe" title="Permanent link">&para;</a></h4>
-<p>Diese Aktion kombiniert mehrere Schritte für Abschlussarbeiten:
-1. Anhänge werden via <code>save_email_attachments</code> im Studentenordner gespeichert.
-2. Ein Kalendereintrag wird für in <strong>7 Tagen</strong> angelegt, um an die Korrektur zu erinnern.
-3. Ein Antwortentwurf zur Bestätigung des Empfangs wird erstellt.</p>
+<p>Diese Aktion kombiniert mehrere Schritte für Abschlussarbeiten:<br />
+1. Anhänge werden via <code>save_email_attachments</code> im Studentenordner gespeichert.<br />
+2. Ein Kalendereintrag wird für in <strong>7 Tagen</strong> angelegt, um an die Korrektur zu erinnern.<br />
+3. Ein Antwortentwurf zur Bestätigung des Empfangs wird erstellt.  </p>
 <h4 id="6-termin-fur-kolloquium">6) Termin für Kolloquium<a class="headerlink" href="#6-termin-fur-kolloquium" title="Permanent link">&para;</a></h4>
 <p>Ähnlich wie Aktion 3, jedoch wird hierbei die Dauer fest auf <strong>60 Minuten</strong> eingestellt und ein spezieller Betreff gewählt.</p>
 <hr />
 <h2 id="weiterfuhrende-links">Weiterführende Links<a class="headerlink" href="#weiterfuhrende-links" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a href="../outlook-macros/">Outlook VBA-Makros</a>: Details zu den Export-Skripten.</li>
-<li><a href="../database-processes/">Datenbank-Prozesse</a>: Erfahren Sie mehr über die Verwaltung der <code>profiles_tracking.db</code>.</li>
-<li><a href="../email-classification/">E-Mail Klassifizierung</a>: Details zu den Machine-Learning Modellen.</li>
+<li><a href="../outlook-macros/">Outlook VBA-Makros</a>: Details zu den Export-Skripten.  </li>
+<li><a href="../database-processes/">Datenbank-Prozesse</a>: Erfahren Sie mehr über die Verwaltung der <code>profiles_tracking.db</code>.  </li>
+<li><a href="../email-classification/">E-Mail Klassifizierung</a>: Details zu den Machine-Learning Modellen.  </li>
 <li><a href="../../configuration/">Konfiguration</a>: So passen Sie Pfade und LLM-Einstellungen an.  </li>
 </ul>
 

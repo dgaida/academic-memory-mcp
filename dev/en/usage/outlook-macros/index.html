@@ -1578,22 +1578,22 @@
 <h2 id="ubersicht-der-makros">Übersicht der Makros<a class="headerlink" href="#ubersicht-der-makros" title="Permanent link">&para;</a></h2>
 <h3 id="1-master-export-runallexports">1. Master-Export (RunAllExports)<a class="headerlink" href="#1-master-export-runallexports" title="Permanent link">&para;</a></h3>
 <p><strong>Datei:</strong> <code>ExportStudentMails.bas</code>
-Dies ist das zentrale Makro für den täglichen Gebrauch. Es führt nacheinander zwei Aktionen aus:
-1. Exportiert freie Kalender-Slots (ruft <code>ExportFreeSlots</code> auf).
-2. Exportiert studentische E-Mails aus Posteingang und Gesendeten Elementen (ruft <code>ExportStudentEmails</code> auf).
+Dies ist das zentrale Makro für den täglichen Gebrauch. Es führt nacheinander zwei Aktionen aus:<br />
+1. Exportiert freie Kalender-Slots (ruft <code>ExportFreeSlots</code> auf).<br />
+2. Exportiert studentische E-Mails aus Posteingang und Gesendeten Elementen (ruft <code>ExportStudentEmails</code> auf).<br />
 Sie werden beim Start gefragt, wie viele Tage rückwärts (Standard: 7) nach neuen E-Mails gesucht werden soll.</p>
 <h3 id="2-e-mail-export-exportstudentemails">2. E-Mail Export (ExportStudentEmails)<a class="headerlink" href="#2-e-mail-export-exportstudentemails" title="Permanent link">&para;</a></h3>
 <p><strong>Datei:</strong> <code>ExportStudentMails.bas</code>
-Sucht in Ihrem Postfach nach E-Mails von studentischen Domains (z.B. <code>@smail.th-koeln.de</code>).
-- <strong>Speicherort:</strong> <code>D:\TH_Koeln\StudentMails\Inbox</code> bzw. <code>SentItems</code>.
-- <strong>Dateiname:</strong> <code>YYYYMMDD_HHMMSS - Betreff.msg</code>.
-- <strong>Besonderheit:</strong> Nach dem erfolgreichen Export wird die E-Mail in Outlook gelöscht, um den Posteingang sauber zu halten.</p>
+Sucht in Ihrem Postfach nach E-Mails von studentischen Domains (z.B. <code>@smail.th-koeln.de</code>).<br />
+- <strong>Speicherort:</strong> <code>D:\TH_Koeln\StudentMails\Inbox</code> bzw. <code>SentItems</code>.<br />
+- <strong>Dateiname:</strong> <code>YYYYMMDD_HHMMSS - Betreff.msg</code>.<br />
+- <strong>Besonderheit:</strong> Nach dem erfolgreichen Export wird die E-Mail in Outlook gelöscht, um den Posteingang sauber zu halten.  </p>
 <h3 id="3-kalender-export-exportfreeslots">3. Kalender-Export (ExportFreeSlots)<a class="headerlink" href="#3-kalender-export-exportfreeslots" title="Permanent link">&para;</a></h3>
 <p><strong>Datei:</strong> <code>FreeSlotExport.bas</code>
-Analysiert Ihre Kalender ("Kalender" und "Kalender (Nur dieser Computer)") für die nächsten 14 Tage.
-- <strong>Logik:</strong> Sucht nach freien 30-Minuten-Fenstern zwischen 13:30 und 16:00 Uhr (konfigurierbar).
-- <strong>Ausschlüsse:</strong> Wochenenden, NRW-Feiertage und explizit konfigurierte Wochentage (Standard: Mi, Fr) werden ignoriert.
-- <strong>Ausgabe:</strong> Erstellt eine Markdown-Datei <code>data/free_slots.md</code>, die vom LLM für Terminvorschläge genutzt wird.</p>
+Analysiert Ihre Kalender ("Kalender" und "Kalender (Nur dieser Computer)") für die nächsten 14 Tage.<br />
+- <strong>Logik:</strong> Sucht nach freien 30-Minuten-Fenstern zwischen 13:30 und 16:00 Uhr (konfigurierbar).<br />
+- <strong>Ausschlüsse:</strong> Wochenenden, NRW-Feiertage und explizit konfigurierte Wochentage (Standard: Mi, Fr) werden ignoriert.<br />
+- <strong>Ausgabe:</strong> Erstellt eine Markdown-Datei <code>data/free_slots.md</code>, die vom LLM für Terminvorschläge genutzt wird.  </p>
 <h3 id="4-studierende-sammeln-collectstudentemails">4. Studierende sammeln (CollectStudentEmails)<a class="headerlink" href="#4-studierende-sammeln-collectstudentemails" title="Permanent link">&para;</a></h3>
 <p><strong>Datei:</strong> <code>CollectStudentEmails.bas</code>
 Scannt den Posteingang nach allen Absendern mit studentischer Domain und trägt diese in eine zentrale <code>students.yaml</code> ein. Dies ist nützlich, um eine erste Liste aller Studierenden für den <code>EmailSorter</code> zu erstellen.</p>
@@ -1612,13 +1612,13 @@ Ein Spezial-Makro, das gezielt nach Mails mit einem bestimmten Schlagwort (z.B. 
 <hr />
 <h2 id="installation-der-makros-in-outlook">Installation der Makros in Outlook<a class="headerlink" href="#installation-der-makros-in-outlook" title="Permanent link">&para;</a></h2>
 <ol>
-<li>Öffnen Sie Outlook.</li>
-<li>Drücken Sie <code>ALT + F11</code>, um den VBA-Editor zu öffnen.</li>
-<li>Klicken Sie im Menü auf <code>Einfügen -&gt; Modul</code>.</li>
-<li>Kopieren Sie den Inhalt der gewünschten <code>.bas</code>-Dateien aus dem Ordner <code>outlook_macro/</code> in das neue Modul.</li>
-<li>Passen Sie ggf. die Pfade (Konstanten am Anfang der Dateien) an Ihre lokale Struktur an.</li>
-<li>Speichern Sie das Projekt (<code>STRG + S</code>).</li>
-<li>Sie können die Makros nun über <code>ALT + F8</code> in Outlook starten.</li>
+<li>Öffnen Sie Outlook.  </li>
+<li>Drücken Sie <code>ALT + F11</code>, um den VBA-Editor zu öffnen.  </li>
+<li>Klicken Sie im Menü auf <code>Einfügen -&gt; Modul</code>.  </li>
+<li>Kopieren Sie den Inhalt der gewünschten <code>.bas</code>-Dateien aus dem Ordner <code>outlook_macro/</code> in das neue Modul.  </li>
+<li>Passen Sie ggf. die Pfade (Konstanten am Anfang der Dateien) an Ihre lokale Struktur an.  </li>
+<li>Speichern Sie das Projekt (<code>STRG + S</code>).  </li>
+<li>Sie können die Makros nun über <code>ALT + F8</code> in Outlook starten.  </li>
 </ol>
 
 
