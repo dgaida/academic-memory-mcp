@@ -30,7 +30,6 @@ jobs:
         run: |
           pip install .
           pip install pytest pytest-asyncio "tzlocal<5.0" liteparse networkx pyvis mkdocs-material mkdocs-static-i18n mkdocstrings[python] mkdocs-mermaid2-plugin interrogate git-cliff mike
-          npm install -g markdownlint-cli
 
       - name: Run Tests
         run: python3 -m pytest
@@ -43,8 +42,10 @@ jobs:
           echo "INTERROGATE_VAL=$INTERROGATE_VAL" >> $GITHUB_ENV
 
       - name: Lint Markdown
-        run: |
-          markdownlint docs/**/*.md && echo "LINT_ERRORS=0" >> $GITHUB_ENV || echo "LINT_ERRORS=1" >> $GITHUB_ENV
+        uses: davidanson/markdownlint-cli2-action@v19
+        continue-on-error: true
+        with:
+          globs: "docs/**/*.md"
 
       - name: Check broken links
         run: |
