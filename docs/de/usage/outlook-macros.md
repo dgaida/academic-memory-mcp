@@ -8,24 +8,24 @@ Dieses Projekt enthält eine Sammlung von Outlook VBA-Makros, um den Export von 
 
 ### 1. Master-Export (RunAllExports)
 **Datei:** `ExportStudentMails.bas`
-Dies ist das zentrale Makro für den täglichen Gebrauch. Es führt nacheinander zwei Aktionen aus:
-1. Exportiert freie Kalender-Slots (ruft `ExportFreeSlots` auf).
-2. Exportiert studentische E-Mails aus Posteingang und Gesendeten Elementen (ruft `ExportStudentEmails` auf).
+Dies ist das zentrale Makro für den täglichen Gebrauch. Es führt nacheinander zwei Aktionen aus:  
+1. Exportiert freie Kalender-Slots (ruft `ExportFreeSlots` auf).  
+2. Exportiert studentische E-Mails aus Posteingang und Gesendeten Elementen (ruft `ExportStudentEmails` auf).  
 Sie werden beim Start gefragt, wie viele Tage rückwärts (Standard: 7) nach neuen E-Mails gesucht werden soll.
 
 ### 2. E-Mail Export (ExportStudentEmails)
 **Datei:** `ExportStudentMails.bas`
-Sucht in Ihrem Postfach nach E-Mails von studentischen Domains (z.B. `@smail.th-koeln.de`).
-- **Speicherort:** `D:\TH_Koeln\StudentMails\Inbox` bzw. `SentItems`.
-- **Dateiname:** `YYYYMMDD_HHMMSS - Betreff.msg`.
-- **Besonderheit:** Nach dem erfolgreichen Export wird die E-Mail in Outlook gelöscht, um den Posteingang sauber zu halten.
+Sucht in Ihrem Postfach nach E-Mails von studentischen Domains (z.B. `@smail.th-koeln.de`).  
+- **Speicherort:** `D:\TH_Koeln\StudentMails\Inbox` bzw. `SentItems`.  
+- **Dateiname:** `YYYYMMDD_HHMMSS - Betreff.msg`.  
+- **Besonderheit:** Nach dem erfolgreichen Export wird die E-Mail in Outlook gelöscht, um den Posteingang sauber zu halten.  
 
 ### 3. Kalender-Export (ExportFreeSlots)
 **Datei:** `FreeSlotExport.bas`
-Analysiert Ihre Kalender ("Kalender" und "Kalender (Nur dieser Computer)") für die nächsten 14 Tage.
-- **Logik:** Sucht nach freien 30-Minuten-Fenstern zwischen 13:30 und 16:00 Uhr (konfigurierbar).
-- **Ausschlüsse:** Wochenenden, NRW-Feiertage und explizit konfigurierte Wochentage (Standard: Mi, Fr) werden ignoriert.
-- **Ausgabe:** Erstellt eine Markdown-Datei `data/free_slots.md`, die vom LLM für Terminvorschläge genutzt wird.
+Analysiert Ihre Kalender ("Kalender" und "Kalender (Nur dieser Computer)") für die nächsten 14 Tage.  
+- **Logik:** Sucht nach freien 30-Minuten-Fenstern zwischen 13:30 und 16:00 Uhr (konfigurierbar).  
+- **Ausschlüsse:** Wochenenden, NRW-Feiertage und explizit konfigurierte Wochentage (Standard: Mi, Fr) werden ignoriert.  
+- **Ausgabe:** Erstellt eine Markdown-Datei `data/free_slots.md`, die vom LLM für Terminvorschläge genutzt wird.  
 
 ### 4. Studierende sammeln (CollectStudentEmails)
 **Datei:** `CollectStudentEmails.bas`
@@ -51,10 +51,10 @@ Ein Spezial-Makro, das gezielt nach Mails mit einem bestimmten Schlagwort (z.B. 
 
 ## Installation der Makros in Outlook
 
-1. Öffnen Sie Outlook.
-2. Drücken Sie `ALT + F11`, um den VBA-Editor zu öffnen.
-3. Klicken Sie im Menü auf `Einfügen -> Modul`.
-4. Kopieren Sie den Inhalt der gewünschten `.bas`-Dateien aus dem Ordner `outlook_macro/` in das neue Modul.
-5. Passen Sie ggf. die Pfade (Konstanten am Anfang der Dateien) an Ihre lokale Struktur an.
-6. Speichern Sie das Projekt (`STRG + S`).
-7. Sie können die Makros nun über `ALT + F8` in Outlook starten.
+1. Öffnen Sie Outlook.  
+2. Drücken Sie `ALT + F11`, um den VBA-Editor zu öffnen.  
+3. Klicken Sie im Menü auf `Einfügen -> Modul`.  
+4. Kopieren Sie den Inhalt der gewünschten `.bas`-Dateien aus dem Ordner `outlook_macro/` in das neue Modul.  
+5. Passen Sie ggf. die Pfade (Konstanten am Anfang der Dateien) an Ihre lokale Struktur an.  
+6. Speichern Sie das Projekt (`STRG + S`).  
+7. Sie können die Makros nun über `ALT + F8` in Outlook starten.  

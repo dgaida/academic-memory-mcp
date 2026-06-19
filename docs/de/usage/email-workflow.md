@@ -11,7 +11,7 @@ Der Prozess beginnt direkt in Microsoft Outlook. Da das System lokal auf exporti
 Verwenden Sie die im Projekt bereitgestellten VBA-Makros, um Daten in den `inbox`-Ordner zu exportieren. Eine detaillierte Beschreibung aller verfügbaren Makros und deren Installation finden Sie unter [Outlook VBA-Makros](outlook-macros.md).
 
 - **E-Mails:** Exportiert E-Mails (meist von Studierenden) als `.msg` Dateien. Das System erkennt dabei automatisch Absender, Datum und Betreff.  
-- **Kalenderdaten:** Exportiert freie Zeitfenster aus Ihrem Outlook-Kalender in eine Datei namens `free_slots.md`. Diese dient als Grundlage für automatisierte Terminvorschläge.
+- **Kalenderdaten:** Exportiert freie Zeitfenster aus Ihrem Outlook-Kalender in eine Datei namens `free_slots.md`. Diese dient als Grundlage für automatisierte Terminvorschläge.  
 
 ---
 
@@ -34,11 +34,11 @@ python -m mcp_university.classifier.sort_emails --source ./inbox --target ./sort
 ## 3. Phase: KI-gestützte Analyse (Analyse & Kontext)
 Nachdem die Mails sortiert sind, erfolgt die Analyse durch `process_sorted_emails.py`. In dieser Phase wird der notwendige Kontext für eine spätere Bearbeitung gesammelt.
 
-**Inhalte dieser Phase:**
-- **Zusammenfassung:** Das System erstellt eine prägnante Zusammenfassung des bisherigen Konversationsverlaufs im Studentenordner (`.emails_summary.md`).
-- **RAG-Kontext (Retrieval Augmented Generation):** Das System durchsucht eine Vektordatenbank nach thematisch passenden Informationen (z.B. Prüfungsordnungen), basierend auf dem Inhalt der aktuellen Mail.
-- **Ähnlichkeits-Suche:** Es wird nach den 3 neuesten, thematisch ähnlichsten E-Mails desselben Studenten im Archiv gesucht, um eine konsistente Historie zu gewährleisten.
-- **Aktions-Klassifizierung:** Das LLM entscheidet vorab, welche der 6 möglichen Aktionen am besten zur E-Mail passt.
+**Inhalte dieser Phase:**  
+- **Zusammenfassung:** Das System erstellt eine prägnante Zusammenfassung des bisherigen Konversationsverlaufs im Studentenordner (`.emails_summary.md`).  
+- **RAG-Kontext (Retrieval Augmented Generation):** Das System durchsucht eine Vektordatenbank nach thematisch passenden Informationen (z.B. Prüfungsordnungen), basierend auf dem Inhalt der aktuellen Mail.  
+- **Ähnlichkeits-Suche:** Es wird nach den 3 neuesten, thematisch ähnlichsten E-Mails desselben Studenten im Archiv gesucht, um eine konsistente Historie zu gewährleisten.  
+- **Aktions-Klassifizierung:** Das LLM entscheidet vorab, welche der 6 möglichen Aktionen am besten zur E-Mail passt.  
 
 ---
 
@@ -60,10 +60,10 @@ Basierend auf der Analyse schlägt das System eine von sechs Aktionen vor. Diese
 Der Prozess wird in einer interaktiven Web-Oberfläche kontrolliert (Human-in-the-loop).
 
 **Funktionen der GUI:**  
-- **Korrektur der Klassifizierung:** Ändern der E-Mail-Klasse via Dropdown (physische Verschiebung beim Speichern).
-- **Aktions-Review:** Überprüfung und ggf. Änderung der vorgeschlagenen Aktion.
-- **Anhänge extrahieren:** Checkbox zum automatischen Speichern von Anhängen im Studentenordner.
-- **Quick-Links:** Direktes Öffnen des Windows-Ordners oder der E-Mail-Datei.
+- **Korrektur der Klassifizierung:** Ändern der E-Mail-Klasse via Dropdown (physische Verschiebung beim Speichern).  
+- **Aktions-Review:** Überprüfung und ggf. Änderung der vorgeschlagenen Aktion.  
+- **Anhänge extrahieren:** Checkbox zum automatischen Speichern von Anhängen im Studentenordner.  
+- **Quick-Links:** Direktes Öffnen des Windows-Ordners oder der E-Mail-Datei.  
 
 ---
 
@@ -85,10 +85,10 @@ Wird genutzt, wenn der Student einen Termin bestätigt hat. Das System extrahier
 Die E-Mail wird als bearbeitet markiert. Es erfolgt keine weitere technische Aktion in Outlook.
 
 #### 5) Aufgabe im Kalender anlegen (Finale Abgabe)
-Diese Aktion kombiniert mehrere Schritte für Abschlussarbeiten:
-1. Anhänge werden via `save_email_attachments` im Studentenordner gespeichert.
-2. Ein Kalendereintrag wird für in **7 Tagen** angelegt, um an die Korrektur zu erinnern.
-3. Ein Antwortentwurf zur Bestätigung des Empfangs wird erstellt.
+Diese Aktion kombiniert mehrere Schritte für Abschlussarbeiten:  
+1. Anhänge werden via `save_email_attachments` im Studentenordner gespeichert.  
+2. Ein Kalendereintrag wird für in **7 Tagen** angelegt, um an die Korrektur zu erinnern.  
+3. Ein Antwortentwurf zur Bestätigung des Empfangs wird erstellt.  
 
 #### 6) Termin für Kolloquium
 Ähnlich wie Aktion 3, jedoch wird hierbei die Dauer fest auf **60 Minuten** eingestellt und ein spezieller Betreff gewählt.
@@ -96,7 +96,7 @@ Diese Aktion kombiniert mehrere Schritte für Abschlussarbeiten:
 ---
 
 ## Weiterführende Links  
-- [Outlook VBA-Makros](outlook-macros.md): Details zu den Export-Skripten.
-- [Datenbank-Prozesse](database-processes.md): Erfahren Sie mehr über die Verwaltung der `profiles_tracking.db`.
-- [E-Mail Klassifizierung](email-classification.md): Details zu den Machine-Learning Modellen.
+- [Outlook VBA-Makros](outlook-macros.md): Details zu den Export-Skripten.  
+- [Datenbank-Prozesse](database-processes.md): Erfahren Sie mehr über die Verwaltung der `profiles_tracking.db`.  
+- [E-Mail Klassifizierung](email-classification.md): Details zu den Machine-Learning Modellen.  
 - [Konfiguration](../configuration.md): So passen Sie Pfade und LLM-Einstellungen an.  
