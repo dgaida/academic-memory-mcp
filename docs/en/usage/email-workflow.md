@@ -25,8 +25,12 @@ python -m mcp_university.classifier.sort_emails --source ./inbox --target ./sort
 
 **What happens here?**  
 1. **Topic Recognition:** The [Email Classification](email-classification.md) system uses a machine learning model (transformer-based) to assign the content of the email to a category (e.g., *Bachelor Thesis*, *Project*, *PO-Change*).  
-2. **File System Structure:** The emails are moved into a three-level hierarchy: `Semester (e.g., 2023_24_WS) / Lastname_Firstname / (Inbox or SentItems)`.  
-3. **Normalization:** Names are normalized (umlauts replaced, special characters cleaned) to ensure compatibility with the file system.  
+2. **File System Structure:** The emails are moved into a three-level hierarchy: `Semester (e.g., 2023_24_WS) / Lastname / (Inbox or SentItems)`.
+3. **Lastname Extraction:** The lastname is automatically extracted from the email address or display name.
+    - *Example 1:* `max.mustermann@th-koeln.de` -> Folder: `Mustermann`
+    - *Example 2:* `mustermann@stud.th-koeln.de` -> Folder: `Mustermann`
+    - *Example 3:* `Mustermann-Schmidt, Erika <erika.mustermann@...>` -> Folder: `Mustermann_Schmidt`
+4. **Normalization:** Names are normalized (umlauts replaced, special characters cleaned) to ensure compatibility with the file system.
 
 ---
 
@@ -41,13 +45,16 @@ To generate a high-quality and context-sensitive response, the LLM receives a va
     - **Student Profile:** Information about the sender (role, previous topics). Details can be found under [Person Profiles](profiles.md).  
     - **User Profile:** Your own persona (name, role, tone), defined in `config/user.yaml`.  
 - **Skills:** For each email class, there is a Markdown file (e.g., `SKILL_Bachelor_Thesis.md`) containing specific instructions and expertise for that topic.  
-- **RAG Context (Retrieval Augmented Generation):** The system searches a vector database for similar cases or documents configured in [Memory Paths](email-classification.md#memory-index).  
+- **Summary:** The system creates a concise summary of the previous conversation history in the student folder (`.emails_summary.md`). This serves to provide the user with a quick overview in the [Gradio GUI](#gradio-gui).
+    - An example of the resulting structure can be found under [Example Email Structures](indexing-details.md#example-email-structures).
+    - If an email is reclassified in the GUI, the `.emails_summary.md` is automatically moved to the new target folder.
+- **RAG Context (Retrieval Augmented Generation):** The system searches a vector database for thematically matching information (e.g., examination regulations) based on the content of the current mail. Details on this multi-stage process can be found under [RAG Process](rag-process.md).
 - **Similarity Search:** The system searches for the 3 most recent, thematically similar emails from the same student in the archive to ensure consistent responses.  
 
 ---
 
 ## Phase 4: Actions and Automation
-Based on the analysis, the system suggests one of six actions. In the [Gradio Interface](#phase-5-verification-gradio-gui), you can confirm or change this selection.
+Based on the analysis, the system suggests one of six actions. In the [Gradio Interface](#gradio-gui), you can confirm or change this selection.
 
 ### List of Actions
 
@@ -62,7 +69,7 @@ Based on the analysis, the system suggests one of six actions. In the [Gradio In
 
 ---
 
-## Phase 5: Verification (Gradio GUI)
+## Phase 5: Verification (Gradio GUI) {#gradio-gui}
 The process ends in an interactive web interface. Here, the human remains in full control (Human-in-the-loop).
 
 **GUI Functions:**  
