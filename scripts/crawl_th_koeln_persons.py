@@ -160,7 +160,8 @@ class THKoelnCrawler:
             "is_dekan": False,
             "is_senat": False,
             "is_institutsdirektor": False,
-            "is_praesidium": False
+            "is_praesidium": False,
+            "studiengangsleitung": None
         }
 
         intro_div = soup.find("div", class_="introduction-personal")
@@ -196,15 +197,12 @@ class THKoelnCrawler:
                         details["is_institutsdirektor"] = True
                     if any(term in text for term in ["Vizepräsident", "Vizepräsidentin", "Präsident", "Präsidentin"]) and "Ehemalig" not in text:
                         details["is_praesidium"] = True
-
+                    if "Studiengangsleitung" in text:
+                        details["studiengangsleitung"] = "ja" if text.strip() == "Studiengangsleitung" else text.strip()
         return details
-
     def crawl(self, chars: List[str], faculty: Optional[str] = None, institution: Optional[str] = None) -> List[Dict[str, Any]]:
         """Crawls persons for a list of characters and/or faculty/institution.
 
-        Args:
-            chars: List of characters to crawl.
-            faculty: Optional faculty to filter by.
             institution: Optional institution to filter by.
 
         Returns:
@@ -250,8 +248,9 @@ def save_to_markdown(data: List[Dict[str, Any]], filename: str) -> None:
     os.makedirs(os.path.dirname(os.path.abspath(filename)), exist_ok=True)
     with open(filename, "w", encoding="utf-8") as f:
         f.write("# Personen TH Köln\n\n")
-        f.write("| Name | E-Mail | Fakultät oder Einrichtung | Institut | PA-Vorsitz | DekanIn | Senat | InstitutsdirektorIn | Präsidiumsmitglied |\n")
-        f.write("| --- | --- | --- | --- | --- | --- | --- | --- | --- |\n")
+
+        f.write("| Name | E-Mail | Fakultät oder Einrichtung | Institut | PA-Vorsitz | DekanIn | Senat | InstitutsdirektorIn | Präsidiumsmitglied | Studiengangsleitung |\n")
+        f.write("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n")
         for person in data:
             name = person.get("name") or ""
             email = person.get("email") or ""
@@ -262,7 +261,8 @@ def save_to_markdown(data: List[Dict[str, Any]], filename: str) -> None:
             senat = "X" if person.get("is_senat") else ""
             inst_dir = "X" if person.get("is_institutsdirektor") else ""
             praesidium = "X" if person.get("is_praesidium") else ""
-            f.write(f"| {name} | {email} | {faculty} | {institute} | {pa} | {dekan} | {senat} | {inst_dir} | {praesidium} |\n")
+            studiengangsleitung = person.get("studiengangsleitung") or ""
+            f.write(f"| {name} | {email} | {faculty} | {institute} | {pa} | {dekan} | {senat} | {inst_dir} | {praesidium} | {studiengangsleitung} |\n")
 
 
 def parse_markdown_files(directory: Path) -> List[Dict[str, Any]]:
@@ -294,7 +294,8 @@ def parse_markdown_files(directory: Path) -> List[Dict[str, Any]]:
                         "is_dekan": parts[6] == "X",
                         "is_senat": parts[7] == "X",
                         "is_institutsdirektor": parts[8] == "X",
-                        "is_praesidium": parts[9] == "X"
+                        "is_praesidium": parts[9] == "X",
+                        "studiengangsleitung": parts[10] if len(parts) > 10 and parts[10] != "" else None
                     }
                     all_persons.append(person)
     return all_persons
@@ -326,7 +327,8 @@ def save_to_database(data: List[Dict[str, Any]], db_path: Path) -> None:
             "is_dekan": person.get("is_dekan", False),
             "is_senat": person.get("is_senat", False),
             "is_institutsdirektor": person.get("is_institutsdirektor", False),
-            "is_praesidium": person.get("is_praesidium", False)
+            "is_praesidium": person.get("is_praesidium", False),
+            "studiengangsleitung": person.get("studiengangsleitung")
         }
 
         # Create person node

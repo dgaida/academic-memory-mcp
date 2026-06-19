@@ -312,6 +312,21 @@ def extract_data() -> None:
 
                     f.write("\n")
 
+        # Create Studiengangsleitung edges
+        logger.info("Erstelle Studiengangsleitung-Kanten...")
+        all_persons = [n for n in store.get_all_nodes() if n["type"] == "Person"]
+        all_studiengaenge = [n for n in store.get_all_nodes() if n["type"] == "Studiengang"]
+
+        for person in all_persons:
+            props = json.loads(person.get("properties_json", "{}"))
+            sl = props.get("studiengangsleitung")
+            if sl and sl.lower() != "ja":
+                # Search for study program in the description
+                for sg in all_studiengaenge:
+                    if sg["name"].lower() in sl.lower():
+                        logger.info(f"  Match gefunden: {person['name']} -> hat Studiengangsleitung -> {sg['name']}")
+                        store.upsert_edge(person["id"], sg["id"], "hat Studiengangsleitung")
+
         logger.info(f"Extraktion und Graph-Integration abgeschlossen. Ergebnisse in {output_file}")
 
     except Exception as e:
