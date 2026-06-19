@@ -18,7 +18,7 @@
         <link rel="prev" href="../mocogi-extraction/">
       
       
-        <link rel="next" href="../profiles/">
+        <link rel="next" href="../outlook-macros/">
       
       
         
@@ -1065,6 +1065,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../outlook-macros/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Outlook Makros
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../profiles/" class="md-nav__link">
         
   
@@ -1586,9 +1614,9 @@
 <h2 id="phase-1-data-export-and-preparation">Phase 1: Data Export and Preparation<a class="headerlink" href="#phase-1-data-export-and-preparation" title="Permanent link">&para;</a></h2>
 <p>The process begins directly in Microsoft Outlook. Since the system works locally on exported data, the relevant information must first be provided.</p>
 <h3 id="export-from-outlook">Export from Outlook<a class="headerlink" href="#export-from-outlook" title="Permanent link">&para;</a></h3>
-<p>Use the VBA macros provided in the project to export data into the <code>inbox</code> folder:
-- <strong>Emails:</strong> Exports emails (mostly from students) as <code>.msg</code> files. The system automatically detects the sender, date, and subject.
-- <strong>Calendar Data:</strong> Exports free time slots from your Outlook calendar into a file named <code>free_slots.yaml</code>. This serves as the basis for automated appointment suggestions.</p>
+<p>Use the VBA macros provided in the project to export data into the <code>inbox</code> folder:<br />
+- <strong>Emails:</strong> Exports emails (mostly from students) as <code>.msg</code> files. The system automatically detects the sender, date, and subject.<br />
+- <strong>Calendar Data:</strong> Exports free time slots from your Outlook calendar into a file named <code>free_slots.yaml</code>. This serves as the basis for automated appointment suggestions.  </p>
 <hr />
 <h2 id="phase-2-classification-and-sorting">Phase 2: Classification and Sorting<a class="headerlink" href="#phase-2-classification-and-sorting" title="Permanent link">&para;</a></h2>
 <p>Before a content analysis takes place, the emails are sorted by topic.</p>
@@ -1596,23 +1624,23 @@
 <p>Run the sorting script:
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python<span class="w"> </span>-m<span class="w"> </span>mcp_university.classifier.sort_emails<span class="w"> </span>--source<span class="w"> </span>./inbox<span class="w"> </span>--target<span class="w"> </span>./sorted_mails
 </code></pre></div></p>
-<p><strong>What happens here?</strong>
-1. <strong>Topic Recognition:</strong> The <a href="../email-classification/">Email Classification</a> system uses a machine learning model (transformer-based) to assign the content of the email to a category (e.g., <em>Bachelor Thesis</em>, <em>Project</em>, <em>PO-Change</em>).
-2. <strong>File System Structure:</strong> The emails are moved into a three-level hierarchy: <code>Semester (e.g., 2023_24_WS) / Lastname_Firstname / (Inbox or SentItems)</code>.
-3. <strong>Normalization:</strong> Names are normalized (umlauts replaced, special characters cleaned) to ensure compatibility with the file system.</p>
+<p><strong>What happens here?</strong><br />
+1. <strong>Topic Recognition:</strong> The <a href="../email-classification/">Email Classification</a> system uses a machine learning model (transformer-based) to assign the content of the email to a category (e.g., <em>Bachelor Thesis</em>, <em>Project</em>, <em>PO-Change</em>).<br />
+2. <strong>File System Structure:</strong> The emails are moved into a three-level hierarchy: <code>Semester (e.g., 2023_24_WS) / Lastname_Firstname / (Inbox or SentItems)</code>.<br />
+3. <strong>Normalization:</strong> Names are normalized (umlauts replaced, special characters cleaned) to ensure compatibility with the file system.  </p>
 <hr />
 <h2 id="phase-3-ai-powered-analysis-llm">Phase 3: AI-Powered Analysis (LLM)<a class="headerlink" href="#phase-3-ai-powered-analysis-llm" title="Permanent link">&para;</a></h2>
 <p>After the emails are sorted, the actual intelligence work is performed by <code>process_sorted_emails.py</code>. The LLM (Large Language Model) analyzes each email in detail.</p>
 <h3 id="information-passed-to-the-llm">Information Passed to the LLM:<a class="headerlink" href="#information-passed-to-the-llm" title="Permanent link">&para;</a></h3>
-<p>To generate a high-quality and context-sensitive response, the LLM receives a variety of information:
-- <strong>Current Email Content:</strong> The text of the latest message in the conversation.
-- <strong>Conversation History:</strong> Previous emails in the same folder are included to maintain context.
-- <strong>Person Profiles:</strong>
-    - <strong>Student Profile:</strong> Information about the sender (role, previous topics). Details can be found under <a href="../profiles/">Person Profiles</a>.
-    - <strong>User Profile:</strong> Your own persona (name, role, tone), defined in <code>config/user.yaml</code>.
-- <strong>Skills:</strong> For each email class, there is a Markdown file (e.g., <code>SKILL_Bachelor_Thesis.md</code>) containing specific instructions and expertise for that topic.
-- <strong>RAG Context (Retrieval Augmented Generation):</strong> The system searches a vector database for similar cases or documents configured in <a href="../email-classification/#memory-index">Memory Paths</a>.
-- <strong>Similarity Search:</strong> The system searches for the 3 most recent, thematically similar emails from the same student in the archive to ensure consistent responses.</p>
+<p>To generate a high-quality and context-sensitive response, the LLM receives a variety of information:<br />
+- <strong>Current Email Content:</strong> The text of the latest message in the conversation.<br />
+- <strong>Conversation History:</strong> Previous emails in the same folder are included to maintain context.<br />
+- <strong>Person Profiles:</strong><br />
+    - <strong>Student Profile:</strong> Information about the sender (role, previous topics). Details can be found under <a href="../profiles/">Person Profiles</a>.<br />
+    - <strong>User Profile:</strong> Your own persona (name, role, tone), defined in <code>config/user.yaml</code>.<br />
+- <strong>Skills:</strong> For each email class, there is a Markdown file (e.g., <code>SKILL_Bachelor_Thesis.md</code>) containing specific instructions and expertise for that topic.<br />
+- <strong>RAG Context (Retrieval Augmented Generation):</strong> The system searches a vector database for similar cases or documents configured in <a href="../email-classification/#memory-index">Memory Paths</a>.<br />
+- <strong>Similarity Search:</strong> The system searches for the 3 most recent, thematically similar emails from the same student in the archive to ensure consistent responses.  </p>
 <hr />
 <h2 id="phase-4-actions-and-automation">Phase 4: Actions and Automation<a class="headerlink" href="#phase-4-actions-and-automation" title="Permanent link">&para;</a></h2>
 <p>Based on the analysis, the system suggests one of six actions. In the <a href="#phase-5-verification-gradio-gui">Gradio Interface</a>, you can confirm or change this selection.</p>
@@ -1661,18 +1689,18 @@
 <hr />
 <h2 id="phase-5-verification-gradio-gui">Phase 5: Verification (Gradio GUI)<a class="headerlink" href="#phase-5-verification-gradio-gui" title="Permanent link">&para;</a></h2>
 <p>The process ends in an interactive web interface. Here, the human remains in full control (Human-in-the-loop).</p>
-<p><strong>GUI Functions:</strong>
-- <strong>Correction of Classification:</strong> If an email was incorrectly sorted, you can change the class via a dropdown. The system automatically moves the files physically on the disk when saving.
-- <strong>Action Review:</strong> Check which action the LLM suggests and change it if necessary.
-- <strong>Extract Attachments:</strong> Via a checkbox, you can decide whether attachments of the email should be saved directly in the student folder.
-- <strong>Quick Links:</strong> Open the corresponding Windows folder or the email file with one click directly from the browser.
-- <strong>Summaries:</strong> Each email is briefly summarized to allow for quick scanning of the inbox.</p>
+<p><strong>GUI Functions:</strong><br />
+- <strong>Correction of Classification:</strong> If an email was incorrectly sorted, you can change the class via a dropdown. The system automatically moves the files physically on the disk when saving.<br />
+- <strong>Action Review:</strong> Check which action the LLM suggests and change it if necessary.<br />
+- <strong>Extract Attachments:</strong> Via a checkbox, you can decide whether attachments of the email should be saved directly in the student folder.<br />
+- <strong>Quick Links:</strong> Open the corresponding Windows folder or the email file with one click directly from the browser.<br />
+- <strong>Summaries:</strong> Each email is briefly summarized to allow for quick scanning of the inbox.  </p>
 <hr />
 <h2 id="further-links">Further Links<a class="headerlink" href="#further-links" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a href="../database-processes/">Database Processes</a>: Learn more about managing <code>profiles_tracking.db</code> and the Knowledge Graph.</li>
-<li><a href="../email-classification/">Email Classification</a>: Details on the machine learning models and memory indices.</li>
-<li><a href="../../configuration/">Configuration</a>: How to customize paths and LLM settings.</li>
+<li><a href="../database-processes/">Database Processes</a>: Learn more about managing <code>profiles_tracking.db</code> and the Knowledge Graph.  </li>
+<li><a href="../email-classification/">Email Classification</a>: Details on the machine learning models and memory indices.  </li>
+<li><a href="../../configuration/">Configuration</a>: How to customize paths and LLM settings.  </li>
 </ul>
 
 
