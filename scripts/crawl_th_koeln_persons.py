@@ -23,6 +23,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from mcp_university.metadata.store import MetadataStore
+from mcp_university.config import get_config
 
 # Try to reconfigure stdout/stdin for UTF-8 (mainly for Windows)
 if hasattr(sys.stdout, 'reconfigure'):
@@ -432,8 +433,8 @@ Examples:
     parser.add_argument(
         "--db",
         type=Path,
-        default=Path("data/metadata/university.db"),
-        help="Path to the university metadata database (default: data/metadata/university.db)."
+        default=get_config().th_personal_path,
+        help=f"Path to the university metadata database (default: {get_config().th_personal_path})."
     )
 
     args = parser.parse_args()

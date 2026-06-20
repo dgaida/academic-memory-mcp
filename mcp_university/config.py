@@ -142,6 +142,15 @@ class Config:
         return self.data_dir / "logs"
 
     @property
+    def th_personal_path(self) -> Path:
+        """Gibt den Pfad zur TH-Personal-Datenbank zurück.
+
+        Returns:
+            Path: DB-Pfad.
+        """
+        return self.data_dir / "metadata" / "th_personal.db"
+
+    @property
     def sqlite_path(self) -> Path:
         """Gibt den Pfad zur SQLite-Datenbank zurück.
 
