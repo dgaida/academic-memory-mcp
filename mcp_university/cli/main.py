@@ -14,6 +14,7 @@ from ..mcp_server.server import create_server
 from ..knowledge_graph.engine import KnowledgeGraphEngine
 import yaml
 from .db import db_app
+from .memory import memory_app
 
 profiles_app = typer.Typer(help="Verwaltung von Personen-Steckbriefen")
 
@@ -129,6 +130,7 @@ app = typer.Typer(help="MCP University Memory System CLI - Lokales Wissensmanage
 app.add_typer(graph_app, name="graph")
 app.add_typer(db_app, name="db")
 app.add_typer(profiles_app, name="profiles")
+app.add_typer(memory_app, name="memory")
 
 def setup_logging(debug: bool) -> None:
     """Konfiguriert das Logging für Konsole und Datei."""
