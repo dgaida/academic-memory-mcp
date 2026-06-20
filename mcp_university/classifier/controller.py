@@ -256,11 +256,45 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
         reply = ""
         should_attach = False
 
+
         if action_idx == 3: # 4) Nur archivieren
             return "E-Mail archiviert."
 
+        # Delayed summary generation
+        summary_content = ""
+        if action_idx in [0, 1, 2, 4, 5]: # Reply-related actions
+            identifier_path = email_data.get("new_identifier_path") or email_data.get("identifier_path")
+            if identifier_path:
+                summary_file = identifier_path / ".emails_summary.md"
+                # For simplicity, we always re-generate or check freshness here
+                # Or just load if exists, and generate if not.
+                # Since we want it to be current:
+                email_files = list(identifier_path.rglob("*.msg")) + list(identifier_path.rglob("*.eml"))
+                dated_emails = []
+                for f in email_files:
+                    try:
+                        dated_emails.append((self.mail_parser.get_email_date(f), f))
+                    except Exception:
+                        dated_emails.append((datetime.min, f))
+                dated_emails.sort(key=lambda x: x[0])
+
+                latest_date = dated_emails[-1][0] if dated_emails else datetime.min
+
+                if not summary_file.exists() or latest_date > datetime.fromtimestamp(summary_file.stat().st_mtime):
+                    c_content = ""
+                    for d, f in dated_emails:
+                        p = self.mail_parser.parse(f)
+                        if p:
+                            c_content += f"\n--- EMAIL VOM {d} ---\n{p}\n"
+                    summary_content = self.summarizer.summarize_email_conversation(identifier_path.name, c_content)
+                    if summary_content:
+                        summary_file.write_text(summary_content, encoding="utf-8")
+                else:
+                    summary_content = summary_file.read_text(encoding="utf-8")
+
+
         reply_subject, reply, should_attach = self.generate_reply(
-            latest_mail, "", skill_path, "", persona_path, add_ctx, apt_skill_path, sender_name, student_email,
+            latest_mail, summary_content, skill_path, "", persona_path, add_ctx, apt_skill_path, sender_name, student_email,
             action_idx=action_idx, email_class=email_data.get('class')
         )
 
@@ -774,20 +808,9 @@ TEXT:
                 if pdf_path.exists():
                     add_ctx += f"\nDu kannst bei Bedarf Details aus der Datei '{pdf_path}' mittels des read_file Tools auslesen.\n"
 
-            conv_content = ""
+            # Conversation summary is now delayed until execute_action/generate_reply
             summary_content = ""
-            summary_file = email["identifier_path"] / ".emails_summary.md"
-            if not summary_file.exists() or latest_date > datetime.fromtimestamp(summary_file.stat().st_mtime):
-                c_content = ""
-                for d, f in email["dated_emails"]:
-                    p = self.mail_parser.parse(f)
-                    if p:
-                        c_content += f"\n--- EMAIL VOM {d} ---\n{p}\n"
-                summary_content = self.summarizer.summarize_email_conversation(email["identifier_path"].name, c_content)
-                if summary_content:
-                    summary_file.write_text(summary_content, encoding="utf-8")
-            else:
-                summary_content = summary_file.read_text(encoding="utf-8")
+            conv_content = ""
 
             reply_subject, reply, should_attach = self.generate_reply(
                 latest_mail, summary_content, skill_path, conv_content, persona_path, add_ctx, apt_skill_path, sender_name, student_email,

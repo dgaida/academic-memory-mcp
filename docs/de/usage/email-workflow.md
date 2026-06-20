@@ -41,9 +41,7 @@ Nachdem die Mails sortiert sind, erfolgt die Analyse durch `process_sorted_email
 
 **Inhalte dieser Phase:**
 
-- **Zusammenfassung:** Das System erstellt eine prägnante Zusammenfassung des bisherigen Konversationsverlaufs im Studentenordner (`.emails_summary.md`). Diese dient primär als Kontext für das LLM bei der Antwortgenerierung. In der [Gradio GUI](#gradio-gui) wird hingegen für jede Mail eine separate, kurze (2 Sätze) Zusammenfassung des aktuellen Inhalts angezeigt, um einen schnellen Überblick zu ermöglichen.  
-    - Ein Beispiel für die resultierende Struktur finden Sie unter [Beispiel E-Mail-Strukturen](indexing-details.md#beispiel-e-mail-strukturen).  
-    - Falls eine E-Mail in der GUI umklassifiziert wird, wird die `.emails_summary.md` automatisch in den neuen Zielordner mitverschoben.  
+- **Gradio GUI Zusammenfassung:** In der [Gradio GUI](#gradio-gui) wird für jede Mail eine separate, kurze (2 Sätze) Zusammenfassung des aktuellen Inhalts angezeigt, um einen schnellen Überblick zu ermöglichen. Die vollständige Konversations-Zusammenfassung (`.emails_summary.md`) wird erst in **Phase 6** bei der Ausführung einer Antwort-Aktion erstellt, um Ressourcen zu sparen und den aktuellsten Stand zu garantieren.
 - **RAG-Kontext (Retrieval Augmented Generation):** Das System durchsucht eine Vektordatenbank nach thematisch passenden Informationen (z.B. Prüfungsordnungen), basierend auf dem Inhalt der aktuellen Mail. Dieser Kontext wird sowohl für die Aktions-Klassifizierung als auch für die spätere Antwortgenerierung genutzt. Details zu diesem mehrstufigen Prozess finden Sie unter [RAG-Prozess](rag-process.md).  
 - **Ähnlichkeits-Suche:** Es wird nach den 3 neuesten, thematisch ähnlichsten E-Mails desselben Studenten im Archiv gesucht, um eine konsistente Historie zu gewährleisten.  
 - **Aktions-Klassifizierung:** Das LLM entscheidet vorab, welche der 6 möglichen Aktionen am besten zur E-Mail passt.  
@@ -82,8 +80,13 @@ Sobald Sie in der GUI auf "Speichern & Ausführen" klicken, wird die gewählte A
 
 ### Detail-Logik der Aktionen:
 
+#### Vorbereitung: Konversations-Zusammenfassung
+Bevor eine Antwort generiert wird, erstellt das System eine prägnante Zusammenfassung des bisherigen Konversationsverlaufs im Studentenordner (`.emails_summary.md`). Diese dient als wichtiger Kontext für das LLM, um über bisherige Absprachen informiert zu sein.
+- Ein Beispiel für die resultierende Struktur finden Sie unter [Beispiel E-Mail-Strukturen](indexing-details.md#beispiel-e-mail-strukturen).
+- Falls eine E-Mail in der GUI umklassifiziert wurde, bezieht die Zusammenfassung automatisch die neue Ordnerstruktur mit ein.
+
 #### 1) Antwort schreiben
-Das LLM generiert einen Antworttext unter Berücksichtigung Ihres eigenen **Personen-Steckbriefs** (Tonalität, Rolle) und des **Studenten-Steckbriefs**. Details zur Erstellung und Nutzung der Steckbriefe finden Sie unter [Personen-Profile](profiles.md). Es wird automatisch ein Entwurf in Outlook erstellt, der die Original-Mail als Anhang enthält.
+Das LLM generiert einen Antworttext unter Berücksichtigung Ihres eigenen **Personen-Steckbriefs** (Tonalität, Rolle), des **Studenten-Steckbriefs** und der oben genannten **Konversations-Zusammenfassung**. Details zur Erstellung und Nutzung der Steckbriefe finden Sie unter [Personen-Profile](profiles.md). Es wird automatisch ein Entwurf in Outlook erstellt, der die Original-Mail als Anhang enthält.
 
 #### 2) Antwort schreiben mit einem Terminvorschlag
 Das System ruft das Tool `get_appointment_slots` auf, welches die `free_slots.md` ausliest. Die gefundenen Zeiten werden formatiert in den Antwortentwurf integriert.

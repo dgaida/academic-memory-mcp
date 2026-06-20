@@ -106,7 +106,10 @@ Student_B/
 ```
 
 **Fall 3: Kombinierte E-Mail-Konversation (Spezialfall)**
-Wenn sowohl `Inbox` und `SentItems` vorhanden sind, erkennt der Crawler dies als Konversation und erstellt eine gemeinsame Zusammenfassung (`.emails_summary.md`). Die Einzelordner erhalten dann keine eigenen `.Inbox_summary.md` Dateien mehr, da sie in der Konversation aufgehen.
+
+Wenn sowohl `Inbox` und `SentItems` vorhanden sind, erkennt der Crawler dies als Konversation und erstellt eine gemeinsame Zusammenfassung (`.emails_summary.md`).
+
+*Wichtiger Hinweis:* Während der **Crawler** diese Datei bei einer vollständigen Indexierung des Archivs anlegt, wird sie im täglichen **E-Mail-Workflow** (via `process_sorted_emails.py`) erst "Just-in-Time" in Phase 6 (Ausführung) generiert.
 
 Vorher:
 ```text

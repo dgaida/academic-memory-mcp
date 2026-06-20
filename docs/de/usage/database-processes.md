@@ -46,6 +46,12 @@ Extrahiert Modulinformationen aus der MOCOGI-API und schreibt:
 ### 6. Student Sync (`mcp-uni db sync-students`)
 Liest eine lokale `students.yaml` Datei und schreibt die darin enthaltenen Informationen über Studierende, deren Status und Abschlussarbeitsthemen in die Datenbank.
 
+
+### 8. Email Controller (`process_sorted_emails.py`)
+Im Rahmen des täglichen E-Mail-Workflows modifiziert der Controller die Datenstruktur:
+* **Relocation:** Verschiebt E-Mails bei Umklassifizierung physisch auf dem Dateisystem.
+* **Just-in-Time Zusammenfassung:** Erstellt die `.emails_summary.md` erst bei der Ausführung einer Antwort-Aktion, um den aktuellsten Kontext einzubeziehen.
+
 ### 7. Ontology Learner (`mcp_university/knowledge_graph/ontology_learner.py`)
 Automatisiert das Lernen von Aliasen:  
 * Extrahiert Name-Email Paare aus E-Mail-Headern.  
