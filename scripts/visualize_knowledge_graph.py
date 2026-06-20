@@ -33,11 +33,12 @@ def main() -> None:
     interaktive Pyvis-Visualisierung.
     """
     parser = argparse.ArgumentParser(description="Visualisierung des Wissensgraphen.")
+    parser.add_argument("--db", type=Path, default=get_config().th_personal_path, help=f"Path to the metadata database (default: {get_config().th_personal_path}).")
     parser.add_argument("--filter", type=str, nargs="+", help="Filtert den Graphen nach einem oder mehreren Knotennamen. Zeigt die Knoten, ihre Eltern-Strukturen (eingehende Kanten) und alle davon ausgehenden Teilgraphen.")
     args = parser.parse_args()
 
     config = get_config()
-    store = MetadataStore(config.sqlite_path)
+    store = MetadataStore(args.db)
 
     nodes = store.get_all_nodes()
     edges = store.get_all_edges()

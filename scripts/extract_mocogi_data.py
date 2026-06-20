@@ -14,6 +14,8 @@ import sys
 import urllib.request
 import urllib.error
 import re
+import argparse
+from pathlib import Path
 from typing import Dict, Any, Optional
 
 from mcp_university.metadata.store import MetadataStore
@@ -206,11 +208,12 @@ def match_person(store: MetadataStore, name: str) -> Optional[int]:
                 return node["id"]
     return None
 
-def extract_data() -> None:
+def extract_data(db_path: Optional[Path] = None) -> None:
     """Extrahiert alle Studiengänge, POs und Module und integriert sie in den Graphen."""
     load_env_manual()
     cfg = get_config()
-    store = MetadataStore(cfg.sqlite_path)
+    db_path = db_path or cfg.th_personal_path
+    store = MetadataStore(db_path)
 
     base_url = "https://module.gm.th-koeln.de/api"
     output_file = "data/mocogi_modules.md"
@@ -335,5 +338,18 @@ def extract_data() -> None:
         traceback.print_exc()
         sys.exit(1)
 
+
+def main() -> None:
+    """Main entry point with argparse."""
+    parser = argparse.ArgumentParser(description="Extract MOCOGI data and integrate into Knowledge Graph.")
+    parser.add_argument(
+        "--db",
+        type=Path,
+        default=get_config().th_personal_path,
+        help=f"Path to the university metadata database (default: {get_config().th_personal_path})."
+    )
+    args = parser.parse_args()
+    extract_data(db_path=args.db)
+
 if __name__ == "__main__":
-    extract_data()
+    main()
