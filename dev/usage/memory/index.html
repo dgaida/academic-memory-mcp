@@ -1504,20 +1504,20 @@
 </code></pre></div>
 <h3 id="optionen">Optionen<a class="headerlink" href="#optionen" title="Permanent link">&para;</a></h3>
 <ul>
-<li><code>--config</code> / <code>-c</code>: Pfad zur Speicherpfad-Konfiguration (Standard: <code>config/classifier_memory_paths.yaml</code>).</li>
-<li><code>--debug</code> / <code>-d</code>: Aktiviert detaillierte Debug-Logs während des Indexierungsprozesses.</li>
+<li><code>--config</code> / <code>-c</code>: Pfad zur Speicherpfad-Konfiguration (Standard: <code>config/classifier_memory_paths.yaml</code>).  </li>
+<li><code>--debug</code> / <code>-d</code>: Aktiviert detaillierte Debug-Logs während des Indexierungsprozesses.  </li>
 </ul>
 <h3 id="funktionsweise">Funktionsweise<a class="headerlink" href="#funktionsweise" title="Permanent link">&para;</a></h3>
-<p>Das Skript führt folgende Schritte aus:
-1. <strong>Pfad-Auflösung</strong>: Es liest die Konfiguration und bestimmt, welche Ordner welchen Vektordatenbanken zugeordnet sind.
-2. <strong>Parsing</strong>: Alle unterstützten Dateien (<code>.pdf</code>, <code>.docx</code>, <code>.md</code>, <code>.txt</code>, <code>.eml</code>, <code>.msg</code>, <code>.py</code>, <code>.ipynb</code>, <code>.json</code>, <code>.html</code>) werden eingelesen.
-3. <strong>Chunking</strong>: Lange Texte werden in kleinere Abschnitte (Chunks) unterteilt.
-4. <strong>Indizierung</strong>: Die Chunks werden mittels des konfigurierten Embedding-Modells vektorisiert und in der Qdrant-Vektordatenbank unter <code>data/memory/&lt;Klassenname&gt;</code> gespeichert.</p>
+<p>Das Skript führt folgende Schritte aus:<br />
+1. <strong>Pfad-Auflösung</strong>: Es liest die Konfiguration und bestimmt, welche Ordner welchen Vektordatenbanken zugeordnet sind.<br />
+2. <strong>Parsing</strong>: Alle unterstützten Dateien (<code>.pdf</code>, <code>.docx</code>, <code>.md</code>, <code>.txt</code>, <code>.eml</code>, <code>.msg</code>, <code>.py</code>, <code>.ipynb</code>, <code>.json</code>, <code>.html</code>) werden eingelesen.<br />
+3. <strong>Chunking</strong>: Lange Texte werden in kleinere Abschnitte (Chunks) unterteilt.<br />
+4. <strong>Indizierung</strong>: Die Chunks werden mittels des konfigurierten Embedding-Modells vektorisiert und in der Qdrant-Vektordatenbank unter <code>data/memory/&lt;Klassenname&gt;</code> gespeichert.  </p>
 <p>Da absolute Pfade als Dokument-IDs verwendet werden, führt ein erneuter Lauf dazu, dass bestehende Dokumente aktualisiert und neue Dokumente hinzugefügt werden.</p>
 <hr />
-<p>Siehe auch:
-- <a href="../rag-process/">RAG-Prozess</a>
-- <a href="../indexing-details/">Indizierung von Dokumenten</a></p>
+<p>Siehe auch:<br />
+- <a href="../rag-process/">RAG-Prozess</a><br />
+- <a href="../indexing-details/">Indizierung von Dokumenten</a>  </p>
 
 
 
