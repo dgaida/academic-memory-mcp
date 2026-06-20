@@ -1489,21 +1489,27 @@
 
 
 <h1 id="rag-prozess-retrieval-augmented-generation">RAG-Prozess (Retrieval Augmented Generation)<a class="headerlink" href="#rag-prozess-retrieval-augmented-generation" title="Permanent link">&para;</a></h1>
-<p>Um E-Mails fachlich korrekt und kontextbezogen zu beantworten, nutzt das System einen mehrstufigen RAG-Prozess. Dieser Prozess stellt sicher, dass das LLM Zugriff auf spezifisches Wissen (wie Prüfungsordnungen oder Modulbeschreibungen) hat, das in den Vektordatenbanken der jeweiligen E-Mail-Klassen gespeichert ist.</p>
+<p>Um E-Mails fachlich korrekt zu klassifizieren und kontextbezogen zu beantworten, nutzt das System einen mehrstufigen RAG-Prozess. Dieser Prozess stellt sicher, dass das LLM Zugriff auf spezifisches Wissen (wie Prüfungsordnungen oder Modulbeschreibungen) hat, das in den Vektordatenbanken der jeweiligen E-Mail-Klassen gespeichert ist.</p>
 <h2 id="ablauf-des-prozesses">Ablauf des Prozesses<a class="headerlink" href="#ablauf-des-prozesses" title="Permanent link">&para;</a></h2>
 <p>Der Prozess in <code>EmailController</code> läuft in drei Hauptschritten ab:</p>
 <h3 id="1-generierung-von-suchanfragen">1. Generierung von Suchanfragen<a class="headerlink" href="#1-generierung-von-suchanfragen" title="Permanent link">&para;</a></h3>
-<p>Anstatt den gesamten E-Mail-Text direkt für die Suche zu verwenden, lässt das System das LLM zunächst <strong>3 präzise Suchanfragen (Fragen)</strong> generieren.
-- Das LLM analysiert die eingehende E-Mail.
-- Es formuliert Fragen, die darauf abzielen, die notwendigen Informationen zur Beantwortung der Anfrage aus einer Wissensdatenbank zu extrahieren.</p>
+<p>Anstatt den gesamten E-Mail-Text direkt für die Suche zu verwenden, lässt das System das LLM zunächst <strong>3 präzise Suchanfragen (Fragen)</strong> generieren.</p>
+<ul>
+<li>Das LLM analysiert die eingehende E-Mail.</li>
+<li>Es formuliert Fragen, die darauf abzielen, die notwendigen Informationen zur Beantwortung der Anfrage aus einer Wissensdatenbank zu extrahieren.</li>
+</ul>
 <h3 id="2-vektorsuche-retrieval">2. Vektorsuche (Retrieval)<a class="headerlink" href="#2-vektorsuche-retrieval" title="Permanent link">&para;</a></h3>
-<p>Die generierten Fragen werden genutzt, um in der Vektordatenbank der zugehörigen E-Mail-Klasse (z.B. <code>Bachelor_Thesis</code> oder <code>PAV</code>) nach relevanten Textabschnitten (Chunks) zu suchen.
-- Für jede der 3 Fragen werden die jeweils passendsten Ergebnisse abgerufen.
-- Das System nutzt hierfür den <code>SearchIndex</code>, der auf den eingebetteten Dokumenten im Ordner <code>data/memory/&lt;Klasse&gt;</code> basiert.</p>
+<p>Die generierten Fragen werden genutzt, um in der Vektordatenbank der zugehörigen E-Mail-Klasse (z.B. <code>Bachelor_Thesis</code> oder <code>PAV</code>) nach relevanten Textabschnitten (Chunks) zu suchen.</p>
+<ul>
+<li>Für jede der 3 Fragen werden die jeweils passendsten Ergebnisse abgerufen.</li>
+<li>Das System nutzt hierfür den <code>SearchIndex</code>, der auf den eingebetteten Dokumenten im Ordner <code>data/memory/&lt;Klasse&gt;</code> basiert.</li>
+</ul>
 <h3 id="3-kontext-injektion-augmentation">3. Kontext-Injektion (Augmentation)<a class="headerlink" href="#3-kontext-injektion-augmentation" title="Permanent link">&para;</a></h3>
-<p>Die gefundenen Informationen werden gefiltert und aufbereitet:
-- Es werden die <strong>Top 3 eindeutigen Chunks</strong> ausgewählt (basierend auf ihrem Ähnlichkeits-Score).
-- Diese Chunks werden als "Zusätzlicher Kontext" in den Prompt für die finale Antwortgenerierung eingefügt.</p>
+<p>Die gefundenen Informationen werden gefiltert und aufbereitet:</p>
+<ul>
+<li>Es werden die <strong>Top 3 eindeutigen Chunks</strong> ausgewählt (basierend auf ihrem Ähnlichkeits-Score).</li>
+<li>Diese Chunks werden als "Zusätzlicher Kontext" in den Prompt für die Aktions-Klassifizierung (Phase 3) sowie die finale Antwortgenerierung (Phase 6) eingefügt.</li>
+</ul>
 <h2 id="vorteile-dieses-ansatzes">Vorteile dieses Ansatzes<a class="headerlink" href="#vorteile-dieses-ansatzes" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Präzision:</strong> Durch die Generierung gezielter Fragen wird das Rauschen reduziert, das bei einer Suche mit dem rohen E-Mail-Text entstehen könnte.</li>
@@ -1511,10 +1517,12 @@
 <li><strong>Transparenz:</strong> In den Debug-Logs und Prompts ist genau nachvollziehbar, welche Informationen als Kontext herangezogen wurden.</li>
 </ul>
 <hr />
-<p>Siehe auch:
-- <a href="../email-classification/">E-Mail Klassifizierung</a>
-- <a href="../indexing-details/">Indizierung von Dokumenten</a>
-- <a href="../../configuration/">Konfiguration</a></p>
+<p>Siehe auch:</p>
+<ul>
+<li><a href="../email-classification/">E-Mail Klassifizierung</a></li>
+<li><a href="../indexing-details/">Indizierung von Dokumenten</a></li>
+<li><a href="../../configuration/">Konfiguration</a></li>
+</ul>
 
 
 

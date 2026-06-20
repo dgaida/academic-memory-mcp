@@ -1774,8 +1774,8 @@
 <h3 id="export-aus-outlook">Export aus Outlook<a class="headerlink" href="#export-aus-outlook" title="Permanent link">&para;</a></h3>
 <p>Verwenden Sie die im Projekt bereitgestellten VBA-Makros, um Daten in den <code>inbox</code>-Ordner zu exportieren. Eine detaillierte Beschreibung aller verfügbaren Makros und deren Installation finden Sie unter <a href="../outlook-macros/">Outlook VBA-Makros</a>.</p>
 <ul>
-<li><strong>E-Mails:</strong> Exportiert E-Mails (meist von Studierenden) als <code>.msg</code> Dateien. Das System erkennt dabei automatisch Absender, Datum und Betreff.  </li>
-<li><strong>Kalenderdaten:</strong> Exportiert freie Zeitfenster aus Ihrem Outlook-Kalender in eine Datei namens <code>free_slots.md</code>. Diese dient als Grundlage für automatisierte Terminvorschläge.  </li>
+<li><strong>E-Mails:</strong> Exportiert E-Mails (meist von Studierenden) als <code>.msg</code> Dateien. Das System erkennt dabei automatisch Absender, Datum und Betreff.</li>
+<li><strong>Kalenderdaten:</strong> Exportiert freie Zeitfenster aus Ihrem Outlook-Kalender in eine Datei namens <code>free_slots.md</code>. Diese dient als Grundlage für automatisierte Terminvorschläge.</li>
 </ul>
 <hr />
 <h2 id="2-phase-klassifizierung-und-sortierung">2. Phase: Klassifizierung und Sortierung<a class="headerlink" href="#2-phase-klassifizierung-und-sortierung" title="Permanent link">&para;</a></h2>
@@ -1784,24 +1784,32 @@
 <p>Führen Sie das Sortier-Skript aus:
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python<span class="w"> </span>-m<span class="w"> </span>mcp_university.classifier.sort_emails<span class="w"> </span>--source<span class="w"> </span>./inbox<span class="w"> </span>--target<span class="w"> </span>./sorted_mails
 </code></pre></div></p>
-<p><strong>Was passiert hier?</strong><br />
-1. <strong>Themen-Erkennung:</strong> Der <a href="../email-classification/">EmailClassifier</a> nutzt ein Machine-Learning-Modell (Transformer-basiert), um den Inhalt der Mail einer Kategorie zuzuordnen (z.B. <em>Bachelor Thesis</em>, <em>Projekt</em>, <em>PO-Wechsel</em>).<br />
-2. <strong>Dateisystem-Struktur:</strong> Die E-Mails werden in eine dreistufige Hierarchie verschoben: <code>Semester (z.B. 2023_24_WS) / Nachname / (Inbox oder SentItems)</code>.
-3. <strong>Extraktion des Nachnamens:</strong> Der Nachname wird automatisch aus der E-Mail-Adresse oder dem Anzeigenamen ermittelt.
-    - <em>Beispiel 1:</em> <code>max.mustermann@th-koeln.de</code> -&gt; Ordner: <code>Mustermann</code>
-    - <em>Beispiel 2:</em> <code>mustermann@stud.th-koeln.de</code> -&gt; Ordner: <code>Mustermann</code>
-    - <em>Beispiel 3:</em> <code>Mustermann-Schmidt, Erika &lt;erika.mustermann@...&gt;</code> -&gt; Ordner: <code>Mustermann_Schmidt</code>
-4. <strong>Normalisierung:</strong> Namen werden normalisiert (Umlaute ersetzt, Sonderzeichen bereinigt), um Kompatibilität mit dem Dateisystem zu gewährleisten.</p>
+<p><strong>Was passiert hier?</strong></p>
+<ol>
+<li><strong>Themen-Erkennung:</strong> Der <a href="../email-classification/">EmailClassifier</a> nutzt ein Machine-Learning-Modell (Transformer-basiert), um den Inhalt der Mail einer Kategorie zuzuordnen (z.B. <em>Bachelor Thesis</em>, <em>Projekt</em>, <em>PO-Wechsel</em>).</li>
+<li><strong>Dateisystem-Struktur:</strong> Die E-Mails werden in eine dreistufige Hierarchie verschoben: <code>Semester (z.B. 2023_24_WS) / Nachname / (Inbox oder SentItems)</code>.</li>
+<li><strong>Extraktion des Nachnamens:</strong> Der Nachname wird automatisch aus der E-Mail-Adresse oder dem Anzeigenamen ermittelt.<ul>
+<li><em>Beispiel 1:</em> <code>max.mustermann@th-koeln.de</code> -&gt; Ordner: <code>Mustermann</code></li>
+<li><em>Beispiel 2:</em> <code>mustermann@stud.th-koeln.de</code> -&gt; Ordner: <code>Mustermann</code></li>
+<li><em>Beispiel 3:</em> <code>Mustermann-Schmidt, Erika &lt;erika.mustermann@...&gt;</code> -&gt; Ordner: <code>Mustermann_Schmidt</code></li>
+</ul>
+</li>
+<li><strong>Normalisierung:</strong> Namen werden normalisiert (Umlaute ersetzt, Sonderzeichen bereinigt), um Kompatibilität mit dem Dateisystem zu gewährleisten.</li>
+</ol>
 <hr />
 <h2 id="3-phase-ki-gestutzte-analyse-analyse-kontext">3. Phase: KI-gestützte Analyse (Analyse &amp; Kontext)<a class="headerlink" href="#3-phase-ki-gestutzte-analyse-analyse-kontext" title="Permanent link">&para;</a></h2>
 <p>Nachdem die Mails sortiert sind, erfolgt die Analyse durch <code>process_sorted_emails.py</code>. In dieser Phase wird der notwendige Kontext für eine spätere Bearbeitung gesammelt.</p>
-<p><strong>Inhalte dieser Phase:</strong>
-- <strong>Zusammenfassung:</strong> Das System erstellt eine prägnante Zusammenfassung des bisherigen Konversationsverlaufs im Studentenordner (<code>.emails_summary.md</code>). Diese dient dazu, dem Nutzer in der <a href="#gradio-gui">Gradio GUI</a> einen schnellen Überblick über den Stand der Kommunikation zu geben, ohne alle E-Mails einzeln lesen zu müssen.
-    - Ein Beispiel für die resultierende Struktur finden Sie unter <a href="../indexing-details/#beispiel-e-mail-strukturen">Beispiel E-Mail-Strukturen</a>.
-    - Falls eine E-Mail in der GUI umklassifiziert wird, wird die <code>.emails_summary.md</code> automatisch in den neuen Zielordner mitverschoben.
-- <strong>RAG-Kontext (Retrieval Augmented Generation):</strong> Das System durchsucht eine Vektordatenbank nach thematisch passenden Informationen (z.B. Prüfungsordnungen), basierend auf dem Inhalt der aktuellen Mail. Details zu diesem mehrstufigen Prozess finden Sie unter <a href="../rag-process/">RAG-Prozess</a>.
-- <strong>Ähnlichkeits-Suche:</strong> Es wird nach den 3 neuesten, thematisch ähnlichsten E-Mails desselben Studenten im Archiv gesucht, um eine konsistente Historie zu gewährleisten.
-- <strong>Aktions-Klassifizierung:</strong> Das LLM entscheidet vorab, welche der 6 möglichen Aktionen am besten zur E-Mail passt.  </p>
+<p><strong>Inhalte dieser Phase:</strong></p>
+<ul>
+<li><strong>Zusammenfassung:</strong> Das System erstellt eine prägnante Zusammenfassung des bisherigen Konversationsverlaufs im Studentenordner (<code>.emails_summary.md</code>). Diese dient primär als Kontext für das LLM bei der Antwortgenerierung. In der <a href="#gradio-gui">Gradio GUI</a> wird hingegen für jede Mail eine separate, kurze (2 Sätze) Zusammenfassung des aktuellen Inhalts angezeigt, um einen schnellen Überblick zu ermöglichen.<ul>
+<li>Ein Beispiel für die resultierende Struktur finden Sie unter <a href="../indexing-details/#beispiel-e-mail-strukturen">Beispiel E-Mail-Strukturen</a>.</li>
+<li>Falls eine E-Mail in der GUI umklassifiziert wird, wird die <code>.emails_summary.md</code> automatisch in den neuen Zielordner mitverschoben.</li>
+</ul>
+</li>
+<li><strong>RAG-Kontext (Retrieval Augmented Generation):</strong> Das System durchsucht eine Vektordatenbank nach thematisch passenden Informationen (z.B. Prüfungsordnungen), basierend auf dem Inhalt der aktuellen Mail. Dieser Kontext wird sowohl für die Aktions-Klassifizierung als auch für die spätere Antwortgenerierung genutzt. Details zu diesem mehrstufigen Prozess finden Sie unter <a href="../rag-process/">RAG-Prozess</a>.</li>
+<li><strong>Ähnlichkeits-Suche:</strong> Es wird nach den 3 neuesten, thematisch ähnlichsten E-Mails desselben Studenten im Archiv gesucht, um eine konsistente Historie zu gewährleisten.</li>
+<li><strong>Aktions-Klassifizierung:</strong> Das LLM entscheidet vorab, welche der 6 möglichen Aktionen am besten zur E-Mail passt.</li>
+</ul>
 <hr />
 <h2 id="4-phase-aktions-vorschlag">4. Phase: Aktions-Vorschlag<a class="headerlink" href="#4-phase-aktions-vorschlag" title="Permanent link">&para;</a></h2>
 <p>Basierend auf der Analyse schlägt das System eine von sechs Aktionen vor. Diese Auswahl wird in der GUI vorselektiert.</p>
@@ -1842,11 +1850,14 @@
 <hr />
 <h2 id="gradio-gui">5. Phase: Überprüfung (Gradio GUI)<a class="headerlink" href="#gradio-gui" title="Permanent link">&para;</a></h2>
 <p>Der Prozess wird in einer interaktiven Web-Oberfläche kontrolliert (Human-in-the-loop).</p>
-<p><strong>Funktionen der GUI:</strong><br />
-- <strong>Korrektur der Klassifizierung:</strong> Ändern der E-Mail-Klasse via Dropdown (physische Verschiebung beim Speichern).<br />
-- <strong>Aktions-Review:</strong> Überprüfung und ggf. Änderung der vorgeschlagenen Aktion.<br />
-- <strong>Anhänge extrahieren:</strong> Checkbox zum automatischen Speichern von Anhängen im Studentenordner.<br />
-- <strong>Quick-Links:</strong> Direktes Öffnen des Windows-Ordners oder der E-Mail-Datei.  </p>
+<p><strong>Funktionen der GUI:</strong></p>
+<ul>
+<li><strong>Korrektur der Klassifizierung:</strong> Ändern der E-Mail-Klasse via Dropdown (physische Verschiebung beim Speichern).</li>
+<li><strong>Aktions-Review:</strong> Überprüfung und ggf. Änderung der vorgeschlagenen Aktion.</li>
+<li><strong>Anhänge extrahieren:</strong> Checkbox zum automatischen Speichern von Anhängen im Studentenordner.</li>
+<li><strong>Quick-Links:</strong> Direktes Öffnen des Windows-Ordners oder der E-Mail-Datei.</li>
+<li><strong>Zusammenfassungen:</strong> Für jede E-Mail wird eine kurze (2 Sätze) Zusammenfassung direkt in der GUI angezeigt, um das schnelle Scannen des Posteingangs zu erleichtern.</li>
+</ul>
 <hr />
 <h2 id="6-phase-ausfuhrung-der-aktionen-details">6. Phase: Ausführung der Aktionen (Details)<a class="headerlink" href="#6-phase-ausfuhrung-der-aktionen-details" title="Permanent link">&para;</a></h2>
 <p>Sobald Sie in der GUI auf "Speichern &amp; Ausführen" klicken, wird die gewählte Aktion technisch umgesetzt. Hierbei werden nun auch die <strong>Personen-Steckbriefe</strong> (Student &amp; Eigene Persona) sowie die <strong>Skills</strong> (Fachwissen-Dateien) einbezogen.</p>
@@ -1860,19 +1871,21 @@
 <h4 id="4-e-mail-nur-archivieren">4) E-Mail nur archivieren<a class="headerlink" href="#4-e-mail-nur-archivieren" title="Permanent link">&para;</a></h4>
 <p>Die E-Mail wird als bearbeitet markiert. Es erfolgt keine weitere technische Aktion in Outlook.</p>
 <h4 id="5-aufgabe-im-kalender-anlegen-finale-abgabe">5) Aufgabe im Kalender anlegen (Finale Abgabe)<a class="headerlink" href="#5-aufgabe-im-kalender-anlegen-finale-abgabe" title="Permanent link">&para;</a></h4>
-<p>Diese Aktion kombiniert mehrere Schritte für Abschlussarbeiten:<br />
-1. Anhänge werden via <code>save_email_attachments</code> im Studentenordner gespeichert.<br />
-2. Ein Kalendereintrag wird für in <strong>7 Tagen</strong> angelegt, um an die Korrektur zu erinnern.<br />
-3. Ein Antwortentwurf zur Bestätigung des Empfangs wird erstellt.  </p>
+<p>Diese Aktion kombiniert mehrere Schritte für Abschlussarbeiten:</p>
+<ol>
+<li>Anhänge werden via <code>save_email_attachments</code> im Studentenordner gespeichert.</li>
+<li>Ein Kalendereintrag wird für in <strong>7 Tagen</strong> angelegt, um an die Korrektur zu erinnern.</li>
+<li>Ein Antwortentwurf zur Bestätigung des Empfangs wird erstellt.</li>
+</ol>
 <h4 id="6-termin-fur-kolloquium">6) Termin für Kolloquium<a class="headerlink" href="#6-termin-fur-kolloquium" title="Permanent link">&para;</a></h4>
 <p>Ähnlich wie Aktion 3, jedoch wird hierbei die Dauer fest auf <strong>60 Minuten</strong> eingestellt und ein spezieller Betreff gewählt.</p>
 <hr />
 <h2 id="weiterfuhrende-links">Weiterführende Links<a class="headerlink" href="#weiterfuhrende-links" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a href="../outlook-macros/">Outlook VBA-Makros</a>: Details zu den Export-Skripten.  </li>
-<li><a href="../database-processes/">Datenbank-Prozesse</a>: Erfahren Sie mehr über die Verwaltung der <code>profiles_tracking.db</code>.  </li>
-<li><a href="../email-classification/">E-Mail Klassifizierung</a>: Details zu den Machine-Learning Modellen.  </li>
-<li><a href="../../configuration/">Konfiguration</a>: So passen Sie Pfade und LLM-Einstellungen an.  </li>
+<li><a href="../outlook-macros/">Outlook VBA-Makros</a>: Details zu den Export-Skripten.</li>
+<li><a href="../database-processes/">Datenbank-Prozesse</a>: Erfahren Sie mehr über die Verwaltung der <code>profiles_tracking.db</code>.</li>
+<li><a href="../email-classification/">E-Mail Klassifizierung</a>: Details zu den Machine-Learning Modellen.</li>
+<li><a href="../../configuration/">Konfiguration</a>: So passen Sie Pfade und LLM-Einstellungen an.</li>
 </ul>
 
 

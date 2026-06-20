@@ -1491,21 +1491,27 @@
 
 
 <h1 id="rag-process-retrieval-augmented-generation">RAG Process (Retrieval Augmented Generation)<a class="headerlink" href="#rag-process-retrieval-augmented-generation" title="Permanent link">&para;</a></h1>
-<p>To answer emails professionally and contextually, the system uses a multi-stage RAG process. This process ensures that the LLM has access to specific knowledge (such as examination regulations or module descriptions) stored in the vector databases of the respective email classes.</p>
+<p>To professionally classify and contextually answer emails, the system uses a multi-stage RAG process. This process ensures that the LLM has access to specific knowledge (such as examination regulations or module descriptions) stored in the vector databases of the respective email classes.</p>
 <h2 id="process-flow">Process Flow<a class="headerlink" href="#process-flow" title="Permanent link">&para;</a></h2>
 <p>The process in <code>EmailController</code> follows three main steps:</p>
 <h3 id="1-search-query-generation">1. Search Query Generation<a class="headerlink" href="#1-search-query-generation" title="Permanent link">&para;</a></h3>
-<p>Instead of using the entire email text directly for the search, the system first has the LLM generate <strong>3 precise search queries (questions)</strong>.
-- The LLM analyzes the incoming email.
-- It formulates questions aimed at extracting the necessary information to answer the request from a knowledge base.</p>
+<p>Instead of using the entire email text directly for the search, the system first has the LLM generate <strong>3 precise search queries (questions)</strong>.</p>
+<ul>
+<li>The LLM analyzes the incoming email.</li>
+<li>It formulates questions aimed at extracting the necessary information to answer the request from a knowledge base.</li>
+</ul>
 <h3 id="2-vector-search-retrieval">2. Vector Search (Retrieval)<a class="headerlink" href="#2-vector-search-retrieval" title="Permanent link">&para;</a></h3>
-<p>The generated questions are used to search for relevant text sections (chunks) in the vector database of the associated email class (e.g., <code>Bachelor_Thesis</code> or <code>PAV</code>).
-- For each of the 3 questions, the most relevant results are retrieved.
-- The system uses the <code>SearchIndex</code> for this, which is based on the embedded documents in the folder <code>data/memory/&lt;Class&gt;</code>.</p>
+<p>The generated questions are used to search for relevant text sections (chunks) in the vector database of the associated email class (e.g., <code>Bachelor_Thesis</code> or <code>PAV</code>).</p>
+<ul>
+<li>For each of the 3 questions, the most relevant results are retrieved.</li>
+<li>The system uses the <code>SearchIndex</code> for this, which is based on the embedded documents in the folder <code>data/memory/&lt;Class&gt;</code>.</li>
+</ul>
 <h3 id="3-context-injection-augmentation">3. Context Injection (Augmentation)<a class="headerlink" href="#3-context-injection-augmentation" title="Permanent link">&para;</a></h3>
-<p>The found information is filtered and prepared:
-- The <strong>Top 3 unique chunks</strong> are selected (based on their similarity score).
-- These chunks are inserted as "Additional Context" into the prompt for the final response generation.</p>
+<p>The found information is filtered and prepared:</p>
+<ul>
+<li>The <strong>Top 3 unique chunks</strong> are selected (based on their similarity score).</li>
+<li>These chunks are inserted as "Additional Context" into the prompt for action classification (Phase 3) as well as the final response generation (Phase 6).</li>
+</ul>
 <h2 id="advantages-of-this-approach">Advantages of this Approach<a class="headerlink" href="#advantages-of-this-approach" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Precision:</strong> Generating specific questions reduces the noise that could arise from a search with the raw email text.</li>
@@ -1513,10 +1519,12 @@
 <li><strong>Transparency:</strong> In the debug logs and prompts, it is exactly traceable which information was used as context.</li>
 </ul>
 <hr />
-<p>See also:
-- <a href="../email-classification/">Email Classification</a>
-- <a href="../indexing-details/">Document Indexing</a>
-- <a href="../../configuration/">Configuration</a></p>
+<p>See also:</p>
+<ul>
+<li><a href="../email-classification/">Email Classification</a></li>
+<li><a href="../indexing-details/">Document Indexing</a></li>
+<li><a href="../../configuration/">Configuration</a></li>
+</ul>
 
 
 
