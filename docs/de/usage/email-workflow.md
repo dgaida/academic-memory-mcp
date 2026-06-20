@@ -42,7 +42,7 @@ Nachdem die Mails sortiert sind, erfolgt die Analyse durch `process_sorted_email
 **Inhalte dieser Phase:**
 
 - **Gradio GUI Zusammenfassung:** In der [Gradio GUI](#gradio-gui) wird für jede Mail eine separate, kurze (2 Sätze) Zusammenfassung des aktuellen Inhalts angezeigt, um einen schnellen Überblick zu ermöglichen. Die vollständige Konversations-Zusammenfassung (`.emails_summary.md`) wird erst in **Phase 6** bei der Ausführung einer Antwort-Aktion erstellt, um Ressourcen zu sparen und den aktuellsten Stand zu garantieren.  
-- **RAG-Kontext (Retrieval Augmented Generation):** Das System durchsucht eine Vektordatenbank nach thematisch passenden Informationen (z.B. Prüfungsordnungen), basierend auf dem Inhalt der aktuellen Mail. Dieser Kontext wird sowohl für die Aktions-Klassifizierung als auch für die spätere Antwortgenerierung genutzt. Details zu diesem mehrstufigen Prozess finden Sie unter [RAG-Prozess](rag-process.md).  
+- **RAG-Kontext (Retrieval Augmented Generation):** Das System durchsucht eine Vektordatenbank nach thematisch passenden Informationen (z.B. Prüfungsordnungen), basierend auf dem Inhalt der aktuellen Mail. Dieser Kontext wird ausschließlich für die spätere Antwortgenerierung genutzt. Details zu diesem mehrstufigen Prozess finden Sie unter [RAG-Prozess](rag-process.md).
 - **Ähnlichkeits-Suche:** Es wird nach den 3 neuesten, thematisch ähnlichsten E-Mails desselben Studenten im Archiv gesucht, um eine konsistente Historie zu gewährleisten.  
 - **Aktions-Klassifizierung:** Das LLM entscheidet vorab, welche der 6 möglichen Aktionen am besten zur E-Mail passt.  
 
@@ -56,7 +56,7 @@ Basierend auf der Analyse schlägt das System eine von sechs Aktionen vor. Diese
 | **1) Antwort schreiben** | Standard-Antwort basierend auf dem Thema. |
 | **2) Antwort mit Terminvorschlag** | Sucht freie Slots und schlägt diese vor. |
 | **3) Termin direkt buchen** | Erkennt eine Terminbestätigung und trägt diese ein. |
-| **4) Nur archivieren** | Keine Antwort nötig (z.B. reine Information). |
+| **4) Nur archivieren** | Einsortierung in den Archiv-Ordner; keine Antwort nötig. |
 | **5) Aufgabe "Anhang lesen"** | Speziell für finale Abgaben (Korrektur-Erinnerung). |
 | **6) Kolloquium-Termin** | Spezielle Buchung für Abschlussvorträge. |
 
@@ -95,7 +95,7 @@ Das System ruft das Tool `get_appointment_slots` auf, welches die `free_slots.md
 Wird genutzt, wenn der Student einen Termin bestätigt hat. Das System extrahiert Datum und Uhrzeit und nutzt das Tool `manage_calendar_appointment`, um einen echten Eintrag in Ihrem Outlook-Kalender zu erstellen.
 
 #### 4) E-Mail nur archivieren
-Die E-Mail wird als bearbeitet markiert. Es erfolgt keine weitere technische Aktion in Outlook.
+Die E-Mail wird im entsprechenden studentischen Archiv-Ordner gespeichert. Es erfolgt keine weitere technische Aktion (wie z.B. ein Antwort-Entwurf).
 
 #### 5) Aufgabe im Kalender anlegen (Finale Abgabe)
 Diese Aktion kombiniert mehrere Schritte für Abschlussarbeiten:
