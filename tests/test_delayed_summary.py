@@ -1,5 +1,4 @@
 import pytest
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 from datetime import datetime
 from mcp_university.classifier.controller import EmailController
@@ -15,7 +14,7 @@ def mock_controller(tmp_path):
     mock_config.data_dir.mkdir()
 
     with patch("mcp_university.classifier.controller.get_config", return_value=mock_config), \
-         patch("mcp_university.classifier.controller.Summarizer") as mock_summarizer_cls, \
+         patch("mcp_university.classifier.controller.Summarizer"), \
          patch("mcp_university.classifier.controller.PersonProfiler"), \
          patch("mcp_university.classifier.controller.Agent"), \
          patch("mcp_university.classifier.controller.MailParser") as mock_parser_cls:
