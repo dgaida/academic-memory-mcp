@@ -13,54 +13,12 @@ from mcp_university.classifier.engine import EmailClassifier
 from mcp_university.parser.mail_parser import MailParser
 from mcp_university.config import get_config
 from mcp_university.utils.encoding import decode_mime_header
+from mcp_university.utils.semester import get_semester, normalize_name
 
 # Logging konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
 
-
-def get_semester(date: datetime) -> str:
-    """Bestimmt den Semester-Ordnernamen basierend auf dem Datum.
-from mcp_university.utils.encoding import decode_mime_header
-
-    SoSe: 01.04. - 30.09. -> YYYY_SoSe
-    WS: 01.10. - 31.03. -> YYYY_YY+1_WS
-
-    Args:
-        date: Das Datum der E-Mail.
-
-    Returns:
-        str: Der Name des Semester-Ordners.
-    """
-    year = date.year
-    month = date.month
-
-    if 4 <= month <= 9:
-        return f"{year}_SoSe"
-    else:
-        if month >= 10:
-            return f"{year}_{str(year + 1)[2:]}_WS"
-        else:
-            return f"{year-1}_{str(year)[2:]}_WS"
-
-
-def normalize_name(name: str) -> str:
-    """Normalisiert Namen durch Ersetzung von Umlauten und Sonderzeichen.
-
-    Args:
-        name: Der zu normalisierende Name.
-
-    Returns:
-        str: Der normalisierte Name.
-    """
-    replacements = {
-        "ä": "ae", "ö": "oe", "ü": "ue",
-        "Ä": "Ae", "Ö": "Oe", "Ü": "Ue",
-        "ß": "ss"
-    }
-    for old, new in replacements.items():
-        name = name.replace(old, new)
-    return name
 
 def extract_firstname(name_str: str) -> str:
     """Extrahiert den Vornamen aus einem Namensstring oder einer E-Mail-Adresse.
@@ -105,6 +63,27 @@ def extract_firstname(name_str: str) -> str:
     return "Unknown"
 
 
+def extract_firstname_simple(name_str: str) -> str:
+    """Alternative, vereinfachte Extraktion des Vornamens.
+
+    Args:
+        name_str (str): Der zu parsende Name oder die E-Mail-Adresse.
+
+    Returns:
+        str: Der extrahierte Vorname.
+    """
+    if not name_str:
+        return "Unknown"
+    display_name = decode_mime_header(name_str).split("<")[0].strip()
+    if "," in display_name:
+        parts = display_name.split(",")
+        if len(parts) > 1:
+            return parts[1].strip()
+    elif " " in display_name:
+        return display_name.split()[0].strip()
+    return "Unknown"
+
+
 def extract_lastname(name_str: str) -> str:
     """Extrahiert den Nachnamen aus einem Namensstring oder einer E-Mail-Adresse.
 
@@ -115,11 +94,12 @@ def extract_lastname(name_str: str) -> str:
     Normalisiert Umlaute. Priorisiert Display-Namen wenn die E-Mail keinen Punkt enthält.
 
     Args:
-        name_str: Der zu parsende Name oder die E-Mail-Adresse.
+        name_str (str): Der zu parsende Name oder die E-Mail-Adresse.
 
     Returns:
         str: Der extrahierte Nachname.
     """
+    logger.debug(f"Extrahiere Nachname aus: {name_str}")
     if not name_str or name_str == "(No Sender)" or name_str == "(No Receiver)":
         return "Unknown"
 
@@ -136,6 +116,7 @@ def extract_lastname(name_str: str) -> str:
         # Falls Punkt im lokalen Teil: Immer diese Regel anwenden (z.B. vorname.nachname)
         if "." in local_part:
             lastname_part = local_part.split(".", 1)[1]
+            logger.debug(f"Punkt im lokalen Teil gefunden: {local_part} -> Extrahiere {lastname_part}")
             parts = re.split(r'[._]', lastname_part)
             res = "_".join(p[0].upper() + p[1:] for p in parts if p)
             return normalize_name(res)
@@ -173,8 +154,8 @@ def find_student_folder(base_path: Path, lastname: str) -> Optional[Path]:
     """Sucht nach einem existierenden Studierendenordner in allen Semesterordnern.
 
     Args:
-        base_path: Basisverzeichnis für die Suche.
-        lastname: Nachname des Studenten.
+        base_path (Path): Basisverzeichnis für die Suche.
+        lastname (str): Nachname des Studenten.
 
     Returns:
         Optional[Path]: Pfad zum Ordner falls gefunden, sonst None.
@@ -197,9 +178,9 @@ def process_emails(
     """Verarbeitet E-Mails und sortiert sie basierend auf Absender/Empfänger.
 
     Args:
-        source_root: Quellverzeichnis mit den E-Mails.
-        classifier_model: Pfad zum trainierten Modell.
-        config: Konfiguration der Zielpfade.
+        source_root (Path): Quellverzeichnis mit den E-Mails.
+        classifier_model (Path): Pfad zum trainierten Modell.
+        config (Dict[str, str]): Konfiguration der Zielpfade.
 
     Returns:
         List[Dict[str, Any]]: Liste der verschobenen E-Mails.
@@ -210,11 +191,12 @@ def process_emails(
 
     moved_emails = []
 
-    logger.info(f"Verarbeite Quellverzeichnis: {source_root}")
+    logger.info(f"Beginne E-Mail-Sortierung in: {source_root}")
 
     for msg_file in sorted(source_root.rglob("*.msg")):
         try:
             # Klassifizierung
+            logger.debug(f"Klassifiziere {msg_file.name}...")
             prediction = classifier.predict(msg_file)
             email_class = prediction["prediction"]
 
@@ -238,6 +220,7 @@ def process_emails(
 
             with extract_msg.openMsg(str(msg_file)) as msg:
                 sender = (msg.sender.lower() if msg.sender else "").strip()
+                logger.debug(f"Analysiere Sender/Empfänger für {msg_file.name} (Klasse: {email_class}, Sender: {sender})")
 
                 if any(e.lower() in sender for e in get_config().user.emails):
                     target_folder = "SentItems"
@@ -247,7 +230,9 @@ def process_emails(
                         found_student = False
                         for rec in recipients:
                             rec_email = (rec.email or "").lower()
-                            if any(domain in rec_email for domain in ["@smail.th-koeln.de", "@smail.fh-koeln.de", "@th-koeln.de", "@fh-koeln.de"]):
+                            is_user = any(e.lower() in rec_email for e in get_config().user.emails)
+                            if not is_user and any(domain in rec_email for domain in ["@smail.th-koeln.de", "@smail.fh-koeln.de", "@th-koeln.de", "@fh-koeln.de"]):
+                                logger.debug(f"Student in Empfängern gefunden: {rec_email}")
                                 lastname = extract_lastname(rec.name or rec.email)
                                 found_student = True
                                 break
@@ -265,7 +250,9 @@ def process_emails(
                     if recipients:
                         for rec in recipients:
                             rec_email = (rec.email or "").lower()
-                            if any(domain in rec_email for domain in ["@smail.th-koeln.de", "@smail.fh-koeln.de", "@th-koeln.de", "@fh-koeln.de"]):
+                            is_user = any(e.lower() in rec_email for e in get_config().user.emails)
+                            if not is_user and any(domain in rec_email for domain in ["@smail.th-koeln.de", "@smail.fh-koeln.de", "@th-koeln.de", "@fh-koeln.de"]):
+                                logger.debug(f"Student in Empfängern gefunden (Fallback): {rec_email}")
                                 target_folder = "SentItems"
                                 lastname = extract_lastname(rec.name or rec.email)
                                 found_student = True
@@ -277,6 +264,7 @@ def process_emails(
                          lastname = extract_lastname(msg.sender)
 
             # Ziel-Pfad bestimmen
+            logger.debug(f"Bestimme Ziel-Pfad für {lastname} in {target_folder} (Semester: {semester})")
             student_dir = find_student_folder(class_base_path, lastname)
             if not student_dir:
                 student_dir = class_base_path / semester / lastname
@@ -308,8 +296,8 @@ def write_report(source_root: Path, moved_emails: List[Dict[str, Any]]) -> None:
     """Erstellt den Markdown-Report.
 
     Args:
-        source_root: Quellverzeichnis für den Report.
-        moved_emails: Liste der verschobenen E-Mails.
+        source_root (Path): Quellverzeichnis für den Report.
+        moved_emails (List[Dict[str, Any]]): Liste der verschobenen E-Mails.
     """
     if not moved_emails:
         logger.info("Keine E-Mails verschoben. Erstelle keinen Report.")

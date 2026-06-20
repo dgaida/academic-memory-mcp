@@ -19,11 +19,14 @@ from mcp_university.summarizer.profiler import PersonProfiler
 from mcp_university.agent.engine import Agent
 from mcp_university.agent.mcp_agent import MCPAgent
 from mcp_university.classifier.engine import resolve_model_path
+from mcp_university.utils.semester import get_semester, normalize_name
 from mcp_university.classifier.sort_emails import (
+    extract_firstname_simple,
+    extract_lastname,
     process_emails,
     write_report,
     extract_firstname,
-    get_semester,
+
     find_student_folder,
 )
 from mcp_university.retrieval.index import SearchIndex, get_model
