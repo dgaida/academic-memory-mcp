@@ -10,7 +10,7 @@ import yaml
 
 from mcp_university.config import get_config
 from mcp_university.classifier.sort_emails import find_student_folder, extract_lastname
-from mcp_university.utils.semester import normalize_name
+
 
 def open_file(filepath):
     if not filepath or not Path(filepath).exists():
