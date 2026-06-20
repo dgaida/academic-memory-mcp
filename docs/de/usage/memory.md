@@ -16,20 +16,20 @@ mcp-uni memory update
 
 ### Optionen
 
-- `--config` / `-c`: Pfad zur Speicherpfad-Konfiguration (Standard: `config/classifier_memory_paths.yaml`).
-- `--debug` / `-d`: Aktiviert detaillierte Debug-Logs während des Indexierungsprozesses.
+- `--config` / `-c`: Pfad zur Speicherpfad-Konfiguration (Standard: `config/classifier_memory_paths.yaml`).  
+- `--debug` / `-d`: Aktiviert detaillierte Debug-Logs während des Indexierungsprozesses.  
 
 ### Funktionsweise
 
-Das Skript führt folgende Schritte aus:
-1. **Pfad-Auflösung**: Es liest die Konfiguration und bestimmt, welche Ordner welchen Vektordatenbanken zugeordnet sind.
-2. **Parsing**: Alle unterstützten Dateien (`.pdf`, `.docx`, `.md`, `.txt`, `.eml`, `.msg`, `.py`, `.ipynb`, `.json`, `.html`) werden eingelesen.
-3. **Chunking**: Lange Texte werden in kleinere Abschnitte (Chunks) unterteilt.
-4. **Indizierung**: Die Chunks werden mittels des konfigurierten Embedding-Modells vektorisiert und in der Qdrant-Vektordatenbank unter `data/memory/<Klassenname>` gespeichert.
+Das Skript führt folgende Schritte aus:  
+1. **Pfad-Auflösung**: Es liest die Konfiguration und bestimmt, welche Ordner welchen Vektordatenbanken zugeordnet sind.  
+2. **Parsing**: Alle unterstützten Dateien (`.pdf`, `.docx`, `.md`, `.txt`, `.eml`, `.msg`, `.py`, `.ipynb`, `.json`, `.html`) werden eingelesen.  
+3. **Chunking**: Lange Texte werden in kleinere Abschnitte (Chunks) unterteilt.  
+4. **Indizierung**: Die Chunks werden mittels des konfigurierten Embedding-Modells vektorisiert und in der Qdrant-Vektordatenbank unter `data/memory/<Klassenname>` gespeichert.  
 
 Da absolute Pfade als Dokument-IDs verwendet werden, führt ein erneuter Lauf dazu, dass bestehende Dokumente aktualisiert und neue Dokumente hinzugefügt werden.
 
 ---
-Siehe auch:
-- [RAG-Prozess](rag-process.md)
-- [Indizierung von Dokumenten](indexing-details.md)
+Siehe auch:  
+- [RAG-Prozess](rag-process.md)  
+- [Indizierung von Dokumenten](indexing-details.md)  
