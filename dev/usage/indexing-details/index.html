@@ -1629,8 +1629,9 @@ Nachher:
 <a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>└── SentItems/
 <a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    └── antwort.msg
 </code></pre></div></p>
-<p><strong>Fall 3: Kombinierte E-Mail-Konversation (Spezialfall)</strong>
-Wenn sowohl <code>Inbox</code> und <code>SentItems</code> vorhanden sind, erkennt der Crawler dies als Konversation und erstellt eine gemeinsame Zusammenfassung (<code>.emails_summary.md</code>). Die Einzelordner erhalten dann keine eigenen <code>.Inbox_summary.md</code> Dateien mehr, da sie in der Konversation aufgehen.</p>
+<p><strong>Fall 3: Kombinierte E-Mail-Konversation (Spezialfall)</strong></p>
+<p>Wenn sowohl <code>Inbox</code> und <code>SentItems</code> vorhanden sind, erkennt der Crawler dies als Konversation und erstellt eine gemeinsame Zusammenfassung (<code>.emails_summary.md</code>).</p>
+<p><em>Wichtiger Hinweis:</em> Während der <strong>Crawler</strong> diese Datei bei einer vollständigen Indexierung des Archivs anlegt, wird sie im täglichen <strong>E-Mail-Workflow</strong> (via <code>process_sorted_emails.py</code>) erst "Just-in-Time" in Phase 6 (Ausführung) generiert.</p>
 <p>Vorher:
 <div class="language-text highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Student_C/
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>├── Inbox/

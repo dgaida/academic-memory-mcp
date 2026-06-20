@@ -1644,8 +1644,8 @@
 <h3 id="export-from-outlook">Export from Outlook<a class="headerlink" href="#export-from-outlook" title="Permanent link">&para;</a></h3>
 <p>Use the VBA macros provided in the project to export data into the <code>inbox</code> folder:</p>
 <ul>
-<li><strong>Emails:</strong> Exports emails (mostly from students) as <code>.msg</code> files. The system automatically detects the sender, date, and subject.</li>
-<li><strong>Calendar Data:</strong> Exports free time slots from your Outlook calendar into a file named <code>free_slots.yaml</code>. This serves as the basis for automated appointment suggestions.</li>
+<li><strong>Emails:</strong> Exports emails (mostly from students) as <code>.msg</code> files. The system automatically detects the sender, date, and subject.  </li>
+<li><strong>Calendar Data:</strong> Exports free time slots from your Outlook calendar into a file named <code>free_slots.yaml</code>. This serves as the basis for automated appointment suggestions.  </li>
 </ul>
 <hr />
 <h2 id="phase-2-classification-and-sorting">Phase 2: Classification and Sorting<a class="headerlink" href="#phase-2-classification-and-sorting" title="Permanent link">&para;</a></h2>
@@ -1656,15 +1656,15 @@
 </code></pre></div></p>
 <p><strong>What happens here?</strong></p>
 <ol>
-<li><strong>Topic Recognition:</strong> The <a href="../email-classification/">Email Classification</a> system uses a machine learning model (transformer-based) to assign the content of the email to a category (e.g., <em>Bachelor Thesis</em>, <em>Project</em>, <em>PO-Change</em>).</li>
-<li><strong>File System Structure:</strong> The emails are moved into a three-level hierarchy: <code>Semester (e.g., 2023_24_WS) / Lastname / (Inbox or SentItems)</code>.</li>
-<li><strong>Lastname Extraction:</strong> The lastname is automatically extracted from the email address or display name.<ul>
-<li><em>Example 1:</em> <code>max.mustermann@th-koeln.de</code> -&gt; Folder: <code>Mustermann</code></li>
-<li><em>Example 2:</em> <code>mustermann@stud.th-koeln.de</code> -&gt; Folder: <code>Mustermann</code></li>
-<li><em>Example 3:</em> <code>Mustermann-Schmidt, Erika &lt;erika.mustermann@...&gt;</code> -&gt; Folder: <code>Mustermann_Schmidt</code></li>
+<li><strong>Topic Recognition:</strong> The <a href="../email-classification/">Email Classification</a> system uses a machine learning model (transformer-based) to assign the content of the email to a category (e.g., <em>Bachelor Thesis</em>, <em>Project</em>, <em>PO-Change</em>).  </li>
+<li><strong>File System Structure:</strong> The emails are moved into a three-level hierarchy: <code>Semester (e.g., 2023_24_WS) / Lastname / (Inbox or SentItems)</code>.  </li>
+<li><strong>Lastname Extraction:</strong> The lastname is automatically extracted from the email address or display name.  <ul>
+<li><em>Example 1:</em> <code>max.mustermann@th-koeln.de</code> -&gt; Folder: <code>Mustermann</code>  </li>
+<li><em>Example 2:</em> <code>mustermann@stud.th-koeln.de</code> -&gt; Folder: <code>Mustermann</code>  </li>
+<li><em>Example 3:</em> <code>Mustermann-Schmidt, Erika &lt;erika.mustermann@...&gt;</code> -&gt; Folder: <code>Mustermann_Schmidt</code>  </li>
 </ul>
 </li>
-<li><strong>Normalization:</strong> Names are normalized (umlauts replaced, special characters cleaned) to ensure compatibility with the file system.</li>
+<li><strong>Normalization:</strong> Names are normalized (umlauts replaced, special characters cleaned) to ensure compatibility with the file system.  </li>
 </ol>
 <hr />
 <h2 id="phase-3-ai-powered-analysis-llm">Phase 3: AI-Powered Analysis (LLM)<a class="headerlink" href="#phase-3-ai-powered-analysis-llm" title="Permanent link">&para;</a></h2>
@@ -1672,21 +1672,21 @@
 <h3 id="information-passed-to-the-llm">Information Passed to the LLM:<a class="headerlink" href="#information-passed-to-the-llm" title="Permanent link">&para;</a></h3>
 <p>To generate a high-quality and context-sensitive response, the LLM receives a variety of information:</p>
 <ul>
-<li><strong>Current Email Content:</strong> The text of the latest message in the conversation.</li>
-<li><strong>Conversation History:</strong> Previous emails in the same folder are included to maintain context.</li>
-<li><strong>Person Profiles:</strong><ul>
-<li><strong>Student Profile:</strong> Information about the sender (role, previous topics). Details can be found under <a href="../profiles/">Person Profiles</a>.</li>
-<li><strong>User Profile:</strong> Your own persona (name, role, tone), defined in <code>config/user.yaml</code>.</li>
+<li><strong>Current Email Content:</strong> The text of the latest message in the conversation.  </li>
+<li><strong>Conversation History:</strong> Previous emails in the same folder are included to maintain context.  </li>
+<li><strong>Person Profiles:</strong>  <ul>
+<li><strong>Student Profile:</strong> Information about the sender (role, previous topics). Details can be found under <a href="../profiles/">Person Profiles</a>.  </li>
+<li><strong>User Profile:</strong> Your own persona (name, role, tone), defined in <code>config/user.yaml</code>.  </li>
 </ul>
 </li>
-<li><strong>Skills:</strong> For each email class, there is a Markdown file (e.g., <code>SKILL_Bachelor_Thesis.md</code>) containing specific instructions and expertise for that topic.</li>
-<li><strong>Summary:</strong> The system creates a concise summary of the previous conversation history in the student folder (<code>.emails_summary.md</code>). This primarily serves as context for the LLM during reply generation. In the <a href="#gradio-gui">Gradio GUI</a>, however, a separate, short (2-sentence) summary of the current content is displayed for each email to provide a quick overview.<ul>
-<li>An example of the resulting structure can be found under <a href="../indexing-details/#example-email-structures">Example Email Structures</a>.</li>
-<li>If an email is reclassified in the GUI, the <code>.emails_summary.md</code> is automatically moved to the new target folder.</li>
+<li><strong>Skills:</strong> For each email class, there is a Markdown file (e.g., <code>SKILL_Bachelor_Thesis.md</code>) containing specific instructions and expertise for that topic.  </li>
+<li><strong>Summary:</strong> The system creates a concise summary of the previous conversation history in the student folder (<code>.emails_summary.md</code>). This primarily serves as context for the LLM during reply generation. In the <a href="#gradio-gui">Gradio GUI</a>, however, a separate, short (2-sentence) summary of the current content is displayed for each email to provide a quick overview.  <ul>
+<li>An example of the resulting structure can be found under <a href="../indexing-details/#example-email-structures">Example Email Structures</a>.  </li>
+<li>If an email is reclassified in the GUI, the <code>.emails_summary.md</code> is automatically moved to the new target folder.  </li>
 </ul>
 </li>
-<li><strong>RAG Context (Retrieval Augmented Generation):</strong> The system searches a vector database for thematically matching information (e.g., examination regulations) based on the content of the current mail. This context is used for both action classification and subsequent response generation. Details on this multi-stage process can be found under <a href="../rag-process/">RAG Process</a>.</li>
-<li><strong>Similarity Search:</strong> The system searches for the 3 most recent, thematically similar emails from the same student in the archive to ensure consistent responses.</li>
+<li><strong>RAG Context (Retrieval Augmented Generation):</strong> The system searches a vector database for thematically matching information (e.g., examination regulations) based on the content of the current mail. This context is used for both action classification and subsequent response generation. Details on this multi-stage process can be found under <a href="../rag-process/">RAG Process</a>.  </li>
+<li><strong>Similarity Search:</strong> The system searches for the 3 most recent, thematically similar emails from the same student in the archive to ensure consistent responses.  </li>
 </ul>
 <hr />
 <h2 id="phase-4-actions-and-automation">Phase 4: Actions and Automation<a class="headerlink" href="#phase-4-actions-and-automation" title="Permanent link">&para;</a></h2>
@@ -1738,18 +1738,18 @@
 <p>The process ends in an interactive web interface. Here, the human remains in full control (Human-in-the-loop).</p>
 <p><strong>GUI Functions:</strong></p>
 <ul>
-<li><strong>Correction of Classification:</strong> If an email was incorrectly sorted, you can change the class via a dropdown. The system automatically moves the files physically on the disk when saving.</li>
-<li><strong>Action Review:</strong> Check which action the LLM suggests and change it if necessary.</li>
-<li><strong>Extract Attachments:</strong> Via a checkbox, you can decide whether attachments of the email should be saved directly in the student folder.</li>
-<li><strong>Quick Links:</strong> Open the corresponding Windows folder or the email file with one click directly from the browser.</li>
-<li><strong>Summaries:</strong> Each email is briefly summarized to allow for quick scanning of the inbox.</li>
+<li><strong>Correction of Classification:</strong> If an email was incorrectly sorted, you can change the class via a dropdown. The system automatically moves the files physically on the disk when saving.  </li>
+<li><strong>Action Review:</strong> Check which action the LLM suggests and change it if necessary.  </li>
+<li><strong>Extract Attachments:</strong> Via a checkbox, you can decide whether attachments of the email should be saved directly in the student folder.  </li>
+<li><strong>Quick Links:</strong> Open the corresponding Windows folder or the email file with one click directly from the browser.  </li>
+<li><strong>Summaries:</strong> Each email is briefly summarized to allow for quick scanning of the inbox.  </li>
 </ul>
 <hr />
 <h2 id="further-links">Further Links<a class="headerlink" href="#further-links" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a href="../database-processes/">Database Processes</a>: Learn more about managing <code>profiles_tracking.db</code> and the Knowledge Graph.</li>
-<li><a href="../email-classification/">Email Classification</a>: Details on the machine learning models and memory indices.</li>
-<li><a href="../../configuration/">Configuration</a>: How to customize paths and LLM settings.</li>
+<li><a href="../database-processes/">Database Processes</a>: Learn more about managing <code>profiles_tracking.db</code> and the Knowledge Graph.  </li>
+<li><a href="../email-classification/">Email Classification</a>: Details on the machine learning models and memory indices.  </li>
+<li><a href="../../configuration/">Configuration</a>: How to customize paths and LLM settings.  </li>
 </ul>
 
 
