@@ -189,11 +189,6 @@ ANTWORTE NUR MIT DEN 3 FRAGEN, EINE PRO ZEILE, OHNE NUMMERIERUNG."""
         mail_content = self.mail_parser.parse(mail_path)
         mail_content = self.mail_parser.extract_latest_message(mail_content)
 
-        # Retrieval memory logic
-        if email_class:
-            retrieved_context = self._get_memory_context(mail_content, email_class)
-            if retrieved_context:
-                additional_context += retrieved_context
 
         options_str = "\n".join(self.ACTION_OPTIONS)
 
@@ -569,11 +564,6 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
             extracted_file = mail_path.parent / f"{mail_path.stem}_extracted.md"
             extracted_file.write_text(mail_content, encoding="utf-8")
 
-        # Retrieval memory logic
-        if email_class:
-            retrieved_context = self._get_memory_context(mail_content, email_class)
-            if retrieved_context:
-                additional_context += retrieved_context
 
         appointment_skill_content = ""
         if appointment_skill_path and appointment_skill_path.exists():
@@ -754,6 +744,12 @@ E-MAIL: {mail_content}
                     )
             except Exception:
                 pass
+
+        # Retrieval memory logic
+        if email_class:
+            retrieved_context = self._get_memory_context(mail_content, email_class)
+            if retrieved_context:
+                additional_context += retrieved_context
 
         # STEP 2: REGULAR REPLY
         logger.info("Schritt 2: Generiere reguläre Antwort...")
