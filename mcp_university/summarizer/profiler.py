@@ -372,12 +372,19 @@ Die Zielperson hat die E-Mail-Adresse: {email}
 {context}
 
 {kg_info}{email_info}
+
+Falls die E-Mailadresse NICHT "th-koeln" enthält, handelt es sich um eine externe Person. In diesem Fall ergänze bitte (falls in den Mails vorhanden):
+- Name des Unternehmens
+- Kontaktdaten (Telefon, Adresse, etc.)
+- Branche des Unternehmens
+
 Erstelle einen strukturierten Steckbrief in Markdown mit folgenden Punkten:
 1. Name und E-Mailadresse
 2. Rolle (z.B. Studierende, Lehrende, Mitarbeiter, Professor, externer Partner, ...)
 3. Bevorzugte Anrede (Du oder Sie? Analyse basierend auf dem Ton der E-Mails)
 4. Datum des ersten Kontakts
-5. Wichtige Stationen/Ereignisse:
+5. Bei externen Personen: Unternehmensname, Branche und Kontaktdaten (falls bekannt)
+6. Wichtige Stationen/Ereignisse:
    - Bei Mitarbeitern: Wichtige Aufgaben, Projekte, Zuständigkeiten.
    - Bei Professoren: Gelesene Module, Forschungsprojekte, Gremienarbeit.
    - Bei Studierenden: Abgeschlossene Projektarbeiten/Thesen, Wechsel der Prüfungsordnung, Praktika, etc.

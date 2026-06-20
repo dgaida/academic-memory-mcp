@@ -812,8 +812,7 @@ TEXT:
         emails = self.parse_report(report_path)
         logger.info(f"{len(emails)} sortierte E-Mails gefunden.")
 
-        unique_emails_to_process = []
-        temp_folders = set()
+        emails_to_process = []
 
         for email in emails:
             mail_path = Path(email["path"])
@@ -843,26 +842,19 @@ TEXT:
                     "needs_answer": needs_answer,
                 }
             )
-
-            if identifier not in temp_folders:
-                temp_folders.add(identifier)
-                unique_emails_to_process.append(email)
+            emails_to_process.append(email)
 
         emails_to_process_path = source_dir / "emails_to_process.md"
         with open(emails_to_process_path, "w", encoding="utf-8") as f:
-            f.write(
-                "# Zu beantwortende E-Mails\n\n| Student | Klasse | Semester |\n| :--- | :--- | :--- |\n"
-            )
-            for email in unique_emails_to_process:
-                f.write(
-                    f"| {email['lastname']} | {email['class']} | {email['semester']} |\n"
-                )
+            f.write("# Zu beantwortende E-Mails\n\n| Student | Klasse | Semester |\n| :--- | :--- | :--- |\n")
+            for email in emails_to_process:
+                f.write(f"| {email['lastname']} | {email['class']} | {email['semester']} |\n")
 
         processed_results = []
         persona_path = Path("skills/SKILL_persona.md")
         apt_skill_path = Path("skills/SKILL_Appointment.md")
 
-        for email in unique_emails_to_process:
+        for email in emails_to_process:
             latest_mail = email["latest_mail"]
             latest_date = email["latest_date"]
 
@@ -1048,7 +1040,7 @@ TEXT:
             )
 
         if self.use_action_classifier:
-            return unique_emails_to_process
+            return emails_to_process
 
         if processed_results:
             with open(source_dir / "processed_emails.md", "w", encoding="utf-8") as f:
