@@ -42,7 +42,7 @@ Nachdem die Mails sortiert sind, erfolgt die Analyse durch `process_sorted_email
 **Inhalte dieser Phase:**
 
 - **Gradio GUI Zusammenfassung:** In der [Gradio GUI](#gradio-gui) wird für jede Mail eine separate, kurze (2 Sätze) Zusammenfassung des aktuellen Inhalts angezeigt, um einen schnellen Überblick zu ermöglichen. Die vollständige Konversations-Zusammenfassung (`.emails_summary.md`) wird erst in **Phase 6** bei der Ausführung einer Antwort-Aktion erstellt, um Ressourcen zu sparen und den aktuellsten Stand zu garantieren.  
-- **RAG-Kontext (Retrieval Augmented Generation):** Das System durchsucht eine Vektordatenbank nach thematisch passenden Informationen (z.B. Prüfungsordnungen), basierend auf dem Inhalt der aktuellen Mail. Dieser Kontext wird ausschließlich für die spätere Antwortgenerierung genutzt. Details zu diesem mehrstufigen Prozess finden Sie unter [RAG-Prozess](rag-process.md).
+- **RAG-Kontext (Retrieval Augmented Generation):** Das System durchsucht eine Vektordatenbank nach thematisch passenden Informationen (z.B. Prüfungsordnungen), basierend auf dem Inhalt der aktuellen Mail. Dieser Kontext wird ausschließlich für die spätere Antwortgenerierung genutzt. Details zu diesem mehrstufigen Prozess finden Sie unter [RAG-Prozess](rag-process.md).  
 - **Ähnlichkeits-Suche:** Es wird nach den 3 neuesten, thematisch ähnlichsten E-Mails desselben Studenten im Archiv gesucht, um eine konsistente Historie zu gewährleisten.  
 - **Aktions-Klassifizierung:** Das LLM entscheidet vorab, welche der 6 möglichen Aktionen am besten zur E-Mail passt.  
 
