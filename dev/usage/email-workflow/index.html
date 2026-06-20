@@ -1824,7 +1824,7 @@
 <p><strong>Inhalte dieser Phase:</strong></p>
 <ul>
 <li><strong>Gradio GUI Zusammenfassung:</strong> In der <a href="#gradio-gui">Gradio GUI</a> wird für jede Mail eine separate, kurze (2 Sätze) Zusammenfassung des aktuellen Inhalts angezeigt, um einen schnellen Überblick zu ermöglichen. Die vollständige Konversations-Zusammenfassung (<code>.emails_summary.md</code>) wird erst in <strong>Phase 6</strong> bei der Ausführung einer Antwort-Aktion erstellt, um Ressourcen zu sparen und den aktuellsten Stand zu garantieren.  </li>
-<li><strong>RAG-Kontext (Retrieval Augmented Generation):</strong> Das System durchsucht eine Vektordatenbank nach thematisch passenden Informationen (z.B. Prüfungsordnungen), basierend auf dem Inhalt der aktuellen Mail. Dieser Kontext wird sowohl für die Aktions-Klassifizierung als auch für die spätere Antwortgenerierung genutzt. Details zu diesem mehrstufigen Prozess finden Sie unter <a href="../rag-process/">RAG-Prozess</a>.  </li>
+<li><strong>RAG-Kontext (Retrieval Augmented Generation):</strong> Das System durchsucht eine Vektordatenbank nach thematisch passenden Informationen (z.B. Prüfungsordnungen), basierend auf dem Inhalt der aktuellen Mail. Dieser Kontext wird ausschließlich für die spätere Antwortgenerierung genutzt. Details zu diesem mehrstufigen Prozess finden Sie unter <a href="../rag-process/">RAG-Prozess</a>.</li>
 <li><strong>Ähnlichkeits-Suche:</strong> Es wird nach den 3 neuesten, thematisch ähnlichsten E-Mails desselben Studenten im Archiv gesucht, um eine konsistente Historie zu gewährleisten.  </li>
 <li><strong>Aktions-Klassifizierung:</strong> Das LLM entscheidet vorab, welche der 6 möglichen Aktionen am besten zur E-Mail passt.  </li>
 </ul>
@@ -1853,7 +1853,7 @@
 </tr>
 <tr>
 <td style="text-align: left;"><strong>4) Nur archivieren</strong></td>
-<td style="text-align: left;">Keine Antwort nötig (z.B. reine Information).</td>
+<td style="text-align: left;">Einsortierung in den Archiv-Ordner; keine Antwort nötig.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>5) Aufgabe "Anhang lesen"</strong></td>
@@ -1891,7 +1891,7 @@
 <h4 id="3-termin-im-kalender-anlegen">3) Termin im Kalender anlegen<a class="headerlink" href="#3-termin-im-kalender-anlegen" title="Permanent link">&para;</a></h4>
 <p>Wird genutzt, wenn der Student einen Termin bestätigt hat. Das System extrahiert Datum und Uhrzeit und nutzt das Tool <code>manage_calendar_appointment</code>, um einen echten Eintrag in Ihrem Outlook-Kalender zu erstellen.</p>
 <h4 id="4-e-mail-nur-archivieren">4) E-Mail nur archivieren<a class="headerlink" href="#4-e-mail-nur-archivieren" title="Permanent link">&para;</a></h4>
-<p>Die E-Mail wird als bearbeitet markiert. Es erfolgt keine weitere technische Aktion in Outlook.</p>
+<p>Die E-Mail wird im entsprechenden studentischen Archiv-Ordner gespeichert. Es erfolgt keine weitere technische Aktion (wie z.B. ein Antwort-Entwurf).</p>
 <h4 id="5-aufgabe-im-kalender-anlegen-finale-abgabe">5) Aufgabe im Kalender anlegen (Finale Abgabe)<a class="headerlink" href="#5-aufgabe-im-kalender-anlegen-finale-abgabe" title="Permanent link">&para;</a></h4>
 <p>Diese Aktion kombiniert mehrere Schritte für Abschlussarbeiten:</p>
 <ol>
