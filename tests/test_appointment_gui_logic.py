@@ -1,7 +1,6 @@
 import pytest
 import os
-from pathlib import Path
-from datetime import datetime, timedelta
+from datetime import datetime
 from unittest.mock import MagicMock, patch
 import pandas as pd
 import gradio as gr
@@ -68,9 +67,6 @@ def test_load_student_details_logic(tmp_path):
 
         # Verify file was updated
         assert summary_file.read_text(encoding="utf-8") == "New Summary Content"
-
-if __name__ == "__main__":
-    pytest.main([__file__])
 
 def test_load_student_details_fresh_summary(tmp_path):
     # Setup mock file system
@@ -143,3 +139,6 @@ def test_load_student_details_no_email(tmp_path):
         # Verify results - profile should NOT be generated if no email found
         assert "Kein Steckbrief gefunden" in profile
         mock_profiler.get_profile.assert_not_called()
+
+if __name__ == "__main__":
+    pytest.main([__file__])
