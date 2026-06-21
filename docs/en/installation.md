@@ -31,6 +31,20 @@ For testing and documentation generation:
 pip install pytest pytest-asyncio mkdocs-material mkdocs-static-i18n mkdocstrings[python] interrogate git-cliff mike
 ```
 
+
+## GPU Support (Optional)
+
+A GPU can be used for training and running the transformer models. For this, the corresponding version of PyTorch must be installed.
+
+### NVIDIA GPU (CUDA)
+Visit [pytorch.org](https://pytorch.org/get-started/locally/) to get the appropriate installation command for your CUDA version. Example for CUDA 12.1:
+```bash
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+```
+
+### Apple Silicon (MPS)
+On Macs with M1/M2/M3 chips, the GPU (Metal Performance Shaders) is automatically supported if a current PyTorch version is installed.
+
 ## System Dependencies
 
 ### Ollama (LLM Backend)

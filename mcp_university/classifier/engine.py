@@ -3,6 +3,7 @@ from mcp_university.classifier.stopwords import ALL_STOP_WORDS
 from mcp_university.config import get_config
 from mcp_university.parser.mail_parser import MailParser
 from mcp_university.utils.anonymizer import anonymize_th_koeln_names
+from mcp_university.utils.torch_utils import get_device
 from pathlib import Path
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -239,13 +240,16 @@ class EmailClassifier:
 
         if self.method == "transformer":
             text = self._format_transformer_input(Path(file_path))
+            device = get_device()
             inputs = self.tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=512)
+            inputs = {k: v.to(device) for k, v in inputs.items()}
+            self.classifier.to(device)
             self.classifier.eval()
             with torch.no_grad():
                 outputs = self.classifier(inputs["input_ids"], inputs["attention_mask"])
                 probs = torch.softmax(outputs, dim=1)[0]
                 y_pred = torch.argmax(probs).item()
-                y_prob = probs.numpy()
+                y_prob = probs.cpu().numpy()
         else:
             text = self._extract_text(Path(file_path))
             if not text:
@@ -321,6 +325,7 @@ class EmailClassifier:
                 token=os.environ.get("HF_TOKEN")
             )
             self.classifier.load_state_dict(c_data["state_dict"])
+            self.classifier.to(get_device())
             self.tokenizer = AutoTokenizer.from_pretrained(
                 self.embedding_model_name,
                 token=os.environ.get("HF_TOKEN")

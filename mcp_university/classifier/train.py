@@ -1,5 +1,6 @@
 """Skript zum Trainieren des E-Mail-Klassifikators."""
 from mcp_university.classifier.engine import EmailClassifier, resolve_model_path
+from mcp_university.utils.torch_utils import get_device
 from pathlib import Path
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.model_selection import GridSearchCV, train_test_split
@@ -33,6 +34,8 @@ def evaluate_and_save(classifier: EmailClassifier, texts: list, labels: list, ou
     if classifier.method == "transformer":
         classifier.classifier.eval()
         y_pred_idx = []
+        device = get_device()
+        classifier.classifier.to(device)
         with torch.no_grad():
             # Batchweise Verarbeitung für Evaluierung
             logger.info(f"Tokenisiere {len(texts)} Texte für die Evaluierung...")
@@ -42,10 +45,10 @@ def evaluate_and_save(classifier: EmailClassifier, texts: list, labels: list, ou
             num_batches = len(loader)
             logger.info(f"Starte Batch-Vorhersage ({num_batches} Batches)...")
             for i, batch in enumerate(loader):
-                ids, mask = batch
+                ids, mask = [t.to(device) for t in batch]
                 outputs = classifier.classifier(ids, mask)
                 preds = torch.argmax(outputs, dim=1)
-                y_pred_idx.extend(preds.numpy())
+                y_pred_idx.extend(preds.cpu().numpy())
                 if (i + 1) % 10 == 0 or (i + 1) == num_batches:
                     logger.info(f"Evaluierung: Batch {i + 1}/{num_batches} verarbeitet.")
         y_pred_idx = np.array(y_pred_idx)
@@ -173,6 +176,7 @@ def main() -> None:
         y_val = classifier.label_encoder.transform(labels_val)
 
         if args.method == "transformer":
+            device = get_device()
             logger.info("Starte Transformer Fine-Tuning...")
             from mcp_university.classifier.engine import EmailTransformerClassifier
             import os
@@ -180,13 +184,14 @@ def main() -> None:
             if classifier.is_trained and classifier.method == "transformer":
                 logger.info("Setze Training des geladenen Transformer-Modells fort.")
                 # Die Gewichte sind bereits in classifier.classifier geladen
+                classifier.classifier.to(device)
             else:
                 logger.info("Initialisiere neues Transformer-Modell.")
                 classifier.classifier = EmailTransformerClassifier(
                     args.embedding_model,
                     num_classes,
                     token=os.environ.get("HF_TOKEN")
-                )
+                ).to(device)
 
             # Tokenisierung Training
             logger.info(f"Tokenisiere {len(texts_train)} Texte für das Training...")
@@ -210,7 +215,7 @@ def main() -> None:
                 total_train_loss = 0
                 for i, batch in enumerate(loader_train):
                     optimizer.zero_grad()
-                    input_ids, mask, targets = batch
+                    input_ids, mask, targets = [t.to(device) for t in batch]
                     outputs = classifier.classifier(input_ids, mask)
                     loss = criterion(outputs, targets)
                     loss.backward()
@@ -226,7 +231,7 @@ def main() -> None:
                 total_val_loss = 0
                 with torch.no_grad():
                     for batch in loader_val:
-                        input_ids, mask, targets = batch
+                        input_ids, mask, targets = [t.to(device) for t in batch]
                         outputs = classifier.classifier(input_ids, mask)
                         loss = criterion(outputs, targets)
                         total_val_loss += loss.item()
@@ -290,6 +295,7 @@ def main() -> None:
         # Evaluierung auf Trainings- und Validierungsdaten
         logger.info("Starte Evaluierung und Berichterstellung...")
         if args.method == "transformer":
+            device = get_device()
             evaluate_and_save(classifier, texts_train, labels_train, model_file.parent, prefix="train", cv_results=cv_results)
             evaluate_and_save(classifier, texts_val, labels_val, model_file.parent, prefix="val")
         else:

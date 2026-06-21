@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import List, Dict, Any
 import numpy as np
 from mcp_university.config import get_config
+from mcp_university.utils.torch_utils import get_device
 
 try:
     from qdrant_client import QdrantClient, models
@@ -29,16 +30,17 @@ def get_model(model_name: str, offline: bool = False) -> Any:
         return _MODEL_CACHE[model_name]
 
     logger.info(f"Loading SentenceTransformer model: {model_name}")
+    device = str(get_device())
     try:
-        logger.info(f"Versuche Embedding-Modell lokal zu laden: {model_name}")
-        model = SentenceTransformer(model_name, local_files_only=True)
+        logger.info(f"Versuche Embedding-Modell lokal zu laden: {model_name} auf {device}")
+        model = SentenceTransformer(model_name, local_files_only=True, device=device)
         logger.info(f"ERFOLG: Modell {model_name} wurde LOKAL geladen.")
     except Exception as e:
         if offline:
             logger.error(f"Modell {model_name} nicht lokal gefunden und Offline-Modus ist aktiv: {e}")
             raise
         logger.info(f"Modell nicht lokal gefunden. Lade von Hugging Face: {model_name}")
-        model = SentenceTransformer(model_name)
+        model = SentenceTransformer(model_name, device=device)
 
     _MODEL_CACHE[model_name] = model
     return model
