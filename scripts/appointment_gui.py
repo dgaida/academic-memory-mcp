@@ -28,6 +28,7 @@ def open_file(filepath):
     except Exception as e:
         return f"Fehler beim Öffnen: {e}"
 
+
 def parse_appointments():
     config = get_config()
     file_path = config.data_dir / "appointments.md"
@@ -141,6 +142,7 @@ def parse_appointments():
         df = df.drop(columns=["dt"])
     return df
 
+
 def get_class_paths():
     config = get_config()
     cp_path = config.config_dir / "classifier_paths.yaml"
@@ -151,15 +153,18 @@ def get_class_paths():
         cp_data = yaml.safe_load(f)
     return cp_data.get("class_paths", {})
 
+
 def get_class_from_title(title, class_paths):
     for class_name in class_paths.keys():
         if class_name.lower() in title.lower():
             return class_name
     return "Other"
 
+
 def extract_email(text):
     match = re.search(r"[\w\.-]+@[\w\.-]+", text)
     return match.group(0) if match else None
+
 
 def load_student_details(evt: gr.SelectData, df):
     row_idx = evt.index[0]
@@ -192,7 +197,7 @@ def load_student_details(evt: gr.SelectData, df):
     if email:
         profile_path = Path("Steckbriefe") / f"{email}.md"
         if not profile_path.exists():
-             profile_path = Path(r"D:\Steckbriefe") / f"{email}.md"
+            profile_path = Path(r"D:\Steckbriefe") / f"{email}.md"
 
         if profile_path.exists():
             profile = f"### Steckbrief\n\n{profile_path.read_text(encoding='utf-8', errors='replace')}"
@@ -201,8 +206,10 @@ def load_student_details(evt: gr.SelectData, df):
 
     return summary, profile, explorer_root, str(student_dir) if student_dir else ""
 
+
 def on_file_select(evt: gr.SelectData):
     return evt.value
+
 
 with gr.Blocks(title="Appointment Manager") as demo:
     gr.Markdown("# Wochen-Terminplaner & Student-Info")
@@ -233,11 +240,15 @@ with gr.Blocks(title="Appointment Manager") as demo:
     def handle_selection(evt: gr.SelectData, df):
         summary, profile, folder_root, folder_str = load_student_details(evt, df)
         if folder_root:
-            return summary, profile, gr.update(root=folder_root, visible=True), folder_str
+            return summary, profile, gr.update(root_dir=folder_root, visible=True), folder_str
         else:
             return summary, profile, gr.update(visible=False), ""
 
-    table.select(handle_selection, inputs=[appointments_df], outputs=[summary_md, profile_md, explorer, student_path_display])
+    table.select(
+        handle_selection,
+        inputs=[appointments_df],
+        outputs=[summary_md, profile_md, explorer, student_path_display]
+    )
 
     def open_selected_file(evt: gr.SelectData, student_dir):
         if not student_dir:
@@ -248,4 +259,4 @@ with gr.Blocks(title="Appointment Manager") as demo:
     explorer.select(open_selected_file, inputs=[student_path_display], outputs=[open_status])
 
 if __name__ == "__main__":
-    demo.launch()
+    demo.launch(inbrowser=True)
