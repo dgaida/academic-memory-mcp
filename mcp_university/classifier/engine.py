@@ -12,7 +12,6 @@ from transformers import AutoModel, AutoTokenizer
 from typing import List, Tuple, Dict, Any, Optional, Union
 import logging
 import numpy as np
-import pickle
 import torch
 import torch.nn as nn
 
