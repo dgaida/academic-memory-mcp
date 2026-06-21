@@ -12,7 +12,6 @@ from transformers import AutoModel, AutoTokenizer
 from typing import List, Tuple, Dict, Any, Optional, Union
 import logging
 import numpy as np
-import pickle
 import torch
 import torch.nn as nn
 
@@ -300,8 +299,7 @@ class EmailClassifier:
             "label_encoder": self.label_encoder,
             "is_trained": self.is_trained
         }
-        with open(model_path, "wb") as f:
-            pickle.dump(data, f)
+        torch.save(data, model_path)
 
     def load(self, model_path: Union[str, Path]) -> None:
         """Lädt das Modell aus einer Datei.
@@ -309,8 +307,17 @@ class EmailClassifier:
         Args:
             model_path: Pfad zur Modelldatei.
         """
-        with open(model_path, "rb") as f:
-            data = pickle.load(f)
+        try:
+            data = torch.load(model_path, map_location=get_device(), weights_only=False)
+        except RuntimeError as e:
+            if "CUDA device" in str(e) and not torch.cuda.is_available():
+                logger.error(
+                    "Das Modell wurde auf einer GPU gespeichert, aber dieses System hat nur eine CPU. "
+                    "Bitte speichern Sie das Modell auf dem GPU-Rechner mit der aktualisierten Version "
+                    "dieses Skripts neu (welches nun 'torch.save' verwendet), damit es hardwareunabhängig "
+                    "geladen werden kann."
+                )
+            raise e
 
         self.mode = data["mode"]
         self.method = data.get("method", "randomforest")  # Fallback für alte Modelle
