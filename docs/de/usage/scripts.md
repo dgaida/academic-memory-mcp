@@ -16,6 +16,32 @@ Flacht eine Ordnerstruktur ab, indem alle Dateien in das Wurzelverzeichnis versc
 python scripts/flatten_directory.py /pfad/zu/daten
 ```
 
+## E-Mail Management & Klassifizierung
+
+### E-Mail-Ordnerstruktur korrigieren
+Migriert E-Mails in die Standardstruktur: `Semester/Nachname/Inbox|SentItems/`. Dies ist besonders wichtig für die korrekte Zuordnung im System.
+```bash
+python scripts/fix_email_folders.py data/classifier_paths.yaml
+```
+
+### Klassifikator-Daten umstrukturieren
+Strukturiert die Trainings- und Testdaten des Klassifikators um, um sie für das Training vorzubereiten.
+```bash
+python scripts/restructure_classifier_data.py
+```
+
+### Klassen zusammenfassen (Data Augmentation)
+Analysiert Trainingsordner und erstellt LLM-Zusammenfassungen für Klassen mit wenigen Daten (<= 50 E-Mails). Diese Zusammenfassungen enthalten Informationen über Themen, Stil und beteiligtes Personal aus der `th_personal.db`.
+```bash
+python scripts/summarize_classes.py
+```
+
+### Synthetische E-Mails generieren
+Generiert künstliche E-Mails basierend auf den zuvor erstellten Klassenzusammenfassungen, um den Trainingsdatensatz zu vergrößern.
+```bash
+python scripts/generate_synthetic_emails.py
+```
+
 ## Wissensgraph & Personen
 
 ### Wissensgraph visualisieren
@@ -30,10 +56,15 @@ python scripts/visualize_knowledge_graph.py
 Die Ausgabe erfolgt in `knowledge_graph.html`.
 
 **Offline-Unterstützung:**
-Standardmäßig benötigt die von Pyvis generierte HTML-Datei eine Internetverbindung, um die benötigten JavaScript- und CSS-Bibliotheken (vis-network) von einem CDN (Content Delivery Network) zu laden.
-Das Skript wurde so konfiguriert, dass diese Ressourcen nun direkt "in-line" in die HTML-Datei eingebettet werden (`cdn_resources='in_line'`). Dadurch ist die Visualisierung vollständig offline-fähig, führt jedoch zu einer größeren Dateigröße.
+Das Skript ist vollständig offline-fähig, da alle Ressourcen (vis-network) in die HTML-Datei eingebettet werden.
 
-Unterstützt den Parameter `--filter <Name>` (oder `-f` in der CLI), um den Graphen auf einen bestimmten Knoten und seinen Kontext zu beschränken. Dabei werden alle "Eltern-Strukturen" (eingehende Kanten, z.B. Institut oder Fakultät einer Person) sowie alle von diesen Strukturen ausgehenden Teilgraphen (ausgehende Kanten, z.B. alle Mitglieder des Instituts oder Module einer Person) einbezogen.
+Unterstützt den Parameter `--filter <Name>` (oder `-f` in der CLI), um den Graphen auf einen bestimmten Knoten und seinen Kontext zu beschränken.
+
+### Wissensgraph aufbauen
+Baut den Wissensgraphen aus extrahierten E-Mail-Zusammenfassungen und anderen Quellen auf.
+```bash
+python scripts/build_knowledge_graph.py
+```
 
 ### TH Köln Personen-Crawler
 Crawlt das Personenverzeichnis der TH Köln nach Namen, E-Mails, Fakultäten und Instituten.
@@ -47,13 +78,6 @@ python scripts/crawl_th_koeln_persons.py --institution "Präsidium"
 python scripts/crawl_th_koeln_persons.py --faculty "Informatik und Ingenieurwissenschaften"
 ```
 
-Mit `--list-institutions` oder `--list-faculties` können alle verfügbaren Optionen angezeigt werden. Für einen vollständigen Crawl aller Bereiche:
-```bash
-python scripts/crawl_th_koeln_persons.py --crawl-all both
-```
-
-Unterstützt mehrere Anfangsbuchstaben als Argumente.
-
 ### Personen-Steckbriefe erstellen
 Erstellt manuell einen Steckbrief für eine bestimmte E-Mail-Adresse basierend auf vorhandenen E-Mails.
 ```bash
@@ -66,11 +90,44 @@ Extrahiert Modulinformationen (Verantwortliche, Prüfer) aus der MOCOGI-API und 
 python scripts/extract_mocogi_data.py
 ```
 
+## Wissensbasis & Memory
+
+### Memory indexieren
+Indexiert Dokumente aus den in der Konfiguration definierten Pfaden in die Vektordatenbank.
+```bash
+mcp-uni memory update
+```
+Oder direkt:
+```bash
+python scripts/index_memory.py
+```
+
+## Termine & Kolloquien
+
+### Termin-Verwaltung (GUI)
+Öffnet eine Gradio-Oberfläche zur Verwaltung von wöchentlichen Terminen, basierend auf `data/appointments.md`.
+```bash
+python scripts/appointment_gui.py
+```
+
+### Kolloquiums-Konfiguration erstellen
+Erstellt JSON-Konfigurationsdateien für den `colloquium-protocol-creator`.
+```bash
+python scripts/create_colloquium_config.py "Name des Kandidaten" --date "2023-10-27" --time "10:00" --location-type campus --room "R3.14"
+```
+
+## Analyse & Visualisierung
+
+### Embeddings visualisieren
+Erstellt eine 2D-Visualisierung der E-Mail-Embeddings mittels t-SNE, um die Trennbarkeit der Klassen zu analysieren.
+```bash
+python scripts/visualize_embeddings.py
+```
+
 ## Vorlesungen & Lehre
 
 ### Vorlesungsskripte zusammenfassen
-Sucht nach PDFs in einem Ordner und generiert kompakte Markdown-Zusammenfassungen. Überspringt Dateien, die bereits verarbeitet wurden (Mtime-Check).
+Sucht nach PDFs in einem Ordner und generiert kompakte Markdown-Zusammenfassungen. Überspringt Dateien, die bereits verarbeitet wurden.
 ```bash
 python scripts/summarize_lectures.py /pfad/zu/vorlesungen
 ```
-Nutzt primär `liteparse` und einen LLM-Fallback bei Fehlern.
