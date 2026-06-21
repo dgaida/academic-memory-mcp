@@ -12,6 +12,7 @@ import numpy as np
 from torch.utils.data import DataLoader, TensorDataset
 
 from mcp_university.classifier.engine import EmailClassifier, resolve_model_path
+from mcp_university.utils.torch_utils import get_device
 
 # Logging konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
@@ -46,6 +47,8 @@ def evaluate(model_path: Path, test_dir: Path) -> None:
 
     # Vorhersagen
     if classifier.method == 'transformer':
+        device = get_device()
+        classifier.classifier.to(device)
         classifier.classifier.eval()
         y_pred_idx = []
         with torch.no_grad():
@@ -57,10 +60,10 @@ def evaluate(model_path: Path, test_dir: Path) -> None:
             num_batches = len(loader)
             logger.info(f'Starte Batch-Vorhersage ({num_batches} Batches)...')
             for i, batch in enumerate(loader):
-                ids, mask = batch
+                ids, mask = [t.to(device) for t in batch]
                 outputs = classifier.classifier(ids, mask)
                 preds = torch.argmax(outputs, dim=1)
-                y_pred_idx.extend(preds.numpy())
+                y_pred_idx.extend(preds.cpu().numpy())
                 if (i + 1) % 10 == 0 or (i + 1) == num_batches:
                     logger.info(f'Evaluierung: Batch {i + 1}/{num_batches} verarbeitet.')
         y_pred_idx = np.array(y_pred_idx)
