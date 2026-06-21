@@ -115,8 +115,6 @@ Diese Aktion kombiniert mehrere Schritte für Abschlussarbeiten:
 - [E-Mail Klassifizierung](email-classification.md): Details zu den Machine-Learning Modellen.  
 - [Konfiguration](../configuration.md): So passen Sie Pfade und LLM-Einstellungen an.  
 
-!!! info "SentItems Archivierung"
-    E-Mails im Ordner  werden grundsätzlich nur archiviert. Sie benötigen nie eine Antwort-Aktion, unabhängig von ihrem Alter oder dem Status der Konversation.
 
 !!! info "SentItems Archivierung"
     E-Mails im Ordner `SentItems` werden grundsätzlich nur archiviert. Sie benötigen nie eine Antwort-Aktion, unabhängig von ihrem Alter oder dem Status der Konversation.
