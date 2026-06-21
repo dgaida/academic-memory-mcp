@@ -62,8 +62,10 @@ def parse_appointments():
                 continue
             parts = [p.strip() for p in line.split("|")]
             # Remove empty first/last parts if pipe-wrapped
-            if parts and not parts[0]: parts.pop(0)
-            if parts and not parts[-1]: parts.pop()
+            if parts and not parts[0]:
+                parts.pop(0)
+            if parts and not parts[-1]:
+                parts.pop()
         else:
             # Assume tab or whitespace separated
             parts = [p.strip() for p in line.split("\t") if p.strip()]
