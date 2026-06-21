@@ -128,3 +128,8 @@ The script `scripts/crawl_th_koeln_persons.py` is used to fetch personnel data.
 
 ## Steckbrieferstellung (PersonProfiler)  
 - Um die Performance zu gewährleisten und die Kontextgröße des LLM nicht zu sprengen, werden bei der Erstellung oder Aktualisierung eines Steckbriefs maximal die **100 neuesten E-Mails** einer Person berücksichtigt.  
+
+## Email Handling Rules
+- **SentItems:** Emails located in the `SentItems` folder must ALWAYS be archived and never require a reply action, regardless of their age or the overall conversation state.
+
+- **Memory Recording:** Always document significant logic changes (like the SentItems archiving rule) in AGENTS.md and relevant documentation folders to maintain project clarity.
