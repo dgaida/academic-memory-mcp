@@ -1,7 +1,6 @@
 import pytest
 from unittest.mock import MagicMock, patch
 from pathlib import Path
-import json
 from mcp_university.summarizer.profiler import PersonProfiler
 
 @pytest.fixture
