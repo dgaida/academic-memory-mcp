@@ -7,7 +7,7 @@
 '      im Konto "daniel.gaida@th-koeln.de" zu.
 '   2. Durchlaeuft die naechsten 4 Wochen (ab heute).
 '   3. Extrahiert Datum, Uhrzeit, Dauer, Ort, Thema und Teilnehmer.
-'   4. Schreibt alle Termine als Markdown-Tabelle in:
+'   4. Schreibt alle Termine als Markdown-Tabelle in UTF-8 kodiert in:
 '      D:\TH_Koeln\academic-memory-mcp\data\appointments.md
 ' =============================================================================
 
@@ -36,8 +36,8 @@ Public Sub ExportAppointments()
     Dim cal2        As Outlook.Folder
     Dim startDate   As Date
     Dim endDate     As Date
-    Dim fileNum     As Integer
     Dim parentDir   As String
+    Dim utf8Stream  As Object
 
     Set ns = Application.GetNamespace("MAPI")
 
@@ -75,28 +75,32 @@ Public Sub ExportAppointments()
         Exit Sub
     End If
 
-    fileNum = FreeFile()
-    Open OUTPUT_PATH For Output As #fileNum
+    ' ADODB.Stream fuer UTF-8 verwenden
+    Set utf8Stream = CreateObject("ADODB.Stream")
+    utf8Stream.Type = 2 ' adTypeText
+    utf8Stream.Charset = "utf-8"
+    utf8Stream.Open
 
-    Print #fileNum, "# Termine der kommenden 4 Wochen"
-    Print #fileNum, ""
-    Print #fileNum, "Zeitraum: " & Format(startDate, "YYYY-MM-DD") & " bis " & Format(endDate, "YYYY-MM-DD")
-    Print #fileNum, "Generiert am: " & Format(Now, "YYYY-MM-DD HH:MM:SS")
-    Print #fileNum, ""
-    Print #fileNum, "| Datum | Uhrzeit | Dauer (Min) | Ort | Thema | Teilnehmer |"
-    Print #fileNum, "| :--- | :--- | :--- | :--- | :--- | :--- |"
+    utf8Stream.WriteText "# Termine der kommenden 4 Wochen" & vbCrLf
+    utf8Stream.WriteText vbCrLf
+    utf8Stream.WriteText "Zeitraum: " & Format(startDate, "YYYY-MM-DD") & " bis " & Format(endDate, "YYYY-MM-DD") & vbCrLf
+    utf8Stream.WriteText "Generiert am: " & Format(Now, "YYYY-MM-DD HH:MM:SS") & vbCrLf
+    utf8Stream.WriteText vbCrLf
+    utf8Stream.WriteText "| Datum | Uhrzeit | Dauer (Min) | Ort | Thema | Teilnehmer |" & vbCrLf
+    utf8Stream.WriteText "| :--- | :--- | :--- | :--- | :--- | :--- |" & vbCrLf
 
     ' Termine aus beiden Kalendern verarbeiten
-    ProcessCalendar cal1, startDate, endDate, fileNum
-    ProcessCalendar cal2, startDate, endDate, fileNum
+    ProcessCalendar cal1, startDate, endDate, utf8Stream
+    ProcessCalendar cal2, startDate, endDate, utf8Stream
 
-    Close #fileNum
+    utf8Stream.SaveToFile OUTPUT_PATH, 2 ' adSaveCreateOverWrite
+    utf8Stream.Close
 
     MsgBox "Export abgeschlossen in " & OUTPUT_PATH, vbInformation
 End Sub
 
-''' Durchlaeuft einen Kalender-Ordner und schreibt gefilterte Termine in die Datei.
-Private Sub ProcessCalendar(ByVal calFolder As Outlook.Folder, ByVal startDate As Date, ByVal endDate As Date, ByVal fileNum As Integer)
+''' Durchlaeuft einen Kalender-Ordner und schreibt gefilterte Termine in den Stream.
+Private Sub ProcessCalendar(ByVal calFolder As Outlook.Folder, ByVal startDate As Date, ByVal endDate As Date, ByRef utf8Stream As Object)
     If calFolder Is Nothing Then Exit Sub
 
     Dim items As Outlook.Items
@@ -108,7 +112,6 @@ Private Sub ProcessCalendar(ByVal calFolder As Outlook.Folder, ByVal startDate A
     items.Sort "[Start]"
 
     ' Outlook Filter Format: MM/DD/YYYY HH:MM AM/PM
-    ' Wir filtern grob auf den Zeitraum.
     filter = "[Start] >= """ & Month(startDate) & "/" & Day(startDate) & "/" & Year(startDate) & " 00:00 AM""" & _
              " AND [Start] <= """ & Month(endDate) & "/" & Day(endDate) & "/" & Year(endDate) & " 11:59 PM"""
 
@@ -116,23 +119,23 @@ Private Sub ProcessCalendar(ByVal calFolder As Outlook.Folder, ByVal startDate A
 
     For Each appt In items
         If TypeOf appt Is AppointmentItem Then
-            WriteAppointmentToMarkdown appt, fileNum
+            WriteAppointmentToStream appt, utf8Stream
         End If
     Next appt
 End Sub
 
 ''' Formatiert ein AppointmentItem als Tabellenzeile.
-Private Sub WriteAppointmentToMarkdown(ByVal appt As Outlook.AppointmentItem, ByVal fileNum As Integer)
+Private Sub WriteAppointmentToStream(ByVal appt As Outlook.AppointmentItem, ByRef utf8Stream As Object)
     Dim participants As String
     participants = GetRecipientEmails(appt)
 
     ' | Datum | Uhrzeit | Dauer (Min) | Ort | Thema | Teilnehmer |
-    Print #fileNum, "| " & Format(appt.Start, "YYYY-MM-DD") & _
-                    " | " & Format(appt.Start, "HH:MM") & _
-                    " | " & appt.Duration & _
-                    " | " & SanitizeMarkdown(appt.Location) & _
-                    " | " & SanitizeMarkdown(appt.Subject) & _
-                    " | " & participants & " |"
+    utf8Stream.WriteText "| " & Format(appt.Start, "YYYY-MM-DD") & _
+                         " | " & Format(appt.Start, "HH:MM") & _
+                         " | " & appt.Duration & _
+                         " | " & SanitizeMarkdown(appt.Location) & _
+                         " | " & SanitizeMarkdown(appt.Subject) & _
+                         " | " & participants & " |" & vbCrLf
 End Sub
 
 ''' Extrahiert alle Teilnehmer-E-Mail-Adressen.
@@ -167,7 +170,7 @@ Private Function GetSmtpAddress(ByVal recip As Outlook.Recipient) As String
        addrEntry.AddressEntryUserType = olExchangeRemoteUserAddressEntry Then
         Dim exchUser As Outlook.ExchangeUser
         Set exchUser = addrEntry.GetExchangeUser()
-        If Not exchUser Is Nothing Then
+        if Not exchUser Is Nothing Then
             GetSmtpAddress = exchUser.PrimarySmtpAddress
             Exit Function
         End If
