@@ -10,7 +10,32 @@ import yaml
 
 from mcp_university.config import get_config
 from mcp_university.classifier.sort_emails import find_student_folder, extract_lastname
+from mcp_university.summarizer.engine import Summarizer
+from mcp_university.parser.mail_parser import MailParser
+from mcp_university.summarizer.profiler import PersonProfiler
 
+class Tools:
+    _summarizer = None
+    _mail_parser = None
+    _profiler = None
+
+    @classmethod
+    def summarizer(cls):
+        if cls._summarizer is None:
+            cls._summarizer = Summarizer()
+        return cls._summarizer
+
+    @classmethod
+    def mail_parser(cls):
+        if cls._mail_parser is None:
+            cls._mail_parser = MailParser()
+        return cls._mail_parser
+
+    @classmethod
+    def profiler(cls):
+        if cls._profiler is None:
+            cls._profiler = PersonProfiler()
+        return cls._profiler
 
 def open_file(filepath):
     if not filepath or not Path(filepath).exists():
@@ -71,7 +96,7 @@ def parse_appointments():
             # Assume tab or whitespace separated
             parts = [p.strip() for p in line.split("\t") if p.strip()]
             if len(parts) < 2:
-                parts = [p.strip() for p in re.split(r'\s{2,}', line) if p.strip()]
+                parts = [p.strip() for re_split in [re.split(r'\s{2,}', line)] for p in re_split if p.strip()]
 
         if not parts:
             continue
@@ -116,11 +141,6 @@ def parse_appointments():
         df["dt"] = pd.to_datetime(df["Start"], errors='coerce')
         now = datetime.now()
 
-        # If all dates are in the far future (like user's 2026), don't filter out everything
-        # Just for better UX during testing or if the file contains future dates.
-        # But the requirement says "dieser Woche".
-        # We'll stick to the requirement but ensure we don't crash.
-
         start_of_week = now - timedelta(days=now.weekday())
         start_of_week = start_of_week.replace(hour=0, minute=0, second=0, microsecond=0)
         end_of_week = start_of_week + timedelta(days=7)
@@ -130,9 +150,6 @@ def parse_appointments():
         if mask.any():
             df = df[mask]
         else:
-            # If nothing this week, maybe show next 7 days instead of strict week?
-            # Or just show everything if it's a test file.
-            # Given the user's example is 2026, I will show all if week is empty.
             pass
 
     except Exception as e:
@@ -187,6 +204,40 @@ def load_student_details(evt: gr.SelectData, df):
             if student_dir:
                 break
 
+    if student_dir:
+        summary_path = student_dir / ".emails_summary.md"
+        # 1) Freshness check for .emails_summary.md
+        email_files = list(student_dir.rglob("*.msg")) + list(student_dir.rglob("*.eml"))
+        if email_files:
+            latest_email_date = max(Tools.mail_parser().get_email_date(f) for f in email_files)
+
+            summary_outdated = False
+            if not summary_path.exists():
+                summary_outdated = True
+            else:
+                summary_mtime = datetime.fromtimestamp(summary_path.stat().st_mtime)
+                if latest_email_date > summary_mtime:
+                    summary_outdated = True
+
+            if summary_outdated:
+                dated_emails = []
+                for f in email_files:
+                    try:
+                        dated_emails.append((Tools.mail_parser().get_email_date(f), f))
+                    except Exception:
+                        dated_emails.append((datetime.min, f))
+                dated_emails.sort(key=lambda x: x[0])
+
+                conversation_content = ""
+                for d, f in dated_emails:
+                    parsed = Tools.mail_parser().parse(f)
+                    if parsed:
+                        conversation_content += f"\n--- EMAIL VOM {d} ---\n{parsed}\n"
+
+                new_summary = Tools.summarizer().summarize_email_conversation(student_dir.name, conversation_content)
+                if new_summary:
+                    summary_path.write_text(new_summary, encoding="utf-8")
+
     summary = "### Ordner-Zusammenfassung\n\nKeine Zusammenfassung gefunden."
     if student_dir:
         summary_path = student_dir / ".emails_summary.md"
@@ -195,12 +246,18 @@ def load_student_details(evt: gr.SelectData, df):
 
     profile = "### Steckbrief\n\nKein Steckbrief gefunden."
     if email:
-        profile_path = Path("Steckbriefe") / f"{email}.md"
-        if not profile_path.exists():
-            profile_path = Path(r"D:\Steckbriefe") / f"{email}.md"
+        # 2) Automatic Steckbrief generation/update
+        profile_content = Tools.profiler().get_profile(email)
+        if profile_content:
+            profile = f"### Steckbrief\n\n{profile_content}"
+        else:
+            # Fallback to existing logic if profiler fails to produce content
+            profile_path = Path("Steckbriefe") / f"{email}.md"
+            if not profile_path.exists():
+                profile_path = Path(r"D:\Steckbriefe") / f"{email}.md"
 
-        if profile_path.exists():
-            profile = f"### Steckbrief\n\n{profile_path.read_text(encoding='utf-8', errors='replace')}"
+            if profile_path.exists():
+                profile = f"### Steckbrief\n\n{profile_path.read_text(encoding='utf-8', errors='replace')}"
 
     explorer_root = str(student_dir) if student_dir and student_dir.exists() else None
 
