@@ -45,7 +45,6 @@ def test_generate_profile_includes_sources(profiler, mock_store):
 
 def test_update_profile_updates_sources(profiler, mock_store, mock_profile_store, tmp_path):
     email = "test@example.com"
-    # profiler.storage_path is already tmp_path from fixture
     profile_file = tmp_path / f"{email}.md"
 
     # Initial profile
@@ -78,3 +77,46 @@ def test_update_profile_updates_sources(profiler, mock_store, mock_profile_store
             assert "- Wissensgraph" in profile
             assert "- Ordner: /data/folder1" in profile
             assert "- Ordner: /data/folder2" in profile
+
+def test_find_emails_includes_cc(profiler):
+    email = "cc@example.com"
+
+    # Mock mail details
+    details = {
+        "from_email": "other@example.com",
+        "to": [{"email": "to@example.com"}],
+        "cc": [{"email": "cc@example.com"}],
+        "date": "2023-01-01",
+        "subject": "CC Test",
+        "body": "Body"
+    }
+
+    with patch.object(profiler.mail_parser, '_get_msg_details', return_value=details):
+        with patch.object(profiler, 'get_search_paths', return_value=[Path("/test")]):
+            with patch.object(Path, 'rglob', return_value=[Path("/test/mail.msg")]):
+                emails = profiler.find_emails_for_address(email)
+                assert len(emails) == 1
+                assert emails[0]["path"] == Path("/test/mail.msg")
+
+def test_find_emails_limit(profiler):
+    email = "test@example.com"
+
+    # 150 mock emails
+    all_files = [Path(f"/test/mail_{i}.msg") for i in range(150)]
+
+    def mock_get_details(path):
+        i = int(path.stem.split("_")[1])
+        return {
+            "from_email": email,
+            "to": [],
+            "cc": [],
+            "date": f"2023-01-{i:02d}" if i < 30 else "2023-02-01",
+            "subject": f"Subj {i}",
+            "body": "Body"
+        }
+
+    with patch.object(profiler.mail_parser, '_get_msg_details', side_effect=mock_get_details):
+        with patch.object(profiler, 'get_search_paths', return_value=[Path("/test")]):
+            with patch.object(Path, 'rglob', return_value=all_files):
+                emails = profiler.find_emails_for_address(email)
+                assert len(emails) == 100

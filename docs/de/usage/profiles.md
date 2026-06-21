@@ -47,3 +47,6 @@ Das System verfügt über eine robuste Dekodierung für MIME-Header (RFC 2047). 
 ## Dateipfade  
 - **Steckbriefe:** Standardmäßig unter `D:\Steckbriefe\` (konfigurierbar).  
 - **Tracking-Datenbank:** `data/profiles_tracking.db`.  
+
+### Performance-Hinweis
+Um eine schnelle Erstellung der Steckbriefe zu ermöglichen, berücksichtigt das System maximal die **100 neuesten E-Mails** einer Person. Dies stellt sicher, dass die Kontextgröße des LLMs optimal genutzt wird, ohne die Verarbeitungszeit unnötig zu verlängern.

@@ -125,3 +125,6 @@ The script `scripts/crawl_th_koeln_persons.py` is used to fetch personnel data.
 - **Discovery:** Use `--list-institutions` and `--list-faculties` to see available filters.  
 - **Bulk Crawling:** Use `--crawl-all [faculties|institutions|both]` to crawl all persons for the respective categories. This iterates through each category and saves separate Markdown files.  
 - **Output:** The script ensures that the `data/` directory and subdirectories are created automatically.  
+
+## Steckbrieferstellung (PersonProfiler)
+- Um die Performance zu gewährleisten und die Kontextgröße des LLM nicht zu sprengen, werden bei der Erstellung oder Aktualisierung eines Steckbriefs maximal die **100 neuesten E-Mails** einer Person berücksichtigt.

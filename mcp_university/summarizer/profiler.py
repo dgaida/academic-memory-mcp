@@ -95,22 +95,31 @@ class PersonProfiler:
                         if details.get("from_email", "").lower() == email_address:
                             match = True
 
-                        # Check recipients
+                        # Check recipients (To and Cc)
                         if not match:
                             for rec in details.get("to", []):
-                                if rec.lower() == email_address:
+                                if rec.get("email", "").lower() == email_address:
+                                    match = True
+                                    break
+
+                        if not match:
+                            for rec in details.get("cc", []):
+                                if rec.get("email", "").lower() == email_address:
                                     match = True
                                     break
 
                         if match:
                             found_emails.append({
                                 "path": file_path,
+                                "date": details.get("date", datetime.min),
                                 "details": details
                             })
                     except Exception as e:
                         logger.warning(f"Fehler beim Parsen von {file_path}: {e}")
 
-        return found_emails
+        # Sortieren nach Datum absteigend, um die neuesten 100 zu nehmen
+        found_emails.sort(key=lambda x: x["date"], reverse=True)
+        return found_emails[:100]
 
     def create_batches(self, emails: List[Dict[str, Any]], max_chars: int = 15000) -> List[List[Dict[str, Any]]]:
         """Teilt E-Mails in Batches auf, um die Kontextgröße des LLM nicht zu überschreiten.
@@ -473,5 +482,5 @@ Erstelle einen strukturierten Steckbrief in Markdown mit folgenden Punkten:
 
 WICHTIG: Erstelle KEINEN Abschnitt "Quellen". Dieser wird automatisch generiert.
 
-Verhalte dich objektiv und sachlich. Antworte NUR mit dem Markdown-Inhalt des Steckbriefs.
+Verhalte dich objektiv und sachlich. Antworte NUR with dem Markdown-Inhalt des Steckbriefs.
 """
