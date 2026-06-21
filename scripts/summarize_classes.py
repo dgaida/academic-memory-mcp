@@ -4,7 +4,6 @@ import logging
 from pathlib import Path
 from mcp_university.utils.llm_client_wrapper import LLMClientWrapper
 from mcp_university.parser.mail_parser import MailParser
-from mcp_university.config import get_config
 
 # Logging Setup
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
