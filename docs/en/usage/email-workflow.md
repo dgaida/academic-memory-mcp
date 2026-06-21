@@ -89,3 +89,7 @@ The process ends in an interactive web interface. Here, the human remains in ful
 - [Database Processes](database-processes.md): Learn more about managing `profiles_tracking.db` and the Knowledge Graph.  
 - [Email Classification](email-classification.md): Details on the machine learning models and memory indices.  
 - [Configuration](../configuration.md): How to customize paths and LLM settings.  
+
+
+!!! info "SentItems Archiving"
+    Emails in the `SentItems` folder are always only archived. They never require a reply action, regardless of their age or the status of the conversation.

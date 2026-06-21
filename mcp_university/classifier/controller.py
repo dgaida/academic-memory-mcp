@@ -830,9 +830,13 @@ TEXT:
                     dated_emails.append((datetime.min, f))
             dated_emails.sort(key=lambda x: x[0])
             latest_date, latest_mail = dated_emails[-1]
-            needs_answer = (
-                "Inbox" in latest_mail.parts and "SentItems" not in latest_mail.parts
-            )
+            # Individual email in SentItems never needs an answer
+            if email.get("folder") == "SentItems":
+                needs_answer = False
+            else:
+                needs_answer = (
+                    "Inbox" in latest_mail.parts and "SentItems" not in latest_mail.parts
+                )
             email.update(
                 {
                     "latest_date": latest_date,
@@ -868,9 +872,15 @@ TEXT:
                     is_old = True
 
             if self.use_action_classifier:
-                # If old or already answered, default to Archive
-                if is_old or not email.get("needs_answer", True):
-                    reason = "alt" if is_old else "bereits beantwortet"
+                # If old or already answered or in SentItems, default to Archive
+                is_sent = email.get("folder") == "SentItems"
+                if is_old or is_sent or not email.get("needs_answer", True):
+                    if is_old:
+                        reason = "alt"
+                    elif is_sent:
+                        reason = "im SentItems Ordner"
+                    else:
+                        reason = "bereits beantwortet"
                     logger.info(
                         f"E-Mail von {email['lastname']} ist {reason}. Automatische Aktion: Archivieren."
                     )
