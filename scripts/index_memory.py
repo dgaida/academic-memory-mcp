@@ -1,8 +1,10 @@
+"""Script to index memory folders into a vector database."""
 import yaml
 import argparse
 import logging
+import os
 from pathlib import Path
-from typing import List, Any
+from typing import List, Any, Set
 from tqdm import tqdm
 from transformers import AutoTokenizer
 
@@ -10,13 +12,24 @@ from mcp_university.retrieval.index import SearchIndex
 from mcp_university.parser.factory import ParserFactory
 from mcp_university.config import get_config
 from mcp_university.utils.memory import resolve_memory_index_names
+from mcp_university.utils.shortcuts import resolve_path
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 def chunk_text(text: str, tokenizer: Any, chunk_size: int = 512, overlap: int = 100) -> List[str]:
-    """Splits text into chunks using a tokenizer."""
+    """Splits text into chunks using a tokenizer.
+
+    Args:
+        text (str): The text to chunk.
+        tokenizer (Any): Tokenizer instance.
+        chunk_size (int): Max number of tokens per chunk.
+        overlap (int): Number of tokens to overlap between chunks.
+
+    Returns:
+        List[str]: List of text chunks.
+    """
     tokens = tokenizer.encode(text, add_special_tokens=False)
     chunks = []
     for i in range(0, len(tokens), chunk_size - overlap):
@@ -26,15 +39,64 @@ def chunk_text(text: str, tokenizer: Any, chunk_size: int = 512, overlap: int = 
             break
     return chunks
 
-def process_memory_folder(index_name: str, base_path: Path, index: SearchIndex, parser_factory: ParserFactory, tokenizer: Any):
-    """Traverses a folder, parses files, chunks them and adds to the index."""
+def get_all_files(base_path: Path, supported_extensions: List[str]) -> List[Path]:
+    """
+    Finds all files in base_path, following symlinks and resolving shortcuts.
+    Avoids infinite recursion and duplicate processing.
+
+    Args:
+        base_path (Path): Base directory to search.
+        supported_extensions (List[str]): List of supported file extensions.
+
+    Returns:
+        List[Path]: List of files to process.
+    """
+    files_to_process = []
+    seen_paths: Set[str] = set()
+
+    def _collect(current_path: Path):
+        """Recursively collects files while handling links and avoiding cycles.
+
+        Args:
+            current_path (Path): The current path to explore.
+        """
+        resolved = resolve_path(current_path)
+        if not resolved.exists():
+            return
+
+        resolved_str = str(resolved.absolute())
+        if resolved_str in seen_paths:
+            return
+        seen_paths.add(resolved_str)
+
+        if resolved.is_file():
+            if resolved.suffix.lower() in supported_extensions:
+                files_to_process.append(resolved)
+        elif resolved.is_dir():
+            try:
+                for entry in os.scandir(resolved):
+                    _collect(Path(entry.path))
+            except PermissionError:
+                logger.warning(f"Permission denied for directory: {resolved}")
+
+    _collect(base_path)
+    return files_to_process
+
+def process_memory_folder(index_name: str, base_path: Path, index: SearchIndex, parser_factory: ParserFactory, tokenizer: Any) -> None:
+    """Traverses a folder, parses files, chunks them and adds to the index.
+
+    Args:
+        index_name (str): Name of the index.
+        base_path (Path): Path to the folder to process.
+        index (SearchIndex): Search index instance.
+        parser_factory (ParserFactory): Parser factory instance.
+        tokenizer (Any): Tokenizer instance.
+    """
     logger.info(f"Processing memory index '{index_name}' from path: {base_path}")
 
     supported_extensions = [".pdf", ".docx", ".md", ".txt", ".eml", ".msg", ".py", ".ipynb", ".json", ".html"]
 
-    files_to_process = []
-    for ext in supported_extensions:
-        files_to_process.extend(list(base_path.rglob(f"*{ext}")))
+    files_to_process = get_all_files(base_path, supported_extensions)
 
     if not files_to_process:
         logger.warning(f"No supported files found in {base_path}")
@@ -72,7 +134,8 @@ def process_memory_folder(index_name: str, base_path: Path, index: SearchIndex, 
     else:
         logger.warning(f"No content extracted for {index_name}")
 
-def main():
+def main() -> None:
+    """Main entry point for memory indexing script."""
     parser = argparse.ArgumentParser(description="Index memory files into vector databases.")
     parser.add_argument("--config", type=str, default="config/classifier_memory_paths.yaml", help="Path to the memory paths yaml.")
     args = parser.parse_args()
@@ -113,7 +176,7 @@ def main():
             continue
 
         index_dir = memory_base_dir / index_name
-        index = SearchIndex(location=index_dir, embedding_model_name=global_config.embeddings.model)
+        index = SearchIndex(location=str(index_dir), embedding_model_name=global_config.embeddings.model)
 
         process_memory_folder(index_name, base_path, index, parser_factory, tokenizer)
 
