@@ -3,7 +3,7 @@ import argparse
 import logging
 import shutil
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List
 
 import extract_msg
 from mcp_university.config import get_config
@@ -12,18 +12,18 @@ from mcp_university.config import get_config
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
 
-def sort_emails_by_direction(source_dir: Path, user_email: str) -> Dict[str, int]:
+def sort_emails_by_direction(source_dir: Path, user_emails: List[str]) -> Dict[str, int]:
     """Sortiert .msg Dateien in Inbox oder SentItems.
 
     Args:
         source_dir: Quellverzeichnis mit .msg Dateien.
-        user_email: Die E-Mail-Adresse des Nutzers.
+        user_emails: Liste der E-Mail-Adressen des Nutzers.
 
     Returns:
         Dict[str, int]: Statistik der verschobenen Dateien.
     """
     stats = {"Inbox": 0, "SentItems": 0, "Error": 0}
-    user_email = user_email.lower()
+    user_emails = [e.lower() for e in user_emails]
 
     if not source_dir.exists():
         logger.error(f"Verzeichnis {source_dir} existiert nicht.")
@@ -31,12 +31,12 @@ def sort_emails_by_direction(source_dir: Path, user_email: str) -> Dict[str, int
 
     for msg_file in source_dir.glob("*.msg"):
         try:
-            target_folder = None
+            target_folder = "Inbox" # Default
             with extract_msg.openMsg(str(msg_file)) as msg:
                 sender = (msg.sender.lower() if msg.sender else "").strip()
 
                 # Prüfe ob der Nutzer der Absender ist
-                if user_email in sender:
+                if any(u_email in sender for u_email in user_emails):
                     target_folder = "SentItems"
                 else:
                     # Standardmäßig Inbox
@@ -70,10 +70,10 @@ def main() -> None:
     source_path = Path(args.source_dir)
 
     cfg = get_config()
-    user_email = cfg.user.email
+    user_emails = cfg.user.emails
 
-    logger.info(f"Starte Sortierung in {source_path} für {user_email}...")
-    stats = sort_emails_by_direction(source_path, user_email)
+    logger.info(f"Starte Sortierung in {source_path} für {user_emails}...")
+    stats = sort_emails_by_direction(source_path, user_emails)
 
     logger.info(f"Fertig! Inbox: {stats['Inbox']}, SentItems: {stats['SentItems']}, Fehler: {stats['Error']}")
 

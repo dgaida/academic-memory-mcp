@@ -252,7 +252,7 @@ def process_emails(
                             is_user = any(e.lower() in rec_email for e in get_config().user.emails)
                             if not is_user and any(domain in rec_email for domain in ["@smail.th-koeln.de", "@smail.fh-koeln.de", "@th-koeln.de", "@fh-koeln.de"]):
                                 logger.debug(f"Student in Empfängern gefunden (Fallback): {rec_email}")
-                                target_folder = "SentItems"
+                                target_folder = "Inbox"
                                 lastname = extract_lastname(rec.name or rec.email)
                                 found_student = True
                                 break
