@@ -307,7 +307,7 @@ class EmailClassifier:
         Args:
             model_path: Pfad zur Modelldatei.
         """
-        data = torch.load(model_path, map_location=get_device())
+        data = torch.load(model_path, map_location=get_device(), weights_only=False)
 
         self.mode = data["mode"]
         self.method = data.get("method", "randomforest")  # Fallback für alte Modelle
