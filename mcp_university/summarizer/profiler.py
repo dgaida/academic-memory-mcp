@@ -98,68 +98,109 @@ class PersonProfiler:
                         # Check recipients
                         if not match:
                             for rec in details.get("to", []):
-                                if rec.get("email", "").lower() == email_address:
-                                    match = True
-                                    break
-
-                        if not match:
-                            for rec in details.get("cc", []):
-                                if rec.get("email", "").lower() == email_address:
+                                if rec.lower() == email_address:
                                     match = True
                                     break
 
                         if match:
                             found_emails.append({
                                 "path": file_path,
-                                "date": details.get("date") or datetime.min,
                                 "details": details
                             })
                     except Exception as e:
-                        logger.error(f"Fehler beim Parsen von {file_path}: {e}")
+                        logger.warning(f"Fehler beim Parsen von {file_path}: {e}")
 
-        # Sortieren nach Datum absteigend, um die neuesten 100 zu nehmen
-        found_emails.sort(key=lambda x: x["date"], reverse=True)
-        found_emails = found_emails[:100]
-
-        # Zurück-Sortieren nach Datum aufsteigend für die Batch-Verarbeitung
-        found_emails.sort(key=lambda x: x["date"])
         return found_emails
 
-    def create_batches(self, emails: List[Dict[str, Any]]) -> List[List[Dict[str, Any]]]:
-        """Teilt E-Mails in Batches auf, basierend auf der Zeitlücke.
+    def create_batches(self, emails: List[Dict[str, Any]], max_chars: int = 15000) -> List[List[Dict[str, Any]]]:
+        """Teilt E-Mails in Batches auf, um die Kontextgröße des LLM nicht zu überschreiten.
 
         Args:
-            emails (List[Dict[str, Any]]): Sortierte Liste von E-Mails.
+            emails (List[Dict[str, Any]]): Liste der E-Mails.
+            max_chars (int): Maximale Zeichenanzahl pro Batch.
 
         Returns:
             List[List[Dict[str, Any]]]: Liste von E-Mail-Batches.
         """
+        # Sortieren nach Datum
+        emails.sort(key=lambda x: x["details"]["date"])
+
         batches = []
-        remaining = emails
+        current_batch = []
+        current_chars = 0
 
-        while remaining:
-            if len(remaining) <= 10:
-                batches.append(remaining)
-                break
+        for mail in emails:
+            mail_chars = len(mail["details"]["body"])
+            if current_chars + mail_chars > max_chars and current_batch:
+                batches.append(current_batch)
+                current_batch = []
+                current_chars = 0
 
-            # Betrachte die ersten 5-10 Mails
-            sample_size = min(len(remaining), 10)
+            current_batch.append(mail)
+            current_chars += mail_chars
 
-            max_gap = -1
-            split_idx = sample_size
+        if current_batch:
+            batches.append(current_batch)
 
-            for i in range(1, sample_size):
-                gap = (remaining[i]["date"] - remaining[i-1]["date"]).total_seconds()
-                if gap > max_gap:
-                    max_gap = gap
-                    split_idx = i
-
-            batches.append(remaining[:split_idx])
-            remaining = remaining[split_idx:]
+        # Größte zeitliche Lücke finden für intelligentes Batching
+        if len(batches) > 1:
+            return self._optimize_batches(batches)
 
         return batches
 
+    def _optimize_batches(self, batches: List[List[Dict[str, Any]]]) -> List[List[Dict[str, Any]]]:
+        """Optimiert Batches basierend auf zeitlichen Abständen.
 
+        Wenn zwischen zwei E-Mails eine große Pause liegt (z.B. Semesterferien),
+        sollte dort ein Batch-Schnitt erfolgen.
+
+        Args:
+            batches (List[List[Dict[str, Any]]]): Vorläufige Batches.
+
+        Returns:
+            List[List[Dict[str, Any]]]: Optimierte Batches.
+        """
+        all_emails = [mail for batch in batches for mail in batch]
+        if len(all_emails) < 2:
+            return batches
+
+        gaps = []
+        for i in range(len(all_emails) - 1):
+            d1 = datetime.fromisoformat(all_emails[i]["details"]["date"].replace("Z", "+00:00"))
+            d2 = datetime.fromisoformat(all_emails[i+1]["details"]["date"].replace("Z", "+00:00"))
+            gaps.append((d2 - d1).total_seconds())
+
+        if not gaps:
+            return batches
+
+        # Top-Gaps finden (einfacher Ansatz: alles über dem Durchschnitt * 2)
+        avg_gap = sum(gaps) / len(gaps)
+        threshold = max(avg_gap * 2, 60 * 60 * 24 * 30) # Mindestens 30 Tage
+
+        optimized_batches = []
+        current_batch = [all_emails[0]]
+
+        for i in range(len(all_emails) - 1):
+            if gaps[i] > threshold:
+                optimized_batches.append(current_batch)
+                current_batch = []
+            current_batch.append(all_emails[i+1])
+
+        if current_batch:
+            optimized_batches.append(current_batch)
+
+        # Falls ein Batch immer noch zu groß ist, rekursiv splitten (einfaches Halbier-Prinzip)
+        final_batches = []
+        for batch in optimized_batches:
+            batch_chars = sum(len(m["details"]["body"]) for m in batch)
+            if batch_chars > 20000:
+                split_idx = len(batch) // 2
+                final_batches.append(batch[:split_idx])
+                final_batches.append(batch[split_idx:])
+            else:
+                final_batches.append(batch)
+
+        return final_batches
 
     def _get_knowledge_graph_context(self, email_address: str) -> str:
         """Sucht im Wissensgraphen nach Informationen über die Person.
@@ -256,6 +297,10 @@ class PersonProfiler:
             response = self.llm.chat([{"role": "user", "content": prompt}])
             current_profile = response["message"]["content"]
 
+        # Quellen hinzufügen
+        sources_text = self._get_sources_text(emails, kg_context)
+        current_profile += sources_text
+
         # Speichern
         profile_file.write_text(current_profile, encoding="utf-8")
         
@@ -288,6 +333,11 @@ class PersonProfiler:
             return self.generate_profile(email_address, force_update=True)
 
         existing_profile = profile_file.read_text(encoding="utf-8")
+
+        # Bestehende Quellen entfernen, damit sie nicht in den Prompt gelangen
+        if "## Quellen" in existing_profile:
+            existing_profile = existing_profile.split("## Quellen")[0].strip()
+
         processed_files = self.profile_store.get_processed_filenames(email_address)
         
         all_emails = self.find_emails_for_address(email_address)
@@ -315,6 +365,10 @@ class PersonProfiler:
             prompt = self._get_profiling_prompt(email_address, batch_content, current_profile, kg_context)
             response = self.llm.chat([{"role": "user", "content": prompt}])
             current_profile = response["message"]["content"]
+
+        # Quellen hinzufügen (basierend auf allen E-Mails)
+        sources_text = self._get_sources_text(all_emails, kg_context)
+        current_profile += sources_text
 
         # Speichern und Tracking aktualisieren
         profile_file.write_text(current_profile, encoding="utf-8")
@@ -345,6 +399,33 @@ class PersonProfiler:
             Optional[str]: Steckbrief-Inhalt.
         """
         return self.update_profile(email_address)
+
+    def _get_sources_text(self, emails: List[Dict[str, Any]], kg_context: str) -> str:
+        """Erstellt den Text für den Quellen-Abschnitt.
+
+        Args:
+            emails (List[Dict[str, Any]]): Liste der E-Mails.
+            kg_context (str): Kontext aus dem Wissensgraphen.
+
+        Returns:
+            str: Formatierter Quellen-Text.
+        """
+        sources = []
+        if kg_context:
+            sources.append("- Wissensgraph")
+
+        folders = set()
+        for mail in emails:
+            path = Path(mail["path"])
+            folders.add(str(path.parent))
+
+        for folder in sorted(list(folders)):
+            sources.append(f"- Ordner: {folder}")
+
+        if not sources:
+            return ""
+
+        return "\n\n## Quellen\n" + "\n".join(sources) + "\n"
 
     def _get_profiling_prompt(self, email: str, new_content: str, existing_profile: str, kg_context: str = "") -> str:
         """Erstellt den Prompt für das LLM.
@@ -389,6 +470,8 @@ Erstelle einen strukturierten Steckbrief in Markdown mit folgenden Punkten:
    - Bei Professoren: Gelesene Module, Forschungsprojekte, Gremienarbeit.
    - Bei Studierenden: Abgeschlossene Projektarbeiten/Thesen, Wechsel der Prüfungsordnung, Praktika, etc.
    - Sonstiges: Alle weiteren relevanten Informationen aus dem Mailverlauf.
+
+WICHTIG: Erstelle KEINEN Abschnitt "Quellen". Dieser wird automatisch generiert.
 
 Verhalte dich objektiv und sachlich. Antworte NUR mit dem Markdown-Inhalt des Steckbriefs.
 """
