@@ -306,9 +306,19 @@ class MailParser:
                     """Internal exception class."""
                     pass
 
-            with extract_msg.openMsg(str(file_path)) as msg:
+            try:
+                msg_obj = extract_msg.openMsg(str(file_path))
+            except (StandardViolationError, Exception) as e:
+                logger.warning(f"Could not open .msg file {file_path} with extract_msg: {e}. Falling back to basic parser.")
+                return self._get_eml_details(file_path)
+
+            with msg_obj as msg:
                 # Basic info
-                date = msg.date
+                try:
+                    date = msg.date
+                except (StandardViolationError, Exception) as e:
+                    logger.warning(f"Could not read date from .msg {file_path}: {e}")
+                    date = self.get_email_date(file_path)
                 if not isinstance(date, datetime):
                     date = self.get_email_date(file_path)
 
