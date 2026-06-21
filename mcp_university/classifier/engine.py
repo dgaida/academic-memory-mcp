@@ -307,7 +307,17 @@ class EmailClassifier:
         Args:
             model_path: Pfad zur Modelldatei.
         """
-        data = torch.load(model_path, map_location=get_device(), weights_only=False)
+        try:
+            data = torch.load(model_path, map_location=get_device(), weights_only=False)
+        except RuntimeError as e:
+            if "CUDA device" in str(e) and not torch.cuda.is_available():
+                logger.error(
+                    "Das Modell wurde auf einer GPU gespeichert, aber dieses System hat nur eine CPU. "
+                    "Bitte speichern Sie das Modell auf dem GPU-Rechner mit der aktualisierten Version "
+                    "dieses Skripts neu (welches nun 'torch.save' verwendet), damit es hardwareunabhängig "
+                    "geladen werden kann."
+                )
+            raise e
 
         self.mode = data["mode"]
         self.method = data.get("method", "randomforest")  # Fallback für alte Modelle
