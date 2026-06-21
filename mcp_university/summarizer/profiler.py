@@ -175,8 +175,10 @@ class PersonProfiler:
 
         gaps = []
         for i in range(len(all_emails) - 1):
-            d1 = datetime.fromisoformat(all_emails[i]["details"]["date"].replace("Z", "+00:00"))
-            d2 = datetime.fromisoformat(all_emails[i+1]["details"]["date"].replace("Z", "+00:00"))
+            val1 = all_emails[i]["details"]["date"]
+            d1 = val1 if isinstance(val1, datetime) else datetime.fromisoformat(val1.replace("Z", "+00:00"))
+            val2 = all_emails[i+1]["details"]["date"]
+            d2 = val2 if isinstance(val2, datetime) else datetime.fromisoformat(val2.replace("Z", "+00:00"))
             gaps.append((d2 - d1).total_seconds())
 
         if not gaps:
