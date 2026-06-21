@@ -78,6 +78,13 @@ python scripts/crawl_th_koeln_persons.py --institution "Präsidium"
 python scripts/crawl_th_koeln_persons.py --faculty "Informatik und Ingenieurwissenschaften"
 ```
 
+Mit `--list-institutions` oder `--list-faculties` können alle verfügbaren Optionen angezeigt werden. Für einen vollständigen Crawl aller Bereiche:
+```bash
+python scripts/crawl_th_koeln_persons.py --crawl-all both
+```
+
+Unterstützt mehrere Anfangsbuchstaben als Argumente.
+
 ### Personen-Steckbriefe erstellen
 Erstellt manuell einen Steckbrief für eine bestimmte E-Mail-Adresse basierend auf vorhandenen E-Mails.
 ```bash
