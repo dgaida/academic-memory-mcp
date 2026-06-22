@@ -1,4 +1,3 @@
-import pytest
 from typer.testing import CliRunner
 from unittest.mock import MagicMock, patch, mock_open
 from mcp_university.cli.main import app
@@ -72,7 +71,6 @@ def test_main_search(mock_setup, mock_config, mock_summarizer, mock_store, mock_
 
 @patch("mcp_university.cli.memory.Path.exists")
 def test_memory_update_error(mock_exists):
-    from mcp_university.cli.memory import memory_app
     mock_exists.return_value = False
     with patch("mcp_university.cli.main.setup_logging"):
         # The memory_app itself is a Typer object, so we call its commands.

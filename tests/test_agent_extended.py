@@ -13,6 +13,7 @@ def mock_cfg():
     cfg.qdrant_path = Path("/tmp/qdrant")
     cfg.embeddings.model = "em"
     cfg.log_path = Path("/tmp/logs")
+    cfg.user.email = "user@example.com"
     return cfg
 
 def test_agent_init(mock_cfg):
@@ -32,9 +33,10 @@ def test_agent_chat(mock_cfg):
         res = agent.chat([{"role": "user", "content": "Hello"}])
         assert "Response content" in res
 
-def test_agent_tools(mock_cfg):
-    with patch("mcp_university.agent.engine.get_config", return_value=mock_cfg),          patch("mcp_university.agent.engine.MetadataStore") as mock_store,          patch("mcp_university.agent.engine.SearchIndex") as mock_idx,          patch("mcp_university.agent.engine.LLMClientWrapper"),          patch("mcp_university.agent.engine.ParserFactory") as mock_pf:
+def test_agent_tools(mock_cfg, tmp_path):
+    with patch("mcp_university.agent.engine.get_config", return_value=mock_cfg),          patch("mcp_university.agent.engine.MetadataStore") as mock_store_cls,          patch("mcp_university.agent.engine.SearchIndex") as mock_idx,          patch("mcp_university.agent.engine.LLMClientWrapper"),          patch("mcp_university.agent.engine.ParserFactory") as mock_pf:
         
+        mock_store = mock_store_cls.return_value
         agent = Agent()
         
         # Test _tool_search_documents
@@ -43,12 +45,18 @@ def test_agent_tools(mock_cfg):
         assert "found" in res
         
         # Test _tool_read_file
+        dummy_file = tmp_path / "test.txt"
+        dummy_file.write_text("file content")
+
         mock_pf.return_value.parse.return_value = "file content"
-        res = agent._tool_read_file("some/path")
+        res = agent._tool_read_file(str(dummy_file))
         assert "file content" in res
         
         # Test _tool_get_student_info
-        mock_store.return_value.get_node_by_property.return_value = {"id": 1, "name": "Doe", "type": "Person"}
-        mock_store.return_value.get_outgoing_edges.return_value = []
+        mock_conn = mock_store._get_connection.return_value.__enter__.return_value
+        mock_cursor = mock_conn.cursor.return_value
+        mock_cursor.fetchone.return_value = (1, "Doe", "doe@example.com", "Topic", "Status", 1, "/path")
+
         res = agent._tool_get_student_info("Doe")
         assert "Doe" in res
+        assert "doe@example.com" in res

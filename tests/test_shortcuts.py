@@ -1,6 +1,5 @@
-import pytest
 from pathlib import Path
-from unittest.mock import MagicMock, patch, mock_open
+from unittest.mock import patch, mock_open
 from mcp_university.utils.shortcuts import resolve_path, resolve_lnk
 
 def test_resolve_path_non_existent():

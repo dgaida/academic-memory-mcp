@@ -1,6 +1,5 @@
 import pytest
 from mcp_university.metadata.store import MetadataStore
-from pathlib import Path
 
 @pytest.fixture
 def store(tmp_path):
