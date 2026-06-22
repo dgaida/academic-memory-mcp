@@ -354,6 +354,15 @@ class EmailTransformerClassifier(nn.Module):
         self.classifier = nn.Linear(self.transformer.config.hidden_size, num_classes)
 
     def forward(self, input_ids, attention_mask) -> torch.Tensor:
+        """Performs the forward pass of the model.
+
+        Args:
+            input_ids (torch.Tensor): Input token IDs.
+            attention_mask (torch.Tensor): Attention mask.
+
+        Returns:
+            torch.Tensor: The model logits.
+        """
         outputs = self.transformer(input_ids=input_ids, attention_mask=attention_mask)
         # Use [CLS] token (first token)
         cls_output = outputs.last_hidden_state[:, 0, :]

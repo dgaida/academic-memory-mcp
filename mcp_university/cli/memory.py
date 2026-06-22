@@ -1,3 +1,4 @@
+"""CLI commands for memory management."""
 import typer
 import logging
 import yaml

@@ -1,3 +1,4 @@
+"""Utilities for PyTorch device management."""
 import torch
 import logging
 

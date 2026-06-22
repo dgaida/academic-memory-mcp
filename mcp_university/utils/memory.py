@@ -1,3 +1,4 @@
+"""Utilities for memory index management."""
 from pathlib import Path
 from typing import Dict
 

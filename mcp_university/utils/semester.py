@@ -1,3 +1,4 @@
+"""Utilities for semester and name normalization."""
 import re
 from datetime import datetime
 

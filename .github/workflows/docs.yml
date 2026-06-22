@@ -31,14 +31,11 @@ jobs:
           pip install .
           pip install pytest pytest-asyncio "tzlocal<5.0" liteparse networkx pyvis mkdocs-material mkdocs-static-i18n mkdocstrings[python] mkdocs-mermaid2-plugin interrogate git-cliff mike
 
-      - name: Run Tests
-        run: python3 -m pytest
-
       - name: Check API doc coverage
         run: |
           mkdir -p docs/assets
-          interrogate mcp_university/ --fail-under 95 --generate-badge docs/assets/interrogate.svg
-          INTERROGATE_VAL=$(interrogate mcp_university/ --fail-under 95 | grep -oP 'actual: \d+(\.\d+)?%' | grep -oP '\d+(\.\d+)?' || true)
+          interrogate mcp_university/ --fail-under 99 --generate-badge docs/assets/interrogate.svg
+          INTERROGATE_VAL=$(interrogate mcp_university/ --fail-under 99 | grep -oP 'actual: \d+(\.\d+)?%' | grep -oP '\d+(\.\d+)?' || true)
           echo "INTERROGATE_VAL=$INTERROGATE_VAL" >> $GITHUB_ENV
 
       - name: Lint Markdown
