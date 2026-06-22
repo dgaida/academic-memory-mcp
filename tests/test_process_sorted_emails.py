@@ -29,6 +29,8 @@ def test_generate_reply_appointment_booked(mock_agent_cls, mock_parser_cls, tmp_
     controller = EmailController(debug=False)
     # Agent.chat returns a string
     mock_agent_cls.return_value.chat.return_value = "APPOINTMENT_BOOKED"
+    mock_agent_cls.return_value.last_appointment_info = {"start_time": "2026-06-22 14:00"}
+    mock_agent_cls.return_value.last_tool_error = None
 
     mail_path = tmp_path / "test.msg"
     mail_path.write_text("dummy")

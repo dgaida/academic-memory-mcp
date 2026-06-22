@@ -25,6 +25,7 @@ class MCPAgent:
         self.cfg = get_config()
         self.model = model or self.cfg.llm.model
         self.last_appointment_info = None
+        self.last_tool_error = None
         self.base_url = str(base_url or self.cfg.llm.base_url)
 
         self.use_cloud = use_cloud
@@ -147,6 +148,7 @@ class MCPAgent:
             str: Die finale Antwort des Agenten.
         """
         self.last_appointment_info = None
+        self.last_tool_error = None
 
         processed_messages = []
         if self.use_cloud and self.anonymizer and sender_name and sender_email:
@@ -203,6 +205,7 @@ class MCPAgent:
                     except Exception as e:
                         tool_result = f"Fehler bei MCP Tool-Ausführung: {e}"
                         logger.error(tool_result)
+                        self.last_tool_error = tool_result
                 else:
                     tool_result = f"MCP Tool {function_name} nicht verfügbar."
                     logger.warning(tool_result)

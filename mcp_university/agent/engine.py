@@ -45,6 +45,7 @@ class Agent:
         self.store = MetadataStore(self.cfg.sqlite_path)
         self.index = SearchIndex(str(self.cfg.qdrant_path), self.cfg.embeddings.model, store=self.store)
         self.last_appointment_info = None
+        self.last_tool_error = None
 
         self.available_tools: Dict[str, Callable] = {
             "read_file": self._tool_read_file,
@@ -346,6 +347,9 @@ class Agent:
             # Termin eintragen
             auto_send = self.cfg.calendar.send_invitations_automatically
 
+            if dt_end <= dt_start:
+                return f"Fehler: Das Ende des Termins ({end_time}) muss nach dem Beginn ({start_time}) liegen."
+
             if not auto_send and target_folder:
                 appointment = target_folder.Items.Add(1) # 1 = olAppointmentItem
                 logger.info(f"ERFOLG: Erstelle Termin-Entwurf in '{target_folder_name}' ({target_folder.FolderPath}).")
@@ -425,6 +429,7 @@ class Agent:
             str: Die finale Antwort des Agenten.
         """
         self.last_appointment_info = None
+        self.last_tool_error = None
 
         processed_messages = []
         if self.use_cloud and self.anonymizer and sender_name and sender_email:
@@ -486,9 +491,11 @@ class Agent:
                     except TypeError as e:
                         tool_result = f"Fehler: Falsche Argumente für Tool '{function_name}'. Details: {e}. Bitte stelle sicher, dass ALLE erforderlichen Argumente korrekt übergeben werden."
                         logger.error(f"Tool-Argument-Fehler: {e}")
+                        self.last_tool_error = tool_result
                     except Exception as e:
                         tool_result = f"Fehler bei Tool-Ausführung: {e}"
                         logger.error(f"Tool-Ausführungs-Fehler: {e}")
+                        self.last_tool_error = tool_result
                 else:
                     tool_result = f"Tool {function_name} nicht verfügbar."
 

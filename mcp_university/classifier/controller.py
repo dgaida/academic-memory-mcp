@@ -336,11 +336,12 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
 
         if reply.startswith("APPOINTMENT_BOOKED"):
             apt_info = self.agent.last_appointment_info
-            return (
-                f"Termin gebucht ({apt_info['start_time']})"
-                if apt_info and "start_time" in apt_info
-                else "Termin gebucht"
-            )
+            if apt_info and "start_time" in apt_info:
+                return f"Termin gebucht ({apt_info['start_time']})"
+
+            # If we are here, something went wrong although LLM said APPOINTMENT_BOOKED
+            err = getattr(self.agent, "last_tool_error", None)
+            return f"Fehler bei Terminbuchung: {err}" if err else "Fehler bei Terminbuchung (Tool wurde nicht erfolgreich aufgerufen)."
 
         # Entwurf erstellen
         cc_list = []
@@ -647,10 +648,14 @@ WICHTIGE ANWEISUNG:
                 )
                 if "APPOINTMENT_BOOKED" in content:
                     apt_info = self.agent.last_appointment_info
-                    apt_text = "APPOINTMENT_BOOKED"
                     if apt_info and "start_time" in apt_info:
                         apt_text = f"APPOINTMENT_BOOKED|{apt_info['start_time']}"
-                    return "APPOINTMENT_BOOKED", apt_text, False
+                        return "APPOINTMENT_BOOKED", apt_text, False
+
+                    # Tool call failed or was not made
+                    err = getattr(self.agent, "last_tool_error", None)
+                    err_msg = f"FEHLER: Termin konnte nicht gebucht werden. {err}" if err else "FEHLER: Terminbuchungs-Tool wurde nicht aufgerufen."
+                    return "APPOINTMENT_BOOKING_FAILED", err_msg, False
                 if "NO_APPOINTMENT_RELEVANCE" not in content:
                     should_attach = "ANHANG: JA" in content
                     reply_subject = (
@@ -1005,16 +1010,22 @@ TEXT:
 
             if reply.startswith("APPOINTMENT_BOOKED"):
                 apt_info = self.agent.last_appointment_info
-                status = (
-                    f"Termin gebucht ({apt_info['start_time']})"
-                    if apt_info and "start_time" in apt_info
-                    else "Termin gebucht"
-                )
+                status = f"Termin gebucht ({apt_info['start_time']})"
                 processed_results.append(
                     {
                         "lastname": email["lastname"],
                         "subject": latest_mail.stem,
                         "status": status,
+                    }
+                )
+                continue
+
+            if reply.startswith("APPOINTMENT_BOOKING_FAILED"):
+                processed_results.append(
+                    {
+                        "lastname": email["lastname"],
+                        "subject": latest_mail.stem,
+                        "status": reply,
                     }
                 )
                 continue
