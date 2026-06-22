@@ -8,6 +8,14 @@ sys.modules["win32com"] = mock_win32
 sys.modules["win32com.client"] = mock_win32.client
 sys.modules["ollama"] = MagicMock()
 
+# Mock xgboost if not available
+try:
+    import importlib.util
+    if importlib.util.find_spec("xgboost") is None:
+        sys.modules["xgboost"] = MagicMock()
+except Exception:
+    sys.modules["xgboost"] = MagicMock()
+
 @pytest.fixture
 def mock_llm_client_wrapper():
     """Fixture to mock LLMClientWrapper across all tests."""
@@ -47,10 +55,3 @@ def mock_outlook_dependencies():
     """Fixture to mock Outlook-related dependencies for all tests."""
     with patch('mcp_university.utils.outlook.is_outlook_open', return_value=True),          patch('mcp_university.utils.outlook.OUTLOOK_AVAILABLE', True):
         yield
-
-# Mock xgboost if not available
-try:
-    import xgboost
-except ImportError:
-    mock_xgboost = MagicMock()
-    sys.modules["xgboost"] = mock_xgboost
