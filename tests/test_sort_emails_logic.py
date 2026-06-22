@@ -58,8 +58,8 @@ def test_sent_items_multiple_to(mock_dependencies, tmp_path):
     mock_msg = MagicMock()
     mock_msg.sender = "daniel.gaida@th-koeln.de"
 
-    rec1 = create_recipient("student1@smail.th-koeln.de", "Student One", 1) # TO
-    rec2 = create_recipient("student2@smail.th-koeln.de", "Student Two", 1) # TO
+    rec1 = create_recipient("mustermann@smail.th-koeln.de", "Max Mustermann", 1) # TO
+    rec2 = create_recipient("musterfrau@smail.th-koeln.de", "Erika Musterfrau", 1) # TO
     mock_msg.recipients = [rec1, rec2]
 
     # Mocking context manager
@@ -69,10 +69,10 @@ def test_sent_items_multiple_to(mock_dependencies, tmp_path):
     moved = process_emails(source_root, Path("dummy"), config)
 
     assert moved[0]["folder"] == "SentItems"
-    assert moved[0]["lastname"] == "One"
+    assert moved[0]["lastname"] == "Mustermann"
 
 def test_sent_items_to_and_cc(mock_dependencies, tmp_path):
-    """Test: User sends to Student (TO) and Colleague (CC). Should take Student."""
+    """Test: User sends to Student (TO) and Colleague (CC). Should take Student (TO)."""
     source_root = tmp_path / "source"
     source_root.mkdir()
     (source_root / "mail2.msg").touch()
@@ -80,8 +80,8 @@ def test_sent_items_to_and_cc(mock_dependencies, tmp_path):
     mock_msg = MagicMock()
     mock_msg.sender = "daniel.gaida@th-koeln.de"
 
-    rec1 = create_recipient("colleague@th-koeln.de", "Colleague Name", 2) # CC
-    rec2 = create_recipient("student@smail.th-koeln.de", "Student Name", 1) # TO
+    rec1 = create_recipient("colleague@th-koeln.de", "Erika Musterfrau", 2) # CC
+    rec2 = create_recipient("student@smail.th-koeln.de", "Max Mustermann", 1) # TO
     mock_msg.recipients = [rec1, rec2]
 
     mock_dependencies["open_msg"].return_value.__enter__.return_value = mock_msg
@@ -90,7 +90,7 @@ def test_sent_items_to_and_cc(mock_dependencies, tmp_path):
     moved = process_emails(source_root, Path("dummy"), config)
 
     assert moved[0]["folder"] == "SentItems"
-    assert moved[0]["lastname"] == "Name"
+    assert moved[0]["lastname"] == "Mustermann"
 
 def test_inbox_from_student_with_cc(mock_dependencies, tmp_path):
     """Test: Student sends to User with another student in CC. Should take Sender."""
@@ -99,10 +99,10 @@ def test_inbox_from_student_with_cc(mock_dependencies, tmp_path):
     (source_root / "mail3.msg").touch()
 
     mock_msg = MagicMock()
-    mock_msg.sender = "student@smail.th-koeln.de"
+    mock_msg.sender = "Max Mustermann <mustermann@smail.th-koeln.de>"
 
     rec1 = create_recipient("daniel.gaida@th-koeln.de", "Daniel Gaida", 1) # TO
-    rec2 = create_recipient("other_student@smail.th-koeln.de", "Other Student", 2) # CC
+    rec2 = create_recipient("other_student@smail.th-koeln.de", "Erika Musterfrau", 2) # CC
     mock_msg.recipients = [rec1, rec2]
 
     mock_dependencies["open_msg"].return_value.__enter__.return_value = mock_msg
@@ -111,19 +111,20 @@ def test_inbox_from_student_with_cc(mock_dependencies, tmp_path):
     moved = process_emails(source_root, Path("dummy"), config)
 
     assert moved[0]["folder"] == "Inbox"
-    assert moved[0]["lastname"] == "Student" # The sender
+    assert moved[0]["lastname"] == "Mustermann" # The sender
 
 def test_inbox_from_external_to_user_and_student(mock_dependencies, tmp_path):
-    """Test: External sends to User and Student. Should take Student."""
+    """Test: External sends to User and Student. Should take Sender's lastname."""
     source_root = tmp_path / "source"
     source_root.mkdir()
     (source_root / "mail4.msg").touch()
 
     mock_msg = MagicMock()
-    mock_msg.sender = "external@gmail.com"
+    # Using 'External, Name' to ensure extract_lastname returns 'External'
+    mock_msg.sender = "External, Name <external@gmail.com>"
 
     rec1 = create_recipient("daniel.gaida@th-koeln.de", "Daniel Gaida", 1) # TO
-    rec2 = create_recipient("student@smail.th-koeln.de", "Student Name", 1) # TO
+    rec2 = create_recipient("student@smail.th-koeln.de", "Max Mustermann", 1) # TO
     mock_msg.recipients = [rec1, rec2]
 
     mock_dependencies["open_msg"].return_value.__enter__.return_value = mock_msg
@@ -132,10 +133,10 @@ def test_inbox_from_external_to_user_and_student(mock_dependencies, tmp_path):
     moved = process_emails(source_root, Path("dummy"), config)
 
     assert moved[0]["folder"] == "Inbox"
-    assert moved[0]["lastname"] == "Name"
+    assert moved[0]["lastname"] == "External"
 
-def test_sent_items_fallback_to_second_to(mock_dependencies, tmp_path):
-    """Test: User sends to invalid name (TO) and Student (TO). Should take Student."""
+def test_sent_items_multiple_to_and_cc(mock_dependencies, tmp_path):
+    """Test: User sends to 2 students (TO) and 1 person (CC). Should take first student (TO)."""
     source_root = tmp_path / "source"
     source_root.mkdir()
     (source_root / "mail5.msg").touch()
@@ -143,12 +144,34 @@ def test_sent_items_fallback_to_second_to(mock_dependencies, tmp_path):
     mock_msg = MagicMock()
     mock_msg.sender = "daniel.gaida@th-koeln.de"
 
+    rec1 = create_recipient("student1@smail.th-koeln.de", "Max Mustermann", 1) # TO
+    rec2 = create_recipient("student2@smail.th-koeln.de", "Erika Musterfrau", 1) # TO
+    rec3 = create_recipient("cc@th-koeln.de", "CC Person", 2) # CC
+    mock_msg.recipients = [rec1, rec2, rec3]
+
+    mock_dependencies["open_msg"].return_value.__enter__.return_value = mock_msg
+
+    config = {"BachelorThesis": str(tmp_path / "target")}
+    moved = process_emails(source_root, Path("dummy"), config)
+
+    assert moved[0]["folder"] == "SentItems"
+    assert moved[0]["lastname"] == "Mustermann"
+
+def test_sent_items_fallback_to_second_to(mock_dependencies, tmp_path):
+    """Test: User sends to invalid name (TO) and Student (TO). Should take Student."""
+    source_root = tmp_path / "source"
+    source_root.mkdir()
+    (source_root / "mail6.msg").touch()
+
+    mock_msg = MagicMock()
+    mock_msg.sender = "daniel.gaida@th-koeln.de"
+
     # Mocking extract_lastname to return "Unknown" for "Unknown" name
     with patch('mcp_university.classifier.sort_emails.extract_lastname') as mock_extract:
-        mock_extract.side_effect = lambda x: "Unknown" if "Unknown" in str(x) else "Student"
+        mock_extract.side_effect = lambda x: "Unknown" if "Unknown" in str(x) else "Mustermann"
 
         rec1 = create_recipient("unknown@some.com", "Unknown", 1) # TO
-        rec2 = create_recipient("student@smail.th-koeln.de", "Valid Student", 1) # TO
+        rec2 = create_recipient("student@smail.th-koeln.de", "Max Mustermann", 1) # TO
         mock_msg.recipients = [rec1, rec2]
 
         mock_dependencies["open_msg"].return_value.__enter__.return_value = mock_msg
@@ -157,4 +180,4 @@ def test_sent_items_fallback_to_second_to(mock_dependencies, tmp_path):
         moved = process_emails(source_root, Path("dummy"), config)
 
         assert moved[0]["folder"] == "SentItems"
-        assert moved[0]["lastname"] == "Student"
+        assert moved[0]["lastname"] == "Mustermann"

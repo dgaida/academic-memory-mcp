@@ -235,45 +235,23 @@ def process_emails(
                 if is_sent_by_user:
                     target_folder = "SentItems"
                     # Rule: Prioritize direct recipients (To) for folder naming, ignore CC
-                    # Rule: Take first 'To' student, fallback to second if first fails
+                    # Rule: Take first 'To' recipient, fallback to second if first fails
                     to_recipients = [r for r in recipients if getattr(r, "type", None) == 1]
-                    to_students = [r for r in to_recipients if is_student(r.email)]
 
-                    if to_students:
-                        lastname = extract_lastname(to_students[0].name or to_students[0].email)
-                        if lastname == "Unknown" and len(to_students) > 1:
-                            lastname = extract_lastname(to_students[1].name or to_students[1].email)
+                    if to_recipients:
+                        lastname = extract_lastname(to_recipients[0].name or to_recipients[0].email)
+                        if lastname == "Unknown" and len(to_recipients) > 1:
+                            lastname = extract_lastname(to_recipients[1].name or to_recipients[1].email)
                     else:
-                        # Fallback to any non-user 'To' recipient
-                        other_to = [r for r in to_recipients if not any(u_email in (r.email or "").lower() for u_email in user_emails)]
-                        if other_to:
-                            lastname = extract_lastname(other_to[0].name or other_to[0].email)
-                            if lastname == "Unknown" and len(other_to) > 1:
-                                lastname = extract_lastname(other_to[1].name or other_to[1].email)
+                        # Fallback to any recipient
+                        if recipients:
+                            lastname = extract_lastname(recipients[0].name or recipients[0].email)
                         else:
-                            # Final fallback to any recipient
-                            if recipients:
-                                lastname = extract_lastname(recipients[0].name or recipients[0].email)
-                            else:
-                                lastname = "Unknown"
+                            lastname = "Unknown"
                 else:
                     target_folder = "Inbox"
-                    # Rule: If sender is student, use sender
-                    if is_student(sender):
-                        lastname = extract_lastname(msg.sender)
-                    else:
-                        # Rule: Search recipients for student (prefer To, then CC)
-                        to_students = [r for r in recipients if getattr(r, "type", None) == 1 and is_student(r.email)]
-                        cc_students = [r for r in recipients if getattr(r, "type", None) == 2 and is_student(r.email)]
-
-                        potential_students = to_students + cc_students
-                        if potential_students:
-                            lastname = extract_lastname(potential_students[0].name or potential_students[0].email)
-                            if lastname == "Unknown" and len(potential_students) > 1:
-                                lastname = extract_lastname(potential_students[1].name or potential_students[1].email)
-                        else:
-                            # Fallback to sender
-                            lastname = extract_lastname(msg.sender)
+                    # Rule: Folder name should be the sender's lastname
+                    lastname = extract_lastname(msg.sender)
             # Ziel-Pfad bestimmen
             logger.debug(f"Bestimme Ziel-Pfad für {lastname} in {target_folder} (Semester: {semester})")
             student_dir = find_student_folder(class_base_path, lastname)
