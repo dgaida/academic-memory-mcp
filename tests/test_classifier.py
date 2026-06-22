@@ -33,7 +33,7 @@ def temp_data_dir():
 
 def test_classifier_train_predict_tfidf(temp_data_dir):
     """Testet das Training und die Vorhersage im TF-IDF Modus mit Unterordnern."""
-    classifier = EmailClassifier(mode="tfidf")
+    classifier = EmailClassifier(mode="tfidf", method="randomforest")
 
     # Mock MailParser.parse
     with patch("mcp_university.classifier.engine.MailParser.parse") as mock_parse:
@@ -53,7 +53,7 @@ def test_classifier_train_predict_tfidf(temp_data_dir):
 
 def test_classifier_save_load(temp_data_dir, tmp_path):
     """Testet Speichern und Laden des Modells."""
-    classifier = EmailClassifier(mode="tfidf")
+    classifier = EmailClassifier(mode="tfidf", method="randomforest")
     model_path = tmp_path / "model.pkl"
 
     with patch("mcp_university.classifier.engine.MailParser.parse") as mock_parse:

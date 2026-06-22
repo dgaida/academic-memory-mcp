@@ -1,3 +1,4 @@
+"""Module for generating and updating person profiles."""
 import json
 import logging
 import yaml

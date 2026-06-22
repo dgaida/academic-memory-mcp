@@ -193,6 +193,7 @@ def process_emails(
     student_domains = ["@smail.th-koeln.de", "@smail.fh-koeln.de", "@th-koeln.de", "@fh-koeln.de"]
 
     def is_student(email_addr):
+        """Checks if an email address belongs to a student."""
         email_addr = (email_addr or "").lower()
         if not email_addr:
             return False

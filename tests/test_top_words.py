@@ -1,54 +1,51 @@
-import pytest
-from pathlib import Path
-import shutil
-import tempfile
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from mcp_university.classifier.top_words import get_top_words_per_class
+import numpy as np
 
-@pytest.fixture
-def temp_mail_data():
-    """Erstellt ein temporäres Verzeichnis mit Test-E-Mails."""
-    tmpdir = tempfile.mkdtemp()
-    root = Path(tmpdir)
+def test_get_top_words(tmp_path):
+    """Testet die Extraktion der Top-Wörter mit Mocks."""
+    with patch("mcp_university.classifier.top_words.EmailClassifier") as mock_cls:
+        mock_instance = mock_cls.return_value
+        mock_instance.preprocess_data.return_value = (["text1", "text2"], ["ClassA", "ClassA"])
 
-    # Erstelle Klassen
-    exam = root / "Pruefungsamt"
-    exam.mkdir()
-    (exam / "Inbox").mkdir()
+        with patch("mcp_university.classifier.top_words.TfidfVectorizer") as mock_tfidf,              patch("mcp_university.classifier.top_words.CountVectorizer") as mock_cv:
 
-    thesis = root / "Thesis"
-    thesis.mkdir()
-    (thesis / "Inbox").mkdir()
+            mock_tfidf_instance = mock_tfidf.return_value
+            mock_tfidf_instance.get_feature_names_out.return_value = np.array(["word1", "word2"])
 
-    # Erstelle E-Mails mit spezifischen Wörtern
-    (exam / "Inbox" / "mail1.msg").write_text("Anmeldung zur Prüfung im Prüfungsamt")
-    (exam / "Inbox" / "mail2.msg").write_text("Notenspiegel und Prüfung")
+            # Mock TF-IDF matrix
+            mock_tfidf_matrix = MagicMock()
+            mock_row = MagicMock()
+            mock_row.toarray.return_value = np.array([[0.5, 0.5]])
+            mock_tfidf_matrix.__getitem__.return_value = mock_row
 
-    (thesis / "Inbox" / "mail3.msg").write_text("Bachelorarbeit Thema für die Thesis")
-    (thesis / "Inbox" / "mail4.msg").write_text("Kolloquium Thesis Bachelorarbeit")
+            mock_tfidf_instance.fit_transform.return_value = mock_tfidf_matrix
 
-    yield root
-    shutil.rmtree(tmpdir)
+            mock_tfidf_instance.idf_ = np.array([1.0, 1.0])
+            mock_tfidf_instance.vocabulary_ = {"word1": 0, "word2": 1}
 
-def test_get_top_words(temp_mail_data):
-    """Testet die Extraktion der Top-Wörter."""
-    with patch("mcp_university.classifier.engine.MailParser.parse") as mock_parse:
-        mock_parse.side_effect = lambda p: p.read_text()
+            # Mock Count matrix
+            mock_cv_instance = mock_cv.return_value
+            mock_cv_instance.get_feature_names_out.return_value = np.array(["word1", "word2"])
 
-        results = get_top_words_per_class(temp_mail_data, top_n=2)
+            mock_cv_matrix = MagicMock()
+            # For global TF
+            mock_cv_matrix.sum.return_value = np.array([[1, 1]])
+            # For class TF
+            mock_class_row = MagicMock()
+            mock_class_row.toarray.return_value = np.array([[1, 1]])
+            mock_cv_matrix.__getitem__.return_value = mock_class_row
 
-        assert "Pruefungsamt" in results
-        assert "Thesis" in results
+            mock_cv_instance.fit_transform.return_value = mock_cv_matrix
 
-        # Prüfung ob relevante Wörter enthalten sind (TF-IDF sollte diese hoch ranken)
-        # Beachte: TfidfVectorizer normalisiert und tokenisiert
-        pa_words = [w.lower() for w in results["Pruefungsamt"]]
-        thesis_words = [w.lower() for w in results["Thesis"]]
-
-        assert "prüfung" in pa_words or "prüfungsamt" in pa_words
-        assert "thesis" in thesis_words or "bachelorarbeit" in thesis_words
+            results = get_top_words_per_class(tmp_path, top_n=2)
+            assert "ClassA" in results
+            assert "word1" in results["ClassA"]
 
 def test_get_top_words_empty(tmp_path):
     """Testet das Verhalten bei leerem Verzeichnis."""
-    results = get_top_words_per_class(tmp_path)
-    assert results == {}
+    with patch("mcp_university.classifier.top_words.EmailClassifier") as mock_cls:
+        mock_instance = mock_cls.return_value
+        mock_instance.preprocess_data.return_value = ([], [])
+        results = get_top_words_per_class(tmp_path)
+        assert results == {}

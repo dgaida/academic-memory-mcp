@@ -8,6 +8,21 @@ sys.modules["win32com"] = mock_win32
 sys.modules["win32com.client"] = mock_win32.client
 sys.modules["ollama"] = MagicMock()
 
+# Mock xgboost if not available
+try:
+    import importlib.util
+    if importlib.util.find_spec("xgboost") is None:
+        sys.modules["xgboost"] = MagicMock()
+except Exception:
+    sys.modules["xgboost"] = MagicMock()
+
+# Mock sentence_transformers if not available
+try:
+    if importlib.util.find_spec("sentence_transformers") is None:
+        sys.modules["sentence_transformers"] = MagicMock()
+except Exception:
+    sys.modules["sentence_transformers"] = MagicMock()
+
 @pytest.fixture
 def mock_llm_client_wrapper():
     """Fixture to mock LLMClientWrapper across all tests."""

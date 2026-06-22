@@ -63,6 +63,7 @@ def sort_emails_by_direction(source_dir: Path, user_emails: List[str]) -> Dict[s
     return stats
 
 def main() -> None:
+    """Main entry point for sorting emails by direction."""
     parser = argparse.ArgumentParser(description="Sortiert E-Mails in Inbox/SentItems.")
     parser.add_argument("source_dir", type=str, help="Ordner mit .msg Dateien.")
 
