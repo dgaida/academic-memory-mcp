@@ -1,26 +1,13 @@
-import sys
 from unittest.mock import MagicMock, patch
 from pathlib import Path
 from datetime import datetime
 import pytest
 
-# Stub dependencies to avoid torch error
-sys.modules['mcp_university.classifier.engine'] = MagicMock()
-sys.modules['mcp_university.parser.mail_parser'] = MagicMock()
-sys.modules['torch'] = MagicMock()
-
-# Import after stubbing
-from mcp_university.classifier.sort_emails import process_emails # noqa: E402
+from mcp_university.classifier.sort_emails import process_emails
 
 @pytest.fixture
 def mock_dependencies():
-    with patch('mcp_university.classifier.sort_emails.EmailClassifier') as mock_classifier_class, \
-         patch('mcp_university.classifier.sort_emails.MailParser') as mock_mail_parser, \
-         patch('extract_msg.openMsg') as mock_open_msg, \
-         patch('shutil.move') as mock_move, \
-         patch('mcp_university.classifier.sort_emails.get_config') as mock_get_config, \
-         patch('mcp_university.classifier.sort_emails.get_semester') as mock_get_semester, \
-         patch('mcp_university.classifier.sort_emails.find_student_folder') as mock_find_folder:
+    with patch('mcp_university.classifier.sort_emails.EmailClassifier') as mock_classifier_class,          patch('mcp_university.classifier.sort_emails.MailParser') as mock_mail_parser,          patch('extract_msg.openMsg') as mock_open_msg,          patch('shutil.move') as mock_move,          patch('mcp_university.classifier.sort_emails.get_config') as mock_get_config,          patch('mcp_university.classifier.sort_emails.get_semester') as mock_get_semester,          patch('mcp_university.classifier.sort_emails.find_student_folder') as mock_find_folder:
 
         # Setup common mocks
         mock_config = MagicMock()
