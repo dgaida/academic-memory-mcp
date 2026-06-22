@@ -1,5 +1,4 @@
-import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from mcp_university.mcp_server.server import create_server
 
 @patch("mcp_university.mcp_server.server.get_config")
@@ -18,7 +17,7 @@ def test_create_server(mock_fastmcp, mock_summarizer, mock_index, mock_store, mo
     
     mcp_instance = mock_fastmcp.return_value
     
-    server = create_server()
+    create_server()
     
     assert mock_fastmcp.called
     # Check if tools were registered

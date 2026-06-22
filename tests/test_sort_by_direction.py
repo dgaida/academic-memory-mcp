@@ -1,5 +1,4 @@
 import pytest
-import shutil
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 from mcp_university.classifier.sort_by_direction import sort_emails_by_direction

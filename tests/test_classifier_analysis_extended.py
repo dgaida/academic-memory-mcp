@@ -1,8 +1,6 @@
-import pytest
 from unittest.mock import MagicMock, patch, mock_open
 from pathlib import Path
 import numpy as np
-import pandas as pd
 from mcp_university.classifier.xai_analysis import run_xai_analysis
 from mcp_university.classifier.plot_data_distribution import count_emails, plot_distribution
 

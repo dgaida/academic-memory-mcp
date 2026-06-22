@@ -16,14 +16,14 @@ def mock_cfg():
     return cfg
 
 def test_agent_init(mock_cfg):
-    with patch("mcp_university.agent.engine.get_config", return_value=mock_cfg),          patch("mcp_university.agent.engine.MetadataStore"),          patch("mcp_university.agent.engine.SearchIndex"),          patch("mcp_university.agent.engine.LLMClientWrapper"),          patch("mcp_university.agent.engine.ParserFactory"):
+    with patch("mcp_university.agent.engine.get_config", return_value=mock_cfg),           patch("mcp_university.agent.engine.MetadataStore"),           patch("mcp_university.agent.engine.SearchIndex"),           patch("mcp_university.agent.engine.LLMClientWrapper"),           patch("mcp_university.agent.engine.ParserFactory"):
         
         agent = Agent()
         assert agent.model == "m"
         assert "search_documents" in agent.available_tools
 
 def test_agent_chat(mock_cfg):
-    with patch("mcp_university.agent.engine.get_config", return_value=mock_cfg),          patch("mcp_university.agent.engine.MetadataStore"),          patch("mcp_university.agent.engine.SearchIndex"),          patch("mcp_university.agent.engine.LLMClientWrapper") as mock_llm,          patch("mcp_university.agent.engine.ParserFactory"):
+    with patch("mcp_university.agent.engine.get_config", return_value=mock_cfg),           patch("mcp_university.agent.engine.MetadataStore"),           patch("mcp_university.agent.engine.SearchIndex"),           patch("mcp_university.agent.engine.LLMClientWrapper") as mock_llm,           patch("mcp_university.agent.engine.ParserFactory"):
         
         agent = Agent()
         mock_llm_inst = mock_llm.return_value
@@ -33,7 +33,7 @@ def test_agent_chat(mock_cfg):
         assert "Response content" in res
 
 def test_agent_tools(mock_cfg):
-    with patch("mcp_university.agent.engine.get_config", return_value=mock_cfg),          patch("mcp_university.agent.engine.MetadataStore") as mock_store,          patch("mcp_university.agent.engine.SearchIndex") as mock_idx,          patch("mcp_university.agent.engine.LLMClientWrapper"),          patch("mcp_university.agent.engine.ParserFactory") as mock_pf:
+    with patch("mcp_university.agent.engine.get_config", return_value=mock_cfg),           patch("mcp_university.agent.engine.MetadataStore") as mock_store,           patch("mcp_university.agent.engine.SearchIndex") as mock_idx,           patch("mcp_university.agent.engine.LLMClientWrapper"),           patch("mcp_university.agent.engine.ParserFactory") as mock_pf:
         
         agent = Agent()
         
@@ -44,8 +44,10 @@ def test_agent_tools(mock_cfg):
         
         # Test _tool_read_file
         mock_pf.return_value.parse.return_value = "file content"
-        res = agent._tool_read_file("some/path")
-        assert "file content" in res
+        with patch("mcp_university.agent.engine.Path") as mock_path_cls:
+            mock_path_cls.return_value.exists.return_value = True
+            res = agent._tool_read_file("some/path")
+            assert "file content" in res
         
         # Test _tool_get_student_info
         mock_store.return_value.get_node_by_property.return_value = {"id": 1, "name": "Doe", "type": "Person"}

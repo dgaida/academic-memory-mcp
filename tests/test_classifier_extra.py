@@ -1,4 +1,3 @@
-import pytest
 from unittest.mock import MagicMock, patch, mock_open
 from pathlib import Path
 import pandas as pd
@@ -30,7 +29,7 @@ def test_run_xai_analysis(mock_anon, mock_shap, mock_classifier_cls):
         assert mock_classifier.load.called
 
 def test_xai_main():
-    with patch("mcp_university.classifier.xai_analysis.argparse.ArgumentParser.parse_args") as mock_args,          patch("mcp_university.classifier.xai_analysis.resolve_model_path") as mock_resolve,          patch("mcp_university.classifier.xai_analysis.run_xai_analysis") as mock_run:
+    with patch("mcp_university.classifier.xai_analysis.argparse.ArgumentParser.parse_args") as mock_args,          patch("mcp_university.classifier.xai_analysis.resolve_model_path"),          patch("mcp_university.classifier.xai_analysis.run_xai_analysis") as mock_run:
         mock_args.return_value = MagicMock(test_dir="test", model_path="model", method="rf", mode="tfidf")
         xai_main()
         assert mock_run.called
@@ -54,7 +53,7 @@ def test_plot_distribution():
         assert mock_plt.savefig.called
 
 def test_plot_main():
-    with patch("mcp_university.classifier.plot_data_distribution.argparse.ArgumentParser.parse_args") as mock_args,          patch("mcp_university.classifier.plot_data_distribution.count_emails") as mock_count,          patch("mcp_university.classifier.plot_data_distribution.plot_distribution") as mock_plot:
+    with patch("mcp_university.classifier.plot_data_distribution.argparse.ArgumentParser.parse_args") as mock_args,          patch("mcp_university.classifier.plot_data_distribution.count_emails") as mock_count,          patch("mcp_university.classifier.plot_data_distribution.plot_distribution"):
         mock_args.return_value = MagicMock(data_dir="data", output="out.png", title="Title")
         plot_main()
         assert mock_count.called

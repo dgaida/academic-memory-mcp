@@ -1,19 +1,21 @@
 import pytest
 from unittest.mock import MagicMock, patch
-from mcp_university.retrieval.index import SearchIndex
 import numpy as np
 
 @pytest.fixture
 def search_index(tmp_path):
-    with patch("mcp_university.retrieval.index.get_model") as mock_model:
-        model_inst = mock_model.return_value
-        model_inst.get_sentence_embedding_dimension.return_value = 128
-        model_inst.encode.return_value = np.zeros((1, 128))
+    # Patch at the module level where they are used
+    with patch("mcp_university.retrieval.index.SentenceTransformer") as mock_st,          patch("mcp_university.retrieval.index.QdrantClient"),          patch("mcp_university.retrieval.index.get_model") as mock_get_model:
         
-        with patch("mcp_university.retrieval.index.QdrantClient") as mock_qdrant:
-            idx = SearchIndex(location=str(tmp_path / "qdrant"), embedding_model_name="test-model")
-            idx.use_qmd = False
-            return idx
+        st_inst = mock_st.return_value
+        st_inst.get_sentence_embedding_dimension.return_value = 128
+        st_inst.encode.return_value = np.zeros((1, 128))
+        mock_get_model.return_value = st_inst
+
+        from mcp_university.retrieval.index import SearchIndex
+        idx = SearchIndex(location=str(tmp_path / "qdrant"), embedding_model_name="test-model")
+        idx.use_qmd = False
+        yield idx
 
 def test_add_documents(search_index):
     search_index.add_documents([

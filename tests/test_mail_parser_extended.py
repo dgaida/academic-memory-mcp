@@ -1,7 +1,6 @@
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from mcp_university.parser.mail_parser import MailParser
-from pathlib import Path
 from datetime import datetime
 
 @pytest.fixture

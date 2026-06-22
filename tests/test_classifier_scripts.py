@@ -3,7 +3,6 @@ from unittest.mock import MagicMock, patch, mock_open
 from pathlib import Path
 import numpy as np
 import torch
-import pandas as pd
 
 # We will import these inside tests to ensure they are tracked by coverage if needed,
 # though normally top-level import is fine with pytest-cov.
@@ -25,7 +24,7 @@ def mock_classifier():
         yield classifier_inst
 
 def test_evaluate_transformer(mock_classifier):
-    with patch('mcp_university.classifier.evaluate.plt'),          patch('mcp_university.classifier.evaluate.sns'),          patch('mcp_university.classifier.evaluate.open', mock_open()) as mock_file:
+    with patch('mcp_university.classifier.evaluate.plt'),          patch('mcp_university.classifier.evaluate.sns'),          patch('mcp_university.classifier.evaluate.open', mock_open()):
         
         model_path = MagicMock(spec=Path)
         model_path.exists.return_value = True

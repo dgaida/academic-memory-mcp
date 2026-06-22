@@ -3,7 +3,6 @@ from unittest.mock import MagicMock, patch, mock_open
 from pathlib import Path
 import numpy as np
 import torch
-from mcp_university.classifier.train import evaluate_and_save, main as train_main
 
 @pytest.fixture
 def mock_classifier():
@@ -20,18 +19,24 @@ def mock_classifier():
         classifier_inst.classifier = MagicMock()
         classifier_inst.classifier.return_value = torch.tensor([[1.0, 0.0], [0.0, 1.0]])
         classifier_inst.classifier.predict.return_value = np.array([0, 1])
+        classifier_inst.get_features.return_value = np.zeros((2, 10))
+        classifier_inst.preprocess_data.return_value = (['t1', 't2'], ['Class1', 'Class2'])
+        classifier_inst.is_trained = False
         yield classifier_inst
 
 def test_evaluate_and_save(mock_classifier):
-    with patch('mcp_university.classifier.train.plt'),          patch('mcp_university.classifier.train.sns'),          patch('mcp_university.classifier.train.open', mock_open()):
+    from mcp_university.classifier.train import evaluate_and_save
+    with patch('mcp_university.classifier.train.plt'),           patch('mcp_university.classifier.train.sns'),           patch('mcp_university.classifier.train.open', mock_open()):
         
         output_dir = MagicMock(spec=Path)
         evaluate_and_save(mock_classifier, ['text', 'text2'], ['Class1', 'Class2'], output_dir)
         assert output_dir.mkdir.called
 
 def test_train_main():
-    with patch('mcp_university.classifier.train.argparse.ArgumentParser.parse_args') as mock_args,          patch('mcp_university.classifier.train.EmailClassifier') as mock_classifier_cls,          patch('mcp_university.classifier.train.train_test_split') as mock_split,          patch('mcp_university.classifier.train.resolve_model_path') as mock_resolve,          patch('mcp_university.classifier.train.evaluate_and_save') as mock_eval,          patch('mcp_university.config.get_config') as mock_config,          patch('mcp_university.classifier.train.get_device'),          patch('mcp_university.classifier.engine.EmailTransformerClassifier'):
+    from mcp_university.classifier.train import main as train_main
+    with patch('mcp_university.classifier.train.argparse.ArgumentParser.parse_args') as mock_args,           patch('mcp_university.classifier.train.EmailClassifier') as mock_classifier_cls,           patch('mcp_university.classifier.train.train_test_split') as mock_split,           patch('mcp_university.classifier.train.resolve_model_path') as mock_resolve,           patch('mcp_university.classifier.train.evaluate_and_save'),           patch('mcp_university.config.get_config'),           patch('mcp_university.classifier.train.get_device'),           patch('mcp_university.classifier.train.Path') as mock_path_cls,           patch('mcp_university.classifier.engine.EmailTransformerClassifier'):
         
+        mock_path_cls.return_value.exists.return_value = True
         mock_args.return_value = MagicMock(
             data_dir='data', method='transformer', mode='combined', 
             model_path='model.pkl', embedding_model='bert-base-uncased'
@@ -39,7 +44,6 @@ def test_train_main():
         mock_classifier = mock_classifier_cls.return_value
         mock_classifier.method = 'transformer'
         mock_classifier.preprocess_data.return_value = (['t1', 't2', 't3', 't4'], ['Class1', 'Class2', 'Class1', 'Class2'])
-        # Return 4 lists of size 2 each
         mock_split.return_value = (['t1', 't3'], ['t2', 't4'], ['Class1', 'Class1'], ['Class2', 'Class2'])
         
         resolved_path = MagicMock(spec=Path)
@@ -47,18 +51,20 @@ def test_train_main():
         mock_resolve.return_value = resolved_path
         
         train_main()
-        # Even if it fails later, we hit many lines
         assert True
 
 def test_train_main_rf():
-    with patch('mcp_university.classifier.train.argparse.ArgumentParser.parse_args') as mock_args,          patch('mcp_university.classifier.train.EmailClassifier') as mock_classifier_cls,          patch('mcp_university.classifier.train.train_test_split') as mock_split,          patch('mcp_university.classifier.train.resolve_model_path') as mock_resolve,          patch('mcp_university.classifier.train.GridSearchCV') as mock_grid,          patch('mcp_university.config.get_config') as mock_config:
+    from mcp_university.classifier.train import main as train_main
+    with patch('mcp_university.classifier.train.argparse.ArgumentParser.parse_args') as mock_args,           patch('mcp_university.classifier.train.EmailClassifier') as mock_classifier_cls,           patch('mcp_university.classifier.train.train_test_split') as mock_split,           patch('mcp_university.classifier.train.resolve_model_path') as mock_resolve,           patch('mcp_university.classifier.train.GridSearchCV') as mock_grid,           patch('mcp_university.config.get_config'),           patch('mcp_university.classifier.train.Path') as mock_path_cls:
         
+        mock_path_cls.return_value.exists.return_value = True
         mock_args.return_value = MagicMock(
             data_dir='data', method='randomforest', mode='tfidf', 
             model_path='model.pkl', embedding_model='bert-base-uncased'
         )
         mock_classifier = mock_classifier_cls.return_value
         mock_classifier.method = 'randomforest'
+        mock_classifier.is_trained = False
         mock_classifier.preprocess_data.return_value = (['t1', 't2'], ['Class1', 'Class2'])
         mock_split.return_value = (['t1'], ['t2'], ['Class1'], ['Class2'])
         
