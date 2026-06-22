@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from mcp_university.classifier.evaluate import evaluate, main as evaluate_main
+from mcp_university.classifier.evaluate import evaluate
 from mcp_university.classifier.predict import main as predict_main
 
 @pytest.fixture
