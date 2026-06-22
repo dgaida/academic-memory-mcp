@@ -159,22 +159,33 @@ def create_tool_server() -> FastMCP:
             for i in range(1, namespace.Accounts.Count + 1):
                 account = namespace.Accounts.Item(i)
                 if account.SmtpAddress.lower() == target_account.lower():
+                    logger.info(f"ERFOLG: Konto gefunden: {account.SmtpAddress}")
                     store = account.DeliveryStore
                     root = store.GetRootFolder()
                     for j in range(1, root.Folders.Count + 1):
                         folder = root.Folders.Item(j)
                         if folder.Name == target_calendar_name:
+                            logger.info(f"ERFOLG: Ziel-Kalender gefunden: {folder.FolderPath}")
                             cal_folder = folder
                             break
+                    if not cal_folder:
+                        # Fallback: Default Calendar for this store (olFolderCalendar = 9)
+                        try:
+                            cal_folder = store.GetDefaultFolder(9)
+                        except Exception:
+                            pass
                     break
 
             if not cal_folder:
                 return f"Fehler: Kalender '{target_calendar_name}' für '{target_account}' nicht gefunden."
 
+            if dt_end <= dt_start:
+                return f"Fehler: Das Ende des Termins ({end_time}) muss nach dem Beginn ({start_time}) liegen."
+
             appointment = cal_folder.Items.Add(1) # olAppointmentItem
             appointment.Subject = subject
-            appointment.Start = dt_start
-            appointment.End = dt_end
+            appointment.Start = dt_start.replace(tzinfo=None)
+            appointment.End = dt_end.replace(tzinfo=None)
             appointment.Location = "Zoom (siehe E-Mail-Signatur)"
             body_text = body if body else (f"Terminbestätigung auf Basis Ihrer Mail vom {original_mail_date}" if original_mail_date else "Terminbestätigung via MCP System.")
             appointment.Body = body_text
