@@ -78,7 +78,7 @@ def test_process_emails(mock_open_msg, mock_mail_parser, mock_classifier_class, 
     mock_msg2.recipients = [mock_recip2]
 
     mock_msg3 = MagicMock()
-    mock_msg3.sender = "someone@else.com"
+    mock_msg3.sender = "hans.huber@smail.th-koeln.de"
     mock_recip3 = MagicMock()
     mock_recip3.email = "hans.huber@smail.th-koeln.de"
     mock_recip3.name = "Hans Huber"

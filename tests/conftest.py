@@ -47,3 +47,10 @@ def mock_outlook_dependencies():
     """Fixture to mock Outlook-related dependencies for all tests."""
     with patch('mcp_university.utils.outlook.is_outlook_open', return_value=True),          patch('mcp_university.utils.outlook.OUTLOOK_AVAILABLE', True):
         yield
+
+# Mock xgboost if not available
+try:
+    import xgboost
+except ImportError:
+    mock_xgboost = MagicMock()
+    sys.modules["xgboost"] = mock_xgboost
