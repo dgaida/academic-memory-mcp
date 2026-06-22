@@ -1,9 +1,12 @@
 """Skript zur Zusammenfassung von E-Mail-Klassen für Data Augmentation."""
 
 import logging
+import json
 from pathlib import Path
 from mcp_university.utils.llm_client_wrapper import LLMClientWrapper
 from mcp_university.parser.mail_parser import MailParser
+from mcp_university.config import get_config
+from mcp_university.metadata.store import MetadataStore
 
 # Logging Setup
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -13,6 +16,8 @@ def main() -> None:
     """Analysiert Trainingsordner und erstellt LLM-Zusammenfassungen für kleine Klassen."""
     llm = LLMClientWrapper()
     parser = MailParser()
+    config = get_config()
+    store = MetadataStore(config.th_personal_path)
 
     train_path = Path("data/classifier/train")
 
@@ -27,8 +32,8 @@ def main() -> None:
         class_name = class_dir.name
         logger.info(f"Verarbeite Klasse: {class_name}")
 
-        inbox_mails = list((class_dir / "Inbox").glob("*.msg"))
-        sent_mails = list((class_dir / "SentItems").glob("*.msg"))
+        inbox_mails = list((class_dir / "Inbox").glob("*.msg")) + list((class_dir / "Inbox").glob("*.eml"))
+        sent_mails = list((class_dir / "SentItems").glob("*.msg")) + list((class_dir / "SentItems").glob("*.eml"))
         total_count = len(inbox_mails) + len(sent_mails)
 
         logger.info(f"  Emails: {total_count} (Inbox: {len(inbox_mails)}, SentItems: {len(sent_mails)})")
@@ -37,6 +42,8 @@ def main() -> None:
             logger.info(f"  Erstelle Zusammenfassung für Klasse '{class_name}' (Data Augmentation)...")
 
             all_texts = []
+            unique_emails = set()
+
             for mail_path in (inbox_mails + sent_mails)[:20]:
                 text = parser.parse(mail_path)
                 if not text:
@@ -47,6 +54,46 @@ def main() -> None:
                         text = "Konnte Mail nicht lesen."
                 all_texts.append(text)
 
+                # Extrahiere E-Mails für Personal-Check
+                try:
+                    details = parser.get_email_details(mail_path)
+                    if details.get("from_email"):
+                        unique_emails.add(details["from_email"].lower())
+                    for rec in details.get("to", []):
+                        if rec.get("email"):
+                            unique_emails.add(rec["email"].lower())
+                    for rec in details.get("cc", []):
+                        if rec.get("email"):
+                            unique_emails.add(rec["email"].lower())
+                except Exception as e:
+                    logger.debug(f"Fehler beim Extrahieren der Details von {mail_path}: {e}")
+
+            # Suche nach Personal in th_personal.db
+            identified_staff = []
+            for email in unique_emails:
+                node = store.get_node_by_property("email", email)
+                if node:
+                    props = json.loads(node.get("properties_json", "{}"))
+                    roles = []
+                    if props.get("is_pa_vorsitz"):
+                        roles.append("PA-Vorsitz")
+                    if props.get("is_dekan"):
+                        roles.append("DekanIn")
+                    if props.get("is_institutsdirektor"):
+                        roles.append("InstitutsdirektorIn")
+                    if props.get("studiengangsleitung"):
+                        roles.append(f"Studiengangsleitung {props['studiengangsleitung']}")
+
+                    role_str = ", ".join(roles) if roles else "Mitarbeiter/Professor"
+                    identified_staff.append(f"{node['name']} ({role_str})")
+
+            personnel_context = ""
+            if identified_staff:
+                personnel_context = "\nFolgende Personen aus den E-Mails wurden als Mitarbeiter oder Professoren der TH Köln identifiziert:\n"
+                for person in identified_staff:
+                    personnel_context += f"- {person}\n"
+                personnel_context += "\nDies bedeutet, dass diese Personen in offizieller Funktion handeln.\n"
+
             context = "\n---\n".join(all_texts)
 
             prompt = f"""
@@ -56,7 +103,8 @@ Diese Zusammenfassung wird später genutzt, um künstliche Trainingsdaten (Data 
 Achte bei der Zusammenfassung besonders auf:
 1. Themen: Worüber wird typischerweise in diesen E-Mails geschrieben?
 2. Schreibstil: Wie sind die E-Mails verfasst?
-3. Rollen: Wer schreibt an wen?
+3. Rollen: Wer schreibt an wen? (Beachte den unten stehenden Personal-Kontext)
+{personnel_context}
 
 Hier sind die Beispiel-E-Mails:
 {context}
