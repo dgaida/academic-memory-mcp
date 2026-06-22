@@ -189,8 +189,16 @@ def process_emails(
     parser = MailParser()
 
     moved_emails = []
+    user_emails = [e.lower() for e in get_config().user.emails]
+    student_domains = ["@smail.th-koeln.de", "@smail.fh-koeln.de", "@th-koeln.de", "@fh-koeln.de"]
 
-    logger.info(f"Beginne E-Mail-Sortierung in: {source_root}")
+    def is_student(email_addr):
+        email_addr = (email_addr or "").lower()
+        if not email_addr:
+            return False
+        if any(u_email in email_addr for u_email in user_emails):
+            return False
+        return any(domain in email_addr for domain in student_domains)
 
     for msg_file in sorted(source_root.rglob("*.msg")):
         try:
@@ -221,47 +229,51 @@ def process_emails(
                 sender = (msg.sender.lower() if msg.sender else "").strip()
                 logger.debug(f"Analysiere Sender/Empfänger für {msg_file.name} (Klasse: {email_class}, Sender: {sender})")
 
-                if any(e.lower() in sender for e in get_config().user.emails):
+                is_sent_by_user = any(u_email in sender for u_email in user_emails)
+                recipients = msg.recipients or []
+
+                if is_sent_by_user:
                     target_folder = "SentItems"
-                    # Suche in Empfängern nach Student
-                    recipients = msg.recipients
-                    if recipients:
-                        found_student = False
-                        for rec in recipients:
-                            rec_email = (rec.email or "").lower()
-                            is_user = any(e.lower() in rec_email for e in get_config().user.emails)
-                            if not is_user and any(domain in rec_email for domain in ["@smail.th-koeln.de", "@smail.fh-koeln.de", "@th-koeln.de", "@fh-koeln.de"]):
-                                logger.debug(f"Student in Empfängern gefunden: {rec_email}")
-                                lastname = extract_lastname(rec.name or rec.email)
-                                found_student = True
-                                break
-                        if not found_student:
-                            # Fallback falls kein Student in Empfängern
-                            lastname = extract_lastname(recipients[0].name or recipients[0].email)
-                elif any(domain in sender for domain in ["@smail.th-koeln.de", "@smail.fh-koeln.de", "@th-koeln.de", "@fh-koeln.de"]):
-                    target_folder = "Inbox"
-                    lastname = extract_lastname(msg.sender)
+                    # Rule: Prioritize direct recipients (To) for folder naming, ignore CC
+                    # Rule: Take first 'To' student, fallback to second if first fails
+                    to_recipients = [r for r in recipients if getattr(r, "type", None) == 1]
+                    to_students = [r for r in to_recipients if is_student(r.email)]
+
+                    if to_students:
+                        lastname = extract_lastname(to_students[0].name or to_students[0].email)
+                        if lastname == "Unknown" and len(to_students) > 1:
+                            lastname = extract_lastname(to_students[1].name or to_students[1].email)
+                    else:
+                        # Fallback to any non-user 'To' recipient
+                        other_to = [r for r in to_recipients if not any(u_email in (r.email or "").lower() for u_email in user_emails)]
+                        if other_to:
+                            lastname = extract_lastname(other_to[0].name or other_to[0].email)
+                            if lastname == "Unknown" and len(other_to) > 1:
+                                lastname = extract_lastname(other_to[1].name or other_to[1].email)
+                        else:
+                            # Final fallback to any recipient
+                            if recipients:
+                                lastname = extract_lastname(recipients[0].name or recipients[0].email)
+                            else:
+                                lastname = "Unknown"
                 else:
-                    # Fallback falls weder noch
-                    # Versuche Student in Sender oder Empfängern zu finden
-                    recipients = msg.recipients
-                    found_student = False
-                    if recipients:
-                        for rec in recipients:
-                            rec_email = (rec.email or "").lower()
-                            is_user = any(e.lower() in rec_email for e in get_config().user.emails)
-                            if not is_user and any(domain in rec_email for domain in ["@smail.th-koeln.de", "@smail.fh-koeln.de", "@th-koeln.de", "@fh-koeln.de"]):
-                                logger.debug(f"Student in Empfängern gefunden (Fallback): {rec_email}")
-                                target_folder = "SentItems"
-                                lastname = extract_lastname(rec.name or rec.email)
-                                found_student = True
-                                break
+                    target_folder = "Inbox"
+                    # Rule: If sender is student, use sender
+                    if is_student(sender):
+                        lastname = extract_lastname(msg.sender)
+                    else:
+                        # Rule: Search recipients for student (prefer To, then CC)
+                        to_students = [r for r in recipients if getattr(r, "type", None) == 1 and is_student(r.email)]
+                        cc_students = [r for r in recipients if getattr(r, "type", None) == 2 and is_student(r.email)]
 
-                    if not found_student:
-                         # Wenn immer noch nichts, bleibe bei Inbox und versuche Sender
-                         target_folder = "Inbox"
-                         lastname = extract_lastname(msg.sender)
-
+                        potential_students = to_students + cc_students
+                        if potential_students:
+                            lastname = extract_lastname(potential_students[0].name or potential_students[0].email)
+                            if lastname == "Unknown" and len(potential_students) > 1:
+                                lastname = extract_lastname(potential_students[1].name or potential_students[1].email)
+                        else:
+                            # Fallback to sender
+                            lastname = extract_lastname(msg.sender)
             # Ziel-Pfad bestimmen
             logger.debug(f"Bestimme Ziel-Pfad für {lastname} in {target_folder} (Semester: {semester})")
             student_dir = find_student_folder(class_base_path, lastname)
