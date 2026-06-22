@@ -1,5 +1,3 @@
-import pytest
-from pathlib import Path
 from unittest.mock import patch, MagicMock
 from mcp_university.classifier.top_words import get_top_words_per_class
 import numpy as np
@@ -17,9 +15,6 @@ def test_get_top_words(tmp_path):
 
             # Mock TF-IDF matrix
             mock_tfidf_matrix = MagicMock()
-            # This is for tfidf_matrix[i].toarray().flatten()
-            # Since unique_labels has 1 entry, i will be 0.
-            # So mock_tfidf_matrix[0] should return something that has toarray().flatten()
             mock_row = MagicMock()
             mock_row.toarray.return_value = np.array([[0.5, 0.5]])
             mock_tfidf_matrix.__getitem__.return_value = mock_row
