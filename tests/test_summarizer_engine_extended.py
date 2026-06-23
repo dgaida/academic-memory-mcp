@@ -1,6 +1,6 @@
 """Tests for test_summarizer_engine_extended.py."""
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from mcp_university.summarizer.engine import Summarizer
 
 @pytest.fixture

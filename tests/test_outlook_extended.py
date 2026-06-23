@@ -1,7 +1,5 @@
 """Tests for test_outlook_extended.py."""
-import pytest
 from unittest.mock import MagicMock, patch
-from pathlib import Path
 from mcp_university.utils.outlook import is_outlook_open, create_outlook_draft
 
 def test_is_outlook_open_windows():

@@ -1,5 +1,4 @@
 """Tests for test_sort_emails_extended.py."""
-import pytest
 from mcp_university.classifier.sort_emails import extract_lastname
 
 def test_extract_lastname_edge_cases():

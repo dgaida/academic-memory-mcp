@@ -1,6 +1,5 @@
 """Tests for test_metadata_migration.py."""
 import sqlite3
-import pytest
 from mcp_university.metadata.store import MetadataStore
 
 def test_nodes_migration(tmp_path):
@@ -15,7 +14,7 @@ def test_nodes_migration(tmp_path):
     conn.close()
     
     # Initialize store which triggers migration
-    store = MetadataStore(db_path)
+    MetadataStore(db_path)
     
     # Verify new schema has UNIQUE(name, type)
     conn = sqlite3.connect(db_path)

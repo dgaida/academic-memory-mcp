@@ -1,6 +1,5 @@
 """Tests for test_cli_extended.py."""
 import pytest
-import yaml
 from typer.testing import CliRunner
 from unittest.mock import MagicMock, patch
 from mcp_university.cli.db import db_app
