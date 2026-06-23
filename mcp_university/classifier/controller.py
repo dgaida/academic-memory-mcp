@@ -1,8 +1,6 @@
 """Controller für die Verarbeitung und Beantwortung von E-Mails."""
 
 import logging
-import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
 import re
 import shutil
 import yaml
@@ -29,7 +27,7 @@ from mcp_university.classifier.sort_emails import (
 
     find_student_folder,
 )
-from mcp_university.retrieval.index import SearchIndex, get_model
+from mcp_university.retrieval.index import SearchIndex
 from mcp_university.utils.memory import resolve_memory_index_names
 from mcp_university.utils.outlook import create_outlook_draft
 
@@ -1072,135 +1070,25 @@ TEXT:
 
         # Always return emails_to_process for GUI consistency
 
-        if processed_results:
-            with open(source_dir / "processed_emails.md", "w", encoding="utf-8") as f:
-                f.write(
-                    "# Verarbeitete E-Mails\n\n| Student | Betreff | Status |\n| :--- | :--- | :--- |\n"
-                )
-                for res in processed_results:
-                    f.write(
-                        f"| {res['lastname']} | {res['subject']} | {res['status']} |\n"
-                    )
+        if self.processed_results:
+            self.write_processed_report(source_dir, self.processed_results)
+
 
         return emails_to_process
 
-    def write_processed_report(self, source_dir, results):
-        if not results: return
+    def write_processed_report(self, source_dir: Path, results: list):
+        """Schreibt den Abschlussbericht über verarbeitete E-Mails."""
+        if not results:
+            return
+
         report_path = source_dir / "processed_emails.md"
         with open(report_path, "w", encoding="utf-8") as f:
             f.write("# Verarbeitete E-Mails\n\n")
             f.write("| Student | Betreff | Status |\n")
             f.write("| :--- | :--- | :--- |\n")
             for res in results:
-                f.write(f"| {res.get('lastname', 'Unknown')} | {res.get('subject', 'No Subject')} | {res.get('status', 'Unknown')} |\n")
+                n = res.get("lastname", "Unknown")
+                s = res.get("subject", "No Subject")
+                t = res.get("status", "Unknown")
+                f.write(f"| {n} | {s} | {t} |\n")
         logger.info(f"Bericht in {report_path} geschrieben.")
-    def generate_short_summary(self, mail_path: Path) -> str:
-        """Generiert eine kurze Zusammenfassung (2 Sätze) einer E-Mail."""
-        try:
-            parsed = self.mail_parser.parse(mail_path)
-            if not parsed:
-                return "Keine Zusammenfassung möglich."
-
-            prompt = f"Fasse die folgende E-Mail in genau 2 prägnanten Sätzen zusammen:\n\n{parsed}"
-
-            # Using LLMClientWrapper via summarizer
-            # Since summarizer.summarize_email_conversation exists, we can use a similar pattern
-            # but with a specific prompt.
-            # However, summarizer doesn't have a generic call exposed easily without more logic.
-            # Let's use the wrapper directly if possible or call a simple summary.
-
-            response = self.summarizer.client.chat(
-                system_prompt="Du bist ein hilfreicher Assistent, der E-Mails kurz zusammenfasst.",
-                messages=[{"role": "user", "content": prompt}],
-            )
-
-            content = response.get("message", {}).get("content", "")
-            return content.strip() or "Zusammenfassung fehlgeschlagen."
-        except Exception as e:
-            logger.error(f"Fehler bei der Kurzzusammenfassung: {e}")
-            return "Fehler bei Zusammenfassung."
-
-    def get_similarity_info(self, mail_path: Path, lastname: str) -> str:
-        """Findet die ähnlichsten E-Mails desselben Studenten in den konfigurierten Pfaden.
-
-        Args:
-            mail_path: Pfad zur aktuellen E-Mail.
-            lastname: Nachname des Studenten.
-
-        Returns:
-            str: Markdown-formatierte Information über die ähnlichste E-Mails.
-        """
-        try:
-            # 1. Details der aktuellen Mail
-            current_details = self.mail_parser.get_email_details(mail_path)
-            current_subject = current_details.get("subject", "")
-            if not current_subject:
-                return "Kein Betreff in aktueller Mail gefunden."
-
-            # 2. Alle relevanten Mails des Studenten in allen Klassen-Pfaden suchen
-            all_mails = []
-            seen_paths = set()
-
-            for class_name, base_path_str in self.class_paths.items():
-                base_path = Path(base_path_str)
-                student_dir = find_student_folder(base_path, lastname)
-                if student_dir:
-                    for ext in ["*.msg", "*.eml"]:
-                        for f in student_dir.rglob(ext):
-                            resolved_f = f.resolve()
-                            if (
-                                resolved_f == mail_path.resolve()
-                                or resolved_f in seen_paths
-                            ):
-                                continue
-                            try:
-                                date = self.mail_parser.get_email_date(f)
-                                details = self.mail_parser.get_email_details(f)
-                                if details.get("subject"):
-                                    all_mails.append(
-                                        {
-                                            "path": f,
-                                            "date": date,
-                                            "subject": details.get("subject"),
-                                        }
-                                    )
-                                    seen_paths.add(resolved_f)
-                            except Exception:
-                                continue
-
-            if not all_mails:
-                return "Keine anderen E-Mails des Studenten in den Archiv-Ordnern gefunden."
-
-            # 3. Die 3 neuesten nehmen
-            all_mails.sort(key=lambda x: x["date"], reverse=True)
-            newest_mails = all_mails[:3]
-
-            # 4. Embeddings und Similarity
-
-            model_name = self.config.embeddings.model
-
-            # Lazy load similarity model on controller using shared cache
-            if not hasattr(self, "_similarity_model"):
-                self._similarity_model = get_model(
-                    model_name, offline=self.config.offline
-                )
-
-            subjects = [m["subject"] for m in newest_mails]
-
-            curr_emb = self._similarity_model.encode([current_subject])
-            other_embs = self._similarity_model.encode(subjects)
-
-            similarities = cosine_similarity(curr_emb, other_embs)[0]
-            best_idx = int(np.argmax(similarities))
-            best_score = float(similarities[best_idx])
-            best_mail = newest_mails[best_idx]
-
-            return (
-                f"**Ähnlichste Mail (Top 3 neuere):** {best_mail['subject']}\n\n"
-                f"**Pfad:** `{best_mail['path']}`\n\n"
-                f"**Cosine Similarity:** {best_score:.4f}"
-            )
-
-        except Exception as e:
-            logger.error(f"Fehler bei Similarity-Suche für {lastname}: {e}")
-            return f"*Fehler bei Similarity-Suche: {str(e)}*"
