@@ -74,6 +74,7 @@ class EmailController:
         self.config_path = config_path
         self.debug = debug
         self.use_action_classifier = use_action_classifier
+        self.processed_results = []
         self.mail_parser = MailParser()
         self.summarizer = Summarizer(
             model=self.config.llm.model, base_url=self.config.llm.base_url
@@ -864,7 +865,7 @@ TEXT:
             for email in emails_to_process:
                 f.write(f"| {email['lastname']} | {email['class']} | {email['semester']} |\n")
 
-        processed_results = []
+
         persona_path = Path("skills/SKILL_persona.md")
         apt_skill_path = Path("skills/SKILL_Appointment.md")
 
@@ -908,7 +909,7 @@ TEXT:
 
             # Legacy processing (only if use_action_classifier is False)
             if is_old:
-                processed_results.append(
+                self.processed_results.append(
                     {
                         "lastname": email["lastname"],
                         "subject": latest_mail.stem,
@@ -918,7 +919,7 @@ TEXT:
                 continue
 
             if not needs_answer:
-                processed_results.append(
+                self.processed_results.append(
                     {
                         "lastname": email["lastname"],
                         "subject": latest_mail.stem,
@@ -1008,7 +1009,7 @@ TEXT:
             )
 
             if reply_subject == "NO_REPLY_NEEDED":
-                processed_results.append(
+                self.processed_results.append(
                     {
                         "lastname": email["lastname"],
                         "subject": latest_mail.stem,
@@ -1020,7 +1021,7 @@ TEXT:
             if reply.startswith("APPOINTMENT_BOOKED"):
                 apt_info = self.agent.last_appointment_info
                 status = f"Termin gebucht ({apt_info['start_time']})"
-                processed_results.append(
+                self.processed_results.append(
                     {
                         "lastname": email["lastname"],
                         "subject": latest_mail.stem,
@@ -1030,7 +1031,7 @@ TEXT:
                 continue
 
             if reply.startswith("APPOINTMENT_BOOKING_FAILED"):
-                processed_results.append(
+                self.processed_results.append(
                     {
                         "lastname": email["lastname"],
                         "subject": latest_mail.stem,
@@ -1061,7 +1062,7 @@ TEXT:
                 r_path.write_text(reply, encoding="utf-8")
                 res_status = f"Datei: {r_path}"
 
-            processed_results.append(
+            self.processed_results.append(
                 {
                     "lastname": email["lastname"],
                     "subject": latest_mail.stem,
@@ -1083,6 +1084,16 @@ TEXT:
 
         return emails_to_process
 
+    def write_processed_report(self, source_dir, results):
+        if not results: return
+        report_path = source_dir / "processed_emails.md"
+        with open(report_path, "w", encoding="utf-8") as f:
+            f.write("# Verarbeitete E-Mails\n\n")
+            f.write("| Student | Betreff | Status |\n")
+            f.write("| :--- | :--- | :--- |\n")
+            for res in results:
+                f.write(f"| {res.get('lastname', 'Unknown')} | {res.get('subject', 'No Subject')} | {res.get('status', 'Unknown')} |\n")
+        logger.info(f"Bericht in {report_path} geschrieben.")
     def generate_short_summary(self, mail_path: Path) -> str:
         """Generiert eine kurze Zusammenfassung (2 Sätze) einer E-Mail."""
         try:
