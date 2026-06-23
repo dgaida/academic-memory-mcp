@@ -1,3 +1,4 @@
+"""Tests for test_server_extended.py."""
 from unittest.mock import patch
 from mcp_university.mcp_server.server import create_server
 
@@ -7,6 +8,7 @@ from mcp_university.mcp_server.server import create_server
 @patch("mcp_university.mcp_server.server.Summarizer")
 @patch("mcp_university.mcp_server.server.FastMCP")
 def test_create_server(mock_fastmcp, mock_summarizer, mock_index, mock_store, mock_config):
+    """Tests test_create_server."""
     # Mock config
     cfg = mock_config.return_value
     cfg.sqlite_path = "test.db"
@@ -28,6 +30,7 @@ def test_create_server(mock_fastmcp, mock_summarizer, mock_index, mock_store, mo
 @patch("mcp_university.mcp_server.server.SearchIndex")
 @patch("mcp_university.mcp_server.server.Summarizer")
 def test_server_tools(mock_summarizer, mock_index, mock_store, mock_config):
+    """Tests test_server_tools."""
     cfg = mock_config.return_value
     cfg.sqlite_path = "test.db"
     
@@ -37,6 +40,7 @@ def test_server_tools(mock_summarizer, mock_index, mock_store, mock_config):
     
     tools = {}
     def mock_tool(func):
+        """Test function."""
         tools[func.__name__] = func
         return func
     

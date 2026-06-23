@@ -1,9 +1,11 @@
+"""Tests for test_mail_parser_signed.py."""
 from unittest.mock import patch
 from pathlib import Path
 from mcp_university.parser.mail_parser import MailParser
 from extract_msg.exceptions import StandardViolationError
 
 def test_parse_msg_signed_fallback():
+    """Tests test_parse_msg_signed_fallback."""
     parser = MailParser()
     file_path = Path("signed.msg")
 
@@ -20,6 +22,7 @@ def test_parse_msg_signed_fallback():
             mock_parse_eml.assert_called_once_with(file_path)
 
 def test_get_msg_details_signed_fallback():
+    """Tests test_get_msg_details_signed_fallback."""
     parser = MailParser()
     file_path = Path("signed.msg")
 
@@ -36,6 +39,7 @@ def test_get_msg_details_signed_fallback():
             mock_get_eml.assert_called_once_with(file_path)
 
 def test_save_msg_attachments_signed_graceful():
+    """Tests test_save_msg_attachments_signed_graceful."""
     parser = MailParser()
     file_path = Path("signed.msg")
     target_dir = Path("attachments")

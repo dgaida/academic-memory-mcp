@@ -1,3 +1,4 @@
+"""Tests for test_folder_summary_logic.py."""
 import pytest
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -5,6 +6,7 @@ from mcp_university.crawler.crawler import Crawler
 
 @pytest.fixture
 def mock_components():
+    """Test function."""
     config = MagicMock()
     config.folders.folders = []
     config.folders.supported_extensions = [".txt"]
@@ -27,6 +29,7 @@ def mock_components():
     return config, store, parser, summarizer, index
 
 def test_root_folder_summary_location(tmp_path, mock_components):
+    """Tests test_root_folder_summary_location."""
     config, store, parser, summarizer, index = mock_components
     root_dir = tmp_path / "my_root"
     root_dir.mkdir()
@@ -46,6 +49,7 @@ def test_root_folder_summary_location(tmp_path, mock_components):
     summarizer.summarize_folder.assert_called_with("my_root", ["file summary"])
 
 def test_subfolder_summary_location(tmp_path, mock_components):
+    """Tests test_subfolder_summary_location."""
     config, store, parser, summarizer, index = mock_components
     root_dir = tmp_path / "my_root"
     sub_dir = root_dir / "my_sub"
@@ -67,6 +71,7 @@ def test_subfolder_summary_location(tmp_path, mock_components):
     summarizer.summarize_folder.assert_called_with("my_root/my_sub", ["file summary"])
 
 def test_recursive_path_building(tmp_path, mock_components):
+    """Tests test_recursive_path_building."""
     config, store, parser, summarizer, index = mock_components
     root_dir = tmp_path / "A"
     sub_dir = root_dir / "B"
@@ -86,6 +91,7 @@ def test_recursive_path_building(tmp_path, mock_components):
     assert "A" in paths_passed
 
 def test_summary_recreation_on_missing_file(tmp_path, mock_components):
+    """Tests test_summary_recreation_on_missing_file."""
     config, store, parser, summarizer, index = mock_components
     root_dir = tmp_path / "root"
     root_dir.mkdir()

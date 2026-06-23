@@ -1,3 +1,4 @@
+"""Tests for tests/test_classifier_scripts.py."""
 import pytest
 from unittest.mock import MagicMock, patch, mock_open
 from pathlib import Path
@@ -11,6 +12,7 @@ from mcp_university.classifier.predict import main as predict_main
 
 @pytest.fixture
 def mock_classifier():
+    """Test function."""
     with patch('mcp_university.classifier.evaluate.EmailClassifier') as mock:
         classifier_inst = mock.return_value
         classifier_inst.label_encoder.classes_ = np.array(['Class1', 'Class2'])
@@ -24,6 +26,7 @@ def mock_classifier():
         yield classifier_inst
 
 def test_evaluate_transformer(mock_classifier):
+    """Tests test_evaluate_transformer."""
     with patch('mcp_university.classifier.evaluate.plt'),          patch('mcp_university.classifier.evaluate.sns'),          patch('mcp_university.classifier.evaluate.open', mock_open()) as _mock_file:
         
         model_path = MagicMock(spec=Path)
@@ -44,6 +47,7 @@ def test_evaluate_transformer(mock_classifier):
         assert mock_classifier.preprocess_data.called
 
 def test_evaluate_non_transformer(mock_classifier):
+    """Tests test_evaluate_non_transformer."""
     mock_classifier.method = 'randomforest'
     mock_classifier.classifier.predict.return_value = np.array([0, 1])
     
@@ -65,6 +69,7 @@ def test_evaluate_non_transformer(mock_classifier):
         assert mock_classifier.get_features.called
 
 def test_evaluate_missing_paths(mock_classifier):
+    """Tests test_evaluate_missing_paths."""
     model_path = MagicMock(spec=Path)
     model_path.exists.return_value = False
     test_dir = MagicMock(spec=Path)
@@ -79,6 +84,7 @@ def test_evaluate_missing_paths(mock_classifier):
     assert not mock_classifier.load.called
 
 def test_evaluate_no_data(mock_classifier):
+    """Tests test_evaluate_no_data."""
     mock_classifier.preprocess_data.return_value = ([], [])
     model_path = MagicMock(spec=Path)
     model_path.exists.return_value = True
@@ -89,6 +95,7 @@ def test_evaluate_no_data(mock_classifier):
     assert mock_classifier.load.called
 
 def test_evaluate_main():
+    """Tests test_evaluate_main."""
     with patch('mcp_university.classifier.evaluate.argparse.ArgumentParser.parse_args') as mock_args,          patch('mcp_university.classifier.evaluate.resolve_model_path') as mock_resolve,          patch('mcp_university.classifier.evaluate.evaluate') as mock_evaluate:
         
         mock_args.return_value = MagicMock(test_dir='test', model_path='model', method='transformer', mode='combined')
@@ -101,6 +108,7 @@ def test_evaluate_main():
 
 @pytest.fixture
 def mock_predict_classifier():
+    """Test function."""
     with patch('mcp_university.classifier.predict.EmailClassifier') as mock:
         classifier_inst = mock.return_value
         classifier_inst.predict.return_value = {
@@ -111,6 +119,7 @@ def mock_predict_classifier():
         yield classifier_inst
 
 def test_predict_main(mock_predict_classifier):
+    """Tests test_predict_main."""
     with patch('mcp_university.classifier.predict.argparse.ArgumentParser.parse_args') as mock_args,          patch('mcp_university.classifier.predict.resolve_model_path') as mock_resolve,          patch('mcp_university.classifier.predict.Path') as mock_path:
         
         mock_args.return_value = MagicMock(file_path='test.msg', model_path='model.pkl', method='transformer', mode='tfidf', json=False)
@@ -125,6 +134,7 @@ def test_predict_main(mock_predict_classifier):
         assert mock_predict_classifier.predict.called
 
 def test_predict_main_json(mock_predict_classifier):
+    """Tests test_predict_main_json."""
     with patch('mcp_university.classifier.predict.argparse.ArgumentParser.parse_args') as mock_args,          patch('mcp_university.classifier.predict.resolve_model_path') as mock_resolve,          patch('mcp_university.classifier.predict.Path') as mock_path,          patch('builtins.print') as mock_print:
         
         mock_args.return_value = MagicMock(file_path='test.msg', model_path='model.pkl', method='transformer', mode='tfidf', json=True)
@@ -136,6 +146,7 @@ def test_predict_main_json(mock_predict_classifier):
         mock_print.assert_called()
 
 def test_predict_main_missing_file(mock_predict_classifier):
+    """Tests test_predict_main_missing_file."""
     with patch('mcp_university.classifier.predict.argparse.ArgumentParser.parse_args') as mock_args,          patch('mcp_university.classifier.predict.resolve_model_path') as mock_resolve,          patch('mcp_university.classifier.predict.Path') as mock_path:
         
         mock_args.return_value = MagicMock(file_path='test.msg', model_path='model.pkl', method='transformer', mode='tfidf', json=False)

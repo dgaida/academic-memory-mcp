@@ -1,3 +1,4 @@
+"""Tests for test_profiler_sources.py."""
 import pytest
 from unittest.mock import MagicMock, patch
 from pathlib import Path
@@ -5,16 +6,19 @@ from mcp_university.summarizer.profiler import PersonProfiler
 
 @pytest.fixture
 def mock_store():
+    """Test function."""
     store = MagicMock()
     return store
 
 @pytest.fixture
 def mock_profile_store():
+    """Test function."""
     store = MagicMock()
     return store
 
 @pytest.fixture
 def profiler(mock_store, mock_profile_store, tmp_path):
+    """Test function."""
     with patch('mcp_university.summarizer.profiler.MetadataStore', return_value=mock_store):
         with patch('mcp_university.summarizer.profiler.ProfileStore', return_value=mock_profile_store):
             with patch('mcp_university.summarizer.profiler.LLMClientWrapper') as mock_llm:
@@ -24,6 +28,7 @@ def profiler(mock_store, mock_profile_store, tmp_path):
                     yield p
 
 def test_generate_profile_includes_sources(profiler, mock_store):
+    """Tests test_generate_profile_includes_sources."""
     email = "test@example.com"
 
     # Mock emails
@@ -44,6 +49,7 @@ def test_generate_profile_includes_sources(profiler, mock_store):
             assert "- Ordner: /data/folder2" in profile
 
 def test_update_profile_updates_sources(profiler, mock_store, mock_profile_store, tmp_path):
+    """Tests test_update_profile_updates_sources."""
     email = "test@example.com"
     profile_file = tmp_path / f"{email}.md"
 
@@ -64,6 +70,7 @@ def test_update_profile_updates_sources(profiler, mock_store, mock_profile_store
 
             # LLM should receive profile without sources
             def mock_chat(messages):
+                """Test function."""
                 prompt = messages[0]["content"]
                 assert "## Quellen" not in prompt
                 return {"message": {"content": "# Updated Profile\nNew details."}}
@@ -79,6 +86,7 @@ def test_update_profile_updates_sources(profiler, mock_store, mock_profile_store
             assert "- Ordner: /data/folder2" in profile
 
 def test_find_emails_includes_cc(profiler):
+    """Tests test_find_emails_includes_cc."""
     email = "cc@example.com"
 
     # Mock mail details
@@ -99,12 +107,14 @@ def test_find_emails_includes_cc(profiler):
                 assert emails[0]["path"] == Path("/test/mail.msg")
 
 def test_find_emails_limit(profiler):
+    """Tests test_find_emails_limit."""
     email = "test@example.com"
 
     # 150 mock emails
     all_files = [Path(f"/test/mail_{i}.msg") for i in range(150)]
 
     def mock_get_details(path):
+        """Test function."""
         i = int(path.stem.split("_")[1])
         return {
             "from_email": email,

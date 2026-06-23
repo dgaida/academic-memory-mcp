@@ -1,0 +1,117 @@
+<<<<<<< SEARCH
+import json
+import logging
+import yaml
+=======
+import email.utils
+import json
+import logging
+import yaml
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+    def find_emails_for_address(self, email_address: str) -> List[Dict[str, Any]]:
+        """Sucht rekursiv nach E-Mails von oder an die angegebene Adresse.
+
+        Args:
+            email_address (str): Die zu suchende E-Mail-Adresse.
+
+        Returns:
+            List[Dict[str, Any]]: Liste der gefundenen E-Mails mit Metadaten.
+        """
+        email_address = email_address.lower()
+=======
+    def find_emails_for_address(self, email_address: str) -> List[Dict[str, Any]]:
+        """Sucht rekursiv nach E-Mails von oder an die angegebene Adresse.
+
+        Args:
+            email_address (str): Die zu suchende E-Mail-Adresse.
+
+        Returns:
+            List[Dict[str, Any]]: Liste der gefundenen E-Mails mit Metadaten.
+        """
+        name_part, addr_part = email.utils.parseaddr(email_address)
+        actual_email = addr_part.lower() if addr_part else email_address.lower()
+
+        logger.info(f"Suche E-Mails für Adresse: {actual_email} (Input: {email_address})")
+
+        email_address = actual_email
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+    def _get_knowledge_graph_context(self, email_address: str) -> str:
+        """Sucht im Wissensgraphen nach Informationen über die Person.
+
+        Verfolgt ausgehende Kanten mittels Tiefensuche (DFS), um Fakultät, Institut etc. zu finden.
+
+        Args:
+            email_address (str): E-Mail-Adresse der Person.
+
+        Returns:
+            str: Formatierte Informationen aus dem Wissensgraphen.
+        """
+        person_node = self.store.get_node_by_property("email", email_address)
+        if not person_node:
+            return ""
+=======
+    def _get_knowledge_graph_context(self, email_address: str) -> str:
+        """Sucht im Wissensgraphen nach Informationen über die Person.
+
+        Verfolgt ausgehende Kanten mittels Tiefensuche (DFS), um Fakultät, Institut etc. zu finden.
+
+        Args:
+            email_address (str): E-Mail-Adresse der Person.
+
+        Returns:
+            str: Formatierte Informationen aus dem Wissensgraphen.
+        """
+        name_part, addr_part = email.utils.parseaddr(email_address)
+        actual_email = addr_part.lower() if addr_part else email_address.lower()
+
+        logger.info(f"Suche im Wissensgraph für: {actual_email} (Name: {name_part})")
+
+        person_node = self.store.get_node_by_property("email", actual_email)
+
+        # Fallback: Suche nach Name, falls im Adress-String vorhanden
+        if not person_node and name_part:
+            logger.info(f"Kein Knoten für Email {actual_email} gefunden. Versuche Suche nach Name: {name_part}")
+            # Wir suchen hier nach dem exakten Namen, wie er im KG gespeichert ist
+            # Meistens "Nachname, Vorname" oder "Vorname Nachname"
+            # Da wir nicht wissen welches Format, probieren wir das Node-Property "name"
+            for node in self.store.get_all_nodes():
+                if node.get("type") == "Person" and node.get("name") == name_part:
+                    person_node = node
+                    logger.info(f"Person über Name {name_part} gefunden.")
+                    break
+
+        if not person_node:
+            return ""
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+    def generate_profile(self, email_address: str, force_update: bool = False) -> Optional[str]:
+        """Erstellt oder aktualisiert einen Steckbrief für die angegebene Adresse.
+
+        Args:
+            email_address (str): E-Mail-Adresse der Person.
+            force_update (bool): Ob die Aktualisierung erzwungen werden soll.
+
+        Returns:
+            Optional[str]: Der Inhalt des Steckbriefs oder None bei Fehler.
+        """
+        profile_file = self.storage_path / f"{email_address}.md"
+=======
+    def generate_profile(self, email_address: str, force_update: bool = False) -> Optional[str]:
+        """Erstellt oder aktualisiert einen Steckbrief für die angegebene Adresse.
+
+        Args:
+            email_address (str): E-Mail-Adresse der Person.
+            force_update (bool): Ob die Aktualisierung erzwungen werden soll.
+
+        Returns:
+            Optional[str]: Der Inhalt des Steckbriefs oder None bei Fehler.
+        """
+        logger.info(f"generate_profile aufgerufen für: {email_address} (force_update={force_update})")
+
+        name_part, addr_part = email.utils.parseaddr(email_address)
+        actual_email = addr_part.lower() if addr_part else email_address.lower()
+
+        profile_file = self.storage_path / f"{actual_email}.md"
+>>>>>>> REPLACE

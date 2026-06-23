@@ -1,3 +1,4 @@
+"""Tests for test_sort_emails_logic.py."""
 from unittest.mock import MagicMock, patch
 from pathlib import Path
 from datetime import datetime
@@ -7,6 +8,7 @@ from mcp_university.classifier.sort_emails import process_emails
 
 @pytest.fixture
 def mock_dependencies():
+    """Test function."""
     with patch('mcp_university.classifier.sort_emails.EmailClassifier') as mock_classifier_class,          patch('mcp_university.classifier.sort_emails.MailParser') as mock_mail_parser,          patch('extract_msg.openMsg') as mock_open_msg,          patch('shutil.move') as mock_move,          patch('mcp_university.classifier.sort_emails.get_config') as mock_get_config,          patch('mcp_university.classifier.sort_emails.get_semester') as mock_get_semester,          patch('mcp_university.classifier.sort_emails.find_student_folder') as mock_find_folder:
 
         # Setup common mocks
@@ -30,6 +32,7 @@ def mock_dependencies():
         }
 
 def create_recipient(email, name, r_type):
+    """Test function."""
     rec = MagicMock()
     rec.email = email
     rec.name = name
@@ -37,6 +40,7 @@ def create_recipient(email, name, r_type):
     return rec
 
 def test_sent_items_multiple_to(mock_dependencies, tmp_path):
+    """Tests test_sent_items_multiple_to."""
     """Test: User sends to multiple students. Should take the first 'To' student."""
     source_root = tmp_path / "source"
     source_root.mkdir()
@@ -59,6 +63,7 @@ def test_sent_items_multiple_to(mock_dependencies, tmp_path):
     assert moved[0]["lastname"] == "Mustermann"
 
 def test_sent_items_to_and_cc(mock_dependencies, tmp_path):
+    """Tests test_sent_items_to_and_cc."""
     """Test: User sends to Student (TO) and Colleague (CC). Should take Student (TO)."""
     source_root = tmp_path / "source"
     source_root.mkdir()
@@ -80,6 +85,7 @@ def test_sent_items_to_and_cc(mock_dependencies, tmp_path):
     assert moved[0]["lastname"] == "Mustermann"
 
 def test_inbox_from_student_with_cc(mock_dependencies, tmp_path):
+    """Tests test_inbox_from_student_with_cc."""
     """Test: Student sends to User with another student in CC. Should take Sender."""
     source_root = tmp_path / "source"
     source_root.mkdir()
@@ -101,6 +107,7 @@ def test_inbox_from_student_with_cc(mock_dependencies, tmp_path):
     assert moved[0]["lastname"] == "Mustermann" # The sender
 
 def test_inbox_from_external_to_user_and_student(mock_dependencies, tmp_path):
+    """Tests test_inbox_from_external_to_user_and_student."""
     """Test: External sends to User and Student. Should take Sender's lastname."""
     source_root = tmp_path / "source"
     source_root.mkdir()
@@ -123,6 +130,7 @@ def test_inbox_from_external_to_user_and_student(mock_dependencies, tmp_path):
     assert moved[0]["lastname"] == "External"
 
 def test_sent_items_multiple_to_and_cc(mock_dependencies, tmp_path):
+    """Tests test_sent_items_multiple_to_and_cc."""
     """Test: User sends to 2 students (TO) and 1 person (CC). Should take first student (TO)."""
     source_root = tmp_path / "source"
     source_root.mkdir()
@@ -145,6 +153,7 @@ def test_sent_items_multiple_to_and_cc(mock_dependencies, tmp_path):
     assert moved[0]["lastname"] == "Mustermann"
 
 def test_sent_items_fallback_to_second_to(mock_dependencies, tmp_path):
+    """Tests test_sent_items_fallback_to_second_to."""
     """Test: User sends to invalid name (TO) and Student (TO). Should take Student."""
     source_root = tmp_path / "source"
     source_root.mkdir()

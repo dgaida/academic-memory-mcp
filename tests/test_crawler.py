@@ -1,8 +1,10 @@
+"""Tests for test_crawler.py."""
 from unittest.mock import MagicMock
 from mcp_university.crawler.crawler import Crawler
 from mcp_university.config import Config
 
 def test_crawler_file_processing(tmp_path):
+    """Tests test_crawler_file_processing."""
     config = Config()
     config.folders.folders = [str(tmp_path)]
     store = MagicMock()
@@ -27,6 +29,7 @@ def test_crawler_file_processing(tmp_path):
     assert index.add_document.called
 
 def test_crawler_folder_summary_file_creation(tmp_path):
+    """Tests test_crawler_folder_summary_file_creation."""
     """Testet die Erstellung der versteckten Ordner-Zusammenfassungsdatei."""
     root_path = tmp_path / "root"
     sub_path = root_path / "subdir"

@@ -1,9 +1,11 @@
+"""Tests for test_parsers.py."""
 """Tests für die Parser des MCP University Systems."""
 from unittest.mock import MagicMock, patch
 from mcp_university.parser.pdf_parser import PDFParser
 from mcp_university.parser.mail_parser import MailParser
 
 def test_pdf_parser_docling(tmp_path):
+    """Tests test_pdf_parser_docling."""
     """Testet den PDFParser mit docling als Fallback."""
     cache_dir = tmp_path / "cache"
 
@@ -32,6 +34,7 @@ def test_pdf_parser_docling(tmp_path):
         mock_converter.convert.assert_called_once_with(str(pdf_file), max_num_pages=3)
 
 def test_mail_parser_msg_handling(tmp_path):
+    """Tests test_mail_parser_msg_handling."""
     """Testet die Verarbeitung von .msg Dateien im MailParser."""
     parser = MailParser()
     msg_file = tmp_path / "test.msg"
@@ -50,6 +53,7 @@ def test_mail_parser_msg_handling(tmp_path):
         assert "This is a test message body." in content
 
 def test_mail_parser_eml_fallback_on_decode_error(tmp_path):
+    """Tests test_mail_parser_eml_fallback_on_decode_error."""
     """Testet den Fallback auf latin-1 bei Kodierungsfehlern in EML-Dateien."""
     parser = MailParser()
     eml_file = tmp_path / "test.eml"
@@ -63,6 +67,7 @@ def test_mail_parser_eml_fallback_on_decode_error(tmp_path):
     assert "Subject: Test" in content
 
 def test_pdf_parser_priority_liteparse(tmp_path):
+    """Tests test_pdf_parser_priority_liteparse."""
     """Testet, dass der PDFParser liteparse bevorzugt."""
     cache_dir = tmp_path / "cache"
 

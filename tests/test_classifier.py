@@ -1,3 +1,4 @@
+"""Tests for tests/test_classifier.py."""
 """Tests für den E-Mail-Klassifikator."""
 import pytest
 from pathlib import Path
@@ -32,6 +33,7 @@ def temp_data_dir():
     shutil.rmtree(tmpdir)
 
 def test_classifier_train_predict_tfidf(temp_data_dir):
+    """Tests test_classifier_train_predict_tfidf."""
     """Testet das Training und die Vorhersage im TF-IDF Modus mit Unterordnern."""
     classifier = EmailClassifier(mode="tfidf", method="randomforest")
 
@@ -52,6 +54,7 @@ def test_classifier_train_predict_tfidf(temp_data_dir):
         assert "probabilities" in result
 
 def test_classifier_save_load(temp_data_dir, tmp_path):
+    """Tests test_classifier_save_load."""
     """Testet Speichern und Laden des Modells."""
     classifier = EmailClassifier(mode="tfidf", method="randomforest")
     model_path = tmp_path / "model.pkl"
@@ -71,6 +74,7 @@ def test_classifier_save_load(temp_data_dir, tmp_path):
 
 @patch("sentence_transformers.SentenceTransformer")
 def test_classifier_embedding_mode(mock_st, temp_data_dir):
+    """Tests test_classifier_embedding_mode."""
     """Testet den Embedding-Modus mit Mocks."""
     # Mock SentenceTransformer encode
     mock_model = MagicMock()
@@ -92,6 +96,7 @@ def test_classifier_embedding_mode(mock_st, temp_data_dir):
         assert result["prediction"] in ["BachelorThesis", "MasterThesis"]
 
 def test_classifier_train_predict_xgboost(temp_data_dir):
+    """Tests test_classifier_train_predict_xgboost."""
     """Testet das Training und die Vorhersage im XGBoost Modus."""
     classifier = EmailClassifier(mode="tfidf", method="xgboost")
 

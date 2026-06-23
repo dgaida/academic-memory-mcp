@@ -1,8 +1,10 @@
+"""Tests for test_server.py."""
 import pytest
 from unittest.mock import patch
 
 @pytest.mark.asyncio
 async def test_server_tools(mock_llm_client_wrapper):
+    """Test function for server tools."""
     # Mock models to avoid downloads and external calls
     with patch("mcp_university.retrieval.index.SentenceTransformer"),          patch("mcp_university.retrieval.index.QdrantClient"):
 

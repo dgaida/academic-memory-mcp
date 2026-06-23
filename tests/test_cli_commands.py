@@ -1,3 +1,4 @@
+"""Tests for test_cli_commands.py."""
 from typer.testing import CliRunner
 from unittest.mock import MagicMock, patch, mock_open
 from mcp_university.cli.main import app
@@ -7,6 +8,7 @@ from pathlib import Path
 runner = CliRunner()
 
 def test_cli_main_help():
+    """Tests test_cli_main_help."""
     result = runner.invoke(app, ["--help"])
     assert result.exit_code == 0
     assert "Usage" in result.stdout
@@ -14,6 +16,7 @@ def test_cli_main_help():
 @patch("mcp_university.cli.main.PersonProfiler")
 @patch("mcp_university.cli.main.setup_logging")
 def test_profiles_update(mock_setup, mock_profiler):
+    """Tests test_profiles_update."""
     result = runner.invoke(app, ["profiles", "update", "--email", "test@example.com"])
     assert result.exit_code == 0
     mock_profiler.return_value.update_profile.assert_called_with("test@example.com")
@@ -21,6 +24,7 @@ def test_profiles_update(mock_setup, mock_profiler):
 @patch("mcp_university.cli.main.PersonProfiler")
 @patch("mcp_university.cli.main.setup_logging")
 def test_profiles_update_all(mock_setup, mock_profiler):
+    """Tests test_profiles_update_all."""
     result = runner.invoke(app, ["profiles", "update"])
     assert result.exit_code == 0
     mock_profiler.return_value.update_all_profiles.assert_called_once()
@@ -33,6 +37,7 @@ def test_profiles_update_all(mock_setup, mock_profiler):
 @patch("mcp_university.cli.main.yaml.safe_load")
 @patch("builtins.open", new_callable=mock_open, read_data="class_paths: {}")
 def test_graph_build(mock_open, mock_load, mock_setup, mock_config, mock_kg, mock_summarizer, mock_store):
+    """Tests test_graph_build."""
     cfg = MagicMock()
     cfg.config_dir = Path("config")
     cfg.user.name = "User"
@@ -46,6 +51,7 @@ def test_graph_build(mock_open, mock_load, mock_setup, mock_config, mock_kg, moc
 
 @patch("mcp_university.cli.db.get_store_and_index")
 def test_db_list_files(mock_get_store):
+    """Tests test_db_list_files."""
     mock_store = MagicMock()
     mock_store.get_all_files.return_value = [
         {'id': 1, 'path': 'test.txt', 'type': 'text', 'last_indexed': 1234567890}
@@ -62,6 +68,7 @@ def test_db_list_files(mock_get_store):
 @patch("mcp_university.cli.main.get_config")
 @patch("mcp_university.cli.main.setup_logging")
 def test_main_search(mock_setup, mock_config, mock_summarizer, mock_store, mock_idx):
+    """Tests test_main_search."""
     mock_idx.return_value.search.return_value = [
         {'score': 0.9, 'filename': 'test.txt', 'path': 'path/test.txt', 'content': 'content'}
     ]
@@ -71,6 +78,7 @@ def test_main_search(mock_setup, mock_config, mock_summarizer, mock_store, mock_
 
 @patch("mcp_university.cli.memory.Path.exists")
 def test_memory_update_error(mock_exists):
+    """Tests test_memory_update_error."""
     mock_exists.return_value = False
     with patch("mcp_university.cli.main.setup_logging"):
         # The memory_app itself is a Typer object, so we call its commands.
@@ -95,6 +103,7 @@ def test_memory_update_error(mock_exists):
 @patch("mcp_university.cli.memory.Path.exists")
 @patch("mcp_university.cli.memory.Path.mkdir")
 def test_memory_update_success(mock_mkdir, mock_exists, mock_open, mock_load, mock_resolve, mock_config, mock_tokenizer, mock_pf, mock_idx, mock_process):
+    """Tests test_memory_update_success."""
     mock_exists.return_value = True
     mock_load.return_value = {"class_paths": {"class1": "/path1"}}
     mock_resolve.return_value = {"class1": "index1"}

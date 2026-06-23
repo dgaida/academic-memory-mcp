@@ -1,9 +1,11 @@
+"""Tests for test_classify_folder.py."""
 from pathlib import Path
 from unittest.mock import patch
 from mcp_university.classifier.classify_folder import classify_and_move
 
 @patch('mcp_university.classifier.classify_folder.EmailClassifier')
 def test_classify_and_move(mock_classifier_class, tmp_path):
+    """Tests test_classify_and_move."""
     source_dir = tmp_path / "source"
     source_dir.mkdir()
 
@@ -30,6 +32,7 @@ def test_classify_and_move(mock_classifier_class, tmp_path):
 
 @patch('mcp_university.classifier.classify_folder.EmailClassifier')
 def test_classify_and_move_with_output_dir(mock_classifier_class, tmp_path):
+    """Tests test_classify_and_move_with_output_dir."""
     source_dir = tmp_path / "source"
     source_dir.mkdir()
     output_dir = tmp_path / "output"
@@ -48,6 +51,7 @@ def test_classify_and_move_with_output_dir(mock_classifier_class, tmp_path):
 
 @patch('mcp_university.classifier.classify_folder.EmailClassifier')
 def test_classify_and_move_duplicate_names(mock_classifier_class, tmp_path):
+    """Tests test_classify_and_move_duplicate_names."""
     source_dir = tmp_path / "source"
     source_dir.mkdir()
 

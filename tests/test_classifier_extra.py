@@ -1,3 +1,4 @@
+"""Tests for tests/test_classifier_extra.py."""
 from unittest.mock import MagicMock, patch, mock_open
 from pathlib import Path
 import pandas as pd
@@ -9,6 +10,7 @@ from mcp_university.classifier.plot_data_distribution import count_emails, plot_
 @patch("mcp_university.classifier.xai_analysis.shap.TreeExplainer")
 @patch("mcp_university.classifier.xai_analysis.anonymize_th_koeln_names")
 def test_run_xai_analysis(mock_anon, mock_shap, mock_classifier_cls):
+    """Tests test_run_xai_analysis."""
     mock_classifier = mock_classifier_cls.return_value
     mock_classifier.mode = "tfidf"
     mock_classifier.label_encoder.classes_ = ["Class1"]
@@ -29,6 +31,7 @@ def test_run_xai_analysis(mock_anon, mock_shap, mock_classifier_cls):
         assert mock_classifier.load.called
 
 def test_xai_main():
+    """Tests test_xai_main."""
     with patch("mcp_university.classifier.xai_analysis.argparse.ArgumentParser.parse_args") as mock_args,          patch("mcp_university.classifier.xai_analysis.resolve_model_path") as _mock_resolve,          patch("mcp_university.classifier.xai_analysis.run_xai_analysis") as mock_run:
         mock_args.return_value = MagicMock(test_dir="test", model_path="model", method="rf", mode="tfidf")
         xai_main()
@@ -36,6 +39,7 @@ def test_xai_main():
 
 # Plot distribution tests
 def test_count_emails(tmp_path):
+    """Tests test_count_emails."""
     class1 = tmp_path / "Class1"
     class1.mkdir()
     (class1 / "Inbox").mkdir()
@@ -47,12 +51,14 @@ def test_count_emails(tmp_path):
     assert df.iloc[0]["Inbox"] == 1
 
 def test_plot_distribution():
+    """Tests test_plot_distribution."""
     df = pd.DataFrame([{"Klasse": "C1", "Inbox": 1, "SentItems": 1}])
     with patch("mcp_university.classifier.plot_data_distribution.plt") as mock_plt:
         plot_distribution(df, "Title", Path("out.png"))
         assert mock_plt.savefig.called
 
 def test_plot_main():
+    """Tests test_plot_main."""
     with patch("mcp_university.classifier.plot_data_distribution.argparse.ArgumentParser.parse_args") as mock_args,          patch("mcp_university.classifier.plot_data_distribution.count_emails") as mock_count,          patch("mcp_university.classifier.plot_data_distribution.plot_distribution") as _mock_plot:
         mock_args.return_value = MagicMock(data_dir="data", output="out.png", title="Title")
         plot_main()

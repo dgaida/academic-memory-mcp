@@ -1,3 +1,4 @@
+"""Tests for test_email_conversation.py."""
 import pytest
 from unittest.mock import MagicMock
 from mcp_university.crawler.crawler import Crawler
@@ -9,6 +10,7 @@ from mcp_university.retrieval.index import SearchIndex
 
 @pytest.fixture
 def mock_deps(tmp_path):
+    """Test function."""
     config = MagicMock(spec=Config)
     config.folders = FolderConfig(folders=[str(tmp_path)])
     config.folders.supported_extensions = [".eml", ".msg", ".md"]
@@ -28,6 +30,7 @@ def mock_deps(tmp_path):
     return config, store, parser, summarizer, index
 
 def test_email_conversation_processing(tmp_path, mock_deps):
+    """Tests test_email_conversation_processing."""
     config, store, parser, summarizer, index = mock_deps
 
     # Create structure
@@ -68,6 +71,7 @@ def test_email_conversation_processing(tmp_path, mock_deps):
     assert args[2]["filename"] == ".emails_summary.md"
 
 def test_email_sorting(tmp_path, mock_deps):
+    """Tests test_email_sorting."""
     config, store, parser, summarizer, index = mock_deps
 
     # Create structure

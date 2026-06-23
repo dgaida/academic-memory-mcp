@@ -57,4 +57,4 @@ ignore-init-module = false
 ignore-magic = true
 fail-under = 99
 verbose = 1
-exclude = ["setup.py", "docs", "build", "tests"]
+exclude = ["setup.py", "docs", "build"]

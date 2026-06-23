@@ -1,3 +1,4 @@
+"""Tests for test_profiler_kg.py."""
 import pytest
 from unittest.mock import MagicMock, patch
 from pathlib import Path
@@ -6,11 +7,13 @@ from mcp_university.summarizer.profiler import PersonProfiler
 
 @pytest.fixture
 def mock_store():
+    """Test function."""
     store = MagicMock()
     return store
 
 @pytest.fixture
 def profiler(mock_store):
+    """Test function."""
     with patch('mcp_university.summarizer.profiler.MetadataStore', return_value=mock_store):
         with patch('mcp_university.summarizer.profiler.LLMClientWrapper'):
             with patch('mcp_university.summarizer.profiler.MailParser'):
@@ -18,6 +21,7 @@ def profiler(mock_store):
                 return p
 
 def test_get_knowledge_graph_context(profiler, mock_store):
+    """Tests test_get_knowledge_graph_context."""
     email = "test@example.com"
 
     # Mock data
@@ -29,6 +33,7 @@ def test_get_knowledge_graph_context(profiler, mock_store):
     mock_store.get_node_by_property.side_effect = lambda k, v: person_node if k == "email" and v == email else None
 
     def get_node_by_id(node_id):
+        """Test function."""
         if node_id == 1:
             return person_node
         if node_id == 2:
@@ -39,6 +44,7 @@ def test_get_knowledge_graph_context(profiler, mock_store):
     mock_store.get_node_by_id.side_effect = get_node_by_id
 
     def get_outgoing_edges(node_id):
+        """Test function."""
         if node_id == 1:
             return [{"target_id": 2, "relation_type": "ist Element von"}]
         if node_id == 2:
@@ -58,6 +64,7 @@ def test_get_knowledge_graph_context(profiler, mock_store):
     assert "    - Test Fakultät (Fakultät)" in context
 
 def test_profiling_prompt_includes_kg(profiler):
+    """Tests test_profiling_prompt_includes_kg."""
     email = "test@example.com"
     kg_context = "KG INFO"
     new_content = "MAIL CONTENT"

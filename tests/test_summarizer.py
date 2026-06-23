@@ -1,6 +1,8 @@
+"""Tests for test_summarizer.py."""
 from mcp_university.summarizer.engine import Summarizer
 
 def test_answer_question(mock_llm_client_wrapper):
+    """Tests test_answer_question."""
     summarizer = Summarizer()
     mock_llm_client_wrapper.chat.return_value = {
         'message': {'content': 'Die Antwort ist 42.'}
@@ -9,6 +11,7 @@ def test_answer_question(mock_llm_client_wrapper):
     assert answer == "Die Antwort ist 42."
 
 def test_summarize_email(mock_llm_client_wrapper):
+    """Tests test_summarize_email."""
     summarizer = Summarizer()
     mock_llm_client_wrapper.chat.return_value = {
         'message': {'content': '# E-Mail Zusammenfassung'}
@@ -17,6 +20,7 @@ def test_summarize_email(mock_llm_client_wrapper):
     assert "# E-Mail Zusammenfassung" in summary
 
 def test_summarize_long_doc(mock_llm_client_wrapper):
+    """Tests test_summarize_long_doc."""
     summarizer = Summarizer()
     mock_llm_client_wrapper.chat.side_effect = [
         {'message': {'content': 'Typ'}},
@@ -26,6 +30,7 @@ def test_summarize_long_doc(mock_llm_client_wrapper):
     assert "Zusammenfassung" in summary
 
 def test_answer_question_error(mock_llm_client_wrapper):
+    """Tests test_answer_question_error."""
     summarizer = Summarizer()
     mock_llm_client_wrapper.chat.side_effect = Exception("error")
     answer = summarizer.answer_question("query", "context")

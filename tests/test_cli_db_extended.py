@@ -1,3 +1,4 @@
+"""Tests for test_cli_db_extended.py."""
 import pytest
 from typer.testing import CliRunner
 from unittest.mock import MagicMock, patch
@@ -7,6 +8,7 @@ runner = CliRunner()
 
 @pytest.fixture
 def mock_store_index():
+    """Test function."""
     with patch("mcp_university.cli.db.get_store_and_index") as mock_get:
         mock_store = MagicMock()
         mock_idx = MagicMock()
@@ -14,6 +16,7 @@ def mock_store_index():
         yield mock_store, mock_idx
 
 def test_db_list_summaries(mock_store_index):
+    """Tests test_db_list_summaries."""
     mock_store, _ = mock_store_index
     mock_store.get_all_summaries.return_value = [
         {'id': 1, 'item_type': 'folder', 'item_id': 1, 'content': 'Summary content', 'created_at': 1234567890}
@@ -23,6 +26,7 @@ def test_db_list_summaries(mock_store_index):
     assert "Summary content" in result.stdout
 
 def test_db_list_deadlines(mock_store_index):
+    """Tests test_db_list_deadlines."""
     mock_store, _ = mock_store_index
     mock_store.get_all_deadlines.return_value = [
         {'id': 1, 'title': 'Deadline 1', 'due_date': 1234567890, 'item_type': 'task'}
@@ -32,6 +36,7 @@ def test_db_list_deadlines(mock_store_index):
     assert "Deadline 1" in result.stdout
 
 def test_db_list_nodes(mock_store_index):
+    """Tests test_db_list_nodes."""
     mock_store, _ = mock_store_index
     mock_store.get_all_nodes.return_value = [
         {'id': 1, 'name': 'Node 1', 'type': 'Person', 'properties_json': '{}'}
@@ -41,6 +46,7 @@ def test_db_list_nodes(mock_store_index):
     assert "Node 1" in result.stdout
 
 def test_db_delete_file(mock_store_index):
+    """Tests test_db_delete_file."""
     mock_store, mock_idx = mock_store_index
     mock_store.get_all_files.return_value = [{'id': 1, 'path': 'test.txt'}]
     
@@ -51,6 +57,7 @@ def test_db_delete_file(mock_store_index):
     mock_store.delete_file.assert_called_with(1)
 
 def test_db_delete_node(mock_store_index):
+    """Tests test_db_delete_node."""
     mock_store, _ = mock_store_index
     mock_store.get_node_by_id.return_value = {'id': 1, 'name': 'Node 1', 'type': 'Person'}
     

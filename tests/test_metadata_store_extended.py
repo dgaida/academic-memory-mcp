@@ -1,12 +1,15 @@
+"""Tests for test_metadata_store_extended.py."""
 import pytest
 from mcp_university.metadata.store import MetadataStore
 
 @pytest.fixture
 def store(tmp_path):
+    """Test function."""
     db_path = tmp_path / "test.db"
     return MetadataStore(db_path)
 
 def test_upsert_node(store):
+    """Tests test_upsert_node."""
     node_id, created = store.upsert_node("Test Node", "Person", {"email": "test@example.com"})
     assert created is True
     assert node_id > 0
@@ -16,6 +19,7 @@ def test_upsert_node(store):
     assert created2 is False
 
 def test_upsert_edge(store):
+    """Tests test_upsert_edge."""
     id1, _ = store.upsert_node("N1", "T")
     id2, _ = store.upsert_node("N2", "T")
     
@@ -28,22 +32,26 @@ def test_upsert_edge(store):
     assert created2 is False
 
 def test_get_node_by_id(store):
+    """Tests test_get_node_by_id."""
     node_id, _ = store.upsert_node("Node 1", "Type A")
     node = store.get_node_by_id(node_id)
     assert node['name'] == "Node 1"
     assert store.get_node_by_id(9999) is None
 
 def test_get_node_by_property(store):
+    """Tests test_get_node_by_property."""
     store.upsert_node("Node P", "Type B", {"key": "val"})
     node = store.get_node_by_property("key", "val")
     assert node['name'] == "Node P"
 
 def test_delete_node(store):
+    """Tests test_delete_node."""
     nid, _ = store.upsert_node("To Delete", "T")
     store.delete_node(nid)
     assert store.get_node_by_id(nid) is None
 
 def test_get_outgoing_edges(store):
+    """Tests test_get_outgoing_edges."""
     id1, _ = store.upsert_node("N1", "T")
     id2, _ = store.upsert_node("N2", "T")
     store.upsert_edge(id1, id2, "REL")
@@ -53,6 +61,7 @@ def test_get_outgoing_edges(store):
     assert edges[0]['target_id'] == id2
 
 def test_student_management(store):
+    """Tests test_student_management."""
     sid = store.upsert_student("Student A", "s@example.com", "Topic", "Active", 1)
     assert sid > 0
     
@@ -63,6 +72,7 @@ def test_student_management(store):
     assert not any(s['id'] == sid for s in store.get_all_students())
 
 def test_folder_management(store):
+    """Tests test_folder_management."""
     fid = store.upsert_folder("path/to/folder", None)
     assert fid > 0
     
@@ -73,6 +83,7 @@ def test_folder_management(store):
     assert not any(f['id'] == fid for f in store.get_all_folders())
 
 def test_summary_management(store):
+    """Tests test_summary_management."""
     store.add_summary("folder", 1, "Content here")
     
     summaries = store.get_all_summaries()
@@ -83,6 +94,7 @@ def test_summary_management(store):
     assert not any(s['id'] == smid for s in store.get_all_summaries())
 
 def test_alias_management(store):
+    """Tests test_alias_management."""
     store.add_alias("Alias", "Real Name", "Category")
     name = store.resolve_canonical_name("Alias", "Category")
     assert name == "Real Name"
@@ -91,6 +103,7 @@ def test_alias_management(store):
     assert any(a['alias'] == "Alias" for a in aliases)
 
 def test_file_management(store):
+    """Tests test_file_management."""
     fid = store.upsert_file("test.txt", "hash1", 123.0, "text")
     assert fid > 0
     

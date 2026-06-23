@@ -1,3 +1,4 @@
+"""Tests for tests/test_classifier_train_extended.py."""
 from unittest.mock import MagicMock, patch, mock_open
 from pathlib import Path
 import numpy as np
@@ -5,6 +6,7 @@ import torch
 from mcp_university.classifier.train import evaluate_and_save, main as train_main
 
 def test_evaluate_and_save():
+    """Tests test_evaluate_and_save."""
     mock_classifier = MagicMock()
     mock_classifier.label_encoder.classes_ = np.array(['Class1', 'Class2'])
     mock_classifier.label_encoder.inverse_transform.side_effect = lambda x: np.array(['Class1', 'Class2'])[x.astype(int)]
@@ -26,6 +28,7 @@ def test_evaluate_and_save():
 @patch('mcp_university.config.get_config')
 @patch('mcp_university.classifier.train.get_device')
 def test_train_main(mock_dev, mock_cfg, mock_resolve, mock_split, mock_classifier_cls, mock_args):
+    """Tests test_train_main."""
     mock_args.return_value = MagicMock(data_dir='data', method='transformer', mode='combined', model_path='model.pkl', embedding_model='bert')
     mock_classifier = mock_classifier_cls.return_value
     mock_classifier.preprocess_data.return_value = (['t1', 't2', 't3', 't4'], ['C1', 'C2', 'C1', 'C2'])
