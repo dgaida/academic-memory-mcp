@@ -898,30 +898,19 @@ TEXT:
             else:
                 email["suggested_action"] = 0  # Default: Antwort schreiben
 
+            # Always record automatically handled emails in processed_results
+            if is_old or not needs_answer:
+                status = f"Übersprungen (> {age_months} Monate)" if is_old else "Bereits beantwortet (Übersprungen)"
+                processed_results.append(
+                    {
+                        "lastname": email["lastname"],
+                        "subject": latest_mail.stem,
+                        "status": status,
+                    }
+                )
+
             if self.use_action_classifier:
                 continue
-
-            # Legacy processing (only if use_action_classifier is False)
-            if is_old:
-                processed_results.append(
-                    {
-                        "lastname": email["lastname"],
-                        "subject": latest_mail.stem,
-                        "status": f"Übersprungen (> {age_months} Monate)",
-                    }
-                )
-                continue
-
-            if not needs_answer:
-                processed_results.append(
-                    {
-                        "lastname": email["lastname"],
-                        "subject": latest_mail.stem,
-                        "status": "Bereits beantwortet (Übersprungen)",
-                    }
-                )
-                continue
-
             student_email = ""
             sender_name = ""
             try:
