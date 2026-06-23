@@ -1,4 +1,4 @@
-"""Tests for tests/test_classifier_train.py."""
+"""Tests for test_classifier_train.py."""
 import pytest
 from unittest.mock import MagicMock, patch, mock_open
 from pathlib import Path
@@ -8,7 +8,7 @@ from mcp_university.classifier.train import evaluate_and_save, main as train_mai
 
 @pytest.fixture
 def mock_classifier():
-    """Test function."""
+    """Test function docstring."""
     with patch('mcp_university.classifier.train.EmailClassifier') as mock:
         classifier_inst = mock.return_value
         classifier_inst.label_encoder.classes_ = np.array(['Class1', 'Class2'])
@@ -25,7 +25,7 @@ def mock_classifier():
         yield classifier_inst
 
 def test_evaluate_and_save(mock_classifier):
-    """Tests test_evaluate_and_save."""
+    """Test function docstring."""
     with patch('mcp_university.classifier.train.plt'),          patch('mcp_university.classifier.train.sns'),          patch('mcp_university.classifier.train.open', mock_open()):
         
         output_dir = MagicMock(spec=Path)
@@ -33,7 +33,7 @@ def test_evaluate_and_save(mock_classifier):
         assert output_dir.mkdir.called
 
 def test_train_main():
-    """Tests test_train_main."""
+    """Test function docstring."""
     with patch('mcp_university.classifier.train.argparse.ArgumentParser.parse_args') as mock_args,          patch('mcp_university.classifier.train.EmailClassifier') as mock_classifier_cls,          patch('mcp_university.classifier.train.train_test_split') as mock_split,          patch('mcp_university.classifier.train.resolve_model_path') as mock_resolve,          patch('mcp_university.classifier.train.evaluate_and_save') as _mock_eval,          patch('mcp_university.config.get_config') as _mock_config,          patch('mcp_university.classifier.train.get_device'),          patch('mcp_university.classifier.engine.EmailTransformerClassifier'),          patch('mcp_university.classifier.train.Path.exists', return_value=True):
         
         mock_args.return_value = MagicMock(
@@ -56,7 +56,7 @@ def test_train_main():
         assert True
 
 def test_train_main_rf():
-    """Tests test_train_main_rf."""
+    """Test function docstring."""
     with patch('mcp_university.classifier.train.argparse.ArgumentParser.parse_args') as mock_args,          patch('mcp_university.classifier.train.EmailClassifier') as mock_classifier_cls,          patch('mcp_university.classifier.train.train_test_split') as mock_split,          patch('mcp_university.classifier.train.resolve_model_path') as mock_resolve,          patch('mcp_university.classifier.train.GridSearchCV') as mock_grid,          patch('mcp_university.config.get_config') as _mock_config,          patch('mcp_university.classifier.train.Path.exists', return_value=True):
         
         mock_args.return_value = MagicMock(

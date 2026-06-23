@@ -6,7 +6,7 @@ from mcp_university.classifier.controller import EmailController
 
 @pytest.fixture
 def mock_controller(tmp_path):
-    """Test function."""
+    """Test function docstring."""
     # Setup mock config
     mock_config = MagicMock()
     mock_config.user.emails = ["test@example.com"]
@@ -30,7 +30,7 @@ def mock_controller(tmp_path):
         yield controller, tmp_path
 
 def test_delayed_summary_logic(mock_controller):
-    """Tests test_delayed_summary_logic."""
+    """Test function docstring."""
     controller, tmp_path = mock_controller
 
     # 1. Setup a "sorted" structure in a source_dir

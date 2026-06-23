@@ -7,7 +7,7 @@ from mcp_university.summarizer.profiler import PersonProfiler
 
 @pytest.fixture
 def mock_profiler_deps():
-    """Test function."""
+    """Test function docstring."""
     with patch('mcp_university.summarizer.profiler.get_config') as mock_get:
         cfg = MagicMock()
         cfg.data_dir = Path("/tmp/data")
@@ -19,7 +19,7 @@ def mock_profiler_deps():
             yield cfg
 
 def test_profiler_init_fallback(tmp_path):
-    """Tests test_profiler_init_fallback."""
+    """Test function docstring."""
     # Force exception in storage_path.mkdir
     with patch('mcp_university.summarizer.profiler.get_config') as mock_get:
         cfg = MagicMock()
@@ -33,7 +33,7 @@ def test_profiler_init_fallback(tmp_path):
                 assert profiler.storage_path == Path("Steckbriefe")
 
 def test_optimize_batches_gap(mock_profiler_deps):
-    """Tests test_optimize_batches_gap."""
+    """Test function docstring."""
     profiler = PersonProfiler()
     
     date1 = datetime(2024, 1, 1)
@@ -99,7 +99,7 @@ def test_optimize_batches_gap(mock_profiler_deps):
     assert len(optimized) >= 2
 
 def test_optimize_batches_too_large(mock_profiler_deps):
-    """Tests test_optimize_batches_too_large."""
+    """Test function docstring."""
     profiler = PersonProfiler()
     
     all_emails = [

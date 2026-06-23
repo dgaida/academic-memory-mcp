@@ -6,11 +6,11 @@ from datetime import datetime
 
 @pytest.fixture
 def mail_parser():
-    """Test function."""
+    """Test function docstring."""
     return MailParser()
 
 def test_get_email_date(mail_parser, tmp_path):
-    """Tests test_get_email_date."""
+    """Test function docstring."""
     with patch("extract_msg.openMsg") as mock_open:
         mock_msg = mock_open.return_value.__enter__.return_value
         mock_msg.date = datetime(2024, 1, 1)
@@ -22,7 +22,7 @@ def test_get_email_date(mail_parser, tmp_path):
         assert date.year == 2024
 
 def test_get_email_details_eml(mail_parser, tmp_path):
-    """Tests test_get_email_details_eml."""
+    """Test function docstring."""
     eml_content = """Date: Mon, 1 Jan 2024 10:00:00 +0000
 From: sender@example.com
 To: recipient@example.com
@@ -40,7 +40,7 @@ This is the body."""
 
 @patch("extract_msg.openMsg")
 def test_get_email_details_msg(mock_open, mail_parser, tmp_path):
-    """Tests test_get_email_details_msg."""
+    """Test function docstring."""
     mock_msg = mock_open.return_value.__enter__.return_value
     mock_msg.subject = "MSG Subject"
     mock_msg.sender = "sender@example.com"
@@ -55,7 +55,7 @@ def test_get_email_details_msg(mock_open, mail_parser, tmp_path):
     assert str(details['subject']) == "MSG Subject"
 
 def test_parse_eml_minimal(mail_parser, tmp_path):
-    """Tests test_parse_eml_minimal."""
+    """Test function docstring."""
     eml_path = tmp_path / "test.eml"
     eml_path.write_text("Subject: T\n\nContent")
     content = mail_parser.parse(eml_path)

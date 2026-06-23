@@ -1,9 +1,0 @@
-<<<<<<< SEARCH
-        if not emails and not kg_context:
-            logger.warning(f"Keine E-Mails und keine Wissensgraph-Infos für {email_address} gefunden.")
-            return None
-=======
-        if not emails and not kg_context:
-            logger.warning(f"Keine E-Mails und keine Wissensgraph-Infos für {actual_email} (Input: {email_address}) gefunden.")
-            return None
->>>>>>> REPLACE

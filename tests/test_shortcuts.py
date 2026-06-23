@@ -4,18 +4,18 @@ from unittest.mock import patch, mock_open
 from mcp_university.utils.shortcuts import resolve_path, resolve_lnk
 
 def test_resolve_path_non_existent():
-    """Tests test_resolve_path_non_existent."""
+    """Test function docstring."""
     p = Path("non_existent_file_xyz.txt")
     assert resolve_path(p) == p
 
 def test_resolve_path_regular_file(tmp_path):
-    """Tests test_resolve_path_regular_file."""
+    """Test function docstring."""
     p = tmp_path / "test.txt"
     p.touch()
     assert resolve_path(p) == p
 
 def test_resolve_path_symlink(tmp_path):
-    """Tests test_resolve_path_symlink."""
+    """Test function docstring."""
     target = tmp_path / "target.txt"
     target.touch()
     link = tmp_path / "link.txt"
@@ -23,7 +23,7 @@ def test_resolve_path_symlink(tmp_path):
     assert resolve_path(link) == target.resolve()
 
 def test_resolve_path_lnk_file(tmp_path):
-    """Tests test_resolve_path_lnk_file."""
+    """Test function docstring."""
     lnk = tmp_path / "test.lnk"
     lnk.touch()
     target = tmp_path / "target.txt"
@@ -34,17 +34,17 @@ def test_resolve_path_lnk_file(tmp_path):
         mock_resolve.assert_called_once_with(lnk)
 
 def test_resolve_lnk_invalid_header():
-    """Tests test_resolve_lnk_invalid_header."""
+    """Test function docstring."""
     with patch("builtins.open", mock_open(read_data=b"INVALID")):
         assert resolve_lnk(Path("test.lnk")) is None
 
 def test_resolve_lnk_too_short():
-    """Tests test_resolve_lnk_too_short."""
+    """Test function docstring."""
     with patch("builtins.open", mock_open(read_data=b"L\x00\x00\x00" + b"\x00"*10)):
         assert resolve_lnk(Path("test.lnk")) is None
 
 def test_resolve_lnk_minimal_valid_structure():
-    """Tests test_resolve_lnk_minimal_valid_structure."""
+    """Test function docstring."""
     # Header 76 bytes. 
     # data[0:4] == b'L\x00\x00\x00'
     # flags at data[20:24]. Let's say no flags.
@@ -53,7 +53,7 @@ def test_resolve_lnk_minimal_valid_structure():
         assert resolve_lnk(Path("test.lnk")) is None
 
 def test_resolve_lnk_with_local_base_path():
-    """Tests test_resolve_lnk_with_local_base_path."""
+    """Test function docstring."""
     # flags & 0x02 (HasLinkInfo)
     flags = 0x02
     header = b'L\x00\x00\x00' + b'\x00' * 16 + flags.to_bytes(4, 'little') + b'\x00' * 52
@@ -78,7 +78,7 @@ def test_resolve_lnk_with_local_base_path():
         assert str(result).replace('\\', '/') == "C:/Target/Path"
 
 def test_resolve_lnk_with_relative_path():
-    """Tests test_resolve_lnk_with_relative_path."""
+    """Test function docstring."""
     # flags & 0x08 (HasRelativePath)
     flags = 0x08
     header = b'L\x00\x00\x00' + b'\x00' * 16 + flags.to_bytes(4, 'little') + b'\x00' * 52
@@ -96,12 +96,12 @@ def test_resolve_lnk_with_relative_path():
             assert result == Path("/tmp/target.txt")
 
 def test_resolve_lnk_exception():
-    """Tests test_resolve_lnk_exception."""
+    """Test function docstring."""
     with patch("builtins.open", side_effect=Exception("Read error")):
         assert resolve_lnk(Path("test.lnk")) is None
 
 def test_resolve_lnk_with_id_list():
-    """Tests test_resolve_lnk_with_id_list."""
+    """Test function docstring."""
     # flags & 0x01 (HasTargetIDList)
     flags = 0x01
     header = b'L\x00\x00\x00' + b'\x00' * 16 + flags.to_bytes(4, 'little') + b'\x00' * 52
@@ -124,7 +124,7 @@ def test_resolve_lnk_with_id_list():
             assert result == Path("/tmp/target.txt")
 
 def test_resolve_lnk_unicode_relative_path():
-    """Tests test_resolve_lnk_unicode_relative_path."""
+    """Test function docstring."""
     # flags & 0x08 (HasRelativePath) and flags & 0x80 (IsUnicode)
     flags = 0x08 | 0x80
     header = b'L\x00\x00\x00' + b'\x00' * 16 + flags.to_bytes(4, 'little') + b'\x00' * 52

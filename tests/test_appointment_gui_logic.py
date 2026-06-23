@@ -10,7 +10,7 @@ import gradio as gr
 import scripts.appointment_gui as gui
 
 def test_load_student_details_logic(tmp_path):
-    """Tests test_load_student_details_logic."""
+    """Test function docstring."""
     # Setup mock file system
     student_dir = tmp_path / "Student_Folder"
     student_dir.mkdir()
@@ -71,7 +71,7 @@ def test_load_student_details_logic(tmp_path):
         assert summary_file.read_text(encoding="utf-8") == "New Summary Content"
 
 def test_load_student_details_fresh_summary(tmp_path):
-    """Tests test_load_student_details_fresh_summary."""
+    """Test function docstring."""
     # Setup mock file system
     student_dir = tmp_path / "Student_Folder_Fresh"
     student_dir.mkdir()
@@ -118,7 +118,7 @@ def test_load_student_details_fresh_summary(tmp_path):
         mock_summarizer.summarize_email_conversation.assert_not_called()
 
 def test_load_student_details_no_email(tmp_path):
-    """Tests test_load_student_details_no_email."""
+    """Test function docstring."""
     # Setup mock file system
     student_dir = tmp_path / "Student_Folder_No_Email"
     student_dir.mkdir()

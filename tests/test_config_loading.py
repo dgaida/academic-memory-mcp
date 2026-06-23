@@ -1,9 +1,7 @@
-"""Tests for test_config_loading.py."""
 """Tests for the configuration loading logic."""
 from mcp_university.config import UserConfig
 
 def test_user_config_single_email():
-    """Tests test_user_config_single_email."""
     """Test UserConfig with a single email string."""
     data = {
         "name": "Test User",
@@ -15,7 +13,6 @@ def test_user_config_single_email():
     assert user.emails == []
 
 def test_user_config_email_list():
-    """Tests test_user_config_email_list."""
     """Test UserConfig with email as a list."""
     data = {
         "name": "Test User",
@@ -27,7 +24,6 @@ def test_user_config_email_list():
     assert user.emails == ["primary@example.com", "secondary@example.com"]
 
 def test_user_config_explicit_emails():
-    """Tests test_user_config_explicit_emails."""
     """Test UserConfig with explicit emails list and single email string."""
     data = {
         "name": "Test User",
@@ -40,7 +36,6 @@ def test_user_config_explicit_emails():
     assert user.emails == ["other@example.com"]
 
 def test_user_config_empty_email_list():
-    """Tests test_user_config_empty_email_list."""
     """Test UserConfig with an empty email list."""
     data = {
         "name": "Test User",

@@ -10,24 +10,24 @@ import mcp_university.cli.db as db_module
 
 @pytest.fixture
 def db_path(tmp_path):
-    """Test function."""
+    """Test function docstring."""
     return tmp_path / "test_university.db"
 
 @pytest.fixture
 def store(db_path):
-    """Test function."""
+    """Test function docstring."""
     return MetadataStore(db_path)
 
 @pytest.fixture
 def qdrant_path(tmp_path):
-    """Test function."""
+    """Test function docstring."""
     path = tmp_path / "qdrant"
     path.mkdir()
     return path
 
 @pytest.fixture
 def search_index(qdrant_path, store):
-    """Test function."""
+    """Test function docstring."""
     # We must patch where SearchIndex looks for SentenceTransformer
     with patch("mcp_university.retrieval.index.SentenceTransformer", create=True) as mock_st:
         mock_model = mock_st.return_value
@@ -36,7 +36,7 @@ def search_index(qdrant_path, store):
         return SearchIndex(str(qdrant_path), "all-MiniLM-L6-v2", store=store)
 
 def test_metadata_store_retrieval(store):
-    """Tests test_metadata_store_retrieval."""
+    """Test function docstring."""
     fid = store.upsert_file("/path/to/file.txt", "hash1", 123.45, ".txt")
     store.upsert_folder("/path/to/folder")
     store.add_summary("file", fid, "Test summary")
@@ -55,7 +55,7 @@ def test_metadata_store_retrieval(store):
     assert summaries[0]['content'] == "Test summary"
 
 def test_metadata_store_deletion(store):
-    """Tests test_metadata_store_deletion."""
+    """Test function docstring."""
     folder_id = store.upsert_folder("/path/to/folder")
     fid = store.upsert_file("/path/to/file.txt", "hash1", 123.45, ".txt", folder_id=folder_id)
     store.add_summary("file", fid, "File summary")
@@ -68,7 +68,7 @@ def test_metadata_store_deletion(store):
     assert len(store.get_all_summaries()) == 0
 
 def test_search_index_deletion(search_index):
-    """Tests test_search_index_deletion."""
+    """Test function docstring."""
     doc_id = "/path/to/doc.txt"
     content = "This is a test document content."
     metadata = {"type": "text"}
@@ -85,7 +85,7 @@ def test_search_index_deletion(search_index):
     assert len(results) == 0 or all(r['path'] != doc_id for r in results)
 
 def test_cli_list_files(store, search_index, monkeypatch):
-    """Tests test_cli_list_files."""
+    """Test function docstring."""
     monkeypatch.setattr(db_module, "get_store_and_index", lambda: (store, search_index))
     runner = CliRunner()
     result = runner.invoke(app, ["db", "list-files"])
@@ -97,7 +97,7 @@ def test_cli_list_files(store, search_index, monkeypatch):
     assert "/test/path.txt" in result.stdout
 
 def test_cli_delete_file(store, search_index, monkeypatch):
-    """Tests test_cli_delete_file."""
+    """Test function docstring."""
     monkeypatch.setattr(db_module, "get_store_and_index", lambda: (store, search_index))
     fid = store.upsert_file("/test/delete_me.txt", "hash", 1.0, ".txt")
     search_index.add_document("/test/delete_me.txt", "content", {})
@@ -110,7 +110,7 @@ def test_cli_delete_file(store, search_index, monkeypatch):
     assert all(r['path'] != "/test/delete_me.txt" for r in results)
 
 def test_cli_delete_folder(store, search_index, monkeypatch):
-    """Tests test_cli_delete_folder."""
+    """Test function docstring."""
     monkeypatch.setattr(db_module, "get_store_and_index", lambda: (store, search_index))
     folder_id = store.upsert_folder("/test/folder")
     store.upsert_file("/test/folder/file.txt", "hash", 1.0, ".txt", folder_id=folder_id)

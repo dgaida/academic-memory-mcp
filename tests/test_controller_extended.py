@@ -7,7 +7,7 @@ import numpy as np
 
 @pytest.fixture
 def controller():
-    """Test function."""
+    """Test function docstring."""
     with patch("mcp_university.classifier.controller.get_config") as mock_cfg,          patch("mcp_university.classifier.controller.Summarizer"),          patch("mcp_university.classifier.controller.PersonProfiler"),          patch("mcp_university.classifier.controller.Agent"),          patch("mcp_university.classifier.controller.Path.exists") as mock_exists:
         
         cfg = mock_cfg.return_value
@@ -27,7 +27,7 @@ def controller():
 @patch("mcp_university.classifier.controller.find_student_folder")
 @patch("mcp_university.classifier.controller.Path.mkdir")
 def test_relocate_emails(mock_mkdir, mock_find, mock_parser, mock_exists, mock_unlink, mock_move, controller):
-    """Tests test_relocate_emails."""
+    """Test function docstring."""
     # Instead of side_effect, let's just return False for exists most of the time
     mock_exists.return_value = False
     
@@ -56,7 +56,7 @@ def test_relocate_emails(mock_mkdir, mock_find, mock_parser, mock_exists, mock_u
 
 @patch("mcp_university.classifier.controller.get_model")
 def test_get_similarity_info(mock_get_model, controller):
-    """Tests test_get_similarity_info."""
+    """Test function docstring."""
     mock_model = MagicMock()
     mock_get_model.return_value = mock_model
     mock_model.encode.return_value = np.array([[1.0, 0.0]])

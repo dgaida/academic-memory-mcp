@@ -5,7 +5,7 @@ from mcp_university.agent.mcp_agent import MCPAgent
 
 @pytest.fixture
 def mock_dependencies():
-    """Test function."""
+    """Test function docstring."""
     with patch('mcp_university.mcp_server.tool_server.create_tool_server') as mock_create_server,          patch('mcp_university.agent.mcp_agent.LLMClientWrapper') as mock_llm_class,          patch('mcp_university.agent.mcp_agent.Anonymizer') as mock_anon_class,          patch('mcp_university.agent.mcp_agent.get_config') as mock_get_config:
         
         mock_cfg = MagicMock()
@@ -30,7 +30,7 @@ def mock_dependencies():
         }
 
 def test_mcp_agent_chat_simple(mock_dependencies):
-    """Tests test_mcp_agent_chat_simple."""
+    """Test function docstring."""
     agent = MCPAgent()
     mock_dependencies['llm'].chat.return_value = {
         'message': {'role': 'assistant', 'content': 'Hello'}
@@ -40,7 +40,7 @@ def test_mcp_agent_chat_simple(mock_dependencies):
     assert response == 'Hello'
 
 def test_mcp_agent_chat_with_tool(mock_dependencies):
-    """Tests test_mcp_agent_chat_with_tool."""
+    """Test function docstring."""
     agent = MCPAgent()
     
     mock_dependencies['llm'].chat.side_effect = [
@@ -62,7 +62,7 @@ def test_mcp_agent_chat_with_tool(mock_dependencies):
     assert response == 'The content is: file content'
 
 def test_mcp_agent_chat_with_anonymization(mock_dependencies):
-    """Tests test_mcp_agent_chat_with_anonymization."""
+    """Test function docstring."""
     agent = MCPAgent(use_cloud=True)
     
     mock_anon = mock_dependencies['anon']
@@ -81,7 +81,7 @@ def test_mcp_agent_chat_with_anonymization(mock_dependencies):
     assert response == 'Hello Original Name'
 
 def test_mcp_agent_tool_error(mock_dependencies):
-    """Tests test_mcp_agent_tool_error."""
+    """Test function docstring."""
     agent = MCPAgent()
     mock_dependencies['tool_fn'].side_effect = Exception("Tool failed")
     

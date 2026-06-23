@@ -11,7 +11,7 @@ from mcp_university.retrieval.index import SearchIndex
 
 @pytest.fixture
 def mock_deps(tmp_path):
-    """Test function."""
+    """Test function docstring."""
     config = MagicMock(spec=Config)
     config.folders = FolderConfig(folders=[str(tmp_path)])
     config.folders.supported_extensions = [".eml", ".msg", ".md"]
@@ -31,7 +31,7 @@ def mock_deps(tmp_path):
     return config, store, parser, summarizer, index
 
 def test_email_conversation_logging(tmp_path, mock_deps, caplog):
-    """Tests test_email_conversation_logging."""
+    """Test function docstring."""
     config, store, parser, summarizer, index = mock_deps
     caplog.set_level(logging.INFO)
 
@@ -55,7 +55,7 @@ def test_email_conversation_logging(tmp_path, mock_deps, caplog):
     assert "  - b.eml" in caplog.text
 
 def test_individual_email_summarization_option(tmp_path, mock_deps):
-    """Tests test_individual_email_summarization_option."""
+    """Test function docstring."""
     config, store, parser, summarizer, index = mock_deps
     config.folders.summarize_emails_individually = True
 

@@ -1,4 +1,4 @@
-"""Tests for tests/test_transformer_classifier.py."""
+"""Tests for test_transformer_classifier.py."""
 import pytest
 from unittest.mock import MagicMock, patch
 import torch
@@ -6,7 +6,7 @@ from mcp_university.classifier.engine import EmailClassifier
 
 @pytest.fixture
 def transformer_classifier():
-    """Test function."""
+    """Test function docstring."""
     with patch("transformers.AutoModel.from_pretrained") as mock_model:
         with patch("transformers.AutoTokenizer.from_pretrained"):
             # Mock model configuration
@@ -15,14 +15,14 @@ def transformer_classifier():
             yield classifier
 
 def test_transformer_initialization(transformer_classifier):
-    """Tests test_transformer_initialization."""
+    """Test function docstring."""
     assert transformer_classifier.method == "transformer"
     assert transformer_classifier.classifier is None
 
 @patch("mcp_university.classifier.engine.EmailTransformerClassifier")
 @patch("extract_msg.openMsg")
 def test_transformer_predict(mock_open_msg, mock_nn_class, transformer_classifier, tmp_path):
-    """Tests test_transformer_predict."""
+    """Test function docstring."""
     # Setup mock message
     mock_msg = MagicMock()
     mock_msg.subject = "Test Subject"
@@ -62,7 +62,7 @@ def test_transformer_predict(mock_open_msg, mock_nn_class, transformer_classifie
     assert result["confidence"] > 0.5
 
 def test_transformer_input_formatting(transformer_classifier, tmp_path):
-    """Tests test_transformer_input_formatting."""
+    """Test function docstring."""
     with patch("extract_msg.openMsg") as mock_open_msg:
         mock_msg = MagicMock()
         mock_msg.subject = "Hilfe beim Projekt"

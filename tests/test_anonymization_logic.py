@@ -6,7 +6,6 @@ from typing import Set, List
 # Rule-based logic copied from the implementation for testing purposes
 # since we have environment/dependency issues running the full module in some contexts
 def anonymize_th_koeln_names(text: str) -> str:
-    """Test function."""
     if not text:
         return text
     email_pattern = r'\b([a-zA-Z0-9._-]+)@((?:smail\.)?th-koeln\.de)\b'
@@ -37,19 +36,19 @@ def anonymize_th_koeln_names(text: str) -> str:
 class TestAnonymization(unittest.TestCase):
     """Test class."""
     def test_basic_anonymization(self):
-        """Test function."""
+        """Test function docstring."""
         text = "Hallo Erika Mustermann, erika.mustermann@smail.th-koeln.de."
         expected = "Hallo Max Mustermann Max Mustermann, max.mustermann@smail.th-koeln.de."
         self.assertEqual(anonymize_th_koeln_names(text), expected)
 
     def test_skip_daniel_gaida(self):
-        """Test function."""
+        """Test function docstring."""
         text = "Daniel Gaida <daniel.gaida@th-koeln.de>"
         # Should stay the same
         self.assertEqual(anonymize_th_koeln_names(text), text)
 
     def test_mixed_case_and_parts(self):
-        """Test function."""
+        """Test function docstring."""
         text = "Max Power (max.power@th-koeln.de) sent a mail. Power is a cool name."
         # max.power -> max, power.
         # "Max" (if > 2) replaced by Max Mustermann
@@ -61,7 +60,7 @@ class TestAnonymization(unittest.TestCase):
         self.assertNotIn("max.power", result)
 
     def test_multiple_names(self):
-        """Test function."""
+        """Test function docstring."""
         text = "John Doe (john.doe@smail.th-koeln.de) and Jane Smith (jane.smith@th-koeln.de)"
         result = anonymize_th_koeln_names(text)
         self.assertIn("max.mustermann@smail.th-koeln.de", result)
@@ -70,7 +69,7 @@ class TestAnonymization(unittest.TestCase):
         self.assertNotIn("Jane", result)
 
     def test_underscore_in_email(self):
-        """Test function."""
+        """Test function docstring."""
         text = "vorname_nachname@th-koeln.de"
         result = anonymize_th_koeln_names(text)
         self.assertEqual(result, "max.mustermann@th-koeln.de")

@@ -6,13 +6,13 @@ from mcp_university.classifier.sort_by_direction import sort_emails_by_direction
 
 @pytest.fixture
 def temp_email_dir(tmp_path):
-    """Test function."""
+    """Test function docstring."""
     source_dir = tmp_path / "emails"
     source_dir.mkdir()
     return source_dir
 
 def test_sort_emails_inbox(temp_email_dir):
-    """Tests test_sort_emails_inbox."""
+    """Test function docstring."""
     # Create a dummy .msg file
     msg_file = temp_email_dir / "test_inbox.msg"
     msg_file.touch()
@@ -32,7 +32,7 @@ def test_sort_emails_inbox(temp_email_dir):
     assert not msg_file.exists()
 
 def test_sort_emails_sent_items(temp_email_dir):
-    """Tests test_sort_emails_sent_items."""
+    """Test function docstring."""
     # Create a dummy .msg file
     msg_file = temp_email_dir / "test_sent.msg"
     msg_file.touch()
@@ -51,7 +51,7 @@ def test_sort_emails_sent_items(temp_email_dir):
     assert (temp_email_dir / "SentItems" / "test_sent.msg").exists()
 
 def test_sort_emails_existing_file(temp_email_dir):
-    """Tests test_sort_emails_existing_file."""
+    """Test function docstring."""
     # Create a dummy .msg file
     msg_file = temp_email_dir / "test.msg"
     msg_file.touch()
@@ -74,13 +74,13 @@ def test_sort_emails_existing_file(temp_email_dir):
     assert (target_dir / "test_0.msg").exists()
 
 def test_sort_emails_missing_dir():
-    """Tests test_sort_emails_missing_dir."""
+    """Test function docstring."""
     stats = sort_emails_by_direction(Path("/non/existent/path"), ["me@example.com"])
     assert stats["Inbox"] == 0
     assert stats["SentItems"] == 0
 
 def test_sort_emails_error_handling(temp_email_dir):
-    """Tests test_sort_emails_error_handling."""
+    """Test function docstring."""
     msg_file = temp_email_dir / "error.msg"
     msg_file.touch()
     
@@ -90,7 +90,7 @@ def test_sort_emails_error_handling(temp_email_dir):
     assert stats["Error"] == 1
 
 def test_main_function():
-    """Tests test_main_function."""
+    """Test function docstring."""
     with patch("mcp_university.classifier.sort_by_direction.get_config") as mock_get_config,          patch("mcp_university.classifier.sort_by_direction.sort_emails_by_direction") as mock_sort,          patch("argparse.ArgumentParser.parse_args") as mock_args:
         
         mock_config = MagicMock()

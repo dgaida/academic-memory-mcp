@@ -10,7 +10,7 @@ runner = CliRunner()
 
 @pytest.fixture
 def mock_db_deps():
-    """Test function."""
+    """Test function docstring."""
     with patch('mcp_university.cli.db.get_store_and_index') as mock_get:
         mock_store = MagicMock()
         mock_index = MagicMock()
@@ -18,7 +18,7 @@ def mock_db_deps():
         yield mock_store, mock_index
 
 def test_cli_list_files_empty(mock_db_deps):
-    """Tests test_cli_list_files_empty."""
+    """Test function docstring."""
     mock_store, _ = mock_db_deps
     mock_store.get_all_files.return_value = []
     
@@ -27,7 +27,7 @@ def test_cli_list_files_empty(mock_db_deps):
     assert "Keine Dateien" in result.stdout
 
 def test_cli_list_files_content(mock_db_deps):
-    """Tests test_cli_list_files_content."""
+    """Test function docstring."""
     mock_store, _ = mock_db_deps
     mock_store.get_all_files.return_value = [
         {'id': 1, 'path': 'test.pdf', 'type': 'pdf', 'last_indexed': 1700000000}
@@ -38,7 +38,7 @@ def test_cli_list_files_content(mock_db_deps):
     assert "test.pdf" in result.stdout
 
 def test_cli_delete_file_success(mock_db_deps):
-    """Tests test_cli_delete_file_success."""
+    """Test function docstring."""
     mock_store, mock_index = mock_db_deps
     mock_store.get_all_files.return_value = [{'id': 1, 'path': 'test.pdf'}]
     
@@ -49,7 +49,7 @@ def test_cli_delete_file_success(mock_db_deps):
     mock_index.delete_document.assert_called_once_with('test.pdf')
 
 def test_profiles_update(tmp_path):
-    """Tests test_profiles_update."""
+    """Test function docstring."""
     with patch('mcp_university.cli.main.PersonProfiler') as mock_profiler_cls:
         mock_profiler = mock_profiler_cls.return_value
         result = runner.invoke(main_app, ["profiles", "update", "--email", "test@test.de"])
@@ -58,7 +58,7 @@ def test_profiles_update(tmp_path):
         mock_profiler.update_profile.assert_called_once_with("test@test.de")
 
 def test_cli_list_folders(mock_db_deps):
-    """Tests test_cli_list_folders."""
+    """Test function docstring."""
     mock_store, _ = mock_db_deps
     mock_store.get_all_folders.return_value = [
         {'id': 1, 'path': 'students/WS24', 'last_summarized': 1700000000}
@@ -68,7 +68,7 @@ def test_cli_list_folders(mock_db_deps):
     assert "students/WS24" in result.stdout
 
 def test_cli_delete_folder_success(mock_db_deps):
-    """Tests test_cli_delete_folder_success."""
+    """Test function docstring."""
     mock_store, mock_index = mock_db_deps
     mock_store.get_all_folders.return_value = [{'id': 1, 'path': 'folder1'}]
     mock_store.get_folder_files.return_value = [(101, 'file1.pdf', 'hash', 0, 'pdf', 0, 1)]
@@ -80,7 +80,7 @@ def test_cli_delete_folder_success(mock_db_deps):
     mock_store.delete_folder.assert_called_once_with(1)
 
 def test_cli_list_nodes(mock_db_deps):
-    """Tests test_cli_list_nodes."""
+    """Test function docstring."""
     mock_store, _ = mock_db_deps
     mock_store.get_all_nodes.return_value = [{'id': 1, 'name': "NodeA", 'type': "Person", 'properties_json': "{}"}]
     result = runner.invoke(db_app, ["list-nodes"])
@@ -88,14 +88,14 @@ def test_cli_list_nodes(mock_db_deps):
     assert "NodeA" in result.stdout
 
 def test_cli_delete_node(mock_db_deps):
-    """Tests test_cli_delete_node."""
+    """Test function docstring."""
     mock_store, _ = mock_db_deps
     result = runner.invoke(db_app, ["delete-node", "1"], input="y\n")
     assert result.exit_code == 0
     mock_store.delete_node.assert_called_once_with(1)
 
 def test_cli_list_edges(mock_db_deps):
-    """Tests test_cli_list_edges."""
+    """Test function docstring."""
     mock_store, _ = mock_db_deps
     mock_store.get_all_edges.return_value = [{'id': 1, 'source_id': 1, 'target_id': 2, 'relation_type': 'TEST_REL', 'properties_json': '{}'}]
     mock_store.get_all_nodes.return_value = [{'id': 1, 'name': 'A', 'type': 'T'}, {'id': 2, 'name': 'B', 'type': 'T'}]
@@ -104,14 +104,14 @@ def test_cli_list_edges(mock_db_deps):
     assert "TEST_REL" in result.stdout
 
 def test_cli_delete_edge(mock_db_deps):
-    """Tests test_cli_delete_edge."""
+    """Test function docstring."""
     mock_store, _ = mock_db_deps
     result = runner.invoke(db_app, ["delete-edge", "1"], input="y\n")
     assert result.exit_code == 0
     mock_store.delete_edge_by_id.assert_called_once_with(1)
 
 def test_cli_delete_node_not_found(mock_db_deps):
-    """Tests test_cli_delete_node_not_found."""
+    """Test function docstring."""
     mock_store, _ = mock_db_deps
     mock_store.get_node_by_id.return_value = None
     result = runner.invoke(db_app, ["delete-node", "999"])

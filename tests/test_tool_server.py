@@ -6,7 +6,7 @@ from mcp_university.mcp_server.tool_server import create_tool_server
 
 @pytest.fixture
 def mcp_context():
-    """Test function."""
+    """Test function docstring."""
     with patch('mcp_university.mcp_server.tool_server.MetadataStore') as mock_store_class,          patch('mcp_university.mcp_server.tool_server.SearchIndex') as mock_index_class,          patch('mcp_university.mcp_server.tool_server.ParserFactory') as mock_parser_factory_class,          patch('mcp_university.mcp_server.tool_server.get_config') as mock_get_config:
         
         mock_config = MagicMock()
@@ -27,14 +27,13 @@ def mcp_context():
         }
 
 def get_tool_by_name(mcp_server, name):
-    """Test function."""
     for comp in mcp_server.local_provider._components.values():
         if comp.name == name:
             return comp
     return None
 
 def test_tool_registration(mcp_context):
-    """Tests test_tool_registration."""
+    """Test function docstring."""
     tools = mcp_context['server'].local_provider._components
     tool_names = [comp.name for comp in tools.values()]
     assert "read_file" in tool_names
@@ -45,7 +44,7 @@ def test_tool_registration(mcp_context):
     assert "save_email_attachments" in tool_names
 
 def test_tool_read_file(mcp_context):
-    """Tests test_tool_read_file."""
+    """Test function docstring."""
     comp = get_tool_by_name(mcp_context['server'], "read_file")
     read_file_tool = comp.fn
     parser_factory = mcp_context['parser_factory']
@@ -58,7 +57,7 @@ def test_tool_read_file(mcp_context):
         assert "nicht gefunden" in read_file_tool("missing_path")
 
 def test_tool_search_documents(mcp_context):
-    """Tests test_tool_search_documents."""
+    """Test function docstring."""
     comp = get_tool_by_name(mcp_context['server'], "search_documents")
     search_tool = comp.fn
     index = mcp_context['index']
@@ -70,7 +69,7 @@ def test_tool_search_documents(mcp_context):
     assert "found text" in result
 
 def test_tool_get_student_info(mcp_context):
-    """Tests test_tool_get_student_info."""
+    """Test function docstring."""
     comp = get_tool_by_name(mcp_context['server'], "get_student_info")
     student_tool = comp.fn
     store = mcp_context['store']
@@ -88,7 +87,7 @@ def test_tool_get_student_info(mcp_context):
     assert "Folder summary content" in result
 
 def test_tool_get_appointment_slots(mcp_context):
-    """Tests test_tool_get_appointment_slots."""
+    """Test function docstring."""
     comp = get_tool_by_name(mcp_context['server'], "get_appointment_slots")
     slots_tool = comp.fn
             
@@ -100,7 +99,7 @@ def test_tool_get_appointment_slots(mcp_context):
         assert slots_tool() == "Slot 1: 10:00"
 
 def test_tool_manage_calendar_appointment(mcp_context):
-    """Tests test_tool_manage_calendar_appointment."""
+    """Test function docstring."""
     comp = get_tool_by_name(mcp_context['server'], "manage_calendar_appointment")
     calendar_tool = comp.fn
             
@@ -129,7 +128,7 @@ def test_tool_manage_calendar_appointment(mcp_context):
         assert mock_appointment.Save.called
 
 def test_tool_save_email_attachments(mcp_context):
-    """Tests test_tool_save_email_attachments."""
+    """Test function docstring."""
     comp = get_tool_by_name(mcp_context['server'], "save_email_attachments")
     save_tool = comp.fn
             

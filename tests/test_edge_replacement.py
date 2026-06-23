@@ -1,4 +1,3 @@
-"""Tests for test_edge_replacement.py."""
 """Tests für die Kanten-Ersetzungslogik im Wissensgraphen."""
 import pytest
 from unittest.mock import MagicMock
@@ -21,7 +20,6 @@ def mock_summarizer():
     return summarizer
 
 def test_edge_replacement_logic(temp_db, mock_summarizer) -> None:
-    """Tests test_edge_replacement_logic."""
     """Testet, ob Kanten mit niedrigerer Priorität durch solche mit höherer ersetzt werden."""
     ontology = OntologyConfig(
         node_types=["Person", "Modul"],
@@ -77,7 +75,6 @@ def test_edge_replacement_logic(temp_db, mock_summarizer) -> None:
     assert edges[0]['relation_type'] == "hat Bachelorarbeit abgeschlossen"
 
 def test_edge_downgrade_ignored(temp_db, mock_summarizer) -> None:
-    """Tests test_edge_downgrade_ignored."""
     """Testet, ob Kanten mit niedrigerer Priorität ignoriert werden, wenn eine höhere existiert."""
     ontology = OntologyConfig(
         node_types=["Person"],

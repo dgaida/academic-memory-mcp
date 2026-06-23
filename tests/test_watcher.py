@@ -6,14 +6,14 @@ from mcp_university.crawler.watcher import IndexingHandler, Watcher
 
 @pytest.fixture
 def mock_crawler():
-    """Test function."""
+    """Test function docstring."""
     crawler = MagicMock()
     crawler.config.folders.supported_extensions = [".pdf", ".md", ".msg"]
     crawler.config.folders.folders = ["/tmp/watch"]
     return crawler
 
 def test_indexing_handler_on_modified(mock_crawler):
-    """Tests test_indexing_handler_on_modified."""
+    """Test function docstring."""
     handler = IndexingHandler(mock_crawler)
     event = MagicMock()
     event.is_directory = False
@@ -23,7 +23,7 @@ def test_indexing_handler_on_modified(mock_crawler):
     mock_crawler._process_file.assert_called_once_with(Path("/tmp/watch/test.pdf"), 0)
 
 def test_indexing_handler_on_modified_unsupported(mock_crawler):
-    """Tests test_indexing_handler_on_modified_unsupported."""
+    """Test function docstring."""
     handler = IndexingHandler(mock_crawler)
     event = MagicMock()
     event.is_directory = False
@@ -33,7 +33,7 @@ def test_indexing_handler_on_modified_unsupported(mock_crawler):
     assert not mock_crawler._process_file.called
 
 def test_indexing_handler_on_created(mock_crawler):
-    """Tests test_indexing_handler_on_created."""
+    """Test function docstring."""
     handler = IndexingHandler(mock_crawler)
     event = MagicMock()
     event.is_directory = False
@@ -43,7 +43,7 @@ def test_indexing_handler_on_created(mock_crawler):
     mock_crawler._process_file.assert_called_once_with(Path("/tmp/watch/test.md"), 0)
 
 def test_watcher_start(mock_crawler):
-    """Tests test_watcher_start."""
+    """Test function docstring."""
     with patch("mcp_university.crawler.watcher.Observer") as mock_observer_class:
         mock_observer = mock_observer_class.return_value
         watcher = Watcher(mock_crawler)

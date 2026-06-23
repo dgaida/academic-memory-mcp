@@ -1,5 +1,0 @@
-<<<<<<< SEARCH
-exclude = ["setup.py", "docs", "build", "tests"]
-=======
-exclude = ["setup.py", "docs", "build"]
->>>>>>> REPLACE

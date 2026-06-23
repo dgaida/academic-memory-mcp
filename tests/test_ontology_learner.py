@@ -6,13 +6,13 @@ from mcp_university.knowledge_graph.ontology_learner import OntologyLearner
 
 @pytest.fixture
 def mock_deps():
-    """Test function."""
+    """Test function docstring."""
     store = MagicMock()
     summarizer = MagicMock()
     return store, summarizer
 
 def test_learn_from_emails(mock_deps, tmp_path):
-    """Tests test_learn_from_emails."""
+    """Test function docstring."""
     store, summarizer = mock_deps
     learner = OntologyLearner(store, summarizer)
     
@@ -34,7 +34,7 @@ def test_learn_from_emails(mock_deps, tmp_path):
     store.add_alias.assert_called_once_with("D. Gaida", "Daniel Gaida", "Person")
 
 def test_learn_module_aliases(mock_deps):
-    """Tests test_learn_module_aliases."""
+    """Test function docstring."""
     store, summarizer = mock_deps
     learner = OntologyLearner(store, summarizer)
     
@@ -49,7 +49,7 @@ def test_learn_module_aliases(mock_deps):
     store.add_alias.assert_called_once_with("KI", "Künstliche Intelligenz", "Modul")
 
 def test_learn_module_aliases_empty(mock_deps):
-    """Tests test_learn_module_aliases_empty."""
+    """Test function docstring."""
     store, summarizer = mock_deps
     learner = OntologyLearner(store, summarizer)
     store.get_all_nodes.return_value = []

@@ -8,18 +8,18 @@ from mcp_university.summarizer.engine import Summarizer
 
 @pytest.fixture
 def temp_db(tmp_path):
-    """Test function."""
+    """Test function docstring."""
     db_path = tmp_path / "test_university.db"
     return MetadataStore(db_path)
 
 @pytest.fixture
 def mock_summarizer():
-    """Test function."""
+    """Test function docstring."""
     summarizer = MagicMock(spec=Summarizer)
     return summarizer
 
 def test_knowledge_graph_extraction(temp_db, mock_summarizer):
-    """Tests test_knowledge_graph_extraction."""
+    """Test function docstring."""
     engine = KnowledgeGraphEngine(temp_db, mock_summarizer)
 
     # Mock LLM response
@@ -64,7 +64,7 @@ def test_knowledge_graph_extraction(temp_db, mock_summarizer):
     assert "besucht" in relations
 
 def test_upsert_node_properties(temp_db):
-    """Tests test_upsert_node_properties."""
+    """Test function docstring."""
     temp_db.upsert_node("Test Person", "Person", {"role": ["Studierender"]})
     node = temp_db.get_all_nodes()[0]
     assert json.loads(node['properties_json']) == {"role": ["Studierender"]}
@@ -75,7 +75,7 @@ def test_upsert_node_properties(temp_db):
     assert json.loads(node['properties_json']) == {"role": ["Studierender", "SHK"]}
 
 def test_dynamic_ontology_prompt(temp_db, mock_summarizer):
-    """Tests test_dynamic_ontology_prompt."""
+    """Test function docstring."""
     from mcp_university.config import OntologyConfig
     custom_ontology = OntologyConfig(
         node_types=["CustomNode"],

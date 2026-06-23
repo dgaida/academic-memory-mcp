@@ -1,4 +1,3 @@
-"""Tests for test_summarize_lectures_skip.py."""
 """Tests for the skip logic in summarize_lectures.py."""
 import os
 import time
@@ -18,7 +17,6 @@ def temp_dirs(tmp_path):
     return source_dir, target_dir
 
 def test_skip_logic(temp_dirs):
-    """Tests test_skip_logic."""
     """Tests that a PDF is skipped if a newer MD summary exists."""
     source_dir, target_dir = temp_dirs
     pdf_path = source_dir / "test.pdf"
@@ -41,7 +39,6 @@ def test_skip_logic(temp_dirs):
         mock_summarize.assert_not_called()
 
 def test_process_if_pdf_newer(temp_dirs):
-    """Tests test_process_if_pdf_newer."""
     """Tests that a PDF is processed if it is newer than the existing MD summary."""
     source_dir, target_dir = temp_dirs
     pdf_path = source_dir / "test.pdf"

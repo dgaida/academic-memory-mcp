@@ -4,7 +4,7 @@ import pytest
 from mcp_university.metadata.store import MetadataStore
 
 def test_nodes_migration(tmp_path):
-    """Tests test_nodes_migration."""
+    """Test function docstring."""
     db_path = tmp_path / "test_migration.db"
     # Create old schema
     conn = sqlite3.connect(db_path)
@@ -26,7 +26,7 @@ def test_nodes_migration(tmp_path):
     conn.close()
 
 def test_aliases_migration(tmp_path):
-    """Tests test_aliases_migration."""
+    """Test function docstring."""
     db_path = tmp_path / "test_alias_migration.db"
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()

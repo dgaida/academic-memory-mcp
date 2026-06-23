@@ -8,7 +8,7 @@ from datetime import datetime
 
 @pytest.fixture
 def mock_controller_deps(tmp_path):
-    """Test function."""
+    """Test function docstring."""
     config_dir = tmp_path / "config"
     config_dir.mkdir()
     
@@ -41,13 +41,13 @@ def mock_controller_deps(tmp_path):
             yield controller, mock_cfg
 
 def test_get_memory_context_not_configured(mock_controller_deps):
-    """Tests test_get_memory_context_not_configured."""
+    """Test function docstring."""
     controller, _ = mock_controller_deps
     res = controller._get_memory_context("content", "UnknownClass")
     assert res == ""
 
 def test_get_memory_context_success(mock_controller_deps, tmp_path):
-    """Tests test_get_memory_context_success."""
+    """Test function docstring."""
     controller, cfg = mock_controller_deps
     
     # Setup memory index dir
@@ -69,7 +69,7 @@ def test_get_memory_context_success(mock_controller_deps, tmp_path):
         assert "Relevant answer" in res
 
 def test_get_memory_context_exception(mock_controller_deps, tmp_path):
-    """Tests test_get_memory_context_exception."""
+    """Test function docstring."""
     controller, cfg = mock_controller_deps
     index_dir = cfg.data_dir / "memory" / "exam_memory"
     index_dir.mkdir(parents=True)
@@ -79,7 +79,7 @@ def test_get_memory_context_exception(mock_controller_deps, tmp_path):
     assert res == ""
 
 def test_get_similarity_info_error_path(mock_controller_deps, tmp_path):
-    """Tests test_get_similarity_info_error_path."""
+    """Test function docstring."""
     controller, _ = mock_controller_deps
     
     # Create a dummy email file
@@ -103,7 +103,7 @@ def test_get_similarity_info_error_path(mock_controller_deps, tmp_path):
                 assert "Fehler bei Similarity-Suche" in res
 
 def test_classify_action_success(mock_controller_deps, tmp_path):
-    """Tests test_classify_action_success."""
+    """Test function docstring."""
     controller, _ = mock_controller_deps
     mail_path = tmp_path / "action.msg"
     mail_path.write_text("Hello")
@@ -115,7 +115,7 @@ def test_classify_action_success(mock_controller_deps, tmp_path):
         assert idx == 2
 
 def test_classify_action_fallback(mock_controller_deps, tmp_path):
-    """Tests test_classify_action_fallback."""
+    """Test function docstring."""
     controller, _ = mock_controller_deps
     mail_path = tmp_path / "action.msg"
     mail_path.write_text("Hello")
@@ -125,13 +125,13 @@ def test_classify_action_fallback(mock_controller_deps, tmp_path):
         assert idx == 0
 
 def test_execute_action_archive(mock_controller_deps, tmp_path):
-    """Tests test_execute_action_archive."""
+    """Test function docstring."""
     controller, _ = mock_controller_deps
     res = controller.execute_action(3, tmp_path / "mail.msg", {})
     assert "archiviert" in res
 
 def test_execute_action_reply(mock_controller_deps, tmp_path):
-    """Tests test_execute_action_reply."""
+    """Test function docstring."""
     controller, _ = mock_controller_deps
     # 0 = olMailItem reply
     with patch.object(controller, 'generate_reply', return_value=("Subject", "Draft", False)):
@@ -140,7 +140,7 @@ def test_execute_action_reply(mock_controller_deps, tmp_path):
             assert "Outlook Entwurf erstellt" in res
 
 def test_generate_reply_archive(mock_controller_deps, tmp_path):
-    """Tests test_generate_reply_archive."""
+    """Test function docstring."""
     controller, _ = mock_controller_deps
     mail_path = tmp_path / "mail.msg"
     mail_path.write_text("content")
@@ -150,14 +150,14 @@ def test_generate_reply_archive(mock_controller_deps, tmp_path):
     assert res == ("NO_REPLY_NEEDED", "Archivieren", False)
 
 def test_run_sort_no_model(mock_controller_deps, tmp_path):
-    """Tests test_run_sort_no_model."""
+    """Test function docstring."""
     controller, _ = mock_controller_deps
     with patch('mcp_university.classifier.controller.resolve_model_path', return_value=Path("nonexistent.pkl")):
         with pytest.raises(FileNotFoundError):
             controller.run_sort(str(tmp_path))
 
 def test_parse_report_simple(mock_controller_deps, tmp_path):
-    """Tests test_parse_report_simple."""
+    """Test function docstring."""
     controller, _ = mock_controller_deps
     report = tmp_path / "sorted_emails.md"
     report.write_text("# Sortierte E-Mails\n\n## ClassA\n- **2024_WS** | Name | Inbox: `path/to/mail.msg`\n")

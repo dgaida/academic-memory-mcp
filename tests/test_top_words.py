@@ -4,7 +4,6 @@ from mcp_university.classifier.top_words import get_top_words_per_class
 import numpy as np
 
 def test_get_top_words(tmp_path):
-    """Tests test_get_top_words."""
     """Testet die Extraktion der Top-Wörter mit Mocks."""
     with patch("mcp_university.classifier.top_words.EmailClassifier") as mock_cls:
         mock_instance = mock_cls.return_value
@@ -45,7 +44,6 @@ def test_get_top_words(tmp_path):
             assert "word1" in results["ClassA"]
 
 def test_get_top_words_empty(tmp_path):
-    """Tests test_get_top_words_empty."""
     """Testet das Verhalten bei leerem Verzeichnis."""
     with patch("mcp_university.classifier.top_words.EmailClassifier") as mock_cls:
         mock_instance = mock_cls.return_value

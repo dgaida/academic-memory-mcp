@@ -5,7 +5,7 @@ from mcp_university.utils.anonymizer import Anonymizer
 logging.basicConfig(level=logging.INFO)
 
 def test_anonymizer():
-    """Tests test_anonymizer."""
+    """Test function docstring."""
     # We mock the Ollama client for the test if possible,
     # but here we can just check if the logic in the class works.
     # Note: the actual LLM call won't work without a running Ollama,

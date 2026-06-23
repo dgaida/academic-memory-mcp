@@ -1,4 +1,4 @@
-"""Tests for tests/test_classifier_scripts_extended.py."""
+"""Tests for test_classifier_scripts_extended.py."""
 import pytest
 from unittest.mock import MagicMock, patch, mock_open
 from pathlib import Path
@@ -10,7 +10,7 @@ from mcp_university.classifier.predict import main as predict_main
 
 @pytest.fixture
 def mock_classifier():
-    """Test function."""
+    """Test function docstring."""
     with patch('mcp_university.classifier.evaluate.EmailClassifier') as mock:
         classifier_inst = mock.return_value
         classifier_inst.label_encoder.classes_ = np.array(['Class1', 'Class2'])
@@ -23,7 +23,7 @@ def mock_classifier():
         yield classifier_inst
 
 def test_evaluate_transformer(mock_classifier):
-    """Tests test_evaluate_transformer."""
+    """Test function docstring."""
     with patch('mcp_university.classifier.evaluate.plt'),          patch('mcp_university.classifier.evaluate.sns'),          patch('mcp_university.classifier.evaluate.open', mock_open()):
         model_path = MagicMock(spec=Path)
         model_path.exists.return_value = True
@@ -36,7 +36,7 @@ def test_evaluate_transformer(mock_classifier):
         assert mock_classifier.load.called
 
 def test_predict_main():
-    """Tests test_predict_main."""
+    """Test function docstring."""
     with patch('mcp_university.classifier.predict.EmailClassifier') as mock_cls,          patch('mcp_university.classifier.predict.argparse.ArgumentParser.parse_args') as mock_args,          patch('mcp_university.classifier.predict.resolve_model_path') as mock_resolve,          patch('mcp_university.classifier.predict.Path') as mock_path:
         mock_args.return_value = MagicMock(file_path='test.msg', model_path='model.pkl', method='transformer', mode='tfidf', json=False)
         mock_resolve.return_value.exists.return_value = True

@@ -5,7 +5,7 @@ from mcp_university.retrieval.index import SearchIndex
 
 @pytest.fixture
 def mock_store():
-    """Test function."""
+    """Test function docstring."""
     store = MagicMock()
     # Mock get_file return: (id, path, hash, mtime, type, last_indexed, folder_id)
     store.get_file.return_value = (1, "/path/to/doc.pdf", "hash", 123.0, ".pdf", 456.0, 10)
@@ -13,7 +13,7 @@ def mock_store():
     return store
 
 def test_search_index_enrichment(mock_store, tmp_path):
-    """Tests test_search_index_enrichment."""
+    """Test function docstring."""
     # Setup SearchIndex with mock store and disable qmd for this test
     with patch("mcp_university.retrieval.index.SearchIndex._check_qmd", return_value=False), \
          patch("mcp_university.retrieval.index.NATIVE_AVAILABLE", True), \
@@ -42,7 +42,7 @@ def test_search_index_enrichment(mock_store, tmp_path):
         mock_store.get_summary.assert_called_with("file", 1)
 
 def test_crawler_indexes_summary(tmp_path):
-    """Tests test_crawler_indexes_summary."""
+    """Test function docstring."""
     from mcp_university.crawler.crawler import Crawler
     from mcp_university.config import Config
 

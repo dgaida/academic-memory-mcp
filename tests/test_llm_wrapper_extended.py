@@ -6,7 +6,7 @@ from mcp_university.utils.llm_client_wrapper import LLMClientWrapper
 
 @pytest.fixture
 def mock_cfg_llm():
-    """Test function."""
+    """Test function docstring."""
     with patch('mcp_university.utils.llm_client_wrapper.get_config') as mock_get:
         cfg = MagicMock()
         cfg.llm.model = "m"
@@ -18,7 +18,7 @@ def mock_cfg_llm():
         yield cfg
 
 def test_llm_wrapper_openai_success(mock_cfg_llm):
-    """Tests test_llm_wrapper_openai_success."""
+    """Test function docstring."""
     with patch('mcp_university.utils.llm_client_wrapper.HAS_LLM_CLIENT', True),          patch('mcp_university.utils.llm_client_wrapper.LLMClient') as mock_client_cls:
         
         mock_inst = mock_client_cls.return_value
@@ -32,20 +32,20 @@ def test_llm_wrapper_openai_success(mock_cfg_llm):
         assert res["message"]["content"] == "Cloud Response"
 
 def test_llm_wrapper_openai_fail_fallback(mock_cfg_llm):
-    """Tests test_llm_wrapper_openai_fail_fallback."""
+    """Test function docstring."""
     with patch('mcp_university.utils.llm_client_wrapper.HAS_LLM_CLIENT', True),          patch('mcp_university.utils.llm_client_wrapper.LLMClient', side_effect=Exception("Init fail")),          patch('ollama.Client'):
         
         wrapper = LLMClientWrapper(provider="openai")
         assert wrapper.provider == "ollama"
 
 def test_llm_wrapper_unsupported_fallback(mock_cfg_llm):
-    """Tests test_llm_wrapper_unsupported_fallback."""
+    """Test function docstring."""
     with patch('mcp_university.utils.llm_client_wrapper.HAS_LLM_CLIENT', True),          patch('ollama.Client'):
         wrapper = LLMClientWrapper(provider="unknown")
         assert wrapper.provider == "ollama"
 
 def test_llm_wrapper_cloud_chat_error(mock_cfg_llm):
-    """Tests test_llm_wrapper_cloud_chat_error."""
+    """Test function docstring."""
     with patch('mcp_university.utils.llm_client_wrapper.HAS_LLM_CLIENT', True),          patch('mcp_university.utils.llm_client_wrapper.LLMClient') as mock_client_cls:
         
         mock_inst = mock_client_cls.return_value
