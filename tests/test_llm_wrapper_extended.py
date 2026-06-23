@@ -54,3 +54,21 @@ def test_llm_wrapper_cloud_chat_error(mock_cfg_llm):
         wrapper = LLMClientWrapper(provider="openai")
         res = wrapper.chat([{"role": "user", "content": "Hi"}])
         assert "Error: Chat fail" in res["message"]["content"]
+
+def test_llm_wrapper_openai_tools_success(mock_cfg_llm):
+    """Test tool calling with cloud provider."""
+    with patch('mcp_university.utils.llm_client_wrapper.HAS_LLM_CLIENT', True),          patch('mcp_university.utils.llm_client_wrapper.LLMClient') as mock_client_cls:
+
+        mock_inst = mock_client_cls.return_value
+        mock_inst.chat_completion_with_tools.return_value = {
+            "content": "Thinking...",
+            "tool_calls": [{"id": "1", "function": {"name": "test_tool", "arguments": "{}"}}]
+        }
+
+        wrapper = LLMClientWrapper(provider="openai")
+        tools = [{"type": "function", "function": {"name": "test_tool"}}]
+        res = wrapper.chat([{"role": "user", "content": "Call tool"}], tools=tools)
+
+        assert res["message"]["content"] == "Thinking..."
+        assert res["message"]["tool_calls"][0]["function"]["name"] == "test_tool"
+        mock_inst.chat_completion_with_tools.assert_called_once()
