@@ -1,3 +1,4 @@
+"""Tests for test_sort_emails.py."""
 from pathlib import Path
 from datetime import datetime
 from unittest.mock import MagicMock, patch
@@ -5,6 +6,7 @@ from unittest.mock import MagicMock, patch
 from mcp_university.classifier.sort_emails import get_semester, extract_lastname, process_emails, write_report
 
 def test_get_semester():
+    """Test function docstring."""
     # SoSe: 01.04. - 30.09.
     assert get_semester(datetime(2025, 4, 1)) == "2025_SoSe"
     assert get_semester(datetime(2025, 9, 30)) == "2025_SoSe"
@@ -15,6 +17,7 @@ def test_get_semester():
     assert get_semester(datetime(2025, 1, 15)) == "2024_25_WS"
 
 def test_extract_lastname():
+    """Test function docstring."""
     assert extract_lastname("Max Mustermann") == "Mustermann"
     assert extract_lastname("Mustermann, Max") == "Mustermann"
     assert extract_lastname("Max Mustermann <max@example.com>") == "Mustermann"
@@ -28,6 +31,7 @@ def test_extract_lastname():
 @patch('mcp_university.classifier.sort_emails.MailParser')
 @patch('extract_msg.openMsg')
 def test_process_emails(mock_open_msg, mock_mail_parser, mock_classifier_class, tmp_path):
+    """Test function docstring."""
     # Setup source directory
     source_root = tmp_path / "source"
     some_folder = source_root / "ArbitraryFolder"
@@ -105,6 +109,7 @@ def test_process_emails(mock_open_msg, mock_mail_parser, mock_classifier_class, 
     assert moved[2]["lastname"] == "Huber"
 
 def test_write_report(tmp_path):
+    """Test function docstring."""
     source_root = tmp_path
     moved_emails = [
         {

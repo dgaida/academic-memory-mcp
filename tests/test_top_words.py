@@ -1,3 +1,4 @@
+"""Tests for test_top_words.py."""
 from unittest.mock import patch, MagicMock
 from mcp_university.classifier.top_words import get_top_words_per_class
 import numpy as np

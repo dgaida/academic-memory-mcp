@@ -1,3 +1,4 @@
+"""Tests for test_retrieval_index_extended.py."""
 import pytest
 from unittest.mock import MagicMock, patch
 import numpy as np
@@ -5,6 +6,7 @@ import numpy as np
 # Ensure SearchIndex and get_model are mocked wherever they might be used
 @pytest.fixture(autouse=True)
 def mock_search_dependencies():
+    """Test function docstring."""
     mock_st = MagicMock()
     mock_st.get_sentence_embedding_dimension.return_value = 128
     mock_st.encode.return_value = np.zeros((1, 128))
@@ -13,6 +15,7 @@ def mock_search_dependencies():
         yield mock_st, mock_qdrant
 
 def test_add_documents(tmp_path, mock_search_dependencies):
+    """Test function docstring."""
     from mcp_university.retrieval.index import SearchIndex
     mock_st, mock_qdrant = mock_search_dependencies
 
@@ -25,6 +28,7 @@ def test_add_documents(tmp_path, mock_search_dependencies):
     assert idx.client.upsert.called
 
 def test_search_minimal(tmp_path, mock_search_dependencies):
+    """Test function docstring."""
     from mcp_university.retrieval.index import SearchIndex
     mock_st, mock_qdrant = mock_search_dependencies
 
@@ -43,6 +47,7 @@ def test_search_minimal(tmp_path, mock_search_dependencies):
     assert results[0]['path'] == "p1"
 
 def test_delete_document(tmp_path, mock_search_dependencies):
+    """Test function docstring."""
     from mcp_university.retrieval.index import SearchIndex
     mock_st, mock_qdrant = mock_search_dependencies
 

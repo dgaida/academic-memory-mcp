@@ -1,8 +1,10 @@
+"""Tests for test_mail_attachments.py."""
 from unittest.mock import MagicMock, patch
 from mcp_university.parser.mail_parser import MailParser
 from email.message import EmailMessage
 
 def test_parse_msg_with_attachments(tmp_path):
+    """Test function docstring."""
     parser = MailParser()
     msg_file = tmp_path / "test.msg"
     msg_file.touch()
@@ -31,6 +33,7 @@ def test_parse_msg_with_attachments(tmp_path):
         assert "image.png" in content
 
 def test_parse_eml_with_attachments(tmp_path):
+    """Test function docstring."""
     parser = MailParser()
     eml_file = tmp_path / "test.eml"
 
@@ -55,6 +58,7 @@ def test_parse_eml_with_attachments(tmp_path):
     assert "notes.txt" in content
 
 def test_parse_eml_no_attachments(tmp_path):
+    """Test function docstring."""
     parser = MailParser()
     eml_file = tmp_path / "test_no_att.eml"
 

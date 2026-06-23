@@ -14,6 +14,7 @@ with patch('mcp_university.agent.engine.SearchIndex'),      patch('mcp_universit
 from mcp_university.utils.outlook import create_outlook_draft
 
 def test_parse_sorted_report(tmp_path):
+    """Test function docstring."""
     report = tmp_path / "sorted_emails.md"
     report.write_text("# Sortierte\n\n## Class\n- **S** | Name | Inbox: `D:\\mail.msg`", encoding="utf-8")
     with patch('mcp_university.classifier.controller.Agent'):
@@ -24,6 +25,7 @@ def test_parse_sorted_report(tmp_path):
 @patch("mcp_university.classifier.controller.MailParser")
 @patch("mcp_university.classifier.controller.Agent")
 def test_generate_reply_appointment_booked(mock_agent_cls, mock_parser_cls, tmp_path):
+    """Test function docstring."""
     mock_parser = mock_parser_cls.return_value
     mock_parser.parse.return_value = "content"
     mock_parser.extract_latest_message.return_value = "content"
@@ -43,6 +45,7 @@ def test_generate_reply_appointment_booked(mock_agent_cls, mock_parser_cls, tmp_
 @patch("mcp_university.classifier.controller.MailParser")
 @patch("mcp_university.classifier.controller.Agent")
 def test_generate_reply_no_appointment_fallback(mock_agent_cls, mock_parser_cls, tmp_path):
+    """Test function docstring."""
     mock_parser = mock_parser_cls.return_value
     mock_parser.parse.return_value = "content"
     mock_parser.extract_latest_message.return_value = "content"
@@ -63,6 +66,7 @@ def test_generate_reply_no_appointment_fallback(mock_agent_cls, mock_parser_cls,
     assert reply == "Reply"
 
 def test_create_outlook_draft_success():
+    """Test function docstring."""
     with patch('win32com.client.Dispatch') as mock_dispatch:
         mock_outlook = mock_dispatch.return_value
         mock_namespace = mock_outlook.GetNamespace.return_value
@@ -83,6 +87,7 @@ def test_create_outlook_draft_success():
 @patch("mcp_university.classifier.controller.MailParser")
 @patch("mcp_university.classifier.controller.Agent")
 def test_generate_reply_no_reply_needed(mock_agent_cls, mock_parser_cls, tmp_path):
+    """Test function docstring."""
     mock_parser = mock_parser_cls.return_value
     mock_parser.parse.return_value = "content"
     mock_parser.extract_latest_message.return_value = "content"

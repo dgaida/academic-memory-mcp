@@ -1,3 +1,4 @@
+"""Tests for test_profiler_kg.py."""
 import pytest
 from unittest.mock import MagicMock, patch
 from pathlib import Path
@@ -6,11 +7,13 @@ from mcp_university.summarizer.profiler import PersonProfiler
 
 @pytest.fixture
 def mock_store():
+    """Test function docstring."""
     store = MagicMock()
     return store
 
 @pytest.fixture
 def profiler(mock_store):
+    """Test function docstring."""
     with patch('mcp_university.summarizer.profiler.MetadataStore', return_value=mock_store):
         with patch('mcp_university.summarizer.profiler.LLMClientWrapper'):
             with patch('mcp_university.summarizer.profiler.MailParser'):
@@ -18,6 +21,7 @@ def profiler(mock_store):
                 return p
 
 def test_get_knowledge_graph_context(profiler, mock_store):
+    """Test function docstring."""
     email = "test@example.com"
 
     # Mock data
@@ -58,6 +62,7 @@ def test_get_knowledge_graph_context(profiler, mock_store):
     assert "    - Test Fakultät (Fakultät)" in context
 
 def test_profiling_prompt_includes_kg(profiler):
+    """Test function docstring."""
     email = "test@example.com"
     kg_context = "KG INFO"
     new_content = "MAIL CONTENT"

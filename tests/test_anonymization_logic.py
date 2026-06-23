@@ -1,3 +1,4 @@
+"""Tests for test_anonymization_logic.py."""
 import unittest
 import re
 from typing import Set, List
@@ -33,17 +34,21 @@ def anonymize_th_koeln_names(text: str) -> str:
     return anonymized_text
 
 class TestAnonymization(unittest.TestCase):
+    """Test class."""
     def test_basic_anonymization(self):
+        """Test function docstring."""
         text = "Hallo Erika Mustermann, erika.mustermann@smail.th-koeln.de."
         expected = "Hallo Max Mustermann Max Mustermann, max.mustermann@smail.th-koeln.de."
         self.assertEqual(anonymize_th_koeln_names(text), expected)
 
     def test_skip_daniel_gaida(self):
+        """Test function docstring."""
         text = "Daniel Gaida <daniel.gaida@th-koeln.de>"
         # Should stay the same
         self.assertEqual(anonymize_th_koeln_names(text), text)
 
     def test_mixed_case_and_parts(self):
+        """Test function docstring."""
         text = "Max Power (max.power@th-koeln.de) sent a mail. Power is a cool name."
         # max.power -> max, power.
         # "Max" (if > 2) replaced by Max Mustermann
@@ -55,6 +60,7 @@ class TestAnonymization(unittest.TestCase):
         self.assertNotIn("max.power", result)
 
     def test_multiple_names(self):
+        """Test function docstring."""
         text = "John Doe (john.doe@smail.th-koeln.de) and Jane Smith (jane.smith@th-koeln.de)"
         result = anonymize_th_koeln_names(text)
         self.assertIn("max.mustermann@smail.th-koeln.de", result)
@@ -63,6 +69,7 @@ class TestAnonymization(unittest.TestCase):
         self.assertNotIn("Jane", result)
 
     def test_underscore_in_email(self):
+        """Test function docstring."""
         text = "vorname_nachname@th-koeln.de"
         result = anonymize_th_koeln_names(text)
         self.assertEqual(result, "max.mustermann@th-koeln.de")

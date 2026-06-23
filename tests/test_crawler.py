@@ -1,8 +1,10 @@
+"""Tests for test_crawler.py."""
 from unittest.mock import MagicMock
 from mcp_university.crawler.crawler import Crawler
 from mcp_university.config import Config
 
 def test_crawler_file_processing(tmp_path):
+    """Test function docstring."""
     config = Config()
     config.folders.folders = [str(tmp_path)]
     store = MagicMock()

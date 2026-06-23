@@ -1,5 +1,7 @@
+"""Tests for test_llm_client.py."""
 
 def test_llm_client_wrapper_chat(mock_llm_client_wrapper):
+    """Test function docstring."""
     # Setup mock behavior
     mock_llm_client_wrapper.chat.return_value = {
         'message': {'role': 'assistant', 'content': 'Mocked Content'}

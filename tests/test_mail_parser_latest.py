@@ -1,6 +1,8 @@
+"""Tests for test_mail_parser_latest.py."""
 from mcp_university.parser.mail_parser import MailParser
 
 def test_extract_latest_message_standard():
+    """Test function docstring."""
     parser = MailParser()
     text = """Hallo, hier ist meine Antwort.
 Zweite Zeile für den Test.
@@ -13,6 +15,7 @@ Zitat von daniel.gaida@th-koeln.de:
     assert "Zitat von" not in latest
 
 def test_extract_latest_message_reply_below_quote():
+    """Test function docstring."""
     parser = MailParser()
     text = """Zitat von daniel.gaida@th-koeln.de:
 
@@ -32,6 +35,7 @@ Beste Grüße!"""
     assert "Guten Tag Herr" not in latest
 
 def test_extract_latest_message_with_multiple_quotes():
+    """Test function docstring."""
     parser = MailParser()
     text = """Hier ist meine neue Antwort.
 Und noch mehr Text.
@@ -48,6 +52,7 @@ Am 01.01.2024 um 10:00 schrieb student@smail.th-koeln.de:
     assert "Alte Antwort" not in latest
 
 def test_extract_latest_message_no_fallback_on_clear_marker():
+    """Test function docstring."""
     parser = MailParser()
     text = """Short reply.
 Zitat von daniel.gaida@th-koeln.de:
@@ -57,6 +62,7 @@ Zitat von daniel.gaida@th-koeln.de:
     assert latest == "Short reply."
 
 def test_extract_latest_message_no_fallback_on_quotes():
+    """Test function docstring."""
     parser = MailParser()
     text = """Short.
 > Quote line 1

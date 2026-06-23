@@ -1,3 +1,4 @@
+"""Tests for test_profiler_sources.py."""
 import pytest
 from unittest.mock import MagicMock, patch
 from pathlib import Path
@@ -5,16 +6,19 @@ from mcp_university.summarizer.profiler import PersonProfiler
 
 @pytest.fixture
 def mock_store():
+    """Test function docstring."""
     store = MagicMock()
     return store
 
 @pytest.fixture
 def mock_profile_store():
+    """Test function docstring."""
     store = MagicMock()
     return store
 
 @pytest.fixture
 def profiler(mock_store, mock_profile_store, tmp_path):
+    """Test function docstring."""
     with patch('mcp_university.summarizer.profiler.MetadataStore', return_value=mock_store):
         with patch('mcp_university.summarizer.profiler.ProfileStore', return_value=mock_profile_store):
             with patch('mcp_university.summarizer.profiler.LLMClientWrapper') as mock_llm:
@@ -24,6 +28,7 @@ def profiler(mock_store, mock_profile_store, tmp_path):
                     yield p
 
 def test_generate_profile_includes_sources(profiler, mock_store):
+    """Test function docstring."""
     email = "test@example.com"
 
     # Mock emails
@@ -44,6 +49,7 @@ def test_generate_profile_includes_sources(profiler, mock_store):
             assert "- Ordner: /data/folder2" in profile
 
 def test_update_profile_updates_sources(profiler, mock_store, mock_profile_store, tmp_path):
+    """Test function docstring."""
     email = "test@example.com"
     profile_file = tmp_path / f"{email}.md"
 
@@ -79,6 +85,7 @@ def test_update_profile_updates_sources(profiler, mock_store, mock_profile_store
             assert "- Ordner: /data/folder2" in profile
 
 def test_find_emails_includes_cc(profiler):
+    """Test function docstring."""
     email = "cc@example.com"
 
     # Mock mail details
@@ -99,6 +106,7 @@ def test_find_emails_includes_cc(profiler):
                 assert emails[0]["path"] == Path("/test/mail.msg")
 
 def test_find_emails_limit(profiler):
+    """Test function docstring."""
     email = "test@example.com"
 
     # 150 mock emails

@@ -1,4 +1,5 @@
 """Module for generating and updating person profiles."""
+import email.utils
 import json
 import logging
 import yaml
@@ -75,7 +76,12 @@ class PersonProfiler:
         Returns:
             List[Dict[str, Any]]: Liste der gefundenen E-Mails mit Metadaten.
         """
-        email_address = email_address.lower()
+        name_part, addr_part = email.utils.parseaddr(email_address)
+        actual_email = addr_part.lower() if addr_part else email_address.lower()
+
+        logger.info(f"Suche E-Mails für Adresse: {actual_email} (Input: {email_address})")
+
+        email_address = actual_email
         search_paths = self.get_search_paths()
         found_emails = []
 
@@ -225,7 +231,30 @@ class PersonProfiler:
         Returns:
             str: Formatierte Informationen aus dem Wissensgraphen.
         """
-        person_node = self.store.get_node_by_property("email", email_address)
+        name_part, addr_part = email.utils.parseaddr(email_address)
+        actual_email = addr_part.lower() if addr_part else email_address.lower()
+
+        logger.info(f"Suche im Wissensgraph für: {actual_email} (Name: {name_part})")
+
+        person_node = self.store.get_node_by_property("email", actual_email)
+
+        # Fallback: Suche nach Name, falls im Adress-String vorhanden
+        if not person_node and name_part:
+            logger.info(f"Kein Knoten für Email {actual_email} gefunden. Versuche Suche nach Name: {name_part}")
+            # Wir suchen hier nach dem exakten Namen oder Varianten ("Vorname Nachname" vs "Nachname, Vorname")
+            name_variants = [name_part]
+            if " " in name_part and "," not in name_part:
+                parts = name_part.split(" ")
+                name_variants.append(f"{parts[-1]}, {' '.join(parts[:-1])}")
+
+            for node in self.store.get_all_nodes():
+                if node.get("type") == "Person":
+                    node_name = node.get("name", "")
+                    if node_name in name_variants:
+                        person_node = node
+                        logger.info(f"Person über Name {node_name} gefunden.")
+                        break
+
         if not person_node:
             return ""
 
@@ -275,7 +304,12 @@ class PersonProfiler:
         Returns:
             Optional[str]: Der Inhalt des Steckbriefs oder None bei Fehler.
         """
-        profile_file = self.storage_path / f"{email_address}.md"
+        logger.info(f"generate_profile aufgerufen für: {email_address} (force_update={force_update})")
+
+        name_part, addr_part = email.utils.parseaddr(email_address)
+        actual_email = addr_part.lower() if addr_part else email_address.lower()
+
+        profile_file = self.storage_path / f"{actual_email}.md"
 
         if profile_file.exists() and not force_update:
             logger.info(f"Steckbrief für {email_address} existiert bereits.")
@@ -290,7 +324,7 @@ class PersonProfiler:
             kg_context = user_info + kg_context
 
         if not emails and not kg_context:
-            logger.warning(f"Keine E-Mails und keine Wissensgraph-Infos für {email_address} gefunden.")
+            logger.warning(f"Keine E-Mails und keine Wissensgraph-Infos für {actual_email} (Input: {email_address}) gefunden.")
             return None
 
         batches = self.create_batches(emails) if emails else [[]]

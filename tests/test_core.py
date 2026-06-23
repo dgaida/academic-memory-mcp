@@ -1,8 +1,10 @@
+"""Tests for test_core.py."""
 from mcp_university.config import Config
 from mcp_university.metadata.store import MetadataStore
 from mcp_university.parser.factory import ParserFactory
 
 def test_config_loading(tmp_path):
+    """Test function docstring."""
     config_dir = tmp_path / "config"
     config_dir.mkdir()
     (config_dir / "folders.yaml").write_text("folders: ['/test']")
@@ -14,6 +16,7 @@ def test_config_loading(tmp_path):
     assert cfg.calendar.send_invitations_automatically is True
 
 def test_metadata_store(tmp_path):
+    """Test function docstring."""
     db_path = tmp_path / "test.db"
     store = MetadataStore(db_path)
     fid = store.upsert_folder("/path/to/folder")
@@ -26,6 +29,7 @@ def test_metadata_store(tmp_path):
     assert file[1] == "/path/to/folder/file.txt"
 
 def test_parser_factory(tmp_path):
+    """Test function docstring."""
     cache_dir = tmp_path / "cache"
     factory = ParserFactory(cache_dir)
 

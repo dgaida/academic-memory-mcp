@@ -1,3 +1,4 @@
+"""Tests for test_classifier_analysis_extended.py."""
 from unittest.mock import MagicMock, patch, mock_open
 from pathlib import Path
 import numpy as np
@@ -7,6 +8,7 @@ from mcp_university.classifier.plot_data_distribution import count_emails, plot_
 @patch("mcp_university.classifier.xai_analysis.EmailClassifier")
 @patch("mcp_university.classifier.xai_analysis.shap.TreeExplainer")
 def test_run_xai_analysis(mock_shap, mock_classifier_cls):
+    """Test function docstring."""
     mock_classifier = mock_classifier_cls.return_value
     mock_classifier.mode = "tfidf"
     mock_classifier.label_encoder.classes_ = ["Class1"]
@@ -20,6 +22,7 @@ def test_run_xai_analysis(mock_shap, mock_classifier_cls):
         assert mock_classifier.load.called
 
 def test_plot_dist(tmp_path):
+    """Test function docstring."""
     d = tmp_path / "C1"
     d.mkdir()
     (d / "Inbox").mkdir()

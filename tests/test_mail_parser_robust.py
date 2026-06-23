@@ -1,9 +1,11 @@
+"""Tests for test_mail_parser_robust.py."""
 from unittest.mock import MagicMock, patch
 from pathlib import Path
 from datetime import datetime
 from mcp_university.parser.mail_parser import MailParser
 
 def test_get_msg_details_robust_recipients():
+    """Test function docstring."""
     parser = MailParser()
     file_path = Path("test.msg")
 
@@ -28,6 +30,7 @@ def test_get_msg_details_robust_recipients():
         assert details["cc"] == [{"name": "CC Person", "email": "cc@example.com"}]
 
 def test_get_msg_details_robust_smtp_address():
+    """Test function docstring."""
     parser = MailParser()
     file_path = Path("test.msg")
 
@@ -51,6 +54,7 @@ def test_get_msg_details_robust_smtp_address():
         assert details["to"] == [{"name": "Real Name", "email": "real@example.com"}]
 
 def test_get_msg_details_fallback_headers():
+    """Test function docstring."""
     parser = MailParser()
     file_path = Path("test.msg")
 
@@ -77,6 +81,7 @@ def test_get_msg_details_fallback_headers():
         assert details["cc"] == [{"name": "Header Cc", "email": "cc@example.com"}]
 
 def test_parse_address_list_various_formats():
+    """Test function docstring."""
     parser = MailParser()
 
     assert parser._parse_address_list("simple@example.com") == [{"name": "", "email": "simple@example.com"}]

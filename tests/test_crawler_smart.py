@@ -1,9 +1,11 @@
+"""Tests for test_crawler_smart.py."""
 import pytest
 from unittest.mock import MagicMock, patch
 from mcp_university.crawler.crawler import Crawler
 
 @pytest.fixture
 def mock_deps():
+    """Test function docstring."""
     config = MagicMock()
     config.folders.supported_extensions = [".txt"]
     config.folders.exclude_patterns = []
@@ -16,6 +18,7 @@ def mock_deps():
     return config, store, parser, summarizer, index
 
 def test_folder_summarization_skipped_when_unchanged(tmp_path, mock_deps):
+    """Test function docstring."""
     config, store, parser, summarizer, index = mock_deps
 
     subdir = tmp_path / "subdir"
@@ -43,6 +46,7 @@ def test_folder_summarization_skipped_when_unchanged(tmp_path, mock_deps):
     assert summarizer.summarize_folder.called is False
 
 def test_folder_summarization_triggered_when_file_deleted(tmp_path, mock_deps):
+    """Test function docstring."""
     config, store, parser, summarizer, index = mock_deps
 
     subdir = tmp_path / "subdir"
@@ -75,6 +79,7 @@ def test_folder_summarization_triggered_when_file_deleted(tmp_path, mock_deps):
     assert summarizer.summarize_folder.called
 
 def test_folder_summarization_triggered_when_file_changed(tmp_path, mock_deps):
+    """Test function docstring."""
     config, store, parser, summarizer, index = mock_deps
 
     subdir = tmp_path / "subdir"
