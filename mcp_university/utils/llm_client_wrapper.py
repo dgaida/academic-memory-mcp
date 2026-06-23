@@ -121,15 +121,26 @@ class LLMClientWrapper:
                 )
 
             try:
-                # LLMClient.chat_completion is synchronous
-                content = self.client.chat_completion(chat_messages)
-                return {
-                    "message": {
-                        "role": "assistant",
-                        "content": content,
-                        "tool_calls": None,
+                if tools:
+                    # LLMClient.chat_completion_with_tools returns a dict with 'content' and 'tool_calls'
+                    result = self.client.chat_completion_with_tools(chat_messages, tools=tools)
+                    return {
+                        "message": {
+                            "role": "assistant",
+                            "content": result.get("content"),
+                            "tool_calls": result.get("tool_calls"),
+                        }
                     }
-                }
+                else:
+                    # LLMClient.chat_completion is synchronous
+                    content = self.client.chat_completion(chat_messages)
+                    return {
+                        "message": {
+                            "role": "assistant",
+                            "content": content,
+                            "tool_calls": None,
+                        }
+                    }
             except Exception as e:
                 logger.error(f"Cloud LLM error: {e}")
                 return {
