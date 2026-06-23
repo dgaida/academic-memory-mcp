@@ -908,7 +908,7 @@ TEXT:
                         "status": status,
                     }
                 )
-
+                continue
             if self.use_action_classifier:
                 continue
             student_email = ""
