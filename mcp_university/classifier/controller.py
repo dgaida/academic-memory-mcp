@@ -876,28 +876,32 @@ TEXT:
                 if latest_date.replace(tzinfo=None) < cutoff:
                     is_old = True
 
-            if self.use_action_classifier:
-                # If old or already answered or in SentItems, default to Archive
-                is_sent = email.get("folder") == "SentItems"
-                if is_old or is_sent or not email.get("needs_answer", True):
-                    if is_old:
-                        reason = "alt"
-                    elif is_sent:
-                        reason = "im SentItems Ordner"
-                    else:
-                        reason = "bereits beantwortet"
-                    logger.info(
-                        f"E-Mail von {email['lastname']} ist {reason}. Automatische Aktion: Archivieren."
-                    )
-                    email["suggested_action"] = (
-                        3  # index for "4) E-Mail nur archivieren"
-                    )
+            # Standard suggested action: Archive if old, sent, or already answered
+            is_sent = email.get("folder") == "SentItems"
+            needs_answer = email.get("needs_answer", True)
+
+            if is_old or is_sent or not needs_answer:
+                if is_old:
+                    reason = f"alt (> {age_months} Monate)"
+                elif is_sent:
+                    reason = "im SentItems Ordner"
                 else:
-                    email["suggested_action"] = self.classify_action(
-                        latest_mail, email_class=email["class"]
-                    )
+                    reason = "bereits beantwortet"
+                logger.info(
+                    f"E-Mail von {email['lastname']} ist {reason}. Automatische Aktion: Archivieren."
+                )
+                email["suggested_action"] = 3  # index for "4) E-Mail nur archivieren"
+            elif self.use_action_classifier:
+                email["suggested_action"] = self.classify_action(
+                    latest_mail, email_class=email["class"]
+                )
+            else:
+                email["suggested_action"] = 0  # Default: Antwort schreiben
+
+            if self.use_action_classifier:
                 continue
 
+            # Legacy processing (only if use_action_classifier is False)
             if is_old:
                 processed_results.append(
                     {
@@ -908,7 +912,7 @@ TEXT:
                 )
                 continue
 
-            if not email.get("needs_answer", True):
+            if not needs_answer:
                 processed_results.append(
                     {
                         "lastname": email["lastname"],
@@ -1060,8 +1064,7 @@ TEXT:
                 }
             )
 
-        if self.use_action_classifier:
-            return emails_to_process
+        # Always return emails_to_process for GUI consistency
 
         if processed_results:
             with open(source_dir / "processed_emails.md", "w", encoding="utf-8") as f:
@@ -1073,7 +1076,7 @@ TEXT:
                         f"| {res['lastname']} | {res['subject']} | {res['status']} |\n"
                     )
 
-        return processed_results
+        return emails_to_process
 
     def generate_short_summary(self, mail_path: Path) -> str:
         """Generiert eine kurze Zusammenfassung (2 Sätze) einer E-Mail."""
