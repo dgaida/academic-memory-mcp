@@ -37,8 +37,6 @@ logger = logging.getLogger(__name__)
 
 
 class EmailController:
-    """Steuert den Prozess der E-Mail-Verarbeitung, Klassifizierungskorrektur und Antwortgenerierung."""
-
     ACTION_OPTIONS = [
         "1) Antwort schreiben.",
         "2) Antwort schreiben mit einem Terminvorschlag.",
@@ -116,6 +114,38 @@ class EmailController:
                 self.class_to_memory_index = resolve_memory_index_names(
                     self.memory_paths
                 )
+    def _detect_language(self, content: str) -> str:
+        """Erkennt die Sprache der E-Mail (Deutsch oder Englisch)."""
+        prompt = f"Analysiere die Sprache des folgenden Textes. Antworte NUR mit 'English' oder 'German'.\n\n{content[:500]}"
+        try:
+            response = self.summarizer.client.chat(
+                system_prompt="Du bist ein Assistent zur Spracherkennung.",
+                messages=[{"role": "user", "content": prompt}],
+            )
+            lang = response.get("message", {}).get("content", "").strip().capitalize()
+            if "English" in lang:
+                return "English"
+            return "German"
+        except Exception as e:
+            logger.error(f"Fehler bei der Spracherkennung: {e}")
+            return "German"
+
+    def _extract_honorific_preference(self, profile: Optional[str] = None) -> str:
+        """Extrahiert die bevorzugte Anrede (Du oder Sie) aus dem Profil."""
+        if not profile:
+            return "Sie"
+
+        # Suche nach "Bevorzugte Anrede: Du" oder ähnlichem
+        if re.search(r"Bevorzugte Anrede:.*?\bDu\b", profile, re.IGNORECASE):
+            return "Du"
+        if re.search(r"Bevorzugte Anrede:.*?\bSie\b", profile, re.IGNORECASE):
+            return "Sie"
+
+        # Fallback: Suche im gesamten Profil nach Hinweisen
+        if "Anrede: Du" in profile or "(Du)" in profile or "duzt" in profile:
+            return "Du"
+
+        return "Sie"
 
     def _get_memory_context(self, mail_content: str, email_class: str) -> str:
         """Generiert Suchanfragen aus der E-Mail und holt relevante Chunks aus der Vektordatenbank."""
@@ -186,6 +216,7 @@ ANTWORTE NUR MIT DEN 3 FRAGEN, EINE PRO ZEILE, OHNE NUMMERIERUNG."""
             logger.error(f"Fehler bei der Retrieval-Context-Generierung: {e}")
             return ""
 
+
     def classify_action(
         self, mail_path: Path, additional_context: str = "", email_class: str = None
     ) -> int:
@@ -248,12 +279,27 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
         try:
             with extract_msg.openMsg(str(latest_mail)) as msg:
                 from mcp_university.classifier.sort_emails import extract_firstname
-
                 first_name = extract_firstname(msg.sender)
         except Exception:
             pass
 
-        salutation = f"Guten Tag {self.summarizer.determine_gender(first_name)} {email_data.get('lastname', '')}"
+        # Spracherkennung und Anrede-Präferenz
+        mail_text = self.mail_parser.parse(latest_mail)
+        detected_language = self._detect_language(mail_text)
+        honorific = self._extract_honorific_preference(person_profile)
+
+        if honorific == "Du":
+            salutation = f"Hallo {first_name}" if first_name != "Unknown" else "Hallo"
+        else:
+            salutation = f"Guten Tag {self.summarizer.determine_gender(first_name)} {email_data.get('lastname', '')}"
+
+        if detected_language == "English":
+            if honorific == "Du":
+                salutation = f"Hi {first_name}" if first_name != "Unknown" else "Hi"
+            else:
+                salutation = f"Dear {self.summarizer.determine_gender(first_name)} {email_data.get('lastname', '')}"
+                salutation = salutation.replace("Herr", "Mr.").replace("Frau", "Ms.")
+
         add_ctx = f"Anrede: {salutation}\n"
         if user_profile:
             add_ctx += (
@@ -286,9 +332,6 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
             )
             if identifier_path:
                 summary_file = identifier_path / ".emails_summary.md"
-                # For simplicity, we always re-generate or check freshness here
-                # Or just load if exists, and generate if not.
-                # Since we want it to be current:
                 email_files = list(identifier_path.rglob("*.msg")) + list(
                     identifier_path.rglob("*.eml")
                 )
@@ -330,6 +373,8 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
             student_email,
             action_idx=action_idx,
             email_class=email_data.get("class"),
+            detected_language=detected_language,
+            honorific=honorific,
         )
 
         if reply_subject == "NO_REPLY_NEEDED":
@@ -340,11 +385,9 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
             if apt_info and "start_time" in apt_info:
                 return f"Termin gebucht ({apt_info['start_time']})"
 
-            # If we are here, something went wrong although LLM said APPOINTMENT_BOOKED
             err = getattr(self.agent, "last_tool_error", None)
             return f"Fehler bei Terminbuchung: {err}" if err else "Fehler bei Terminbuchung (Tool wurde nicht erfolgreich aufgerufen)."
 
-        # Entwurf erstellen
         cc_list = []
         try:
             with extract_msg.openMsg(str(latest_mail)) as msg:
@@ -372,7 +415,6 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
                 attachments.append(pdf)
 
         from mcp_university.utils.outlook import create_outlook_draft
-
         success = create_outlook_draft(
             reply_subject or latest_mail.stem,
             reply,
@@ -470,9 +512,7 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
 
             target_dir.mkdir(parents=True, exist_ok=True)
 
-            # 1. Save attachments if requested (BEFORE moving the email, but using target info)
             if change.get("save_attachments"):
-                # Save to the parent of the target folder (student folder)
                 attachment_target = target_dir.parent
                 logger.info(
                     f"Speichere Anhänge von {old_path.name} in {attachment_target}"
@@ -506,7 +546,6 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
             target_student_folder = target_dir.parent
 
             def has_emails(student_folder: Path):
-                """Prüft, ob der Student-Ordner noch E-Mails enthält."""
                 for sub in ["Inbox", "SentItems"]:
                     p = student_folder / sub
                     if p.exists() and p.is_dir():
@@ -531,7 +570,6 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
                         summary_file.unlink()
 
             def delete_if_empty(folder: Path):
-                """Löscht einen Ordner, wenn er leer ist."""
                 if folder.exists() and folder.is_dir():
                     items = list(folder.iterdir())
                     if not items:
@@ -558,6 +596,8 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
         sender_email: str = None,
         action_idx: int = None,
         email_class: str = None,
+        detected_language: str = "German",
+        honorific: str = "Sie",
     ) -> Tuple[str, str, bool]:
         """Generiert eine Antwortmail mit dem LLM in mehreren Schritten."""
         mail_content = self.mail_parser.parse(mail_path)
@@ -569,7 +609,6 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
             extracted_file = mail_path.parent / f"{mail_path.stem}_extracted.md"
             extracted_file.write_text(mail_content, encoding="utf-8")
 
-
         appointment_skill_content = ""
         if appointment_skill_path and appointment_skill_path.exists():
             appointment_skill_content = appointment_skill_path.read_text(
@@ -580,9 +619,8 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
         if persona_path and persona_path.exists():
             persona_content = persona_path.read_text(encoding="utf-8")
 
-        system_prompt = "Du bist ein hilfreicher Assistent an der TH Köln. Verfasse eine Antwort-E-Mail auf Deutsch."
+        system_prompt = f"Du bist ein hilfreicher Assistent an der TH Köln. Verfasse eine Antwort-E-Mail auf {detected_language}."
 
-        # Action-specific flags
         skip_step1 = False
         force_appointment_slots = False
         force_calendar_booking = False
@@ -607,10 +645,8 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
                 force_colloquium = True
                 skip_step12 = True
 
-        # STEP 1: APPOINTMENT
         if not skip_step1:
             logger.info("Schritt 1: Prüfe Terminrelevanz...")
-
             forced_instr = ""
             if force_appointment_slots:
                 forced_instr = "\nERZWUNGENE AKTION: Diese E-Mail ist eine Terminanfrage. Du MUSST ZWINGEND get_appointment_slots aufrufen."
@@ -619,7 +655,7 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
             elif force_colloquium:
                 forced_instr = "\nERZWUNGENE AKTION: Diese E-Mail bestätigt ein Kolloquium (60 Min). Du MUSST ZWINGEND manage_calendar_appointment aufrufen."
 
-            appointment_user_prompt = f"""Du bist ein Tool-Calling-Agent. Deine EINZIGE Aufgabe ist es, basierend auf der E-Mail und dem TERMINVERWALTUNG SKILL die korrekte Aktion auszuführen.
+            appointment_user_prompt = f"""Du bist ein Tool-Calling-Agent. Deine EINZIGE Aufgabe ist es, basierend auf der E-Mail und dem TERMINVERWALTUNG SKILL die korrekte Aktion auf {detected_language} auszuführen. Nutze die Anrede '{honorific}'.
 
 HEUTE IST: {datetime.now(ZoneInfo("Europe/Berlin")).strftime("%A, den %d.%m.%Y %H:%M")}
 
@@ -658,7 +694,6 @@ VERBOTE:
                         apt_text = f"APPOINTMENT_BOOKED|{apt_info['start_time']}"
                         return "APPOINTMENT_BOOKED", apt_text, False
 
-                    # Tool call failed or was not made
                     err = getattr(self.agent, "last_tool_error", None)
                     err_msg = f"FEHLER: Termin konnte nicht gebucht werden. {err}" if err else "FEHLER: Terminbuchungs-Tool wurde nicht aufgerufen."
                     return "APPOINTMENT_BOOKING_FAILED", err_msg, False
@@ -678,7 +713,6 @@ VERBOTE:
             except Exception as e:
                 logger.error(f"Fehler in Schritt 1 (Appointment): {e}")
 
-        # STEP 1.2: FINAL SUBMISSION
         fs_skill_path = Path("skills/SKILL_FinalSubmission.md")
         if not fs_skill_path.exists():
             fs_skill_path = (
@@ -688,12 +722,11 @@ VERBOTE:
         if not skip_step12 and fs_skill_path.exists():
             logger.info("Schritt 1.2: Prüfe auf finale Abgabe...")
             fs_content = fs_skill_path.read_text(encoding="utf-8")
-
             forced_instr = ""
             if force_final_submission:
                 forced_instr = "\nERZWUNGENE AKTION: Dies ist eine finale Abgabe. Du MUSST ZWINGEND manage_calendar_appointment und save_email_attachments aufrufen."
 
-            fs_prompt = f"""Prüfe die folgende E-Mail auf eine finale Abgabe basierend auf dem FINALE ABGABE SKILL.
+            fs_prompt = f"""Prüfe die folgende E-Mail auf eine finale Abgabe basierend auf dem FINALE ABGABE SKILL. Antworte auf {detected_language} und nutze die Anrede '{honorific}'.
 
 HEUTE IST: {datetime.now(ZoneInfo("Europe/Berlin")).strftime("%A, den %d.%m.%Y %H:%M")}
 
@@ -731,10 +764,9 @@ WICHTIGE ANWEISUNG:
             except Exception as e:
                 logger.error(f"Fehler in Schritt 1.2 (FinalSubmission): {e}")
 
-        # STEP 1.5: NECESSITY (only if not forced)
         if action_idx is None:
             logger.info("Schritt 1.5: Prüfe Notwendigkeit...")
-            nec_prompt = f"""Prüfe, ob die E-Mail eine Antwort erfordert.
+            nec_prompt = f"""Prüfe, ob die E-Mail eine Antwort erfordert. Antworte auf {detected_language}.
 PERSONA: {persona_content}
 KONTEXT: {additional_context}
 E-MAIL: {mail_content}
@@ -759,20 +791,18 @@ E-MAIL: {mail_content}
             except Exception:
                 pass
 
-        # Retrieval memory logic
         if email_class:
             retrieved_context = self._get_memory_context(mail_content, email_class)
             if retrieved_context:
                 additional_context += retrieved_context
 
-        # STEP 2: REGULAR REPLY
         logger.info("Schritt 2: Generiere reguläre Antwort...")
         skill_content = (
             skill_path.read_text(encoding="utf-8")
             if skill_path and skill_path.exists()
             else ""
         )
-        reg_prompt = f"""Verfasse eine Antwort auf die folgende E-Mail basierend auf der PERSONA und dem SKILL.
+        reg_prompt = f"""Verfasse eine Antwort auf die folgende E-Mail auf {detected_language} basierend auf der PERSONA und dem SKILL. Nutze die Anrede '{honorific}'.
 
 PERSONA:
 {persona_content}
@@ -841,7 +871,6 @@ TEXT:
                     dated_emails.append((datetime.min, f))
             dated_emails.sort(key=lambda x: x[0])
             latest_date, latest_mail = dated_emails[-1]
-            # Individual email in SentItems never needs an answer
             if email.get("folder") == "SentItems":
                 needs_answer = False
             else:
@@ -865,7 +894,6 @@ TEXT:
             for email in emails_to_process:
                 f.write(f"| {email['lastname']} | {email['class']} | {email['semester']} |\n")
 
-        
         persona_path = Path("skills/SKILL_persona.md")
         apt_skill_path = Path("skills/SKILL_Appointment.md")
 
@@ -873,7 +901,6 @@ TEXT:
             latest_mail = email["latest_mail"]
             latest_date = email["latest_date"]
 
-            # Check if email is old
             is_old = False
             if age_months:
                 cutoff = (datetime.now() - timedelta(days=age_months * 30)).replace(
@@ -882,7 +909,6 @@ TEXT:
                 if latest_date.replace(tzinfo=None) < cutoff:
                     is_old = True
 
-            # Standard suggested action: Archive if old, sent, or already answered
             is_sent = email.get("folder") == "SentItems"
             needs_answer = email.get("needs_answer", True)
 
@@ -896,18 +922,17 @@ TEXT:
                 logger.info(
                     f"E-Mail von {email['lastname']} ist {reason}. Automatische Aktion: Archivieren."
                 )
-                email["suggested_action"] = 3  # index for "4) E-Mail nur archivieren"
+                email["suggested_action"] = 3
             elif self.use_action_classifier:
                 email["suggested_action"] = self.classify_action(
                     latest_mail, email_class=email["class"]
                 )
             else:
-                email["suggested_action"] = 0  # Default: Antwort schreiben
+                email["suggested_action"] = 0
 
             if self.use_action_classifier:
                 continue
 
-            # Legacy processing (only if use_action_classifier is False)
             if is_old:
                 self.processed_results.append(
                     {
@@ -970,11 +995,28 @@ TEXT:
             first_name = "Unknown"
             try:
                 with extract_msg.openMsg(str(latest_mail)) as msg:
+                    from mcp_university.classifier.sort_emails import extract_firstname
                     first_name = extract_firstname(msg.sender)
             except Exception:
                 pass
 
-            salutation = f"Guten Tag {self.summarizer.determine_gender(first_name)} {email['lastname']}"
+            # Spracherkennung und Anrede-Präferenz
+            mail_text = self.mail_parser.parse(latest_mail)
+            detected_language = self._detect_language(mail_text)
+            honorific = self._extract_honorific_preference(person_profile)
+
+            if honorific == "Du":
+                salutation = f"Hallo {first_name}" if first_name != "Unknown" else "Hallo"
+            else:
+                salutation = f"Guten Tag {self.summarizer.determine_gender(first_name)} {email['lastname']}"
+
+            if detected_language == "English":
+                if honorific == "Du":
+                    salutation = f"Hi {first_name}" if first_name != "Unknown" else "Hi"
+                else:
+                    salutation = f"Dear {self.summarizer.determine_gender(first_name)} {email['lastname']}"
+                    salutation = salutation.replace("Herr", "Mr.").replace("Frau", "Ms.")
+
             add_ctx = f"Anrede: {salutation}\n"
             if user_profile:
                 add_ctx += (
@@ -991,10 +1033,8 @@ TEXT:
                 if pdf_path.exists():
                     add_ctx += f"\nDu kannst bei Bedarf Details aus der Datei '{pdf_path}' mittels des read_file Tools auslesen.\n"
 
-            # Conversation summary is now delayed until execute_action/generate_reply
             summary_content = ""
             conv_content = ""
-
             reply_subject, reply, should_attach = self.generate_reply(
                 latest_mail,
                 summary_content,
@@ -1006,6 +1046,8 @@ TEXT:
                 sender_name,
                 student_email,
                 email_class=email["class"],
+                detected_language=detected_language,
+                honorific=honorific,
             )
 
             if reply_subject == "NO_REPLY_NEEDED":
@@ -1070,23 +1112,13 @@ TEXT:
                 }
             )
 
-        # Always return emails_to_process for GUI consistency
-
         if self.processed_results:
             self.write_processed_report(source_dir, self.processed_results)
 
         return emails_to_process
 
     def write_processed_report(self, source_dir: Path, results: list):
-        """Schreibt den Abschlussbericht über verarbeitete E-Mails.
-
-        Args:
-            source_dir (Path): Quellverzeichnis.
-            results (list): Liste von Dictionaries mit 'lastname', 'subject', 'status'.
-
-        Returns:
-            None
-        """
+        """Schreibt den Abschlussbericht über verarbeitete E-Mails."""
         if not results:
             return
 
@@ -1126,23 +1158,13 @@ TEXT:
             return "Fehler bei Zusammenfassung."
 
     def get_similarity_info(self, mail_path: Path, lastname: str) -> str:
-        """Findet die ähnlichsten E-Mails desselben Studenten in den konfigurierten Pfaden.
-
-        Args:
-            mail_path: Pfad zur aktuellen E-Mail.
-            lastname: Nachname des Studenten.
-
-        Returns:
-            str: Markdown-formatierte Information über die ähnlichste E-Mails.
-        """
+        """Findet die ähnlichsten E-Mails desselben Studenten in den konfigurierten Pfaden."""
         try:
-            # 1. Details der aktuellen Mail
             current_details = self.mail_parser.get_email_details(mail_path)
             current_subject = current_details.get("subject", "")
             if not current_subject:
                 return "Kein Betreff in aktueller Mail gefunden."
 
-            # 2. Alle relevanten Mails des Studenten in allen Klassen-Pfaden suchen
             all_mails = []
             seen_paths = set()
 
@@ -1176,26 +1198,18 @@ TEXT:
             if not all_mails:
                 return "Keine anderen E-Mails des Studenten in den Archiv-Ordnern gefunden."
 
-            # 3. Die 3 neuesten nehmen
             all_mails.sort(key=lambda x: x["date"], reverse=True)
             newest_mails = all_mails[:3]
 
-            # 4. Embeddings und Similarity
-
             model_name = self.config.embeddings.model
-
-            # Lazy load similarity model on controller using shared cache
             if not hasattr(self, "_similarity_model"):
                 self._similarity_model = get_model(
                     model_name, offline=self.config.offline
                 )
 
             subjects = [m["subject"] for m in newest_mails]
-
             curr_emb = self._similarity_model.encode([current_subject])
             other_embs = self._similarity_model.encode(subjects)
-            
-                        
             similarities = cosine_similarity(curr_emb, other_embs)[0]
             best_idx = int(np.argmax(similarities))
             best_score = float(similarities[best_idx])
@@ -1206,7 +1220,6 @@ TEXT:
                 f"**Pfad:** `{best_mail['path']}`\n\n"
                 f"**Cosine Similarity:** {best_score:.4f}"
             )
-
         except Exception as e:
             logger.error(f"Fehler bei Similarity-Suche für {lastname}: {e}")
             return f"*Fehler bei Similarity-Suche: {str(e)}*"
