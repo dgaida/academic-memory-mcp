@@ -117,6 +117,56 @@ class EmailController:
                     self.memory_paths
                 )
 
+    def _detect_language(self, content: Optional[str]) -> str:
+        """Erkennt die Sprache der E-Mail (Deutsch oder Englisch).
+
+        Args:
+            content (Optional[str]): Der Inhalt der E-Mail.
+
+        Returns:
+            str: "English" oder "German".
+        """
+        if not content:
+            return "German"
+        prompt = f"Analysiere die Sprache des folgenden Textes. Antworte NUR mit 'English' oder 'German'.\n\n{content[:500]}"
+        try:
+            response = self.summarizer.client.chat(
+                system_prompt="Du bist ein Assistent zur Spracherkennung.",
+                messages=[{"role": "user", "content": prompt}],
+            )
+            lang = response.get("message", {}).get("content", "").strip().capitalize()
+            if "English" in lang:
+                return "English"
+            return "German"
+        except Exception as e:
+            logger.error(f"Fehler bei der Spracherkennung: {e}")
+            return "German"
+
+    def _extract_honorific_preference(self, profile: Optional[str] = None) -> str:
+        """Extrahiert die bevorzugte Anrede (Du oder Sie) aus dem Profil.
+
+        Args:
+            profile (Optional[str]): Der Personen-Steckbrief.
+
+        Returns:
+            str: "Du" oder "Sie".
+        """
+        if not profile:
+            return "Sie"
+
+        # Suche nach "Bevorzugte Anrede: Du" oder ähnlichem
+        if re.search(r"Bevorzugte Anrede:.*?\bDu\b", profile, re.IGNORECASE):
+            return "Du"
+        if re.search(r"Bevorzugte Anrede:.*?\bSie\b", profile, re.IGNORECASE):
+            return "Sie"
+        
+        # Fallback: Suche im gesamten Profil nach Hinweisen
+        if "Anrede: Du" in profile or "(Du)" in profile or "duzt" in profile:
+            return "Du"
+            
+        return "Sie"
+
+
     def _get_memory_context(self, mail_content: str, email_class: str) -> str:
         """Generiert Suchanfragen aus der E-Mail und holt relevante Chunks aus der Vektordatenbank."""
         if email_class not in self.class_to_memory_index:
@@ -253,7 +303,23 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
         except Exception:
             pass
 
-        salutation = f"Guten Tag {self.summarizer.determine_gender(first_name)} {email_data.get('lastname', '')}"
+        # Spracherkennung und Anrede-Präferenz
+        mail_text = self.mail_parser.parse(latest_mail)
+        detected_language = self._detect_language(mail_text)
+        honorific = self._extract_honorific_preference(person_profile)
+
+        if honorific == "Du":
+            salutation = f"Hallo {first_name}" if first_name != "Unknown" else "Hallo"
+        else:
+            salutation = f"Guten Tag {self.summarizer.determine_gender(first_name)} {email_data.get('lastname', '')}"
+        
+        if detected_language == "English":
+            if honorific == "Du":
+                salutation = f"Hi {first_name}" if first_name != "Unknown" else "Hi"
+            else:
+                salutation = f"Dear {self.summarizer.determine_gender(first_name)} {email_data.get('lastname', '')}"
+                # Map Herr/Frau to Mr./Ms.
+                salutation = salutation.replace("Herr", "Mr.").replace("Frau", "Ms.")
         add_ctx = f"Anrede: {salutation}\n"
         if user_profile:
             add_ctx += (
@@ -329,6 +395,8 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
             sender_name,
             student_email,
             action_idx=action_idx,
+            detected_language=detected_language,
+            honorific=honorific,
             email_class=email_data.get("class"),
         )
 
@@ -558,8 +626,29 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
         sender_email: str = None,
         action_idx: int = None,
         email_class: str = None,
+        detected_language: str = "German",
+        honorific: str = "Sie",
     ) -> Tuple[str, str, bool]:
-        """Generiert eine Antwortmail mit dem LLM in mehreren Schritten."""
+        """Generiert eine Antwortmail mit dem LLM in mehreren Schritten.
+
+        Args:
+            mail_path (Path): Pfad zur E-Mail-Datei.
+            summary_content (str): Zusammenfassung des bisherigen Schriftverkehrs.
+            skill_path (Path): Pfad zur Skill-Datei.
+            conversation_content (str): Inhalt des bisherigen Schriftverkehrs.
+            persona_path (Path): Pfad zur Persona-Datei.
+            additional_context (str): Zusätzlicher Kontext für das LLM.
+            appointment_skill_path (Path): Pfad zur Terminverwaltungs-Skill-Datei.
+            sender_name (str): Name des Absenders.
+            sender_email (str): E-Mail-Adresse des Absenders.
+            action_idx (int): Index der gewählten Aktion.
+            email_class (str): E-Mail-Klasse.
+            detected_language (str): Die erkannte Sprache der E-Mail.
+            honorific (str): Die bevorzugte Anrede ('Du' oder 'Sie').
+
+        Returns:
+            Tuple[str, str, bool]: Betreff, Antworttext und ob ein Anhang beigefügt werden soll.
+        """
         mail_content = self.mail_parser.parse(mail_path)
         mail_content = self.mail_parser.extract_latest_message(mail_content)
         if action_idx == 3:  # 4) Nur archivieren
@@ -580,7 +669,7 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
         if persona_path and persona_path.exists():
             persona_content = persona_path.read_text(encoding="utf-8")
 
-        system_prompt = "Du bist ein hilfreicher Assistent an der TH Köln. Verfasse eine Antwort-E-Mail auf Deutsch."
+        system_prompt = f"Du bist ein hilfreicher Assistent an der TH Köln. Verfasse eine Antwort-E-Mail auf {detected_language}."
 
         # Action-specific flags
         skip_step1 = False
@@ -619,7 +708,7 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
             elif force_colloquium:
                 forced_instr = "\nERZWUNGENE AKTION: Diese E-Mail bestätigt ein Kolloquium (60 Min). Du MUSST ZWINGEND manage_calendar_appointment aufrufen."
 
-            appointment_user_prompt = f"""Du bist ein Tool-Calling-Agent. Deine EINZIGE Aufgabe ist es, basierend auf der E-Mail und dem TERMINVERWALTUNG SKILL die korrekte Aktion auszuführen.
+            appointment_user_prompt = f"""Du bist ein Tool-Calling-Agent. Deine EINZIGE Aufgabe ist es, basierend auf der E-Mail und dem TERMINVERWALTUNG SKILL die korrekte Aktion auf {detected_language} auszuführen. Nutze die Anrede '{honorific}'.
 
 HEUTE IST: {datetime.now(ZoneInfo("Europe/Berlin")).strftime("%A, den %d.%m.%Y %H:%M")}
 
@@ -693,7 +782,7 @@ VERBOTE:
             if force_final_submission:
                 forced_instr = "\nERZWUNGENE AKTION: Dies ist eine finale Abgabe. Du MUSST ZWINGEND manage_calendar_appointment und save_email_attachments aufrufen."
 
-            fs_prompt = f"""Prüfe die folgende E-Mail auf eine finale Abgabe basierend auf dem FINALE ABGABE SKILL.
+            fs_prompt = f"""Prüfe die folgende E-Mail auf eine finale Abgabe basierend auf dem FINALE ABGABE SKILL. Antworte auf {detected_language} und nutze die Anrede '{honorific}'.
 
 HEUTE IST: {datetime.now(ZoneInfo("Europe/Berlin")).strftime("%A, den %d.%m.%Y %H:%M")}
 
@@ -734,7 +823,7 @@ WICHTIGE ANWEISUNG:
         # STEP 1.5: NECESSITY (only if not forced)
         if action_idx is None:
             logger.info("Schritt 1.5: Prüfe Notwendigkeit...")
-            nec_prompt = f"""Prüfe, ob die E-Mail eine Antwort erfordert.
+            nec_prompt = f"""Prüfe, ob die E-Mail eine Antwort erfordert. Antworte auf {detected_language}.
 PERSONA: {persona_content}
 KONTEXT: {additional_context}
 E-MAIL: {mail_content}
@@ -772,7 +861,7 @@ E-MAIL: {mail_content}
             if skill_path and skill_path.exists()
             else ""
         )
-        reg_prompt = f"""Verfasse eine Antwort auf die folgende E-Mail basierend auf der PERSONA und dem SKILL.
+        reg_prompt = f"""Verfasse eine Antwort auf die folgende E-Mail auf {detected_language} basierend auf der PERSONA und dem SKILL. Nutze die Anrede '{honorific}'.
 
 PERSONA:
 {persona_content}
@@ -974,7 +1063,22 @@ TEXT:
             except Exception:
                 pass
 
-            salutation = f"Guten Tag {self.summarizer.determine_gender(first_name)} {email['lastname']}"
+            # Spracherkennung und Anrede-Präferenz
+            mail_text = self.mail_parser.parse(latest_mail)
+            detected_language = self._detect_language(mail_text)
+            honorific = self._extract_honorific_preference(person_profile)
+
+            if honorific == "Du":
+                salutation = f"Hallo {first_name}" if first_name != "Unknown" else "Hallo"
+            else:
+                salutation = f"Guten Tag {self.summarizer.determine_gender(first_name)} {email['lastname']}"
+            
+            if detected_language == "English":
+                if honorific == "Du":
+                    salutation = f"Hi {first_name}" if first_name != "Unknown" else "Hi"
+                else:
+                    salutation = f"Dear {self.summarizer.determine_gender(first_name)} {email['lastname']}"
+                    salutation = salutation.replace("Herr", "Mr.").replace("Frau", "Ms.")
             add_ctx = f"Anrede: {salutation}\n"
             if user_profile:
                 add_ctx += (
