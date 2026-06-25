@@ -21,8 +21,6 @@ from mcp_university.agent.mcp_agent import MCPAgent
 from mcp_university.classifier.engine import resolve_model_path
 from mcp_university.utils.semester import get_semester
 from mcp_university.classifier.sort_emails import (
-
-
     process_emails,
     write_report,
 

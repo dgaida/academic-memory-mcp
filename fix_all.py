@@ -1,13 +1,27 @@
-import pytest
+import sys
+from pathlib import Path
+import re
+
+# 1. Fix controller.py imports
+path_ctrl = Path("mcp_university/classifier/controller.py")
+content_ctrl = path_ctrl.read_text(encoding="utf-8")
+# Remove any empty lines in the middle of imports or unused markers
+content_ctrl = re.sub(r"from mcp_university\.classifier\.sort_emails import \(\n\n\n    process_emails,",
+                      r"from mcp_university.classifier.sort_emails import (\n    process_emails,", content_ctrl)
+path_ctrl.write_text(content_ctrl, encoding="utf-8")
+
+# 2. Fix test_reply_logic_custom.py (PEP8 imports)
+path_test = Path("tests/test_reply_logic_custom.py")
+new_test_content = """import pytest
 from unittest.mock import MagicMock, patch
 from pathlib import Path
 from mcp_university.classifier.controller import EmailController
 
 @pytest.fixture
 def controller():
-    with patch("mcp_university.classifier.controller.get_config"), \
-         patch("mcp_university.classifier.controller.Summarizer"), \
-         patch("mcp_university.classifier.controller.PersonProfiler"), \
+    with patch("mcp_university.classifier.controller.get_config"), \\
+         patch("mcp_university.classifier.controller.Summarizer"), \\
+         patch("mcp_university.classifier.controller.PersonProfiler"), \\
          patch("mcp_university.classifier.controller.Agent"):
         return EmailController()
 
@@ -99,3 +113,5 @@ def test_salutation_logic_english_sie(controller, tmp_path):
     assert "Anrede: Dear Mr. Mustermann" in add_ctx
     assert kwargs["detected_language"] == "English"
     assert kwargs["honorific"] == "Sie"
+"""
+path_test.write_text(new_test_content, encoding="utf-8")
