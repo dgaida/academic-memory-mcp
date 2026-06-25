@@ -1,5 +1,6 @@
 import sys
 from unittest.mock import MagicMock
+from pathlib import Path
 
 # Simple mocking for all heavy dependencies
 m = MagicMock()
@@ -27,7 +28,6 @@ sys.modules['xgboost'] = MagicMock()
 
 import pytest
 from unittest.mock import patch
-from pathlib import Path
 from mcp_university.classifier.controller import EmailController
 
 @pytest.fixture
@@ -69,6 +69,7 @@ def test_salutation_logic_german_sie(controller):
     controller.execute_action(0, Path("test.msg"), email_data)
 
     args, kwargs = controller.generate_reply.call_args
+    # salutation is in add_ctx which is the 6th argument (index 5)
     add_ctx = args[5]
     assert "Anrede: Guten Tag Herr Mustermann" in add_ctx
     assert kwargs["detected_language"] == "German"

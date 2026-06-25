@@ -25,7 +25,6 @@ from mcp_university.classifier.sort_emails import (
 
     process_emails,
     write_report,
-    extract_firstname,
 
     find_student_folder,
 )
