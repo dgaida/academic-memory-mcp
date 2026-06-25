@@ -1116,7 +1116,7 @@ TEXT:
             if not parsed:
                 return "Keine Zusammenfassung möglich."
 
-            prompt = f"Fasse die folgende E-Mail in genau 2 prägnanten Sätzen zusammen:\n\n{parsed}"
+            prompt = f"Fasse die folgende E-Mail in genau 2 prägnanten Sätzen zusammen:
 
 {parsed}"
 
