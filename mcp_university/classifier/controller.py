@@ -111,8 +111,10 @@ class EmailController:
                 self.class_to_memory_index = resolve_memory_index_names(
                     self.memory_paths
                 )
-    def _detect_language(self, content: str) -> str:
+    def _detect_language(self, content: Optional[str]) -> str:
         """Erkennt die Sprache der E-Mail (Deutsch oder Englisch)."""
+        if not content:
+            return "German"
         prompt = f"Analysiere die Sprache des folgenden Textes. Antworte NUR mit 'English' oder 'German'.\n\n{content[:500]}"
         try:
             response = self.summarizer.client.chat(
