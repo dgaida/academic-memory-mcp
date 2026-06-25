@@ -1093,13 +1093,9 @@ TEXT:
         report_path = source_dir / "processed_emails.md"
         try:
             with open(report_path, "w", encoding="utf-8") as f:
-                f.write("# Verarbeitete E-Mails
-
-")
-                f.write("| Student | Betreff | Status |
-")
-                f.write("| :--- | :--- | :--- |
-")
+                f.write("# Verarbeitete E-Mails")
+                f.write("| Student | Betreff | Status |")
+                f.write("| :--- | :--- | :--- |")
                 for res in results:
                     n_v = res.get("lastname", "Unknown")
                     s_v = res.get("subject", "No Subject")
