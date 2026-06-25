@@ -30,7 +30,7 @@ from mcp_university.classifier.sort_emails import (
     find_student_folder,
 )
 from mcp_university.retrieval.index import SearchIndex, get_model
-from mcp_university.utils.memory import resolve_memory_index_names, get_model
+from mcp_university.utils.memory import resolve_memory_index_names
 from mcp_university.utils.outlook import create_outlook_draft
 
 logger = logging.getLogger(__name__)
