@@ -118,3 +118,51 @@ Diese Aktion kombiniert mehrere Schritte für Abschlussarbeiten:
 
 !!! info "SentItems Archivierung"
     E-Mails im Ordner `SentItems` werden grundsätzlich nur archiviert. Sie benötigen nie eine Antwort-Aktion, unabhängig von ihrem Alter oder dem Status der Konversation.
+---
+
+## Erstellte Berichte und Dateien
+
+Während der Verarbeitung durch `process_sorted_emails.py` werden verschiedene Markdown-Dateien im Quellverzeichnis erstellt, um den Status und die Ergebnisse zu dokumentieren.
+
+### 1. `sorted_emails.md`
+Dieser Bericht wird direkt nach der initialen Sortierung erstellt und listet alle gefundenen E-Mails und ihre vorläufige Klassifizierung auf.
+
+**Beispiel:**
+```markdown
+# Sortierte E-Mails
+
+## Bachelor Thesis
+- **Mustermann** | Max | Inbox: `D:\Mails\2023_24_WS\Mustermann\Inbox\Frage.msg`
+```
+
+### 2. `emails_to_process.md`
+Diese Datei enthält eine Liste aller E-Mails, die für die Bearbeitung in der Gradio GUI vorgesehen sind, inklusive Metadaten wie Klasse und Semester.
+
+**Beispiel:**
+```markdown
+# Zu beantwortende E-Mails
+
+| Student | Klasse | Semester |
+| :--- | :--- | :--- |
+| Mustermann | Bachelor Thesis | 2023_24_WS |
+```
+
+### 3. `processed_emails.md`
+Der Abschlussbericht, der nach der Verarbeitung (entweder automatisch oder via GUI) erstellt wird. Er dokumentiert, was mit jeder E-Mail geschehen ist.
+
+**Beispiel:**
+```markdown
+# Verarbeitete E-Mails
+
+| Student | Betreff | Status |
+| :--- | :--- | :--- |
+| Mustermann | Frage | Outlook Entwurf (Work in Progress) |
+| Schmidt | Termin | Termin gebucht (2023-10-27 10:00) |
+| Doe | Alte Mail | Automatisch archiviert (alt (> 6 Monate)) |
+```
+
+### 4. `.emails_summary.md` (im Studentenordner)
+Eine KI-generierte Zusammenfassung des bisherigen Konversationsverlaufs mit dem Studenten. Diese Datei wird vor der Antwortgenerierung erstellt oder aktualisiert.
+
+### 5. `*_reply.md` (im Studentenordner)
+Falls kein Outlook-Entwurf erstellt werden konnte, wird die generierte Antwort als Markdown-Datei im Ordner des Studenten gespeichert.

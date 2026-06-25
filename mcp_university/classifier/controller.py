@@ -30,7 +30,7 @@ from mcp_university.classifier.sort_emails import (
     find_student_folder,
 )
 from mcp_university.retrieval.index import SearchIndex, get_model
-from mcp_university.utils.memory import resolve_memory_index_names
+from mcp_university.utils.memory import resolve_memory_index_names, get_model
 from mcp_university.utils.outlook import create_outlook_draft
 
 logger = logging.getLogger(__name__)
@@ -74,6 +74,7 @@ class EmailController:
         self.config_path = config_path
         self.debug = debug
         self.use_action_classifier = use_action_classifier
+        self.processed_results = []
         self.mail_parser = MailParser()
         self.summarizer = Summarizer(
             model=self.config.llm.model, base_url=self.config.llm.base_url
@@ -864,7 +865,7 @@ TEXT:
             for email in emails_to_process:
                 f.write(f"| {email['lastname']} | {email['class']} | {email['semester']} |\n")
 
-        processed_results = []
+        
         persona_path = Path("skills/SKILL_persona.md")
         apt_skill_path = Path("skills/SKILL_Appointment.md")
 
@@ -908,7 +909,7 @@ TEXT:
 
             # Legacy processing (only if use_action_classifier is False)
             if is_old:
-                processed_results.append(
+                self.processed_results.append(
                     {
                         "lastname": email["lastname"],
                         "subject": latest_mail.stem,
@@ -918,7 +919,7 @@ TEXT:
                 continue
 
             if not needs_answer:
-                processed_results.append(
+                self.processed_results.append(
                     {
                         "lastname": email["lastname"],
                         "subject": latest_mail.stem,
@@ -1008,7 +1009,7 @@ TEXT:
             )
 
             if reply_subject == "NO_REPLY_NEEDED":
-                processed_results.append(
+                self.processed_results.append(
                     {
                         "lastname": email["lastname"],
                         "subject": latest_mail.stem,
@@ -1020,7 +1021,7 @@ TEXT:
             if reply.startswith("APPOINTMENT_BOOKED"):
                 apt_info = self.agent.last_appointment_info
                 status = f"Termin gebucht ({apt_info['start_time']})"
-                processed_results.append(
+                self.processed_results.append(
                     {
                         "lastname": email["lastname"],
                         "subject": latest_mail.stem,
@@ -1030,7 +1031,7 @@ TEXT:
                 continue
 
             if reply.startswith("APPOINTMENT_BOOKING_FAILED"):
-                processed_results.append(
+                self.processed_results.append(
                     {
                         "lastname": email["lastname"],
                         "subject": latest_mail.stem,
@@ -1061,7 +1062,7 @@ TEXT:
                 r_path.write_text(reply, encoding="utf-8")
                 res_status = f"Datei: {r_path}"
 
-            processed_results.append(
+            self.processed_results.append(
                 {
                     "lastname": email["lastname"],
                     "subject": latest_mail.stem,
@@ -1071,17 +1072,42 @@ TEXT:
 
         # Always return emails_to_process for GUI consistency
 
-        if processed_results:
-            with open(source_dir / "processed_emails.md", "w", encoding="utf-8") as f:
-                f.write(
-                    "# Verarbeitete E-Mails\n\n| Student | Betreff | Status |\n| :--- | :--- | :--- |\n"
-                )
-                for res in processed_results:
-                    f.write(
-                        f"| {res['lastname']} | {res['subject']} | {res['status']} |\n"
-                    )
+        if self.processed_results:
+            self.write_processed_report(source_dir, self.processed_results)
 
         return emails_to_process
+
+    def write_processed_report(self, source_dir: Path, results: list):
+        """Schreibt den Abschlussbericht über verarbeitete E-Mails.
+
+        Args:
+            source_dir (Path): Quellverzeichnis.
+            results (list): Liste von Dictionaries mit 'lastname', 'subject', 'status'.
+
+        Returns:
+            None
+        """
+        if not results:
+            return
+
+        report_path = source_dir / "processed_emails.md"
+        try:
+            with open(report_path, "w", encoding="utf-8") as f:
+                f.write("# Verarbeitete E-Mails
+
+")
+                f.write("| Student | Betreff | Status |
+")
+                f.write("| :--- | :--- | :--- |
+")
+                for res in results:
+                    n_v = res.get("lastname", "Unknown")
+                    s_v = res.get("subject", "No Subject")
+                    t_v = res.get("status", "Unknown")
+                    f.write(f"| {n_v} | {s_v} | {t_v} |\n")
+            logger.info(f"Bericht in {report_path} geschrieben.")
+        except Exception as e:
+            logger.error(f"Fehler beim Schreiben des Berichts: {e}")
 
     def generate_short_summary(self, mail_path: Path) -> str:
         """Generiert eine kurze Zusammenfassung (2 Sätze) einer E-Mail."""
@@ -1092,19 +1118,15 @@ TEXT:
 
             prompt = f"Fasse die folgende E-Mail in genau 2 prägnanten Sätzen zusammen:\n\n{parsed}"
 
-            # Using LLMClientWrapper via summarizer
-            # Since summarizer.summarize_email_conversation exists, we can use a similar pattern
-            # but with a specific prompt.
-            # However, summarizer doesn't have a generic call exposed easily without more logic.
-            # Let's use the wrapper directly if possible or call a simple summary.
+{parsed}"
 
             response = self.summarizer.client.chat(
                 system_prompt="Du bist ein hilfreicher Assistent, der E-Mails kurz zusammenfasst.",
                 messages=[{"role": "user", "content": prompt}],
             )
 
-            content = response.get("message", {}).get("content", "")
-            return content.strip() or "Zusammenfassung fehlgeschlagen."
+            content_v = response.get("message", {}).get("content", "")
+            return content_v.strip() or "Zusammenfassung fehlgeschlagen."
         except Exception as e:
             logger.error(f"Fehler bei der Kurzzusammenfassung: {e}")
             return "Fehler bei Zusammenfassung."
@@ -1178,7 +1200,8 @@ TEXT:
 
             curr_emb = self._similarity_model.encode([current_subject])
             other_embs = self._similarity_model.encode(subjects)
-
+            
+                        
             similarities = cosine_similarity(curr_emb, other_embs)[0]
             best_idx = int(np.argmax(similarities))
             best_score = float(similarities[best_idx])
