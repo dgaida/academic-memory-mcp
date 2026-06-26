@@ -2000,6 +2000,9 @@
 <p>Migriert E-Mails in die Standardstruktur: <code>Semester/Nachname/Inbox|SentItems/</code>. Dies ist besonders wichtig für die korrekte Zuordnung im System.
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>python<span class="w"> </span>scripts/fix_email_folders.py<span class="w"> </span>data/classifier_paths.yaml
 </code></pre></div></p>
+<p><strong>Argumente:</strong>
+- <code>--dry-run</code>: Zeigt nur die erkannten Fehler an, ohne sie zu beheben.
+- <code>--verify</code>: Prüft rekursiv alle E-Mails in allen Unterordnern auf korrekte Semester-, Namens- und Ordnerzuordnung. Ohne dieses Argument werden nur E-Mails im Basisverzeichnis verarbeitet.</p>
 <h3 id="klassifikator-daten-umstrukturieren">Klassifikator-Daten umstrukturieren<a class="headerlink" href="#klassifikator-daten-umstrukturieren" title="Permanent link">&para;</a></h3>
 <p>Strukturiert die Trainings- und Testdaten des Klassifikators um, um sie für das Training vorzubereiten.
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python<span class="w"> </span>scripts/restructure_classifier_data.py
