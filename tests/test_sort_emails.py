@@ -22,8 +22,9 @@ def test_extract_lastname():
     assert extract_lastname("Mustermann, Max") == "Mustermann"
     assert extract_lastname("Max Mustermann <max@example.com>") == "Mustermann"
     assert extract_lastname("Mustermann, Max <max@example.com>") == "Mustermann"
-    assert extract_lastname("'Hans Müller'") == "Mueller"
-    assert extract_lastname("'Müller, Hans'") == "Mueller"
+    # Note: Logic was changed to preserve umlauts from display names
+    assert extract_lastname("'Hans Müller'") == "Müller"
+    assert extract_lastname("'Müller, Hans'") == "Müller"
     assert extract_lastname("(No Sender)") == "Unknown"
     assert extract_lastname("") == "Unknown"
 
