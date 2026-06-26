@@ -4,7 +4,6 @@ import logging
 import shutil
 import re
 from pathlib import Path
-from typing import Dict, Any, List, Optional
 from mcp_university.classifier.sort_emails import extract_lastname, get_semester, find_student_folder
 from mcp_university.config import get_config
 from mcp_university.parser.mail_parser import MailParser

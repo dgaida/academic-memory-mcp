@@ -1,11 +1,9 @@
 """Tests for the fix_email_folders script."""
 import pytest
 import yaml
-import shutil
-import os
 from pathlib import Path
 from datetime import datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from scripts.fix_email_folders import fix_folders, walk_bottom_up
 
 @pytest.fixture
