@@ -24,6 +24,10 @@ Migriert E-Mails in die Standardstruktur: `Semester/Nachname/Inbox|SentItems/`. 
 python scripts/fix_email_folders.py data/classifier_paths.yaml
 ```
 
+**Argumente:**
+- `--dry-run`: Zeigt nur die erkannten Fehler an, ohne sie zu beheben.
+- `--verify`: Prüft rekursiv alle E-Mails in allen Unterordnern auf korrekte Semester-, Namens- und Ordnerzuordnung. Ohne dieses Argument werden nur E-Mails im Basisverzeichnis verarbeitet.
+
 ### Klassifikator-Daten umstrukturieren
 Strukturiert die Trainings- und Testdaten des Klassifikators um, um sie für das Training vorzubereiten.
 ```bash
