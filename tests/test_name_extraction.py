@@ -12,7 +12,7 @@ from mcp_university.classifier.sort_emails import extract_firstname, extract_las
     ("hans-peter.muster-hase@smail.th-koeln.de", "Hans-Peter", "Muster-Hase"),
     ("max_hans.muster_hase@smail.th-koeln.de", "Max Hans", "Muster Hase"),
     ("Angela Spaß (aspass) <angela.spass@smail.th-koeln.de>", "Angela", "Spaß"),
-    ("studium-gm@th-koeln.de", "Unknown", "studium-gm"),
+    ("studium-gm@th-koeln.de", "Unknown", "Studium-Gm"),
     ("f10-request@f10.th-koeln.de; im Auftrag von; Marcel Mueller, B.Sc. <marcel.mueller@th-koeln.de>", "Marcel", "Mueller"),
     ("Sabrina Tuba <stuba@fft.com>", "Sabrina", "Tuba"),
     ("stuba@fft.com", "Unknown", "Stuba"),
