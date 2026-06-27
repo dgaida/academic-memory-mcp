@@ -14,12 +14,12 @@ sys.modules['xgboost'] = MagicMock()
 sys.modules['transformers'] = MagicMock()
 sys.modules['sentence_transformers'] = MagicMock()
 
-from unittest.mock import patch
-from pathlib import Path
-from datetime import datetime
-import pytest
+from unittest.mock import patch  # noqa: E402
+from pathlib import Path  # noqa: E402
+from datetime import datetime  # noqa: E402
+import pytest  # noqa: E402
 
-from mcp_university.classifier.sort_emails import process_emails
+from mcp_university.classifier.sort_emails import process_emails  # noqa: E402
 
 @pytest.fixture
 def mock_dependencies():

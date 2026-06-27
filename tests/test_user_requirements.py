@@ -14,13 +14,13 @@ sys.modules['xgboost'] = MagicMock()
 sys.modules['transformers'] = MagicMock()
 sys.modules['sentence_transformers'] = MagicMock()
 
-import pytest
-from pathlib import Path
-from unittest.mock import patch
-from datetime import datetime
+import pytest  # noqa: E402
+from pathlib import Path  # noqa: E402
+from unittest.mock import patch  # noqa: E402
+from datetime import datetime  # noqa: E402
 
 # Now import the project modules
-from mcp_university.classifier.sort_emails import extract_lastname, process_emails
+from mcp_university.classifier.sort_emails import extract_lastname, process_emails  # noqa: E402
 
 def create_recipient(email, name, r_type):
     rec = MagicMock()
