@@ -182,14 +182,14 @@ def extract_lastname(name_str: str) -> str:
         else:
             parts = display_name.split()
             if len(parts) > 1:
-                return " ".join(parts[1:])
+                return parts[-1]
             return display_name
 
     # Priority 2: Email with dot in local part
     if email:
         local_part = email.split("@")[0]
         if "." in local_part:
-            lastname_part = local_part.split(".", 1)[1]
+            lastname_part = local_part.rsplit(".", 1)[1]
             logger.debug(f"Punkt im lokalen Teil gefunden: {local_part} -> Extrahiere {lastname_part}")
             parts = re.split(r'([._])', lastname_part)
             res = ""
@@ -210,14 +210,14 @@ def extract_lastname(name_str: str) -> str:
     # Priority 3: System addresses with dash or complex email logic
     if email:
         local_part = email.split("@")[0]
-        # Specific rule for digital-sciences
-        if "digital-sciences" in local_part.lower():
-            return "Digital-Sciences"
+        # Specific rule for digital-science
+        if "digital-science" in local_part.lower():
+            return "Digital-science"
         # Specific rule for kreditorenbuchhaltung
         if "kreditorenbuchhaltung" in local_part.lower():
             return "Kreditorenbuchhaltung"
 
-        if "-" in local_part and "@th-koeln.de" in email.lower():
+        if "-" in local_part and ("th-koeln.de" in email.lower() or "fh-koeln.de" in email.lower()):
             parts = local_part.split("-")
             return "-".join(p[0].upper() + p[1:] for p in parts if p)
 
@@ -230,7 +230,7 @@ def extract_lastname(name_str: str) -> str:
             # Format: Firstname Lastname
             parts = display_name.split()
             if len(parts) > 1:
-                return " ".join(parts[1:])
+                return parts[-1]
             return display_name
 
     # Priority 5: Fallback
