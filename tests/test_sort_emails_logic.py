@@ -1,5 +1,20 @@
-"""Tests for test_sort_emails_logic.py."""
-from unittest.mock import MagicMock, patch
+import sys
+from unittest.mock import MagicMock
+
+# Mock heavy dependencies
+sys.modules['torch'] = MagicMock()
+sys.modules['torch.nn'] = MagicMock()
+sys.modules['sklearn'] = MagicMock()
+sys.modules['sklearn.feature_extraction'] = MagicMock()
+sys.modules['sklearn.feature_extraction.text'] = MagicMock()
+sys.modules['sklearn.ensemble'] = MagicMock()
+sys.modules['sklearn.preprocessing'] = MagicMock()
+sys.modules['sklearn.metrics'] = MagicMock()
+sys.modules['xgboost'] = MagicMock()
+sys.modules['transformers'] = MagicMock()
+sys.modules['sentence_transformers'] = MagicMock()
+
+from unittest.mock import patch
 from pathlib import Path
 from datetime import datetime
 import pytest
