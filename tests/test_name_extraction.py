@@ -70,7 +70,7 @@ def create_rec(email, name, r_type):
     ("hans-peter.muster-hase@smail.th-koeln.de", "Muster-Hase"),
     ("max_hans.muster_hase@smail.th-koeln.de", "Muster Hase"),
     ("Angela Spaß (aspass) <angela.spass@smail.th-koeln.de>", "Spaß"),
-    ("studium-gm@th-koeln.de", "studium-gm"),
+    ("studium-gm@th-koeln.de", "Studium-Gm"),
     ("f10-request@f10.th-koeln.de; im Auftrag von; Marcel Mueller, B.Sc. <marcel.mueller@th-koeln.de>", "Mueller"),
     ("Sabrina Tuba <stuba@fft.com>", "Tuba"),
     ("stuba@fft.com", "Stuba"),
