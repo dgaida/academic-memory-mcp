@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 # Liste generischer Email-Local-Parts, die nicht als Name verwendet werden sollten.
 GENERIC_LOCAL_PARTS = [
     "student", "onbehalfof", "no-reply", "support", "info",
-    "admin", "office", "sekretariat", "onbehalf"
+    "admin", "office", "sekretariat", "onbehalf", "f10-request"
 ]
 
 
@@ -34,7 +34,7 @@ def clean_sender_name(name_string: str) -> str:
     """Bereinigt den Absendernamen von komplexen Headern wie 'im Auftrag von'.
 
     Args:
-        name_string: Der zu bereinigende Namensstring.
+        name_string (str): Der zu bereinigende Namensstring.
 
     Returns:
         str: Der bereinigte Name.
@@ -47,14 +47,25 @@ def clean_sender_name(name_string: str) -> str:
 
     if "im Auftrag von" in name_string:
         # Versuche einen echten Namen nach "im Auftrag von;" zu finden
-        parts = name_string.split("im Auftrag von;")
+        parts = name_string.split("im Auftrag von")
         if len(parts) > 1:
-            name_string = parts[1].split("<")[0].strip()
+            name_candidate = parts[1].strip(":; ")
+            # Falls Name leer ist oder nur Email-Teil, versuche weiter zu parsen
+            if not name_candidate or "@" in name_candidate.split("<")[0]:
+                 # Check if there's a name after a second semicolon or similar
+                 subparts = name_candidate.split(";")
+                 for sp in subparts:
+                      sp = sp.strip()
+                      if sp and "@" not in sp.split("<")[0]:
+                           name_candidate = sp
+                           break
+            if name_candidate:
+                return name_candidate.strip("'\" ")
         else:
             # Fallback für andere Varianten
-            match = re.search(r"im Auftrag von\s*[:;]?\s*([^<]+)", name_string)
+            match = re.search(r"im Auftrag von\s*[:;]?\s*([^<;]+)", name_string)
             if match:
-                name_string = match.group(1).strip()
+                return match.group(1).strip("'\" ")
 
     # Handle spezifisches Präfix "TH //"
     name_string = re.sub(r"^TH\s*//\s*", "", name_string)
@@ -76,7 +87,7 @@ def _format_dashed_name(name_input: str) -> str:
         return ""
     if "-" in name_input:
         parts = name_input.split("-")
-        return "-".join(part[0].upper() + part[1:] for part in parts if part)
+        return "-".join(part[0].upper() + part[1:] if part else "" for part in parts)
     return name_input[0].upper() + name_input[1:]
 
 
@@ -84,7 +95,7 @@ def extract_firstname(name_input: str) -> str:
     """Extrahiert den Vornamen aus einem Namensstring oder einer E-Mail-Adresse.
 
     Args:
-        name_input: Der zu parsende Name oder die E-Mail-Adresse.
+        name_input (str): Der zu parsende Name oder die E-Mail-Adresse.
 
     Returns:
         str: Der extrahierte Vorname oder 'Unknown'.
@@ -94,8 +105,10 @@ def extract_firstname(name_input: str) -> str:
 
     cleaned_name = clean_sender_name(name_input)
 
-    # Suche nach E-Mail-Adresse
-    email_match = re.search(r"[\w\.-]+@[\w\.-]+", name_input)
+    # Suche nach E-Mail-Adresse im bereinigten Namen bevorzugt
+    email_match = re.search(r"[\w\.-]+@[\w\.-]+", cleaned_name)
+    if not email_match:
+        email_match = re.search(r"[\w\.-]+@[\w\.-]+", name_input)
     email_address = email_match.group(0) if email_match else ""
 
     # Anzeige-Name extrahieren (Teil vor der spitzen Klammer)
@@ -162,7 +175,7 @@ def extract_lastname(name_input: str) -> str:
     multi-word Nachnamen und Fallbacks auf den E-Mail Local-Part.
 
     Args:
-        name_input: Der zu parsende Name oder die E-Mail-Adresse.
+        name_input (str): Der zu parsende Name oder die E-Mail-Adresse.
 
     Returns:
         str: Der extrahierte Nachname oder 'Unknown'.
@@ -173,8 +186,11 @@ def extract_lastname(name_input: str) -> str:
 
     cleaned_name = clean_sender_name(name_input)
 
-    # Email und Local-Part extrahieren
-    email_match = re.search(r"[\w\.-]+@[\w\.-]+", name_input)
+    # Email und Local-Part extrahieren - Bevorzugt aus bereinigtem Namen (Wichtig für 'im Auftrag von')
+    email_match = re.search(r"[\w\.-]+@[\w\.-]+", cleaned_name)
+    if not email_match:
+         email_match = re.search(r"[\w\.-]+@[\w\.-]+", name_input)
+
     email_address = email_match.group(0) if email_match else ""
     local_part = email_address.split("@")[0] if email_address else ""
 
@@ -229,7 +245,7 @@ def extract_lastname(name_input: str) -> str:
             elif part:
                 if "-" in part:
                     subparts = part.split("-")
-                    result_lastname += "-".join(sub[0].upper() + sub[1:] for sub in subparts if sub)
+                    result_lastname += "-".join(sub[0].upper() + sub[1:] if sub else "" for sub in subparts)
                 else:
                     result_lastname += part[0].upper() + part[1:]
         if result_lastname.strip():
@@ -280,8 +296,8 @@ def find_student_folder(base_directory: Path, lastname: str) -> Optional[Path]:
     Sucht rekursiv in den Semester-Unterordnern nach einem passenden Verzeichnis.
 
     Args:
-        base_directory: Das Basisverzeichnis der jeweiligen Klasse.
-        lastname: Der Nachname des Studenten.
+        base_directory (Path): Das Basisverzeichnis der jeweiligen Klasse.
+        lastname (str): Der Nachname des Studenten.
 
     Returns:
         Optional[Path]: Der Pfad zum Studentenordner oder None, falls nicht gefunden.
@@ -306,9 +322,9 @@ def process_emails(
     """Verarbeitet E-Mails aus dem Quellverzeichnis und sortiert sie ein.
 
     Args:
-        source_root_path: Verzeichnis mit den zu sortierenden .msg-Dateien.
-        classifier_model_path: Pfad zum trainierten Klassifizierer-Modell.
-        path_config: Pfad-Konfiguration für die E-Mail-Klassen.
+        source_root_path (Path): Verzeichnis mit den zu sortierenden .msg-Dateien.
+        classifier_model_path (Path): Pfad zum trainierten Klassifizierer-Modell.
+        path_config (Dict[str, str]): Pfad-Konfiguration für die E-Mail-Klassen.
 
     Returns:
         List[Dict[str, Any]]: Liste der verschobenen E-Mails mit Metadaten.
@@ -402,8 +418,8 @@ def write_report(base_directory: Path, moved_emails_list: List[Dict[str, Any]]) 
     """Erstellt einen Markdown-Report über die erfolgreich einsortierten E-Mails.
 
     Args:
-        base_directory: Quellverzeichnis für den Speicherort des Reports.
-        moved_emails_list: Liste der verschobenen E-Mails.
+        base_directory (Path): Quellverzeichnis für den Speicherort des Reports.
+        moved_emails_list (List[Dict[str, Any]]): Liste der verschobenen E-Mails.
     """
     if not moved_emails_list:
         logger.info("Keine E-Mails zum Berichten vorhanden.")

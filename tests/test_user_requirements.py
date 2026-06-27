@@ -37,7 +37,7 @@ def test_requirement_1_name_extraction():
         ("Nils Hans Morz <nils_hans.morz@smail.th-koeln.de>", "Morz"),
         ("'Anna Pizza Sibel' <anna.pizza_sibel@smail.th-koeln.de>", "Pizza Sibel"),
         ("'Sam Josh Strich' <sam_josh.strich@smail.th-koeln.de>", "Strich"),
-        ("'Digital Science (Ma) Management Board' <digital-science@f10.th-koeln.de>", "Digital-science"),
+        ("'Digital Science (Ma) Management Board' <digital-science@f10.th-koeln.de>", "Digital-Science"),
         ("eRechnung TH Köln <kreditorenbuchhaltung@th-koeln.de>", "Kreditorenbuchhaltung"),
         ("TH // chris.hase@th-koeln.de", "Hase"),
         ("'Eva Adam | Hans GmbH' <eva.adam@hans-gmbh.com>", "Adam"),
