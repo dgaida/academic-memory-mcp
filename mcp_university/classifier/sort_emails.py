@@ -19,6 +19,28 @@ logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
 
 
+def clean_sender_name(name_str: str) -> str:
+    """Bereinigt den Absendernamen von komplexen Headern wie 'im Auftrag von'.
+
+    Args:
+        name_str: Der zu bereinigende Namensstring.
+
+    Returns:
+        str: Der bereinigte Name.
+    """
+    if "im Auftrag von" in name_str:
+        # Versuche einen echten Namen nach "im Auftrag von;" zu finden
+        parts = name_str.split("im Auftrag von;")
+        if len(parts) > 1:
+            return parts[1].split("<")[0].strip()
+        else:
+            # Fallback für andere Varianten
+            match = re.search(r"im Auftrag von\s*[:;]?\s*([^<]+)", name_str)
+            if match:
+                return match.group(1).strip()
+    return name_str
+
+
 def extract_firstname(name_str: str) -> str:
     """Extrahiert den Vornamen aus einem Namensstring oder einer E-Mail-Adresse.
 
@@ -34,17 +56,7 @@ def extract_firstname(name_str: str) -> str:
     if not name_str or name_str == "(No Sender)" or name_str == "(No Receiver)":
         return "Unknown"
 
-    # Handle "im Auftrag von" or similar complex headers
-    if "im Auftrag von" in name_str:
-        # Try to find a real name after "im Auftrag von;"
-        parts = name_str.split("im Auftrag von;")
-        if len(parts) > 1:
-            name_str = parts[1].split("<")[0].strip()
-        else:
-            # Fallback for other variants
-            match = re.search(r"im Auftrag von\s*[:;]?\s*([^<]+)", name_str)
-            if match:
-                name_str = match.group(1).strip()
+    name_str = clean_sender_name(name_str)
 
     # Suche nach E-Mail-Adresse
     email_match = re.search(r"[\w\.-]+@[\w\.-]+", name_str)
@@ -134,15 +146,7 @@ def extract_lastname(name_str: str) -> str:
     if not name_str or name_str == "(No Sender)" or name_str == "(No Receiver)":
         return "Unknown"
 
-    # Handle "im Auftrag von" or similar complex headers
-    if "im Auftrag von" in name_str:
-        parts = name_str.split("im Auftrag von;")
-        if len(parts) > 1:
-            name_str = parts[1].split("<")[0].strip()
-        else:
-            match = re.search(r"im Auftrag von\s*[:;]?\s*([^<]+)", name_str)
-            if match:
-                name_str = match.group(1).strip()
+    name_str = clean_sender_name(name_str)
 
     # Suche nach E-Mail-Adresse
     email_match = re.search(r"[\w\.-]+@[\w\.-]+", name_str)
@@ -261,6 +265,14 @@ def process_emails(
     student_domains = ["@smail.th-koeln.de", "@smail.fh-koeln.de"]
 
     def is_student(email_addr: str) -> bool:
+        """Prüft ob eine E-Mail-Adresse zu einem Studenten gehört.
+
+        Args:
+            email_addr: Die zu prüfende E-Mail-Adresse.
+
+        Returns:
+            bool: True wenn es eine Studenten-E-Mail ist, sonst False.
+        """
         email_addr = email_addr.lower()
         if any(u_email in email_addr for u_email in user_emails):
             return False
