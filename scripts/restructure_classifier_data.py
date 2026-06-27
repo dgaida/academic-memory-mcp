@@ -3,6 +3,7 @@ import argparse
 import shutil
 from pathlib import Path
 import logging
+from typing import Any, List, Optional
 from mcp_university.config import get_config
 
 try:
@@ -18,7 +19,7 @@ logger = logging.getLogger(__name__)
 # Warnungen von extract-msg unterdrücken
 logging.getLogger("extract_msg").setLevel(logging.ERROR)
 
-def restructure_data(root_dir: Path):
+def restructure_data(root_dir: Path) -> None:
     """Verschiebt E-Mails in Inbox/SentItems Unterordner pro Klasse.
 
     Args:
@@ -38,8 +39,6 @@ def restructure_data(root_dir: Path):
         inbox_dir = class_dir / "Inbox"
         sent_dir = class_dir / "SentItems"
 
-        # Wir suchen nur direkt im Klassenordner nach .msg Dateien (nicht rekursiv,
-        # da wir sie in Unterordner verschieben wollen und Endlosschleifen/Doppelverarbeitung vermeiden wollen)
         msg_files = list(class_dir.glob("*.msg"))
 
         if not msg_files:
@@ -55,7 +54,7 @@ def restructure_data(root_dir: Path):
                 with extract_msg.openMsg(str(msg_file)) as msg:
                     sender = (msg.sender.lower() if msg.sender else "").strip()
 
-                # Datei verschieben (außerhalb des Context-Managers, um Locks zu vermeiden)
+                # Datei verschieben
                 if get_config().user.email in sender:
                     target_path = sent_dir / msg_file.name
                     shutil.move(str(msg_file), str(target_path))
@@ -67,7 +66,8 @@ def restructure_data(root_dir: Path):
             except Exception as e:
                 logger.error(f"Fehler beim Verarbeiten von {msg_file.name}: {e}")
 
-def main():
+def main() -> None:
+    """Hauptfunktion für das Restrukturierungs-Skript."""
     parser = argparse.ArgumentParser(description="Restrukturiert E-Mail-Klassifikationsdaten in Inbox/SentItems.")
     parser.add_argument("data_dir", type=str, help="Verzeichnis mit den Klassen-Unterordnern.")
     args = parser.parse_args()

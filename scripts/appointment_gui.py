@@ -1,43 +1,70 @@
+"""Gradio-GUI für die Verwaltung von wöchentlichen Terminen."""
 import os
-import re
-import subprocess
 import platform
+import subprocess
+import re
+import yaml
 import pandas as pd
 import gradio as gr
 from pathlib import Path
 from datetime import datetime, timedelta
-import yaml
+from typing import Dict, Any, List, Optional, Tuple
 
 from mcp_university.config import get_config
-from mcp_university.classifier.sort_emails import find_student_folder, extract_lastname
-from mcp_university.summarizer.engine import Summarizer
+from mcp_university.classifier.sort_emails import extract_lastname, find_student_folder
 from mcp_university.parser.mail_parser import MailParser
+from mcp_university.summarizer.engine import Summarizer
 from mcp_university.summarizer.profiler import PersonProfiler
 
 class Tools:
-    _summarizer = None
-    _mail_parser = None
-    _profiler = None
+    """Lazy-loading Container für Tools um Startzeit zu optimieren."""
+    _parser: Optional[MailParser] = None
+    _summarizer: Optional[Summarizer] = None
+    _profiler: Optional[PersonProfiler] = None
 
     @classmethod
-    def summarizer(cls):
+    def mail_parser(cls) -> MailParser:
+        """Gibt eine Instanz des MailParsers zurück.
+
+        Returns:
+            MailParser: Eine Instanz des MailParsers.
+        """
+        if cls._parser is None:
+            cls._parser = MailParser()
+        return cls._parser
+
+    @classmethod
+    def summarizer(cls) -> Summarizer:
+        """Gibt eine Instanz des Summarizers zurück.
+
+        Returns:
+            Summarizer: Eine Instanz des Summarizers.
+        """
         if cls._summarizer is None:
             cls._summarizer = Summarizer()
         return cls._summarizer
 
     @classmethod
-    def mail_parser(cls):
-        if cls._mail_parser is None:
-            cls._mail_parser = MailParser()
-        return cls._mail_parser
+    def profiler(cls) -> PersonProfiler:
+        """Gibt eine Instanz des PersonProfilers zurück.
 
-    @classmethod
-    def profiler(cls):
+        Returns:
+            PersonProfiler: Eine Instanz des PersonProfilers.
+        """
         if cls._profiler is None:
             cls._profiler = PersonProfiler()
         return cls._profiler
 
-def open_file(filepath):
+
+def open_file(filepath: str) -> str:
+    """Öffnet eine Datei mit der Standardanwendung des Betriebssystems.
+
+    Args:
+        filepath (str): Der Pfad zur Datei.
+
+    Returns:
+        str: Eine Statusmeldung.
+    """
     if not filepath or not Path(filepath).exists():
         return f"Datei nicht gefunden: {filepath}"
 
@@ -54,7 +81,12 @@ def open_file(filepath):
         return f"Fehler beim Öffnen: {e}"
 
 
-def parse_appointments():
+def parse_appointments() -> pd.DataFrame:
+    """Parst die Termine aus der appointments.md Datei.
+
+    Returns:
+        pd.DataFrame: Ein DataFrame mit den Terminen.
+    """
     config = get_config()
     file_path = config.data_dir / "appointments.md"
     if not file_path.exists():
@@ -70,7 +102,7 @@ def parse_appointments():
             continue
 
     if not content:
-        # Fallback with replacement
+        # Fallback mit Replacement
         with open(file_path, "r", encoding="utf-8", errors="replace") as f:
             content = f.read()
 
@@ -160,7 +192,12 @@ def parse_appointments():
     return df
 
 
-def get_class_paths():
+def get_class_paths() -> Dict[str, str]:
+    """Gibt die konfigurierten Pfade für die E-Mail-Klassen zurück.
+
+    Returns:
+        Dict[str, str]: Ein Dictionary mit Klassen-Pfaden.
+    """
     config = get_config()
     cp_path = config.config_dir / "classifier_paths.yaml"
     if not cp_path.exists():
@@ -171,19 +208,45 @@ def get_class_paths():
     return cp_data.get("class_paths", {})
 
 
-def get_class_from_title(title, class_paths):
+def get_class_from_title(title: str, class_paths: Dict[str, str]) -> str:
+    """Bestimmt die E-Mail-Klasse basierend auf dem Terminbetreff.
+
+    Args:
+        title (str): Der Betreff des Termins.
+        class_paths (Dict[str, str]): Die konfigurierten Pfade.
+
+    Returns:
+        str: Die gefundene Klasse oder 'Other'.
+    """
     for class_name in class_paths.keys():
         if class_name.lower() in title.lower():
             return class_name
     return "Other"
 
 
-def extract_email(text):
+def extract_email(text: str) -> Optional[str]:
+    """Extrahiert eine E-Mail-Adresse aus einem String.
+
+    Args:
+        text (str): Der zu durchsuchende Text.
+
+    Returns:
+        Optional[str]: Die gefundene E-Mail-Adresse oder None.
+    """
     match = re.search(r"[\w\.-]+@[\w\.-]+", text)
     return match.group(0) if match else None
 
 
-def load_student_details(evt: gr.SelectData, df):
+def load_student_details(evt: gr.SelectData, df: pd.DataFrame) -> Tuple[str, str, Optional[str], str]:
+    """Lädt Details zu einem Studenten basierend auf einem ausgewählten Termin.
+
+    Args:
+        evt (gr.SelectData): Das Selektions-Event aus der Gradio Tabelle.
+        df (pd.DataFrame): Das DataFrame mit den Terminen.
+
+    Returns:
+        Tuple[str, str, Optional[str], str]: Zusammenfassung, Steckbrief, Explorer-Root, Pfad-String.
+    """
     row_idx = evt.index[0]
     title = df.iloc[row_idx]["Betreff"]
     participant_info = df.iloc[row_idx]["Teilnehmer"]
@@ -264,7 +327,15 @@ def load_student_details(evt: gr.SelectData, df):
     return summary, profile, explorer_root, str(student_dir) if student_dir else ""
 
 
-def on_file_select(evt: gr.SelectData):
+def on_file_select(evt: gr.SelectData) -> Any:
+    """Wird aufgerufen wenn eine Datei im Explorer ausgewählt wird.
+
+    Args:
+        evt (gr.SelectData): Das Selektions-Event.
+
+    Returns:
+        Any: Der Pfad zur Datei.
+    """
     return evt.value
 
 
@@ -288,13 +359,27 @@ with gr.Blocks(title="Appointment Manager") as demo:
             explorer = gr.FileExplorer(label="Dateien (Klick zum Öffnen)", file_count="single")
             open_status = gr.Textbox(label="Status", interactive=False)
 
-    def update_table():
+    def update_table() -> Tuple[pd.DataFrame, pd.DataFrame]:
+        """Aktualisiert die Tabelle der Termine.
+
+        Returns:
+            Tuple[pd.DataFrame, pd.DataFrame]: Die neuen Daten für die GUI.
+        """
         new_df = parse_appointments()
         return new_df, new_df
 
     refresh_btn.click(update_table, outputs=[table, appointments_df])
 
-    def handle_selection(evt: gr.SelectData, df):
+    def handle_selection(evt: gr.SelectData, df: pd.DataFrame) -> Tuple[str, str, Any, str]:
+        """Verarbeitet die Auswahl eines Termins.
+
+        Args:
+            evt: Selektions-Event.
+            df: Aktuelles DataFrame.
+
+        Returns:
+            Gradio Updates für die UI.
+        """
         summary, profile, folder_root, folder_str = load_student_details(evt, df)
         if folder_root:
             return summary, profile, gr.update(root_dir=folder_root, visible=True), folder_str
@@ -307,11 +392,20 @@ with gr.Blocks(title="Appointment Manager") as demo:
         outputs=[summary_md, profile_md, explorer, student_path_display]
     )
 
-    def open_selected_file(evt: gr.SelectData, student_dir):
+    def open_selected_file(evt: gr.SelectData, student_dir: str) -> str:
+        """Öffnet die ausgewählte Datei.
+
+        Args:
+            evt: Selektions-Event.
+            student_dir: Der Pfad zum Studenten-Ordner.
+
+        Returns:
+            Statusmeldung.
+        """
         if not student_dir:
             return "Kein Studenten-Ordner ausgewählt."
         full_path = Path(student_dir) / evt.value[0] if isinstance(evt.value, list) else Path(student_dir) / evt.value
-        return open_file(full_path)
+        return open_file(str(full_path))
 
     explorer.select(open_selected_file, inputs=[student_path_display], outputs=[open_status])
 

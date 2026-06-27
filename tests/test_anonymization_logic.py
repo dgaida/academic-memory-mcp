@@ -1,17 +1,23 @@
-"""Tests for test_anonymization_logic.py."""
+"""Tests für die Anonymisierungs-Logik."""
 import unittest
 import re
-from typing import Set, List
+from typing import Set, List, Dict, Any, Tuple
 
-# Rule-based logic copied from the implementation for testing purposes
-# since we have environment/dependency issues running the full module in some contexts
 def anonymize_th_koeln_names(text: str) -> str:
+    """Anonymisiert Namen und E-Mails der TH Köln in einem Text.
+
+    Args:
+        text: Der zu anonymisierende Text.
+
+    Returns:
+        str: Der anonymisierte Text.
+    """
     if not text:
         return text
     email_pattern = r'\b([a-zA-Z0-9._-]+)@((?:smail\.)?th-koeln\.de)\b'
     emails = re.findall(email_pattern, text, re.IGNORECASE)
     names_to_replace: Set[str] = set()
-    emails_to_replace: List[tuple] = []
+    emails_to_replace: List[Tuple[str, str]] = []
     for local_part, domain in emails:
         if local_part.lower() == "daniel.gaida":
             continue
@@ -21,7 +27,7 @@ def anonymize_th_koeln_names(text: str) -> str:
             if len(part) > 2:
                 names_to_replace.add(part)
     anonymized_text = text
-    email_placeholders = {}
+    email_placeholders: Dict[str, str] = {}
     for i, (full_email, domain) in enumerate(emails_to_replace):
         placeholder = f"TEMP_EMAIL_PLACEHOLDER_{i}"
         email_placeholders[placeholder] = f"max.mustermann@{domain}"
@@ -34,33 +40,29 @@ def anonymize_th_koeln_names(text: str) -> str:
     return anonymized_text
 
 class TestAnonymization(unittest.TestCase):
-    """Test class."""
-    def test_basic_anonymization(self):
-        """Test function docstring."""
+    """Testklasse für die Anonymisierung."""
+    def test_basic_anonymization(self) -> None:
+        """Testet die grundlegende Anonymisierung."""
         text = "Hallo Erika Mustermann, erika.mustermann@smail.th-koeln.de."
         expected = "Hallo Max Mustermann Max Mustermann, max.mustermann@smail.th-koeln.de."
         self.assertEqual(anonymize_th_koeln_names(text), expected)
 
-    def test_skip_daniel_gaida(self):
-        """Test function docstring."""
+    def test_skip_daniel_gaida(self) -> None:
+        """Testet, dass Daniel Gaida nicht anonymisiert wird."""
         text = "Daniel Gaida <daniel.gaida@th-koeln.de>"
-        # Should stay the same
         self.assertEqual(anonymize_th_koeln_names(text), text)
 
-    def test_mixed_case_and_parts(self):
-        """Test function docstring."""
+    def test_mixed_case_and_parts(self) -> None:
+        """Testet gemischte Schreibweise und Namensbestandteile."""
         text = "Max Power (max.power@th-koeln.de) sent a mail. Power is a cool name."
-        # max.power -> max, power.
-        # "Max" (if > 2) replaced by Max Mustermann
-        # "Power" replaced by Max Mustermann
         result = anonymize_th_koeln_names(text)
         self.assertIn("Max Mustermann", result)
         self.assertIn("max.mustermann@th-koeln.de", result)
         self.assertNotIn("Max Power", result)
         self.assertNotIn("max.power", result)
 
-    def test_multiple_names(self):
-        """Test function docstring."""
+    def test_multiple_names(self) -> None:
+        """Testet mehrere Namen im gleichen Text."""
         text = "John Doe (john.doe@smail.th-koeln.de) and Jane Smith (jane.smith@th-koeln.de)"
         result = anonymize_th_koeln_names(text)
         self.assertIn("max.mustermann@smail.th-koeln.de", result)
@@ -68,8 +70,8 @@ class TestAnonymization(unittest.TestCase):
         self.assertNotIn("John", result)
         self.assertNotIn("Jane", result)
 
-    def test_underscore_in_email(self):
-        """Test function docstring."""
+    def test_underscore_in_email(self) -> None:
+        """Testet Unterstriche in Email-Adressen."""
         text = "vorname_nachname@th-koeln.de"
         result = anonymize_th_koeln_names(text)
         self.assertEqual(result, "max.mustermann@th-koeln.de")
