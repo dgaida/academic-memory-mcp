@@ -8,7 +8,7 @@ import pandas as pd
 import gradio as gr
 from pathlib import Path
 from datetime import datetime, timedelta
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Dict, Any, Optional, Tuple
 
 from mcp_university.config import get_config
 from mcp_university.classifier.sort_emails import extract_lastname, find_student_folder

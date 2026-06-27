@@ -3,7 +3,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 from pathlib import Path
 from datetime import datetime
-from typing import Any, List, Optional
+from typing import Any
 from mcp_university.classifier.sort_emails import extract_firstname, extract_lastname, process_emails
 
 @pytest.mark.parametrize("input_str, expected_first, expected_last", [

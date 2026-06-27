@@ -3,7 +3,6 @@ import argparse
 import shutil
 from pathlib import Path
 import logging
-from typing import Any, List, Optional
 from mcp_university.config import get_config
 
 try:

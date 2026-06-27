@@ -1,7 +1,7 @@
 """Tests für die Anonymisierungs-Logik."""
 import unittest
 import re
-from typing import Set, List, Dict, Any, Tuple
+from typing import Set, List, Dict, Tuple
 
 def anonymize_th_koeln_names(text: str) -> str:
     """Anonymisiert Namen und E-Mails der TH Köln in einem Text.

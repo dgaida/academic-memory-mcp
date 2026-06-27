@@ -2,9 +2,8 @@
 import sys
 import os
 from datetime import datetime, timedelta
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from pathlib import Path
-from typing import Any, List, Optional
 
 # Ensure we can import mcp_university
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))

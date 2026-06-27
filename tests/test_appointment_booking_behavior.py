@@ -2,7 +2,7 @@
 import pytest
 from unittest.mock import MagicMock, patch
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Tuple
 from mcp_university.classifier.controller import EmailController
 
 @pytest.fixture
@@ -32,7 +32,7 @@ def test_generate_reply_triggers_appointment_tool(mock_controller_deps: Tuple[Ma
     Args:
         mock_controller_deps: Gemockte Abhängigkeiten.
     """
-    mock_cfg, mock_agent, mock_parser = mock_controller_deps
+    _, mock_agent, mock_parser = mock_controller_deps
 
     controller = EmailController()
 
@@ -53,7 +53,7 @@ def test_generate_reply_triggers_appointment_tool(mock_controller_deps: Tuple[Ma
     assert subject == "APPOINTMENT_BOOKED"
     assert "2026-07-08 13:30" in reply
 
-    args, kwargs = mock_agent.chat.call_args
+    _, kwargs = mock_agent.chat.call_args
     prompt = kwargs['messages'][0]['content']
     assert "ERZWUNGENE AKTION: Diese E-Mail bestätigt einen Termin. Du MUSST ZWINGEND manage_calendar_appointment aufrufen." in prompt
     assert "VERBOTE:" in prompt

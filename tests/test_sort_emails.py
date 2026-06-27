@@ -1,6 +1,4 @@
 """Tests für die E-Mail-Sortierung."""
-import pytest
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 from mcp_university.classifier.sort_emails import main
 
@@ -14,6 +12,7 @@ def test_main_invocation() -> None:
         with patch('mcp_university.classifier.sort_emails.Path.exists', return_value=True),              patch('mcp_university.classifier.sort_emails.open', MagicMock()):
             main()
             assert mock_process.called
+            assert mock_write is not None
 
 def test_placeholder_sort_1() -> None:
     """Platzhalter 1."""
