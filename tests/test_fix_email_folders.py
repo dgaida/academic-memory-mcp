@@ -269,6 +269,7 @@ def test_fix_folders_to_recipient_loop(mock_extract, mock_find, mock_get_config,
 @patch("scripts.fix_email_folders.MailParser")
 @patch("scripts.fix_email_folders.get_config")
 def test_fix_folders_fallback_inbox(mock_get_config, mock_parser_class, mock_config_path, tmp_path):
+    """Should land in Inbox since it is sent to the user."""
     """Tests fallback to Inbox when user sends to non-student.
 
     Args:
@@ -381,7 +382,7 @@ def test_fix_folders_external_sender_to_sent_items(mock_get_config, mock_parser_
     with patch("scripts.fix_email_folders.shutil.move") as mock_move:
         fix_folders(mock_config_path, dry_run=False, full_verify=False)
         args, _ = mock_move.call_args
-        assert "SentItems" in str(args[1])
+        assert "Inbox" in str(args[1])
 
 @patch("scripts.fix_email_folders.MailParser")
 @patch("scripts.fix_email_folders.get_config")

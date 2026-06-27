@@ -65,41 +65,24 @@ def fix_folders(config_path: Path, dry_run: bool = False, full_verify: bool = Fa
 
                 if is_sent_by_user:
                     folder_name = "SentItems"
-                    # Try to find student in recipients
-                    recipients = details.get("to", []) + details.get("cc", [])
-                    found_student = False
-                    for rec in recipients:
-                        rec_email = rec.get("email", "").lower()
-                        if any(domain in rec_email for domain in ["@smail.th-koeln.de", "@smail.fh-koeln.de", "@th-koeln.de", "@fh-koeln.de"]):
-                            lastname = extract_lastname(rec.get("name") or rec.get("email"))
-                            found_student = True
-                            break
-                    if not found_student and recipients:
-                        # Rule: Take first 'To' recipient, fallback to second if first fails (simplification here)
-                        to_recipients = details.get("to", [])
-                        if to_recipients:
-                            lastname = extract_lastname(to_recipients[0].get("name") or to_recipients[0].get("email"))
-                            if (lastname == "Unknown" or not lastname) and len(to_recipients) > 1:
-                                lastname = extract_lastname(to_recipients[1].get("name") or to_recipients[1].get("email"))
-                        else:
+                    # Rule: Prioritize direct recipients (To) for folder naming, ignore CC
+                    # Rule: Take first 'To' recipient, fallback to second if first fails
+                    to_recipients = details.get("to", [])
+                    if to_recipients:
+                        lastname = extract_lastname(to_recipients[0].get("name") or to_recipients[0].get("email"))
+                        if (lastname == "Unknown" or not lastname) and len(to_recipients) > 1:
+                            lastname = extract_lastname(to_recipients[1].get("name") or to_recipients[1].get("email"))
+                    else:
+                        # Fallback to any recipient
+                        recipients = details.get("to", []) + details.get("cc", [])
+                        if recipients:
                             lastname = extract_lastname(recipients[0].get("name") or recipients[0].get("email"))
-                elif any(domain in sender for domain in ["@smail.th-koeln.de", "@smail.fh-koeln.de", "@th-koeln.de", "@fh-koeln.de"]):
-                    folder_name = "Inbox"
-                    lastname = extract_lastname(details.get("from_name") or details.get("from_email"))
+                        else:
+                            lastname = "Unknown"
                 else:
-                    # Fallback
-                    recipients = details.get("to", []) + details.get("cc", [])
-                    found_student = False
-                    for rec in recipients:
-                        rec_email = rec.get("email", "").lower()
-                        if any(domain in rec_email for domain in ["@smail.th-koeln.de", "@smail.fh-koeln.de", "@th-koeln.de", "@fh-koeln.de"]):
-                            folder_name = "SentItems"
-                            lastname = extract_lastname(rec.get("name") or rec.get("email"))
-                            found_student = True
-                            break
-                    if not found_student:
-                        folder_name = "Inbox"
-                        lastname = extract_lastname(details.get("from_name") or details.get("from_email"))
+                    folder_name = "Inbox"
+                    # Rule: Folder name should be the sender's lastname
+                    lastname = extract_lastname(details.get("from_name") or details.get("from_email"))
 
                 # Ziel-Pfad bestimmen (Favorisiere existierenden Ordner)
                 student_dir = find_student_folder(base_path, lastname)

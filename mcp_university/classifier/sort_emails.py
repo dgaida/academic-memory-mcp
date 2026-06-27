@@ -210,9 +210,6 @@ def extract_lastname(name_str: str) -> str:
     # Priority 3: System addresses with dash or complex email logic
     if email:
         local_part = email.split("@")[0]
-        # Specific rule for digital-sciences
-        if "digital-science" in local_part.lower():
-            return "Digital-Science"
         # Specific rule for kreditorenbuchhaltung
         if "kreditorenbuchhaltung" in local_part.lower():
             return "Kreditorenbuchhaltung"
