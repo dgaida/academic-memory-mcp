@@ -1,26 +1,11 @@
-import sys
-from unittest.mock import MagicMock
+import pytest
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+from datetime import datetime
 
-# Mock heavy dependencies before they are imported
-sys.modules['torch'] = MagicMock()
-sys.modules['torch.nn'] = MagicMock()
-sys.modules['sklearn'] = MagicMock()
-sys.modules['sklearn.feature_extraction'] = MagicMock()
-sys.modules['sklearn.feature_extraction.text'] = MagicMock()
-sys.modules['sklearn.ensemble'] = MagicMock()
-sys.modules['sklearn.preprocessing'] = MagicMock()
-sys.modules['sklearn.metrics'] = MagicMock()
-sys.modules['xgboost'] = MagicMock()
-sys.modules['transformers'] = MagicMock()
-sys.modules['sentence_transformers'] = MagicMock()
-
-import pytest  # noqa: E402
-from pathlib import Path  # noqa: E402
-from unittest.mock import patch  # noqa: E402
-from datetime import datetime  # noqa: E402
-
-# Now import the project modules
-from mcp_university.classifier.sort_emails import extract_lastname, process_emails  # noqa: E402
+# Import project modules. We assume CI has dependencies or we use localized mocking if needed.
+# Since ruff failed on E402, we put imports at top.
+from mcp_university.classifier.sort_emails import extract_lastname, process_emails
 
 def create_recipient(email, name, r_type):
     rec = MagicMock()

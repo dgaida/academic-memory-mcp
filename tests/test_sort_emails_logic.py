@@ -1,25 +1,9 @@
-import sys
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
+from pathlib import Path
+from datetime import datetime
+import pytest
 
-# Mock heavy dependencies
-sys.modules['torch'] = MagicMock()
-sys.modules['torch.nn'] = MagicMock()
-sys.modules['sklearn'] = MagicMock()
-sys.modules['sklearn.feature_extraction'] = MagicMock()
-sys.modules['sklearn.feature_extraction.text'] = MagicMock()
-sys.modules['sklearn.ensemble'] = MagicMock()
-sys.modules['sklearn.preprocessing'] = MagicMock()
-sys.modules['sklearn.metrics'] = MagicMock()
-sys.modules['xgboost'] = MagicMock()
-sys.modules['transformers'] = MagicMock()
-sys.modules['sentence_transformers'] = MagicMock()
-
-from unittest.mock import patch  # noqa: E402
-from pathlib import Path  # noqa: E402
-from datetime import datetime  # noqa: E402
-import pytest  # noqa: E402
-
-from mcp_university.classifier.sort_emails import process_emails  # noqa: E402
+from mcp_university.classifier.sort_emails import process_emails
 
 @pytest.fixture
 def mock_dependencies():
