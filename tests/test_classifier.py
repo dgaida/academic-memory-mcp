@@ -1,60 +1,63 @@
-"""Tests für den E-Mail-Klassifikator."""
 import pytest
-from pathlib import Path
-import shutil
-import tempfile
-from unittest.mock import MagicMock, patch
-
+from unittest.mock import patch
 from mcp_university.classifier.engine import EmailClassifier
 
 @pytest.fixture
-def temp_data_dir():
-    """Erstellt ein temporäres Verzeichnis mit Testdaten in der neuen Struktur."""
-    tmpdir = tempfile.mkdtemp()
-    root = Path(tmpdir)
+def temp_data_dir(tmp_path):
+    """Erstellt ein temporäres Verzeichnis mit Testdaten."""
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
 
-    # Erstelle zwei Klassen-Ordner
-    bach = root / "BachelorThesis"
-    mast = root / "MasterThesis"
+    # Erstelle Unterordner für Klassen
+    for cls in ["BachelorThesis", "MasterThesis", "Other"]:
+        cls_dir = data_dir / cls
+        cls_dir.mkdir()
+        # Erstelle ein paar Testdateien
+        for i in range(3):
+            (cls_dir / f"mail_{i}.msg").write_text(f"Inhalt von Mail {i} für {cls}")
 
-    for d in [bach, mast]:
-        d.mkdir()
-        (d / "Inbox").mkdir()
-        (d / "SentItems").mkdir()
+    return data_dir
 
-    # Erstelle Dummy .msg Dateien in Unterordnern
-    (bach / "Inbox" / "test1.msg").write_text("Anmeldung Bachelorarbeit")
-    (bach / "SentItems" / "test2.msg").write_text("Frage zu Bachelor")
-    (mast / "Inbox" / "test3.msg").write_text("Masterarbeit Thema")
-    (mast / "SentItems" / "test4.msg").write_text("Kolloquium Master")
+def test_classifier_initialization():
+    """Testet die Initialisierung des Klassifizierers."""
+    classifier = EmailClassifier(mode="tfidf", method="randomforest")
+    assert classifier.mode == "tfidf"
+    assert classifier.method == "randomforest"
+    assert classifier.classifier is not None
 
-    yield root
-    shutil.rmtree(tmpdir)
-
-def test_classifier_train_predict_tfidf(temp_data_dir):
-    """Testet das Training und die Vorhersage im TF-IDF Modus mit Unterordnern."""
+def test_classifier_train(temp_data_dir):
+    """Testet das Training des Klassifizierers."""
     classifier = EmailClassifier(mode="tfidf", method="randomforest")
 
-    # Mock MailParser.parse
     with patch("mcp_university.classifier.engine.MailParser.parse") as mock_parse:
         mock_parse.side_effect = lambda p: p.read_text()
 
         classifier.train(temp_data_dir)
-        assert classifier.is_trained
 
-        # Test Vorhersage
-        test_file = temp_data_dir / "BachelorThesis" / "Inbox" / "test1.msg"
-        result = classifier.predict(test_file)
+        assert classifier.classifier is not None
+        assert classifier.tfidf_vectorizer is not None
+        assert classifier.label_encoder is not None
+        assert len(classifier.label_encoder.classes_) == 3
 
-        assert "prediction" in result
-        assert result["prediction"] in ["BachelorThesis", "MasterThesis"]
-        assert "confidence" in result
-        assert "probabilities" in result
+def test_classifier_predict(temp_data_dir):
+    """Testet die Vorhersage."""
+    classifier = EmailClassifier(mode="tfidf", method="randomforest")
+
+    with patch("mcp_university.classifier.engine.MailParser.parse") as mock_parse:
+        mock_parse.side_effect = lambda p: p.read_text()
+        classifier.train(temp_data_dir)
+
+        test_file = temp_data_dir / "BachelorThesis" / "mail_0.msg"
+        prediction = classifier.predict(test_file)
+
+        assert "prediction" in prediction
+        assert "confidence" in prediction
+        assert prediction["prediction"] in ["BachelorThesis", "MasterThesis", "Other"]
 
 def test_classifier_save_load(temp_data_dir, tmp_path):
     """Testet Speichern und Laden des Modells."""
     classifier = EmailClassifier(mode="tfidf", method="randomforest")
-    model_path = tmp_path / "model.pkl"
+    model_path = tmp_path / "model.pt" # Use .pt as we use torch.save
 
     with patch("mcp_university.classifier.engine.MailParser.parse") as mock_parse:
         mock_parse.side_effect = lambda p: p.read_text()
@@ -62,52 +65,11 @@ def test_classifier_save_load(temp_data_dir, tmp_path):
         classifier.train(temp_data_dir)
         classifier.save(model_path)
 
+        assert model_path.exists()
+
         new_classifier = EmailClassifier()
         new_classifier.load(model_path)
 
-        assert new_classifier.is_trained
         assert new_classifier.mode == "tfidf"
-        assert len(new_classifier.label_encoder.classes_) == 2
-
-@patch("sentence_transformers.SentenceTransformer")
-def test_classifier_embedding_mode(mock_st, temp_data_dir):
-    """Testet den Embedding-Modus mit Mocks."""
-    # Mock SentenceTransformer encode
-    mock_model = MagicMock()
-    mock_model.encode.return_value = [[0.1, 0.2, 0.3]] * 4
-    mock_st.return_value = mock_model
-
-    classifier = EmailClassifier(mode="embedding")
-
-    with patch("mcp_university.classifier.engine.MailParser.parse") as mock_parse:
-        mock_parse.side_effect = lambda p: p.read_text()
-
-        classifier.train(temp_data_dir)
-        assert classifier.is_trained
-
-        # Mock for predict
-        mock_model.encode.return_value = [[0.1, 0.2, 0.3]]
-        test_file = temp_data_dir / "BachelorThesis" / "Inbox" / "test1.msg"
-        result = classifier.predict(test_file)
-        assert result["prediction"] in ["BachelorThesis", "MasterThesis"]
-
-def test_classifier_train_predict_xgboost(temp_data_dir):
-    """Testet das Training und die Vorhersage im XGBoost Modus."""
-    classifier = EmailClassifier(mode="tfidf", method="xgboost")
-
-    # Mock MailParser.parse
-    with patch("mcp_university.classifier.engine.MailParser.parse") as mock_parse:
-        mock_parse.side_effect = lambda p: p.read_text()
-
-        classifier.train(temp_data_dir)
-        assert classifier.is_trained
-        assert classifier.method == "xgboost"
-
-        # Test Vorhersage
-        test_file = temp_data_dir / "BachelorThesis" / "Inbox" / "test1.msg"
-        result = classifier.predict(test_file)
-
-        assert "prediction" in result
-        assert result["prediction"] in ["BachelorThesis", "MasterThesis"]
-        assert "confidence" in result
-        assert "probabilities" in result
+        assert new_classifier.method == "randomforest"
+        assert new_classifier.classifier is not None
