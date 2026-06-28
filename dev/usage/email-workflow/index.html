@@ -18,7 +18,7 @@
         <link rel="prev" href="../mocogi-extraction/">
       
       
-        <link rel="next" href="../rag-process/">
+        <link rel="next" href="../email-parsing/">
       
       
         
@@ -1212,6 +1212,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../email-parsing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    E-Mail Parsing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../rag-process/" class="md-nav__link">
         
   
@@ -1992,7 +2020,7 @@
 </ol>
 <hr />
 <h2 id="3-phase-ki-gestutzte-analyse-analyse-kontext">3. Phase: KI-gestützte Analyse (Analyse &amp; Kontext)<a class="headerlink" href="#3-phase-ki-gestutzte-analyse-analyse-kontext" title="Permanent link">&para;</a></h2>
-<p>Nachdem die Mails sortiert sind, erfolgt die Analyse durch <code>process_sorted_emails.py</code>. In dieser Phase wird der notwendige Kontext für eine spätere Bearbeitung gesammelt.</p>
+<p>Nachdem die Mails sortiert sind, erfolgt die Analyse durch <code>scripts/process_sorted_emails.py</code>. In dieser Phase wird der notwendige Kontext für eine spätere Bearbeitung gesammelt.</p>
 <p><strong>Inhalte dieser Phase:</strong></p>
 <ul>
 <li><strong>Gradio GUI Zusammenfassung:</strong> In der <a href="#gradio-gui">Gradio GUI</a> wird für jede Mail eine separate, kurze (2 Sätze) Zusammenfassung des aktuellen Inhalts angezeigt, um einen schnellen Überblick zu ermöglichen. Die vollständige Konversations-Zusammenfassung (<code>.emails_summary.md</code>) wird erst in <strong>Phase 6</strong> bei der Ausführung einer Antwort-Aktion erstellt, um Ressourcen zu sparen und den aktuellsten Stand zu garantieren.  </li>
@@ -2087,7 +2115,7 @@
 </div>
 <hr />
 <h2 id="erstellte-berichte-und-dateien">Erstellte Berichte und Dateien<a class="headerlink" href="#erstellte-berichte-und-dateien" title="Permanent link">&para;</a></h2>
-<p>Während der Verarbeitung durch <code>process_sorted_emails.py</code> werden verschiedene Markdown-Dateien im Quellverzeichnis erstellt, um den Status und die Ergebnisse zu dokumentieren.</p>
+<p>Während der Verarbeitung durch <code>scripts/process_sorted_emails.py</code> werden verschiedene Markdown-Dateien im Quellverzeichnis erstellt, um den Status und die Ergebnisse zu dokumentieren.</p>
 <h3 id="1-sorted_emailsmd">1. <code>sorted_emails.md</code><a class="headerlink" href="#1-sorted_emailsmd" title="Permanent link">&para;</a></h3>
 <p>Dieser Bericht wird direkt nach der initialen Sortierung erstellt und listet alle gefundenen E-Mails und ihre vorläufige Klassifizierung auf.</p>
 <p><strong>Beispiel:</strong>
