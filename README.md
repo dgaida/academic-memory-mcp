@@ -54,7 +54,7 @@ mcp_university/
 │   └── cli/            # Typer-based CLI
 ├── outlook_macro/      # VBA macros for Outlook integration
 ├── tests/              # Unit and integration tests
-└── process_sorted_emails.py # Main workflow script
+└── scripts/process_sorted_emails.py # Main workflow script
 ```
 
 ## Installation
@@ -76,7 +76,7 @@ mcp-uni search "Themenvorschläge Bachelorarbeit"
 mcp-uni serve-mcp
 
 # Process and classify new emails
-python process_sorted_emails.py
+python scripts/process_sorted_emails.py
 ```
 
 Detailed documentation can be found in the `docs/` directory or on the [Documentation Page](https://dgaida.github.io/academic-memory-mcp/).

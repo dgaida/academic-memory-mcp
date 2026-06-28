@@ -67,6 +67,7 @@ def run_gradio_gui(controller: EmailController, report_path: Path, emails_to_pro
                             open_mail_btn = gr.Button("✉️ Mail öffnen", size="sm")
 
                             def open_folder(p=str(folder_path)):
+                                """Öffnet den Ordner im Explorer."""
                                 try:
                                     if platform.system() == "Windows":
                                         os.startfile(p)
@@ -78,6 +79,7 @@ def run_gradio_gui(controller: EmailController, report_path: Path, emails_to_pro
                                     print(f"Error opening folder: {e}")
 
                             def open_mail(p=str(mail_path)):
+                                """Öffnet die Mail-Datei."""
                                 try:
                                     if platform.system() == "Windows":
                                         os.startfile(p)
@@ -145,6 +147,7 @@ def run_gradio_gui(controller: EmailController, report_path: Path, emails_to_pro
             status_out = gr.Textbox(label="Ergebnis")
 
         def handle_click(*inputs):
+            """Verarbeitet die Benutzereingaben aus der GUI."""
             # Inputs are class_dropdowns, action_dropdowns (if present), then checkboxes
             num_mails = len(email_data)
             selected_classes = inputs[:num_mails]

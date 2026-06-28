@@ -1,7 +1,31 @@
 """Tests for test_sort_emails.py."""
+import sys
+from unittest.mock import MagicMock
+
+# Mock heavy dependencies
+mock_modules = [
+    'torch',
+    'torch.nn',
+    'transformers',
+    'sentence_transformers',
+    'xgboost',
+    'gradio',
+    'qdrant_client',
+    'docling',
+    'liteparse',
+    'sklearn.metrics.pairwise'
+]
+for mod in mock_modules:
+    sys.modules[mod] = MagicMock()
+
+class MockTensor:
+    pass
+sys.modules['torch'].Tensor = MockTensor
+
+# ruff: noqa: E402
 from pathlib import Path
 from datetime import datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from mcp_university.classifier.sort_emails import get_semester, extract_lastname, process_emails, write_report
 
@@ -101,7 +125,10 @@ def test_process_emails(mock_open_msg, mock_mail_parser, mock_classifier_class, 
     # as the real shutil.move will fail if the file doesn't exist (which it won't after being moved once)
 
     with patch('shutil.move'):
-        moved = process_emails(source_root, Path("dummy_model"), config)
+        # Mock university user emails
+        with patch('mcp_university.classifier.sort_emails.get_config') as mock_cfg:
+            mock_cfg.return_value.user.emails = ["daniel.gaida@th-koeln.de"]
+            moved = process_emails(source_root, Path("dummy_model"), config)
 
     assert len(moved) == 3
 
@@ -140,3 +167,4 @@ def test_write_report(tmp_path):
     assert "## BachelorThesis" in content
     assert "Mustermann" in content
     assert "Musterfrau" in content
+    assert "/path/to/mail1.msg" in content

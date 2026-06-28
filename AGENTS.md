@@ -114,7 +114,7 @@ In `mcp_university/classifier/engine.py` und `mcp_university/retrieval/index.py`
 `logger.info(f"ERFOLG: Modell {self.embedding_model_name} wurde LOKAL geladen.")`
 
 ### 2. Terminbuchung (Appointment Booking)
-In `process_sorted_emails.py` muss bei der Verarbeitung des `APPOINTMENT_BOOKED` Signals zwingend `agent.last_appointment_info` geprüft werden.
+In `scripts/process_sorted_emails.py` muss bei der Verarbeitung des `APPOINTMENT_BOOKED` Signals zwingend `agent.last_appointment_info` geprüft werden.
 
 ### 3. F-Strings
 Achte auf f-string Kompatibilität mit Python 3.10 (vermeide verschachtelte Anführungszeichen gleichen Typs).
@@ -129,7 +129,17 @@ The script `scripts/crawl_th_koeln_persons.py` is used to fetch personnel data.
 ## Steckbrieferstellung (PersonProfiler)  
 - Um die Performance zu gewährleisten und die Kontextgröße des LLM nicht zu sprengen, werden bei der Erstellung oder Aktualisierung eines Steckbriefs maximal die **100 neuesten E-Mails** einer Person berücksichtigt.  
 
-## Email Handling Rules  
+## Email Handling Rules
+### Email Parsing Rules (CRITICAL)
+- **Hierarchical Extraction:**
+  1. Handle "im Auftrag von" headers first.
+  2. **Greedy Name Matching:** Match display name parts against the local part of the email. If a part of the display name (like "Mustermann") is found within the local part (like "mustermann.max"), it is definitively the **lastname**.
+  3. **Dot-Separated Fallback:** If no display name match, use segments from dot-separated local parts.
+  4. **Validation:** Always return identified names in Title Case.
+- **Priority:** Direct 'To' recipients are prioritized over CC/BCC for folder organization in SentItems.
+- **Consistency:** Ensure `extract_lastname` and `extract_firstname` are used consistently across all sorting and processing scripts.
+- **Example:** "Mustermann Max <mustermann@example.com>" MUST result in lastname "Mustermann".
+
 - **SentItems:** Emails located in the `SentItems` folder must ALWAYS be archived and never require a reply action, regardless of their age or the overall conversation state.  
 
 - **Memory Recording:** Always document significant logic changes (like the SentItems archiving rule) in AGENTS.md and relevant documentation folders to maintain project clarity.  

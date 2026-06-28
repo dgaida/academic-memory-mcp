@@ -1,273 +1,188 @@
-"""Skript zum Sortieren von E-Mails basierend auf einer Klassifizierung.
-
-Dieses Modul bietet Funktionen zum Extrahieren von Namen aus E-Mail-Adressen
-und zum Verschieben von E-Mail-Dateien in eine strukturierte Ordnerhierarchie.
-"""
+"""Modul zum Sortieren von E-Mails basierend auf Klassifizierung."""
 
 import argparse
 import logging
-import re
 import shutil
-from pathlib import Path
-from typing import Any, Dict, List, Optional
-
+import re
 import yaml
+from pathlib import Path
+from typing import List, Dict, Any, Optional
 
-from mcp_university.classifier.engine import EmailClassifier
-from mcp_university.parser.mail_parser import MailParser
 from mcp_university.config import get_config
-from mcp_university.utils.encoding import decode_mime_header
-from mcp_university.utils.semester import get_semester, normalize_name
+from mcp_university.utils.semester import get_semester
+from mcp_university.parser.mail_parser import MailParser
+from mcp_university.classifier.engine import EmailClassifier
+from mcp_university.utils.torch_utils import get_device  # noqa: F401
 
-# Logging konfigurieren
-logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
 
-# Liste generischer Email-Local-Parts, die nicht als Name verwendet werden sollten.
-GENERIC_LOCAL_PARTS = [
-    "student", "onbehalfof", "no-reply", "support", "info", 
-    "admin", "office", "sekretariat", "onbehalf", "f10-request"
-]
+# Liste von generischen Local-Parts, die ignoriert werden sollen
+GENERIC_LOCAL_PARTS = {
+    "info", "sekretariat", "service", "kontakt", "studium", "pruefungsamt",
+    "international", "career", "bibliothek", "it-service", "beratung",
+    "alumni", "marketing", "presse", "events", "support", "helpdesk"
+}
 
 
-def clean_sender_name(name_string: str) -> str:
-    """Bereinigt den Absendernamen von komplexen Headern wie 'im Auftrag von'.
+def normalize_name(name: str) -> str:
+    """Normalisiert einen Namen für den Vergleich (entfernt Sonderzeichen, Kleinschreibung).
 
     Args:
-        name_string (str): Der zu bereinigende Namensstring.
+        name (str): Der zu normalisierende Name.
 
     Returns:
-        str: Der bereinigte Name.
+        str: Der normalisierte Name.
     """
-    if not name_string:
+    if not name:
         return ""
-    
-    # MIME-Header dekodieren falls nötig
-    name_string = decode_mime_header(name_string)
-    
-    if "im Auftrag von" in name_string:
-        # Versuche einen echten Namen nach "im Auftrag von;" zu finden
-        parts = name_string.split("im Auftrag von")
-        if len(parts) > 1:
-            name_candidate = parts[1].strip(":; ")
-            # Falls Name leer ist oder nur Email-Teil, versuche weiter zu parsen
-            if not name_candidate or "@" in name_candidate.split("<")[0]:
-                 # Check if there's a name after a second semicolon or similar
-                 subparts = name_candidate.split(";")
-                 for sp in subparts:
-                      sp = sp.strip()
-                      if sp and "@" not in sp.split("<")[0]:
-                           name_candidate = sp
-                           break
-            if name_candidate:
-                return name_candidate.strip("'\" ")
-        else:
-            # Fallback für andere Varianten
-            match = re.search(r"im Auftrag von\s*[:;]?\s*([^<;]+)", name_string)
-            if match:
-                return match.group(1).strip("'\" ")
-
-    # Handle spezifisches Präfix "TH //"
-    name_string = re.sub(r"^TH\s*//\s*", "", name_string)
-    return name_string.strip("'\" ")
+    # Entferne akademische Titel und Sonderzeichen
+    name = re.sub(r"(Prof\.|Dr\.|B\.Sc\.|M\.Sc\.|Dipl\.-Ing\.)", "", name, flags=re.IGNORECASE)
+    # Nur Buchstaben und Bindestriche behalten
+    name = re.sub(r"[^a-zA-ZäöüÄÖÜß\-]", " ", name)
+    return name.strip()
 
 
-def _format_dashed_name(name_input: str) -> str:
-    """Formatiert einen Namen mit Bindestrichen (Title Case pro Teil).
+def _format_dashed_name(name: str) -> str:
+    """Formatiert einen Namen mit Bindestrichen korrekt (Großschreibung nach Bindestrich)."""
+    parts = name.split("-")
+    return "-".join(p.capitalize() for p in parts if p)
 
-    Beispiel: 'studium-gm' wird zu 'Studium-Gm'.
+
+def _clean_for_comparison(s: str) -> str:
+    """Bereitet einen String für den Vergleich vor (Kleinschreibung, Trim)."""
+    return s.strip().lower()
+
+
+def extract_firstname(sender_raw: str) -> str:
+    """Extrahiert den Vornamen aus einer Sender-Zeile.
 
     Args:
-        name_input: Der zu formatierende Name.
-
-    Returns:
-        str: Der formatierte Name mit Großbuchstaben nach Bindestrichen.
-    """
-    if not name_input:
-        return ""
-    if "-" in name_input:
-        parts = name_input.split("-")
-        return "-".join(part[0].upper() + part[1:] if part else "" for part in parts)
-    return name_input[0].upper() + name_input[1:]
-
-
-def extract_firstname(name_input: str) -> str:
-    """Extrahiert den Vornamen aus einem Namensstring oder einer E-Mail-Adresse.
-
-    Args:
-        name_input (str): Der zu parsende Name oder die E-Mail-Adresse.
+        sender_raw (str): Die rohe Sender-Information (z.B. 'Max Mustermann <max@example.com>').
 
     Returns:
         str: Der extrahierte Vorname oder 'Unknown'.
     """
-    if not name_input or name_input in ["(No Sender)", "(No Receiver)", "Unknown"]:
+    if not sender_raw or sender_raw == "(No Sender)":
         return "Unknown"
 
-    cleaned_name = clean_sender_name(name_input)
+    display_name = ""
+    local_part = ""
 
-    # Suche nach E-Mail-Adresse im bereinigten Namen bevorzugt
-    email_match = re.search(r"[\w\.-]+@[\w\.-]+", cleaned_name)
-    if not email_match:
-        email_match = re.search(r"[\w\.-]+@[\w\.-]+", name_input)
-    email_address = email_match.group(0) if email_match else ""
-
-    # Anzeige-Name extrahieren (Teil vor der spitzen Klammer)
-    display_name = cleaned_name.split("<")[0].strip()
-    if display_name == email_address:
-        display_name = ""
-        
-    # Klammern und akademische Titel entfernen
-    display_name = re.sub(r"\(.*?\)", "", display_name).strip()
-    display_name = re.sub(r",?\s*(B\.Sc\.|M\.Sc\.|Prof\.|Dr\.)\s*", "", display_name).strip()
-
-    # Priorität 1: Reicher Anzeigename (mehrere Wörter oder Format 'Nachname, Vorname')
-    if display_name and (" " in display_name or "," in display_name):
-        if "," in display_name:
-            parts = display_name.split(",")
-            if len(parts) > 1:
-                return parts[1].strip().split()[0].strip("'\"")
+    # 1. Extraktion von Display-Name und Email
+    match = re.match(r"^(.*?)\s*<([^>]+)>", sender_raw)
+    if match:
+        display_name = match.group(1).strip().strip("'").strip('"')
+        email = match.group(2).strip()
+        local_part = email.split("@")[0] if "@" in email else ""
+    else:
+        if "@" in sender_raw:
+            local_part = sender_raw.split("@")[0]
         else:
-            parts = display_name.split()
-            if len(parts) > 1:
-                return " ".join(parts[:-1]).strip("'\"")
+            display_name = sender_raw.strip().strip("'").strip('"')
 
-    # Priorität 2: E-Mail-Adresse mit Punkt im Local-Part (Hochschul-Format: vorname.nachname)
-    if email_address and any(domain in email_address.lower() for domain in ["th-koeln.de", "fh-koeln.de"]):
-        local_part = email_address.split("@")[0]
-        if "." in local_part:
-            firstname_part = local_part.split(".")[0]
-            # Ersetze Unterstriche durch Leerzeichen und setze Wortanfänge groß
-            parts = re.split(r'([_-])', firstname_part)
-            result_firstname = ""
-            for part in parts:
-                if part in ["_", "-"]:
-                    result_firstname += " " if part == "_" else "-"
-                else:
-                    if part:
-                        result_firstname += part[0].upper() + part[1:]
-            return result_firstname
+    # 2. Heuristik für Vornamen
+    if "," in display_name:
+        parts = display_name.split(",")
+        if len(parts) > 1:
+            return parts[1].strip().split()[0]
 
-    # Priorität 3: Fallback auf verbleibenden Anzeigenamen
     if display_name:
-        return display_name
+        parts = display_name.split()
+        if len(parts) > 1:
+            return parts[0]
+
+    if "." in local_part:
+        parts = local_part.split(".")
+        if len(parts) > 1:
+            first = parts[0]
+            if _clean_for_comparison(first) not in GENERIC_LOCAL_PARTS:
+                return first.capitalize()
 
     return "Unknown"
 
 
-def _clean_for_comparison(string_value: str) -> str:
-    """Hilfsfunktion für den normalisierten Vergleich von Namensteilen.
+def extract_lastname(sender_raw: str) -> str:
+    """Extrahiert den Nachnamen aus einer Sender-Zeile.
 
-    Normalisiert Umlaute und entfernt Trennzeichen für einen robusten Vergleich.
-
-    Args:
-        string_value: Der zu säubernde String.
-
-    Returns:
-        str: Der gesäuberte und normalisierte String.
-    """
-    return string_value.lower().replace("ß", "ss").replace("_", "").replace(".", "").replace("-", "").strip()
-
-
-def extract_lastname(name_input: str) -> str:
-    """Extrahiert den Nachnamen aus einem Namensstring oder einer E-Mail-Adresse.
-
-    Berücksichtigt spezifische Anforderungen für Hochschul-Systemadressen, 
-    multi-word Nachnamen und Fallbacks auf den E-Mail Local-Part.
+    Hierarchische Extraktionslogik:
+    1. Beachtet "im Auftrag von" Header.
+    2. Greedy Name Matching: Abgleich von Display-Name Teilen gegen den Local-Part der Email.
+       Wichtig: Falls ein Teil des Display-Namens im Local-Part vorkommt, wird dieser als Nachname bevorzugt.
+       Dabei werden längere Matches (z.B. 'Mustermann') gegenüber kürzeren (z.B. 'Max') bevorzugt,
+       wenn beide im Local-Part vorkommen (z.B. 'mustermann.max').
+    3. Fallback auf dot-separated Local Part Segmente.
+    4. Generische Fallbacks (Kommata-Separation, letztes Wort im Namen).
 
     Args:
-        name_input (str): Der zu parsende Name oder die E-Mail-Adresse.
+        sender_raw (str): Die rohe Sender-Information.
 
     Returns:
-        str: Der extrahierte Nachname oder 'Unknown'.
+        str: Der extrahierte Nachname (Title Case) oder 'Unknown'.
     """
-    logger.debug(f"Extrahiere Nachname aus: {name_input}")
-    if not name_input or name_input in ["(No Sender)", "(No Receiver)", "Unknown"]:
+    if not sender_raw or sender_raw == "(No Sender)":
         return "Unknown"
 
-    cleaned_name = clean_sender_name(name_input)
+    display_name = ""
+    local_part = ""
 
-    # Email und Local-Part extrahieren - Bevorzugt aus bereinigtem Namen (Wichtig für 'im Auftrag von')
-    email_match = re.search(r"[\w\.-]+@[\w\.-]+", cleaned_name)
-    if not email_match:
-         email_match = re.search(r"[\w\.-]+@[\w\.-]+", name_input)
-    
-    email_address = email_match.group(0) if email_match else ""
-    local_part = email_address.split("@")[0] if email_address else ""
+    # 1. "im Auftrag von" Logik (Priorisierung des eigentlichen Senders)
+    if "im Auftrag von" in sender_raw:
+        parts = sender_raw.split("im Auftrag von")
+        sender_raw = parts[1].strip()
 
-    # Anzeige-Namen extrahieren und bereinigen
-    display_name = cleaned_name.split("<")[0].strip()
-    if display_name == email_address:
-        display_name = ""
-    display_name = display_name.strip("'\" ")
-    display_name = re.sub(r"\(.*?\)", "", display_name).strip()
-    display_name = re.sub(r",?\s*(B\.Sc\.|M\.Sc\.|Prof\.|Dr\.)\s*", "", display_name).strip()
-    display_name = re.sub(r"\s*\|\s*.*$", "", display_name)
-    display_name = re.sub(r"\s+GmbH\b.*$", "", display_name).strip("'\" ")
+    # 2. Extraktion von Display-Name und Email
+    match = re.match(r"^(.*?)\s*<([^>]+)>", sender_raw)
+    if match:
+        display_name = match.group(1).strip().strip("'").strip('"')
+        email = match.group(2).strip()
+        local_part = email.split("@")[0] if "@" in email else ""
+    else:
+        if "@" in sender_raw:
+            local_part = sender_raw.split("@")[0]
+        else:
+            display_name = sender_raw.strip().strip("'").strip('"')
 
-    # 1. Systemadressen (Priorität 1)
-    if local_part:
-        local_part_lower = local_part.lower()
-        if "digital-sciences" in local_part_lower:
-            return "Digital-Sciences"
-        if "kreditorenbuchhaltung" in local_part_lower:
-            return "Kreditorenbuchhaltung"
+    # 3. Greedy Name Matching (Suche nach Namensteilen im Local-Part)
+    # Behandelt Fälle wie 'Mustermann Max' -> 'Mustermann' im Local-Part 'mustermann.max'
+    if display_name and local_part:
+        # Bereinige Display-Name von Kommas für den Abgleich
+        clean_display = display_name.replace(",", " ")
+        name_parts = clean_display.split()
+        if len(name_parts) > 1:
+            # Suche nach dem Teil des Display-Namens, der im Local-Part vorkommt (ignorieren von '.' und '-')
+            norm_local = normalize_name(local_part).lower().replace(".", "").replace("-", "")
 
-    # 2. Greedy Match gegen den letzten Teil des Local-Parts (Priorität 2)
-    # Behandelt Fälle wie 'A B C D <a_b.c_d@smail...>' -> 'C D'
-    if display_name and local_part and _clean_for_comparison(local_part) not in GENERIC_LOCAL_PARTS:
-        # Teil nach dem letzten Punkt im Local-Part als Referenz nehmen
-        lp_lastname_segment = local_part.split(".")[-1]
-        lp_segment_normalized = _clean_for_comparison(lp_lastname_segment)
-        
-        # Falls Komma vorhanden (Format 'Nachname, Vorname'), nur den Teil davor betrachten
-        potential_source = display_name.split(",")[-1].strip() if "," in display_name else display_name
-        words = potential_source.split()
-        
-        matching_words = []
-        for word in reversed(words):
-            word_normalized = _clean_for_comparison(word)
-            if word_normalized and word_normalized in lp_segment_normalized:
-                matching_words.insert(0, word)
-            else:
-                break
-        if matching_words:
-            return " ".join(matching_words)
+            best_match = None
+            best_match_len = -1
 
-    # 3. E-Mail mit Punkt im Local-Part (Hochschul-Format)
-    if local_part and "." in local_part:
-        lastname_part = local_part.rsplit(".", 1)[1]
-        logger.debug(f"Punkt im lokalen Teil gefunden: {local_part} -> Extrahiere {lastname_part}")
-        parts = re.split(r'([._])', lastname_part)
-        result_lastname = ""
-        for part in parts:
-            if part in ["_", "."]:
-                result_lastname += " "
-            elif part:
-                if "-" in part:
-                    subparts = part.split("-")
-                    result_lastname += "-".join(sub[0].upper() + sub[1:] if sub else "" for sub in subparts)
-                else:
-                    result_lastname += part[0].upper() + part[1:]
-        if result_lastname.strip():
-            return result_lastname.strip()
+            for part in name_parts:
+                norm_part = normalize_name(part).lower()
+                if norm_part and norm_part in norm_local:
+                    # Wir haben ein Match. Bevorzuge längere Namen (Nachnamen sind oft länger als Vornamen/Initialen)
+                    # ODER wir nehmen einfach den, der im Local-Part an erster Stelle steht?
+                    # Meistens ist die Struktur im Local-Part 'nachname.vorname' oder 'vorname.nachname'.
+                    if len(norm_part) > best_match_len:
+                        best_match = part
+                        best_match_len = len(norm_part)
 
-    # 4. Validierung des identifizierten Nachnamens gegen Local-Part
-    # Falls der Name aus dem Display-Name nicht in der Email vorkommt -> Local Part nutzen (Case: Wester Helmut -> HWester)
-    display_words = display_name.split()
-    standard_lastname = display_words[-1] if display_words else ""
-    if "," in display_name:
-        standard_lastname = display_name.split(",")[0].strip()
-    
-    if standard_lastname and local_part:
-        if _clean_for_comparison(standard_lastname) not in _clean_for_comparison(local_part):
-            if _clean_for_comparison(local_part) not in GENERIC_LOCAL_PARTS:
-                # Falls Local-Part Großbuchstaben hat, diese als Bezeichner bevorzugen (z.B. HWester)
-                if any(character.isupper() for character in local_part):
-                    return local_part
-                # Falls Bindestriche vorhanden sind (z.B. praxissemester-inf)
-                if "-" in local_part:
-                    return _format_dashed_name(local_part)
-                return local_part[0].upper() + local_part[1:] if local_part else "Unknown"
+            if best_match:
+                return _format_dashed_name(best_match) if "-" in best_match else best_match
+
+    # 4. Dot-Separated Local Part Fallback (Priorität 2)
+    if "." in local_part:
+        parts = local_part.split(".")
+        if len(parts) > 1:
+            # Falls einer der Teile im dot-separated local part als Nachname identifiziert werden kann
+            # (Nicht generisch)
+            for part in reversed(parts):
+                if _clean_for_comparison(part) not in GENERIC_LOCAL_PARTS:
+                    # Falls Local-Part Großbuchstaben hat, diese als Bezeichner bevorzugen (z.B. HWester)
+                    if any(character.isupper() for character in part):
+                        return part
+                    # Falls Bindestriche vorhanden sind (z.B. praxissemester-inf)
+                    if "-" in part:
+                        return _format_dashed_name(part)
+                    return part[0].upper() + part[1:] if part else "Unknown"
 
     # 5. Generische Fallbacks (Priorität 3)
     if "," in display_name:
@@ -440,7 +355,7 @@ def write_report(base_directory: Path, moved_emails_list: List[Dict[str, Any]]) 
                 report_file.write(f"## {current_email_class}\n\n")
                 report_file.write("| Semester | Nachname | Ordner | Datei |\n")
                 report_file.write("| --- | --- | --- | --- |\n")
-            report_file.write(f"| {email_item['semester']} | {email_item['lastname']} | {email_item['folder']} | {Path(email_item['path']).name} |\n")
+            report_file.write(f"| {email_item['semester']} | {email_item['lastname']} | {email_item['folder']} | {email_item['path']} |\n")
     logger.info(f"Report erstellt: {report_file_path}")
 
 

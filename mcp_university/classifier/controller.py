@@ -489,19 +489,18 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
                     current_class = class_match.group(1).strip()
                     continue
 
-                mail_match = re.search(
-                    r"- \*\*(.*?)\*\* \| (.*?) \| (.*?): `(.*?)`", line
-                )
-                if mail_match:
-                    emails.append(
-                        {
-                            "class": current_class,
-                            "semester": mail_match.group(1),
-                            "lastname": mail_match.group(2),
-                            "folder": mail_match.group(3),
-                            "path": Path(mail_match.group(4)),
-                        }
-                    )
+                if line.startswith("|") and "Semester" not in line and "---" not in line:
+                    parts = [p.strip() for p in line.split("|")]
+                    if len(parts) >= 6:
+                        emails.append(
+                            {
+                                "class": current_class,
+                                "semester": parts[1],
+                                "lastname": parts[2],
+                                "folder": parts[3],
+                                "path": Path(parts[4]),
+                            }
+                        )
         return emails
 
     def relocate_emails(self, email_changes: List[Dict]):
