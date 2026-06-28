@@ -136,6 +136,6 @@ The script `scripts/crawl_th_koeln_persons.py` is used to fetch personnel data.
 
 ## Erweitere Coding Standards (Update)
 - **Variablennamen:** Verwende sprechende Variablennamen (z.B. `local_part` statt `lp`, `display_name` statt `dn`). Abkürzungen sind zu vermeiden.
-- **Erhaltung:** Bestehende Logging-Statements und Kommentare dürfen nicht gelöscht werden, es sei denn, sie sind nachweislich falsch oder obsolet.
+- **Erhaltung:** Bestehende Logging-Statements und Kommentare dürfen nicht gelöscht werden, es sei denn, sie sind nachweislich falsch oder obsolet. Es dürfen keine Kommentare gelöscht werden, die noch gültig sind.
 - **Formatierung:** Komplexe Ausdrücke wie `parser.add_argument()` oder verkettete Methodenaufrufe sollten für bessere Lesbarkeit auf neue Zeilen aufgeteilt werden.
 - **Dokumentation:** Die Docstring-Abdeckung (interrogate) muss dauerhaft bei mindestens 99% liegen. Alle neuen Tests und Skripte müssen vollständige Google-Style Docstrings enthalten.

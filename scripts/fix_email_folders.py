@@ -63,6 +63,8 @@ def fix_folders(config_path: Path, dry_run: bool = False, full_verify: bool = Fa
 
                 if is_sent_by_user:
                     folder_name = "SentItems"
+                    # Rule: Bevorzuge direkte Empfänger (To) für die Ordnerbenennung, ignoriere CC
+                    # Rule: Nimm den ersten "To"-Empfänger, Fallback auf den zweiten
                     to_recipients = details.get("to", [])
                     if to_recipients:
                         recipient_name = to_recipients[0].get("name")
@@ -87,6 +89,7 @@ def fix_folders(config_path: Path, dry_run: bool = False, full_verify: bool = Fa
                             lastname = "Unknown"
                 else:
                     folder_name = "Inbox"
+                    # Rule: Der Ordnername sollte der Nachname des Absenders sein
                     from_name = details.get("from_name")
                     from_email = details.get("from_email")
                     if from_name and from_email:

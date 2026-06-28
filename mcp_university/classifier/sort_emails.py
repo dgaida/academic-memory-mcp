@@ -375,6 +375,7 @@ def process_emails(
                 if is_sent_by_tool_user:
                     target_subfolder = "SentItems"
                     recipients = message_item.recipients or []
+                    # Rule: Bevorzuge direkte Empfänger (To) für die Ordnerbenennung, ignoriere CC
                     # TO-Empfänger haben Typ 1 in extract-msg
                     to_recipients = [r for r in recipients if getattr(r, "type", None) == 1]
                     if to_recipients:
@@ -388,6 +389,7 @@ def process_emails(
                         final_lastname = extract_lastname(f"{any_rec.name} <{any_rec.email}>" if any_rec.name and any_rec.email else (any_rec.name or any_rec.email))
                 else:
                     target_subfolder = "Inbox"
+                    # Rule: Der Ordnername sollte der Nachname des Absenders sein
                     final_lastname = extract_lastname(sender_raw)
 
             # Ziel-Verzeichnis bestimmen
