@@ -6,20 +6,20 @@ This page describes in detail how the system extracts names from email addresses
 
 The system follows a strict hierarchy to determine the surname of a sender or recipient:
 
-1.  **"im Auftrag von" Recognition**: If an email was sent on behalf of someone else, the actual sender is focused.
-2.  **Greedy Name Matching (Primary)**:
-    *   The display name (e.g., "Mustermann Max") is split into its individual parts.
-    *   These parts are matched against the "local part" of the email address (the part before the @).
-    *   If a part of the display name is found within the local part, it is identified as the surname.
-    *   *Example*: `Mustermann Max <mustermann@example.com>` -> "Mustermann" is found in the local part and is therefore the surname.
-3.  **Dot-Separated Local Part (Fallback 1)**:
-    *   If no match with the display name is possible, the local part is split at dots (`.`).
-    *   The system checks the segments from back to front and ignores generic terms (such as "info", "studium").
-    *   *Example*: `max.mustermann@smail.th-koeln.de` -> "Mustermann".
-4.  **Generic Fallbacks (Fallback 2)**:
-    *   Commas in the display name (`Surname, Firstname`).
-    *   Last word in the display name.
-    *   Local part formatting (uppercase recognition).
+1.  **"im Auftrag von" Recognition**: If an email was sent on behalf of someone else, the actual sender is focused.  
+2.  **Greedy Name Matching (Primary)**:  
+    *   The display name (e.g., "Mustermann Max") is split into its individual parts.  
+    *   These parts are matched against the "local part" of the email address (the part before the @).  
+    *   If a part of the display name is found within the local part, it is identified as the surname.  
+    *   *Example*: `Mustermann Max <mustermann@example.com>` -> "Mustermann" is found in the local part and is therefore the surname.  
+3.  **Dot-Separated Local Part (Fallback 1)**:  
+    *   If no match with the display name is possible, the local part is split at dots (`.`).  
+    *   The system checks the segments from back to front and ignores generic terms (such as "info", "studium").  
+    *   *Example*: `max.mustermann@smail.th-koeln.de` -> "Mustermann".  
+4.  **Generic Fallbacks (Fallback 2)**:  
+    *   Commas in the display name (`Surname, Firstname`).  
+    *   Last word in the display name.  
+    *   Local part formatting (uppercase recognition).  
 
 ## Examples
 
@@ -47,6 +47,6 @@ def extract_lastname(sender_raw: str) -> str:
 
 ## Important Rules for Developers
 
-*   **No deletion of comments**: The explanatory comments in `extract_lastname` are essential for understanding edge cases.
-*   **Google-Style Docstrings**: Every change must be documented.
-*   **Umlaut Handling**: The system normalizes names for comparison (`Müller` vs `mueller`) but returns the original name (Title Case).
+*   **No deletion of comments**: The explanatory comments in `extract_lastname` are essential for understanding edge cases.  
+*   **Google-Style Docstrings**: Every change must be documented.  
+*   **Umlaut Handling**: The system normalizes names for comparison (`Müller` vs `mueller`) but returns the original name (Title Case).  
