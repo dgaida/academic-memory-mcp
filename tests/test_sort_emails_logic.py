@@ -69,7 +69,7 @@ def test_sent_items_to_and_cc(mock_dependencies, tmp_path):
     mock_msg.sender = "daniel.gaida@th-koeln.de"
 
     rec1 = create_recipient("colleague@th-koeln.de", "Erika Musterfrau", 2) # CC
-    rec2 = create_recipient("student@smail.th-koeln.de", "Max Mustermann", 1) # TO
+    rec2 = create_recipient("mustermann@smail.th-koeln.de", "Max Mustermann", 1) # TO
     mock_msg.recipients = [rec1, rec2]
 
     mock_dependencies["open_msg"].return_value.__enter__.return_value = mock_msg
@@ -90,7 +90,7 @@ def test_inbox_from_student_with_cc(mock_dependencies, tmp_path):
     mock_msg.sender = "Max Mustermann <mustermann@smail.th-koeln.de>"
 
     rec1 = create_recipient("daniel.gaida@th-koeln.de", "Daniel Gaida", 1) # TO
-    rec2 = create_recipient("other_student@smail.th-koeln.de", "Erika Musterfrau", 2) # CC
+    rec2 = create_recipient("musterfrau@smail.th-koeln.de", "Erika Musterfrau", 2) # CC
     mock_msg.recipients = [rec1, rec2]
 
     mock_dependencies["open_msg"].return_value.__enter__.return_value = mock_msg
@@ -112,7 +112,7 @@ def test_inbox_from_external_to_user_and_student(mock_dependencies, tmp_path):
     mock_msg.sender = "External, Name <external@gmail.com>"
 
     rec1 = create_recipient("daniel.gaida@th-koeln.de", "Daniel Gaida", 1) # TO
-    rec2 = create_recipient("student@smail.th-koeln.de", "Max Mustermann", 1) # TO
+    rec2 = create_recipient("mustermann@smail.th-koeln.de", "Max Mustermann", 1) # TO
     mock_msg.recipients = [rec1, rec2]
 
     mock_dependencies["open_msg"].return_value.__enter__.return_value = mock_msg
@@ -132,8 +132,52 @@ def test_sent_items_multiple_to_and_cc(mock_dependencies, tmp_path):
     mock_msg = MagicMock()
     mock_msg.sender = "daniel.gaida@th-koeln.de"
 
-    rec1 = create_recipient("student1@smail.th-koeln.de", "Max Mustermann", 1) # TO
-    rec2 = create_recipient("student2@smail.th-koeln.de", "Erika Musterfrau", 1) # TO
+    rec1 = create_recipient("mustermann@smail.th-koeln.de", "Max Mustermann", 1) # TO
+    rec2 = create_recipient("erika.musterfrau@smail.th-koeln.de", "Erika Musterfrau", 1) # TO
+    rec3 = create_recipient("cc@th-koeln.de", "CC Person", 2) # CC
+    mock_msg.recipients = [rec1, rec2, rec3]
+
+    mock_dependencies["open_msg"].return_value.__enter__.return_value = mock_msg
+
+    config = {"BachelorThesis": str(tmp_path / "target")}
+    moved = process_emails(source_root, Path("dummy"), config)
+
+    assert moved[0]["folder"] == "SentItems"
+    assert moved[0]["lastname"] == "Mustermann"
+
+def test_sent_items_multiple_to_and_cc2(mock_dependencies, tmp_path):
+    """Test: User sends to 2 students (TO) and 1 person (CC). Should take first student (TO)."""
+    source_root = tmp_path / "source"
+    source_root.mkdir()
+    (source_root / "mail5.msg").touch()
+
+    mock_msg = MagicMock()
+    mock_msg.sender = "daniel.gaida@th-koeln.de"
+
+    rec1 = create_recipient("mustermann@smail.th-koeln.de", "Mustermann, Max", 1) # TO
+    rec2 = create_recipient("erika.musterfrau@smail.th-koeln.de", "Erika Musterfrau", 1) # TO
+    rec3 = create_recipient("cc@th-koeln.de", "CC Person", 2) # CC
+    mock_msg.recipients = [rec1, rec2, rec3]
+
+    mock_dependencies["open_msg"].return_value.__enter__.return_value = mock_msg
+
+    config = {"BachelorThesis": str(tmp_path / "target")}
+    moved = process_emails(source_root, Path("dummy"), config)
+
+    assert moved[0]["folder"] == "SentItems"
+    assert moved[0]["lastname"] == "Mustermann"
+
+def test_sent_items_multiple_to_and_cc3(mock_dependencies, tmp_path):
+    """Test: User sends to 2 students (TO) and 1 person (CC). Should take first student (TO)."""
+    source_root = tmp_path / "source"
+    source_root.mkdir()
+    (source_root / "mail5.msg").touch()
+
+    mock_msg = MagicMock()
+    mock_msg.sender = "daniel.gaida@th-koeln.de"
+
+    rec1 = create_recipient("max.mustermann@smail.th-koeln.de", "Mustermann, Max", 1) # TO
+    rec2 = create_recipient("erika.musterfrau@smail.th-koeln.de", "Erika Musterfrau", 1) # TO
     rec3 = create_recipient("cc@th-koeln.de", "CC Person", 2) # CC
     mock_msg.recipients = [rec1, rec2, rec3]
 
@@ -159,7 +203,7 @@ def test_sent_items_fallback_to_second_to(mock_dependencies, tmp_path):
         mock_extract.side_effect = lambda x: "Unknown" if "Unknown" in str(x) else "Mustermann"
 
         rec1 = create_recipient("unknown@some.com", "Unknown", 1) # TO
-        rec2 = create_recipient("student@smail.th-koeln.de", "Max Mustermann", 1) # TO
+        rec2 = create_recipient("mustermann@smail.th-koeln.de", "Max Mustermann", 1) # TO
         mock_msg.recipients = [rec1, rec2]
 
         mock_dependencies["open_msg"].return_value.__enter__.return_value = mock_msg

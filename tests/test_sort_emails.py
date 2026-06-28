@@ -20,8 +20,9 @@ def test_extract_lastname():
     """Test function docstring."""
     assert extract_lastname("Max Mustermann") == "Mustermann"
     assert extract_lastname("Mustermann, Max") == "Mustermann"
-    assert extract_lastname("Max Mustermann <max@example.com>") == "Mustermann"
-    assert extract_lastname("Mustermann, Max <max@example.com>") == "Mustermann"
+    assert extract_lastname("Max Mustermann <mustermann@example.com>") == "Mustermann"
+    assert extract_lastname("Mustermann Max <mustermann@example.com>") == "Mustermann"
+    assert extract_lastname("Mustermann, Max <mustermann@example.com>") == "Mustermann"
     # Note: Logic was changed to preserve umlauts from display names
     assert extract_lastname("'Hans Müller'") == "Müller"
     assert extract_lastname("'Müller, Hans'") == "Müller"

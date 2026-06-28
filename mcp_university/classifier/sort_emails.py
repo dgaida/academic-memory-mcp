@@ -207,8 +207,8 @@ def extract_lastname(name_input: str) -> str:
     # 1. Systemadressen (Priorität 1)
     if local_part:
         local_part_lower = local_part.lower()
-        if "digital-science" in local_part_lower:
-            return "Digital-Science"
+        if "digital-sciences" in local_part_lower:
+            return "Digital-Sciences"
         if "kreditorenbuchhaltung" in local_part_lower:
             return "Kreditorenbuchhaltung"
 
