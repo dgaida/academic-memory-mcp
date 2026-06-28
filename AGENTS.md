@@ -150,6 +150,6 @@ The script `scripts/crawl_th_koeln_persons.py` is used to fetch personnel data.
 - **Formatierung:** Komplexe Ausdrücke wie `parser.add_argument()` oder verkettete Methodenaufrufe sollten für bessere Lesbarkeit auf neue Zeilen aufgeteilt werden.  
 - **Dokumentation:** Die Docstring-Abdeckung (interrogate) muss dauerhaft bei mindestens 99% liegen. Alle neuen Tests und Skripte müssen vollständige Google-Style Docstrings enthalten.  
 
-### GUI & Logging Rules (NEW)
-- **Visibility:** All sorted emails MUST be displayed in the Gradio GUI to ensure complete visibility. No emails should be hidden or collapsed unless explicitly requested.
-- **Logging:** Dense and detailed logging is required for all email processing steps. This includes logging each email being processed for the GUI and issuing warnings if expected files are missing.
+### GUI & Logging Rules (NEW)  
+- **Visibility:** All sorted emails MUST be displayed in the Gradio GUI to ensure complete visibility. No emails should be hidden or collapsed unless explicitly requested.  
+- **Logging:** Dense and detailed logging is required for all email processing steps. This includes logging each email being processed for the GUI and issuing warnings if expected files are missing.  

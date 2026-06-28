@@ -67,7 +67,7 @@ Der Prozess wird in einer interaktiven Web-Oberfläche kontrolliert (Human-in-th
 
 **Funktionen der GUI:**
 
-- **Vollständige Sichtbarkeit:** Es werden ALLE zuvor sortierten E-Mails in der GUI angezeigt, um sicherzustellen, dass keine Kommunikation übersehen wird.
+- **Vollständige Sichtbarkeit:** Es werden ALLE zuvor sortierten E-Mails in der GUI angezeigt, um sicherzustellen, dass keine Kommunikation übersehen wird.  
 
 
 - **Korrektur der Klassifizierung:** Ändern der E-Mail-Klasse via Dropdown (physische Verschiebung beim Speichern).  

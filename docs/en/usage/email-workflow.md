@@ -77,7 +77,7 @@ The process ends in an interactive web interface. Here, the human remains in ful
 
 **GUI Functions:**
 
-- **Full Visibility:** ALL previously sorted emails are displayed in the GUI to ensure no communication is overlooked.
+- **Full Visibility:** ALL previously sorted emails are displayed in the GUI to ensure no communication is overlooked.  
 
 - **Correction of Classification:** If an email was incorrectly sorted, you can change the class via a dropdown. The system automatically moves the files physically on the disk when saving.  
 - **Action Review:** Check which action the LLM suggests and change it if necessary.  
