@@ -19,7 +19,7 @@ def main() -> None:
     config = get_config()
     store = MetadataStore(config.th_personal_path)
 
-    train_path = Path("data/classifier/train")
+    train_path = Path("D:/TH_Koeln/MailTrainingData")
 
     if not train_path.exists():
         logger.error(f"Trainingspfad {train_path} existiert nicht.")

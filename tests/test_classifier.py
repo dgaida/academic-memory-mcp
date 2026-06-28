@@ -1,10 +1,18 @@
+"""Tests für das E-Mail-Klassifizierer-Engine."""
 import pytest
 from unittest.mock import patch
 from mcp_university.classifier.engine import EmailClassifier
 
 @pytest.fixture
 def temp_data_dir(tmp_path):
-    """Erstellt ein temporäres Verzeichnis mit Testdaten."""
+    """Erstellt ein temporäres Verzeichnis mit Testdaten.
+
+    Args:
+        tmp_path: Temporärer Pfad.
+
+    Returns:
+        Path: Pfad zum Datenverzeichnis.
+    """
     data_dir = tmp_path / "data"
     data_dir.mkdir()
 
@@ -26,7 +34,11 @@ def test_classifier_initialization():
     assert classifier.classifier is not None
 
 def test_classifier_train(temp_data_dir):
-    """Testet das Training des Klassifizierers."""
+    """Testet das Training des Klassifizierers.
+
+    Args:
+        temp_data_dir: Pfad zum Testdatenverzeichnis.
+    """
     classifier = EmailClassifier(mode="tfidf", method="randomforest")
 
     with patch("mcp_university.classifier.engine.MailParser.parse") as mock_parse:
@@ -40,7 +52,11 @@ def test_classifier_train(temp_data_dir):
         assert len(classifier.label_encoder.classes_) == 3
 
 def test_classifier_predict(temp_data_dir):
-    """Testet die Vorhersage."""
+    """Testet die Vorhersage.
+
+    Args:
+        temp_data_dir: Pfad zum Testdatenverzeichnis.
+    """
     classifier = EmailClassifier(mode="tfidf", method="randomforest")
 
     with patch("mcp_university.classifier.engine.MailParser.parse") as mock_parse:
@@ -55,9 +71,14 @@ def test_classifier_predict(temp_data_dir):
         assert prediction["prediction"] in ["BachelorThesis", "MasterThesis", "Other"]
 
 def test_classifier_save_load(temp_data_dir, tmp_path):
-    """Testet Speichern und Laden des Modells."""
+    """Testet Speichern und Laden des Modells.
+
+    Args:
+        temp_data_dir: Pfad zum Testdatenverzeichnis.
+        tmp_path: Temporärer Pfad.
+    """
     classifier = EmailClassifier(mode="tfidf", method="randomforest")
-    model_path = tmp_path / "model.pt" # Use .pt as we use torch.save
+    model_path = tmp_path / "model.pt"
 
     with patch("mcp_university.classifier.engine.MailParser.parse") as mock_parse:
         mock_parse.side_effect = lambda p: p.read_text()

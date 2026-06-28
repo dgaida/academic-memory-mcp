@@ -4,6 +4,7 @@ import logging
 import shutil
 import re
 from pathlib import Path
+from typing import List, Tuple, Iterator
 from mcp_university.classifier.sort_emails import extract_lastname, get_semester, find_student_folder
 from mcp_university.config import get_config
 from mcp_university.parser.mail_parser import MailParser
@@ -12,23 +13,21 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 def fix_folders(config_path: Path, dry_run: bool = False, full_verify: bool = False) -> None:
-    """Migrates emails to the standard structure: Semester/Lastname/Inbox|SentItems/.
+    """Migriert E-Mails in die Standardstruktur: Semester/Nachname/Inbox|SentItems/.
 
     Args:
-        config_path (Path): Path to the YAML configuration file containing class paths.
-        dry_run (bool): If True, only detected errors are shown but not fixed. Defaults to False.
-        full_verify (bool): If True, all emails in the directories are checked.
-                           If False, only emails in the base directory are processed. Defaults to False.
+        config_path (Path): Pfad zur YAML-Konfigurationsdatei mit Klassenpfaden.
+        dry_run (bool): Falls True, werden Fehler nur gemeldet, aber nicht behoben.
+        full_verify (bool): Falls True, werden alle E-Mails in Unterverzeichnissen geprüft.
     """
     if not config_path.exists():
-        logger.error(f"Config file {config_path} not found.")
+        logger.error(f"Konfigurationsdatei {config_path} nicht gefunden.")
         return
 
     with open(config_path, "r", encoding="utf-8") as f:
-        config = yaml.safe_load(f)
+        config_data = yaml.safe_load(f)
 
-    if "class_paths" in config:
-        config = config["class_paths"]
+    config = config_data.get("class_paths", config_data)
 
     parser = MailParser()
     user_emails = [e.lower() for e in get_config().user.emails]
@@ -38,9 +37,9 @@ def fix_folders(config_path: Path, dry_run: bool = False, full_verify: bool = Fa
         if not base_path.exists():
             continue
 
-        logger.info(f"Processing class {email_class} in {base_path} (Full Verify: {full_verify}, Dry Run: {dry_run})")
+        logger.info(f"Verarbeite Klasse {email_class} in {base_path} (Full Verify: {full_verify}, Dry Run: {dry_run})")
 
-        # Find email files
+        # E-Mail-Dateien finden
         if full_verify:
             email_files = list(base_path.rglob("*.msg")) + list(base_path.rglob("*.eml"))
         else:
@@ -50,13 +49,12 @@ def fix_folders(config_path: Path, dry_run: bool = False, full_verify: bool = Fa
             try:
                 details = parser.get_email_details(email_file)
                 if not details or not details.get("date"):
-                    logger.warning(f"Could not get details for {email_file}, skipping.")
+                    logger.warning(f"Konnte Details für {email_file} nicht laden, überspringe.")
                     continue
 
                 semester = get_semester(details["date"])
 
-                # Determine folder (Inbox or SentItems) and lastname
-                # Logic from sort_emails.py
+                # Ordner und Nachnamen bestimmen
                 sender = details.get("from_email", "").lower()
                 lastname = "Unknown"
                 folder_name = "Inbox"
@@ -65,15 +63,25 @@ def fix_folders(config_path: Path, dry_run: bool = False, full_verify: bool = Fa
 
                 if is_sent_by_user:
                     folder_name = "SentItems"
-                    # Rule: Prioritize direct recipients (To) for folder naming, ignore CC
-                    # Rule: Take first 'To' recipient, fallback to second if first fails
+                    # Rule: Bevorzuge direkte Empfänger (To) für die Ordnerbenennung, ignoriere CC
+                    # Rule: Nimm den ersten "To"-Empfänger, Fallback auf den zweiten
                     to_recipients = details.get("to", [])
                     if to_recipients:
-                        lastname = extract_lastname(to_recipients[0].get("name") or to_recipients[0].get("email"))
+                        recipient_name = to_recipients[0].get("name")
+                        recipient_email = to_recipients[0].get("email")
+                        if recipient_name and recipient_email:
+                            lastname = extract_lastname(f"{recipient_name} <{recipient_email}>")
+                        else:
+                            lastname = extract_lastname(recipient_name or recipient_email)
+                            
                         if (lastname == "Unknown" or not lastname) and len(to_recipients) > 1:
-                            lastname = extract_lastname(to_recipients[1].get("name") or to_recipients[1].get("email"))
+                            r2_name = to_recipients[1].get("name")
+                            r2_email = to_recipients[1].get("email")
+                            if r2_name and r2_email:
+                                lastname = extract_lastname(f"{r2_name} <{r2_email}>")
+                            else:
+                                lastname = extract_lastname(r2_name or r2_email)
                     else:
-                        # Fallback to any recipient
                         recipients = details.get("to", []) + details.get("cc", [])
                         if recipients:
                             lastname = extract_lastname(recipients[0].get("name") or recipients[0].get("email"))
@@ -81,10 +89,15 @@ def fix_folders(config_path: Path, dry_run: bool = False, full_verify: bool = Fa
                             lastname = "Unknown"
                 else:
                     folder_name = "Inbox"
-                    # Rule: Folder name should be the sender's lastname
-                    lastname = extract_lastname(details.get("from_name") or details.get("from_email"))
+                    # Rule: Der Ordnername sollte der Nachname des Absenders sein
+                    from_name = details.get("from_name")
+                    from_email = details.get("from_email")
+                    if from_name and from_email:
+                        lastname = extract_lastname(f"{from_name} <{from_email}>")
+                    else:
+                        lastname = extract_lastname(from_name or from_email)
 
-                # Ziel-Pfad bestimmen (Favorisiere existierenden Ordner)
+                # Ziel-Pfad bestimmen
                 student_dir = find_student_folder(base_path, lastname)
                 if not student_dir:
                     student_dir = base_path / semester / lastname
@@ -96,11 +109,11 @@ def fix_folders(config_path: Path, dry_run: bool = False, full_verify: bool = Fa
                     continue
 
                 if dry_run:
-                    logger.info(f"[DRY RUN] Would move {email_file} to {target_path}")
+                    logger.info(f"[DRY RUN] Würde {email_file} nach {target_path} verschieben")
                 else:
                     target_dir.mkdir(parents=True, exist_ok=True)
 
-                # Find associated .md and .txt files in the SAME directory as the email
+                # Zugehörige .md und .txt Dateien finden
                 parent_dir = email_file.parent
                 match = re.match(r"(\d{8}_\d{6})", email_file.name)
                 files_to_move = [email_file]
@@ -113,38 +126,38 @@ def fix_folders(config_path: Path, dry_run: bool = False, full_verify: bool = Fa
                 for f in files_to_move:
                     dest = target_dir / f.name
                     if dest.exists() and dest.resolve() != f.resolve():
-                        logger.warning(f"Destination {dest} already exists, skipping move of {f}.")
+                        logger.warning(f"Ziel {dest} existiert bereits, überspringe Verschieben von {f}.")
                         continue
                     if dest.resolve() != f.resolve():
                         if dry_run:
                             if f != email_file:
-                                logger.info(f"[DRY RUN] Would move associated file {f} to {target_dir / f.name}")
+                                logger.info(f"[DRY RUN] Würde zugehörige Datei {f} nach {target_dir / f.name} verschieben")
                         else:
-                            logger.info(f"Moving {f} to {dest}")
+                            logger.info(f"Verschiebe {f} nach {dest}")
                             shutil.move(str(f), str(dest))
 
             except Exception as e:
-                logger.error(f"Error processing {email_file}: {e}")
+                logger.error(f"Fehler beim Verarbeiten von {email_file}: {e}")
                 continue
 
         if not dry_run:
-            # Cleanup: Remove empty directories (bottom-up)
+            # Leere Verzeichnisse aufräumen
             for root, dirs, files in walk_bottom_up(base_path):
                 curr_path = Path(root)
                 if curr_path == base_path:
                     continue
                 if not any(curr_path.iterdir()):
-                    logger.info(f"Removing empty directory {curr_path}")
+                    logger.info(f"Entferne leeres Verzeichnis {curr_path}")
                     curr_path.rmdir()
 
-def walk_bottom_up(path: Path):
+def walk_bottom_up(path: Path) -> Iterator[Tuple[str, List[str], List[str]]]:
     """Reziproke Iteration über Ordner von unten nach oben.
 
     Args:
-        path (Path): The starting path.
+        path (Path): Das Startverzeichnis.
 
     Yields:
-        Tuple[str, List[str], List[str]]: Root, dirs, and files as in os.walk.
+        Root, Verzeichnisse und Dateien (wie os.walk).
     """
     import os
     for root, dirs, files in os.walk(path, topdown=False):
@@ -152,9 +165,9 @@ def walk_bottom_up(path: Path):
 
 if __name__ == "__main__":
     import argparse
-    parser = argparse.ArgumentParser(description="Fix email folder structure.")
-    parser.add_argument("--config", default="config/classifier_paths.yaml", help="Path to classifier_paths.yaml")
-    parser.add_argument("--dry-run", action="store_true", help="Only show errors, do not fix them.")
-    parser.add_argument("--verify", action="store_true", help="Check all emails in all subfolders.")
+    parser = argparse.ArgumentParser(description="E-Mail-Ordnerstruktur korrigieren.")
+    parser.add_argument("--config", default="config/classifier_paths.yaml", help="Pfad zu classifier_paths.yaml")
+    parser.add_argument("--dry-run", action="store_true", help="Nur Fehler anzeigen, nichts verschieben.")
+    parser.add_argument("--verify", action="store_true", help="Alle E-Mails in allen Unterordnern prüfen.")
     args = parser.parse_args()
     fix_folders(Path(args.config), dry_run=args.dry_run, full_verify=args.verify)

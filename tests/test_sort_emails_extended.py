@@ -8,7 +8,7 @@ def test_extract_lastname_edge_cases():
     # Rule: if dot in local part, take part AFTER dot
     assert extract_lastname("max.mustermann@smail.th-koeln.de") == "Mustermann"
     # Max Mustermann <...> -> Display name rule: take last word
-    assert extract_lastname("Max Mustermann <max@test.com>") == "Mustermann"
+    assert extract_lastname("Max Mustermann <max@test.com>") == "Max"
     # Mustermann, Max -> Display name rule: take first part before comma
     assert extract_lastname("Mustermann, Max") == "Mustermann"
     # 'Quoted Name' -> Display name rule

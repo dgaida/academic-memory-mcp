@@ -1,10 +1,11 @@
+"""Skript zur manuellen Erstellung von Personen-Steckbriefen aus E-Mails."""
 import argparse
 import logging
 from pathlib import Path
 from mcp_university.summarizer.profiler import PersonProfiler
 
 def main() -> None:
-    """CLI-Tool zur Erstellung von Personen-Steckbriefen."""
+    """Haupteinstiegspunkt für das CLI-Tool zur Erstellung von Personen-Steckbriefen."""
     parser = argparse.ArgumentParser(description="Erstellt Steckbriefe für Personen aus E-Mails.")
     parser.add_argument("--email", type=str, required=True, help="E-Mail-Adresse der Person.")
     parser.add_argument("--storage", type=str, default="D:\\Steckbriefe", help="Speicherpfad für Steckbriefe.")

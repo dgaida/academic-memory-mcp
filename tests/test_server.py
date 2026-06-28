@@ -4,6 +4,11 @@ from unittest.mock import patch
 
 @pytest.mark.asyncio
 async def test_server_tools(mock_llm_client_wrapper):
+    """Test function docstring.
+
+    Args:
+        mock_llm_client_wrapper: Mock for the LLM client.
+    """
     # Mock models to avoid downloads and external calls
     with patch("mcp_university.retrieval.index.SentenceTransformer"),          patch("mcp_university.retrieval.index.QdrantClient"):
 

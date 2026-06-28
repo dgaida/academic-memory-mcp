@@ -1,3 +1,4 @@
+"""Tests für die benutzerdefinierte Antwortlogik."""
 import pytest
 from unittest.mock import MagicMock, patch
 
@@ -5,13 +6,20 @@ from mcp_university.classifier.controller import EmailController
 
 @pytest.fixture
 def controller():
-    with patch("mcp_university.classifier.controller.get_config"), \
-         patch("mcp_university.classifier.controller.Summarizer"), \
-         patch("mcp_university.classifier.controller.PersonProfiler"), \
-         patch("mcp_university.classifier.controller.Agent"):
+    """Erstellt einen EmailController mit gemockten Abhängigkeiten.
+
+    Returns:
+        EmailController: Der initialisierte Controller.
+    """
+    with patch("mcp_university.classifier.controller.get_config"),          patch("mcp_university.classifier.controller.Summarizer"),          patch("mcp_university.classifier.controller.PersonProfiler"),          patch("mcp_university.classifier.controller.Agent"):
         return EmailController()
 
 def test_extract_honorific_preference(controller):
+    """Testet die Extraktion der Anredepräferenz.
+
+    Args:
+        controller: Der Test-Controller.
+    """
     # Test Du
     assert controller._extract_honorific_preference("Bevorzugte Anrede: Du") == "Du"
     assert controller._extract_honorific_preference("Man duzt sich mit dieser Person.") == "Du"
@@ -24,14 +32,30 @@ def test_extract_honorific_preference(controller):
     assert controller._extract_honorific_preference("Random profile text") == "Sie"
 
 def test_detect_language_german(controller):
+    """Testet die Spracherkennung für Deutsch.
+
+    Args:
+        controller: Der Test-Controller.
+    """
     controller.summarizer.client.chat.return_value = {"message": {"content": "German"}}
     assert controller._detect_language("Dies ist eine deutsche E-Mail.") == "German"
 
 def test_detect_language_english(controller):
+    """Testet die Spracherkennung für Englisch.
+
+    Args:
+        controller: Der Test-Controller.
+    """
     controller.summarizer.client.chat.return_value = {"message": {"content": "English"}}
     assert controller._detect_language("This is an English email.") == "English"
 
 def test_salutation_logic_german_sie(controller, tmp_path):
+    """Testet die Anredelogik für Deutsch (Sie).
+
+    Args:
+        controller: Der Test-Controller.
+        tmp_path: Temporärer Pfad.
+    """
     mail_path = tmp_path / "test.msg"
     mail_path.touch()
     
@@ -55,6 +79,12 @@ def test_salutation_logic_german_sie(controller, tmp_path):
     assert kwargs["honorific"] == "Sie"
 
 def test_salutation_logic_english_du(controller, tmp_path):
+    """Testet die Anredelogik für Englisch (Du).
+
+    Args:
+        controller: Der Test-Controller.
+        tmp_path: Temporärer Pfad.
+    """
     mail_path = tmp_path / "test.msg"
     mail_path.touch()
     
@@ -78,6 +108,12 @@ def test_salutation_logic_english_du(controller, tmp_path):
     assert kwargs["honorific"] == "Du"
 
 def test_salutation_logic_english_sie(controller, tmp_path):
+    """Testet die Anredelogik für Englisch (Sie).
+
+    Args:
+        controller: Der Test-Controller.
+        tmp_path: Temporärer Pfad.
+    """
     mail_path = tmp_path / "test.msg"
     mail_path.touch()
     

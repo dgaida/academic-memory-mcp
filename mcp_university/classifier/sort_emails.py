@@ -1,4 +1,9 @@
-"""Skript zum Sortieren von E-Mails basierend auf Klassifizierung."""
+"""Skript zum Sortieren von E-Mails basierend auf einer Klassifizierung.
+
+Dieses Modul bietet Funktionen zum Extrahieren von Namen aus E-Mail-Adressen
+und zum Verschieben von E-Mail-Dateien in eine strukturierte Ordnerhierarchie.
+"""
+
 import argparse
 import logging
 import re
@@ -18,65 +23,104 @@ from mcp_university.utils.semester import get_semester, normalize_name
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
 
+# Liste generischer Email-Local-Parts, die nicht als Name verwendet werden sollten.
+GENERIC_LOCAL_PARTS = [
+    "student", "onbehalfof", "no-reply", "support", "info", 
+    "admin", "office", "sekretariat", "onbehalf", "f10-request"
+]
 
-def clean_sender_name(name_str: str) -> str:
+
+def clean_sender_name(name_string: str) -> str:
     """Bereinigt den Absendernamen von komplexen Headern wie 'im Auftrag von'.
 
     Args:
-        name_str: Der zu bereinigende Namensstring.
+        name_string (str): Der zu bereinigende Namensstring.
 
     Returns:
         str: Der bereinigte Name.
     """
-    if not name_str:
+    if not name_string:
         return ""
-    if "im Auftrag von" in name_str:
+    
+    # MIME-Header dekodieren falls nötig
+    name_string = decode_mime_header(name_string)
+    
+    if "im Auftrag von" in name_string:
         # Versuche einen echten Namen nach "im Auftrag von;" zu finden
-        parts = name_str.split("im Auftrag von;")
+        parts = name_string.split("im Auftrag von")
         if len(parts) > 1:
-            name_str = parts[1].split("<")[0].strip()
+            name_candidate = parts[1].strip(":; ")
+            # Falls Name leer ist oder nur Email-Teil, versuche weiter zu parsen
+            if not name_candidate or "@" in name_candidate.split("<")[0]:
+                 # Check if there's a name after a second semicolon or similar
+                 subparts = name_candidate.split(";")
+                 for sp in subparts:
+                      sp = sp.strip()
+                      if sp and "@" not in sp.split("<")[0]:
+                           name_candidate = sp
+                           break
+            if name_candidate:
+                return name_candidate.strip("'\" ")
         else:
             # Fallback für andere Varianten
-            match = re.search(r"im Auftrag von\s*[:;]?\s*([^<]+)", name_str)
+            match = re.search(r"im Auftrag von\s*[:;]?\s*([^<;]+)", name_string)
             if match:
-                name_str = match.group(1).strip()
+                return match.group(1).strip("'\" ")
 
-    # Handle specific prefix "TH //"
-    name_str = re.sub(r"^TH\s*//\s*", "", name_str)
-    return name_str.strip("'\" ")
+    # Handle spezifisches Präfix "TH //"
+    name_string = re.sub(r"^TH\s*//\s*", "", name_string)
+    return name_string.strip("'\" ")
 
 
-def extract_firstname(name_str: str) -> str:
-    """Extrahiert den Vornamen aus einem Namensstring oder einer E-Mail-Adresse.
+def _format_dashed_name(name_input: str) -> str:
+    """Formatiert einen Namen mit Bindestrichen (Title Case pro Teil).
 
-    Unterstützt das Format vorname.nachname@(smail.)th-koeln.de
-    sowie 'Max Mustermann' oder 'Mustermann, Max'.
+    Beispiel: 'studium-gm' wird zu 'Studium-Gm'.
 
     Args:
-        name_str: Der zu parsende Name oder die E-Mail-Adresse.
+        name_input: Der zu formatierende Name.
 
     Returns:
-        str: Der extrahierte Vorname.
+        str: Der formatierte Name mit Großbuchstaben nach Bindestrichen.
     """
-    if not name_str or name_str == "(No Sender)" or name_str == "(No Receiver)":
+    if not name_input:
+        return ""
+    if "-" in name_input:
+        parts = name_input.split("-")
+        return "-".join(part[0].upper() + part[1:] if part else "" for part in parts)
+    return name_input[0].upper() + name_input[1:]
+
+
+def extract_firstname(name_input: str) -> str:
+    """Extrahiert den Vornamen aus einem Namensstring oder einer E-Mail-Adresse.
+
+    Args:
+        name_input (str): Der zu parsende Name oder die E-Mail-Adresse.
+
+    Returns:
+        str: Der extrahierte Vorname oder 'Unknown'.
+    """
+    if not name_input or name_input in ["(No Sender)", "(No Receiver)", "Unknown"]:
         return "Unknown"
 
-    name_str = clean_sender_name(name_str)
+    cleaned_name = clean_sender_name(name_input)
 
-    # Suche nach E-Mail-Adresse
-    email_match = re.search(r"[\w\.-]+@[\w\.-]+", name_str)
-    email = email_match.group(0) if email_match else ""
+    # Suche nach E-Mail-Adresse im bereinigten Namen bevorzugt
+    email_match = re.search(r"[\w\.-]+@[\w\.-]+", cleaned_name)
+    if not email_match:
+        email_match = re.search(r"[\w\.-]+@[\w\.-]+", name_input)
+    email_address = email_match.group(0) if email_match else ""
 
-    # Handle display name first if available
-    display_name = decode_mime_header(name_str).split("<")[0].strip()
-    if display_name == email:
+    # Anzeige-Name extrahieren (Teil vor der spitzen Klammer)
+    display_name = cleaned_name.split("<")[0].strip()
+    if display_name == email_address:
         display_name = ""
-    # Remove parentheses like (aspass)
-    display_name = re.sub(r"\([^)]*\)", "", display_name).strip()
-    # Remove titles and suffixes
+        
+    # Klammern und akademische Titel entfernen
+    display_name = re.sub(r"\(.*?\)", "", display_name).strip()
     display_name = re.sub(r",?\s*(B\.Sc\.|M\.Sc\.|Prof\.|Dr\.)\s*", "", display_name).strip()
 
-    # Priority 1: "Rich" display name
+    # Priorität 1: Reicher Anzeigename (mehrere Wörter oder Format 'Nachname, Vorname')
     if display_name and (" " in display_name or "," in display_name):
         if "," in display_name:
             parts = display_name.split(",")
@@ -87,369 +131,352 @@ def extract_firstname(name_str: str) -> str:
             if len(parts) > 1:
                 return " ".join(parts[:-1]).strip("'\"")
 
-    # Priority 2: Email address with dot
-    if email:
-        if email.lower().endswith(("@smail.th-koeln.de", "@smail.fh-koeln.de", "@th-koeln.de", "@fh-koeln.de")):
-            local_part = email.split("@")[0]
-            if "." in local_part:
-                firstname_part = local_part.split(".")[0]
-                # Replace _ with space and capitalize
-                parts = re.split(r'([_-])', firstname_part)
-                res = ""
-                for p in parts:
-                    if p in ["_", "-"]:
-                        res += " " if p == "_" else "-"
-                    else:
-                        if p:
-                            res += p[0].upper() + p[1:]
-                return res
+    # Priorität 2: E-Mail-Adresse mit Punkt im Local-Part (Hochschul-Format: vorname.nachname)
+    if email_address and any(domain in email_address.lower() for domain in ["th-koeln.de", "fh-koeln.de"]):
+        local_part = email_address.split("@")[0]
+        if "." in local_part:
+            firstname_part = local_part.split(".")[0]
+            # Ersetze Unterstriche durch Leerzeichen und setze Wortanfänge groß
+            parts = re.split(r'([_-])', firstname_part)
+            result_firstname = ""
+            for part in parts:
+                if part in ["_", "-"]:
+                    result_firstname += " " if part == "_" else "-"
+                else:
+                    if part:
+                        result_firstname += part[0].upper() + part[1:]
+            return result_firstname
 
-    # Priority 3: Any display name
+    # Priorität 3: Fallback auf verbleibenden Anzeigenamen
     if display_name:
         return display_name
 
     return "Unknown"
 
 
-def extract_firstname_simple(name_str: str) -> str:
-    """Alternative, vereinfachte Extraktion des Vornamens.
+def _clean_for_comparison(string_value: str) -> str:
+    """Hilfsfunktion für den normalisierten Vergleich von Namensteilen.
+
+    Normalisiert Umlaute und entfernt Trennzeichen für einen robusten Vergleich.
 
     Args:
-        name_str (str): Der zu parsende Name oder die E-Mail-Adresse.
+        string_value: Der zu säubernde String.
 
     Returns:
-        str: Der extrahierte Vorname.
+        str: Der gesäuberte und normalisierte String.
     """
-    if not name_str:
-        return "Unknown"
-    display_name = decode_mime_header(name_str).split("<")[0].strip()
-    if "," in display_name:
-        parts = display_name.split(",")
-        if len(parts) > 1:
-            return parts[1].strip()
-    elif " " in display_name:
-        return display_name.split()[0].strip()
-    return "Unknown"
+    return string_value.lower().replace("ß", "ss").replace("_", "").replace(".", "").replace("-", "").strip()
 
 
-def extract_lastname(name_str: str) -> str:
+def extract_lastname(name_input: str) -> str:
     """Extrahiert den Nachnamen aus einem Namensstring oder einer E-Mail-Adresse.
 
-    Folgt den spezifischen Regeln: Bevorzugt Email-Local-Part mit Punkten.
-    Bereinigt Display-Namen von Titeln und Firmenzusätzen.
-    Normalisiert Umlaute.
+    Berücksichtigt spezifische Anforderungen für Hochschul-Systemadressen, 
+    multi-word Nachnamen und Fallbacks auf den E-Mail Local-Part.
 
     Args:
-        name_str (str): Der zu parsende Name oder die E-Mail-Adresse.
+        name_input (str): Der zu parsende Name oder die E-Mail-Adresse.
 
     Returns:
-        str: Der extrahierte Nachname.
+        str: Der extrahierte Nachname oder 'Unknown'.
     """
-    logger.debug(f"Extrahiere Nachname aus: {name_str}")
-    if not name_str or name_str == "(No Sender)" or name_str == "(No Receiver)":
+    logger.debug(f"Extrahiere Nachname aus: {name_input}")
+    if not name_input or name_input in ["(No Sender)", "(No Receiver)", "Unknown"]:
         return "Unknown"
 
-    name_str = clean_sender_name(name_str)
+    cleaned_name = clean_sender_name(name_input)
 
-    # Suche nach E-Mail-Adresse
-    email_match = re.search(r"[\w\.-]+@[\w\.-]+", name_str)
-    email = email_match.group(0) if email_match else ""
+    # Email und Local-Part extrahieren - Bevorzugt aus bereinigtem Namen (Wichtig für 'im Auftrag von')
+    email_match = re.search(r"[\w\.-]+@[\w\.-]+", cleaned_name)
+    if not email_match:
+         email_match = re.search(r"[\w\.-]+@[\w\.-]+", name_input)
+    
+    email_address = email_match.group(0) if email_match else ""
+    local_part = email_address.split("@")[0] if email_address else ""
 
-    # Extrahiere Anzeige-Namen (alles vor der ersten <)
-    display_name = decode_mime_header(name_str).split("<")[0].strip()
-    if display_name == email:
+    # Anzeige-Namen extrahieren und bereinigen
+    display_name = cleaned_name.split("<")[0].strip()
+    if display_name == email_address:
         display_name = ""
-
-    # Bereinigung des Anzeigenamens
     display_name = display_name.strip("'\" ")
-    # Remove parentheses like (Ma)
     display_name = re.sub(r"\(.*?\)", "", display_name).strip()
-    # Remove titles
     display_name = re.sub(r",?\s*(B\.Sc\.|M\.Sc\.|Prof\.|Dr\.)\s*", "", display_name).strip()
-    # Remove business suffixes and separators like | Hans GmbH
     display_name = re.sub(r"\s*\|\s*.*$", "", display_name)
-    display_name = re.sub(r"\s+GmbH\b.*$", "", display_name)
-    display_name = display_name.strip("'\" ")
+    display_name = re.sub(r"\s+GmbH\b.*$", "", display_name).strip("'\" ")
 
-    # Requirement: If display name contains special characters like "ß", keep it
-    # but only if it is a "Rich" display name.
-    has_special_chars = "ß" in display_name
-
-    # Priority 1: "Rich" display name with special characters (like ß)
-    if has_special_chars and (" " in display_name or "," in display_name):
-        if "," in display_name:
-            return display_name.split(",")[0].strip()
-        else:
-            parts = display_name.split()
-            if len(parts) > 1:
-                return parts[-1]
-            return display_name
-
-    # Priority 2: Email with dot in local part
-    if email:
-        local_part = email.split("@")[0]
-        if "." in local_part:
-            lastname_part = local_part.rsplit(".", 1)[1]
-            logger.debug(f"Punkt im lokalen Teil gefunden: {local_part} -> Extrahiere {lastname_part}")
-            parts = re.split(r'([._])', lastname_part)
-            res = ""
-            for p in parts:
-                if p == "_":
-                    res += " "
-                elif p == ".":
-                    res += " "
-                else:
-                    if p:
-                        if "-" in p:
-                            subparts = p.split("-")
-                            res += "-".join(sp[0].upper() + sp[1:] for sp in subparts if sp)
-                        else:
-                            res += p[0].upper() + p[1:]
-            return res.strip()
-
-    # Priority 3: System addresses with dash or complex email logic
-    if email:
-        local_part = email.split("@")[0]
-        # Specific rule for digital-science
-        if "digital-science" in local_part.lower():
-            return "Digital-science"
-        # Specific rule for kreditorenbuchhaltung
-        if "kreditorenbuchhaltung" in local_part.lower():
+    # 1. Systemadressen (Priorität 1)
+    if local_part:
+        local_part_lower = local_part.lower()
+        if "digital-science" in local_part_lower:
+            return "Digital-Science"
+        if "kreditorenbuchhaltung" in local_part_lower:
             return "Kreditorenbuchhaltung"
 
-        if "-" in local_part and ("th-koeln.de" in email.lower() or "fh-koeln.de" in email.lower()):
-            parts = local_part.split("-")
-            return "-".join(p[0].upper() + p[1:] for p in parts if p)
+    # 2. Greedy Match gegen den letzten Teil des Local-Parts (Priorität 2)
+    # Behandelt Fälle wie 'A B C D <a_b.c_d@smail...>' -> 'C D'
+    if display_name and local_part and _clean_for_comparison(local_part) not in GENERIC_LOCAL_PARTS:
+        # Teil nach dem letzten Punkt im Local-Part als Referenz nehmen
+        lp_lastname_segment = local_part.split(".")[-1]
+        lp_segment_normalized = _clean_for_comparison(lp_lastname_segment)
+        
+        # Falls Komma vorhanden (Format 'Nachname, Vorname'), nur den Teil davor betrachten
+        potential_source = display_name.split(",")[-1].strip() if "," in display_name else display_name
+        words = potential_source.split()
+        
+        matching_words = []
+        for word in reversed(words):
+            word_normalized = _clean_for_comparison(word)
+            if word_normalized and word_normalized in lp_segment_normalized:
+                matching_words.insert(0, word)
+            else:
+                break
+        if matching_words:
+            return " ".join(matching_words)
 
-    # Priority 4: "Rich" display name (more than one word or has comma)
-    if display_name and (" " in display_name or "," in display_name):
-        if "," in display_name:
-            # Format: Lastname, Firstname
-            return display_name.split(",")[0].strip()
-        else:
-            # Format: Firstname Lastname
-            parts = display_name.split()
-            if len(parts) > 1:
-                return parts[-1]
-            return display_name
+    # 3. E-Mail mit Punkt im Local-Part (Hochschul-Format)
+    if local_part and "." in local_part:
+        lastname_part = local_part.rsplit(".", 1)[1]
+        logger.debug(f"Punkt im lokalen Teil gefunden: {local_part} -> Extrahiere {lastname_part}")
+        parts = re.split(r'([._])', lastname_part)
+        result_lastname = ""
+        for part in parts:
+            if part in ["_", "."]:
+                result_lastname += " "
+            elif part:
+                if "-" in part:
+                    subparts = part.split("-")
+                    result_lastname += "-".join(sub[0].upper() + sub[1:] if sub else "" for sub in subparts)
+                else:
+                    result_lastname += part[0].upper() + part[1:]
+        if result_lastname.strip():
+            return result_lastname.strip()
 
-    # Priority 5: Fallback
+    # 4. Validierung des identifizierten Nachnamens gegen Local-Part
+    # Falls der Name aus dem Display-Name nicht in der Email vorkommt -> Local Part nutzen (Case: Wester Helmut -> HWester)
+    display_words = display_name.split()
+    standard_lastname = display_words[-1] if display_words else ""
+    if "," in display_name:
+        standard_lastname = display_name.split(",")[0].strip()
+    
+    if standard_lastname and local_part:
+        if _clean_for_comparison(standard_lastname) not in _clean_for_comparison(local_part):
+            if _clean_for_comparison(local_part) not in GENERIC_LOCAL_PARTS:
+                # Falls Local-Part Großbuchstaben hat, diese als Bezeichner bevorzugen (z.B. HWester)
+                if any(character.isupper() for character in local_part):
+                    return local_part
+                # Falls Bindestriche vorhanden sind (z.B. praxissemester-inf)
+                if "-" in local_part:
+                    return _format_dashed_name(local_part)
+                return local_part[0].upper() + local_part[1:] if local_part else "Unknown"
+
+    # 5. Generische Fallbacks (Priorität 3)
+    if "," in display_name:
+        return display_name.split(",")[0].strip()
     if display_name:
-        return display_name
-
-    if email:
-        local_part = email.split("@")[0]
-        return local_part[0].upper() + local_part[1:] if local_part else "Unknown"
+        parts = display_name.split()
+        if len(parts) > 1:
+            lastname_candidate = parts[-1]
+            if "-" in lastname_candidate:
+                return _format_dashed_name(lastname_candidate)
+            return lastname_candidate
+        return _format_dashed_name(display_name) if "-" in display_name else display_name
+    if local_part:
+        if any(character.isupper() for character in local_part):
+            return local_part
+        if "-" in local_part:
+            return _format_dashed_name(local_part)
+        return local_part[0].upper() + local_part[1:]
+        
     return "Unknown"
 
-def find_student_folder(base_path: Path, lastname: str) -> Optional[Path]:
+
+def find_student_folder(base_directory: Path, lastname: str) -> Optional[Path]:
     """Sucht nach dem Ordner eines Studenten basierend auf dem Nachnamen.
 
-    Sucht rekursiv in den Semester-Unterordnern.
+    Sucht rekursiv in den Semester-Unterordnern nach einem passenden Verzeichnis.
 
     Args:
-        base_path (Path): Das Basisverzeichnis (z.B. 'BachelorThesis').
+        base_directory (Path): Das Basisverzeichnis der jeweiligen Klasse.
         lastname (str): Der Nachname des Studenten.
 
     Returns:
         Optional[Path]: Der Pfad zum Studentenordner oder None, falls nicht gefunden.
     """
-    # Normalisiere den Such-Nachnamen für den Vergleich
-    search_name = normalize_name(lastname).lower()
-
-    if not base_path.exists():
+    search_name_normalized = normalize_name(lastname).lower()
+    if not base_directory.exists():
         return None
-
-    # Suche in allen Unterordnern (Semester)
-    for semester_dir in base_path.iterdir():
+    for semester_dir in base_directory.iterdir():
         if semester_dir.is_dir():
             for student_dir in semester_dir.iterdir():
                 if student_dir.is_dir():
-                    if normalize_name(student_dir.name).lower() == search_name:
+                    if normalize_name(student_dir.name).lower() == search_name_normalized:
                         return student_dir
     return None
 
 
 def process_emails(
-    source_root: Path, classifier_model_path: Path, config: Dict[str, str]
+    source_root_path: Path, 
+    classifier_model_path: Path, 
+    path_config: Dict[str, str]
 ) -> List[Dict[str, Any]]:
-    """Verarbeitet E-Mails aus dem Quellverzeichnis.
+    """Verarbeitet E-Mails aus dem Quellverzeichnis und sortiert sie ein.
 
     Args:
-        source_root (Path): Verzeichnis mit den zu sortierenden .msg-Dateien.
+        source_root_path (Path): Verzeichnis mit den zu sortierenden .msg-Dateien.
         classifier_model_path (Path): Pfad zum trainierten Klassifizierer-Modell.
-        config (Dict[str, str]): Pfad-Konfiguration für die Klassen.
+        path_config (Dict[str, str]): Pfad-Konfiguration für die E-Mail-Klassen.
 
     Returns:
         List[Dict[str, Any]]: Liste der verschobenen E-Mails mit Metadaten.
     """
-    moved_emails = []
+    moved_emails_data = []
     classifier = EmailClassifier()
     classifier.load(classifier_model_path)
     parser = MailParser()
-    uni_config = get_config()
-    user_emails = [email.lower() for email in uni_config.user.emails]
-    student_domains = ["@smail.th-koeln.de", "@smail.fh-koeln.de"]
+    university_config = get_config()
+    user_emails_list = [email_addr.lower() for email_addr in university_config.user.emails]
 
-    def is_student(email_addr: str) -> bool:
-        """Prüft ob eine E-Mail-Adresse zu einem Studenten gehört.
-
-        Args:
-            email_addr: Die zu prüfende E-Mail-Adresse.
-
-        Returns:
-            bool: True wenn es eine Studenten-E-Mail ist, sonst False.
-        """
-        email_addr = email_addr.lower()
-        if any(u_email in email_addr for u_email in user_emails):
-            return False
-        return any(domain in email_addr for domain in student_domains)
-
-    for msg_file in sorted(source_root.rglob("*.msg")):
+    for msg_file in sorted(source_root_path.rglob("*.msg")):
         try:
-            # Klassifizierung
-            logger.debug(f"Klassifiziere {msg_file.name}...")
-            prediction = classifier.predict(msg_file)
-            email_class = prediction["prediction"]
+            # Klassifizierung durchführen
+            prediction_output = classifier.predict(msg_file)
+            assigned_class = prediction_output["prediction"]
 
-            if email_class not in config:
-                logger.warning(
-                    f"Keine Pfad-Konfiguration für Klasse '{email_class}' gefunden. Überspringe {msg_file.name}"
-                )
+            if assigned_class not in path_config:
+                logger.warning(f"Keine Pfad-Konfiguration für '{assigned_class}' gefunden. Überspringe {msg_file.name}")
                 continue
-
-            class_base_path = Path(config[email_class])
-
-            # Datum und Semester
-            date = parser.get_email_date(msg_file)
-            semester = get_semester(date)
-
-            # Sender/Receiver und Ziel-Ordner bestimmen
-            lastname = "Unknown"
-            target_folder = "Inbox"  # Default
+            
+            class_base_path = Path(path_config[assigned_class])
+            email_date = parser.get_email_date(msg_file)
+            semester_identifier = get_semester(email_date)
+            final_lastname = "Unknown"
+            target_subfolder = "Inbox"
 
             import extract_msg
-
-            with extract_msg.openMsg(str(msg_file)) as msg:
-                sender = (msg.sender.lower() if msg.sender else "").strip()
-                logger.debug(f"Analysiere Sender/Empfänger für {msg_file.name} (Klasse: {email_class}, Sender: {sender})")
-
-                is_sent_by_user = any(u_email in sender for u_email in user_emails)
-                recipients = msg.recipients or []
-
-                if is_sent_by_user:
-                    target_folder = "SentItems"
-                    # Rule: Prioritize direct recipients (To) for folder naming, ignore CC
-                    # Rule: Take first 'To' recipient, fallback to second if first fails
-                    to_recipients = [r for r in recipients if getattr(r, "type", None) == 1]
-
-                    if to_recipients:
-                        lastname = extract_lastname(to_recipients[0].name or to_recipients[0].email)
-                        if lastname == "Unknown" and len(to_recipients) > 1:
-                            lastname = extract_lastname(to_recipients[1].name or to_recipients[1].email)
+            with extract_msg.openMsg(str(msg_file)) as message_item:
+                sender_raw = getattr(message_item, "sender", "")
+                if not isinstance(sender_raw, str):
+                    sender_raw = str(sender_raw)
+                
+                # Bestimmung ob die Mail vom Nutzer gesendet wurde
+                extracted_sender_email = ""
+                email_attr = getattr(message_item, "sender_email", None)
+                if isinstance(email_attr, str):
+                    extracted_sender_email = email_attr.lower().strip()
+                if not extracted_sender_email:
+                    email_search = re.search(r"[\w\.-]+@[\w\.-]+", sender_raw)
+                    if email_search:
+                        extracted_sender_email = email_search.group(0).lower()
                     else:
-                        # Fallback to any recipient
-                        if recipients:
-                            lastname = extract_lastname(recipients[0].name or recipients[0].email)
-                        else:
-                            lastname = "Unknown"
+                        extracted_sender_email = sender_raw.lower()
+
+                is_sent_by_tool_user = any(u_email in extracted_sender_email for u_email in user_emails_list)
+                
+                if is_sent_by_tool_user:
+                    target_subfolder = "SentItems"
+                    recipients = message_item.recipients or []
+                    # Rule: Bevorzuge direkte Empfänger (To) für die Ordnerbenennung, ignoriere CC
+                    # TO-Empfänger haben Typ 1 in extract-msg
+                    to_recipients = [r for r in recipients if getattr(r, "type", None) == 1]
+                    if to_recipients:
+                        first_rec = to_recipients[0]
+                        final_lastname = extract_lastname(f"{first_rec.name} <{first_rec.email}>" if first_rec.name and first_rec.email else (first_rec.name or first_rec.email))
+                        if (not final_lastname or final_lastname == "Unknown") and len(to_recipients) > 1:
+                            second_rec = to_recipients[1]
+                            final_lastname = extract_lastname(f"{second_rec.name} <{second_rec.email}>" if second_rec.name and second_rec.email else (second_rec.name or second_rec.email))
+                    elif recipients:
+                        any_rec = recipients[0]
+                        final_lastname = extract_lastname(f"{any_rec.name} <{any_rec.email}>" if any_rec.name and any_rec.email else (any_rec.name or any_rec.email))
                 else:
-                    target_folder = "Inbox"
-                    # Rule: Folder name should be the sender's lastname
-                    lastname = extract_lastname(msg.sender)
-            # Ziel-Pfad bestimmen
-            logger.debug(f"Bestimme Ziel-Pfad für {lastname} in {target_folder} (Semester: {semester})")
-            student_dir = find_student_folder(class_base_path, lastname)
-            if not student_dir:
-                student_dir = class_base_path / semester / lastname
-            target_dir = student_dir / target_folder
-            target_dir.mkdir(parents=True, exist_ok=True)
-            target_path = target_dir / msg_file.name
+                    target_subfolder = "Inbox"
+                    # Rule: Der Ordnername sollte der Nachname des Absenders sein
+                    final_lastname = extract_lastname(sender_raw)
 
-            # Datei verschieben
-            shutil.move(str(msg_file), str(target_path))
-            logger.info(f"Verschoben: {msg_file.name} -> {target_path}")
-
-            moved_emails.append(
-                {
-                    "class": email_class,
-                    "semester": semester,
-                    "lastname": lastname,
-                    "folder": target_folder,
-                    "path": str(target_path),
-                }
-            )
-
-        except Exception as e:
-            logger.error(f"Fehler beim Verarbeiten von {msg_file}: {e}")
-
-    return moved_emails
+            # Ziel-Verzeichnis bestimmen
+            student_dir_path = find_student_folder(class_base_path, final_lastname)
+            if not student_dir_path:
+                student_dir_path = class_base_path / semester_identifier / final_lastname
+                
+            target_directory = student_dir_path / target_subfolder
+            target_directory.mkdir(parents=True, exist_ok=True)
+            target_file_path = target_directory / msg_file.name
+            shutil.move(str(msg_file), str(target_file_path))
+            
+            moved_emails_data.append({
+                "class": assigned_class, 
+                "semester": semester_identifier, 
+                "lastname": final_lastname, 
+                "folder": target_subfolder, 
+                "path": str(target_file_path)
+            })
+            logger.info(f"Verschoben: {msg_file.name} -> {target_file_path}")
+        except Exception as processing_error:
+            logger.error(f"Fehler bei Verarbeitung von {msg_file}: {processing_error}")
+            
+    return moved_emails_data
 
 
-def write_report(source_root: Path, moved_emails: List[Dict[str, Any]]) -> None:
-    """Erstellt den Markdown-Report.
+def write_report(base_directory: Path, moved_emails_list: List[Dict[str, Any]]) -> None:
+    """Erstellt einen Markdown-Report über die erfolgreich einsortierten E-Mails.
 
     Args:
-        source_root (Path): Quellverzeichnis für den Report.
-        moved_emails (List[Dict[str, Any]]): Liste der verschobenen E-Mails.
+        base_directory (Path): Quellverzeichnis für den Speicherort des Reports.
+        moved_emails_list (List[Dict[str, Any]]): Liste der verschobenen E-Mails.
     """
-    if not moved_emails:
-        logger.info("Keine E-Mails verschoben. Erstelle keinen Report.")
+    if not moved_emails_list:
+        logger.info("Keine E-Mails zum Berichten vorhanden.")
         return
+    
+    # Sortierung für den Report
+    moved_emails_list.sort(key=lambda item: (item["class"], item["semester"], item["lastname"], item["folder"]))
+    report_file_path = base_directory / "sorted_emails.md"
+    
+    with open(report_file_path, "w", encoding="utf-8") as report_file:
+        report_file.write("# Sortierte E-Mails\n\n")
+        current_email_class = None
+        for email_item in moved_emails_list:
+            if email_item["class"] != current_email_class:
+                current_email_class = email_item["class"]
+                report_file.write(f"## {current_email_class}\n\n")
+                report_file.write("| Semester | Nachname | Ordner | Datei |\n")
+                report_file.write("| --- | --- | --- | --- |\n")
+            report_file.write(f"| {email_item['semester']} | {email_item['lastname']} | {email_item['folder']} | {Path(email_item['path']).name} |\n")
+    logger.info(f"Report erstellt: {report_file_path}")
 
-    # Sortierung: Klasse, Semester, Nachname, Folder
-    moved_emails.sort(
-        key=lambda x: (x["class"], x["semester"], x["lastname"], x["folder"])
+
+def main() -> None:
+    """Haupteinstiegspunkt für das E-Mail-Sortier-Skript."""
+    argument_parser = argparse.ArgumentParser(description="Sortiert E-Mails basierend auf Klassifizierung.")
+    
+    argument_parser.add_argument(
+        "source_dir", 
+        help="Quellverzeichnis mit E-Mails."
     )
-
-    report_path = source_root / "sorted_emails.md"
-    with open(report_path, "w", encoding="utf-8") as f:
-        f.write("# Sortierte E-Mails\n\n")
-
-        current_class = None
-        for email in moved_emails:
-            if email["class"] != current_class:
-                current_class = email["class"]
-                f.write(f"## {current_class}\n\n")
-                f.write("| Semester | Nachname | Ordner | Datei |\n")
-                f.write("| --- | --- | --- | --- |\n")
-
-            f.write(
-                f"| {email['semester']} | {email['lastname']} | {email['folder']} | {Path(email['path']).name} |\n"
-            )
-
-    logger.info(f"Report erstellt: {report_path}")
-
-
-def main():
-    """Hauptfunktion des Skripts."""
-    parser = argparse.ArgumentParser(description="Sortiert E-Mails basierend auf Klassifizierung.")
-    parser.add_argument("source_dir", type=str, help="Quellverzeichnis mit E-Mails.")
-    parser.add_argument("--model", type=str, required=True, help="Pfad zum Klassifizierer-Modell.")
-    parser.add_argument("--config", type=str, required=True, help="Pfad zur YAML-Konfiguration.")
-    args = parser.parse_args()
-
-    source_path = Path(args.source_dir)
-    model_path = Path(args.model)
-    config_path = Path(args.config)
-
+    argument_parser.add_argument(
+        "--model", 
+        required=True, 
+        help="Pfad zum Klassifizierer-Modell."
+    )
+    argument_parser.add_argument(
+        "--config", 
+        required=True, 
+        help="Pfad zur YAML-Konfiguration."
+    )
+    
+    cli_args = argument_parser.parse_args()
+    source_path = Path(cli_args.source_dir)
+    
     if not source_path.exists():
-        logger.error(f"Quellverzeichnis {source_path} existiert nicht.")
+        logger.error(f"Pfad existiert nicht: {source_path}")
         return
 
-    if not config_path.exists():
-        logger.error(f"Konfigurationsdatei {config_path} existiert nicht.")
-        return
-
-    with open(config_path, "r", encoding="utf-8") as f:
-        full_config = yaml.safe_load(f)
-
-    # Handle nested config if present
-    path_config = full_config.get("class_paths", full_config)
-
-    moved_emails = process_emails(source_path, model_path, path_config)
-    write_report(source_path, moved_emails)
-
+    with open(cli_args.config, "r", encoding="utf-8") as yaml_file:
+        config_dict = yaml.safe_load(yaml_file)
+        
+    actual_config = config_dict.get("class_paths", config_dict)
+    
+    sorting_results = process_emails(source_path, Path(cli_args.model), actual_config)
+    write_report(source_path, sorting_results)
 
 if __name__ == "__main__":
     main()

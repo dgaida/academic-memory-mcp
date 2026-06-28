@@ -1,7 +1,9 @@
+"""Tests für die Namensextraktion und das Sortieren von E-Mails."""
 import pytest
 from unittest.mock import MagicMock, patch
 from pathlib import Path
 from datetime import datetime
+from typing import Any
 from mcp_university.classifier.sort_emails import extract_firstname, extract_lastname, process_emails
 
 @pytest.mark.parametrize("input_str, expected_first, expected_last", [
@@ -17,7 +19,14 @@ from mcp_university.classifier.sort_emails import extract_firstname, extract_las
     ("Sabrina Tuba <stuba@fft.com>", "Sabrina", "Tuba"),
     ("stuba@fft.com", "Unknown", "Stuba"),
 ])
-def test_name_extraction(input_str, expected_first, expected_last):
+def test_name_extraction(input_str: str, expected_first: str, expected_last: str) -> None:
+    """Testet die Extraktion von Vor- und Nachnamen aus verschiedenen Formaten.
+
+    Args:
+        input_str: Der Eingabestring (Name/Email).
+        expected_first: Erwarteter Vorname.
+        expected_last: Erwarteter Nachname.
+    """
     first = extract_firstname(input_str)
     last = extract_lastname(input_str)
 
@@ -25,14 +34,13 @@ def test_name_extraction(input_str, expected_first, expected_last):
     assert last == expected_last, f"Last name mismatch for {input_str}: expected {expected_last}, got {last}"
 
 @pytest.fixture
-def mock_deps():
-    with patch('mcp_university.classifier.sort_emails.EmailClassifier') as mock_classifier_class, \
-         patch('mcp_university.classifier.sort_emails.MailParser') as mock_mail_parser, \
-         patch('extract_msg.openMsg') as mock_open_msg, \
-         patch('shutil.move') as mock_move, \
-         patch('mcp_university.classifier.sort_emails.get_config') as mock_get_config, \
-         patch('mcp_university.classifier.sort_emails.get_semester') as mock_get_semester, \
-         patch('mcp_university.classifier.sort_emails.find_student_folder') as mock_find_folder:
+def mock_deps() -> Any:
+    """Mockt Abhängigkeiten für die Sortier-Tests.
+
+    Yields:
+        Dictionary mit Mock-Objekten.
+    """
+    with patch('mcp_university.classifier.sort_emails.EmailClassifier') as mock_classifier_class,          patch('mcp_university.classifier.sort_emails.MailParser') as mock_mail_parser,          patch('extract_msg.openMsg') as mock_open_msg,          patch('shutil.move') as mock_move,          patch('mcp_university.classifier.sort_emails.get_config') as mock_get_config,          patch('mcp_university.classifier.sort_emails.get_semester') as mock_get_semester,          patch('mcp_university.classifier.sort_emails.find_student_folder') as mock_find_folder:
 
         mock_config = MagicMock()
         mock_config.user.emails = ["daniel.gaida@th-koeln.de"]
@@ -55,7 +63,17 @@ def mock_deps():
             "classifier": mock_classifier
         }
 
-def create_rec(email, name, r_type):
+def create_rec(email: str, name: str, r_type: int) -> MagicMock:
+    """Erstellt ein Mock-Recipient-Objekt.
+
+    Args:
+        email: E-Mail-Adresse.
+        name: Anzeigename.
+        r_type: Typ (1=TO, 2=CC).
+
+    Returns:
+        MagicMock: Gemockter Empfänger.
+    """
     rec = MagicMock()
     rec.email = email
     rec.name = name
@@ -75,7 +93,15 @@ def create_rec(email, name, r_type):
     ("Sabrina Tuba <stuba@fft.com>", "Tuba"),
     ("stuba@fft.com", "Stuba"),
 ])
-def test_sorting_inbox(mock_deps, tmp_path, sender_str, expected_lastname):
+def test_sorting_inbox(mock_deps: Any, tmp_path: Path, sender_str: str, expected_lastname: str) -> None:
+    """Testet das Sortieren einer eingehenden E-Mail in die Inbox.
+
+    Args:
+        mock_deps: Gemockte Abhängigkeiten.
+        tmp_path: Temporärer Pfad.
+        sender_str: Sender-String.
+        expected_lastname: Erwarteter Nachname für den Ordner.
+    """
     source_root = tmp_path / "source"
     source_root.mkdir()
     (source_root / "test.msg").touch()
