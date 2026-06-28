@@ -1047,6 +1047,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Further Links">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagnosis-and-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnosis and Logging
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -1673,6 +1690,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Further Links">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagnosis-and-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnosis and Logging
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -1794,7 +1828,12 @@
 <p>The process ends in an interactive web interface. Here, the human remains in full control (Human-in-the-loop).</p>
 <p><strong>GUI Functions:</strong></p>
 <ul>
-<li><strong>Correction of Classification:</strong> If an email was incorrectly sorted, you can change the class via a dropdown. The system automatically moves the files physically on the disk when saving.  </li>
+<li>
+<p><strong>Full Visibility:</strong> ALL previously sorted emails are displayed in the GUI to ensure no communication is overlooked.</p>
+</li>
+<li>
+<p><strong>Correction of Classification:</strong> If an email was incorrectly sorted, you can change the class via a dropdown. The system automatically moves the files physically on the disk when saving.  </p>
+</li>
 <li><strong>Action Review:</strong> Check which action the LLM suggests and change it if necessary.  </li>
 <li><strong>Extract Attachments:</strong> Via a checkbox, you can decide whether attachments of the email should be saved directly in the student folder.  </li>
 <li><strong>Quick Links:</strong> Open the corresponding Windows folder or the email file with one click directly from the browser.  </li>
@@ -1811,6 +1850,8 @@
 <p class="admonition-title">SentItems Archiving</p>
 <p>Emails in the <code>SentItems</code> folder are always only archived. They never require a reply action, regardless of their age or the status of the conversation.</p>
 </div>
+<h3 id="diagnosis-and-logging">Diagnosis and Logging<a class="headerlink" href="#diagnosis-and-logging" title="Permanent link">&para;</a></h3>
+<p>The system logs every step of email processing in detail in <code>process_emails.log</code>. If the GUI does not display any emails even though they are listed in <code>sorted_emails.md</code>, check the log file for warnings regarding missing model files or access issues.</p>
 
 
 

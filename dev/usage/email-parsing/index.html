@@ -1515,24 +1515,24 @@
 <h2 id="grundlogik-hierarchisch">Grundlogik (Hierarchisch)<a class="headerlink" href="#grundlogik-hierarchisch" title="Permanent link">&para;</a></h2>
 <p>Das System folgt einer strengen Hierarchie, um den Nachnamen eines Absenders oder Empfängers zu bestimmen:</p>
 <ol>
-<li><strong>"im Auftrag von" Erkennung</strong>: Falls eine E-Mail im Auftrag gesendet wurde, wird der eigentliche Absender fokussiert.</li>
-<li><strong>Greedy Name Matching (Primär)</strong>:<ul>
-<li>Der Display-Name (z.B. "Mustermann Max") wird in seine Einzelteile zerlegt.</li>
-<li>Diese Teile werden mit dem "Local-Part" der E-Mail-Adresse (der Teil vor dem @) abgeglichen.</li>
-<li>Wenn ein Teil des Display-Namens im Local-Part vorkommt, wird dieser als Nachname identifiziert.</li>
-<li><em>Beispiel</em>: <code>Mustermann Max &lt;mustermann@example.com&gt;</code> -&gt; "Mustermann" wird im Local-Part gefunden und ist somit der Nachname.</li>
+<li><strong>"im Auftrag von" Erkennung</strong>: Falls eine E-Mail im Auftrag gesendet wurde, wird der eigentliche Absender fokussiert.  </li>
+<li><strong>Greedy Name Matching (Primär)</strong>:  <ul>
+<li>Der Display-Name (z.B. "Mustermann Max") wird in seine Einzelteile zerlegt.  </li>
+<li>Diese Teile werden mit dem "Local-Part" der E-Mail-Adresse (der Teil vor dem @) abgeglichen.  </li>
+<li>Wenn ein Teil des Display-Namens im Local-Part vorkommt, wird dieser als Nachname identifiziert.  </li>
+<li><em>Beispiel</em>: <code>Mustermann Max &lt;mustermann@example.com&gt;</code> -&gt; "Mustermann" wird im Local-Part gefunden und ist somit der Nachname.  </li>
 </ul>
 </li>
-<li><strong>Dot-Separated Local Part (Fallback 1)</strong>:<ul>
-<li>Falls kein Abgleich mit dem Display-Namen möglich ist, wird der Local-Part an Punkten (<code>.</code>) aufgeteilt.</li>
-<li>Das System prüft die Segmente von hinten nach vorne und ignoriert generische Begriffe (wie "info", "studium").</li>
-<li><em>Beispiel</em>: <code>max.mustermann@smail.th-koeln.de</code> -&gt; "Mustermann".</li>
+<li><strong>Dot-Separated Local Part (Fallback 1)</strong>:  <ul>
+<li>Falls kein Abgleich mit dem Display-Namen möglich ist, wird der Local-Part an Punkten (<code>.</code>) aufgeteilt.  </li>
+<li>Das System prüft die Segmente von hinten nach vorne und ignoriert generische Begriffe (wie "info", "studium").  </li>
+<li><em>Beispiel</em>: <code>max.mustermann@smail.th-koeln.de</code> -&gt; "Mustermann".  </li>
 </ul>
 </li>
-<li><strong>Generische Fallbacks (Fallback 2)</strong>:<ul>
-<li>Kommata im Display-Namen (<code>Nachname, Vorname</code>).</li>
-<li>Letztes Wort im Display-Namen.</li>
-<li>Local-Part Formatierung (Großbuchstaben-Erkennung).</li>
+<li><strong>Generische Fallbacks (Fallback 2)</strong>:  <ul>
+<li>Kommata im Display-Namen (<code>Nachname, Vorname</code>).  </li>
+<li>Letztes Wort im Display-Namen.  </li>
+<li>Local-Part Formatierung (Großbuchstaben-Erkennung).  </li>
 </ul>
 </li>
 </ol>
@@ -1585,9 +1585,9 @@
 </code></pre></div>
 <h2 id="wichtige-regeln-fur-entwickler">Wichtige Regeln für Entwickler<a class="headerlink" href="#wichtige-regeln-fur-entwickler" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Keine Löschung von Kommentaren</strong>: Die erklärenden Kommentare in <code>extract_lastname</code> sind essenziell für das Verständnis der Randfälle.</li>
-<li><strong>Google-Style Docstrings</strong>: Jede Änderung muss dokumentiert werden.</li>
-<li><strong>Umlaut-Handling</strong>: Das System normalisiert Namen für den Vergleich (<code>Müller</code> vs <code>mueller</code>), gibt aber den Originalnamen (Title Case) zurück.</li>
+<li><strong>Keine Löschung von Kommentaren</strong>: Die erklärenden Kommentare in <code>extract_lastname</code> sind essenziell für das Verständnis der Randfälle.  </li>
+<li><strong>Google-Style Docstrings</strong>: Jede Änderung muss dokumentiert werden.  </li>
+<li><strong>Umlaut-Handling</strong>: Das System normalisiert Namen für den Vergleich (<code>Müller</code> vs <code>mueller</code>), gibt aber den Originalnamen (Title Case) zurück.  </li>
 </ul>
 
 

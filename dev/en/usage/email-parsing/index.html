@@ -1517,24 +1517,24 @@
 <h2 id="basic-logic-hierarchical">Basic Logic (Hierarchical)<a class="headerlink" href="#basic-logic-hierarchical" title="Permanent link">&para;</a></h2>
 <p>The system follows a strict hierarchy to determine the surname of a sender or recipient:</p>
 <ol>
-<li><strong>"im Auftrag von" Recognition</strong>: If an email was sent on behalf of someone else, the actual sender is focused.</li>
-<li><strong>Greedy Name Matching (Primary)</strong>:<ul>
-<li>The display name (e.g., "Mustermann Max") is split into its individual parts.</li>
-<li>These parts are matched against the "local part" of the email address (the part before the @).</li>
-<li>If a part of the display name is found within the local part, it is identified as the surname.</li>
-<li><em>Example</em>: <code>Mustermann Max &lt;mustermann@example.com&gt;</code> -&gt; "Mustermann" is found in the local part and is therefore the surname.</li>
+<li><strong>"im Auftrag von" Recognition</strong>: If an email was sent on behalf of someone else, the actual sender is focused.  </li>
+<li><strong>Greedy Name Matching (Primary)</strong>:  <ul>
+<li>The display name (e.g., "Mustermann Max") is split into its individual parts.  </li>
+<li>These parts are matched against the "local part" of the email address (the part before the @).  </li>
+<li>If a part of the display name is found within the local part, it is identified as the surname.  </li>
+<li><em>Example</em>: <code>Mustermann Max &lt;mustermann@example.com&gt;</code> -&gt; "Mustermann" is found in the local part and is therefore the surname.  </li>
 </ul>
 </li>
-<li><strong>Dot-Separated Local Part (Fallback 1)</strong>:<ul>
-<li>If no match with the display name is possible, the local part is split at dots (<code>.</code>).</li>
-<li>The system checks the segments from back to front and ignores generic terms (such as "info", "studium").</li>
-<li><em>Example</em>: <code>max.mustermann@smail.th-koeln.de</code> -&gt; "Mustermann".</li>
+<li><strong>Dot-Separated Local Part (Fallback 1)</strong>:  <ul>
+<li>If no match with the display name is possible, the local part is split at dots (<code>.</code>).  </li>
+<li>The system checks the segments from back to front and ignores generic terms (such as "info", "studium").  </li>
+<li><em>Example</em>: <code>max.mustermann@smail.th-koeln.de</code> -&gt; "Mustermann".  </li>
 </ul>
 </li>
-<li><strong>Generic Fallbacks (Fallback 2)</strong>:<ul>
-<li>Commas in the display name (<code>Surname, Firstname</code>).</li>
-<li>Last word in the display name.</li>
-<li>Local part formatting (uppercase recognition).</li>
+<li><strong>Generic Fallbacks (Fallback 2)</strong>:  <ul>
+<li>Commas in the display name (<code>Surname, Firstname</code>).  </li>
+<li>Last word in the display name.  </li>
+<li>Local part formatting (uppercase recognition).  </li>
 </ul>
 </li>
 </ol>
@@ -1587,9 +1587,9 @@
 </code></pre></div>
 <h2 id="important-rules-for-developers">Important Rules for Developers<a class="headerlink" href="#important-rules-for-developers" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>No deletion of comments</strong>: The explanatory comments in <code>extract_lastname</code> are essential for understanding edge cases.</li>
-<li><strong>Google-Style Docstrings</strong>: Every change must be documented.</li>
-<li><strong>Umlaut Handling</strong>: The system normalizes names for comparison (<code>Müller</code> vs <code>mueller</code>) but returns the original name (Title Case).</li>
+<li><strong>No deletion of comments</strong>: The explanatory comments in <code>extract_lastname</code> are essential for understanding edge cases.  </li>
+<li><strong>Google-Style Docstrings</strong>: Every change must be documented.  </li>
+<li><strong>Umlaut Handling</strong>: The system normalizes names for comparison (<code>Müller</code> vs <code>mueller</code>) but returns the original name (Title Case).  </li>
 </ul>
 
 

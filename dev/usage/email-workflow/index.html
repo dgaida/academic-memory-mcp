@@ -1122,6 +1122,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Weiterführende Links">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagnose-und-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnose und Logging
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1897,6 +1914,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Weiterführende Links">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagnose-und-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnose und Logging
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2070,7 +2104,12 @@
 <p>Der Prozess wird in einer interaktiven Web-Oberfläche kontrolliert (Human-in-the-loop).</p>
 <p><strong>Funktionen der GUI:</strong></p>
 <ul>
-<li><strong>Korrektur der Klassifizierung:</strong> Ändern der E-Mail-Klasse via Dropdown (physische Verschiebung beim Speichern).  </li>
+<li>
+<p><strong>Vollständige Sichtbarkeit:</strong> Es werden ALLE zuvor sortierten E-Mails in der GUI angezeigt, um sicherzustellen, dass keine Kommunikation übersehen wird.</p>
+</li>
+<li>
+<p><strong>Korrektur der Klassifizierung:</strong> Ändern der E-Mail-Klasse via Dropdown (physische Verschiebung beim Speichern).  </p>
+</li>
 <li><strong>Aktions-Review:</strong> Überprüfung und ggf. Änderung der vorgeschlagenen Aktion.  </li>
 <li><strong>Anhänge extrahieren:</strong> Checkbox zum automatischen Speichern von Anhängen im Studentenordner.  </li>
 <li><strong>Quick-Links:</strong> Direktes Öffnen des Windows-Ordners oder der E-Mail-Datei.  </li>
@@ -2114,6 +2153,8 @@
 <p>E-Mails im Ordner <code>SentItems</code> werden grundsätzlich nur archiviert. Sie benötigen nie eine Antwort-Aktion, unabhängig von ihrem Alter oder dem Status der Konversation.</p>
 </div>
 <hr />
+<h3 id="diagnose-und-logging">Diagnose und Logging<a class="headerlink" href="#diagnose-und-logging" title="Permanent link">&para;</a></h3>
+<p>Das System protokolliert jeden Schritt der E-Mail-Verarbeitung detailliert in <code>process_emails.log</code>. Sollte die GUI keine E-Mails anzeigen, obwohl diese in <code>sorted_emails.md</code> gelistet sind, prüfen Sie die Log-Datei auf Warnungen bezüglich fehlender Modelldateien oder Zugriffsproblemen.</p>
 <h2 id="erstellte-berichte-und-dateien">Erstellte Berichte und Dateien<a class="headerlink" href="#erstellte-berichte-und-dateien" title="Permanent link">&para;</a></h2>
 <p>Während der Verarbeitung durch <code>scripts/process_sorted_emails.py</code> werden verschiedene Markdown-Dateien im Quellverzeichnis erstellt, um den Status und die Ergebnisse zu dokumentieren.</p>
 <h3 id="1-sorted_emailsmd">1. <code>sorted_emails.md</code><a class="headerlink" href="#1-sorted_emailsmd" title="Permanent link">&para;</a></h3>
