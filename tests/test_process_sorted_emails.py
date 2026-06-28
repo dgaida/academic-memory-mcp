@@ -2,20 +2,19 @@
 import os
 import sys
 from unittest.mock import MagicMock, patch
+from pathlib import Path
 
 # Add project root to sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-import mcp_university.agent.engine  # noqa: F401
-
 # Mock dependencies to avoid side effects during import/init
-with patch('mcp_university.agent.engine.SearchIndex'), \
-     patch('mcp_university.agent.engine.MetadataStore'), \
-     patch('mcp_university.agent.engine.ParserFactory'):
+with patch('mcp_university.agent.engine.SearchIndex'),      patch('mcp_university.agent.engine.MetadataStore'),      patch('mcp_university.agent.engine.ParserFactory'),      patch('mcp_university.agent.mcp_agent.MCPAgent'):
     from mcp_university.classifier.controller import EmailController
 from mcp_university.utils.outlook import create_outlook_draft
 
-def test_parse_sorted_report(tmp_path):
+@patch('mcp_university.classifier.controller.MCPAgent')
+@patch('mcp_university.classifier.controller.Agent')
+def test_parse_sorted_report(mock_agent, mock_mcp_agent, tmp_path):
     """Prüft das Parsen des sortierten E-Mail Reports.
 
     Args:
@@ -25,15 +24,16 @@ def test_parse_sorted_report(tmp_path):
         None
     """
     report = tmp_path / "sorted_emails.md"
-    report.write_text("# Sortierte\n\n## Class\n- **S** | Name | Inbox: `D:\\mail.msg`", encoding="utf-8")
-    with patch('mcp_university.classifier.controller.Agent'):
-        controller = EmailController()
-        emails = controller.parse_report(report)
-        assert len(emails) == 1
+    report.write_text("# Sortierte\n\n## Class\n| Semester | Nachname | Ordner | Datei |\n| --- | --- | --- | --- |\n| S | Name | Inbox | D:\\mail.msg |", encoding="utf-8")
+    
+    controller = EmailController()
+    emails = controller.parse_report(report)
+    assert len(emails) == 1
 
 @patch("mcp_university.classifier.controller.MailParser")
 @patch("mcp_university.classifier.controller.Agent")
-def test_generate_reply_appointment_booked(mock_agent_cls, mock_parser_cls, tmp_path):
+@patch("mcp_university.classifier.controller.MCPAgent")
+def test_generate_reply_appointment_booked(mock_mcp_agent, mock_agent_cls, mock_parser_cls, tmp_path):
     """Testet die Generierung einer Antwort, wenn ein Termin erfolgreich gebucht wurde.
 
     Args:
@@ -62,7 +62,8 @@ def test_generate_reply_appointment_booked(mock_agent_cls, mock_parser_cls, tmp_
 
 @patch("mcp_university.classifier.controller.MailParser")
 @patch("mcp_university.classifier.controller.Agent")
-def test_generate_reply_no_appointment_fallback(mock_agent_cls, mock_parser_cls, tmp_path):
+@patch("mcp_university.classifier.controller.MCPAgent")
+def test_generate_reply_no_appointment_fallback(mock_mcp_agent, mock_agent_cls, mock_parser_cls, tmp_path):
     """Testet den Fallback der Antwortgenerierung, wenn keine Terminterrelevanz vorliegt.
 
     Args:
@@ -120,7 +121,8 @@ def test_create_outlook_draft_success():
 
 @patch("mcp_university.classifier.controller.MailParser")
 @patch("mcp_university.classifier.controller.Agent")
-def test_generate_reply_no_reply_needed(mock_agent_cls, mock_parser_cls, tmp_path):
+@patch("mcp_university.classifier.controller.MCPAgent")
+def test_generate_reply_no_reply_needed(mock_mcp_agent, mock_agent_cls, mock_parser_cls, tmp_path):
     """Testet die Generierung einer Antwort, wenn keine Antwort erforderlich ist.
 
     Args:

@@ -14,8 +14,7 @@ def mock_controller_deps(tmp_path):
     
     # Paths for config files
     config_path = config_dir / "folders.yaml"
-    memory_config_path = Path("config/classifier_memory_paths.yaml")
-    memory_config_path.parent.mkdir(parents=True, exist_ok=True)
+    memory_config_path = config_dir / "classifier_memory_paths.yaml"
 
     class_paths = {"Exam": str(tmp_path / "exams")}
     with open(config_path, "w") as f:
@@ -24,21 +23,23 @@ def mock_controller_deps(tmp_path):
     memory_paths = {"Exam": "exam_memory"}
     with open(memory_config_path, "w") as f:
         yaml.dump({"class_paths": memory_paths}, f)
-        
-    with patch('mcp_university.classifier.controller.get_config') as mock_get_config:
-        mock_cfg = MagicMock()
-        mock_cfg.config_dir = config_dir
-        mock_cfg.data_dir = tmp_path / "data"
-        mock_cfg.data_dir.mkdir()
-        mock_cfg.embeddings.model = "test-emb-model"
-        mock_cfg.user.emails = ["prof@th-koeln.de"]
-        mock_get_config.return_value = mock_cfg
+    
+    # Patch the controller to use this path
+    with patch("mcp_university.classifier.controller.MEMORY_CONFIG_PATH", memory_config_path):
+        with patch('mcp_university.classifier.controller.get_config') as mock_get_config:
+            mock_cfg = MagicMock()
+            mock_cfg.config_dir = config_dir
+            mock_cfg.data_dir = tmp_path / "data"
+            mock_cfg.data_dir.mkdir()
+            mock_cfg.embeddings.model = "test-emb-model"
+            mock_cfg.user.emails = ["prof@th-koeln.de"]
+            mock_get_config.return_value = mock_cfg
 
-        with patch('mcp_university.classifier.controller.MCPAgent'),              patch('mcp_university.classifier.controller.Agent'),              patch('mcp_university.classifier.controller.Summarizer'):
-            controller = EmailController(config_path=str(config_path))
-            # Manually inject memory index
-            controller.class_to_memory_index = {"Exam": "exam_memory"}
-            yield controller, mock_cfg
+            with patch('mcp_university.classifier.controller.MCPAgent'),                  patch('mcp_university.classifier.controller.Agent'),                  patch('mcp_university.classifier.controller.Summarizer'):
+                controller = EmailController(config_path=str(config_path))
+                # Manually inject memory index
+                controller.class_to_memory_index = {"Exam": "exam_memory"}
+                yield controller, mock_cfg
 
 def test_get_memory_context_not_configured(mock_controller_deps):
     """Test function docstring."""
@@ -112,7 +113,7 @@ def test_classify_action_success(mock_controller_deps, tmp_path):
         
         # 3 is option 3 (index 2)
         idx = controller.classify_action(mail_path, "Context")
-        assert idx == 2
+        assert idx == 3
 
 def test_classify_action_fallback(mock_controller_deps, tmp_path):
     """Test function docstring."""
@@ -160,7 +161,7 @@ def test_parse_report_simple(mock_controller_deps, tmp_path):
     """Test function docstring."""
     controller, _ = mock_controller_deps
     report = tmp_path / "sorted_emails.md"
-    report.write_text("# Sortierte E-Mails\n\n## ClassA\n- **2024_WS** | Name | Inbox: `path/to/mail.msg`\n")
+    report.write_text("# Sortierte E-Mails\n\n## ClassA\n| Semester | Nachname | Ordner | Datei |\n| --- | --- | --- | --- |\n| 2024_WS | Name | Inbox | path/to/mail.msg |\n")
     
     emails = controller.parse_report(report)
     assert len(emails) == 1

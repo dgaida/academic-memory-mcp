@@ -10,7 +10,8 @@ def test_evaluate_and_save():
     mock_classifier.label_encoder.classes_ = np.array(['Class1', 'Class2'])
     mock_classifier.label_encoder.inverse_transform.side_effect = lambda x: np.array(['Class1', 'Class2'])[x.astype(int)]
     mock_classifier.method = 'transformer'
-    mock_classifier.tokenizer.return_value = {'input_ids': torch.tensor([[1]]), 'attention_mask': torch.tensor([[1]])}
+    # Use side_effect to avoid potential TypeError with return_value on callable mocks
+    mock_classifier.tokenizer.side_effect = lambda texts, **kwargs: {'input_ids': torch.tensor([[1]]), 'attention_mask': torch.tensor([[1]])}
     mock_classifier.classifier.return_value = torch.tensor([[1.0, 0.0]])
     
     # Import inside the test to avoid module resolution issues during patch discovery
