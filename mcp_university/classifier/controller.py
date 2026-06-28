@@ -33,6 +33,9 @@ from mcp_university.retrieval.index import SearchIndex, get_model
 from mcp_university.utils.memory import resolve_memory_index_names
 from mcp_university.utils.outlook import create_outlook_draft
 
+# Globale Pfad-Konstante für Tests patchbar machen
+MEMORY_CONFIG_PATH = Path("config/classifier_memory_paths.yaml")
+
 logger = logging.getLogger(__name__)
 
 
@@ -106,7 +109,7 @@ class EmailController:
             self.class_paths = {}
 
         # Load memory paths
-        memory_config_path = Path("config/classifier_memory_paths.yaml")
+        memory_config_path = MEMORY_CONFIG_PATH
         self.memory_paths = {}
         self.class_to_memory_index = {}
         if memory_config_path.exists():
