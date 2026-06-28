@@ -37,7 +37,7 @@ python -m mcp_university.classifier.sort_emails --source ./inbox --target ./sort
 ---
 
 ## 3. Phase: KI-gestützte Analyse (Analyse & Kontext)
-Nachdem die Mails sortiert sind, erfolgt die Analyse durch `process_sorted_emails.py`. In dieser Phase wird der notwendige Kontext für eine spätere Bearbeitung gesammelt.
+Nachdem die Mails sortiert sind, erfolgt die Analyse durch `scripts/process_sorted_emails.py`. In dieser Phase wird der notwendige Kontext für eine spätere Bearbeitung gesammelt.
 
 **Inhalte dieser Phase:**
 
@@ -122,7 +122,7 @@ Diese Aktion kombiniert mehrere Schritte für Abschlussarbeiten:
 
 ## Erstellte Berichte und Dateien
 
-Während der Verarbeitung durch `process_sorted_emails.py` werden verschiedene Markdown-Dateien im Quellverzeichnis erstellt, um den Status und die Ergebnisse zu dokumentieren.
+Während der Verarbeitung durch `scripts/process_sorted_emails.py` werden verschiedene Markdown-Dateien im Quellverzeichnis erstellt, um den Status und die Ergebnisse zu dokumentieren.
 
 ### 1. `sorted_emails.md`
 Dieser Bericht wird direkt nach der initialen Sortierung erstellt und listet alle gefundenen E-Mails und ihre vorläufige Klassifizierung auf.

@@ -37,7 +37,7 @@ python -m mcp_university.classifier.sort_emails --source ./inbox --target ./sort
 ---
 
 ## Phase 3: AI-Powered Analysis (LLM)
-After the emails are sorted, the actual intelligence work is performed by `process_sorted_emails.py`. The LLM (Large Language Model) analyzes each email in detail.
+After the emails are sorted, the actual intelligence work is performed by `scripts/process_sorted_emails.py`. The LLM (Large Language Model) analyzes each email in detail.
 
 ### Information Passed to the LLM:
 To generate a high-quality and context-sensitive response, the LLM receives a variety of information:

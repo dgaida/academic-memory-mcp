@@ -47,7 +47,7 @@ Extrahiert Modulinformationen aus der MOCOGI-API und schreibt:
 Liest eine lokale `students.yaml` Datei und schreibt die darin enthaltenen Informationen über Studierende, deren Status und Abschlussarbeitsthemen in die Datenbank.
 
 
-### 8. Email Controller (`process_sorted_emails.py`)
+### 8. Email Controller (`scripts/process_sorted_emails.py`)
 Im Rahmen des täglichen E-Mail-Workflows modifiziert der Controller die Datenstruktur:  
 * **Relocation:** Verschiebt E-Mails bei Umklassifizierung physisch auf dem Dateisystem.  
 * **Just-in-Time Zusammenfassung:** Erstellt die `.emails_summary.md` erst bei der Ausführung einer Antwort-Aktion, um den aktuellsten Kontext einzubeziehen.  
