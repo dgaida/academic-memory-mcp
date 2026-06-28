@@ -419,6 +419,9 @@ def process_emails(
 def write_report(base_directory: Path, moved_emails_list: List[Dict[str, Any]]) -> None:
     """Erstellt einen Markdown-Report über die erfolgreich einsortierten E-Mails.
 
+    HINWEIS: Alle sortierten E-Mails müssen im Report enthalten sein und später in der GUI
+    angezeigt werden. Es dürfen keine E-Mails unterschlagen werden.
+
     Args:
         base_directory (Path): Quellverzeichnis für den Speicherort des Reports.
         moved_emails_list (List[Dict[str, Any]]): Liste der verschobenen E-Mails.
@@ -440,7 +443,7 @@ def write_report(base_directory: Path, moved_emails_list: List[Dict[str, Any]]) 
                 report_file.write(f"## {current_email_class}\n\n")
                 report_file.write("| Semester | Nachname | Ordner | Datei |\n")
                 report_file.write("| --- | --- | --- | --- |\n")
-            report_file.write(f"| {email_item['semester']} | {email_item['lastname']} | {email_item['folder']} | {Path(email_item['path']).name} |\n")
+            report_file.write(f"| {email_item['semester']} | {email_item['lastname']} | {email_item['folder']} | {email_item['path']} |\n")
     logger.info(f"Report erstellt: {report_file_path}")
 
 

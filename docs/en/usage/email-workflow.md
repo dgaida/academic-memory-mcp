@@ -77,6 +77,8 @@ The process ends in an interactive web interface. Here, the human remains in ful
 
 **GUI Functions:**
 
+- **Full Visibility:** ALL previously sorted emails are displayed in the GUI to ensure no communication is overlooked.
+
 - **Correction of Classification:** If an email was incorrectly sorted, you can change the class via a dropdown. The system automatically moves the files physically on the disk when saving.  
 - **Action Review:** Check which action the LLM suggests and change it if necessary.  
 - **Extract Attachments:** Via a checkbox, you can decide whether attachments of the email should be saved directly in the student folder.  
@@ -93,3 +95,6 @@ The process ends in an interactive web interface. Here, the human remains in ful
 
 !!! info "SentItems Archiving"
     Emails in the `SentItems` folder are always only archived. They never require a reply action, regardless of their age or the status of the conversation.
+
+### Diagnosis and Logging
+The system logs every step of email processing in detail in `process_emails.log`. If the GUI does not display any emails even though they are listed in `sorted_emails.md`, check the log file for warnings regarding missing model files or access issues.

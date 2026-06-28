@@ -67,6 +67,9 @@ Der Prozess wird in einer interaktiven Web-Oberfläche kontrolliert (Human-in-th
 
 **Funktionen der GUI:**
 
+- **Vollständige Sichtbarkeit:** Es werden ALLE zuvor sortierten E-Mails in der GUI angezeigt, um sicherzustellen, dass keine Kommunikation übersehen wird.
+
+
 - **Korrektur der Klassifizierung:** Ändern der E-Mail-Klasse via Dropdown (physische Verschiebung beim Speichern).  
 - **Aktions-Review:** Überprüfung und ggf. Änderung der vorgeschlagenen Aktion.  
 - **Anhänge extrahieren:** Checkbox zum automatischen Speichern von Anhängen im Studentenordner.  
@@ -119,6 +122,13 @@ Diese Aktion kombiniert mehrere Schritte für Abschlussarbeiten:
 !!! info "SentItems Archivierung"
     E-Mails im Ordner `SentItems` werden grundsätzlich nur archiviert. Sie benötigen nie eine Antwort-Aktion, unabhängig von ihrem Alter oder dem Status der Konversation.
 ---
+
+
+
+### Diagnose und Logging
+Das System protokolliert jeden Schritt der E-Mail-Verarbeitung detailliert in `process_emails.log`. Sollte die GUI keine E-Mails anzeigen, obwohl diese in `sorted_emails.md` gelistet sind, prüfen Sie die Log-Datei auf Warnungen bezüglich fehlender Modelldateien oder Zugriffsproblemen.
+
+
 
 ## Erstellte Berichte und Dateien
 
