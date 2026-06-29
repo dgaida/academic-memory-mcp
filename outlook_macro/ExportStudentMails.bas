@@ -26,13 +26,14 @@ Option Explicit
 ' Konfiguration
 Private Const ACCOUNT_NAME As String = "daniel.gaida@th-koeln.de"
 Private Const ROOT_PATH As String = "D:\TH_Koeln\StudentMails"
-Private Const STUDENT_DOMAINS As String = "@smail.th-koeln.de|@smail.fh-koeln.de"
+Private Const DOMAINS_FILE_NAME As String = "student_domains.md"
+Private m_StudentDomains As String
 
 ' =============================================================================
 ' Master-Makro
 ' =============================================================================
 
-''' Ruft nacheinander den FreeSlot-Export und den StudentMail-Export auf.
+''' Ruft nacheinander den FreeSlot-Export, den Appointment-Export und den StudentMail-Export auf.
 Public Sub RunAllExports()
     Dim daysInput As String
     Dim days As Long
@@ -58,6 +59,15 @@ Public Sub RunAllExports()
     End If
     On Error GoTo 0
 
+    ' 1b. Appointments exportieren (aus AppointmentExport.bas)
+    On Error Resume Next
+    ExportAppointments
+    If Err.Number <> 0 Then
+        Debug.Print "Hinweis: ExportAppointments konnte nicht direkt gerufen werden oder warf Fehler: " & Err.Description
+        Err.Clear
+    End If
+    On Error GoTo 0
+
     ' 2. Student Mails exportieren
     ExportStudentEmails days
 End Sub
@@ -77,6 +87,9 @@ Public Sub ExportStudentEmails(Optional ByVal DaysBack As Long = 7)
     Dim rootFolder As Outlook.folder
     Dim inbox As Outlook.folder
     Dim sentItems As Outlook.folder
+
+    ' Domains laden
+    m_StudentDomains = LoadStudentDomains()
 
     Set ns = Application.GetNamespace("MAPI")
 
@@ -218,7 +231,7 @@ Private Function IsStudentMail(ByVal addr As String) As Boolean
     Dim domains() As String
     Dim d As Variant
 
-    domains = Split(STUDENT_DOMAINS, "|")
+    domains = Split(m_StudentDomains, "|")
     addr = LCase(addr)
 
     For Each d In domains
@@ -365,4 +378,57 @@ Private Function EnsureDirectory(ByVal path As String) As Boolean
     fso.CreateFolder path
     EnsureDirectory = (Err.Number = 0 Or fso.FolderExists(path))
     On Error GoTo 0
+End Function
+
+''' Lädt studentische Domains aus einer externen Datei.
+'''
+''' Returns:
+'''     Eine durch "|" getrennte Liste von Domains.
+Private Function LoadStudentDomains() As String
+    Dim fso As Object
+    Dim ts As Object
+    Dim filePath As String
+    Dim line As String
+    Dim result As String
+    Dim defaultDomains As String
+
+    defaultDomains = "@smail.th-koeln.de|@smail.fh-koeln.de"
+    filePath = ROOT_PATH & "\" & DOMAINS_FILE_NAME
+    result = ""
+
+    Set fso = CreateObject("Scripting.FileSystemObject")
+
+    If Not fso.FileExists(filePath) Then
+        LoadStudentDomains = defaultDomains
+        Exit Function
+    End If
+
+    On Error GoTo ReadError
+    Set ts = fso.OpenTextFile(filePath, 1) ' 1 = ForReading
+
+    Do Until ts.AtEndOfStream
+        line = Trim(ts.ReadLine)
+        ' Überschriften und Kommentare ignorieren
+        If Len(line) > 0 And Left(line, 1) <> "#" Then
+            If Len(result) > 0 Then
+                result = result & "|" & line
+            Else
+                result = line
+            End If
+        End If
+    Loop
+
+    ts.Close
+
+    If Len(result) = 0 Then
+        LoadStudentDomains = defaultDomains
+    Else
+        LoadStudentDomains = result
+    End If
+    Exit Function
+
+ReadError:
+    If Not ts Is Nothing Then ts.Close
+    Debug.Print "Fehler beim Lesen der Domains-Datei: " & Err.Description
+    LoadStudentDomains = defaultDomains
 End Function
