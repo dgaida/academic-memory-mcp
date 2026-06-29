@@ -1,6 +1,14 @@
 import re
 
 def normalize_name(name: str) -> str:
+    """Normalizes the name by replacing umlauts.
+
+    Args:
+        name (str): The name to normalize.
+
+    Returns:
+        str: The normalized name.
+    """
     replacements = {
         "ä": "ae", "ö": "oe", "ü": "ue",
         "Ä": "Ae", "Ö": "Oe", "Ü": "Ue",
@@ -11,6 +19,14 @@ def normalize_name(name: str) -> str:
     return name
 
 def extract_lastname(name_str: str) -> str:
+    """Extracts the lastname from a name string.
+
+    Args:
+        name_str (str): The string to extract from.
+
+    Returns:
+        str: The extracted lastname.
+    """
     if not name_str or name_str == "(No Sender)" or name_str == "(No Receiver)":
         return "Unknown"
 
@@ -56,28 +72,29 @@ def extract_lastname(name_str: str) -> str:
 
     return "Unknown"
 
-test_cases = [
-    ("max.mustermann@smail.th-koeln.de", "Mustermann"),
-    ("max.mustermann_schmidt@smail.th-koeln.de", "Mustermann_Schmidt"),
-    ("max.mustermann.extra@smail.th-koeln.de", "Mustermann_Extra"),
-    ("mustermann@gmail.com", "Mustermann"),
-    ("Max Mustermann <max.mustermann@smail.th-koeln.de>", "Mustermann"),
-    ("max_mustermann@smail.th-koeln.de", "Max_Mustermann"),
-    ("Erika.Mustermann-Schmidt@web.de", "Mustermann-Schmidt"),
-    ("erika@web.de", "Erika"),
-    ("Erika Mustermann", "Mustermann"),
-    ("Max Mustermann <max@example.com>", "Mustermann"), # The one that failed in CI
-]
+if __name__ == "__main__":
+    test_cases = [
+        ("max.mustermann@smail.th-koeln.de", "Mustermann"),
+        ("max.mustermann_schmidt@smail.th-koeln.de", "Mustermann_Schmidt"),
+        ("max.mustermann.extra@smail.th-koeln.de", "Mustermann_Extra"),
+        ("mustermann@gmail.com", "Mustermann"),
+        ("Max Mustermann <max.mustermann@smail.th-koeln.de>", "Mustermann"),
+        ("max_mustermann@smail.th-koeln.de", "Max_Mustermann"),
+        ("Erika.Mustermann-Schmidt@web.de", "Mustermann-Schmidt"),
+        ("erika@web.de", "Erika"),
+        ("Erika Mustermann", "Mustermann"),
+        ("Max Mustermann <max@example.com>", "Mustermann"), # The one that failed in CI
+    ]
 
-all_passed = True
-for input_str, expected in test_cases:
-    result = extract_lastname(input_str)
-    status = "PASS" if result == expected else "FAIL"
-    print(f"{status} | Input: {input_str:45} | Expected: {expected:20} | Result: {result}")
-    if result != expected:
-        all_passed = False
+    all_passed = True
+    for input_str, expected in test_cases:
+        result = extract_lastname(input_str)
+        status = "PASS" if result == expected else "FAIL"
+        print(f"{status} | Input: {input_str:45} | Expected: {expected:20} | Result: {result}")
+        if result != expected:
+            all_passed = False
 
-if all_passed:
-    print("\nAll tests passed!")
-else:
-    print("\nSome tests failed.")
+    if all_passed:
+        print("\nAll tests passed!")
+    else:
+        print("\nSome tests failed.")

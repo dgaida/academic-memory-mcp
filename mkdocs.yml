@@ -99,7 +99,6 @@ nav:
   - Nutzung:
       - Übersicht: usage/index.md
       - Indexierung im Detail: usage/indexing-details.md
-      - E-Mail Klassifizierung: usage/email-classification.md
       - Datenbank-Management: usage/database-management.md
       - MCP Integration: usage/mcp.md
       - Hilfsskripte: usage/scripts.md
@@ -114,6 +113,11 @@ nav:
       - Ontology & Aliase: usage/ontology-learning.md
   - API: api/index.md
   - Architektur: architecture/index.md
+  - Packages:
+      - E-Mail Klassifizierer:
+          - Übersicht: packages/email-classifier/index.md
+          - Nutzung: packages/email-classifier/usage.md
+          - Architektur: packages/email-classifier/architecture.md
   - Entwicklung:
       - Übersicht: development/index.md
       - Docstring Guide: development/docstring-guide.md

@@ -24,15 +24,15 @@ This page provides an overview of the key modules and classes of the MCP Univers
 
 ## Email Classifier
 
-::: mcp_university.classifier.engine.EmailClassifier
+::: email_classifier.engine.EmailClassifier
 
 ## XAI Analysis
 
-::: mcp_university.classifier.xai_analysis
+::: email_classifier.xai_analysis
 
 ## Visualization
 
-::: mcp_university.classifier.plot_data_distribution
+::: email_classifier.plot_data_distribution
 
 ## CLI Database Management
 

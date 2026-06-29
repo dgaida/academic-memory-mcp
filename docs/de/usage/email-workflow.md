@@ -21,7 +21,7 @@ Bevor eine inhaltliche Analyse stattfindet, werden die E-Mails nach Themen sorti
 ### Automatisches Einsortieren
 Führen Sie das Sortier-Skript aus:
 ```bash
-python -m mcp_university.classifier.sort_emails --source ./inbox --target ./sorted_mails
+python -m email_classifier.sort_emails --source ./inbox --target ./sorted_mails
 ```
 
 **Was passiert hier?**

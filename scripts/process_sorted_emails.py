@@ -11,7 +11,7 @@ from pathlib import Path
 from datetime import datetime
 
 from mcp_university.config import get_config
-from mcp_university.classifier.controller import EmailController
+from email_classifier.controller import EmailController
 
 # Globaler Logger
 logger = logging.getLogger(__name__)

@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 from pathlib import Path
 from datetime import datetime
 from typing import Any
-from mcp_university.classifier.sort_emails import extract_firstname, extract_lastname, process_emails
+from email_classifier.sort_emails import extract_firstname, extract_lastname, process_emails
 
 @pytest.mark.parametrize("input_str, expected_first, expected_last", [
     ("max.muster@smail.th-koeln.de", "Max", "Muster"),
@@ -40,7 +40,7 @@ def mock_deps() -> Any:
     Yields:
         Dictionary mit Mock-Objekten.
     """
-    with patch('mcp_university.classifier.sort_emails.EmailClassifier') as mock_classifier_class,          patch('mcp_university.classifier.sort_emails.MailParser') as mock_mail_parser,          patch('extract_msg.openMsg') as mock_open_msg,          patch('shutil.move') as mock_move,          patch('mcp_university.classifier.sort_emails.get_config') as mock_get_config,          patch('mcp_university.classifier.sort_emails.get_semester') as mock_get_semester,          patch('mcp_university.classifier.sort_emails.find_student_folder') as mock_find_folder:
+    with patch('email_classifier.sort_emails.EmailClassifier') as mock_classifier_class,          patch('email_classifier.sort_emails.MailParser') as mock_mail_parser,          patch('extract_msg.openMsg') as mock_open_msg,          patch('shutil.move') as mock_move,          patch('email_classifier.sort_emails.get_config') as mock_get_config,          patch('email_classifier.sort_emails.get_semester') as mock_get_semester,          patch('email_classifier.sort_emails.find_student_folder') as mock_find_folder:
 
         mock_config = MagicMock()
         mock_config.user.emails = ["daniel.gaida@th-koeln.de"]

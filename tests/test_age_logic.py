@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 # Mock dependencies to avoid import failures
 with patch('mcp_university.agent.engine.SearchIndex'),      patch('mcp_university.agent.engine.MetadataStore'),      patch('mcp_university.agent.engine.ParserFactory'):
-    from mcp_university.classifier.controller import EmailController
+    from email_classifier.controller import EmailController
 
 def test_age_months_suggested_action(tmp_path):
     """Checks that emails older than the specified age-months are always archived.
@@ -30,7 +30,7 @@ def test_age_months_suggested_action(tmp_path):
     # The parser might be looking for absolute paths or resolving them.
     # Let's check parse_report logic or just use a simple mock for it.
 
-    with patch('mcp_university.classifier.controller.MailParser') as mock_parser_cls,          patch('mcp_university.classifier.controller.Agent'),          patch.object(EmailController, 'parse_report') as mock_parse:
+    with patch('email_classifier.controller.MailParser') as mock_parser_cls,          patch('email_classifier.controller.Agent'),          patch.object(EmailController, 'parse_report') as mock_parse:
 
         # Manually return the email dict that parse_report would produce
         mock_parse.return_value = [{
@@ -80,7 +80,7 @@ def test_sent_items_suggested_action(tmp_path):
     source_dir = tmp_path / "source"
     source_dir.mkdir()
 
-    with patch('mcp_university.classifier.controller.MailParser') as mock_parser_cls,          patch('mcp_university.classifier.controller.Agent'),          patch.object(EmailController, 'parse_report') as mock_parse:
+    with patch('email_classifier.controller.MailParser') as mock_parser_cls,          patch('email_classifier.controller.Agent'),          patch.object(EmailController, 'parse_report') as mock_parse:
 
         mock_parse.return_value = [{
             "lastname": "StudentSent",

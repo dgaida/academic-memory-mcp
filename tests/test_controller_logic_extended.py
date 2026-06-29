@@ -3,7 +3,7 @@ import pytest
 import yaml
 from unittest.mock import MagicMock, patch
 from pathlib import Path
-from mcp_university.classifier.controller import EmailController
+from email_classifier.controller import EmailController
 from datetime import datetime
 
 @pytest.fixture
@@ -25,8 +25,8 @@ def mock_controller_deps(tmp_path):
         yaml.dump({"class_paths": memory_paths}, f)
     
     # Patch the controller to use this path
-    with patch("mcp_university.classifier.controller.MEMORY_CONFIG_PATH", memory_config_path):
-        with patch('mcp_university.classifier.controller.get_config') as mock_get_config:
+    with patch("email_classifier.controller.MEMORY_CONFIG_PATH", memory_config_path):
+        with patch('email_classifier.controller.get_config') as mock_get_config:
             mock_cfg = MagicMock()
             mock_cfg.config_dir = config_dir
             mock_cfg.data_dir = tmp_path / "data"
@@ -35,7 +35,7 @@ def mock_controller_deps(tmp_path):
             mock_cfg.user.emails = ["prof@th-koeln.de"]
             mock_get_config.return_value = mock_cfg
 
-            with patch('mcp_university.classifier.controller.MCPAgent'),                  patch('mcp_university.classifier.controller.Agent'),                  patch('mcp_university.classifier.controller.Summarizer'):
+            with patch('email_classifier.controller.MCPAgent'),                  patch('email_classifier.controller.Agent'),                  patch('email_classifier.controller.Summarizer'):
                 controller = EmailController(config_path=str(config_path))
                 # Manually inject memory index
                 controller.class_to_memory_index = {"Exam": "exam_memory"}
@@ -60,7 +60,7 @@ def test_get_memory_context_success(mock_controller_deps, tmp_path):
         "message": {"content": "Question 1\nQuestion 2\nQuestion 3"}
     }
     
-    with patch('mcp_university.classifier.controller.SearchIndex') as mock_index_cls:
+    with patch('email_classifier.controller.SearchIndex') as mock_index_cls:
         mock_index = mock_index_cls.return_value
         mock_index.search.return_value = [{"content": "Relevant answer", "score": 0.9}]
         
@@ -94,7 +94,7 @@ def test_get_similarity_info_error_path(mock_controller_deps, tmp_path):
     other_mail.write_text("other")
 
     # This will trigger the exception in get_similarity_info
-    with patch('mcp_university.classifier.controller.get_model', return_value=None):
+    with patch('email_classifier.controller.get_model', return_value=None):
         with patch.object(controller.mail_parser, 'get_email_details', side_effect=[
             {"subject": "Subject"},
             {"subject": "Other Subject"}
@@ -113,7 +113,7 @@ def test_classify_action_success(mock_controller_deps, tmp_path):
         
         # 3 is option 3 (index 2)
         idx = controller.classify_action(mail_path, "Context")
-        assert idx == 3
+        assert idx == 2
 
 def test_classify_action_fallback(mock_controller_deps, tmp_path):
     """Test function docstring."""
@@ -136,7 +136,7 @@ def test_execute_action_reply(mock_controller_deps, tmp_path):
     controller, _ = mock_controller_deps
     # 0 = olMailItem reply
     with patch.object(controller, 'generate_reply', return_value=("Subject", "Draft", False)):
-        with patch('mcp_university.classifier.controller.create_outlook_draft', return_value=True):
+        with patch('email_classifier.controller.create_outlook_draft', return_value=True):
             res = controller.execute_action(0, tmp_path / "mail.msg", {"lastname": "Mustermann"})
             assert "Outlook Entwurf erstellt" in res
 
@@ -153,7 +153,7 @@ def test_generate_reply_archive(mock_controller_deps, tmp_path):
 def test_run_sort_no_model(mock_controller_deps, tmp_path):
     """Test function docstring."""
     controller, _ = mock_controller_deps
-    with patch('mcp_university.classifier.controller.resolve_model_path', return_value=Path("nonexistent.pkl")):
+    with patch('email_classifier.controller.resolve_model_path', return_value=Path("nonexistent.pkl")):
         with pytest.raises(FileNotFoundError):
             controller.run_sort(str(tmp_path))
 

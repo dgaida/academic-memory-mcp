@@ -48,8 +48,8 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["mcp_university*"]
+where = [".", "packages/email_classifier/src"]
+include = ["mcp_university*", "email_classifier*"]
 
 [tool.interrogate]
 ignore-init-method = true

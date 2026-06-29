@@ -1,14 +1,17 @@
 import re
 
 def _norm(s: str) -> str:
-    if not s: return ""
+    if not s:
+        return ""
     s = s.lower()
     repl = {"ä": "ae", "ö": "oe", "ü": "ue", "ß": "ss"}
-    for k, v in repl.items(): s = s.replace(k, v)
+    for k, v in repl.items():
+        s = s.replace(k, v)
     return re.sub(r"[^a-z0-9]", "", s)
 
 def _format_name(s: str) -> str:
-    if not s: return ""
+    if not s:
+        return ""
     s = s.replace("_", " ")
     parts = s.split()
     formatted = []
@@ -24,7 +27,8 @@ def _format_name(s: str) -> str:
 GENERIC = {"info", "sekretariat", "service", "kontakt", "studium", "pruefungsamt", "of", "the", "f10-request"}
 
 def extract_lastname(sender_raw: str) -> str:
-    if not sender_raw or sender_raw == "(No Sender)": return "Unknown"
+    if not sender_raw or sender_raw == "(No Sender)":
+        return "Unknown"
     if "im Auftrag von" in sender_raw:
         sender_raw = re.split(r";\s*im Auftrag von[;:]?\s*", sender_raw, flags=re.IGNORECASE)[-1].strip()
 
@@ -43,7 +47,8 @@ def extract_lastname(sender_raw: str) -> str:
     # Rule: "Lastname, Firstname"
     if "," in display_name:
         parts = [p.strip() for p in display_name.split(",")]
-        if len(parts) > 1: return _format_name(parts[0])
+        if len(parts) > 1:
+            return _format_name(parts[0])
 
     clean_display = re.sub(r"[\(\)\|]", " ", display_name)
     if "//" in clean_display:
@@ -72,10 +77,13 @@ def extract_lastname(sender_raw: str) -> str:
         if "." in local_part:
             segs = local_part.split(".")
             for s in reversed(segs):
-                if _norm(s) not in GENERIC: return _format_name(s)
-        if _norm(local_part) not in GENERIC: return _format_name(local_part)
+                if _norm(s) not in GENERIC:
+                    return _format_name(s)
+        if _norm(local_part) not in GENERIC:
+            return _format_name(local_part)
 
-    if name_parts: return _format_name(name_parts[-1])
+    if name_parts:
+        return _format_name(name_parts[-1])
     return "Unknown"
 
 def extract_firstname(sender_raw: str) -> str:
@@ -103,41 +111,46 @@ def extract_firstname(sender_raw: str) -> str:
         ln_n = _norm(lastname)
         firsts = []
         for p in name_parts:
-            if _norm(p) == ln_n: break
+            if _norm(p) == ln_n:
+                break
             if _norm(p) in lp_n or (len(_norm(p))==1 and lp_n.startswith(_norm(p))):
                 firsts.append(p)
-        if firsts: return _format_name(" ".join(firsts))
+        if firsts:
+            return _format_name(" ".join(firsts))
     
-    if local_part and "." in local_part: return _format_name(local_part.split(".")[0])
-    if name_parts: return _format_name(name_parts[0])
+    if local_part and "." in local_part:
+        return _format_name(local_part.split(".")[0])
+    if name_parts:
+        return _format_name(name_parts[0])
     return "Unknown"
 
-test_cases = [
-    ("max.muster@smail.th-koeln.de", "Max", "Muster"),
-    ("max_hans.muster@smail.th-koeln.de", "Max Hans", "Muster"),
-    ("max.muster_hase@smail.th-koeln.de", "Max", "Muster Hase"),
-    ("max.muster-hase@smail.th-koeln.de", "Max", "Muster-Hase"),
-    ("hans-peter.muster-hase@smail.th-koeln.de", "Hans-Peter", "Muster-Hase"),
-    ("max_hans.muster_hase@smail.th-koeln.de", "Max Hans", "Muster Hase"),
-    ("Angela Spaß (aspass) <angela.spass@smail.th-koeln.de>", "Angela", "Spaß"),
-    ("studium-gm@th-koeln.de", "Unknown", "Studium-Gm"),
-    ("f10-request@f10.th-koeln.de; im Auftrag von; Marcel Mueller, B.Sc. <marcel.mueller@th-koeln.de>", "Marcel", "Mueller"),
-    ("Sabrina Tuba <stuba@fft.com>", "Sabrina", "Tuba"),
-    ("stuba@fft.com", "Unknown", "Stuba"),
-    ("Mustermann Max <mustermann@example.com>", "Max", "Mustermann"),
-    ("Max Mustermann <mustermann@example.com>", "Max", "Mustermann"),
-    ("Wester Helmut <HWester@tuev.com>", "Helmut", "HWester"),
-    ("A B C D <a_b.c_d@smail.th-koeln.de>", "A B", "C D"),
-    ("'Anna Pizza Sibel' <anna.pizza_sibel@smail.th-koeln.de>", "Anna", "Pizza Sibel"),
-    ("'Digital Sciences (Ma) Management Board' <digital-sciences@f10.th-koeln.de>", "Unknown", "Digital-Sciences"),
-    ("eRechnung TH Köln <kreditorenbuchhaltung@th-koeln.de>", "Unknown", "Kreditorenbuchhaltung"),
-    ("TH // chris.hase@th-koeln.de", "Chris", "Hase"),
-    ("'Eva Adam | Hans GmbH' <eva.adam@hans-gmbh.com>", "Eva", "Adam"),
-    ("Dampf, Hans <dampf@fh-aachen.de>", "Hans", "Dampf"),
-]
+if __name__ == "__main__":
+    test_cases = [
+        ("max.muster@smail.th-koeln.de", "Max", "Muster"),
+        ("max_hans.muster@smail.th-koeln.de", "Max Hans", "Muster"),
+        ("max.muster_hase@smail.th-koeln.de", "Max", "Muster Hase"),
+        ("max.muster-hase@smail.th-koeln.de", "Max", "Muster-Hase"),
+        ("hans-peter.muster-hase@smail.th-koeln.de", "Hans-Peter", "Muster-Hase"),
+        ("max_hans.muster_hase@smail.th-koeln.de", "Max Hans", "Muster Hase"),
+        ("Angela Spaß (aspass) <angela.spass@smail.th-koeln.de>", "Angela", "Spaß"),
+        ("studium-gm@th-koeln.de", "Unknown", "Studium-Gm"),
+        ("f10-request@f10.th-koeln.de; im Auftrag von; Marcel Mueller, B.Sc. <marcel.mueller@th-koeln.de>", "Marcel", "Mueller"),
+        ("Sabrina Tuba <stuba@fft.com>", "Sabrina", "Tuba"),
+        ("stuba@fft.com", "Unknown", "Stuba"),
+        ("Mustermann Max <mustermann@example.com>", "Max", "Mustermann"),
+        ("Max Mustermann <mustermann@example.com>", "Max", "Mustermann"),
+        ("Wester Helmut <HWester@tuev.com>", "Helmut", "HWester"),
+        ("A B C D <a_b.c_d@smail.th-koeln.de>", "A B", "C D"),
+        ("'Anna Pizza Sibel' <anna.pizza_sibel@smail.th-koeln.de>", "Anna", "Pizza Sibel"),
+        ("'Digital Sciences (Ma) Management Board' <digital-sciences@f10.th-koeln.de>", "Unknown", "Digital-Sciences"),
+        ("eRechnung TH Köln <kreditorenbuchhaltung@th-koeln.de>", "Unknown", "Kreditorenbuchhaltung"),
+        ("TH // chris.hase@th-koeln.de", "Chris", "Hase"),
+        ("'Eva Adam | Hans GmbH' <eva.adam@hans-gmbh.com>", "Eva", "Adam"),
+        ("Dampf, Hans <dampf@fh-aachen.de>", "Hans", "Dampf"),
+    ]
 
-for inp, exp_f, exp_l in test_cases:
-    res_f = extract_firstname(inp)
-    res_l = extract_lastname(inp)
-    status = "PASS" if res_f==exp_f and res_l==exp_l else "FAIL"
-    print(f"{status} | In: {inp[:40]:40} | Exp: {exp_f:10}, {exp_l:15} | Got: {res_f:10}, {res_l:15}")
+    for inp, exp_f, exp_l in test_cases:
+        res_f = extract_firstname(inp)
+        res_l = extract_lastname(inp)
+        status = "PASS" if res_f==exp_f and res_l==exp_l else "FAIL"
+        print(f"{status} | In: {inp[:40]:40} | Exp: {exp_f:10}, {exp_l:15} | Got: {res_f:10}, {res_l:15}")

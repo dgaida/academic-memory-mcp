@@ -1,0 +1,26 @@
+[project]
+name = "email_classifier"
+version = "1.0.0"
+description = "E-Mail Classifier package for student emails"
+dependencies = [
+    "scikit-learn",
+    "pandas",
+    "numpy",
+    "seaborn",
+    "matplotlib",
+    "xgboost",
+    "shap",
+    "transformers",
+    "torch",
+    "extract-msg",
+    "pyyaml",
+]
+requires-python = ">=3.10"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["email_classifier*"]

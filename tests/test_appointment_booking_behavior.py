@@ -1,11 +1,11 @@
 import pytest
 from unittest.mock import MagicMock, patch
 from pathlib import Path
-from mcp_university.classifier.controller import EmailController
+from email_classifier.controller import EmailController
 
 @pytest.fixture
 def mock_controller_deps():
-    with patch('mcp_university.classifier.controller.get_config') as mock_get_config,          patch('mcp_university.classifier.controller.Summarizer'),          patch('mcp_university.classifier.controller.PersonProfiler'),          patch('mcp_university.classifier.controller.Agent') as mock_agent_class,          patch('mcp_university.classifier.controller.MailParser') as mock_parser_class:
+    with patch('email_classifier.controller.get_config') as mock_get_config,          patch('email_classifier.controller.Summarizer'),          patch('email_classifier.controller.PersonProfiler'),          patch('email_classifier.controller.Agent') as mock_agent_class,          patch('email_classifier.controller.MailParser') as mock_parser_class:
 
         mock_cfg = MagicMock()
         mock_cfg.llm.model = "test-model"

@@ -21,7 +21,7 @@ Before a content analysis takes place, the emails are sorted by topic.
 ### Automatic Sorting
 Run the sorting script:
 ```bash
-python -m mcp_university.classifier.sort_emails --source ./inbox --target ./sorted_mails
+python -m email_classifier.sort_emails --source ./inbox --target ./sorted_mails
 ```
 
 **What happens here?**

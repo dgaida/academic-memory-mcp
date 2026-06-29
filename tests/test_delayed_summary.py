@@ -2,7 +2,7 @@
 import pytest
 from unittest.mock import MagicMock, patch
 from datetime import datetime
-from mcp_university.classifier.controller import EmailController
+from email_classifier.controller import EmailController
 
 @pytest.fixture
 def mock_controller(tmp_path):
@@ -15,11 +15,11 @@ def mock_controller(tmp_path):
     mock_config.data_dir = tmp_path / "data"
     mock_config.data_dir.mkdir()
 
-    with patch("mcp_university.classifier.controller.get_config", return_value=mock_config), \
-         patch("mcp_university.classifier.controller.Summarizer"), \
-         patch("mcp_university.classifier.controller.PersonProfiler"), \
-         patch("mcp_university.classifier.controller.Agent"), \
-         patch("mcp_university.classifier.controller.MailParser") as mock_parser_cls:
+    with patch("email_classifier.controller.get_config", return_value=mock_config), \
+         patch("email_classifier.controller.Summarizer"), \
+         patch("email_classifier.controller.PersonProfiler"), \
+         patch("email_classifier.controller.Agent"), \
+         patch("email_classifier.controller.MailParser") as mock_parser_cls:
 
         mock_parser = mock_parser_cls.return_value
         mock_parser.get_email_date.return_value = datetime.now()
@@ -61,7 +61,7 @@ def test_delayed_summary_logic(mock_controller):
     controller.use_action_classifier = False
 
     # We also need to mock create_outlook_draft and generate_reply
-    with patch("mcp_university.classifier.controller.create_outlook_draft", return_value=True), \
+    with patch("email_classifier.controller.create_outlook_draft", return_value=True), \
          patch.object(controller, "generate_reply", return_value=("Subject", "Reply", False)):
         controller.process_all_emails(source_dir)
 
@@ -79,7 +79,7 @@ def test_delayed_summary_logic(mock_controller):
     # Mock mail_parser.get_email_date for the files found in identifier_path
     controller.mail_parser.get_email_date.return_value = datetime.now()
 
-    with patch("mcp_university.classifier.controller.create_outlook_draft", return_value=True), \
+    with patch("email_classifier.controller.create_outlook_draft", return_value=True), \
          patch.object(controller, "generate_reply", return_value=("Subject", "Reply", False)):
         # Action 0: Standard Reply
         controller.execute_action(0, mail_path, email_data)
