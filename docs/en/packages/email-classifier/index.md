@@ -4,5 +4,5 @@ This package contains all functionalities for training, validating, and testing 
 
 ## Overview
 
-- [Usage](usage.md)
-- [Architecture (Transformer)](architecture.md)
+- [Usage](usage.md)  
+- [Architecture (Transformer)](architecture.md)  

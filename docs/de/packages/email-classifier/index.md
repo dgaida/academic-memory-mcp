@@ -4,5 +4,5 @@ Dieses Package enthält alle Funktionalitäten für das Training, die Validierun
 
 ## Übersicht
 
-- [Nutzung](usage.md)
-- [Architektur (Transformer)](architecture.md)
+- [Nutzung](usage.md)  
+- [Architektur (Transformer)](architecture.md)  
