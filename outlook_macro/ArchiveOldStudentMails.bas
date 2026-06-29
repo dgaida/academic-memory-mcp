@@ -34,8 +34,11 @@ Private Const ARCHIVE_ROOT As String = "D:\TH_Koeln\StudentMails"
 ' Mails aelter als diese Anzahl Jahre werden archiviert
 Private Const ARCHIVE_AGE_YEARS As Integer = 1
 
-' Zu pruefende Absender-Domains (Pipe-getrennt, Lowercase)
-Private Const STUDENT_DOMAINS As String = "@smail.th-koeln.de|@smail.fh-koeln.de"
+' Name der Datei mit studentischen Domains
+Private Const DOMAINS_FILE_NAME As String = "student_domains.md"
+
+' Modul-Variable fuer geladene Domains
+Private m_StudentDomains As String
 
 ' Zusaetzliche einzelne E-Mail-Adressen
 Private Const ADDITIONAL_ADDRESSES As String = "noreply@th-koeln.de"
@@ -53,6 +56,9 @@ Private Const ADDITIONAL_ADDRESSES As String = "noreply@th-koeln.de"
 Public Sub ArchiveOldStudentMails()
 
     On Error GoTo MainError
+
+    ' Domains aus Datei laden
+    m_StudentDomains = LoadStudentDomains()
 
     Dim inbox As Outlook.MAPIFolder
     Dim sentItems As Outlook.MAPIFolder
@@ -348,7 +354,7 @@ Private Function ShouldArchiveAddress(ByVal addr As String) As Boolean
     End If
 
     Dim domains() As String
-    domains = Split(STUDENT_DOMAINS, "|")
+    domains = Split(m_StudentDomains, "|")
 
     Dim d As Variant
 
@@ -676,4 +682,63 @@ RecipError:
     Set addrEntry = Nothing
     Set recip = Nothing
 
+End Function
+
+
+' =============================================================================
+' Hilfsfunktionen
+' =============================================================================
+
+''' Lädt studentische Domains aus einer externen Datei (analog zu ExportStudentMails.bas).
+'''
+''' Returns:
+'''     Eine durch "|" getrennte Liste von Domains.
+Private Function LoadStudentDomains() As String
+    Dim fso As Object
+    Dim ts As Object
+    Dim filePath As String
+    Dim line As String
+    Dim result As String
+    Dim defaultDomains As String
+
+    defaultDomains = "@smail.th-koeln.de|@smail.fh-koeln.de"
+    ' Nutzt ARCHIVE_ROOT als Basispfad für die Konfigurationsdatei
+    filePath = ARCHIVE_ROOT & "\" & DOMAINS_FILE_NAME
+    result = ""
+
+    Set fso = CreateObject("Scripting.FileSystemObject")
+
+    If Not fso.FileExists(filePath) Then
+        LoadStudentDomains = defaultDomains
+        Exit Function
+    End If
+
+    On Error GoTo ReadError
+    Set ts = fso.OpenTextFile(filePath, 1) ' 1 = ForReading
+
+    Do Until ts.AtEndOfStream
+        line = Trim(ts.ReadLine)
+        ' Überschriften und Kommentare ignorieren
+        If Len(line) > 0 And Left(line, 1) <> "#" Then
+            If Len(result) > 0 Then
+                result = result & "|" & line
+            Else
+                result = line
+            End If
+        End If
+    Loop
+
+    ts.Close
+
+    If Len(result) = 0 Then
+        LoadStudentDomains = defaultDomains
+    Else
+        LoadStudentDomains = result
+    End If
+    Exit Function
+
+ReadError:
+    If Not ts Is Nothing Then ts.Close
+    Debug.Print "Fehler beim Lesen der Domains-Datei: " & Err.Description
+    LoadStudentDomains = defaultDomains
 End Function
