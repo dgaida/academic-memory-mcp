@@ -395,6 +395,36 @@
   
     
     
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../packages/email-classifier/" class="md-tabs__link">
+          
+  
+  
+  Packages
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
       <li class="md-tabs__item">
         <a href="../../development/" class="md-tabs__link">
           
@@ -668,34 +698,6 @@
     
   
     Indexierung im Detail
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../email-classification/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    E-Mail Klassifizierung
   
 
     
@@ -1336,7 +1338,7 @@
   <span class="md-ellipsis">
     
   
-    Entwicklung
+    Packages
   
 
     
@@ -1349,6 +1351,213 @@
         
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Packages
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_8_1" id="__nav_8_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    E-Mail Klassifizierer
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    E-Mail Klassifizierer
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../packages/email-classifier/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Übersicht
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../packages/email-classifier/usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nutzung
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../packages/email-classifier/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architektur
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Entwicklung
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1742,11 +1951,11 @@
 <p>Before a content analysis takes place, the emails are sorted by topic.</p>
 <h3 id="automatic-sorting">Automatic Sorting<a class="headerlink" href="#automatic-sorting" title="Permanent link">&para;</a></h3>
 <p>Run the sorting script:
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python<span class="w"> </span>-m<span class="w"> </span>mcp_university.classifier.sort_emails<span class="w"> </span>--source<span class="w"> </span>./inbox<span class="w"> </span>--target<span class="w"> </span>./sorted_mails
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python<span class="w"> </span>-m<span class="w"> </span>email_classifier.sort_emails<span class="w"> </span>--source<span class="w"> </span>./inbox<span class="w"> </span>--target<span class="w"> </span>./sorted_mails
 </code></pre></div></p>
 <p><strong>What happens here?</strong></p>
 <ol>
-<li><strong>Topic Recognition:</strong> The <a href="../email-classification/">Email Classification</a> system uses a machine learning model (transformer-based) to assign the content of the email to a category (e.g., <em>Bachelor Thesis</em>, <em>Project</em>, <em>PO-Change</em>).  </li>
+<li><strong>Topic Recognition:</strong> The <a href="email-classification.md">Email Classification</a> system uses a machine learning model (transformer-based) to assign the content of the email to a category (e.g., <em>Bachelor Thesis</em>, <em>Project</em>, <em>PO-Change</em>).  </li>
 <li><strong>File System Structure:</strong> The emails are moved into a three-level hierarchy: <code>Semester (e.g., 2023_24_WS) / Lastname / (Inbox or SentItems)</code>.  </li>
 <li><strong>Lastname Extraction:</strong> The lastname is automatically extracted from the email address or display name.  <ul>
 <li><em>Example 1:</em> <code>max.mustermann@th-koeln.de</code> -&gt; Folder: <code>Mustermann</code>  </li>
@@ -1843,7 +2052,7 @@
 <h2 id="further-links">Further Links<a class="headerlink" href="#further-links" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="../database-processes/">Database Processes</a>: Learn more about managing <code>profiles_tracking.db</code> and the Knowledge Graph.  </li>
-<li><a href="../email-classification/">Email Classification</a>: Details on the machine learning models and memory indices.  </li>
+<li><a href="email-classification.md">Email Classification</a>: Details on the machine learning models and memory indices.  </li>
 <li><a href="../../configuration/">Configuration</a>: How to customize paths and LLM settings.  </li>
 </ul>
 <div class="admonition info">
