@@ -8,9 +8,16 @@ from email_classifier.engine import EmailClassifier
 def transformer_classifier():
     """Test function docstring."""
     with patch("transformers.AutoModel.from_pretrained") as mock_model:
-        with patch("transformers.AutoTokenizer.from_pretrained"):
+        with patch("transformers.AutoTokenizer.from_pretrained") as mock_tokenizer:
             # Mock model configuration
             mock_model.return_value.config.hidden_size = 384
+
+            # Create a mock tokenizer class and instance
+            mock_tok_inst = MagicMock()
+            # Set __class__.__name__ to satisfy transformers' internal checks
+            type(mock_tok_inst).__name__ = "PreTrainedTokenizerFast"
+            mock_tokenizer.return_value = mock_tok_inst
+
             classifier = EmailClassifier(method="transformer")
             yield classifier
 
@@ -41,8 +48,8 @@ def test_transformer_predict(mock_open_msg, mock_nn_class, transformer_classifie
     transformer_classifier.label_encoder.inverse_transform.side_effect = lambda x: [["ClassA", "ClassB"][i] for i in x]
     transformer_classifier.is_trained = True
 
-    # Mock model output
-    mock_output = torch.tensor([[1.0, 0.0]]) # logits
+    # Mock model output - logits
+    mock_output = torch.tensor([[1.0, 0.0]])
     mock_nn.return_value = mock_output
 
     # Mock tokenizer

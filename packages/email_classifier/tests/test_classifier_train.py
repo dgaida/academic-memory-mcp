@@ -19,9 +19,12 @@ def mock_classifier():
             'input_ids': torch.zeros((len(texts), 10)), 
             'attention_mask': torch.ones((len(texts), 10))
         }
-        classifier_inst.classifier = MagicMock()
-        classifier_inst.classifier.return_value = torch.tensor([[1.0, 0.0], [0.0, 1.0]])
-        classifier_inst.classifier.predict.return_value = np.array([0, 1])
+
+        mock_nn = MagicMock()
+        mock_nn.return_value = torch.tensor([[1.0, 0.0], [0.0, 1.0]])
+        mock_nn.predict.return_value = np.array([0, 1])
+        classifier_inst.classifier = mock_nn
+
         yield classifier_inst
 
 def test_evaluate_and_save(mock_classifier):

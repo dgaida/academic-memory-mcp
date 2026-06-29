@@ -12,7 +12,11 @@ def test_evaluate_and_save():
     mock_classifier.method = 'transformer'
     # Use side_effect to avoid potential TypeError with return_value on callable mocks
     mock_classifier.tokenizer.side_effect = lambda texts, **kwargs: {'input_ids': torch.tensor([[1]]), 'attention_mask': torch.tensor([[1]])}
-    mock_classifier.classifier.return_value = torch.tensor([[1.0, 0.0]])
+
+    # Mock the classifier as a callable that returns a tensor
+    mock_nn = MagicMock()
+    mock_nn.return_value = torch.tensor([[1.0, 0.0]])
+    mock_classifier.classifier = mock_nn
     
     # Import inside the test to avoid module resolution issues during patch discovery
     from email_classifier.train import evaluate_and_save

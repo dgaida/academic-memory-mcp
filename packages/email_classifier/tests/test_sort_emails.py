@@ -1,31 +1,10 @@
 # ruff: noqa: E402
 """Tests for test_sort_emails.py."""
-import sys
-from unittest.mock import MagicMock
-
-# Mock heavy dependencies
-mock_modules = [
-    'torch',
-    'torch.nn',
-    'transformers',
-    'sentence_transformers',
-    'xgboost',
-    'gradio',
-    'qdrant_client',
-    'docling',
-    'liteparse',
-    'sklearn.metrics.pairwise'
-]
-for mod in mock_modules:
-    sys.modules[mod] = MagicMock()
-
-class MockTensor:
-    pass
-sys.modules['torch'].Tensor = MockTensor
-
+from unittest.mock import MagicMock, patch
 from pathlib import Path
 from datetime import datetime
-from unittest.mock import patch
+
+# We will use patch in the tests instead of global sys.modules hacks
 
 from email_classifier.sort_emails import get_semester, extract_lastname, process_emails, write_report
 
@@ -82,9 +61,9 @@ def test_process_emails(mock_open_msg, mock_mail_parser, mock_classifier_class, 
     # Mock classifier
     mock_classifier = mock_classifier_class.return_value
     mock_classifier.predict.side_effect = [
-        {"prediction": "BachelorThesis"}, # a_mail1
-        {"prediction": "BachelorThesis"}, # b_mail2
-        {"prediction": "BachelorThesis"}  # c_mail3
+        {"prediction": "BachelorThesis", "lastname": "Mustermann"}, # a_mail1
+        {"prediction": "BachelorThesis", "lastname": "Musterfrau"}, # b_mail2
+        {"prediction": "BachelorThesis", "lastname": "Huber"}       # c_mail3
     ]
 
     # Mock parser
@@ -128,7 +107,9 @@ def test_process_emails(mock_open_msg, mock_mail_parser, mock_classifier_class, 
         # Mock university user emails
         with patch('email_classifier.sort_emails.get_config') as mock_cfg:
             mock_cfg.return_value.user.emails = ["daniel.gaida@th-koeln.de"]
-            moved = process_emails(source_root, Path("dummy_model"), config)
+            # Mock find_student_folder to return something consistent
+            with patch('email_classifier.sort_emails.find_student_folder', side_effect=lambda base, name: base / name):
+                moved = process_emails(source_root, Path("dummy_model"), config)
 
     assert len(moved) == 3
 

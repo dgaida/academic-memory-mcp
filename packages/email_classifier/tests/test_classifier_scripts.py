@@ -20,9 +20,12 @@ def mock_classifier():
         classifier_inst.preprocess_data.return_value = (['text1', 'text2'], ['Class1', 'Class2'])
         classifier_inst.tokenizer.return_value = {'input_ids': torch.tensor([[1]]), 'attention_mask': torch.tensor([[1]])}
         classifier_inst.method = 'transformer'
-        classifier_inst.classifier = MagicMock()
-        # Mocking the forward pass to return a tensor
-        classifier_inst.classifier.return_value = torch.tensor([[1.0, 0.0], [0.0, 1.0]])
+
+        # Mock the classifier as a callable that returns a tensor
+        mock_nn = MagicMock()
+        mock_nn.return_value = torch.tensor([[1.0, 0.0], [0.0, 1.0]])
+        classifier_inst.classifier = mock_nn
+
         yield classifier_inst
 
 def test_evaluate_transformer(mock_classifier):
@@ -49,6 +52,7 @@ def test_evaluate_transformer(mock_classifier):
 def test_evaluate_non_transformer(mock_classifier):
     """Test function docstring."""
     mock_classifier.method = 'randomforest'
+    # For non-transformer, it calls predict() on the classifier member
     mock_classifier.classifier.predict.return_value = np.array([0, 1])
     
     with patch('email_classifier.evaluate.plt'),          patch('email_classifier.evaluate.sns'),          patch('email_classifier.evaluate.open', mock_open()):

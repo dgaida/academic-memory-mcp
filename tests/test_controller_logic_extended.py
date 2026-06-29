@@ -113,7 +113,7 @@ def test_classify_action_success(mock_controller_deps, tmp_path):
         
         # 3 is option 3 (index 2)
         idx = controller.classify_action(mail_path, "Context")
-        assert idx == 3
+        assert idx == 2
 
 def test_classify_action_fallback(mock_controller_deps, tmp_path):
     """Test function docstring."""
