@@ -506,114 +506,170 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
                         )
         return emails
 
-    def relocate_emails(self, email_changes: List[Dict]):
-        """Verschiebt E-Mails in neue Ordner basierend auf Benutzerkorrektur."""
+    def relocate_emails(self, email_changes: List[Dict]) -> List[str]:
+        """Verschiebt E-Mails in neue Ordner basierend auf Benutzerkorrektur.
+
+        Gibt eine Liste von Fehlermeldungen zurück, falls Probleme aufgetreten sind.
+        """
+        errors = []
         for change in email_changes:
-            old_path = Path(change["path"])
-            new_class = change["new_class"]
-            old_class = change["class"]
-
-            lastname = change["lastname"]
             try:
-                date = self.mail_parser.get_email_date(old_path)
-            except Exception:
-                date = datetime.now()
-            semester = get_semester(date)
+                old_path = Path(change["path"])
 
-            if new_class == "Others":
-                if change["folder"] == "Inbox":
-                    target_dir = Path(r"D:\TH_Koeln\StudentMails2\manuell beantworten")
-                elif change["folder"] == "SentItems":
-                    target_dir = Path(r"D:\TH_Koeln\StudentMails2\manuell beantwortet")
-                else:
-                    target_dir = Path(r"D:\TH_Koeln\MailTrainingDataFuture\Others")
-            else:
-                if new_class not in self.class_paths:
-                    logger.error(f"Klasse {new_class} nicht in Konfiguration gefunden.")
-                    continue
-                class_base_path = Path(self.class_paths[new_class])
-
-                student_dir = find_student_folder(class_base_path, lastname)
-                if not student_dir:
-                    student_dir = class_base_path / semester / lastname
-                target_dir = student_dir / change["folder"]
-
-            target_dir.mkdir(parents=True, exist_ok=True)
-
-            # 1. Save attachments if requested (BEFORE moving the email, but using target info)
-            if change.get("save_attachments"):
-                # Save to the parent of the target folder (student folder)
-                attachment_target = target_dir.parent
-                logger.info(
-                    f"Speichere Anhänge von {old_path.name} in {attachment_target}"
-                )
-                self.mail_parser.save_attachments(old_path, attachment_target)
-
-            if new_class == old_class:
-                continue
-
-            logger.info(f"Relocating {old_path.name} from {old_class} to {new_class}")
-
-            match = re.match(r"(\d{8}_\d{6})", old_path.name)
-            files_to_process = [old_path]
-            if match:
-                date_prefix = match.group(1)
-                for md_file in old_path.parent.glob(f"{date_prefix}*.md"):
-                    if md_file != old_path:
-                        files_to_process.append(md_file)
-
-            for f in files_to_process:
-                dest = target_dir / f.name
-                logger.info(f"Verschiebe {f.name} nach {dest}")
-                if dest.exists():
-                    dest.unlink()
-                shutil.move(str(f), str(dest))
-                if f == old_path:
-                    change["new_path"] = dest
-                    change["new_identifier_path"] = target_dir.parent
-            old_folder = old_path.parent
-            old_student_folder = old_folder.parent
-            target_student_folder = target_dir.parent
-
-            def has_emails(student_folder: Path):
-                """Prüft, ob der Student-Ordner noch E-Mails enthält."""
-                for sub in ["Inbox", "SentItems"]:
-                    p = student_folder / sub
-                    if p.exists() and p.is_dir():
-                        if any(p.glob("*.msg")) or any(p.glob("*.eml")):
-                            return True
-                return False
-
-            if not has_emails(old_student_folder):
-                summary_file = old_student_folder / ".emails_summary.md"
-                if not summary_file.exists():
-                    summary_file = old_folder / ".emails_summary.md"
-
-                if summary_file.exists():
-                    dest_summary = target_student_folder / ".emails_summary.md"
-                    if not dest_summary.exists():
-                        logger.info(f"Verschiebe Zusammenfassung nach {dest_summary}")
-                        shutil.move(str(summary_file), str(dest_summary))
-                    else:
+                # Fallback: Falls die Datei am ursprünglichen Ort nicht existiert,
+                # prüfen wir den 'latest_mail' Pfad, da dieser in der GUI primär genutzt wird.
+                if not old_path.exists() and "latest_mail" in change:
+                    candidate = Path(change["latest_mail"])
+                    if candidate.exists():
                         logger.info(
-                            f"Zusammenfassung im Ziel existiert bereits. Lösche {summary_file}"
+                            f"E-Mail an {old_path} nicht gefunden, nutze fallback {candidate}"
                         )
-                        summary_file.unlink()
+                        old_path = candidate
 
-            def delete_if_empty(folder: Path):
-                """Löscht einen Ordner, wenn er leer ist."""
-                if folder.exists() and folder.is_dir():
-                    items = list(folder.iterdir())
-                    if not items:
-                        logger.info(f"Lösche leeren Ordner {folder}")
-                        folder.rmdir()
-                        return True
-                return False
+                if not old_path.exists():
+                    err = f"E-Mail {old_path} konnte nicht gefunden werden."
+                    logger.error(err)
+                    errors.append(f"{change.get('lastname', 'Unbekannt')}: {err}")
+                    continue
 
-            if delete_if_empty(old_folder):
-                parent_folder = old_folder.parent
-                if parent_folder.name == lastname:
-                    delete_if_empty(parent_folder)
+                new_class = change["new_class"]
+                old_class = change["class"]
+                lastname = change["lastname"]
+
+                try:
+                    date = self.mail_parser.get_email_date(old_path)
+                except Exception:
+                    date = datetime.now()
+                semester = get_semester(date)
+
+                if new_class == "Others":
+                    if change["folder"] == "Inbox":
+                        target_dir = Path(r"D:\TH_Koeln\StudentMails2\manuell beantworten")
+                    elif change["folder"] == "SentItems":
+                        target_dir = Path(r"D:\TH_Koeln\StudentMails2\manuell beantwortet")
+                    else:
+                        target_dir = Path(r"D:\TH_Koeln\MailTrainingDataFuture\Others")
+                else:
+                    if new_class not in self.class_paths:
+                        err = f"Klasse {new_class} nicht in Konfiguration gefunden."
+                        logger.error(err)
+                        errors.append(f"{lastname}: {err}")
+                        continue
+                    class_base_path = Path(self.class_paths[new_class])
+
+                    student_dir = find_student_folder(class_base_path, lastname)
+                    if not student_dir:
+                        student_dir = class_base_path / semester / lastname
+                    target_dir = student_dir / change["folder"]
+
+                target_dir.mkdir(parents=True, exist_ok=True)
+
+                # 1. Save attachments if requested
+                if change.get("save_attachments"):
+                    attachment_target = target_dir.parent
+                    logger.info(
+                        f"Speichere Anhänge von {old_path.name} in {attachment_target}"
+                    )
+                    try:
+                        self.mail_parser.save_attachments(old_path, attachment_target)
+                    except Exception as e:
+                        err = f"Fehler beim Speichern der Anhänge: {e}"
+                        logger.error(err)
+                        errors.append(f"{lastname}: {err}")
+
+                # Prüfen, ob Quell- und Zielpfad identisch sind
+                dest_path = target_dir / old_path.name
+                is_same_file = False
+                try:
+                    if old_path.resolve() == dest_path.resolve():
+                        is_same_file = True
+                except Exception:
+                    pass
+
+                if is_same_file:
+                    logger.info(
+                        f"Verschieben übersprungen: Quelle und Ziel sind identisch ({old_path})"
+                    )
+                    change["new_path"] = old_path
+                    change["new_identifier_path"] = target_dir.parent
+                else:
+                    logger.info(
+                        f"Relocating {old_path.name} from {old_class} to {new_class}"
+                    )
+                    match = re.match(r"(\d{8}_\d{6})", old_path.name)
+                    files_to_process = [old_path]
+                    if match:
+                        date_prefix = match.group(1)
+                        for md_file in old_path.parent.glob(f"{date_prefix}*.md"):
+                            if md_file != old_path:
+                                files_to_process.append(md_file)
+
+                    for f in files_to_process:
+                        dest = target_dir / f.name
+                        logger.info(f"Verschiebe {f.name} nach {dest}")
+                        if dest.exists() and dest.resolve() != f.resolve():
+                            dest.unlink()
+
+                        if f.resolve() != dest.resolve():
+                            shutil.move(str(f), str(dest))
+
+                        if f == old_path:
+                            change["new_path"] = dest
+                            change["new_identifier_path"] = target_dir.parent
+
+                # Ordner aufräumen
+                old_folder = old_path.parent
+                old_student_folder = old_folder.parent
+                target_student_folder = target_dir.parent
+
+                def has_emails(student_folder: Path):
+                    """Prüft, ob der Student-Ordner noch E-Mails enthält."""
+                    for sub in ["Inbox", "SentItems"]:
+                        p = student_folder / sub
+                        if p.exists() and p.is_dir():
+                            if any(p.glob("*.msg")) or any(p.glob("*.eml")):
+                                return True
+                    return False
+
+                if not has_emails(old_student_folder):
+                    summary_file = old_student_folder / ".emails_summary.md"
+                    if not summary_file.exists():
+                        summary_file = old_folder / ".emails_summary.md"
+
+                    if summary_file.exists():
+                        dest_summary = target_student_folder / ".emails_summary.md"
+                        if not dest_summary.exists():
+                            logger.info(
+                                f"Verschiebe Zusammenfassung nach {dest_summary}"
+                            )
+                            shutil.move(str(summary_file), str(dest_summary))
+                        else:
+                            logger.info(
+                                f"Zusammenfassung im Ziel existiert bereits. Lösche {summary_file}"
+                            )
+                            summary_file.unlink()
+
+                def delete_if_empty(folder: Path):
+                    """Löscht einen Ordner, wenn er leer ist."""
+                    if folder.exists() and folder.is_dir():
+                        items = list(folder.iterdir())
+                        if not items:
+                            logger.info(f"Lösche leeren Ordner {folder}")
+                            folder.rmdir()
+                            return True
+                    return False
+
+                if delete_if_empty(old_folder):
+                    parent_folder = old_folder.parent
+                    if parent_folder.name == lastname:
+                        delete_if_empty(parent_folder)
+
+            except Exception as e:
+                err = f"Unerwarteter Fehler bei Verarbeitung von {change.get('lastname', 'unbekannt')}: {e}"
+                logger.exception(err)
+                errors.append(err)
+
+        return errors
 
     def generate_reply(
         self,
