@@ -2,7 +2,7 @@
 import pytest
 from unittest.mock import MagicMock, patch
 
-from mcp_university.classifier.controller import EmailController
+from email_classifier.controller import EmailController
 
 @pytest.fixture
 def controller():
@@ -11,7 +11,7 @@ def controller():
     Returns:
         EmailController: Der initialisierte Controller.
     """
-    with patch("mcp_university.classifier.controller.get_config"),          patch("mcp_university.classifier.controller.Summarizer"),          patch("mcp_university.classifier.controller.PersonProfiler"),          patch("mcp_university.classifier.controller.Agent"):
+    with patch("email_classifier.controller.get_config"),          patch("email_classifier.controller.Summarizer"),          patch("email_classifier.controller.PersonProfiler"),          patch("email_classifier.controller.Agent"):
         return EmailController()
 
 def test_extract_honorific_preference(controller):
@@ -98,7 +98,7 @@ def test_salutation_logic_english_du(controller, tmp_path):
     with patch("extract_msg.openMsg") as mock_open:
         mock_msg = mock_open.return_value.__enter__.return_value
         mock_msg.sender = "max@mustermann.de"
-        with patch("mcp_university.classifier.sort_emails.extract_firstname", return_value="Max"):
+        with patch("email_classifier.sort_emails.extract_firstname", return_value="Max"):
             controller.execute_action(0, mail_path, email_data)
     
     args, kwargs = controller.generate_reply.call_args

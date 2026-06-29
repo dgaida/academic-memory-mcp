@@ -37,6 +37,7 @@ dependencies = [
     "shap",
     "pytest-asyncio",
     "llm_client @ git+https://github.com/dgaida/llm_client.git",
+    "email_classifier @ file://./packages/email_classifier",
 ]
 requires-python = ">=3.10"
 

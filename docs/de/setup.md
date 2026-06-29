@@ -70,7 +70,7 @@ Konfigurieren Sie die zu verwendenden LLM- und Embedding-Modelle.
 Wenn Sie einen Ordner mit E-Mails haben, die noch nicht in Inbox/SentItems unterteilt sind, nutzen Sie:
 
 ```bash
-python -m mcp_university.classifier.sort_by_direction /pfad/zu/emails
+python -m email_classifier.sort_by_direction /pfad/zu/emails
 ```
 
 ### E-Mails nach Klassen sortieren
@@ -78,7 +78,7 @@ python -m mcp_university.classifier.sort_by_direction /pfad/zu/emails
 Um E-Mails basierend auf ihrem Inhalt in die entsprechenden Projektordner zu sortieren:
 
 ```bash
-python -m mcp_university.classifier.sort_emails /pfad/zu/emails --config config/classifier_paths.yaml
+python -m email_classifier.sort_emails /pfad/zu/emails --config config/classifier_paths.yaml
 ```
 
 ### 5. Hugging Face Authentifizierung (Optional)
