@@ -5,7 +5,7 @@ import shutil
 import re
 from pathlib import Path
 from typing import List, Tuple, Iterator
-from email_classifier.sort_emails import extract_lastname, get_semester, find_student_folder
+from email_classifier.scripts.sort_emails import extract_lastname, get_semester, find_student_folder
 from mcp_university.config import get_config
 from mcp_university.parser.mail_parser import MailParser
 

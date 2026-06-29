@@ -1,82 +1,83 @@
-# Email Classification
+# Script Usage
 
-The system includes a powerful subpackage for the automated classification of student emails (e.g., bachelor's thesis, internship project).
+This section explains the use of user-focused scripts with concrete examples.
 
-## Training the Model
-To use the classifier, it must first be trained with example data. A folder structure is expected where each subfolder represents a class and contains the emails (.msg).
+## Email Sorting (`sort_emails.py`)
 
+This script sorts emails based on their classification, semester, and student name into a structured folder hierarchy.
+
+**Command:**
 ```bash
-python3 email_classifier/train.py /path/to/training_data --mode tfidf --method transformer
+python -m email_classifier.scripts.sort_emails /path/to/source --config config/class_paths.yaml
 ```
 
-You can choose between `randomforest`, `xgboost`, and `transformer` (default).
+### Before/After Example
 
-## Classifying an Email
-After training, a single email file can be classified:
-
-```bash
-python3 email_classifier/predict.py /path/to/email.msg
+**Before:**
+```text
+/source/
+├── 20240115_103000 - Question about project.msg
+├── 20240220_141500 - Registration bachelor thesis.msg
+└── 20231210_090000 - Homework.msg
 ```
 
-The output contains the most likely class as well as the confidence and a detailed probability distribution.
-
-## XAI Analysis (Interpretability)
-To understand which words were particularly important for classification, XAI analysis can be used. This uses SHAP values to calculate the influence of individual words on the prediction.
-
-```bash
-python3 email_classifier/xai_analysis.py --model-path data/email_classifier_xgboost_tfidf.pkl --test-data-path /path/to/test_data
+**After:**
+```text
+/destination/
+├── WS_2023_24/
+│   └── Mueller/
+│       └── Inbox/
+│           └── 20231210_090000 - Homework.msg
+├── SoSe_2024/
+│   ├── Schmidt/
+│   │   └── Inbox/
+│   │       └── 20240115_103000 - Question about project.msg
+│   └── Weber/
+│       └── Inbox/
+│           └── 20240220_141500 - Registration bachelor thesis.msg
+└── sorted_emails.md  # Summary report
 ```
 
-The script analyzes up to 20 emails per class and returns the top 5 words that are most characteristic for the respective class.
+---
 
-## Email Sorting (Student Folders)
-The most powerful script sorts emails not only by class but also by semester and student (last name):
+## Single Prediction (`predict.py`)
 
+Classifies a single email and outputs the probability distribution.
+
+**Command:**
 ```bash
-python3 email_classifier/sort_emails.py /source/folder --config config/class_paths.yaml --model data/email_classifier_xgboost_combined.pkl
+python -m email_classifier.scripts.predict /path/to/email.msg
 ```
 
-It automatically recognizes:  
-- **Semester:** Based on the email date (Summer/Winter semester).  
-- **Student:** Extracts the last name from `smail.th-koeln.de` addresses or display names.  
-- **Direction:** Sorts into `Inbox` or `SentItems` subfolders.  
-- **Report:** Creates a `sorted_emails.md` with an overview of all moved emails.  
+**Example Output:**
+```text
+Classification for: 'Question about project.msg'
+Result: InformatikProjekt (Confidence: 0.92)
 
-## Batch Classification
-To automatically sort an entire folder of emails (classification only):
-```bash
-python3 email_classifier/classify_folder.py /source/folder --model data/email_classifier_xgboost_combined.pkl
-```
-This moves the emails into subfolders named after the predicted classes.
-
-## Visualizing Data Distribution
-To visualize the distribution of emails per class (split into Inbox and SentItems), the following script can be used:
-
-```bash
-python3 email_classifier/plot_data_distribution.py --train-dir /path/to/train_data --test-dir /path/to/test_data --output-dir data
+Probabilities:
+- InformatikProjekt: 0.92
+- BachelorThesis: 0.05
+- Other: 0.03
 ```
 
-This generates two high-resolution PNG files in `data/`:  
-- `train_data_distribution.png`  
-- `test_data_distribution.png`  
+---
 
-## Feature Modeling (Feature Extraction)
+## Batch Classification (`classify_folder.py`)
 
-The `EmailClassifier` supports three different modes for feature extraction:
+Moves all emails in a folder into subfolders named after the predicted classes (without semester/student logic).
 
-1.  **TF-IDF (`tfidf`)**:  
-    - **Functionality:** Uses Term Frequency-Inverse Document Frequency. Word frequencies are counted and weighted.  
-    - **Pros:** Fast, well-interpretable, effective for clearly defined technical terms.  
-    - **Cons:** Ignores word order and semantics.  
+**Command:**
+```bash
+python -m email_classifier.scripts.classify_folder /path/to/source
+```
 
-2.  **Embeddings (`embedding`)**:  
-    - **Functionality:** Uses `Sentence-Transformers` (`BAAI/bge-m3`) to project the text into a high-dimensional vector space.  
-    - **Pros:** Captures semantic meaning and synonyms.  
-    - **Cons:** More computationally intensive, harder to interpret.  
-
-3.  **Combined (`combined`)**:  
-    - **Functionality:** Concatenates TF-IDF vectors with embedding vectors.  
-    - **Pros:** Combines precision of keywords with deep semantic understanding. Usually highest accuracy.  
-
-### Model Naming
-During training, the chosen method and mode are automatically appended to the filename (e.g., `email_classifier_transformer.pkl`) to avoid confusion between models.
+**Result Structure:**
+```text
+/source/
+├── BachelorThesis/
+│   └── mail1.msg
+├── InformatikProjekt/
+│   └── mail2.msg
+└── Other/
+    └── mail3.msg
+```

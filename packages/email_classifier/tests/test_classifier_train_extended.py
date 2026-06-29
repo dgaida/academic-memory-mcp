@@ -19,24 +19,24 @@ def test_evaluate_and_save():
     mock_classifier.classifier = mock_nn
     
     # Import inside the test to avoid module resolution issues during patch discovery
-    from email_classifier.train import evaluate_and_save
+    from email_classifier.scripts.train import evaluate_and_save
 
-    with patch('email_classifier.train.plt'),          patch('email_classifier.train.sns'),          patch('email_classifier.train.open', mock_open()):
+    with patch('email_classifier.scripts.train.plt'),          patch('email_classifier.scripts.train.sns'),          patch('email_classifier.scripts.train.open', mock_open()):
 
         output_dir = MagicMock(spec=Path)
         output_dir.mkdir = MagicMock()
         evaluate_and_save(mock_classifier, ['text'], ['Class1'], output_dir)
         assert output_dir.mkdir.called
 
-@patch('email_classifier.train.argparse.ArgumentParser.parse_args')
-@patch('email_classifier.train.EmailClassifier')
-@patch('email_classifier.train.train_test_split')
-@patch('email_classifier.train.resolve_model_path')
+@patch('email_classifier.scripts.train.argparse.ArgumentParser.parse_args')
+@patch('email_classifier.scripts.train.EmailClassifier')
+@patch('email_classifier.scripts.train.train_test_split')
+@patch('email_classifier.scripts.train.resolve_model_path')
 @patch('mcp_university.config.get_config')
-@patch('email_classifier.train.get_device')
+@patch('email_classifier.scripts.train.get_device')
 def test_train_main(mock_dev, mock_cfg, mock_resolve, mock_split, mock_classifier_cls, mock_args):
     """Test function docstring."""
-    from email_classifier.train import main as train_main
+    from email_classifier.scripts.train import main as train_main
     mock_args.return_value = MagicMock(data_dir='data', method='transformer', mode='combined', model_path='model.pkl', embedding_model='bert')
     mock_classifier = mock_classifier_cls.return_value
     mock_classifier.preprocess_data.return_value = (['t1', 't2', 't3', 't4'], ['C1', 'C2', 'C1', 'C2'])

@@ -2,13 +2,13 @@
 from unittest.mock import MagicMock, patch, mock_open
 from pathlib import Path
 import pandas as pd
-from email_classifier.xai_analysis import run_xai_analysis, main as xai_main
-from email_classifier.plot_data_distribution import count_emails, plot_distribution, main as plot_main
+from email_classifier.scripts.xai_analysis import run_xai_analysis, main as xai_main
+from email_classifier.scripts.plot_data_distribution import count_emails, plot_distribution, main as plot_main
 
 # XAI Analysis tests
-@patch("email_classifier.xai_analysis.EmailClassifier")
-@patch("email_classifier.xai_analysis.shap.TreeExplainer")
-@patch("email_classifier.xai_analysis.anonymize_th_koeln_names")
+@patch("email_classifier.scripts.xai_analysis.EmailClassifier")
+@patch("email_classifier.scripts.xai_analysis.shap.TreeExplainer")
+@patch("email_classifier.scripts.xai_analysis.anonymize_th_koeln_names")
 def test_run_xai_analysis(mock_anon, mock_shap, mock_classifier_cls):
     """Test function docstring."""
     mock_classifier = mock_classifier_cls.return_value
@@ -26,13 +26,13 @@ def test_run_xai_analysis(mock_anon, mock_shap, mock_classifier_cls):
     test_dir = MagicMock(spec=Path)
     test_dir.exists.return_value = True
     
-    with patch("email_classifier.xai_analysis.open", mock_open()):
+    with patch("email_classifier.scripts.xai_analysis.open", mock_open()):
         run_xai_analysis(model_path, test_dir)
         assert mock_classifier.load.called
 
 def test_xai_main():
     """Test function docstring."""
-    with patch("email_classifier.xai_analysis.argparse.ArgumentParser.parse_args") as mock_args,          patch("email_classifier.xai_analysis.resolve_model_path") as _mock_resolve,          patch("email_classifier.xai_analysis.run_xai_analysis") as mock_run:
+    with patch("email_classifier.scripts.xai_analysis.argparse.ArgumentParser.parse_args") as mock_args,          patch("email_classifier.scripts.xai_analysis.resolve_model_path") as _mock_resolve,          patch("email_classifier.scripts.xai_analysis.run_xai_analysis") as mock_run:
         mock_args.return_value = MagicMock(test_dir="test", model_path="model", method="rf", mode="tfidf")
         xai_main()
         assert mock_run.called
@@ -53,13 +53,13 @@ def test_count_emails(tmp_path):
 def test_plot_distribution():
     """Test function docstring."""
     df = pd.DataFrame([{"Klasse": "C1", "Inbox": 1, "SentItems": 1}])
-    with patch("email_classifier.plot_data_distribution.plt") as mock_plt:
+    with patch("email_classifier.scripts.plot_data_distribution.plt") as mock_plt:
         plot_distribution(df, "Title", Path("out.png"))
         assert mock_plt.savefig.called
 
 def test_plot_main():
     """Test function docstring."""
-    with patch("email_classifier.plot_data_distribution.argparse.ArgumentParser.parse_args") as mock_args,          patch("email_classifier.plot_data_distribution.count_emails") as mock_count,          patch("email_classifier.plot_data_distribution.plot_distribution") as _mock_plot:
+    with patch("email_classifier.scripts.plot_data_distribution.argparse.ArgumentParser.parse_args") as mock_args,          patch("email_classifier.scripts.plot_data_distribution.count_emails") as mock_count,          patch("email_classifier.scripts.plot_data_distribution.plot_distribution") as _mock_plot:
         mock_args.return_value = MagicMock(data_dir="data", output="out.png", title="Title")
         plot_main()
         assert mock_count.called

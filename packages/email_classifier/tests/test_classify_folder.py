@@ -1,9 +1,9 @@
 """Tests for test_classify_folder.py."""
 from pathlib import Path
 from unittest.mock import patch
-from email_classifier.classify_folder import classify_and_move
+from email_classifier.scripts.classify_folder import classify_and_move
 
-@patch('email_classifier.classify_folder.EmailClassifier')
+@patch('email_classifier.scripts.classify_folder.EmailClassifier')
 def test_classify_and_move(mock_classifier_class, tmp_path):
     """Test function docstring."""
     source_dir = tmp_path / "source"
@@ -30,7 +30,7 @@ def test_classify_and_move(mock_classifier_class, tmp_path):
     assert not msg1.exists()
     assert not msg2.exists()
 
-@patch('email_classifier.classify_folder.EmailClassifier')
+@patch('email_classifier.scripts.classify_folder.EmailClassifier')
 def test_classify_and_move_with_output_dir(mock_classifier_class, tmp_path):
     """Test function docstring."""
     source_dir = tmp_path / "source"
@@ -49,7 +49,7 @@ def test_classify_and_move_with_output_dir(mock_classifier_class, tmp_path):
     assert (output_dir / "ClassA" / "test1.msg").exists()
     assert not msg1.exists()
 
-@patch('email_classifier.classify_folder.EmailClassifier')
+@patch('email_classifier.scripts.classify_folder.EmailClassifier')
 def test_classify_and_move_duplicate_names(mock_classifier_class, tmp_path):
     """Test function docstring."""
     source_dir = tmp_path / "source"

@@ -7,13 +7,13 @@ import torch
 
 # We will import these inside tests to ensure they are tracked by coverage if needed,
 # though normally top-level import is fine with pytest-cov.
-from email_classifier.evaluate import evaluate, main as evaluate_main
-from email_classifier.predict import main as predict_main
+from email_classifier.scripts.evaluate import evaluate, main as evaluate_main
+from email_classifier.scripts.predict import main as predict_main
 
 @pytest.fixture
 def mock_classifier():
     """Test function docstring."""
-    with patch('email_classifier.evaluate.EmailClassifier') as mock:
+    with patch('email_classifier.scripts.evaluate.EmailClassifier') as mock:
         classifier_inst = mock.return_value
         classifier_inst.label_encoder.classes_ = np.array(['Class1', 'Class2'])
         classifier_inst.label_encoder.inverse_transform.side_effect = lambda x: np.array(['Class1', 'Class2'])[x.astype(int)]
@@ -30,7 +30,7 @@ def mock_classifier():
 
 def test_evaluate_transformer(mock_classifier):
     """Test function docstring."""
-    with patch('email_classifier.evaluate.plt'),          patch('email_classifier.evaluate.sns'),          patch('email_classifier.evaluate.open', mock_open()) as _mock_file:
+    with patch('email_classifier.scripts.evaluate.plt'),          patch('email_classifier.scripts.evaluate.sns'),          patch('email_classifier.scripts.evaluate.open', mock_open()) as _mock_file:
         
         model_path = MagicMock(spec=Path)
         model_path.exists.return_value = True
@@ -55,7 +55,7 @@ def test_evaluate_non_transformer(mock_classifier):
     # For non-transformer, it calls predict() on the classifier member
     mock_classifier.classifier.predict.return_value = np.array([0, 1])
     
-    with patch('email_classifier.evaluate.plt'),          patch('email_classifier.evaluate.sns'),          patch('email_classifier.evaluate.open', mock_open()):
+    with patch('email_classifier.scripts.evaluate.plt'),          patch('email_classifier.scripts.evaluate.sns'),          patch('email_classifier.scripts.evaluate.open', mock_open()):
         
         model_path = MagicMock(spec=Path)
         model_path.exists.return_value = True
@@ -100,7 +100,7 @@ def test_evaluate_no_data(mock_classifier):
 
 def test_evaluate_main():
     """Test function docstring."""
-    with patch('email_classifier.evaluate.argparse.ArgumentParser.parse_args') as mock_args,          patch('email_classifier.evaluate.resolve_model_path') as mock_resolve,          patch('email_classifier.evaluate.evaluate') as mock_evaluate:
+    with patch('email_classifier.scripts.evaluate.argparse.ArgumentParser.parse_args') as mock_args,          patch('email_classifier.scripts.evaluate.resolve_model_path') as mock_resolve,          patch('email_classifier.scripts.evaluate.evaluate') as mock_evaluate:
         
         mock_args.return_value = MagicMock(test_dir='test', model_path='model', method='transformer', mode='combined')
         mock_resolve.return_value = Path('resolved_model')
@@ -113,7 +113,7 @@ def test_evaluate_main():
 @pytest.fixture
 def mock_predict_classifier():
     """Test function docstring."""
-    with patch('email_classifier.predict.EmailClassifier') as mock:
+    with patch('email_classifier.scripts.predict.EmailClassifier') as mock:
         classifier_inst = mock.return_value
         classifier_inst.predict.return_value = {
             'prediction': 'Class1',
@@ -124,7 +124,7 @@ def mock_predict_classifier():
 
 def test_predict_main(mock_predict_classifier):
     """Test function docstring."""
-    with patch('email_classifier.predict.argparse.ArgumentParser.parse_args') as mock_args,          patch('email_classifier.predict.resolve_model_path') as mock_resolve,          patch('email_classifier.predict.Path') as mock_path:
+    with patch('email_classifier.scripts.predict.argparse.ArgumentParser.parse_args') as mock_args,          patch('email_classifier.scripts.predict.resolve_model_path') as mock_resolve,          patch('email_classifier.scripts.predict.Path') as mock_path:
         
         mock_args.return_value = MagicMock(file_path='test.msg', model_path='model.pkl', method='transformer', mode='tfidf', json=False)
         mock_resolve.return_value.exists.return_value = True
@@ -139,7 +139,7 @@ def test_predict_main(mock_predict_classifier):
 
 def test_predict_main_json(mock_predict_classifier):
     """Test function docstring."""
-    with patch('email_classifier.predict.argparse.ArgumentParser.parse_args') as mock_args,          patch('email_classifier.predict.resolve_model_path') as mock_resolve,          patch('email_classifier.predict.Path') as mock_path,          patch('builtins.print') as mock_print:
+    with patch('email_classifier.scripts.predict.argparse.ArgumentParser.parse_args') as mock_args,          patch('email_classifier.scripts.predict.resolve_model_path') as mock_resolve,          patch('email_classifier.scripts.predict.Path') as mock_path,          patch('builtins.print') as mock_print:
         
         mock_args.return_value = MagicMock(file_path='test.msg', model_path='model.pkl', method='transformer', mode='tfidf', json=True)
         mock_resolve.return_value.exists.return_value = True
@@ -151,7 +151,7 @@ def test_predict_main_json(mock_predict_classifier):
 
 def test_predict_main_missing_file(mock_predict_classifier):
     """Test function docstring."""
-    with patch('email_classifier.predict.argparse.ArgumentParser.parse_args') as mock_args,          patch('email_classifier.predict.resolve_model_path') as mock_resolve,          patch('email_classifier.predict.Path') as mock_path:
+    with patch('email_classifier.scripts.predict.argparse.ArgumentParser.parse_args') as mock_args,          patch('email_classifier.scripts.predict.resolve_model_path') as mock_resolve,          patch('email_classifier.scripts.predict.Path') as mock_path:
         
         mock_args.return_value = MagicMock(file_path='test.msg', model_path='model.pkl', method='transformer', mode='tfidf', json=False)
         mock_resolve.return_value.exists.return_value = True

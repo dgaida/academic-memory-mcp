@@ -98,7 +98,7 @@ def test_salutation_logic_english_du(controller, tmp_path):
     with patch("extract_msg.openMsg") as mock_open:
         mock_msg = mock_open.return_value.__enter__.return_value
         mock_msg.sender = "max@mustermann.de"
-        with patch("email_classifier.sort_emails.extract_firstname", return_value="Max"):
+        with patch("email_classifier.scripts.sort_emails.extract_firstname", return_value="Max"):
             controller.execute_action(0, mail_path, email_data)
     
     args, kwargs = controller.generate_reply.call_args

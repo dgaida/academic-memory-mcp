@@ -4,7 +4,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 from datetime import datetime
 
-from email_classifier.sort_emails import extract_lastname, process_emails
+from email_classifier.scripts.sort_emails import extract_lastname, process_emails
 
 def create_recipient(email, name, r_type):
     """Erstellt ein Mock-Recipient-Objekt."""
@@ -17,7 +17,7 @@ def create_recipient(email, name, r_type):
 @pytest.fixture
 def mock_deps():
     """Mockt Abhängigkeiten für Tests."""
-    with patch('email_classifier.sort_emails.EmailClassifier') as mock_classifier_class,          patch('email_classifier.sort_emails.MailParser') as mock_mail_parser,          patch('extract_msg.openMsg') as mock_open_msg,          patch('shutil.move') as mock_move,          patch('email_classifier.sort_emails.get_config') as mock_get_config,          patch('email_classifier.sort_emails.get_semester') as mock_get_semester,          patch('email_classifier.sort_emails.find_student_folder') as mock_find_folder:
+    with patch('email_classifier.scripts.sort_emails.EmailClassifier') as mock_classifier_class,          patch('email_classifier.scripts.sort_emails.MailParser') as mock_mail_parser,          patch('extract_msg.openMsg') as mock_open_msg,          patch('shutil.move') as mock_move,          patch('email_classifier.scripts.sort_emails.get_config') as mock_get_config,          patch('email_classifier.scripts.sort_emails.get_semester') as mock_get_semester,          patch('email_classifier.scripts.sort_emails.find_student_folder') as mock_find_folder:
 
         mock_config = MagicMock()
         mock_config.user.emails = ["daniel.gaida@th-koeln.de"]

@@ -38,12 +38,12 @@ A locally-running, agentic knowledge and memory system for university and resear
 
 ## Project Structure
 ```text
-mcp_university/
+academic-memory-mcp/
 ├── config/             # YAML configurations and prompts
 ├── data/               # Persistent data (SQLite, Models, Cache)
+├── docs/               # Multilingual documentation (MkDocs)
 ├── mcp_university/     # Core package
 │   ├── agent/          # Agentic workflows and tool definitions
-│   ├── classifier/     # Email classification pipeline (Train, Predict, Evaluate)
 │   ├── crawler/        # File system crawling and watching
 │   ├── metadata/       # SQLite storage and student management
 │   ├── mcp_server/     # FastMCP server implementation
@@ -52,16 +52,21 @@ mcp_university/
 │   ├── summarizer/     # LLM summary and response generation
 │   ├── utils/          # Utilities (Anonymization, Config loader)
 │   └── cli/            # Typer-based CLI
+├── packages/
+│   └── email_classifier/ # Specialized E-Mail Classification Package
+│       ├── src/email_classifier/
+│       │   ├── scripts/  # User-facing scripts (train, predict, sort, etc.)
+│       │   ├── engine.py # ML classification logic
+│       │   └── controller.py # Workflow orchestration
+│       └── tests/        # Classifier-specific tests
+├── scripts/            # Main workflow scripts and maintenance
 ├── outlook_macro/      # VBA macros for Outlook integration
-├── tests/              # Unit and integration tests
-└── scripts/process_sorted_emails.py # Main workflow script
+└── tests/              # Unit and integration tests
 ```
 
 ## Installation
 ```bash
 pip install -e .
-# Or using conda
-conda env create -f environment.yml
 ```
 
 ## Usage
