@@ -37,7 +37,6 @@ dependencies = [
     "shap",
     "pytest-asyncio",
     "llm_client @ git+https://github.com/dgaida/llm_client.git",
-    "email_classifier @ file://./packages/email_classifier",
 ]
 requires-python = ">=3.10"
 
@@ -49,8 +48,8 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["mcp_university*"]
+where = [".", "packages/email_classifier/src"]
+include = ["mcp_university*", "email_classifier*"]
 
 [tool.interrogate]
 ignore-init-method = true

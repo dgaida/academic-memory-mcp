@@ -1,3 +1,4 @@
+# ruff: noqa: E402
 """Tests for test_sort_emails.py."""
 import sys
 from unittest.mock import MagicMock
