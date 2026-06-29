@@ -170,28 +170,48 @@ def run_gradio_gui(controller: EmailController, report_path: Path, emails_to_pro
             try:
                 # 1. Relocate
                 logger.info(f"Verschiebe {len(changes)} E-Mails...")
-                controller.relocate_emails(changes)
+                relocation_errors = controller.relocate_emails(changes)
+
+                if relocation_errors:
+                    for err in relocation_errors:
+                        logger.error(f"Relocation-Fehler: {err}")
 
                 # 2. Execute Actions
                 action_results = []
                 if controller.use_action_classifier:
                     logger.info(f"Führe {len(changes)} Aktionen aus...")
                     for i, (m, action_str) in enumerate(zip(changes, selected_actions)):
-                        action_idx = controller.ACTION_OPTIONS.index(action_str)
-                        # Use the new path if it was moved
-                        current_mail_path = m.get("new_path") or m["latest_mail"]
-                        logger.info(f"Verarbeite E-Mail von {m['lastname']} (Aktion: {action_str})")
-                        res = controller.execute_action(action_idx, current_mail_path, m)
-                        logger.info(f"Ergebnis für {m['lastname']}: {res}")
-                        action_results.append(f"{m['lastname']}: {res}")
+                        try:
+                            action_idx = controller.ACTION_OPTIONS.index(action_str)
+                            # Use the new path if it was moved
+                            current_mail_path = m.get("new_path") or m["latest_mail"]
 
-                res_msg = "Verarbeitung abgeschlossen. Mails wurden ggf. verschoben."
+                            if not Path(current_mail_path).exists():
+                                logger.warning(f"Datei {current_mail_path} existiert nicht. Überspringe Aktion.")
+                                action_results.append(f"{m['lastname']}: Fehler - Datei nicht gefunden.")
+                                continue
+
+                            logger.info(f"Verarbeite E-Mail von {m['lastname']} (Aktion: {action_str})")
+                            res = controller.execute_action(action_idx, current_mail_path, m)
+                            logger.info(f"Ergebnis für {m['lastname']}: {res}")
+                            action_results.append(f"{m['lastname']}: {res}")
+                        except Exception as action_err:
+                            logger.exception(f"Fehler bei Aktion für {m['lastname']}")
+                            action_results.append(f"{m['lastname']}: Fehler - {str(action_err)}")
+
+                res_msg = "Verarbeitung abgeschlossen."
+
+                if relocation_errors:
+                    res_msg += "\n\n⚠️ Fehler beim Verschieben:\n" + "\n".join(relocation_errors)
+                else:
+                    res_msg += " Mails wurden ggf. verschoben."
+
                 if action_results:
                     res_msg += "\n\nAktionen:\n" + "\n".join(action_results)
                 return res_msg
             except Exception as e:
-                logger.exception("Fehler bei Verarbeitung")
-                return f"Fehler: {str(e)}"
+                logger.exception("Kritischer Fehler bei Verarbeitung")
+                return f"Kritischer Fehler: {str(e)}"
 
         # Combine dropdowns and checkboxes
         action_dropdowns = [mail[2] for mail in email_data if mail[2] is not None]
