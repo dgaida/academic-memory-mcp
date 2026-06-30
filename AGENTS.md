@@ -155,8 +155,8 @@ The script `scripts/crawl_th_koeln_persons.py` is used to fetch personnel data.
 - **Visibility:** All sorted emails MUST be displayed in the Gradio GUI to ensure complete visibility. No emails should be hidden or collapsed unless explicitly requested.  
 - **Logging:** Dense and detailed logging is required for all email processing steps. This includes logging each email being processed for the GUI and issuing warnings if expected files are missing.  
 
-## Email Schnellsuche (Email Search GUI)
-- **Engine:** Die `EmailSearchEngine` in `mcp_university/utils/email_search.py` indiziert E-Mails aus den in `classifier_paths.yaml` und `train_test_folders.yaml` konfigurierten Pfaden.
-- **Cache:** Der Index wird in `data/cache/email_search_cache.json` zwischengespeichert, um schnelle Suchergebnisse zu ermöglichen.
-- **GUI:** Ein Gradio-Skript `scripts/email_search_gui.py` bietet eine Benutzeroberfläche mit Autovervollständigung, einer Liste der Suchergebnisse und einem E-Mail-Viewer.
-- **Funktionen:** E-Mails können direkt in Outlook oder im Datei-Explorer geöffnet werden.
+## Email Schnellsuche (Email Search GUI)  
+- **Engine:** Die `EmailSearchEngine` in `mcp_university/utils/email_search.py` indiziert E-Mails aus den in `classifier_paths.yaml` und `train_test_folders.yaml` konfigurierten Pfaden.  
+- **Cache:** Der Index wird in `data/cache/email_search_cache.json` zwischengespeichert, um schnelle Suchergebnisse zu ermöglichen.  
+- **GUI:** Ein Gradio-Skript `scripts/email_search_gui.py` bietet eine Benutzeroberfläche mit Autovervollständigung, einer Liste der Suchergebnisse und einem E-Mail-Viewer.  
+- **Funktionen:** E-Mails können direkt in Outlook oder im Datei-Explorer geöffnet werden.  
