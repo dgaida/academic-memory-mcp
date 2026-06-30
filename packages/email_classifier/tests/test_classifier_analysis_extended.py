@@ -2,11 +2,11 @@
 from unittest.mock import MagicMock, patch, mock_open
 from pathlib import Path
 import numpy as np
-from email_classifier.xai_analysis import run_xai_analysis
-from email_classifier.plot_data_distribution import count_emails, plot_distribution
+from email_classifier.scripts.xai_analysis import run_xai_analysis
+from email_classifier.scripts.plot_data_distribution import count_emails, plot_distribution
 
-@patch("email_classifier.xai_analysis.EmailClassifier")
-@patch("email_classifier.xai_analysis.shap.TreeExplainer")
+@patch("email_classifier.scripts.xai_analysis.EmailClassifier")
+@patch("email_classifier.scripts.xai_analysis.shap.TreeExplainer")
 def test_run_xai_analysis(mock_shap, mock_classifier_cls):
     """Test function docstring."""
     mock_classifier = mock_classifier_cls.return_value
@@ -17,7 +17,7 @@ def test_run_xai_analysis(mock_shap, mock_classifier_cls):
     model_path, test_dir = MagicMock(spec=Path), MagicMock(spec=Path)
     model_path.exists.return_value = True
     test_dir.exists.return_value = True
-    with patch("email_classifier.xai_analysis.open", mock_open()):
+    with patch("email_classifier.scripts.xai_analysis.open", mock_open()):
         run_xai_analysis(model_path, test_dir)
         assert mock_classifier.load.called
 
@@ -29,5 +29,5 @@ def test_plot_dist(tmp_path):
     (d / "Inbox" / "m.msg").touch()
     df = count_emails(str(tmp_path))
     assert len(df) == 1
-    with patch("email_classifier.plot_data_distribution.plt"):
+    with patch("email_classifier.scripts.plot_data_distribution.plt"):
         plot_distribution(df, "T", tmp_path / "out.png")

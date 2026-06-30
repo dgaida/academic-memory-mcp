@@ -3,18 +3,18 @@ from pathlib import Path
 from datetime import datetime
 import pytest
 
-from email_classifier.sort_emails import process_emails, extract_lastname
+from email_classifier.scripts.sort_emails import process_emails, extract_lastname
 from mcp_university.utils.semester import get_semester
 
 @pytest.fixture
 def mock_deps():
     """Mocks dependencies for process_emails."""
-    with patch('email_classifier.sort_emails.EmailClassifier') as mock_classifier_class, \
-         patch('email_classifier.sort_emails.MailParser') as mock_mail_parser, \
+    with patch('email_classifier.scripts.sort_emails.EmailClassifier') as mock_classifier_class, \
+         patch('email_classifier.scripts.sort_emails.MailParser') as mock_mail_parser, \
          patch('extract_msg.openMsg') as mock_open_msg, \
          patch('shutil.move') as mock_move, \
-         patch('email_classifier.sort_emails.get_config') as mock_get_config, \
-         patch('email_classifier.sort_emails.find_student_folder') as mock_find_folder:
+         patch('email_classifier.scripts.sort_emails.get_config') as mock_get_config, \
+         patch('email_classifier.scripts.sort_emails.find_student_folder') as mock_find_folder:
 
         # Setup common mocks
         mock_config = MagicMock()

@@ -2,7 +2,7 @@
 import pytest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
-from email_classifier.sort_by_direction import sort_emails_by_direction
+from email_classifier.scripts.sort_by_direction import sort_emails_by_direction
 
 @pytest.fixture
 def temp_email_dir(tmp_path):
@@ -91,7 +91,7 @@ def test_sort_emails_error_handling(temp_email_dir):
 
 def test_main_function():
     """Test function docstring."""
-    with patch("email_classifier.sort_by_direction.get_config") as mock_get_config,          patch("email_classifier.sort_by_direction.sort_emails_by_direction") as mock_sort,          patch("argparse.ArgumentParser.parse_args") as mock_args:
+    with patch("email_classifier.scripts.sort_by_direction.get_config") as mock_get_config,          patch("email_classifier.scripts.sort_by_direction.sort_emails_by_direction") as mock_sort,          patch("argparse.ArgumentParser.parse_args") as mock_args:
         
         mock_config = MagicMock()
         mock_config.user.emails = ["me@example.com"]
@@ -100,7 +100,7 @@ def test_main_function():
         mock_args.return_value = MagicMock(source_dir="/dummy/dir")
         mock_sort.return_value = {"Inbox": 1, "SentItems": 1, "Error": 0}
         
-        from email_classifier.sort_by_direction import main
+        from email_classifier.scripts.sort_by_direction import main
         main()
         
         mock_sort.assert_called_once()

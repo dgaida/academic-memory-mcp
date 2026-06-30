@@ -6,7 +6,7 @@ import pytest
 def test_evaluate_cli_help():
     """Testet, ob die Hilfe angezeigt wird."""
     result = subprocess.run(
-        [sys.executable, "-m", "email_classifier.evaluate", "--help"],
+        [sys.executable, "-m", "email_classifier.scripts.evaluate", "--help"],
         capture_output=True,
         text=True,
         env={"PYTHONPATH": "packages/email_classifier/src:/app"}
@@ -23,7 +23,7 @@ def test_evaluate_cli_mode_suffix():
     modes = ["tfidf", "embedding", "combined"]
     for mode in modes:
         result = subprocess.run(
-            [sys.executable, "-m", "email_classifier.evaluate", "non_existent_dir", "--mode", mode],
+            [sys.executable, "-m", "email_classifier.scripts.evaluate", "non_existent_dir", "--mode", mode],
             capture_output=True,
             text=True,
             env={"PYTHONPATH": "packages/email_classifier/src:/app"}
@@ -35,7 +35,7 @@ def test_evaluate_cli_mode_suffix():
 def test_evaluate_cli_custom_model_path_suffix():
     """Testet den Suffix bei eigenem Modellpfad."""
     result = subprocess.run(
-        [sys.executable, "-m", "email_classifier.evaluate", "non_existent_dir", "--model-path", "custom/model.pkl", "--mode", "tfidf"],
+        [sys.executable, "-m", "email_classifier.scripts.evaluate", "non_existent_dir", "--model-path", "custom/model.pkl", "--mode", "tfidf"],
         capture_output=True,
         text=True,
         env={"PYTHONPATH": "packages/email_classifier/src:/app"}

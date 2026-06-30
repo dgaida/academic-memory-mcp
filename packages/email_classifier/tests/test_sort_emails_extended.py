@@ -1,5 +1,5 @@
 """Tests for test_sort_emails_extended.py."""
-from email_classifier.sort_emails import extract_lastname
+from email_classifier.scripts.sort_emails import extract_lastname
 
 def test_extract_lastname_edge_cases():
     """Test function docstring."""

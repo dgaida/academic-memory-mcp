@@ -4,12 +4,12 @@ from unittest.mock import MagicMock, patch, mock_open
 from pathlib import Path
 import numpy as np
 import torch
-from email_classifier.evaluate import evaluate
+from email_classifier.scripts.evaluate import evaluate
 
 @pytest.fixture
 def mock_classifier():
     """Test function docstring."""
-    with patch('email_classifier.evaluate.EmailClassifier') as mock:
+    with patch('email_classifier.scripts.evaluate.EmailClassifier') as mock:
         classifier_inst = mock.return_value
         classifier_inst.label_encoder.classes_ = np.array(['Class1', 'Class2'])
         classifier_inst.label_encoder.inverse_transform.side_effect = lambda x: np.array(['Class1', 'Class2'])[x.astype(int)]
@@ -25,7 +25,7 @@ def mock_classifier():
 
 def test_evaluate_transformer(mock_classifier):
     """Test function docstring."""
-    with patch('email_classifier.evaluate.plt'),          patch('email_classifier.evaluate.sns'),          patch('email_classifier.evaluate.open', mock_open()):
+    with patch('email_classifier.scripts.evaluate.plt'),          patch('email_classifier.scripts.evaluate.sns'),          patch('email_classifier.scripts.evaluate.open', mock_open()):
 
         model_path = MagicMock(spec=Path)
         model_path.exists.return_value = True

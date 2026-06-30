@@ -4,12 +4,12 @@ from unittest.mock import MagicMock, patch, mock_open
 from pathlib import Path
 import numpy as np
 import torch
-from email_classifier.train import evaluate_and_save, main as train_main
+from email_classifier.scripts.train import evaluate_and_save, main as train_main
 
 @pytest.fixture
 def mock_classifier():
     """Test function docstring."""
-    with patch('email_classifier.train.EmailClassifier') as mock:
+    with patch('email_classifier.scripts.train.EmailClassifier') as mock:
         classifier_inst = mock.return_value
         classifier_inst.label_encoder.classes_ = np.array(['Class1', 'Class2'])
         classifier_inst.label_encoder.inverse_transform.side_effect = lambda x: np.array(['Class1', 'Class2'])[x.astype(int)]
@@ -29,7 +29,7 @@ def mock_classifier():
 
 def test_evaluate_and_save(mock_classifier):
     """Test function docstring."""
-    with patch('email_classifier.train.plt'),          patch('email_classifier.train.sns'),          patch('email_classifier.train.open', mock_open()):
+    with patch('email_classifier.scripts.train.plt'),          patch('email_classifier.scripts.train.sns'),          patch('email_classifier.scripts.train.open', mock_open()):
         
         output_dir = MagicMock(spec=Path)
         evaluate_and_save(mock_classifier, ['text', 'text2'], ['Class1', 'Class2'], output_dir)
@@ -37,7 +37,7 @@ def test_evaluate_and_save(mock_classifier):
 
 def test_train_main():
     """Test function docstring."""
-    with patch('email_classifier.train.argparse.ArgumentParser.parse_args') as mock_args,          patch('email_classifier.train.EmailClassifier') as mock_classifier_cls,          patch('email_classifier.train.train_test_split') as mock_split,          patch('email_classifier.train.resolve_model_path') as mock_resolve,          patch('email_classifier.train.evaluate_and_save') as _mock_eval,          patch('mcp_university.config.get_config') as _mock_config,          patch('email_classifier.train.get_device'),          patch('email_classifier.engine.EmailTransformerClassifier'),          patch('email_classifier.train.Path.exists', return_value=True):
+    with patch('email_classifier.scripts.train.argparse.ArgumentParser.parse_args') as mock_args,          patch('email_classifier.scripts.train.EmailClassifier') as mock_classifier_cls,          patch('email_classifier.scripts.train.train_test_split') as mock_split,          patch('email_classifier.scripts.train.resolve_model_path') as mock_resolve,          patch('email_classifier.scripts.train.evaluate_and_save') as _mock_eval,          patch('mcp_university.config.get_config') as _mock_config,          patch('email_classifier.scripts.train.get_device'),          patch('email_classifier.engine.EmailTransformerClassifier'),          patch('email_classifier.scripts.train.Path.exists', return_value=True):
         
         mock_args.return_value = MagicMock(
             data_dir='data', method='transformer', mode='combined', 
@@ -60,7 +60,7 @@ def test_train_main():
 
 def test_train_main_rf():
     """Test function docstring."""
-    with patch('email_classifier.train.argparse.ArgumentParser.parse_args') as mock_args,          patch('email_classifier.train.EmailClassifier') as mock_classifier_cls,          patch('email_classifier.train.train_test_split') as mock_split,          patch('email_classifier.train.resolve_model_path') as mock_resolve,          patch('email_classifier.train.GridSearchCV') as mock_grid,          patch('mcp_university.config.get_config') as _mock_config,          patch('email_classifier.train.Path.exists', return_value=True):
+    with patch('email_classifier.scripts.train.argparse.ArgumentParser.parse_args') as mock_args,          patch('email_classifier.scripts.train.EmailClassifier') as mock_classifier_cls,          patch('email_classifier.scripts.train.train_test_split') as mock_split,          patch('email_classifier.scripts.train.resolve_model_path') as mock_resolve,          patch('email_classifier.scripts.train.GridSearchCV') as mock_grid,          patch('mcp_university.config.get_config') as _mock_config,          patch('email_classifier.scripts.train.Path.exists', return_value=True):
         
         mock_args.return_value = MagicMock(
             data_dir='data', method='randomforest', mode='tfidf', 

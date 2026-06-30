@@ -6,7 +6,7 @@ from datetime import datetime
 
 # We will use patch in the tests instead of global sys.modules hacks
 
-from email_classifier.sort_emails import get_semester, extract_lastname, process_emails, write_report
+from email_classifier.scripts.sort_emails import get_semester, extract_lastname, process_emails, write_report
 
 def test_get_semester():
     """Test function docstring."""
@@ -32,8 +32,8 @@ def test_extract_lastname():
     assert extract_lastname("(No Sender)") == "Unknown"
     assert extract_lastname("") == "Unknown"
 
-@patch('email_classifier.sort_emails.EmailClassifier')
-@patch('email_classifier.sort_emails.MailParser')
+@patch('email_classifier.scripts.sort_emails.EmailClassifier')
+@patch('email_classifier.scripts.sort_emails.MailParser')
 @patch('extract_msg.openMsg')
 def test_process_emails(mock_open_msg, mock_mail_parser, mock_classifier_class, tmp_path):
     """Test function docstring."""
@@ -105,10 +105,10 @@ def test_process_emails(mock_open_msg, mock_mail_parser, mock_classifier_class, 
 
     with patch('shutil.move'):
         # Mock university user emails
-        with patch('email_classifier.sort_emails.get_config') as mock_cfg:
+        with patch('email_classifier.scripts.sort_emails.get_config') as mock_cfg:
             mock_cfg.return_value.user.emails = ["daniel.gaida@th-koeln.de"]
             # Mock find_student_folder to return something consistent
-            with patch('email_classifier.sort_emails.find_student_folder', side_effect=lambda base, name: base / name):
+            with patch('email_classifier.scripts.sort_emails.find_student_folder', side_effect=lambda base, name: base / name):
                 moved = process_emails(source_root, Path("dummy_model"), config)
 
     assert len(moved) == 3

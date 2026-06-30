@@ -3,12 +3,12 @@ from pathlib import Path
 from datetime import datetime
 import pytest
 
-from email_classifier.sort_emails import process_emails
+from email_classifier.scripts.sort_emails import process_emails
 
 @pytest.fixture
 def mock_dependencies():
     """Test function docstring."""
-    with patch('email_classifier.sort_emails.EmailClassifier') as mock_classifier_class,          patch('email_classifier.sort_emails.MailParser') as mock_mail_parser,          patch('extract_msg.openMsg') as mock_open_msg,          patch('shutil.move') as mock_move,          patch('email_classifier.sort_emails.get_config') as mock_get_config,          patch('email_classifier.sort_emails.get_semester') as mock_get_semester,          patch('email_classifier.sort_emails.find_student_folder') as mock_find_folder:
+    with patch('email_classifier.scripts.sort_emails.EmailClassifier') as mock_classifier_class,          patch('email_classifier.scripts.sort_emails.MailParser') as mock_mail_parser,          patch('extract_msg.openMsg') as mock_open_msg,          patch('shutil.move') as mock_move,          patch('email_classifier.scripts.sort_emails.get_config') as mock_get_config,          patch('email_classifier.scripts.sort_emails.get_semester') as mock_get_semester,          patch('email_classifier.scripts.sort_emails.find_student_folder') as mock_find_folder:
 
         # Setup common mocks
         mock_config = MagicMock()
@@ -199,7 +199,7 @@ def test_sent_items_fallback_to_second_to(mock_dependencies, tmp_path):
     mock_msg.sender = "daniel.gaida@th-koeln.de"
 
     # Mocking extract_lastname to return "Unknown" for "Unknown" name
-    with patch('email_classifier.sort_emails.extract_lastname') as mock_extract:
+    with patch('email_classifier.scripts.sort_emails.extract_lastname') as mock_extract:
         mock_extract.side_effect = lambda x: "Unknown" if "Unknown" in str(x) else "Mustermann"
 
         rec1 = create_recipient("unknown@some.com", "Unknown", 1) # TO

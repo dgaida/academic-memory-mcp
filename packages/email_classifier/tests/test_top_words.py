@@ -1,15 +1,15 @@
 """Tests for test_top_words.py."""
 from unittest.mock import patch, MagicMock
-from email_classifier.top_words import get_top_words_per_class
+from email_classifier.scripts.top_words import get_top_words_per_class
 import numpy as np
 
 def test_get_top_words(tmp_path):
     """Testet die Extraktion der Top-Wörter mit Mocks."""
-    with patch("email_classifier.top_words.EmailClassifier") as mock_cls:
+    with patch("email_classifier.scripts.top_words.EmailClassifier") as mock_cls:
         mock_instance = mock_cls.return_value
         mock_instance.preprocess_data.return_value = (["text1", "text2"], ["ClassA", "ClassA"])
 
-        with patch("email_classifier.top_words.TfidfVectorizer") as mock_tfidf,              patch("email_classifier.top_words.CountVectorizer") as mock_cv:
+        with patch("email_classifier.scripts.top_words.TfidfVectorizer") as mock_tfidf,              patch("email_classifier.scripts.top_words.CountVectorizer") as mock_cv:
 
             mock_tfidf_instance = mock_tfidf.return_value
             mock_tfidf_instance.get_feature_names_out.return_value = np.array(["word1", "word2"])
@@ -45,7 +45,7 @@ def test_get_top_words(tmp_path):
 
 def test_get_top_words_empty(tmp_path):
     """Testet das Verhalten bei leerem Verzeichnis."""
-    with patch("email_classifier.top_words.EmailClassifier") as mock_cls:
+    with patch("email_classifier.scripts.top_words.EmailClassifier") as mock_cls:
         mock_instance = mock_cls.return_value
         mock_instance.preprocess_data.return_value = ([], [])
         results = get_top_words_per_class(tmp_path)

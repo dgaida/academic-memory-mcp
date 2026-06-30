@@ -20,7 +20,7 @@ from mcp_university.agent.engine import Agent
 from mcp_university.agent.mcp_agent import MCPAgent
 from email_classifier.engine import resolve_model_path
 from mcp_university.utils.semester import get_semester
-from email_classifier.sort_emails import (
+from email_classifier.scripts.sort_emails import (
 
 
     process_emails,
@@ -300,7 +300,7 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
         first_name = "Unknown"
         try:
             with extract_msg.openMsg(str(latest_mail)) as msg:
-                from email_classifier.sort_emails import extract_firstname
+                from email_classifier.scripts.sort_emails import extract_firstname
 
                 first_name = extract_firstname(msg.sender)
         except Exception:

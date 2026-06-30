@@ -1,6 +1,6 @@
 """Tests für die spezifischen Logik-Fälle aus check_logic.py."""
 import pytest
-from email_classifier.sort_emails import extract_lastname
+from email_classifier.scripts.sort_emails import extract_lastname
 
 @pytest.mark.parametrize("input_str, expected", [
     ("A B C D <a_b.c_d@smail.th-koeln.de>", "C D"),

@@ -1,34 +1,41 @@
-# E-Mail-Klassifizierung mit Neuronalen Netzen (Transformer)
+# Architektur & Interne Module
 
-Dieses Modul bietet eine Alternative zu klassischen Modellen (XGBoost/Random Forest), indem es direkt auf den (anonymisierten) Rohdaten der E-Mails arbeitet.
+Dieser Abschnitt beschreibt den internen Aufbau des E-Mail-Klassifikators und die Funktionsweise der Kernmodule.
 
-## Architektur
+## Kernmodule
 
-Die Architektur basiert auf einem **Transformer-Modell** (Standard: `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`), das für die Sequenzklassifizierung feinjustiert wird.
+### `engine.py`
+Enthält die Basisklassen für die Klassifizierung:
+- **`EmailClassifier`**: Verwaltet das Laden von Modellen, Vorverarbeitung und Vorhersagen für klassische Modelle (RandomForest, XGBoost).
+- **`EmailTransformerClassifier`**: Eine PyTorch-basierte Implementierung für Transformer-Modelle.
+- **Vektorisierung**: Unterstützt TF-IDF, Embeddings (BGE-M3) und eine Kombination aus beiden.
 
-### Datenaufbereitung
+### `controller.py`
+Der `EmailController` orchestriert den Prozess:
+1. Laden der Konfiguration und des Modells.
+2. Parsen eingehender E-Mails.
+3. Aufruf der Klassifizierung.
+4. Entscheidung über weitere Aktionen (Sortierung, Antwortgenerierung).
 
-Anstatt den Text einfach als flachen String zu übergeben, werden die E-Mail-Komponenten strukturiert:
+## Transformer-Architektur
 
+Für die Deep-Learning-Klassifizierung wird ein Transformer-Modell (Standard: `paraphrase-multilingual-MiniLM-L12-v2`) verwendet.
+
+### Strukturierter Input
+E-Mails werden vor der Verarbeitung strukturiert, um wichtige Metadaten zu erhalten:
 ```text
 SUBJECT: <Betreff> | ATTACHMENTS: <Datei1.pdf, ...> [SEP] <E-Mail-Body (anonymisiert)>
 ```
+Dies ermöglicht es dem Modell, die starke Signalwirkung von Betreffzeilen explizit zu lernen.
 
-Dies ermöglicht es dem Modell, die starke Signalwirkung von Betreffzeilen und Dateinamen explizit zu lernen.
+### Fine-Tuning
+- Die Gewichte des Transformer-Backbones werden aktualisiert.
+- Ein Klassifizierungskopf (Linear Layer) wird auf den `[CLS]`-Token angewendet.
+- Maximale Sequenzlänge: 512 Token.
 
-## Training
-
-Das Modell wird mittels Fine-Tuning trainiert. Dabei werden:  
-1.  Die Gewichte des Transformer-Backbones aktualisiert.  
-2.  Ein Klassifizierungskopf (Linear Layer) auf den `[CLS]`-Token angewendet.  
-3.  Die E-Mails mit einer maximalen Sequenzlänge von 512 Token verarbeitet.  
-
-## Nutzung
-
-Um den Transformer-Modus zu nutzen, muss beim Training der Parameter `--method transformer` übergeben werden:
-
-```bash
-python -m email_classifier.train <data_dir> --method transformer
-```
-
-Der Vorteil gegenüber TF-IDF liegt in der Erfassung semantischer Ähnlichkeiten, was besonders bei variierenden Formulierungen in Studenten-E-Mails von Vorteil ist.
+## Datenfluss
+1. **Rohdaten**: .msg oder .eml Dateien.
+2. **Parser**: Extraktion von Text, Betreff und Anhängen.
+3. **Vorverarbeitung**: Anonymisierung (PII) und Strukturierung.
+4. **Modell**: Berechnung der Klassenwahrscheinlichkeiten.
+5. **Output**: Zuweisung einer Kategorie (z.B. `BachelorThesis`).
