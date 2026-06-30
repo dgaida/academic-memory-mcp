@@ -2,17 +2,17 @@
 
 Dieses Package enthält alle Funktionalitäten für das Training, die Validierung und den Test des E-Mail-Klassifikators für studentische E-Mails.
 
-## Features
-- **Multi-Modell-Unterstützung:** Klassifizierung mittels RandomForest, XGBoost oder Transformer (MiniLM).
-- **Flexible Merkmalsextraktion:** Unterstützt TF-IDF, semantische Embeddings (BGE-M3) oder eine Kombination aus beiden.
-- **Automatisierte Sortierung:** Skripte zur Einsortierung von E-Mails in Semester- und Studentenordner.
-- **Explainable AI (XAI):** Integration von SHAP zur Interpretation von Modellentscheidungen.
-- **Visualisierung:** Tools zur Analyse der Datenverteilung.
+## Features  
+- **Multi-Modell-Unterstützung:** Klassifizierung mittels RandomForest, XGBoost oder Transformer (MiniLM).  
+- **Flexible Merkmalsextraktion:** Unterstützt TF-IDF, semantische Embeddings (BGE-M3) oder eine Kombination aus beiden.  
+- **Automatisierte Sortierung:** Skripte zur Einsortierung von E-Mails in Semester- und Studentenordner.  
+- **Explainable AI (XAI):** Integration von SHAP zur Interpretation von Modellentscheidungen.  
+- **Visualisierung:** Tools zur Analyse der Datenverteilung.  
 
-## Ordnerstruktur
-- `src/email_classifier/`: Kernlogik und Controller.
-- `src/email_classifier/scripts/`: Benutzerorientierte CLI-Skripte.
-- `tests/`: Umfassende Testsuite für alle Komponenten.
+## Ordnerstruktur  
+- `src/email_classifier/`: Kernlogik und Controller.  
+- `src/email_classifier/scripts/`: Benutzerorientierte CLI-Skripte.  
+- `tests/`: Umfassende Testsuite für alle Komponenten.  
 
 ## Wichtige Skripte
 
