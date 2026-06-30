@@ -33,3 +33,24 @@ python -m email_classifier.scripts.evaluate /pfad/zu/testdaten --mode combined
 - Konsolenausgabe des `classification_report`.
 - Generierung einer Heatmap der Confusion Matrix als PNG.
 - Speicherung der Metriken in `metrics.json`.
+
+## Feature-Modellierung (Merkmalsextraktion)
+
+Der `EmailClassifier` unterstützt drei verschiedene Modi für die Merkmalsextraktion:
+
+1.  **TF-IDF (`tfidf`)**:
+    - **Funktionsweise:** Verwendet die Term Frequency-Inverse Document Frequency. Es werden Worthäufigkeiten gezählt und gewichtet.
+    - **Vorteile:** Schnell, gut interpretierbar, effektiv bei klar definierten Fachbegriffen.
+    - **Nachteile:** Ignoriert Wortreihenfolge und Semantik.
+
+2.  **Embeddings (`embedding`)**:
+    - **Funktionsweise:** Verwendet `Sentence-Transformers` (`BAAI/bge-m3`), um den Text in einen hochdimensionalen Vektorraum zu projizieren.
+    - **Vorteile:** Erfasst die semantische Bedeutung und Synonyme.
+    - **Nachteile:** Rechenintensiver, schwerer interpretierbar.
+
+3.  **Kombiniert (`combined`)**:
+    - **Funktionsweise:** Konkateniert die TF-IDF-Vektoren mit den Embedding-Vektoren.
+    - **Vorteile:** Kombiniert Präzision von Schlüsselwörtern mit tiefem semantischen Verständnis. Meist höchste Genauigkeit.
+
+### Modell-Benennung
+Beim Training wird die gewählte Methode und der Modus automatisch an den Dateinamen angehängt (z.B. `email_classifier_transformer.pkl`), um eine Verwechslung der Modelle zu vermeiden.

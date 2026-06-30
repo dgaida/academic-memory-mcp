@@ -82,10 +82,11 @@ Delete all temporary files before submission:
 
 ## Development Workflow  
 1. **Environment:** `pip install -e .`  
-2. **CLI Usage:** Use `mcp-uni` CLI for testing indexing and search.  
-3. **Database Sync:** Use `mcp-uni db sync-students` after updating `students.yaml`.  
-4. **Parsers:** When adding new parsers, update `mcp_university/parser/factory.py`.  
-5. **MCP Server:** Keep the MCP server tools in `mcp_university/mcp_server/server.py` updated with new capabilities.  
+2. **Conda Support:** The system officially supports Conda. Use `conda env create -f environment.yml` to set up the environment.
+3. **CLI Usage:** Use `mcp-uni` CLI for testing indexing and search.
+4. **Database Sync:** Use `mcp-uni db sync-students` after updating `students.yaml`.
+5. **Parsers:** When adding new parsers, update `mcp_university/parser/factory.py`.
+6. **MCP Server:** Keep the MCP server tools in `mcp_university/mcp_server/server.py` updated with new capabilities.
 
 ## Outlook Macro Maintenance  
 - Keep VBA documentation in Google-style (`''' Args:`, `''' Returns:`).  

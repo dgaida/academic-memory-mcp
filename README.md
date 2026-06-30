@@ -67,6 +67,8 @@ academic-memory-mcp/
 ## Installation
 ```bash
 pip install -e .
+# Or using conda
+conda env create -f environment.yml
 ```
 
 ## Usage
