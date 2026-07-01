@@ -329,6 +329,7 @@ class PersonProfiler:
 
         batches = self.create_batches(emails) if emails else [[]]
         current_profile = ""
+        honorific = self._determine_honorific(emails)
 
         for i, batch in enumerate(batches):
             logger.info(f"Verarbeite Batch {i+1}/{len(batches)} für {email_address}")
@@ -339,7 +340,7 @@ class PersonProfiler:
                 batch_content += f"Betreff: {details['subject']}\n"
                 batch_content += f"Inhalt: {details['body'][:1000]}...\n"
 
-            prompt = self._get_profiling_prompt(email_address, batch_content, current_profile, kg_context)
+            prompt = self._get_profiling_prompt(email_address, batch_content, current_profile, honorific, kg_context)
             response = self.llm.chat([{"role": "user", "content": prompt}])
             current_profile = response["message"]["content"]
 
@@ -398,6 +399,7 @@ class PersonProfiler:
         kg_context = self._get_knowledge_graph_context(email_address)
         batches = self.create_batches(new_emails)
         current_profile = existing_profile
+        honorific = self._determine_honorific(all_emails)
 
         for i, batch in enumerate(batches):
             logger.info(f"Verarbeite Update-Batch {i+1}/{len(batches)} für {email_address}")
@@ -408,7 +410,7 @@ class PersonProfiler:
                 batch_content += f"Betreff: {details['subject']}\n"
                 batch_content += f"Inhalt: {details['body'][:1000]}...\n"
 
-            prompt = self._get_profiling_prompt(email_address, batch_content, current_profile, kg_context)
+            prompt = self._get_profiling_prompt(email_address, batch_content, current_profile, honorific, kg_context)
             response = self.llm.chat([{"role": "user", "content": prompt}])
             current_profile = response["message"]["content"]
 
@@ -446,6 +448,52 @@ class PersonProfiler:
         """
         return self.update_profile(email_address)
 
+    def _determine_honorific(self, emails: List[Dict[str, Any]]) -> str:
+        """Bestimmt die bevorzugte Anrede (Du/Sie) basierend auf den 3 neuesten E-Mails.
+
+        Args:
+            emails (List[Dict[str, Any]]): Liste der E-Mails.
+
+        Returns:
+            str: "Du" oder "Sie".
+        """
+        if not emails:
+            return "Sie"
+
+        # Sortieren nach Datum absteigend und die neuesten 3 nehmen
+        # Wir schauen sowohl in 'date' (für find_emails_for_address Ergebnisse)
+        # als auch in 'details'['date'] (für Batch-Inhalte)
+        def get_date(m):
+            if "date" in m:
+                return m["date"]
+            return m["details"].get("date", datetime.min)
+
+        sorted_emails = sorted(emails, key=get_date, reverse=True)
+        latest_emails = sorted_emails[:3]
+
+        for mail in latest_emails:
+            details = mail.get("details", mail)
+            body = details.get("body", "")
+            subject = details.get("subject", "")
+
+            prompt = f"""Analysiere die folgende E-Mail und bestimme, ob die Person mit "Du" oder "Sie" angesprochen wird (oder selbst "Du" oder "Sie" verwendet).
+Betreff: {subject}
+Inhalt: {body[:1000]}
+
+Antworte NUR mit "Du", "Sie" oder "Unklar".
+"""
+            try:
+                response = self.llm.chat([{"role": "user", "content": prompt}])
+                res = response["message"]["content"].strip().lower()
+                if "du" in res:
+                    return "Du"
+                if "sie" in res:
+                    return "Sie"
+            except Exception as e:
+                logger.warning(f"Fehler bei der Honorific-Bestimmung für eine Mail: {e}")
+
+        return "Sie"
+
     def _get_sources_text(self, emails: List[Dict[str, Any]], kg_context: str) -> str:
         """Erstellt den Text für den Quellen-Abschnitt.
 
@@ -473,13 +521,14 @@ class PersonProfiler:
 
         return "\n\n## Quellen\n" + "\n".join(sources) + "\n"
 
-    def _get_profiling_prompt(self, email: str, new_content: str, existing_profile: str, kg_context: str = "") -> str:
+    def _get_profiling_prompt(self, email: str, new_content: str, existing_profile: str, honorific_preference: str, kg_context: str = "") -> str:
         """Erstellt den Prompt für das LLM.
 
         Args:
             email (str): E-Mail-Adresse.
             new_content (str): Neuer E-Mail-Inhalt (Batch).
             existing_profile (str): Bisheriger Steckbrief.
+            honorific_preference (str): Vorab bestimmte Anrede (Du/Sie).
             kg_context (str): Informationen aus dem Wissensgraphen.
 
         Returns:
@@ -508,7 +557,7 @@ Falls die E-Mailadresse NICHT "th-koeln" enthält, handelt es sich um eine exter
 Erstelle einen strukturierten Steckbrief in Markdown mit folgenden Punkten:
 1. Name und E-Mailadresse
 2. Rolle (z.B. Studierende, Lehrende, Mitarbeiter, Professor, externer Partner, ...)
-3. Bevorzugte Anrede (Du oder Sie? Analyse basierend auf dem Ton der E-Mails)
+3. Bevorzugte Anrede (Setze hier zwingend den Wert: {honorific_preference})
 4. Datum des ersten Kontakts
 5. Bei externen Personen: Unternehmensname, Branche und Kontaktdaten (falls bekannt)
 6. Wichtige Stationen/Ereignisse:
