@@ -68,7 +68,7 @@ def test_profiling_prompt_includes_kg(profiler):
     new_content = "MAIL CONTENT"
     existing_profile = ""
 
-    prompt = profiler._get_profiling_prompt(email, new_content, existing_profile, kg_context)
+    prompt = profiler._get_profiling_prompt(email, new_content, existing_profile, "Sie", kg_context)
 
     assert "KG INFO" in prompt
     assert "Hier sind die neuen E-Mails:" in prompt

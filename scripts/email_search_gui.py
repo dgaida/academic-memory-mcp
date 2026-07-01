@@ -6,7 +6,7 @@ import subprocess
 import pandas as pd
 import gradio as gr
 from pathlib import Path
-from typing import List, Dict, Any, Tuple, Optional
+from typing import Dict, Any, Tuple, Optional
 
 from mcp_university.utils.email_search import EmailSearchEngine
 from mcp_university.parser.mail_parser import MailParser
