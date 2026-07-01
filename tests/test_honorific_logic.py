@@ -15,7 +15,7 @@ def mock_profiler():
 
         with patch('mcp_university.summarizer.profiler.MetadataStore'), \
              patch('mcp_university.summarizer.profiler.MailParser'), \
-             patch('mcp_university.summarizer.profiler.LLMClientWrapper') as mock_llm_wrapper, \
+             patch('mcp_university.summarizer.profiler.LLMClientWrapper'), \
              patch('mcp_university.summarizer.profiler.ProfileStore'):
 
             profiler = PersonProfiler(storage_path=Path("/tmp/steckbriefe"))
