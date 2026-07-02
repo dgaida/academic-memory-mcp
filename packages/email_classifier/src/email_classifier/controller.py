@@ -313,17 +313,21 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
 
         if honorific == "Du":
             salutation = f"Hallo {first_name}" if first_name != "Unknown" else "Hallo"
+            signature = "Viele Grüße, Daniel"
         else:
-            salutation = f"Guten Tag {self.summarizer.determine_gender(first_name)} {email_data.get('lastname', '')}"
+            salutation = f"Guten Tag {self.summarizer.determine_gender(first_name)} {email_data.get("lastname", "")}"
+            signature = "Viele Grüße, Daniel Gaida"
         
         if detected_language == "English":
             if honorific == "Du":
                 salutation = f"Hi {first_name}" if first_name != "Unknown" else "Hi"
+                signature = "Best regards, Daniel"
             else:
-                salutation = f"Dear {self.summarizer.determine_gender(first_name)} {email_data.get('lastname', '')}"
+                salutation = f"Dear {self.summarizer.determine_gender(first_name)} {email_data.get("lastname", "")}"
                 # Map Herr/Frau to Mr./Ms.
                 salutation = salutation.replace("Herr", "Mr.").replace("Frau", "Ms.")
-        add_ctx = f"Anrede: {salutation}\n"
+                signature = "Best regards, Daniel Gaida"
+        add_ctx = f"Anrede: {salutation}\nAbschluss: {signature}\n"
         if user_profile:
             add_ctx += (
                 f"\nDein eigener Steckbrief (Nutzer des Tools):\n{user_profile}\n"
@@ -1128,16 +1132,20 @@ TEXT:
 
             if honorific == "Du":
                 salutation = f"Hallo {first_name}" if first_name != "Unknown" else "Hallo"
+                signature = "Viele Grüße, Daniel"
             else:
-                salutation = f"Guten Tag {self.summarizer.determine_gender(first_name)} {email['lastname']}"
+                salutation = f"Guten Tag {self.summarizer.determine_gender(first_name)} {email["lastname"]}"
+                signature = "Viele Grüße, Daniel Gaida"
             
             if detected_language == "English":
                 if honorific == "Du":
                     salutation = f"Hi {first_name}" if first_name != "Unknown" else "Hi"
+                    signature = "Best regards, Daniel"
                 else:
-                    salutation = f"Dear {self.summarizer.determine_gender(first_name)} {email['lastname']}"
+                    salutation = f"Dear {self.summarizer.determine_gender(first_name)} {email["lastname"]}"
                     salutation = salutation.replace("Herr", "Mr.").replace("Frau", "Ms.")
-            add_ctx = f"Anrede: {salutation}\n"
+                    signature = "Best regards, Daniel Gaida"
+            add_ctx = f"Anrede: {salutation}\nAbschluss: {signature}\n"
             if user_profile:
                 add_ctx += (
                     f"\nDein eigener Steckbrief (Nutzer des Tools):\n{user_profile}\n"
