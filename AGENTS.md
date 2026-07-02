@@ -129,6 +129,7 @@ The script `scripts/crawl_th_koeln_persons.py` is used to fetch personnel data.
 
 ## Steckbrieferstellung (PersonProfiler)  
 - Um die Performance zu gewährleisten und die Kontextgröße des LLM nicht zu sprengen, werden bei der Erstellung oder Aktualisierung eines Steckbriefs maximal die **100 neuesten E-Mails** einer Person berücksichtigt.  
+- Bei der Aktualisierung eines bestehenden Steckbriefs werden nur E-Mails berücksichtigt, die neuer sind als die Steckbrief-Datei selbst (Dateidatum).
 
 ## Email Handling Rules
 ### Email Parsing Rules (CRITICAL)  
