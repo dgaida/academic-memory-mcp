@@ -39,7 +39,22 @@ Füllt Trainings- und Testdaten mit alten E-Mails aus den Originalverzeichnissen
 ```bash
 python scripts/replenish_datasets.py -n 100
 ```
-Das Skript prüft für jede Klasse in den Trainings- und Testordnern, ob mindestens `N` (Default: 100) E-Mails in den Unterordnern `Inbox` und `SentItems` liegen. Ist dies nicht der Fall, wird in den in `config/classifier_paths.yaml` definierten Quellverzeichnissen nach E-Mails gesucht, die älter als ein Jahr sind, und diese werden verschoben. Quellverzeichnisse, die danach nur noch Zusammenfassungsdateien enthalten, werden gelöscht.
+Das Skript prüft für jede Klasse in den Trainings- und Testordnern, ob mindestens `N` (Default: 100) E-Mails in den Unterordnern `Inbox` und `SentItems` liegen. Ist dies nicht der Fall, sucht das Skript rekursiv in den in `config/classifier_paths.yaml` definierten Quellverzeichnissen nach Unterordnern namens `Inbox` und `SentItems`. Dies unterstützt hierarchische Strukturen wie:
+
+```text
+SourcePath/
+├── 2025_SoSe/
+│   ├── Peters/
+│   │   ├── Inbox/
+│   │   └── SentItems/
+│   └── Meier/
+│       ├── Inbox/
+│       └── SentItems/
+└── 2024_25_WS/
+    └── ...
+```
+
+Das Skript findet alle passenden Ordner und verschiebt E-Mails, die älter als ein Jahr sind, bis das Zielkontingent erreicht ist. Quellverzeichnisse, die danach nur noch Zusammenfassungsdateien enthalten, werden gelöscht.
 
 ### Klassen zusammenfassen (Data Augmentation)
 Analysiert Trainingsordner und erstellt LLM-Zusammenfassungen für Klassen mit wenigen Daten (<= 50 E-Mails). Diese Zusammenfassungen enthalten Informationen über Themen, Stil und beteiligtes Personal aus der `th_personal.db`.

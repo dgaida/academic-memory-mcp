@@ -15,7 +15,7 @@ from scripts.replenish_datasets import (
 
 @pytest.fixture
 def temp_env(tmp_path: Path) -> dict:
-    """Erstellt eine temporäre Umgebung für Tests.
+    """Erstellt eine temporäre Umgebung für Tests mit verschachtelter Struktur.
 
     Args:
         tmp_path: Temporärer Pfad von pytest.
@@ -35,14 +35,18 @@ def temp_env(tmp_path: Path) -> dict:
     # Klassenordner
     class_name = "ClassA"
     (train_dir / class_name / "Inbox").mkdir(parents=True)
-    (source_base / class_name / "Inbox").mkdir(parents=True)
+
+    # Verschachtelte Quellstruktur: Semester/Person/Inbox
+    source_class_dir = source_base / class_name
+    source_nested_inbox = source_class_dir / "2025_SoSe" / "Peters" / "Inbox"
+    source_nested_inbox.mkdir(parents=True)
 
     # Konfigurationen
     paths_cfg = tmp_path / "paths.yaml"
     folders_cfg = tmp_path / "folders.yaml"
 
     with open(paths_cfg, "w", encoding='utf-8') as f:
-        yaml.dump({"class_paths": {class_name: str(source_base / class_name)}}, f)
+        yaml.dump({"class_paths": {class_name: str(source_class_dir)}}, f)
 
     with open(folders_cfg, "w", encoding='utf-8') as f:
         yaml.dump({"train_path": str(train_dir), "test_path": str(test_dir)}, f)
@@ -51,6 +55,8 @@ def temp_env(tmp_path: Path) -> dict:
         "tmp_path": tmp_path,
         "train_dir": train_dir,
         "source_base": source_base,
+        "source_class_dir": source_class_dir,
+        "source_nested_inbox": source_nested_inbox,
         "paths_cfg": paths_cfg,
         "folders_cfg": folders_cfg,
         "class_name": class_name
@@ -90,17 +96,20 @@ def test_is_older_than_one_year() -> None:
 
 
 def test_cleanup_folder(tmp_path: Path) -> None:
-    """Testet das Löschen eines "leeren" Ordners.
+    """Testet das Löschen eines "leeren" Ordners und seiner Eltern.
 
     Args:
         tmp_path: Temporärer Pfad von pytest.
     """
-    folder = tmp_path / "cleanup"
-    folder.mkdir()
-    (folder / ".Inbox_summary.md").write_text("summary", encoding='utf-8')
+    base = tmp_path / "base"
+    nested = base / "level1" / "level2"
+    nested.mkdir(parents=True)
+    (nested / ".Inbox_summary.md").write_text("summary", encoding='utf-8')
 
-    cleanup_folder(folder)
-    assert not folder.exists()
+    cleanup_folder(nested, base)
+    assert not nested.exists()
+    assert not (base / "level1").exists()
+    assert base.exists()
 
 
 def test_cleanup_folder_not_empty(tmp_path: Path) -> None:
@@ -109,65 +118,72 @@ def test_cleanup_folder_not_empty(tmp_path: Path) -> None:
     Args:
         tmp_path: Temporärer Pfad von pytest.
     """
-    folder = tmp_path / "no_cleanup"
-    folder.mkdir()
+    base = tmp_path / "base"
+    folder = base / "no_cleanup"
+    folder.mkdir(parents=True)
     (folder / "keep.msg").write_text("content", encoding='utf-8')
 
-    cleanup_folder(folder)
+    cleanup_folder(folder, base)
     assert folder.exists()
 
 
-def test_process_dataset_moves_files(temp_env: dict) -> None:
-    """Testet, ob E-Mails korrekt verschoben werden.
+def test_process_dataset_moves_files_recursively(temp_env: dict) -> None:
+    """Testet, ob E-Mails rekursiv korrekt verschoben werden.
 
     Args:
         temp_env: Temporäre Testumgebung.
     """
     class_name = temp_env["class_name"]
-    source_inbox = temp_env["source_base"] / class_name / "Inbox"
+    source_nested_inbox = temp_env["source_nested_inbox"]
     target_inbox = temp_env["train_dir"] / class_name / "Inbox"
 
-    # Eine alte E-Mail in der Quelle erstellen
-    old_mail = source_inbox / "old.msg"
+    # Eine alte E-Mail in der verschachtelten Quelle erstellen
+    old_mail = source_nested_inbox / "old.msg"
     old_mail.write_text("old content", encoding='utf-8')
 
     # Parser simulieren, der ein altes Datum liefert
     parser = MagicMock()
     parser.get_email_date.return_value = datetime.now() - timedelta(days=500)
 
-    class_paths = {class_name: str(temp_env["source_base"] / class_name)}
+    class_paths = {class_name: str(temp_env["source_class_dir"])}
 
     process_dataset(temp_env["train_dir"], class_paths, n=1, parser=parser)
 
     assert (target_inbox / "old.msg").exists()
     assert not old_mail.exists()
-    # Quellordner sollte gelöscht sein, wenn er nach dem Verschieben leer war
-    assert not source_inbox.exists()
+    # Gesamte Quellstruktur sollte gelöscht sein, wenn sie leer war
+    assert not temp_env["source_nested_inbox"].exists()
+    assert not (temp_env["source_class_dir"] / "2025_SoSe").exists()
 
 
-def test_process_dataset_not_moving_if_enough(temp_env: dict) -> None:
-    """Testet, dass nichts verschoben wird, wenn genug E-Mails da sind.
+def test_process_dataset_multiple_sources(temp_env: dict) -> None:
+    """Testet das Verschieben aus mehreren Quellordnern bis n erreicht ist.
 
     Args:
         temp_env: Temporäre Testumgebung.
     """
     class_name = temp_env["class_name"]
-    source_inbox = temp_env["source_base"] / class_name / "Inbox"
-    target_inbox = temp_env["train_dir"] / class_name / "Inbox"
+    source_class_dir = temp_env["source_class_dir"]
 
-    # E-Mail im Ziel erstellen
-    (target_inbox / "existing.msg").write_text("content", encoding='utf-8')
+    # Zwei Quellordner erstellen
+    src1 = source_class_dir / "Sem1" / "PersonA" / "Inbox"
+    src2 = source_class_dir / "Sem2" / "PersonB" / "Inbox"
+    src1.mkdir(parents=True)
+    src2.mkdir(parents=True)
 
-    # E-Mail in der Quelle erstellen
-    (source_inbox / "source.msg").write_text("content", encoding='utf-8')
+    (src1 / "mail1.msg").write_text("mail1", encoding='utf-8')
+    (src2 / "mail2.msg").write_text("mail2", encoding='utf-8')
 
     parser = MagicMock()
     parser.get_email_date.return_value = datetime.now() - timedelta(days=500)
 
-    class_paths = {class_name: str(temp_env["source_base"] / class_name)}
+    class_paths = {class_name: str(source_class_dir)}
 
-    # Wir brauchen nur eine, und wir haben schon eine
-    process_dataset(temp_env["train_dir"], class_paths, n=1, parser=parser)
+    # Wir brauchen 2 E-Mails
+    process_dataset(temp_env["train_dir"], class_paths, n=2, parser=parser)
 
-    assert not (target_inbox / "source.msg").exists()
-    assert (source_inbox / "source.msg").exists()
+    target_inbox = temp_env["train_dir"] / class_name / "Inbox"
+    assert (target_inbox / "mail1.msg").exists()
+    assert (target_inbox / "mail2.msg").exists()
+    assert not src1.exists()
+    assert not src2.exists()

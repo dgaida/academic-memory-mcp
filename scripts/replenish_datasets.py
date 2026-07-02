@@ -78,13 +78,15 @@ def is_older_than_one_year(file_path: Path, parser: MailParser) -> bool:
         return False
 
 
-def cleanup_folder(path: Path) -> None:
-    """Löscht einen Ordner, wenn er außer Zusammenfassungsdateien leer ist.
+def cleanup_folder(path: Path, base_path: Path) -> None:
+    """Löscht einen Ordner, wenn er außer Zusammenfassungsdateien leer ist,
+    und geht rekursiv nach oben bis zum Basisverzeichnis.
 
     Args:
         path: Der zu bereinigende Ordner.
+        base_path: Der Basisordner, der nicht gelöscht werden soll.
     """
-    if not path.exists() or not path.is_dir():
+    if not path.exists() or not path.is_dir() or path == base_path:
         return
 
     # Prüfen, ob der Ordner "leer" ist (nur Summary-Dateien oder nichts)
@@ -99,10 +101,12 @@ def cleanup_folder(path: Path) -> None:
                 if e.is_file():
                     e.unlink()
                 elif e.is_dir():
-                    cleanup_folder(e)
+                    cleanup_folder(e, base_path)
 
             if path.exists() and not any(path.iterdir()):
                 path.rmdir()
+                # Rekursiv den Elternordner prüfen
+                cleanup_folder(path.parent, base_path)
         except Exception as e:
             logger.error(f"Fehler beim Löschen von {path}: {e}")
 
@@ -136,35 +140,42 @@ def process_dataset(dataset_path: Path, class_paths: Dict[str, str], n: int, par
 
             if count_before < n:
                 needed = n - count_before
-                source_dir = Path(source_base_path_str) / subfolder
+                source_base_path = Path(source_base_path_str)
 
-                logger.info(f"Suche in {source_dir} nach Nachschub...")
-                if not source_dir.exists():
-                    logger.warning(f"Quellverzeichnis {source_dir} existiert nicht.")
+                logger.info(f"Suche rekursiv in {source_base_path} nach '{subfolder}'...")
+                if not source_base_path.exists():
+                    logger.warning(f"Quellbasisverzeichnis {source_base_path} existiert nicht.")
                     continue
 
-                moved_count = 0
-                # Alle potenziellen E-Mails holen
-                source_emails = [f for f in source_dir.glob("*") if f.suffix.lower() in {".msg", ".eml"}]
+                # Rekursiv nach allen Unterordnern mit dem Namen (Inbox/SentItems) suchen
+                source_dirs = [d for d in source_base_path.rglob(subfolder) if d.is_dir()]
 
-                for email_file in source_emails:
+                moved_count = 0
+                for source_dir in source_dirs:
                     if moved_count >= needed:
                         break
 
-                    if is_older_than_one_year(email_file, parser):
-                        dest = target_dir / email_file.name
-                        if not dest.exists():
-                            logger.info(f"Verschiebe {email_file} nach {target_dir}")
-                            shutil.move(str(email_file), str(dest))
-                            moved_count += 1
-                        else:
-                            logger.debug(f"Datei {email_file.name} existiert bereits im Ziel, überspringe.")
+                    # Alle potenziellen E-Mails holen
+                    source_emails = [f for f in source_dir.glob("*") if f.suffix.lower() in {".msg", ".eml"}]
+
+                    for email_file in source_emails:
+                        if moved_count >= needed:
+                            break
+
+                        if is_older_than_one_year(email_file, parser):
+                            dest = target_dir / email_file.name
+                            if not dest.exists():
+                                logger.info(f"Verschiebe {email_file} nach {target_dir}")
+                                shutil.move(str(email_file), str(dest))
+                                moved_count += 1
+                            else:
+                                logger.debug(f"Datei {email_file.name} existiert bereits im Ziel, überspringe.")
+
+                    # Quellordner bereinigen, wenn er jetzt leer ist (ohne Summaries)
+                    cleanup_folder(source_dir, source_base_path)
 
                 count_after = get_email_count(target_dir)
                 logger.info(f"Abgeschlossen {target_dir}: {count_after} E-Mails insgesamt (verschoben {moved_count}).")
-
-                # Quellordner bereinigen, wenn er jetzt leer ist (ohne Summaries)
-                cleanup_folder(source_dir)
             else:
                 logger.info(f"{target_dir} hat bereits genug E-Mails ({count_before} >= {n}).")
 
