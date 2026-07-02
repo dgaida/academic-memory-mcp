@@ -30,6 +30,13 @@ Restructures the classifier's training and test data to prepare it for training.
 python scripts/restructure_classifier_data.py
 ```
 
+### Replenish Datasets
+Replenishes training and test data with old emails from the original directories if a minimum count is not met.
+```bash
+python scripts/replenish_datasets.py -n 100
+```
+The script checks for each class in the training and test folders if at least `N` (default: 100) emails are present in the `Inbox` and `SentItems` subfolders. If not, it searches the source directories defined in `config/classifier_paths.yaml` for emails older than one year and moves them. Source directories that only contain summary files after the move are deleted.
+
 ### Summarize Classes (Data Augmentation)
 Analyzes training folders and creates LLM summaries for classes with limited data (<= 50 emails). These summaries include information about topics, style, and personnel identified from `th_personal.db`.
 ```bash
