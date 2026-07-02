@@ -20,7 +20,7 @@ If no profile exists for an email address, it is automatically created when atte
 ### Automatic Updates
 Profiles are dynamic. The system tracks which emails have already been used for profile generation in a separate database (`profiles_tracking.db`).
 
-When new emails for a person are found in the system, the existing profile is automatically updated by the LLM, using the old profile as a base and integrating only the new information.
+When new emails for a person are found in the system, the existing profile is automatically updated by the LLM. Only emails that have not yet been processed and are newer than the last modification of the profile file are considered. The old profile serves as a base into which only the new information is integrated.
 
 ## CLI Commands
 

@@ -5,7 +5,7 @@ import logging
 import yaml
 from pathlib import Path
 from typing import List, Dict, Any, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from mcp_university.config import get_config
 from mcp_university.parser.mail_parser import MailParser
 from mcp_university.utils.llm_client_wrapper import LLMClientWrapper
@@ -361,6 +361,9 @@ class PersonProfiler:
     def update_profile(self, email_address: str) -> Optional[str]:
         """Aktualisiert den Steckbrief einer Person, falls neue E-Mails vorhanden sind.
 
+        Dabei werden nur E-Mails berücksichtigt, die sowohl noch nicht in der Tracking-Datenbank
+        erfasst sind als auch ein neueres Datum als die Steckbrief-Datei selbst haben.
+
         Für den Tool-Nutzer (user.yaml) wird der Steckbrief nur aus dem Wissensgraphen
         und der Konfiguration aktualisiert, nicht aus E-Mails.
 
@@ -381,6 +384,9 @@ class PersonProfiler:
 
         existing_profile = profile_file.read_text(encoding="utf-8")
 
+        # Bestimme das Alter des aktuellen Steckbriefs
+        profile_mtime = datetime.fromtimestamp(profile_file.stat().st_mtime, tz=timezone.utc)
+
         # Bestehende Quellen entfernen, damit sie nicht in den Prompt gelangen
         if "## Quellen" in existing_profile:
             existing_profile = existing_profile.split("## Quellen")[0].strip()
@@ -388,13 +394,35 @@ class PersonProfiler:
         processed_files = self.profile_store.get_processed_filenames(email_address)
         
         all_emails = self.find_emails_for_address(email_address)
-        new_emails = [m for m in all_emails if m["path"].name not in processed_files]
+
+        # Filtern:
+        # 1. Nicht bereits verarbeitet (Tracking DB)
+        # 2. Datum der Mail ist neuer als die Steckbrief-Datei
+        new_emails = []
+        for m in all_emails:
+            if m["path"].name in processed_files:
+                continue
+
+            # Das Datum kann direkt im Dictionary oder in 'details' liegen
+            mail_date = m.get("date") or m.get("details", {}).get("date")
+
+            if not isinstance(mail_date, datetime):
+                try:
+                    mail_date = datetime.fromisoformat(str(mail_date).replace("Z", "+00:00"))
+                except (ValueError, TypeError):
+                    mail_date = datetime.min.replace(tzinfo=timezone.utc)
+
+            if mail_date.tzinfo is None:
+                mail_date = mail_date.replace(tzinfo=timezone.utc)
+
+            if mail_date > profile_mtime:
+                new_emails.append(m)
 
         if not new_emails:
-            logger.info(f"Keine neuen E-Mails für {email_address} gefunden.")
+            logger.info(f"Keine neuen E-Mails für {email_address} nach dem {profile_mtime} gefunden.")
             return existing_profile
 
-        logger.info(f"{len(new_emails)} neue E-Mails für {email_address} gefunden. Aktualisiere Steckbrief...")
+        logger.info(f"{len(new_emails)} neue E-Mails für {email_address} nach dem {profile_mtime} gefunden. Aktualisiere Steckbrief...")
         
         kg_context = self._get_knowledge_graph_context(email_address)
         batches = self.create_batches(new_emails)
@@ -464,6 +492,7 @@ class PersonProfiler:
         # Wir schauen sowohl in 'date' (für find_emails_for_address Ergebnisse)
         # als auch in 'details'['date'] (für Batch-Inhalte)
         def get_date(m):
+            """Hilfsfunktion zum Auslesen des Datums."""
             if "date" in m:
                 return m["date"]
             return m["details"].get("date", datetime.min)

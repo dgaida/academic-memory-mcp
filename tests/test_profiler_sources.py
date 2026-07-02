@@ -1,5 +1,7 @@
 """Tests for test_profiler_sources.py."""
 import pytest
+from datetime import datetime
+import os
 from unittest.mock import MagicMock, patch
 from pathlib import Path
 from mcp_university.summarizer.profiler import PersonProfiler
@@ -56,6 +58,9 @@ def test_update_profile_updates_sources(profiler, mock_store, mock_profile_store
     # Initial profile
     initial_content = "# Test Profile\nDetails here.\n\n## Quellen\n- Wissensgraph\n- Ordner: /data/folder1\n"
     profile_file.write_text(initial_content, encoding="utf-8")
+    # Set mtime to past so that 2023 emails are considered 'new'
+    past_date = datetime(2022, 1, 1).timestamp()
+    os.utime(profile_file, (past_date, past_date))
 
     # Mock emails
     all_emails = [
