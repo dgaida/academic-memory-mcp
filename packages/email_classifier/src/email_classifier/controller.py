@@ -311,22 +311,25 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
         detected_language = self._detect_language(mail_text)
         honorific = self._extract_honorific_preference(person_profile)
 
+        user_full_name = self.config.user.name
+        user_first_name = user_full_name.split()[0] if user_full_name else "Daniel"
+
         if honorific == "Du":
             salutation = f"Hallo {first_name}" if first_name != "Unknown" else "Hallo"
-            signature = "Viele Grüße, Daniel"
+            signature = f"Viele Grüße,\n{user_first_name}"
         else:
             salutation = f"Guten Tag {self.summarizer.determine_gender(first_name)} {email_data.get('lastname', '')}"
-            signature = "Viele Grüße, Daniel Gaida"
+            signature = f"Viele Grüße,\n{user_full_name}"
         
         if detected_language == "English":
             if honorific == "Du":
                 salutation = f"Hi {first_name}" if first_name != "Unknown" else "Hi"
-                signature = "Best regards, Daniel"
+                signature = f"Best regards,\n{user_first_name}"
             else:
                 salutation = f"Dear {self.summarizer.determine_gender(first_name)} {email_data.get('lastname', '')}"
                 # Map Herr/Frau to Mr./Ms.
                 salutation = salutation.replace("Herr", "Mr.").replace("Frau", "Ms.")
-                signature = "Best regards, Daniel Gaida"
+                signature = f"Best regards,\n{user_full_name}"
         add_ctx = f"Anrede: {salutation}\nAbschluss: {signature}\n"
         if user_profile:
             add_ctx += (
@@ -1130,21 +1133,24 @@ TEXT:
             detected_language = self._detect_language(mail_text)
             honorific = self._extract_honorific_preference(person_profile)
 
+            user_full_name = self.config.user.name
+            user_first_name = user_full_name.split()[0] if user_full_name else "Daniel"
+
             if honorific == "Du":
                 salutation = f"Hallo {first_name}" if first_name != "Unknown" else "Hallo"
-                signature = "Viele Grüße, Daniel"
+                signature = f"Viele Grüße,\n{user_first_name}"
             else:
                 salutation = f"Guten Tag {self.summarizer.determine_gender(first_name)} {email['lastname']}"
-                signature = "Viele Grüße, Daniel Gaida"
+                signature = f"Viele Grüße,\n{user_full_name}"
             
             if detected_language == "English":
                 if honorific == "Du":
                     salutation = f"Hi {first_name}" if first_name != "Unknown" else "Hi"
-                    signature = "Best regards, Daniel"
+                    signature = f"Best regards,\n{user_first_name}"
                 else:
                     salutation = f"Dear {self.summarizer.determine_gender(first_name)} {email['lastname']}"
                     salutation = salutation.replace("Herr", "Mr.").replace("Frau", "Ms.")
-                    signature = "Best regards, Daniel Gaida"
+                    signature = f"Best regards,\n{user_full_name}"
             add_ctx = f"Anrede: {salutation}\nAbschluss: {signature}\n"
             if user_profile:
                 add_ctx += (

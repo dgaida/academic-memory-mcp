@@ -1,6 +1,5 @@
 import pytest
 from unittest.mock import MagicMock, patch
-
 from email_classifier.controller import EmailController
 
 @pytest.fixture
@@ -16,6 +15,7 @@ def test_signature_logic_du(controller, tmp_path):
     controller._detect_language = MagicMock(return_value="German")
     controller._extract_honorific_preference = MagicMock(return_value="Du")
     controller.generate_reply = MagicMock(return_value=("Sub", "Text", False))
+    controller.config.user.name = "Max Maus"
 
     email_data = {"lastname": "Mustermann", "class": "Other"}
 
@@ -27,7 +27,7 @@ def test_signature_logic_du(controller, tmp_path):
 
     args, kwargs = controller.generate_reply.call_args
     add_ctx = args[5]
-    assert "Abschluss: Viele Grüße, Daniel" in add_ctx
+    assert "Abschluss: Viele Grüße,\nMax" in add_ctx
 
 def test_signature_logic_sie(controller, tmp_path):
     mail_path = tmp_path / "test.msg"
@@ -38,6 +38,7 @@ def test_signature_logic_sie(controller, tmp_path):
     controller._extract_honorific_preference = MagicMock(return_value="Sie")
     controller.summarizer.determine_gender = MagicMock(return_value="Herr")
     controller.generate_reply = MagicMock(return_value=("Sub", "Text", False))
+    controller.config.user.name = "Max Maus"
 
     email_data = {"lastname": "Mustermann", "class": "Other"}
 
@@ -48,4 +49,4 @@ def test_signature_logic_sie(controller, tmp_path):
 
     args, kwargs = controller.generate_reply.call_args
     add_ctx = args[5]
-    assert "Abschluss: Viele Grüße, Daniel Gaida" in add_ctx
+    assert "Abschluss: Viele Grüße,\nMax Maus" in add_ctx
