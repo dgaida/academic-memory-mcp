@@ -27,7 +27,7 @@ MCP University is an offline-first system for managing academic data (students, 
    - **Embedding Loading:** Always attempt `local_files_only=True` first. Log `ERFOLG: Modell ... wurde LOKAL geladen.` on success.  
 5. **Summarizer (`mcp_university/summarizer/`)**:  
    - German-localized summarization and Q&A using Ollama via `LLMClientWrapper`.  
-   - **Persona:** Daniel Gaida, Professor at TH Köln. Signature: Dependent on user name and honorific.
+   - **Persona:** Daniel Gaida, Professor at TH Köln. Signature: Dependent on user name and honorific.  
    - **Person Profiler:** Generates Markdown profiles (`Steckbriefe`) in `D:\Steckbriefe\<email>.md` based on email history.  
 6. **Metadata Store (`mcp_university/metadata/`)**:  
    - SQLite database for file metadata, student info, and folder summaries.  
