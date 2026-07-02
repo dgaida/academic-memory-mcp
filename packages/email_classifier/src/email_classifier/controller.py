@@ -315,7 +315,7 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
             salutation = f"Hallo {first_name}" if first_name != "Unknown" else "Hallo"
             signature = "Viele Grüße, Daniel"
         else:
-            salutation = f"Guten Tag {self.summarizer.determine_gender(first_name)} {email_data.get("lastname", "")}"
+            salutation = f"Guten Tag {self.summarizer.determine_gender(first_name)} {email_data.get('lastname', '')}"
             signature = "Viele Grüße, Daniel Gaida"
         
         if detected_language == "English":
@@ -323,7 +323,7 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
                 salutation = f"Hi {first_name}" if first_name != "Unknown" else "Hi"
                 signature = "Best regards, Daniel"
             else:
-                salutation = f"Dear {self.summarizer.determine_gender(first_name)} {email_data.get("lastname", "")}"
+                salutation = f"Dear {self.summarizer.determine_gender(first_name)} {email_data.get('lastname', '')}"
                 # Map Herr/Frau to Mr./Ms.
                 salutation = salutation.replace("Herr", "Mr.").replace("Frau", "Ms.")
                 signature = "Best regards, Daniel Gaida"
@@ -1062,7 +1062,7 @@ TEXT:
             if is_old:
                 self.processed_results.append(
                     {
-                        "lastname": email["lastname"],
+                        "lastname": email['lastname'],
                         "subject": latest_mail.stem,
                         "status": f"Übersprungen (> {age_months} Monate)",
                     }
@@ -1072,7 +1072,7 @@ TEXT:
             if not needs_answer:
                 self.processed_results.append(
                     {
-                        "lastname": email["lastname"],
+                        "lastname": email['lastname'],
                         "subject": latest_mail.stem,
                         "status": "Bereits beantwortet (Übersprungen)",
                     }
@@ -1084,7 +1084,7 @@ TEXT:
             try:
                 with extract_msg.openMsg(str(latest_mail)) as msg:
                     student_email = msg.sender
-                    sender_name = msg.senderName or email["lastname"]
+                    sender_name = msg.senderName or email['lastname']
             except Exception:
                 pass
 
@@ -1134,7 +1134,7 @@ TEXT:
                 salutation = f"Hallo {first_name}" if first_name != "Unknown" else "Hallo"
                 signature = "Viele Grüße, Daniel"
             else:
-                salutation = f"Guten Tag {self.summarizer.determine_gender(first_name)} {email["lastname"]}"
+                salutation = f"Guten Tag {self.summarizer.determine_gender(first_name)} {email['lastname']}"
                 signature = "Viele Grüße, Daniel Gaida"
             
             if detected_language == "English":
@@ -1142,7 +1142,7 @@ TEXT:
                     salutation = f"Hi {first_name}" if first_name != "Unknown" else "Hi"
                     signature = "Best regards, Daniel"
                 else:
-                    salutation = f"Dear {self.summarizer.determine_gender(first_name)} {email["lastname"]}"
+                    salutation = f"Dear {self.summarizer.determine_gender(first_name)} {email['lastname']}"
                     salutation = salutation.replace("Herr", "Mr.").replace("Frau", "Ms.")
                     signature = "Best regards, Daniel Gaida"
             add_ctx = f"Anrede: {salutation}\nAbschluss: {signature}\n"
@@ -1181,7 +1181,7 @@ TEXT:
             if reply_subject == "NO_REPLY_NEEDED":
                 self.processed_results.append(
                     {
-                        "lastname": email["lastname"],
+                        "lastname": email['lastname'],
                         "subject": latest_mail.stem,
                         "status": f"Keine Antwort erforderlich ({reply})",
                     }
@@ -1193,7 +1193,7 @@ TEXT:
                 status = f"Termin gebucht ({apt_info['start_time']})"
                 self.processed_results.append(
                     {
-                        "lastname": email["lastname"],
+                        "lastname": email['lastname'],
                         "subject": latest_mail.stem,
                         "status": status,
                     }
@@ -1203,7 +1203,7 @@ TEXT:
             if reply.startswith("APPOINTMENT_BOOKING_FAILED"):
                 self.processed_results.append(
                     {
-                        "lastname": email["lastname"],
+                        "lastname": email['lastname'],
                         "subject": latest_mail.stem,
                         "status": reply,
                     }
@@ -1234,7 +1234,7 @@ TEXT:
 
             self.processed_results.append(
                 {
-                    "lastname": email["lastname"],
+                    "lastname": email['lastname'],
                     "subject": latest_mail.stem,
                     "status": res_status,
                 }
