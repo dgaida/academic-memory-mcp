@@ -173,8 +173,8 @@ def parse_appointments() -> pd.DataFrame:
         df["dt"] = pd.to_datetime(df["Start"], errors='coerce')
         now = datetime.now()
 
-        start_of_week = now - timedelta(days=now.weekday())
-        start_of_week = start_of_week.replace(hour=0, minute=0, second=0, microsecond=0)
+        # Zeige immer eine Woche ab heute (00:00 Uhr)
+        start_of_week = now.replace(hour=0, minute=0, second=0, microsecond=0)
         end_of_week = start_of_week + timedelta(days=7)
 
         # check if we have ANY data for this week
@@ -187,7 +187,9 @@ def parse_appointments() -> pd.DataFrame:
     except Exception as e:
         print(f"Error parsing dates: {e}")
 
+    # Termine absolut sortieren nach Datum/Uhrzeit
     if "dt" in df.columns:
+        df = df.sort_values("dt")
         df = df.drop(columns=["dt"])
     return df
 
