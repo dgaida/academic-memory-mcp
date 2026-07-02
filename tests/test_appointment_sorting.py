@@ -1,8 +1,6 @@
 """Tests für die Termin-Sortierung in der GUI."""
-import pandas as pd
 import pytest
 from datetime import datetime, timedelta
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 from scripts.appointment_gui import parse_appointments
 
