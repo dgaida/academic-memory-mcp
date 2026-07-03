@@ -421,7 +421,7 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
             # If we are here, something went wrong although LLM said APPOINTMENT_BOOKED
             err = getattr(self.agent, "last_tool_error", None)
             if err and "Vergangenheit" in str(err):
-                return f"Keine Antwort erforderlich (Archiviert (Termin in Vergangenheit))"
+                return "Keine Antwort erforderlich (Archiviert (Termin in Vergangenheit))"
             return f"Fehler bei Terminbuchung: {err}" if err else "Fehler bei Terminbuchung (Tool wurde nicht erfolgreich aufgerufen)."
 
         # Entwurf erstellen
