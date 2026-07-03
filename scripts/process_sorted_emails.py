@@ -1,16 +1,9 @@
 """Skript zur Verarbeitung sortierter E-Mails und Generierung von Antworten."""
 
 import argparse
-import os
-import subprocess
-import platform
 import logging
-import sys
-import shutil
 import gradio as gr
-import re
 from pathlib import Path
-from datetime import datetime
 from typing import List, Dict, Any
 
 from mcp_university.config import get_config
@@ -43,7 +36,7 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
         tab1_mails = gr.State([])
         tab2_mails = gr.State([])
 
-        with gr.Tabs() as tabs:
+        with gr.Tabs():
             with gr.Tab("Schnell-Einsortierung", id=0):
                 gr.Markdown("E-Mails in `D:\\TH_Koeln\\StudentMails` klassifizieren.")
 
@@ -146,8 +139,10 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
                                 results.append(f"{change['lastname']}: Fehler {str(e)}")
 
                         msg = "Verarbeitung abgeschlossen."
-                        if errors: msg += "\nFehler: " + "; ".join(errors)
-                        if results: msg += "\nAktionen:\n" + "\n".join(results)
+                        if errors:
+                            msg += "\nFehler: " + "; ".join(errors)
+                        if results:
+                            msg += "\nAktionen:\n" + "\n".join(results)
                         return msg
 
                     process_btn.click(
