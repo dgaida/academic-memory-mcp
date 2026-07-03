@@ -14,11 +14,11 @@ Die GUI öffnet sich automatisch in Ihrem Standardbrowser.
 
 ## Funktionen
 
-*   **Schnellsuche:** Suchen Sie nach Namen, E-Mail-Adressen, Betreffzeilen oder Dateinamen.
-*   **Automatische Vorschläge:** Während der Eingabe werden passende Absender oder Begriffe vorgeschlagen.
-*   **Getrennte Ansichten:** Ergebnisse werden klar nach **Posteingang (Inbox)** und **Gesendeten Elementen (SentItems)** getrennt angezeigt.
-*   **Vorschau:** Klicken Sie auf eine E-Mail in der Liste, um eine HTML-Vorschau des Inhalts direkt in der GUI zu sehen.
-*   **Integration:** Öffnen Sie die gefundene E-Mail mit einem Klick direkt in Outlook oder springen Sie zum entsprechenden Ordner im Windows Explorer.
+*   **Schnellsuche:** Suchen Sie nach Namen, E-Mail-Adressen, Betreffzeilen oder Dateinamen.  
+*   **Automatische Vorschläge:** Während der Eingabe werden passende Absender oder Begriffe vorgeschlagen.  
+*   **Getrennte Ansichten:** Ergebnisse werden klar nach **Posteingang (Inbox)** und **Gesendeten Elementen (SentItems)** getrennt angezeigt.  
+*   **Vorschau:** Klicken Sie auf eine E-Mail in der Liste, um eine HTML-Vorschau des Inhalts direkt in der GUI zu sehen.  
+*   **Integration:** Öffnen Sie die gefundene E-Mail mit einem Klick direkt in Outlook oder springen Sie zum entsprechenden Ordner im Windows Explorer.  
 
 ## Funktionsweise
 
