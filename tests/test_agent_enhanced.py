@@ -64,7 +64,7 @@ def test_agent_tool_manage_calendar_appointment_busy(mock_agent_deps):
         mock_items.Restrict.return_value = mock_restricted
         mock_restricted.__iter__.return_value = iter([mock_item])
 
-        result = agent._tool_manage_calendar_appointment("2024-10-01 10:00", "2024-10-01 11:00", "Meeting", "student@test.de")
+        result = agent._tool_manage_calendar_appointment("2030-10-01 10:00", "2030-10-01 11:00", "Meeting", "student@test.de")
         assert "belegt" in result
 
 def test_agent_chat_tool_error_handling(mock_agent_deps):
