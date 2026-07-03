@@ -97,6 +97,9 @@ Das System ruft das Tool `get_appointment_slots` auf, welches die `free_slots.md
 #### 3) Termin im Kalender anlegen
 Wird genutzt, wenn der Student einen Termin bestätigt hat. Das System extrahiert Datum und Uhrzeit und nutzt das Tool `manage_calendar_appointment`, um einen echten Eintrag in Ihrem Outlook-Kalender zu erstellen.
 
+!!! info "Termine in der Vergangenheit"
+    Sollte ein Termin in der Vergangenheit liegen, wird dieser automatisch erkannt. In diesem Fall wird kein Kalendereintrag erstellt und die E-Mail wird direkt archiviert (Status: `Archiviert (Termin in Vergangenheit)`).
+
 #### 4) E-Mail nur archivieren
 Die E-Mail wird im entsprechenden studentischen Archiv-Ordner gespeichert. Es erfolgt keine weitere technische Aktion (wie z.B. ein Antwort-Entwurf).
 
