@@ -122,7 +122,7 @@ def test_tool_manage_calendar_appointment(mcp_context):
         
         mock_appointment = mock_folder.Items.Add.return_value
         
-        result = calendar_tool("2024-10-01 10:00", "2024-10-01 11:00", "Test Meeting", "student@example.com")
+        result = calendar_tool("2030-10-01 10:00", "2030-10-01 11:00", "Test Meeting", "student@example.com")
             
         assert "ERFOLG" in result
         assert mock_appointment.Save.called
