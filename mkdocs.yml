@@ -34,6 +34,8 @@ theme:
     - content.code.annotate
     - content.code.copy
     - content.tooltips
+    - content.code.annotate
+    - navigation.footer
 
 plugins:
   - search
@@ -93,40 +95,43 @@ extra:
 
 nav:
   - Home: index.md
-  - Start: getting-started.md
-  - Installation: installation.md
-  - Konfiguration: configuration.md
-  - Nutzung:
-      - Übersicht: usage/index.md
+  - Endnutzer-Handbuch:
+      - Start: getting-started.md
+      - E-Mail Suche: usage/email-search.md
+      - Terminverwaltung: usage/appointment-management.md
+      - E-Mail Workflow: usage/email-workflow.md
+      - Personen-Steckbriefe: usage/profiles.md
+      - Outlook Makros: usage/outlook-macros.md
+      - Installation: installation.md
+      - Konfiguration: configuration.md
+      - Hilfsskripte: usage/scripts.md
+      - Fehlerbehebung: troubleshooting.md
+  - Technische Dokumentation:
+      - Architektur: architecture/index.md
+      - Nutzung (Expert): usage/index.md
       - Indexierung im Detail: usage/indexing-details.md
       - Datenbank-Management: usage/database-management.md
-      - MCP Integration: usage/mcp.md
-      - Hilfsskripte: usage/scripts.md
       - Datenbank-Prozesse: usage/database-processes.md
+      - MCP Integration: usage/mcp.md
       - MOCOGI Extraktion: usage/mocogi-extraction.md
-      - E-Mail Workflow: usage/email-workflow.md
       - E-Mail Parsing: usage/email-parsing.md
       - RAG Prozess: usage/rag-process.md
       - Memory Update: usage/memory.md
-      - Outlook Makros: usage/outlook-macros.md
-      - Personen-Steckbriefe: usage/profiles.md
       - Ontology & Aliase: usage/ontology-learning.md
-  - API: api/index.md
-  - Architektur: architecture/index.md
-  - Packages:
-      - E-Mail Klassifizierer:
-          - Übersicht: packages/email-classifier/index.md
-          - Nutzung der Skripte: packages/email-classifier/usage.md
-          - Training & Evaluierung: packages/email-classifier/training.md
-          - XAI & Visualisierung: packages/email-classifier/analysis.md
-          - Architektur: packages/email-classifier/architecture.md
-  - Entwicklung:
-      - Übersicht: development/index.md
-      - Docstring Guide: development/docstring-guide.md
-      - Changelog: development/changelog.md
-      - Versionierung: development/versioning.md
-      - Metriken: metrics.md
-  - Fehlerbehebung: troubleshooting.md
+      - API: api/index.md
+      - Packages:
+          - E-Mail Klassifizierer:
+              - Übersicht: packages/email-classifier/index.md
+              - Nutzung der Skripte: packages/email-classifier/usage.md
+              - Training & Evaluierung: packages/email-classifier/training.md
+              - XAI & Visualisierung: packages/email-classifier/analysis.md
+              - Architektur: packages/email-classifier/architecture.md
+      - Entwicklung:
+          - Übersicht: development/index.md
+          - Docstring Guide: development/docstring-guide.md
+          - Changelog: development/changelog.md
+          - Versionierung: development/versioning.md
+          - Metriken: metrics.md
 
 validation:
   omitted_files: warn
