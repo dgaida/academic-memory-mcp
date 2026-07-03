@@ -4,7 +4,6 @@ import argparse
 import logging
 import gradio as gr
 from pathlib import Path
-from typing import List, Dict, Any
 
 from mcp_university.config import get_config
 from email_classifier.controller import EmailController
