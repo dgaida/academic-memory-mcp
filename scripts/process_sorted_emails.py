@@ -6,9 +6,12 @@ import subprocess
 import platform
 import logging
 import sys
+import shutil
 import gradio as gr
+import re
 from pathlib import Path
 from datetime import datetime
+from typing import List, Dict, Any
 
 from mcp_university.config import get_config
 from email_classifier.controller import EmailController
@@ -18,215 +21,211 @@ logger = logging.getLogger(__name__)
 
 DEBUG = True
 
-def run_gradio_gui(controller: EmailController, report_path: Path, emails_to_process: list = None):
-    """Startet die Gradio GUI zur Korrektur der Einsortierung.
+def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = "transformer", mode: str = "combined", age_months: int = None):
+    """Startet die Gradio GUI zur Korrektur der Einsortierung mit zwei Tabs.
 
     Args:
         controller: EmailController Instanz.
-        report_path: Pfad zum sorted_emails.md Report.
-        emails_to_process: Liste der bereits analysierten E-Mails.
+        source_dir: Quellverzeichnis der E-Mails.
+        method: Klassifizierungsmethode.
+        mode: Merkmalsextraktion.
+        age_months: Alter der E-Mails in Monaten.
     """
-    emails = emails_to_process if emails_to_process is not None else controller.parse_report(report_path)
-    if not emails:
-        logger.info("Keine E-Mails zum Anzeigen im Gradio GUI.")
-        return
 
     available_classes = sorted([c for c in controller.class_paths.keys() if c != "Other"])
     if "Others" not in available_classes:
         available_classes.append("Others")
 
-    with gr.Blocks(title="E-Mail Sortierung Überprüfung") as demo:
-        gr.Markdown("# E-Mail Sortierung Überprüfung")
-        gr.Markdown("Bitte kontrollieren Sie die automatisch vorgenommene Einsortierung.")
+    with gr.Blocks(title="E-Mail Management") as demo:
+        gr.Markdown("# E-Mail Management")
 
-        dropdowns = []
-        email_data = []
+        # States for the two tabs
+        tab1_mails = gr.State([])
+        tab2_mails = gr.State([])
 
-        for mail in emails:
-            with gr.Group():
+        with gr.Tabs() as tabs:
+            with gr.Tab("Schnell-Einsortierung", id=0):
+                gr.Markdown("E-Mails in `D:\\TH_Koeln\\StudentMails` klassifizieren.")
+
                 with gr.Row():
-                    with gr.Column(scale=4):
-                        mail_path = mail['path']
-                        folder_path = mail_path.parent
+                    scan_btn = gr.Button("E-Mails scannen & klassifizieren", variant="primary")
 
-                        # Summary
-                        summary = controller.generate_short_summary(mail_path)
-
-                        # Similarity Info
-                        similarity_info = controller.get_similarity_info(mail_path, mail['lastname'])
-
-                        gr.Markdown(
-                            f"**Student:** {mail['lastname']} ({mail['semester']}) | **Ordner:** {mail['folder']}\n"
-                            f"**Datei:** `{mail_path.name}`\n\n"
-                            f"*Zusammenfassung:* {summary}\n\n"
-                            f"{similarity_info}"
+                with gr.Row():
+                    with gr.Column():
+                        gr.Markdown("### Inbox")
+                        inbox_list = gr.Dataframe(
+                            headers=["Index", "Klasse", "Student", "Datei"],
+                            datatype=["number", "str", "str", "str"],
+                            interactive=False,
+                            label="Inbox Mails"
+                        )
+                    with gr.Column():
+                        gr.Markdown("### SentItems")
+                        sent_list = gr.Dataframe(
+                            headers=["Index", "Klasse", "Student", "Datei"],
+                            datatype=["number", "str", "str", "str"],
+                            interactive=False,
+                            label="SentItems Mails"
                         )
 
-                        with gr.Row():
-                            open_folder_btn = gr.Button("📁 Ordner öffnen", size="sm")
-                            open_mail_btn = gr.Button("✉️ Mail öffnen", size="sm")
+                with gr.Row():
+                    remove_idx = gr.Number(label="Index zum Entfernen", precision=0)
+                    remove_btn = gr.Button("Markierte Mail nach Tab 2 schieben")
 
-                            def open_folder(p=str(folder_path)):
-                                """Öffnet den Ordner im Explorer."""
-                                try:
-                                    if platform.system() == "Windows":
-                                        os.startfile(p)
-                                    elif platform.system() == "Darwin":
-                                        subprocess.Popen(["open", p])
-                                    else:
-                                        subprocess.Popen(["xdg-open", p])
-                                except Exception as e:
-                                    print(f"Error opening folder: {e}")
+                with gr.Row():
+                    relocate_btn = gr.Button("Verbleibende Mails archivieren", variant="primary")
+                    tab1_status = gr.Textbox(label="Status")
 
-                            def open_mail(p=str(mail_path)):
-                                """Öffnet die Mail-Datei."""
-                                try:
-                                    if platform.system() == "Windows":
-                                        os.startfile(p)
-                                    elif platform.system() == "Darwin":
-                                        subprocess.Popen(["open", p])
-                                    else:
-                                        subprocess.Popen(["xdg-open", p])
-                                except Exception as e:
-                                    print(f"Error opening mail: {e}")
+            with gr.Tab("Detail-Ansicht & Verarbeitung", id=1):
+                gr.Markdown("Hier können Mails detailliert geprüft und verarbeitet werden.")
 
-                            open_folder_btn.click(open_folder)
-                            open_mail_btn.click(open_mail)
+                @gr.render(inputs=tab2_mails)
+                def render_tab2(mails):
+                    if not mails:
+                        gr.Markdown("Keine Mails zur Detail-Ansicht.")
+                        return
 
-                        # Attachment Checkbox
-                        has_attachments = False
-                        try:
-                            import extract_msg
-                            if mail_path.suffix.lower() == ".msg":
-                                with extract_msg.openMsg(str(mail_path)) as msg:
-                                    if msg.attachments:
-                                        has_attachments = True
-                            # For .eml we could also check, but msg is primary
-                        except Exception:
-                            pass
+                    dropdowns = []
+                    action_dropdowns = []
+                    checkboxes = []
 
-                        att_cb = None
-                        if has_attachments:
-                            att_cb = gr.Checkbox(label="Anhang speichern", value=False)
-                        else:
-                            # Dummy component to keep indices consistent if needed,
-                            # but we can handle it in the click function
-                            att_cb = gr.Checkbox(label="Kein Anhang", value=False, visible=False)
+                    for mail in mails:
+                        with gr.Group():
+                            mail_path = Path(mail["path"])
 
-                    with gr.Column(scale=1):
-                        initial_value = mail["class"]
-                        if initial_value == "Other":
-                            initial_value = "Others"
+                            summary = controller.generate_short_summary(mail_path)
+                            similarity_info = controller.get_similarity_info(mail_path, mail["lastname"])
 
-                        dd = gr.Dropdown(
-                            choices=available_classes,
-                            value=initial_value,
-                            label="Korrektes Ziel",
-                        )
-                        dropdowns.append(dd)
-
-                        action_dd = None
-                        if controller.use_action_classifier and "suggested_action" in mail:
-                            action_dd = gr.Dropdown(
-                                choices=controller.ACTION_OPTIONS,
-                                value=controller.ACTION_OPTIONS[mail["suggested_action"]],
-                                label="Aktion"
-                            )
-                        else:
-                            action_dd = gr.Dropdown(
-                                choices=controller.ACTION_OPTIONS,
-                                value=controller.ACTION_OPTIONS[0],
-                                label="Aktion",
-                                visible=controller.use_action_classifier
+                            gr.Markdown(
+                                f"**Student:** {mail['lastname']} | **Klasse:** {mail['class']}\n"
+                                f"**Datei:** `{mail_path.name}`\n\n"
+                                f"*Zusammenfassung:* {summary}\n\n"
+                                f"{similarity_info}"
                             )
 
-                        email_data.append((mail, att_cb, action_dd))
+                            with gr.Row():
+                                dd = gr.Dropdown(choices=available_classes, value=mail["class"], label="Korrektes Ziel")
+                                dropdowns.append(dd)
 
-        with gr.Row():
-            btn = gr.Button("Mails neu einsortieren", variant="primary")
-            status_out = gr.Textbox(label="Ergebnis")
+                                action_val = controller.ACTION_OPTIONS[0]
+                                action_dd = gr.Dropdown(choices=controller.ACTION_OPTIONS, value=action_val, label="Aktion")
+                                action_dropdowns.append(action_dd)
 
-        def handle_click(*inputs):
-            """Verarbeitet die Benutzereingaben aus der GUI."""
-            # Inputs are class_dropdowns, action_dropdowns (if present), then checkboxes
-            num_mails = len(email_data)
-            selected_classes = inputs[:num_mails]
+                                att_cb = gr.Checkbox(label="Anhang speichern", value=False)
+                                checkboxes.append(att_cb)
 
-            offset = num_mails
-            selected_actions = []
-            if controller.use_action_classifier:
-                selected_actions = inputs[offset:offset+num_mails]
-                offset += num_mails
+                    process_btn = gr.Button("Mails in Tab 2 verarbeiten", variant="primary")
+                    tab2_status_local = gr.Textbox(label="Status")
 
-            attachment_flags = inputs[offset:]
+                    def handle_tab2_process(*args):
+                        num = len(mails)
+                        sels = args[:num]
+                        acts = args[num:2*num]
+                        atts = args[2*num:]
+
+                        processed_list = []
+                        for i, m in enumerate(mails):
+                            change = m.copy()
+                            change["new_class"] = sels[i]
+                            change["save_attachments"] = atts[i]
+                            processed_list.append((change, acts[i]))
+
+                        # 1. Relocate
+                        rel_changes = [p[0] for p in processed_list]
+                        errors = controller.relocate_emails(rel_changes)
+
+                        # 2. Actions
+                        results = []
+                        for change, act_str in processed_list:
+                            try:
+                                action_idx = controller.ACTION_OPTIONS.index(act_str)
+                                current_path = change.get("new_path") or change["path"]
+                                res = controller.execute_action(action_idx, current_path, change)
+                                results.append(f"{change['lastname']}: {res}")
+                            except Exception as e:
+                                results.append(f"{change['lastname']}: Fehler {str(e)}")
+
+                        msg = "Verarbeitung abgeschlossen."
+                        if errors: msg += "\nFehler: " + "; ".join(errors)
+                        if results: msg += "\nAktionen:\n" + "\n".join(results)
+                        return msg
+
+                    process_btn.click(
+                        handle_tab2_process,
+                        inputs=dropdowns + action_dropdowns + checkboxes,
+                        outputs=tab2_status_local
+                    )
+
+        def scan_emails():
+            try:
+                results = controller.run_sort(str(source_dir), method=method, mode=mode, dry_run=True)
+                inbox = []
+                sent = []
+                for i, res in enumerate(results):
+                    row = [i, res["class"], res["lastname"], Path(res["path"]).name]
+                    if res["folder"] == "Inbox":
+                        inbox.append(row)
+                    else:
+                        sent.append(row)
+                return results, [], inbox, sent, f"{len(results)} Mails gefunden."
+            except Exception as e:
+                logger.exception("Fehler beim Scannen")
+                return [], [], [], [], f"Fehler: {str(e)}"
+
+        scan_btn.click(
+            scan_emails,
+            outputs=[tab1_mails, tab2_mails, inbox_list, sent_list, tab1_status]
+        )
+
+        def remove_to_tab2(idx, t1_mails, t2_mails):
+            if not t1_mails or idx is None or idx < 0 or idx >= len(t1_mails):
+                return t1_mails, t2_mails, gr.update(), gr.update(), "Ungültiger Index"
+
+            mail_to_move = t1_mails.pop(int(idx))
+            t2_mails.append(mail_to_move)
+
+            inbox = []
+            sent = []
+            for i, res in enumerate(t1_mails):
+                row = [i, res["class"], res["lastname"], Path(res["path"]).name]
+                if res["folder"] == "Inbox":
+                    inbox.append(row)
+                else:
+                    sent.append(row)
+
+            return t1_mails, t2_mails, inbox, sent, f"Mail {mail_to_move['lastname']} nach Tab 2 verschoben."
+
+        remove_btn.click(
+            remove_to_tab2,
+            inputs=[remove_idx, tab1_mails, tab2_mails],
+            outputs=[tab1_mails, tab2_mails, inbox_list, sent_list, tab1_status]
+        )
+
+        def relocate_remaining(t1_mails):
+            if not t1_mails:
+                return [], [], [], "Keine Mails zum Verschieben."
 
             changes = []
-            for i, ((mail, _, _), new_class) in enumerate(zip(email_data, selected_classes)):
-                m = mail.copy()
-                m["new_class"] = new_class
-                m["save_attachments"] = attachment_flags[i]
-                changes.append(m)
+            for m in t1_mails:
+                change = m.copy()
+                change["new_class"] = m["class"]
+                changes.append(change)
 
             try:
-                # 1. Relocate
-                logger.info(f"Verschiebe {len(changes)} E-Mails...")
-                relocation_errors = controller.relocate_emails(changes)
-
-                if relocation_errors:
-                    for err in relocation_errors:
-                        logger.error(f"Relocation-Fehler: {err}")
-
-                # 2. Execute Actions
-                action_results = []
-                if controller.use_action_classifier:
-                    logger.info(f"Führe {len(changes)} Aktionen aus...")
-                    for i, (m, action_str) in enumerate(zip(changes, selected_actions)):
-                        try:
-                            action_idx = controller.ACTION_OPTIONS.index(action_str)
-                            # Use the new path if it was moved
-                            current_mail_path = m.get("new_path") or m["latest_mail"]
-
-                            if not Path(current_mail_path).exists():
-                                logger.warning(f"Datei {current_mail_path} existiert nicht. Überspringe Aktion.")
-                                action_results.append(f"{m['lastname']}: Fehler - Datei nicht gefunden.")
-                                continue
-
-                            logger.info(f"Verarbeite E-Mail von {m['lastname']} (Aktion: {action_str})")
-                            res = controller.execute_action(action_idx, current_mail_path, m)
-                            logger.info(f"Ergebnis für {m['lastname']}: {res}")
-                            action_results.append(f"{m['lastname']}: {res}")
-                        except Exception as action_err:
-                            logger.exception(f"Fehler bei Aktion für {m['lastname']}")
-                            action_results.append(f"{m['lastname']}: Fehler - {str(action_err)}")
-
-                res_msg = "Verarbeitung abgeschlossen."
-
-                if relocation_errors:
-                    res_msg += "\n\n⚠️ Fehler beim Verschieben:\n" + "\n".join(relocation_errors)
-                else:
-                    res_msg += " Mails wurden ggf. verschoben."
-
-                if action_results:
-                    res_msg += "\n\nAktionen:\n" + "\n".join(action_results)
-                return res_msg
+                errors = controller.relocate_emails(changes)
+                if errors:
+                    return t1_mails, gr.update(), gr.update(), "Fehler beim Verschieben: " + "; ".join(errors)
+                return [], [], [], "Mails erfolgreich archiviert."
             except Exception as e:
-                logger.exception("Kritischer Fehler bei Verarbeitung")
-                return f"Kritischer Fehler: {str(e)}"
+                return t1_mails, gr.update(), gr.update(), f"Fehler: {str(e)}"
 
-        # Combine dropdowns and checkboxes
-        action_dropdowns = [mail[2] for mail in email_data if mail[2] is not None]
-        inputs = dropdowns + action_dropdowns + [mail[1] for mail in email_data]
-        btn.click(handle_click, inputs=inputs, outputs=status_out)
+        relocate_btn.click(
+            relocate_remaining,
+            inputs=[tab1_mails],
+            outputs=[tab1_mails, inbox_list, sent_list, tab1_status]
+        )
 
     demo.launch(inbrowser=True)
-
-def valid_date(s: str) -> datetime:
-    """Parses a date string in YYYY-MM-DD format."""
-    try:
-        return datetime.strptime(s, "%Y-%m-%d")
-    except ValueError:
-        msg = f"Invalid date format: '{s}'. Expected format: YYYY-MM-DD."
-        raise argparse.ArgumentTypeError(msg)
 
 def main() -> None:
     """Haupteinstiegspunkt des Skripts."""
@@ -272,19 +271,8 @@ def main() -> None:
         debug=args.debug, use_action_classifier=args.use_action_classifier
     )
 
-    # 1. Sortieren
     try:
-        controller.run_sort(str(source_dir), method=args.method, mode=args.mode)
-    except Exception as e:
-        logger.error(f"Fehler beim Sortieren: {e}")
-        sys.exit(1)
-
-    # 2. Verarbeiten
-    emails_to_process = controller.process_all_emails(source_dir, age_months=args.age_months)
-
-    # 3. Gradio GUI
-    try:
-        run_gradio_gui(controller, source_dir / "sorted_emails.md", emails_to_process=emails_to_process)
+        run_gradio_gui(controller, source_dir, method=args.method, mode=args.mode, age_months=args.age_months)
     except Exception as e:
         logger.error(f"Fehler beim Starten der Gradio GUI: {e}")
 

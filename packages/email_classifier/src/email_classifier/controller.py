@@ -473,18 +473,30 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
             return f"Datei erstellt: {r_path.name}"
 
     def run_sort(
-        self, source_dir: str, method: str = "transformer", mode: str = "combined"
-    ) -> None:
-        """Sortiert E-Mails basierend auf Klassifizierung."""
-        logger.info(f"Sortiere E-Mails in {source_dir}...")
+        self, source_dir: str, method: str = "transformer", mode: str = "combined", dry_run: bool = False
+    ) -> List[Dict]:
+        """Sortiert E-Mails basierend auf Klassifizierung.
+
+        Args:
+            source_dir: Quellverzeichnis.
+            method: Klassifizierungsmethode.
+            mode: Merkmalsextraktion.
+            dry_run: Falls True, werden die Dateien nicht verschoben.
+
+        Returns:
+            List[Dict]: Liste der (verschobenen) E-Mails.
+        """
+        logger.info(f"Sortiere E-Mails in {source_dir} (dry_run={dry_run})...")
         source_root = Path(source_dir)
         model_path = resolve_model_path("data/email_classifier.pkl", method, mode)
 
         if not model_path.exists():
             raise FileNotFoundError(f"Modell-Datei nicht gefunden: {model_path}")
 
-        moved_emails = process_emails(source_root, model_path, self.class_paths)
-        write_report(source_root, moved_emails)
+        results = process_emails(source_root, model_path, self.class_paths, dry_run=dry_run)
+        if not dry_run:
+            write_report(source_root, results)
+        return results
 
     def parse_report(self, report_path: Path) -> List[Dict]:
         """Parst die sorted_emails.md Datei."""
