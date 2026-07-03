@@ -4,6 +4,7 @@ import json
 import logging
 import yaml
 import re
+import functools
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Set
 from datetime import datetime
@@ -50,6 +51,8 @@ class EmailSearchEngine:
             with open(self.cache_file, "w", encoding="utf-8") as f:
                 json.dump(self.index, f, ensure_ascii=False, indent=2)
             logger.info("Cache gespeichert.")
+            # Cache für Vorschläge leeren, wenn sich der Index ändert
+            self.get_suggestions.cache_clear()
         except Exception as e:
             logger.error(f"Fehler beim Speichern des Caches: {e}")
 
@@ -123,13 +126,19 @@ class EmailSearchEngine:
                         else:
                             date_str = str(date_val)
 
+                        # Ordner bestimmen (Inbox oder SentItems)
+                        folder_type = "Inbox"
+                        if "SentItems" in file_path.parts:
+                            folder_type = "SentItems"
+
                         new_index.append({
                             "subject": details.get("subject", ""),
                             "from": details.get("from_email", ""),
                             "from_name": details.get("from_name", ""),
                             "date": date_str,
                             "path": path_str,
-                            "filename": file_path.name
+                            "filename": file_path.name,
+                            "folder": folder_type
                         })
                         indexed_paths.add(path_str)
                     except Exception as e:
@@ -163,6 +172,7 @@ class EmailSearchEngine:
         results.sort(key=lambda x: x["date"], reverse=True)
         return results
 
+    @functools.lru_cache(maxsize=128)
     def get_suggestions(self, partial_query: str) -> List[str]:
         """Gibt Vorschläge für die Suche zurück.
 

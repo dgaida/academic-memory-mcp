@@ -3,13 +3,21 @@
 import os
 import platform
 import subprocess
+import logging
 import pandas as pd
 import gradio as gr
 from pathlib import Path
-from typing import Dict, Any, Tuple, Optional
+from typing import Dict, Any, Tuple, Optional, List
 
 from mcp_university.utils.email_search import EmailSearchEngine
 from mcp_university.parser.mail_parser import MailParser
+
+# Logging konfigurieren
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger("email_search_gui")
 
 class GUITools:
     """Lazy-loading Container für Tools."""
@@ -24,6 +32,7 @@ class GUITools:
             EmailSearchEngine: Die Such-Engine.
         """
         if cls._engine is None:
+            logger.info("Initialisiere EmailSearchEngine...")
             cls._engine = EmailSearchEngine()
             # Beim ersten Start Index aktualisieren
             cls._engine.update_index()
@@ -53,6 +62,7 @@ def open_in_outlook(filepath: str) -> str:
         return f"Datei nicht gefunden: {filepath}"
 
     filepath = str(Path(filepath).absolute())
+    logger.info(f"Öffne Datei in Outlook: {filepath}")
     try:
         if platform.system() == "Windows":
             os.startfile(filepath)
@@ -62,6 +72,7 @@ def open_in_outlook(filepath: str) -> str:
             subprocess.run(["xdg-open", filepath])
         return f"Geöffnet: {filepath}"
     except Exception as e:
+        logger.error(f"Fehler beim Öffnen der Datei: {e}")
         return f"Fehler beim Öffnen: {e}"
 
 def open_in_explorer(filepath: str) -> str:
@@ -77,6 +88,7 @@ def open_in_explorer(filepath: str) -> str:
         return f"Datei nicht gefunden: {filepath}"
 
     folder = str(Path(filepath).parent.absolute())
+    logger.info(f"Öffne Ordner im Explorer: {folder}")
     try:
         if platform.system() == "Windows":
             subprocess.run(["explorer", folder])
@@ -86,33 +98,47 @@ def open_in_explorer(filepath: str) -> str:
             subprocess.run(["xdg-open", folder])
         return f"Ordner geöffnet: {folder}"
     except Exception as e:
+        logger.error(f"Fehler beim Öffnen des Ordners: {e}")
         return f"Fehler beim Öffnen des Ordners: {e}"
 
-def search_emails(query: str) -> pd.DataFrame:
-    """Führt die Suche aus und gibt ein DataFrame zurück.
+def search_emails(query: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """Führt die Suche aus und gibt DataFrames für Inbox und SentItems zurück.
 
     Args:
         query (str): Der Suchbegriff.
 
     Returns:
-        pd.DataFrame: Die Suchergebnisse.
+        Tuple[pd.DataFrame, pd.DataFrame]: Inbox-Ergebnisse, SentItems-Ergebnisse.
     """
+    cols = ["Datum", "Von", "Betreff", "Pfad"]
+    empty_df = pd.DataFrame(columns=cols)
+
     if not query:
-        return pd.DataFrame(columns=["Datum", "Von", "Betreff", "Pfad"])
+        return empty_df, empty_df
+
+    logger.info(f"Suche nach: {query}")
     results = GUITools.engine().search(query)
     if not results:
-        return pd.DataFrame(columns=["Datum", "Von", "Betreff", "Pfad"])
+        logger.info("Keine Ergebnisse gefunden.")
+        return empty_df, empty_df
 
-    data = []
+    inbox_data = []
+    sent_data = []
+
     for res in results:
-        data.append([
+        row = [
             res["date"][:10], # Nur das Datum
             res["from_name"] or res["from"],
             res["subject"],
             res["path"]
-        ])
+        ]
+        if res.get("folder") == "SentItems":
+            sent_data.append(row)
+        else:
+            inbox_data.append(row)
 
-    return pd.DataFrame(data, columns=["Datum", "Von", "Betreff", "Pfad"])
+    logger.info(f"Suche abgeschlossen. Inbox: {len(inbox_data)}, SentItems: {len(sent_data)}")
+    return pd.DataFrame(inbox_data, columns=cols), pd.DataFrame(sent_data, columns=cols)
 
 def get_suggestions(query: str) -> Dict[str, Any]:
     """Gibt Vorschläge für das Suchfeld zurück.
@@ -125,6 +151,8 @@ def get_suggestions(query: str) -> Dict[str, Any]:
     """
     if not query or len(query) < 2:
         return gr.update(choices=[])
+
+    logger.info(f"Hole Vorschläge für: {query}")
     suggestions = GUITools.engine().get_suggestions(query)
     return gr.update(choices=suggestions)
 
@@ -140,6 +168,7 @@ def display_email(evt: gr.SelectData, df: pd.DataFrame) -> Tuple[str, str, str]:
     """
     row_idx = evt.index[0]
     path = df.iloc[row_idx]["Pfad"]
+    logger.info(f"E-Mail ausgewählt: {path}")
 
     try:
         details = GUITools.parser().get_email_details(Path(path))
@@ -169,7 +198,7 @@ def display_email(evt: gr.SelectData, df: pd.DataFrame) -> Tuple[str, str, str]:
     except Exception as e:
         import traceback
         error_msg = f"Fehler beim Laden der E-Mail: {e}\n{traceback.format_exc()}"
-        print(error_msg)
+        logger.error(error_msg)
         return f"<p>Fehler beim Laden der E-Mail: {e}</p>", "", error_msg
 
 with gr.Blocks(title="Email Search Quick") as demo:
@@ -186,11 +215,20 @@ with gr.Blocks(title="Email Search Quick") as demo:
 
             search_btn = gr.Button("Suchen", variant="primary")
 
-            email_list = gr.DataFrame(
+            gr.Markdown("### 📥 Posteingang (Inbox)")
+            inbox_list = gr.DataFrame(
                 headers=["Datum", "Von", "Betreff", "Pfad"],
                 datatype=["str", "str", "str", "str"],
                 interactive=False,
-                label="Gefundene E-Mails"
+                label="Posteingang"
+            )
+
+            gr.Markdown("### 📤 Gesendete Elemente (SentItems)")
+            sent_list = gr.DataFrame(
+                headers=["Datum", "Von", "Betreff", "Pfad"],
+                datatype=["str", "str", "str", "str"],
+                interactive=False,
+                label="Gesendete Mails"
             )
 
         with gr.Column(scale=1):
@@ -216,12 +254,18 @@ with gr.Blocks(title="Email Search Quick") as demo:
     search_btn.click(
         fn=search_emails,
         inputs=[search_input],
-        outputs=[email_list]
+        outputs=[inbox_list, sent_list]
     )
 
-    email_list.select(
+    inbox_list.select(
         fn=display_email,
-        inputs=[email_list],
+        inputs=[inbox_list],
+        outputs=[email_viewer, selected_path, status_output]
+    )
+
+    sent_list.select(
+        fn=display_email,
+        inputs=[sent_list],
         outputs=[email_viewer, selected_path, status_output]
     )
 
@@ -238,4 +282,4 @@ with gr.Blocks(title="Email Search Quick") as demo:
     )
 
 if __name__ == "__main__":
-    demo.launch()
+    demo.launch(inbrowser=True)
