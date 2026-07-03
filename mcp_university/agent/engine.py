@@ -245,6 +245,12 @@ class Agent:
             return "Fehler: pywin32 ist nicht installiert. Kalender-Funktionen sind nicht verfügbar."
 
         try:
+            # Slot prüfen - Nutze Europe/Berlin Zeitzone
+            tz = ZoneInfo("Europe/Berlin")
+            dt_start = datetime.strptime(start_time, "%Y-%m-%d %H:%M").replace(tzinfo=tz)
+            if dt_start < datetime.now(tz):
+                return "Fehler: Der Termin liegt in der Vergangenheit und wird daher nicht angelegt."
+
             outlook = win32com.client.Dispatch("Outlook.Application")
             namespace = outlook.GetNamespace("MAPI")
 
@@ -312,8 +318,6 @@ class Agent:
                 logger.warning(f"Zielordner {target_folder_name} nicht gefunden.")
 
             # Slot prüfen - Nutze Europe/Berlin Zeitzone
-            tz = ZoneInfo("Europe/Berlin")
-            dt_start = datetime.strptime(start_time, "%Y-%m-%d %H:%M").replace(tzinfo=tz)
             dt_end = datetime.strptime(end_time, "%Y-%m-%d %H:%M").replace(tzinfo=tz)
 
             # Logik: Kolloquium immer 60 Min

@@ -88,14 +88,14 @@ def test_tool_manage_calendar_appointment_invalid_times(mock_agent_deps_v2):
         mock_folders.Item.return_value = mock_folder
         mock_root.Folders = mock_folders
 
-        res = agent._tool_manage_calendar_appointment("2024-10-01 11:00", "2024-10-01 10:00", "Sub", "s@t.com")
+        res = agent._tool_manage_calendar_appointment("2030-10-01 11:00", "2030-10-01 10:00", "Sub", "s@t.com")
         assert "muss nach dem Beginn" in res
 
 def test_tool_manage_calendar_appointment_no_pywin32(mock_agent_deps_v2):
     """Test function docstring."""
     agent = Agent()
     with patch('builtins.__import__', side_effect=ImportError("pywin32 missing")):
-        res = agent._tool_manage_calendar_appointment("2024-10-01 10:00", "2024-10-01 11:00", "Sub", "s@t.com")
+        res = agent._tool_manage_calendar_appointment("2030-10-01 10:00", "2030-10-01 11:00", "Sub", "s@t.com")
         assert "pywin32 ist nicht installiert" in res
 
 def test_tool_save_email_attachments_not_found(mock_agent_deps_v2):
