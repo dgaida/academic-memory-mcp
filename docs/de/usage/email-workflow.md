@@ -42,26 +42,26 @@ Der gesamte Prozess wird nun direkt über die Gradio GUI gesteuert (`scripts/pro
 ### Tab 1: Schnell-Einsortierung
 Dieser Tab ist für die massenweise Verarbeitung von E-Mails optimiert, bei denen die automatische Klassifizierung bereits ausreicht.
 
-- **Scan & Klassifizierung:** Liest alle E-Mails aus dem Quellordner ein und weist ihnen mittels Modell eine Klasse zu, ohne sie physisch zu verschieben.
-- **Listenansicht:** Getrennte Anzeige von `Inbox` und `SentItems`.
-- **Entfernen:** Mails, die eine genauere Betrachtung erfordern, können per Index-Auswahl in den zweiten Tab verschoben werden.
-- **Archivieren:** Alle verbleibenden Mails in den Listen werden mit einem Klick direkt in ihre jeweiligen Archiv-Pfade verschoben.
+- **Scan & Klassifizierung:** Liest alle E-Mails aus dem Quellordner ein und weist ihnen mittels Modell eine Klasse zu, ohne sie physisch zu verschieben.  
+- **Listenansicht:** Getrennte Anzeige von `Inbox` und `SentItems`.  
+- **Entfernen:** Mails, die eine genauere Betrachtung erfordern, können per Index-Auswahl in den zweiten Tab verschoben werden.  
+- **Archivieren:** Alle verbleibenden Mails in den Listen werden mit einem Klick direkt in ihre jeweiligen Archiv-Pfade verschoben.  
 
 ### Tab 2: Detail-Ansicht & Verarbeitung
 Hier landen Mails, die aus Tab 1 entfernt wurden, oder die eine tiefergehende Analyse benötigen.
 
-- **KI-Zusammenfassung:** Für jede Mail wird eine prägnante 2-Satz-Zusammenfassung generiert.
-- **Kontext & Ähnlichkeit:** Anzeige der ähnlichsten E-Mails aus dem Archiv (Similarity Search).
-- **Aktions-Auswahl:** Manuelle Auswahl der Aktion (Antworten, Termin buchen, etc.) und des Zielordners.
-- **Anhänge:** Option zum gezielten Speichern von Mail-Anhängen.
+- **KI-Zusammenfassung:** Für jede Mail wird eine prägnante 2-Satz-Zusammenfassung generiert.  
+- **Kontext & Ähnlichkeit:** Anzeige der ähnlichsten E-Mails aus dem Archiv (Similarity Search).  
+- **Aktions-Auswahl:** Manuelle Auswahl der Aktion (Antworten, Termin buchen, etc.) und des Zielordners.  
+- **Anhänge:** Option zum gezielten Speichern von Mail-Anhängen.  
 
 ---
 
 ## 4. Phase: KI-gestützte Analyse (Hintergrund)
 Während der Arbeit in der GUI (insbesondere in Tab 2) finden folgende Prozesse statt:
 
-- **RAG-Kontext (Retrieval Augmented Generation):** Das System durchsucht eine Vektordatenbank nach thematisch passenden Informationen.
-- **Aktions-Vorschlag:** Das LLM schlägt basierend auf dem Inhalt eine der 6 Aktionen vor.
+- **RAG-Kontext (Retrieval Augmented Generation):** Das System durchsucht eine Vektordatenbank nach thematisch passenden Informationen.  
+- **Aktions-Vorschlag:** Das LLM schlägt basierend auf dem Inhalt eine der 6 Aktionen vor.  
 
 ---
 
