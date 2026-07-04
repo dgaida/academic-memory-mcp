@@ -36,15 +36,32 @@ python -m email_classifier.sort_emails --source ./inbox --target ./sorted_mails
 
 ---
 
-## 3. Phase: KI-gestützte Analyse (Analyse & Kontext)
-Nachdem die Mails sortiert sind, erfolgt die Analyse durch `scripts/process_sorted_emails.py`. In dieser Phase wird der notwendige Kontext für eine spätere Bearbeitung gesammelt.
+## 3. Phase: Interaktive Verwaltung (Gradio GUI) {#gradio-gui}
+Der gesamte Prozess wird nun direkt über die Gradio GUI gesteuert (`scripts/process_sorted_emails.py`). Die GUI bietet zwei spezialisierte Tabs für unterschiedliche Arbeitsweisen.
 
-**Inhalte dieser Phase:**
+### Tab 1: Schnell-Einsortierung
+Dieser Tab ist für die massenweise Verarbeitung von E-Mails optimiert, bei denen die automatische Klassifizierung bereits ausreicht.
 
-- **Gradio GUI Zusammenfassung:** In der [Gradio GUI](#gradio-gui) wird für jede Mail eine separate, kurze (2 Sätze) Zusammenfassung des aktuellen Inhalts angezeigt, um einen schnellen Überblick zu ermöglichen. Die vollständige Konversations-Zusammenfassung (`.emails_summary.md`) wird erst in **Phase 6** bei der Ausführung einer Antwort-Aktion erstellt, um Ressourcen zu sparen und den aktuellsten Stand zu garantieren.  
-- **RAG-Kontext (Retrieval Augmented Generation):** Das System durchsucht eine Vektordatenbank nach thematisch passenden Informationen (z.B. Prüfungsordnungen), basierend auf dem Inhalt der aktuellen Mail. Dieser Kontext wird ausschließlich für die spätere Antwortgenerierung genutzt. Details zu diesem mehrstufigen Prozess finden Sie unter [RAG-Prozess](rag-process.md).  
-- **Ähnlichkeits-Suche:** Es wird nach den 3 neuesten, thematisch ähnlichsten E-Mails desselben Studenten im Archiv gesucht, um eine konsistente Historie zu gewährleisten.  
-- **Aktions-Klassifizierung:** Das LLM entscheidet vorab, welche der 6 möglichen Aktionen am besten zur E-Mail passt.  
+- **Scan & Klassifizierung:** Liest alle E-Mails aus dem Quellordner ein und weist ihnen mittels Modell eine Klasse zu, ohne sie physisch zu verschieben.
+- **Listenansicht:** Getrennte Anzeige von `Inbox` und `SentItems`.
+- **Entfernen:** Mails, die eine genauere Betrachtung erfordern, können per Index-Auswahl in den zweiten Tab verschoben werden.
+- **Archivieren:** Alle verbleibenden Mails in den Listen werden mit einem Klick direkt in ihre jeweiligen Archiv-Pfade verschoben.
+
+### Tab 2: Detail-Ansicht & Verarbeitung
+Hier landen Mails, die aus Tab 1 entfernt wurden, oder die eine tiefergehende Analyse benötigen.
+
+- **KI-Zusammenfassung:** Für jede Mail wird eine prägnante 2-Satz-Zusammenfassung generiert.
+- **Kontext & Ähnlichkeit:** Anzeige der ähnlichsten E-Mails aus dem Archiv (Similarity Search).
+- **Aktions-Auswahl:** Manuelle Auswahl der Aktion (Antworten, Termin buchen, etc.) und des Zielordners.
+- **Anhänge:** Option zum gezielten Speichern von Mail-Anhängen.
+
+---
+
+## 4. Phase: KI-gestützte Analyse (Hintergrund)
+Während der Arbeit in der GUI (insbesondere in Tab 2) finden folgende Prozesse statt:
+
+- **RAG-Kontext (Retrieval Augmented Generation):** Das System durchsucht eine Vektordatenbank nach thematisch passenden Informationen.
+- **Aktions-Vorschlag:** Das LLM schlägt basierend auf dem Inhalt eine der 6 Aktionen vor.
 
 ---
 
@@ -62,19 +79,7 @@ Basierend auf der Analyse schlägt das System eine von sechs Aktionen vor. Diese
 
 ---
 
-## 5. Phase: Überprüfung (Gradio GUI) {#gradio-gui}
-Der Prozess wird in einer interaktiven Web-Oberfläche kontrolliert (Human-in-the-loop).
 
-**Funktionen der GUI:**
-
-- **Vollständige Sichtbarkeit:** Es werden ALLE zuvor sortierten E-Mails in der GUI angezeigt, um sicherzustellen, dass keine Kommunikation übersehen wird.  
-
-
-- **Korrektur der Klassifizierung:** Ändern der E-Mail-Klasse via Dropdown (physische Verschiebung beim Speichern).  
-- **Aktions-Review:** Überprüfung und ggf. Änderung der vorgeschlagenen Aktion.  
-- **Anhänge extrahieren:** Checkbox zum automatischen Speichern von Anhängen im Studentenordner.  
-- **Quick-Links:** Direktes Öffnen des Windows-Ordners oder der E-Mail-Datei.  
-- **Zusammenfassungen:** Für jede E-Mail wird eine kurze (2 Sätze) Zusammenfassung direkt in der GUI angezeigt, um das schnelle Scannen des Posteingangs zu erleichtern.  
 
 ---
 

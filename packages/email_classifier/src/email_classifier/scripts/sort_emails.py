@@ -317,7 +317,8 @@ def find_student_folder(base_directory: Path, lastname: str) -> Optional[Path]:
 def process_emails(
     source_root_path: Path, 
     classifier_model_path: Path, 
-    path_config: Dict[str, str]
+    path_config: Dict[str, str],
+    dry_run: bool = False
 ) -> List[Dict[str, Any]]:
     """Verarbeitet E-Mails aus dem Quellverzeichnis und sortiert sie ein.
 
@@ -325,9 +326,10 @@ def process_emails(
         source_root_path (Path): Verzeichnis mit den zu sortierenden .msg-Dateien.
         classifier_model_path (Path): Pfad zum trainierten Klassifizierer-Modell.
         path_config (Dict[str, str]): Pfad-Konfiguration für die E-Mail-Klassen.
+        dry_run (bool): Falls True, werden die Dateien nicht verschoben.
 
     Returns:
-        List[Dict[str, Any]]: Liste der verschobenen E-Mails mit Metadaten.
+        List[Dict[str, Any]]: Liste der verschobenen (oder klassifizierten) E-Mails mit Metadaten.
     """
     moved_emails_data = []
     classifier = EmailClassifier()
@@ -398,18 +400,30 @@ def process_emails(
                 student_dir_path = class_base_path / semester_identifier / final_lastname
                 
             target_directory = student_dir_path / target_subfolder
-            target_directory.mkdir(parents=True, exist_ok=True)
-            target_file_path = target_directory / msg_file.name
-            shutil.move(str(msg_file), str(target_file_path))
             
-            moved_emails_data.append({
-                "class": assigned_class, 
-                "semester": semester_identifier, 
-                "lastname": final_lastname, 
-                "folder": target_subfolder, 
-                "path": str(target_file_path)
-            })
-            logger.info(f"Verschoben: {msg_file.name} -> {target_file_path}")
+            if dry_run:
+                moved_emails_data.append({
+                    "class": assigned_class,
+                    "semester": semester_identifier,
+                    "lastname": final_lastname,
+                    "folder": target_subfolder,
+                    "path": str(msg_file),
+                    "target_path": str(target_directory / msg_file.name)
+                })
+                logger.info(f"Klassifiziert (Dry-Run): {msg_file.name} -> {assigned_class}")
+            else:
+                target_directory.mkdir(parents=True, exist_ok=True)
+                target_file_path = target_directory / msg_file.name
+                shutil.move(str(msg_file), str(target_file_path))
+
+                moved_emails_data.append({
+                    "class": assigned_class,
+                    "semester": semester_identifier,
+                    "lastname": final_lastname,
+                    "folder": target_subfolder,
+                    "path": str(target_file_path)
+                })
+                logger.info(f"Verschoben: {msg_file.name} -> {target_file_path}")
         except Exception as processing_error:
             logger.error(f"Fehler bei Verarbeitung von {msg_file}: {processing_error}")
             
