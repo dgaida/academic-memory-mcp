@@ -103,6 +103,7 @@ nav:
       - Personen-Steckbriefe: usage/profiles.md
       - Outlook Makros: usage/outlook-macros.md
       - Installation: installation.md
+      - Einrichtung: setup.md
       - Konfiguration: configuration.md
       - Hilfsskripte: usage/scripts.md
       - Fehlerbehebung: troubleshooting.md
@@ -119,6 +120,8 @@ nav:
       - Memory Update: usage/memory.md
       - Ontology & Aliase: usage/ontology-learning.md
       - API: api/index.md
+      - Vorschläge:
+          - Neuronale Netzarchitektur: proposals/nn_architecture_proposal.md
       - Packages:
           - E-Mail Klassifizierer:
               - Übersicht: packages/email-classifier/index.md

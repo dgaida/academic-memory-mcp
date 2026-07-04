@@ -26,7 +26,7 @@ python -m email_classifier.sort_emails --source ./inbox --target ./sorted_mails
 
 **Was passiert hier?**
 
-1. **Themen-Erkennung:** Der [EmailClassifier](email-classification.md) nutzt ein Machine-Learning-Modell (Transformer-basiert), um den Inhalt der Mail einer Kategorie zuzuordnen (z.B. *Bachelor Thesis*, *Projekt*, *PO-Wechsel*).  
+1. **Themen-Erkennung:** Der [EmailClassifier](../packages/email-classifier/index.md) nutzt ein Machine-Learning-Modell (Transformer-basiert), um den Inhalt der Mail einer Kategorie zuzuordnen (z.B. *Bachelor Thesis*, *Projekt*, *PO-Wechsel*).
 2. **Dateisystem-Struktur:** Die E-Mails werden in eine dreistufige Hierarchie verschoben: `Semester (z.B. 2023_24_WS) / Nachname / (Inbox oder SentItems)`.  
 3. **Extraktion des Nachnamens:** Der Nachname wird automatisch aus der E-Mail-Adresse oder dem Anzeigenamen ermittelt.  
     - *Beispiel 1:* `max.mustermann@th-koeln.de` -> Ordner: `Mustermann`  
@@ -123,7 +123,7 @@ Diese Aktion kombiniert mehrere Schritte für Abschlussarbeiten:
 ## Weiterführende Links  
 - [Outlook VBA-Makros](outlook-macros.md): Details zu den Export-Skripten.  
 - [Datenbank-Prozesse](database-processes.md): Erfahren Sie mehr über die Verwaltung der `profiles_tracking.db`.  
-- [E-Mail Klassifizierung](email-classification.md): Details zu den Machine-Learning Modellen.  
+- [E-Mail Klassifizierung](../packages/email-classifier/index.md): Details zu den Machine-Learning Modellen.
 - [Konfiguration](../configuration.md): So passen Sie Pfade und LLM-Einstellungen an.  
 
 

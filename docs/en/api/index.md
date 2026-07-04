@@ -28,11 +28,11 @@ This page provides an overview of the key modules and classes of the MCP Univers
 
 ## XAI Analysis
 
-::: email_classifier.xai_analysis
+::: email_classifier.scripts.xai_analysis
 
 ## Visualization
 
-::: email_classifier.plot_data_distribution
+::: email_classifier.scripts.plot_data_distribution
 
 ## CLI Database Management
 
