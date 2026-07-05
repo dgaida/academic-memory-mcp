@@ -32,6 +32,6 @@ The found information is filtered and prepared:
 ---
 See also:
 
-- [Email Classification](../packages/email-classifier/index.md)
+- [Email Classification](../packages/email-classifier/index.md)  
 - [Document Indexing](indexing-details.md)  
 - [Configuration](../configuration.md)  

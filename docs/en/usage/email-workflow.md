@@ -26,7 +26,7 @@ python -m email_classifier.sort_emails --source ./inbox --target ./sorted_mails
 
 **What happens here?**
 
-1. **Topic Recognition:** The [Email Classification](../packages/email-classifier/index.md) system uses a machine learning model (transformer-based) to assign the content of the email to a category (e.g., *Bachelor Thesis*, *Project*, *PO-Change*).
+1. **Topic Recognition:** The [Email Classification](../packages/email-classifier/index.md) system uses a machine learning model (transformer-based) to assign the content of the email to a category (e.g., *Bachelor Thesis*, *Project*, *PO-Change*).  
 2. **File System Structure:** The emails are moved into a three-level hierarchy: `Semester (e.g., 2023_24_WS) / Lastname / (Inbox or SentItems)`.  
 3. **Lastname Extraction:** The lastname is automatically extracted from the email address or display name.  
     - *Example 1:* `max.mustermann@th-koeln.de` -> Folder: `Mustermann`  
@@ -89,7 +89,7 @@ The process ends in an interactive web interface. Here, the human remains in ful
 
 ## Further Links  
 - [Database Processes](database-processes.md): Learn more about managing `profiles_tracking.db` and the Knowledge Graph.  
-- [Email Classification](../packages/email-classifier/index.md): Details on the machine learning models and memory indices.
+- [Email Classification](../packages/email-classifier/index.md): Details on the machine learning models and memory indices.  
 - [Configuration](../configuration.md): How to customize paths and LLM settings.  
 
 
