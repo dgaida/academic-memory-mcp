@@ -77,11 +77,15 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
                         gr.Markdown("Keine Mails zur Detail-Ansicht.")
                         return
 
+                    # Capture snapshot to avoid issues if tab2_mails changes
+                    mails_snapshot = list(mails)
+                    num_mails = len(mails_snapshot)
+
                     dropdowns = []
                     action_dropdowns = []
                     checkboxes = []
 
-                    for mail in mails:
+                    for mail in mails_snapshot:
                         with gr.Group():
                             mail_path = Path(mail["path"])
 
@@ -110,13 +114,16 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
                     tab2_status_local = gr.Textbox(label="Status")
 
                     def handle_tab2_process(*args):
-                        num = len(mails)
+                        # Use captured num_mails and mails_snapshot
+                        num = num_mails
+                        if len(args) < 3 * num:
+                            return f"Fehler: Erwartete {3*num} Argumente, erhielt {len(args)}."
                         sels = args[:num]
                         acts = args[num:2*num]
-                        atts = args[2*num:]
+                        atts = args[2*num:3*num]
 
                         processed_list = []
-                        for i, m in enumerate(mails):
+                        for i, m in enumerate(mails_snapshot):
                             change = m.copy()
                             change["new_class"] = sels[i]
                             change["save_attachments"] = atts[i]
@@ -175,6 +182,10 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
             if not t1_mails or idx is None or idx < 0 or idx >= len(t1_mails):
                 return t1_mails, t2_mails, gr.update(), gr.update(), "Ungültiger Index"
 
+            # Create copies to avoid in-place modification of state
+            t1_mails = list(t1_mails)
+            t2_mails = list(t2_mails)
+
             mail_to_move = t1_mails.pop(int(idx))
             t2_mails.append(mail_to_move)
 
@@ -220,9 +231,7 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
         )
 
     demo.launch(inbrowser=True)
-
 def main() -> None:
-    """Haupteinstiegspunkt des Skripts."""
     config = get_config()
     config.log_path.mkdir(parents=True, exist_ok=True)
 
@@ -264,6 +273,7 @@ def main() -> None:
         api_key=args.api_key,
         debug=args.debug, use_action_classifier=args.use_action_classifier
     )
+
 
     try:
         run_gradio_gui(controller, source_dir, method=args.method, mode=args.mode, age_months=args.age_months)
