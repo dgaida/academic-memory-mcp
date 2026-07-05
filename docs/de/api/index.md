@@ -28,11 +28,11 @@ Diese Seite bietet eine Übersicht über die wichtigsten Module und Klassen des 
 
 ## Visualisierung
 
-::: email_classifier.plot_data_distribution
+::: email_classifier.scripts.plot_data_distribution
 
 ## XAI Analyse
 
-::: email_classifier.xai_analysis
+::: email_classifier.scripts.xai_analysis
 
 ## CLI Datenbank-Management
 
