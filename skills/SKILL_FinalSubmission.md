@@ -29,15 +29,22 @@ Erstelle einen Termin in genau **einer Woche ab heute** (dem Tag, an dem die Mai
 Falls die E-Mail Anhänge enthält:  
 - Rufe das Tool `save_email_attachments` auf.  
 - Übergib den Pfad zur E-Mail (`email_path`).  
-- Dieses Tool speichert die Anhänge automatisch im Elternordner des E-Mail-Verzeichnisses und sorgt dafür, dass keine Dateien überschrieben werden.  
+- Dieses Tool speichert die Anhänge automatisch im Elternordner des E-Mail-Verzeichnisses und sorgt dafür, dass keine Dateien überschrieben werden.
 
-### Schritt C: Antwort formulieren (Empfangsbestätigung)
+### Schritt C: Kolloquium-Konfiguration erstellen
+Wenn eine finale Abgabe detektiert wurde:
+- Identifiziere den Dateinamen der PDF-Arbeit aus den Anhängen.
+- Rufe das Tool `create_colloquium_config` auf.
+  - `email_path`: Pfad zur E-Mail.
+  - `pdf_filename`: Der Dateiname der PDF-Arbeit (z.B. "Bachelorarbeit_Mustermann.pdf").
+
+### Schritt D: Antwort formulieren (Empfangsbestätigung)
 Prüfe, ob der Studierende nach einer Empfangsbestätigung fragt oder ob eine Bestätigung angebracht ist.  
 - Falls ja: Verfasse eine kurze, freundliche Bestätigung des Erhalts.  
 - Falls nein (und keine sonstigen Fragen offen sind): Du kannst EXAKT mit `NO_REPLY_NEEDED` antworten, falls die interne Logik das zulässt, aber im Zweifel ist eine kurze Bestätigung immer gut.  
 
 ## 3. Wichtige Regeln für die Tool-Nutzung  
-- **Zuerst Tools, dann Text:** Du MUSST die Tools `manage_calendar_appointment` und `save_email_attachments` aufrufen, BEVOR du die finale Textantwort generierst.  
+- **Zuerst Tools, dann Text:** Du MUSST die Tools `manage_calendar_appointment`, `save_email_attachments` und `create_colloquium_config` aufrufen, BEVOR du die finale Textantwort generierst.
 - **Kontext für Tools:** Nutze die Informationen aus der E-Mail (Name des Studenten, Typ der Arbeit), um die Tools korrekt zu befüllen.  
 - **Datum für Termin:** Der Termin soll exakt 7 Tage nach dem heutigen Datum (siehe Prompt) um 08:00 Uhr erstellt werden.  
 

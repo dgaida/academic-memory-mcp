@@ -232,6 +232,111 @@ def create_tool_server() -> FastMCP:
         except Exception as e:
             return f"Fehler beim Speichern der Anhänge: {e}"
 
+    @mcp.tool
+    def create_colloquium_config(email_path: str, pdf_filename: str) -> str:
+        """Erstellt eine config.json für den colloquium-protocol-creator bei finaler Abgabe.
+
+        Args:
+            email_path: Pfad zur E-Mail.
+            pdf_filename: Dateiname der PDF-Arbeit im Anhang.
+
+        Returns:
+            Erfolgsmeldung oder Fehler.
+        """
+        try:
+            import json
+            p = Path(email_path)
+            # Anhänge liegen im Elternordner des E-Mail-Ordners (p.parent.parent)
+            target_dir = p.parent.parent
+            if not target_dir.exists():
+                target_dir.mkdir(parents=True, exist_ok=True)
+
+            config_path = target_dir / "config.json"
+
+            config_data = {
+              "task": "colloquium",
+              "description": "Kolloquium auf dem Campus Gummersbach mit automatischer Gemini-Bewertung",
+              "pdf": {
+                "filename": pdf_filename
+              },
+              "colloquium": {
+                "date": "DD.MM.YYYY",
+                "time": "hh:mm",
+                "location_type": "campus",
+                "room": "3.228"
+              },
+              "llm": {
+                "api_choice": None,
+                "model": None,
+                "groq_free": True
+              },
+              "gemini_evaluation": {
+                "enabled": False,
+                "model": "gemini-2.0-flash-exp"
+              },
+              "output": {
+                "folder": None,
+                "compile_pdf": True,
+                "fill_form_only": True
+              }
+            }
+
+            with open(config_path, "w", encoding="utf-8") as f:
+                json.dump(config_data, f, indent=2, ensure_ascii=False)
+
+            return f"ERFOLG: Konfiguration erstellt unter {config_path}"
+        except Exception as e:
+            return f"Fehler beim Erstellen der Konfiguration: {e}"
+
+    @mcp.tool
+    def update_colloquium_config(student_email: str, date: str, time: str) -> str:
+        """Aktualisiert Datum und Uhrzeit in der config.json eines Studenten.
+
+        Args:
+            student_email: E-Mail-Adresse des Studenten.
+            date: Datum des Kolloquiums (DD.MM.YYYY).
+            time: Uhrzeit des Kolloquiums (hh:mm).
+
+        Returns:
+            Erfolgsmeldung oder Fehler.
+        """
+        try:
+            import json
+            with store._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT f.path FROM students s
+                    JOIN folders f ON s.folder_id = f.id
+                    WHERE s.email = ?
+                """, (student_email,))
+                row = cursor.fetchone()
+                if not row:
+                    return f"Fehler: Kein Ordner für Student {student_email} in Datenbank gefunden."
+
+                # student_folder = Path(row[0])
+                # Die config.json liegt im Hauptordner des Studenten, nicht in Unterordnern
+                # Wir suchen sie im gefundenen Pfad und ggf. darüber
+                config_path = Path(row[0]) / "config.json"
+                if not config_path.exists():
+                    # Fallback: Falls row[0] ein Unterordner wie "SentItems" ist
+                    config_path = Path(row[0]).parent / "config.json"
+
+                if not config_path.exists():
+                     return f"Fehler: config.json nicht gefunden in {Path(row[0])}"
+
+                with open(config_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+
+                data["colloquium"]["date"] = date
+                data["colloquium"]["time"] = time
+
+                with open(config_path, "w", encoding="utf-8") as f:
+                    json.dump(data, f, indent=2, ensure_ascii=False)
+
+                return f"ERFOLG: Kolloquiumstermin in {config_path} aktualisiert."
+        except Exception as e:
+            return f"Fehler beim Aktualisieren der Konfiguration: {e}"
+
     return mcp
 
 

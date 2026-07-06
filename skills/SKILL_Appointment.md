@@ -21,11 +21,16 @@ Wenn ein Studierender einen konkreten Termin bestätigt (z.B. "Ich nehme den Ter
    - `subject`: Generiere einen passenden Betreff (z.B. "Kolloquium Max Mustermann" oder "Besprechung [Name] - [Thema]").  
    - `student_email`: Die E-Mail-Adresse des Studierenden (aus dem Kontext).  
    - `original_mail_date`: Das Datum der E-Mail des Studierenden im Format DD.MM.YY.  
-5. **ERST NACH ERFOLGREICHEM TOOL-AUFRUF:** Wenn das Tool eine Nachricht mit "ERFOLG" zurückgibt:  
+5. **UPDATE KOLLOQUIUM-KONFIGURATION:** Falls der Termin ein **Kolloquium** ist:
+   - Rufe zusätzlich das Tool `update_colloquium_config` auf.
+   - `student_email`: Die E-Mail-Adresse des Studierenden.
+   - `date`: Das bestätigte Datum (DD.MM.YYYY).
+   - `time`: Die bestätigte Uhrzeit (HH:MM).
+6. **ERST NACH ERFOLGREICHEM TOOL-AUFRUF:** Wenn das Tool `manage_calendar_appointment` eine Nachricht mit "ERFOLG" zurückgibt:
    - Antworte EXAKT mit dem Signalwort: **APPOINTMENT_BOOKED**  
    - Behaupte NIEMALS, dass ein Termin gebucht wurde, wenn das Tool nicht aufgerufen wurde oder einen Fehler gemeldet hat.  
    - Sende keine weitere E-Mail an den Studierenden (die Einladung erfolgt automatisch über Outlook).  
-6. Wenn das Tool einen Fehler meldet (z.B. Slot belegt oder fehlende Argumente):  
+7. Wenn das Tool einen Fehler meldet (z.B. Slot belegt oder fehlende Argumente):
    - Korrigiere den Tool-Aufruf, falls möglich (z.B. fehlende Argumente ergänzen).  
    - Falls der Slot belegt ist, informiere den Studierenden in der Antwortmail darüber und schlage erneut freie Slots vor (siehe Punkt 1).  
 
