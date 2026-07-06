@@ -7,10 +7,6 @@ from unittest.mock import patch, MagicMock
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'packages', 'email_classifier', 'src')))
 
-# Complete mocks to prevent import chain issues
-sys.modules['mcp_university.metadata.profile_store'] = MagicMock()
-sys.modules['mcp_university.summarizer.profiler'] = MagicMock()
-
 from email_classifier.controller import EmailController  # noqa: E402
 
 def test_age_months_suggested_action(tmp_path):
@@ -27,6 +23,7 @@ def test_age_months_suggested_action(tmp_path):
 
     with patch('email_classifier.controller.MailParser') as mock_parser_cls, \
          patch('email_classifier.controller.Agent'), \
+         patch('email_classifier.controller.PersonProfiler'), \
          patch.object(EmailController, '__init__', lambda x, **kwargs: None), \
          patch.object(EmailController, 'parse_report') as mock_parse:
 
@@ -79,6 +76,7 @@ def test_sent_items_suggested_action(tmp_path):
 
     with patch('email_classifier.controller.MailParser') as mock_parser_cls, \
          patch('email_classifier.controller.Agent'), \
+         patch('email_classifier.controller.PersonProfiler'), \
          patch.object(EmailController, '__init__', lambda x, **kwargs: None), \
          patch.object(EmailController, 'parse_report') as mock_parse:
 

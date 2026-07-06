@@ -4,20 +4,17 @@ from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
 from pathlib import Path
 
-# Add project root to sys.path
+# Add project root and package path to sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'packages', 'email_classifier', 'src')))
-
-# Complete mocks to prevent import chain issues
-sys.modules['mcp_university.metadata.profile_store'] = MagicMock()
-sys.modules['mcp_university.summarizer.profiler'] = MagicMock()
 
 from email_classifier.controller import EmailController  # noqa: E402
 
 def test_get_suggested_action_old_email():
     """Prüft, ob alte E-Mails als 'Archivieren' (Index 3) markiert werden."""
     with patch('email_classifier.controller.MailParser') as mock_parser_cls, \
-         patch('email_classifier.controller.Agent'):
+         patch('email_classifier.controller.Agent'), \
+         patch('email_classifier.controller.PersonProfiler'):
 
         mock_parser = mock_parser_cls.return_value
         # 7 Monate alt
@@ -34,7 +31,8 @@ def test_get_suggested_action_old_email():
 def test_get_suggested_action_sent_items():
     """Prüft, ob E-Mails in SentItems als 'Archivieren' (Index 3) markiert werden."""
     with patch('email_classifier.controller.MailParser') as mock_parser_cls, \
-         patch('email_classifier.controller.Agent'):
+         patch('email_classifier.controller.Agent'), \
+         patch('email_classifier.controller.PersonProfiler'):
 
         mock_parser = mock_parser_cls.return_value
         mock_parser.get_email_date.return_value = datetime.now()
@@ -49,7 +47,8 @@ def test_get_suggested_action_sent_items():
 def test_get_suggested_action_no_answer_needed():
     """Prüft, ob bereits beantwortete E-Mails als 'Archivieren' (Index 3) markiert werden."""
     with patch('email_classifier.controller.MailParser') as mock_parser_cls, \
-         patch('email_classifier.controller.Agent'):
+         patch('email_classifier.controller.Agent'), \
+         patch('email_classifier.controller.PersonProfiler'):
 
         mock_parser = mock_parser_cls.return_value
         mock_parser.get_email_date.return_value = datetime.now()
