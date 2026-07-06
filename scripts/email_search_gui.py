@@ -220,7 +220,7 @@ with gr.Blocks(title="Email Search Quick") as demo:
                 headers=["Datum", "Von", "Betreff", "Pfad"],
                 datatype=["str", "str", "str", "str"],
                 interactive=False,
-                label="Posteingang", height=400
+                label="Posteingang", max_height=400
             )
 
             gr.Markdown("### 📤 Gesendete Elemente (SentItems)")
@@ -228,7 +228,7 @@ with gr.Blocks(title="Email Search Quick") as demo:
                 headers=["Datum", "Von", "Betreff", "Pfad"],
                 datatype=["str", "str", "str", "str"],
                 interactive=False,
-                label="Gesendete Mails", height=400
+                label="Gesendete Mails", max_height=400
             )
 
         with gr.Column(scale=1):
