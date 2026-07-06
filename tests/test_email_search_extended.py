@@ -32,7 +32,7 @@ def test_sent_items_detection_various_names(mock_config: MagicMock, tmp_path: Pa
     """
     cache_file = mock_config.data_dir / "cache" / "test_cache.json"
 
-    folder_names = ["SentItems", "Gesendete Elemente", "Gesendete Objekte", "Sent"]
+    folder_names = ["SentItems", "Sent Items", "Gesendete Elemente", "Gesendete Objekte", "Sent"]
     search_paths = []
 
     for idx, folder_name in enumerate(folder_names):
