@@ -1,0 +1,108 @@
+import os
+import sys
+from datetime import datetime, timedelta
+from unittest.mock import MagicMock, patch
+from pathlib import Path
+
+# Add project root to sys.path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'packages', 'email_classifier', 'src')))
+
+# Complete mocks to prevent import chain issues
+sys.modules['mcp_university.metadata.profile_store'] = MagicMock()
+sys.modules['mcp_university.summarizer.profiler'] = MagicMock()
+
+from email_classifier.controller import EmailController
+
+def test_get_suggested_action_old_email():
+    """Prüft, ob alte E-Mails als 'Archivieren' (Index 3) markiert werden."""
+    with patch('email_classifier.controller.MailParser') as mock_parser_cls, \
+         patch('email_classifier.controller.Agent'):
+
+        mock_parser = mock_parser_cls.return_value
+        # 7 Monate alt
+        old_date = datetime.now() - timedelta(days=210)
+        mock_parser.get_email_date.return_value = old_date
+
+        controller = EmailController()
+        mail_path = Path("test.msg")
+        email_data = {"folder": "Inbox", "needs_answer": True, "lastname": "Test"}
+
+        action = controller.get_suggested_action(mail_path, email_data, age_months=6)
+        assert action == 3
+
+def test_get_suggested_action_sent_items():
+    """Prüft, ob E-Mails in SentItems als 'Archivieren' (Index 3) markiert werden."""
+    with patch('email_classifier.controller.MailParser') as mock_parser_cls, \
+         patch('email_classifier.controller.Agent'):
+
+        mock_parser = mock_parser_cls.return_value
+        mock_parser.get_email_date.return_value = datetime.now()
+
+        controller = EmailController()
+        mail_path = Path("test.msg")
+        email_data = {"folder": "SentItems", "needs_answer": True, "lastname": "Test"}
+
+        action = controller.get_suggested_action(mail_path, email_data, age_months=6)
+        assert action == 3
+
+def test_get_suggested_action_no_answer_needed():
+    """Prüft, ob bereits beantwortete E-Mails als 'Archivieren' (Index 3) markiert werden."""
+    with patch('email_classifier.controller.MailParser') as mock_parser_cls, \
+         patch('email_classifier.controller.Agent'):
+
+        mock_parser = mock_parser_cls.return_value
+        mock_parser.get_email_date.return_value = datetime.now()
+
+        controller = EmailController()
+        mail_path = Path("test.msg")
+        email_data = {"folder": "Inbox", "needs_answer": False, "lastname": "Test"}
+
+        action = controller.get_suggested_action(mail_path, email_data, age_months=6)
+        assert action == 3
+
+def test_get_suggested_action_calls_classifier():
+    """Prüft, ob für aktuelle Mails der Aktions-Klassifizierer aufgerufen wird."""
+    with patch('email_classifier.controller.MailParser') as mock_parser_cls, \
+         patch('email_classifier.controller.Agent'), \
+         patch.object(EmailController, 'classify_action') as mock_classify:
+
+        mock_parser = mock_parser_cls.return_value
+        mock_parser.get_email_date.return_value = datetime.now()
+        mock_classify.return_value = 1 # z.B. Termin vorschlagen
+
+        controller = EmailController()
+        controller.use_action_classifier = True
+        mail_path = Path("test.msg")
+        email_data = {"folder": "Inbox", "needs_answer": True, "lastname": "Test", "class": "TestClass"}
+
+        action = controller.get_suggested_action(mail_path, email_data, age_months=6)
+        assert action == 1
+        mock_classify.assert_called_once_with(mail_path, email_class="TestClass")
+
+def test_process_all_emails_sets_suggested_action():
+    """Prüft, ob process_all_emails das suggested_action Feld für alle Mails setzt."""
+    # Complete mock of EmailController initialization to avoid file system access
+    with patch.object(EmailController, '__init__', lambda x, **kwargs: None):
+        controller = EmailController()
+        controller.use_action_classifier = True
+        controller.processed_results = []
+        controller.parse_report = MagicMock(return_value=[{
+            "lastname": "Student",
+            "class": "ClassA",
+            "semester": "WS2023",
+            "path": "mail.msg",
+            "folder": "Inbox"
+        }])
+        controller.mail_parser = MagicMock()
+        controller.mail_parser.get_email_date.return_value = datetime.now()
+        controller.get_suggested_action = MagicMock(return_value=2)
+
+        # We need to mock Path.rglob because process_all_emails calls it
+        with patch('pathlib.Path.rglob') as mock_rglob:
+            mock_rglob.return_value = [Path("mail.msg")]
+
+            emails = controller.process_all_emails(Path("."))
+            assert len(emails) == 1
+            assert emails[0]["suggested_action"] == 2
+            controller.get_suggested_action.assert_called_once()
