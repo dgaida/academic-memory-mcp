@@ -128,7 +128,7 @@ class EmailSearchEngine:
 
                         # Ordner bestimmen (Inbox oder SentItems)
                         folder_type = "Inbox"
-                        if "SentItems" in file_path.parts:
+                        if any(p in file_path.parts for p in ["SentItems", "Gesendete Elemente", "Gesendete Objekte", "Sent"]):
                             folder_type = "SentItems"
 
                         new_index.append({
