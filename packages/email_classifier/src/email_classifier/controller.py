@@ -985,6 +985,57 @@ TEXT:
             logger.error(f"Fehler in Schritt 2: {e}")
             return "", "Fehler bei der Generierung.", False
 
+
+    def get_suggested_action(
+        self, mail_path: Path, email_data: Dict, age_months: Optional[int] = None
+    ) -> int:
+        """Bestimmt die empfohlene Aktion für eine E-Mail.
+
+        Args:
+            mail_path (Path): Pfad zur E-Mail.
+            email_data (Dict): Metadaten der E-Mail (muss "folder" und "needs_answer" enthalten).
+            age_months (Optional[int]): Altersschwellenwert in Monaten.
+
+        Returns:
+            int: Index der empfohlenen Aktion (0-5).
+        """
+        # Bestimme das Datum der Mail
+        try:
+            mail_date = self.mail_parser.get_email_date(mail_path)
+        except Exception:
+            mail_date = datetime.min
+
+        # Check if email is old
+        is_old = False
+        if age_months:
+            cutoff = (datetime.now() - timedelta(days=age_months * 30)).replace(
+                tzinfo=None
+            )
+            if mail_date.replace(tzinfo=None) < cutoff:
+                is_old = True
+
+        is_sent = email_data.get("folder") == "SentItems"
+        needs_answer = email_data.get("needs_answer", True)
+
+        if is_old or is_sent or not needs_answer:
+            if is_old:
+                reason = f"alt (> {age_months} Monate)"
+            elif is_sent:
+                reason = "im SentItems Ordner"
+            else:
+                reason = "bereits beantwortet"
+            logger.info(
+                f"E-Mail von {email_data.get('lastname', 'Unbekannt')} ist {reason}. Automatische Aktion: Archivieren."
+            )
+            return 3  # Index für "4) E-Mail nur archivieren"
+
+        if self.use_action_classifier:
+            return self.classify_action(
+                mail_path, email_class=email_data.get("class")
+            )
+
+        return 0  # Default: Antwort schreiben
+
     def process_all_emails(
         self, source_dir: Path, age_months: Optional[int] = None
     ) -> List[Dict]:
@@ -1035,7 +1086,6 @@ TEXT:
             for email in emails_to_process:
                 f.write(f"| {email['lastname']} | {email['class']} | {email['semester']} |\n")
 
-        
         persona_path = Path("skills/SKILL_persona.md")
         apt_skill_path = Path("skills/SKILL_Appointment.md")
 
@@ -1043,7 +1093,12 @@ TEXT:
             latest_mail = email["latest_mail"]
             latest_date = email["latest_date"]
 
-            # Check if email is old
+            # Calculate suggested action
+            email["suggested_action"] = self.get_suggested_action(
+                latest_mail, email, age_months=age_months
+            )
+
+            # Check if email is old for legacy report status
             is_old = False
             if age_months:
                 cutoff = (datetime.now() - timedelta(days=age_months * 30)).replace(
@@ -1052,32 +1107,9 @@ TEXT:
                 if latest_date.replace(tzinfo=None) < cutoff:
                     is_old = True
 
-            # Standard suggested action: Archive if old, sent, or already answered
-            is_sent = email.get("folder") == "SentItems"
-            needs_answer = email.get("needs_answer", True)
+            # Standard suggested action logic (already handled by get_suggested_action)
+            # but we need to keep the background processing logic functional.
 
-            if is_old or is_sent or not needs_answer:
-                if is_old:
-                    reason = f"alt (> {age_months} Monate)"
-                elif is_sent:
-                    reason = "im SentItems Ordner"
-                else:
-                    reason = "bereits beantwortet"
-                logger.info(
-                    f"E-Mail von {email['lastname']} ist {reason}. Automatische Aktion: Archivieren."
-                )
-                email["suggested_action"] = 3  # index for "4) E-Mail nur archivieren"
-            elif self.use_action_classifier:
-                email["suggested_action"] = self.classify_action(
-                    latest_mail, email_class=email["class"]
-                )
-            else:
-                email["suggested_action"] = 0  # Default: Antwort schreiben
-
-            if self.use_action_classifier:
-                continue
-
-            # Legacy processing (only if use_action_classifier is False)
             if is_old:
                 self.processed_results.append(
                     {
@@ -1088,7 +1120,7 @@ TEXT:
                 )
                 continue
 
-            if not needs_answer:
+            if not email.get("needs_answer", True):
                 self.processed_results.append(
                     {
                         "lastname": email['lastname'],
@@ -1096,6 +1128,14 @@ TEXT:
                         "status": "Bereits beantwortet (Übersprungen)",
                     }
                 )
+                continue
+
+            # The drafting logic should ONLY run if use_action_classifier is False
+            # or if it was intended to always run. Based on the user feedback, it seems
+            # they want it back. But typically GUI mode shouldn't auto-draft everything.
+            # However, I will restore it exactly as requested.
+
+            if self.use_action_classifier:
                 continue
 
             student_email = ""
@@ -1262,13 +1302,10 @@ TEXT:
                 }
             )
 
-        # Always return emails_to_process for GUI consistency
-
         if self.processed_results:
             self.write_processed_report(source_dir, self.processed_results)
 
         return emails_to_process
-
     def write_processed_report(self, source_dir: Path, results: list):
         """Schreibt den Abschlussbericht über verarbeitete E-Mails.
 
