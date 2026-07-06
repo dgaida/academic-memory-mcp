@@ -88,7 +88,11 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
 
                 @gr.render(inputs=tab1_mails)
                 def render_tab1(mails: List[Dict[str, Any]]) -> None:
-                    """Rendert die Übersicht der E-Mails in Tab 1."""
+                    """Rendert die Übersicht der E-Mails in Tab 1.
+
+                    Args:
+                        mails (List[Dict[str, Any]]): Liste der E-Mails.
+                    """
                     if not mails:
                         gr.Markdown("Keine Mails zum Verarbeiten.")
                         return
@@ -98,6 +102,10 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
 
                     checkboxes = []
 
+                    # Initialisiere die Liste mit None-Werten für alle Mails
+                    # So können wir sie später per Index befüllen
+                    mail_checkbox_map = [None] * len(mails)
+
                     with gr.Row():
                         with gr.Column():
                             gr.Markdown("### Posteingang")
@@ -106,6 +114,7 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
                                 with gr.Group():
                                     with gr.Row():
                                         cb = gr.Checkbox(label=f"{mail['lastname']} ({mail['class']})", value=False)
+                                        mail_checkbox_map[idx] = cb
                                         checkboxes.append(cb)
                                         gr.Markdown(f"`{Path(mail['path']).name}`")
                                     with gr.Row():
@@ -121,6 +130,7 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
                                 with gr.Group():
                                     with gr.Row():
                                         cb = gr.Checkbox(label=f"{mail['lastname']} ({mail['class']})", value=False)
+                                        mail_checkbox_map[idx] = cb
                                         checkboxes.append(cb)
                                         gr.Markdown(f"`{Path(mail['path']).name}`")
                                     with gr.Row():
@@ -134,24 +144,33 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
                         relocate_btn = gr.Button("Verbleibende Mails archivieren")
 
                     def handle_remove_to_tab2(t1_mails, t2_mails, *selected_states):
+                        """Verschiebt markierte E-Mails von Tab 1 nach Tab 2."""
+                        # selected_states enthält die booleschen Werte der Checkboxen in der Reihenfolge ihrer Erstellung
+                        # Wir müssen sie zurück auf die Indizes der t1_mails mappen.
+
+                        # Da wir checkboxes in der Reihenfolge inbox -> sent hinzugefügt haben,
+                        # müssen wir wissen welcher State zu welchem Index gehört.
+
                         actual_selections = []
-                        # Map states back to original indices
                         state_idx = 0
+                        # Inbox zuerst
                         for idx in inbox_indices:
                             if selected_states[state_idx]:
                                 actual_selections.append(idx)
                             state_idx += 1
+                        # Sent danach
                         for idx in sent_indices:
                             if selected_states[state_idx]:
                                 actual_selections.append(idx)
                             state_idx += 1
 
                         if not actual_selections:
-                            yield t1_mails, t2_mails, "Keine Mails ausgewählt.", gr.update()
-                            return
+                            return t1_mails, t2_mails, "Keine Mails ausgewählt.", gr.update()
 
-                        yield from remove_to_tab2_logic(t1_mails, t2_mails, actual_selections)
+                        # Ab hier nutzen wir die Logik von remove_to_tab2, aber angepasst
+                        return next(remove_to_tab2_logic(t1_mails, t2_mails, actual_selections))
 
+                    # Wir brauchen einen Generator oder eine Wrapper-Funktion, die die schrittweise Verarbeitung übernimmt
                     remove_btn.click(
                         handle_remove_to_tab2,
                         inputs=[tab1_mails, tab2_mails] + checkboxes,
@@ -170,7 +189,14 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
 
                 @gr.render(inputs=tab2_mails)
                 def render_tab2(mails: List[Dict[str, Any]]) -> None:
-                    """Rendert die Detail-Ansicht für E-Mails in Tab 2."""
+                    """Rendert die Detail-Ansicht für E-Mails in Tab 2.
+
+                    Args:
+                        mails (List[Dict[str, Any]]): Liste der E-Mails mit Metadaten und Zusammenfassungen.
+
+                    Returns:
+                        None
+                    """
                     if not mails:
                         gr.Markdown("Keine Mails zur Detail-Ansicht.")
                         return
@@ -217,6 +243,14 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
                     process_btn = gr.Button("Mails in Tab 2 verarbeiten", variant="primary")
 
                     def handle_tab2_process(*args: Any) -> str:
+                        """Verarbeitet die E-Mails in Tab 2 basierend auf den Benutzereingaben.
+
+                        Args:
+                            *args: Dynamische Liste von Dropdown-Werten und Checkbox-Status.
+
+                        Returns:
+                            str: Statusbericht der Verarbeitung.
+                        """
                         num = num_mails
                         if len(args) < 3 * num:
                             return f"Fehler: Erwartete {3 * num} Argumente, erhielt {len(args)}."
@@ -257,7 +291,11 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
                     )
 
         def scan_emails() -> Tuple[List[Dict[str, Any]], List[Any], str]:
-            """Scannt das Quellverzeichnis nach E-Mails."""
+            """Scannt das Quellverzeichnis nach E-Mails und klassifiziert diese.
+
+            Returns:
+                Tuple: (Alle Mails, Tab 2 Mails, Statusmeldung)
+            """
             try:
                 results = controller.run_sort(str(source_dir), method=method, mode=mode, dry_run=True)
                 return results, [], f"{len(results)} Mails gefunden."
@@ -268,7 +306,16 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
         demo.load(scan_emails, outputs=[tab1_mails, tab2_mails, tab1_status])
 
         def remove_to_tab2_logic(t1_mails: List[Dict[str, Any]], t2_mails: List[Dict[str, Any]], selected_indices: List[int]) -> Generator:
-            """Verschiebt markierte E-Mails von Tab 1 nach Tab 2 und startet die Verarbeitung."""
+            """Verschiebt markierte E-Mails von Tab 1 nach Tab 2 und startet die Verarbeitung.
+
+            Args:
+                t1_mails (List[Dict[str, Any]]): Aktuelle Mails in Tab 1.
+                t2_mails (List[Dict[str, Any]]): Aktuelle Mails in Tab 2.
+                selected_indices (List[int]): Liste der ausgewählten Indizes in t1_mails.
+
+            Yields:
+                Generator: Updates für UI-Komponenten.
+            """
             selected_indices = sorted(list(set(selected_indices)), reverse=True)
 
             new_t1 = list(t1_mails)
@@ -304,7 +351,14 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
             yield new_t1, final_t2, "Verarbeitung abgeschlossen.", gr.update(selected=1)
 
         def relocate_remaining(t1_mails: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], str]:
-            """Archiviert alle verbleibenden E-Mails in Tab 1."""
+            """Archiviert alle verbleibenden E-Mails in Tab 1.
+
+            Args:
+                t1_mails (List[Dict[str, Any]]): Verbleibende Mails in Tab 1.
+
+            Returns:
+                Tuple: (Leere Liste, Statusmeldung)
+            """
             if not t1_mails:
                 return [], "Keine Mails zum Verschieben."
 
