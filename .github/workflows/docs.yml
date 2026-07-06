@@ -39,7 +39,7 @@ jobs:
           echo "INTERROGATE_VAL=$INTERROGATE_VAL" >> $GITHUB_ENV
 
       - name: Lint Markdown
-        uses: davidanson/markdownlint-cli2-action@v19
+        uses: davidanson/markdownlint-cli2-action@v23
         continue-on-error: true
         with:
           globs: "docs/**/*.md"
