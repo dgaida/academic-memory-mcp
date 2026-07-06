@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..',
 sys.modules['mcp_university.metadata.profile_store'] = MagicMock()
 sys.modules['mcp_university.summarizer.profiler'] = MagicMock()
 
-from email_classifier.controller import EmailController
+from email_classifier.controller import EmailController  # noqa: E402
 
 def test_get_suggested_action_old_email():
     """Prüft, ob alte E-Mails als 'Archivieren' (Index 3) markiert werden."""
@@ -65,6 +65,7 @@ def test_get_suggested_action_calls_classifier():
     """Prüft, ob für aktuelle Mails der Aktions-Klassifizierer aufgerufen wird."""
     with patch('email_classifier.controller.MailParser') as mock_parser_cls, \
          patch('email_classifier.controller.Agent'), \
+         patch('email_classifier.controller.PersonProfiler'), \
          patch.object(EmailController, 'classify_action') as mock_classify:
 
         mock_parser = mock_parser_cls.return_value

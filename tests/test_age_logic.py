@@ -2,7 +2,6 @@ import sys
 import os
 from datetime import datetime, timedelta
 from unittest.mock import patch, MagicMock
-from pathlib import Path
 
 # Ensure we can import mcp_university and email_classifier
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -12,7 +11,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..',
 sys.modules['mcp_university.metadata.profile_store'] = MagicMock()
 sys.modules['mcp_university.summarizer.profiler'] = MagicMock()
 
-from email_classifier.controller import EmailController
+from email_classifier.controller import EmailController  # noqa: E402
 
 def test_age_months_suggested_action(tmp_path):
     """Checks that emails older than the specified age-months are always archived.
