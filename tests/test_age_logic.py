@@ -1,7 +1,7 @@
 import sys
 import os
 from datetime import datetime, timedelta
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 # Ensure we can import mcp_university and email_classifier
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
