@@ -1,7 +1,6 @@
 import json
 import pytest
 import asyncio
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 @pytest.fixture
