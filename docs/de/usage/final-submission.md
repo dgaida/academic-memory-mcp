@@ -4,9 +4,9 @@ Dieses System erkennt automatisch die finale Abgabe von Bachelor-, Master- und P
 
 ## Automatisierte Schritte
 
-1.  **Kalender-Erinnerung:** Es wird automatisch ein Termin in Ihrem Outlook-Kalender erstellt, genau 7 Tage nach Eingang der E-Mail (um 08:00 Uhr), um Sie an das Lesen der Arbeit zu erinnern.
-2.  **Speichern von Anhängen:** Alle Anhänge der E-Mail werden automatisch im entsprechenden Studentenordner gespeichert. Bestehende Dateien werden dabei nicht überschrieben, sondern ggf. mit dem Suffix `_final` versehen.
-3.  **Kolloquium-Konfiguration:** Es wird eine `config.json` Datei im Hauptordner des Studenten erstellt. Diese Datei dient als Konfiguration für den [colloquium-protocol-creator](https://dgaida.github.io/colloquium-protocol-creator/).
+1.  **Kalender-Erinnerung:** Es wird automatisch ein Termin in Ihrem Outlook-Kalender erstellt, genau 7 Tage nach Eingang der E-Mail (um 08:00 Uhr), um Sie an das Lesen der Arbeit zu erinnern.  
+2.  **Speichern von Anhängen:** Alle Anhänge der E-Mail werden automatisch im entsprechenden Studentenordner gespeichert. Bestehende Dateien werden dabei nicht überschrieben, sondern ggf. mit dem Suffix `_final` versehen.  
+3.  **Kolloquium-Konfiguration:** Es wird eine `config.json` Datei im Hauptordner des Studenten erstellt. Diese Datei dient als Konfiguration für den [colloquium-protocol-creator](https://dgaida.github.io/colloquium-protocol-creator/).  
 
 ## Integration mit dem Colloquium Protocol Creator
 

@@ -4,9 +4,9 @@ The system automatically detects the final submission of Bachelor, Master, and p
 
 ## Automated Steps
 
-1.  **Calendar Reminder:** A reminder is automatically created in your Outlook calendar exactly 7 days after the email is received (at 08:00 AM) to remind you to read the thesis.
-2.  **Save Attachments:** All email attachments are automatically saved in the corresponding student folder. Existing files are not overwritten; if necessary, the suffix `_final` is added.
-3.  **Colloquium Configuration:** A `config.json` file is created in the student's main folder. This file serves as a configuration for the [colloquium-protocol-creator](https://dgaida.github.io/colloquium-protocol-creator/).
+1.  **Calendar Reminder:** A reminder is automatically created in your Outlook calendar exactly 7 days after the email is received (at 08:00 AM) to remind you to read the thesis.  
+2.  **Save Attachments:** All email attachments are automatically saved in the corresponding student folder. Existing files are not overwritten; if necessary, the suffix `_final` is added.  
+3.  **Colloquium Configuration:** A `config.json` file is created in the student's main folder. This file serves as a configuration for the [colloquium-protocol-creator](https://dgaida.github.io/colloquium-protocol-creator/).  
 
 ## Integration with the Colloquium Protocol Creator
 
