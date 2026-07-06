@@ -84,33 +84,85 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
         with gr.Tabs() as tabs:
             with gr.Tab("Übersicht & Auswahl", id=0):
                 gr.Markdown("Wähle die E-Mails aus, die du detailliert prüfen möchtest.")
+                tab1_status = gr.Textbox(label="Status")
 
-                with gr.Row():
-                    with gr.Column():
-                        gr.Markdown("### Posteingang")
-                        inbox_list = gr.Dataframe(
-                            headers=["Index", "Klasse", "Student", "Datei", "Auswählen"],
-                            datatype=["number", "str", "str", "str", "bool"],
-                            col_count=(5, "fixed"),
-                            interactive=True,
-                            label="Inbox Mails"
-                        )
-                    with gr.Column():
-                        gr.Markdown("### Gesendete Elemente")
-                        sent_list = gr.Dataframe(
-                            headers=["Index", "Klasse", "Student", "Datei", "Auswählen"],
-                            datatype=["number", "str", "str", "str", "bool"],
-                            col_count=(5, "fixed"),
-                            interactive=True,
-                            label="Sent Mails"
-                        )
+                @gr.render(inputs=tab1_mails)
+                def render_tab1(mails: List[Dict[str, Any]]) -> None:
+                    """Rendert die Übersicht der E-Mails in Tab 1."""
+                    if not mails:
+                        gr.Markdown("Keine Mails zum Verarbeiten.")
+                        return
 
-                with gr.Row():
-                    remove_btn = gr.Button("Markierte Mail nach Tab 2 schieben", variant="primary")
+                    inbox_indices = [i for i, m in enumerate(mails) if m.get("folder") == "Inbox"]
+                    sent_indices = [i for i, m in enumerate(mails) if m.get("folder") != "Inbox"]
 
-                with gr.Row():
-                    relocate_btn = gr.Button("Verbleibende Mails archivieren")
-                    tab1_status = gr.Textbox(label="Status")
+                    checkboxes = []
+
+                    with gr.Row():
+                        with gr.Column():
+                            gr.Markdown("### Posteingang")
+                            for idx in inbox_indices:
+                                mail = mails[idx]
+                                with gr.Group():
+                                    with gr.Row():
+                                        cb = gr.Checkbox(label=f"{mail['lastname']} ({mail['class']})", value=False)
+                                        checkboxes.append(cb)
+                                        gr.Markdown(f"`{Path(mail['path']).name}`")
+                                    with gr.Row():
+                                        open_m_btn = gr.Button("📧 Öffnen", size="sm")
+                                        open_f_btn = gr.Button("📂 Ordner", size="sm")
+                                        open_m_btn.click(lambda p=mail["path"]: open_mail_fn(p), outputs=tab1_status)
+                                        open_f_btn.click(lambda p=mail["path"]: open_folder_fn(p), outputs=tab1_status)
+
+                        with gr.Column():
+                            gr.Markdown("### Gesendete Elemente")
+                            for idx in sent_indices:
+                                mail = mails[idx]
+                                with gr.Group():
+                                    with gr.Row():
+                                        cb = gr.Checkbox(label=f"{mail['lastname']} ({mail['class']})", value=False)
+                                        checkboxes.append(cb)
+                                        gr.Markdown(f"`{Path(mail['path']).name}`")
+                                    with gr.Row():
+                                        open_m_btn = gr.Button("📧 Öffnen", size="sm")
+                                        open_f_btn = gr.Button("📂 Ordner", size="sm")
+                                        open_m_btn.click(lambda p=mail["path"]: open_mail_fn(p), outputs=tab1_status)
+                                        open_f_btn.click(lambda p=mail["path"]: open_folder_fn(p), outputs=tab1_status)
+
+                    with gr.Row():
+                        remove_btn = gr.Button("Markierte Mail nach Tab 2 schieben", variant="primary")
+                        relocate_btn = gr.Button("Verbleibende Mails archivieren")
+
+                    def handle_remove_to_tab2(t1_mails, t2_mails, *selected_states):
+                        actual_selections = []
+                        # Map states back to original indices
+                        state_idx = 0
+                        for idx in inbox_indices:
+                            if selected_states[state_idx]:
+                                actual_selections.append(idx)
+                            state_idx += 1
+                        for idx in sent_indices:
+                            if selected_states[state_idx]:
+                                actual_selections.append(idx)
+                            state_idx += 1
+
+                        if not actual_selections:
+                            yield t1_mails, t2_mails, "Keine Mails ausgewählt.", gr.update()
+                            return
+
+                        yield from remove_to_tab2_logic(t1_mails, t2_mails, actual_selections)
+
+                    remove_btn.click(
+                        handle_remove_to_tab2,
+                        inputs=[tab1_mails, tab2_mails] + checkboxes,
+                        outputs=[tab1_mails, tab2_mails, tab1_status, tabs]
+                    )
+
+                    relocate_btn.click(
+                        relocate_remaining,
+                        inputs=[tab1_mails],
+                        outputs=[tab1_mails, tab1_status]
+                    )
 
             with gr.Tab("Detail-Ansicht & Verarbeitung", id=1):
                 gr.Markdown("Hier können Mails detailliert geprüft und verarbeitet werden.")
@@ -118,14 +170,7 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
 
                 @gr.render(inputs=tab2_mails)
                 def render_tab2(mails: List[Dict[str, Any]]) -> None:
-                    """Rendert die Detail-Ansicht für E-Mails in Tab 2.
-
-                    Args:
-                        mails (List[Dict[str, Any]]): Liste der E-Mails mit Metadaten und Zusammenfassungen.
-
-                    Returns:
-                        None
-                    """
+                    """Rendert die Detail-Ansicht für E-Mails in Tab 2."""
                     if not mails:
                         gr.Markdown("Keine Mails zur Detail-Ansicht.")
                         return
@@ -172,14 +217,6 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
                     process_btn = gr.Button("Mails in Tab 2 verarbeiten", variant="primary")
 
                     def handle_tab2_process(*args: Any) -> str:
-                        """Verarbeitet die E-Mails in Tab 2 basierend auf den Benutzereingaben.
-
-                        Args:
-                            *args: Dynamische Liste von Dropdown-Werten und Checkbox-Status.
-
-                        Returns:
-                            str: Statusbericht der Verarbeitung.
-                        """
                         num = num_mails
                         if len(args) < 3 * num:
                             return f"Fehler: Erwartete {3 * num} Argumente, erhielt {len(args)}."
@@ -219,56 +256,19 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
                         outputs=tab2_status_local
                     )
 
-        def scan_emails() -> Tuple[List[Dict[str, Any]], List[Any], List[List[Any]], List[List[Any]], str]:
-            """Scannt das Quellverzeichnis nach E-Mails und klassifiziert diese.
-
-            Returns:
-                Tuple: (Alle Mails, Tab 2 Mails, Inbox Liste, Sent Liste, Statusmeldung)
-            """
+        def scan_emails() -> Tuple[List[Dict[str, Any]], List[Any], str]:
+            """Scannt das Quellverzeichnis nach E-Mails."""
             try:
                 results = controller.run_sort(str(source_dir), method=method, mode=mode, dry_run=True)
-                inbox = []
-                sent = []
-                for i, res in enumerate(results):
-                    row = [i, res["class"], res["lastname"], Path(res["path"]).name, False]
-                    if res["folder"] == "Inbox":
-                        inbox.append(row)
-                    else:
-                        sent.append(row)
-                return results, [], inbox, sent, f"{len(results)} Mails gefunden."
+                return results, [], f"{len(results)} Mails gefunden."
             except Exception as e:
                 logger.exception("Fehler beim Scannen")
-                return [], [], [], [], f"Fehler: {str(e)}"
+                return [], [], f"Fehler: {str(e)}"
 
-        demo.load(scan_emails, outputs=[tab1_mails, tab2_mails, inbox_list, sent_list, tab1_status])
+        demo.load(scan_emails, outputs=[tab1_mails, tab2_mails, tab1_status])
 
-        def remove_to_tab2(t1_mails: List[Dict[str, Any]], t2_mails: List[Dict[str, Any]], inbox_df: Any, sent_df: Any) -> Generator:
-            """Verschiebt markierte E-Mails von Tab 1 nach Tab 2 und startet die Verarbeitung.
-
-            Args:
-                t1_mails (List[Dict[str, Any]]): Aktuelle Mails in Tab 1.
-                t2_mails (List[Dict[str, Any]]): Aktuelle Mails in Tab 2.
-                inbox_df (Any): Daten des Inbox-Dataframes.
-                sent_df (Any): Daten des Sent-Dataframes.
-
-            Yields:
-                Generator: Updates für UI-Komponenten.
-            """
-            inbox_data = inbox_df.values.tolist() if hasattr(inbox_df, "values") else inbox_df
-            sent_data = sent_df.values.tolist() if hasattr(sent_df, "values") else sent_df
-
-            selected_indices = []
-            for row in inbox_data:
-                if row[4]:
-                    selected_indices.append(int(row[0]))
-            for row in sent_data:
-                if row[4]:
-                    selected_indices.append(int(row[0]))
-
-            if not selected_indices:
-                yield t1_mails, t2_mails, inbox_data, sent_data, "Keine Mails ausgewählt.", gr.update()
-                return
-
+        def remove_to_tab2_logic(t1_mails: List[Dict[str, Any]], t2_mails: List[Dict[str, Any]], selected_indices: List[int]) -> Generator:
+            """Verschiebt markierte E-Mails von Tab 1 nach Tab 2 und startet die Verarbeitung."""
             selected_indices = sorted(list(set(selected_indices)), reverse=True)
 
             new_t1 = list(t1_mails)
@@ -285,16 +285,7 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
 
             current_t2 = new_t2 + moved_this_session
 
-            new_inbox = []
-            new_sent = []
-            for i, res in enumerate(new_t1):
-                row = [i, res["class"], res["lastname"], Path(res["path"]).name, False]
-                if res["folder"] == "Inbox":
-                    new_inbox.append(row)
-                else:
-                    new_sent.append(row)
-
-            yield new_t1, current_t2, new_inbox, new_sent, f"{len(moved_this_session)} Mails nach Tab 2 geschoben. Verarbeite...", gr.update(selected=1)
+            yield new_t1, current_t2, f"{len(moved_this_session)} Mails nach Tab 2 geschoben. Verarbeite...", gr.update(selected=1)
 
             final_t2 = list(new_t2)
             for m in moved_this_session:
@@ -308,27 +299,14 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
                 mail["summary"] = controller.generate_short_summary(mail_path)
                 mail["similarity_info"] = controller.get_similarity_info(mail_path, mail["lastname"])
 
-                yield new_t1, list(final_t2), new_inbox, new_sent, f"Verarbeitet: {mail['lastname']} ({i - len(new_t2) + 1}/{len(moved_this_session)})", gr.update(selected=1)
+                yield new_t1, list(final_t2), f"Verarbeitet: {mail['lastname']} ({i - len(new_t2) + 1}/{len(moved_this_session)})", gr.update(selected=1)
 
-            yield new_t1, final_t2, new_inbox, new_sent, "Verarbeitung abgeschlossen.", gr.update(selected=1)
+            yield new_t1, final_t2, "Verarbeitung abgeschlossen.", gr.update(selected=1)
 
-        remove_btn.click(
-            remove_to_tab2,
-            inputs=[tab1_mails, tab2_mails, inbox_list, sent_list],
-            outputs=[tab1_mails, tab2_mails, inbox_list, sent_list, tab1_status, tabs]
-        )
-
-        def relocate_remaining(t1_mails: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], Any, Any, str]:
-            """Archiviert alle verbleibenden E-Mails in Tab 1.
-
-            Args:
-                t1_mails (List[Dict[str, Any]]): Verbleibende Mails in Tab 1.
-
-            Returns:
-                Tuple: (Leere Liste, Inbox-Update, Sent-Update, Statusmeldung)
-            """
+        def relocate_remaining(t1_mails: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], str]:
+            """Archiviert alle verbleibenden E-Mails in Tab 1."""
             if not t1_mails:
-                return [], gr.update(), gr.update(), "Keine Mails zum Verschieben."
+                return [], "Keine Mails zum Verschieben."
 
             changes = []
             for m in t1_mails:
@@ -339,17 +317,11 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
             try:
                 errors = controller.relocate_emails(changes)
                 if errors:
-                    return t1_mails, gr.update(), gr.update(), "Fehler beim Verschieben: " + "; ".join(errors)
-                return [], [], [], "Mails erfolgreich archiviert."
+                    return t1_mails, "Fehler beim Verschieben: " + "; ".join(errors)
+                return [], "Mails erfolgreich archiviert."
             except Exception as e:
                 logger.error(f"Fehler beim Archivieren: {e}")
-                return t1_mails, gr.update(), gr.update(), f"Fehler: {str(e)}"
-
-        relocate_btn.click(
-            relocate_remaining,
-            inputs=[tab1_mails],
-            outputs=[tab1_mails, inbox_list, sent_list, tab1_status]
-        )
+                return t1_mails, f"Fehler: {str(e)}"
 
     demo.launch(inbrowser=True)
 
