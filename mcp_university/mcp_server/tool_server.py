@@ -83,7 +83,11 @@ def create_tool_server() -> FastMCP:
                 return f"Kein Student mit dem Namen '{student_name}' gefunden."
 
             # (id, name, email, topic, status, folder_path)
-            res = f"Student: {student[1]}\nEmail: {student[2]}\nThema: {student[3]}\nStatus: {student[4]}\nOrdner: {student[5]}\n"
+            res = (f"Student: {student[1]}\n"
+                   f"Email: {student[2]}\n"
+                   f"Thema: {student[3]}\n"
+                   f"Status: {student[4]}\n"
+                   f"Ordner: {student[5]}\n")
 
             # Zusammenfassung aus der Datenbank laden
             if student[5]:
@@ -117,7 +121,7 @@ def create_tool_server() -> FastMCP:
             return f"Fehler beim Lesen der freien Slots: {e}"
 
     @mcp.tool
-    def manage_calendar_appointment(start_time: str, end_time: str, subject: str, student_email: str, original_mail_date: Optional[str] = None, body: Optional[str] = None) -> str:
+    def manage_calendar_appointment(start_time: str, end_time: str, subject: str, student_email: str, original_mail_date: Optional[str] = None, body: Optional[str] = None, is_colloquium: bool = False) -> str:
         """Prüft die Verfügbarkeit eines Zeitfensters im Outlook-Kalender und trägt einen neuen Termin ein.
 
         Args:
@@ -150,7 +154,7 @@ def create_tool_server() -> FastMCP:
             dt_start = datetime.strptime(start_time, "%Y-%m-%d %H:%M").replace(tzinfo=tz)
             dt_end = datetime.strptime(end_time, "%Y-%m-%d %H:%M").replace(tzinfo=tz)
 
-            if "kolloquium" in subject.lower():
+            if is_colloquium:
                 if (dt_end - dt_start) < timedelta(minutes=60):
                     dt_end = dt_start + timedelta(minutes=60)
 
@@ -164,6 +168,7 @@ def create_tool_server() -> FastMCP:
                     root = store.GetRootFolder()
                     for j in range(1, root.Folders.Count + 1):
                         folder = root.Folders.Item(j)
+                        print(f"DEBUG: Checking folder {folder.Name} against {target_calendar_name}"); print(f"DEBUG: Checking folder {folder.Name} against {target_calendar_name}");
                         if folder.Name == target_calendar_name:
                             logger.info(f"ERFOLG: Ziel-Kalender gefunden: {folder.FolderPath}")
                             cal_folder = folder
@@ -195,6 +200,27 @@ def create_tool_server() -> FastMCP:
             appointment.MeetingStatus = 1 # olMeeting
 
             appointment.Save()
+
+            # Automatisches Update der Kolloquium-Config falls erkannt
+            if is_colloquium:
+                try:
+                    update_colloquium_config(student_email, dt_start.strftime("%d.%m.%Y"), dt_start.strftime("%H:%M"))
+                except Exception as e:
+                    logger.error(f"Fehler beim automatischen Update der Kolloquium-Config: {e}")
+
+            # Automatisches Update der Kolloquium-Config falls erkannt
+            if is_colloquium:
+                try:
+                    update_colloquium_config(student_email, dt_start.strftime("%d.%m.%Y"), dt_start.strftime("%H:%M"))
+                except Exception as e:
+                    logger.error(f"Fehler beim automatischen Update der Kolloquium-Config: {e}")
+
+            # Automatisches Update der Kolloquium-Config falls erkannt
+            if is_colloquium:
+                try:
+                    update_colloquium_config(student_email, dt_start.strftime("%d.%m.%Y"), dt_start.strftime("%H:%M"))
+                except Exception as e:
+                    logger.error(f"Fehler beim automatischen Update der Kolloquium-Config: {e}")
             return f"ERFOLG: Termin '{subject}' am {start_time} wurde eingetragen."
 
         except Exception as e:
@@ -235,6 +261,7 @@ def create_tool_server() -> FastMCP:
     @mcp.tool
     def create_colloquium_config(email_path: str, pdf_filename: str) -> str:
         """Erstellt eine config.json für den colloquium-protocol-creator bei finaler Abgabe.
+        Falls die Datei bereits existiert, wird nur der Dateiname der Bachelorarbeit aktualisiert.
 
         Args:
             email_path: Pfad zur E-Mail.
@@ -253,44 +280,51 @@ def create_tool_server() -> FastMCP:
 
             config_path = target_dir / "config.json"
 
-            config_data = {
-              "task": "colloquium",
-              "description": "Kolloquium auf dem Campus Gummersbach mit automatischer Gemini-Bewertung",
-              "pdf": {
-                "filename": pdf_filename
-              },
-              "colloquium": {
-                "date": "DD.MM.YYYY",
-                "time": "hh:mm",
-                "location_type": "campus",
-                "room": "3.228"
-              },
-              "llm": {
-                "api_choice": None,
-                "model": None,
-                "groq_free": True
-              },
-              "gemini_evaluation": {
-                "enabled": False,
-                "model": "gemini-2.0-flash-exp"
-              },
-              "output": {
-                "folder": None,
-                "compile_pdf": True,
-                "fill_form_only": True
-              }
-            }
+            if config_path.exists():
+                logger.info(f"config.json existiert bereits unter {config_path}. Aktualisiere nur PDF-Dateiname.")
+                with open(config_path, "r", encoding="utf-8") as f:
+                    config_data = json.load(f)
+                config_data["pdf"]["filename"] = pdf_filename
+            else:
+                config_data = {
+                  "task": "colloquium",
+                  "description": "Kolloquium auf dem Campus Gummersbach mit automatischer Gemini-Bewertung",
+                  "pdf": {
+                    "filename": pdf_filename
+                  },
+                  "colloquium": {
+                    "date": "DD.MM.YYYY",
+                    "time": "hh:mm",
+                    "location_type": "campus",
+                    "room": "3.228"
+                  },
+                  "llm": {
+                    "api_choice": None,
+                    "model": None,
+                    "groq_free": True
+                  },
+                  "gemini_evaluation": {
+                    "enabled": False,
+                    "model": "gemini-2.0-flash-exp"
+                  },
+                  "output": {
+                    "folder": None,
+                    "compile_pdf": True,
+                    "fill_form_only": True
+                  }
+                }
 
             with open(config_path, "w", encoding="utf-8") as f:
                 json.dump(config_data, f, indent=2, ensure_ascii=False)
 
-            return f"ERFOLG: Konfiguration erstellt unter {config_path}"
+            return f"ERFOLG: Konfiguration erstellt/aktualisiert unter {config_path}"
         except Exception as e:
             return f"Fehler beim Erstellen der Konfiguration: {e}"
 
     @mcp.tool
     def update_colloquium_config(student_email: str, date: str, time: str) -> str:
         """Aktualisiert Datum und Uhrzeit in der config.json eines Studenten.
+        Falls die config.json noch nicht existiert, wird sie mit Standardwerten erstellt.
 
         Args:
             student_email: E-Mail-Adresse des Studenten.
@@ -313,33 +347,54 @@ def create_tool_server() -> FastMCP:
                 if not row:
                     return f"Fehler: Kein Ordner für Student {student_email} in Datenbank gefunden."
 
-                # student_folder = Path(row[0])
                 # Die config.json liegt im Hauptordner des Studenten, nicht in Unterordnern
-                # Wir suchen sie im gefundenen Pfad und ggf. darüber
                 config_path = Path(row[0]) / "config.json"
                 if not config_path.exists():
                     # Fallback: Falls row[0] ein Unterordner wie "SentItems" ist
-                    config_path = Path(row[0]).parent / "config.json"
+                    potential_path = Path(row[0]).parent / "config.json"
+                    if potential_path.exists() or Path(row[0]).name in ["SentItems", "Inbox", "Posteingang", "Gesendete Elemente"]:
+                         config_path = potential_path
 
                 if not config_path.exists():
-                     return f"Fehler: config.json nicht gefunden in {Path(row[0])}"
-
-                with open(config_path, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-
-                data["colloquium"]["date"] = date
-                data["colloquium"]["time"] = time
+                     logger.info(f"config.json nicht gefunden. Erstelle neue unter {config_path}")
+                     config_data = {
+                      "task": "colloquium",
+                      "description": "Kolloquium auf dem Campus Gummersbach mit automatischer Gemini-Bewertung",
+                      "pdf": {
+                        "filename": ""
+                      },
+                      "colloquium": {
+                        "date": date,
+                        "time": time,
+                        "location_type": "campus",
+                        "room": "3.228"
+                      },
+                      "llm": {
+                        "api_choice": None,
+                        "model": None,
+                        "groq_free": True
+                      },
+                      "gemini_evaluation": {
+                        "enabled": False,
+                        "model": "gemini-2.0-flash-exp"
+                      },
+                      "output": {
+                        "folder": None,
+                        "compile_pdf": True,
+                        "fill_form_only": True
+                      }
+                    }
+                else:
+                    with open(config_path, "r", encoding="utf-8") as f:
+                        config_data = json.load(f)
+                    config_data["colloquium"]["date"] = date
+                    config_data["colloquium"]["time"] = time
 
                 with open(config_path, "w", encoding="utf-8") as f:
-                    json.dump(data, f, indent=2, ensure_ascii=False)
+                    json.dump(config_data, f, indent=2, ensure_ascii=False)
 
                 return f"ERFOLG: Kolloquiumstermin in {config_path} aktualisiert."
         except Exception as e:
             return f"Fehler beim Aktualisieren der Konfiguration: {e}"
 
     return mcp
-
-
-if __name__ == "__main__":
-    mcp = create_tool_server()
-    mcp.run()
