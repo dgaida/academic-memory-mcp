@@ -162,6 +162,6 @@ The script `scripts/crawl_th_koeln_persons.py` is used to fetch personnel data.
 - **GUI:** Ein Gradio-Skript `scripts/email_search_gui.py` bietet eine Benutzeroberfläche mit Autovervollständigung, einer Liste der Suchergebnisse und einem E-Mail-Viewer.  
 - **Funktionen:** E-Mails können direkt in Outlook oder im Datei-Explorer geöffnet werden.  
 
-## Email Processing & GUI Rules (Update 2026-07)
-- **Automatic Suggestions:** The system must automatically suggest "4) E-Mail nur archivieren" for emails that are older than the configured threshold or are located in the `SentItems` folder.
-- **Attachment Handling:** The Gradio GUI (`scripts/process_sorted_emails.py`) must provide a checkbox for "Anhang speichern" on both Tab 1 and Tab 2. The selection state from Tab 1 must be preserved when moving a mail to Tab 2.
+## Email Processing & GUI Rules (Update 2026-07)  
+- **Automatic Suggestions:** The system must automatically suggest "4) E-Mail nur archivieren" for emails that are older than the configured threshold or are located in the `SentItems` folder.  
+- **Attachment Handling:** The Gradio GUI (`scripts/process_sorted_emails.py`) must provide a checkbox for "Anhang speichern" on both Tab 1 and Tab 2. The selection state from Tab 1 must be preserved when moving a mail to Tab 2.  
