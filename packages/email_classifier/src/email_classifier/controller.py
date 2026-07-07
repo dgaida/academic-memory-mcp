@@ -785,7 +785,7 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
             elif force_calendar_booking:
                 forced_instr = "\nERZWUNGENE AKTION: Diese E-Mail bestätigt einen Termin. Du MUSST ZWINGEND manage_calendar_appointment aufrufen."
             elif force_colloquium:
-                forced_instr = "\nERZWUNGENE AKTION: Diese E-Mail bestätigt ein Kolloquium (60 Min). Du MUSST ZWINGEND manage_calendar_appointment aufrufen."
+                forced_instr = "\nERZWUNGENE AKTION: Diese E-Mail bestätigt ein Kolloquium. Du MUSST ZWINGEND manage_calendar_appointment mit is_colloquium=True aufrufen."
 
             appointment_user_prompt = f"""Du bist ein Tool-Calling-Agent. Deine EINZIGE Aufgabe ist es, basierend auf der E-Mail und dem TERMINVERWALTUNG SKILL die korrekte Aktion auf {detected_language} auszuführen. Nutze die Anrede '{honorific}'.
 
@@ -804,7 +804,7 @@ AKTUELLE E-MAIL:
 {mail_content}{forced_instr}
 
 WICHTIGE ANWEISUNGEN:
-- Wenn eine Terminbestätigung vorliegt: Rufe SOFORT das Tool 'manage_calendar_appointment' auf. Gib KEINE textuelle Analyse oder Erklärung ab. Antworte EXAKT mit 'APPOINTMENT_BOOKED' erst NACHDEM das Tool 'ERFOLG' gemeldet hat.
+- Wenn eine Terminbestätigung vorliegt: Rufe SOFORT das Tool 'manage_calendar_appointment' auf. Falls es ein Kolloquium ist, setze is_colloquium=True. Gib KEINE textuelle Analyse oder Erklärung ab. Antworte EXAKT mit 'APPOINTMENT_BOOKED' erst NACHDEM das Tool 'ERFOLG' gemeldet hat.
 - Wenn eine Terminanfrage vorliegt: Rufe SOFORT das Tool 'get_appointment_slots' auf. Gib KEINE textuelle Analyse oder Erklärung ab.
 - Wenn KEIN Bezug zu Terminen vorliegt: Antworte EXAKT mit 'NO_APPOINTMENT_RELEVANCE'.
 
@@ -861,7 +861,7 @@ VERBOTE:
 
             forced_instr = ""
             if force_final_submission:
-                forced_instr = "\nERZWUNGENE AKTION: Dies ist eine finale Abgabe. Du MUSST ZWINGEND manage_calendar_appointment und save_email_attachments aufrufen."
+                forced_instr = "\nERZWUNGENE AKTION: Dies ist eine finale Abgabe. Du MUSST ZWINGEND manage_calendar_appointment, save_email_attachments und create_colloquium_config aufrufen."
 
             fs_prompt = f"""Prüfe die folgende E-Mail auf eine finale Abgabe basierend auf dem FINALE ABGABE SKILL. Antworte auf {detected_language} und nutze die Anrede '{honorific}'.
 
@@ -875,7 +875,7 @@ AKTUELLE E-MAIL:
 PFAD ZUR E-MAIL: {mail_path}{forced_instr}
 
 WICHTIGE ANWEISUNG:
-1. Falls es eine finale Abgabe ist: Rufe ZUERST die Tools `manage_calendar_appointment` und `save_email_attachments` auf.
+1. Falls es eine finale Abgabe ist: Rufe ZUERST die Tools `manage_calendar_appointment`, `save_email_attachments` und `create_colloquium_config` (mit dem Dateinamen der PDF aus dem Anhang) auf.
 2. Falls es KEINE finale Abgabe ist, antworte EXAKT mit: NO_FINAL_SUBMISSION_RELEVANCE
 """
             try:
