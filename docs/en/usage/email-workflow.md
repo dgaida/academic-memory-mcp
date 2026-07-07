@@ -81,7 +81,7 @@ The process ends in an interactive web interface. Here, the human remains in ful
 
 - **Correction of Classification:** If an email was incorrectly sorted, you can change the class via a dropdown. The system automatically moves the files physically on the disk when saving.  
 - **Action Review:** Check which action the LLM suggests and change it if necessary.  
-- **Extract Attachments:** Via a checkbox, you can decide whether attachments of the email should be saved directly in the student folder.  
+- **Extract Attachments:** Use the "Anhang speichern" checkbox (available on Tab 1 and Tab 2) to save attachments to the student folder.
 - **Quick Links:** Open the corresponding Windows folder or the email file with one click directly from the browser.  
 - **Summaries:** Each email is briefly summarized to allow for quick scanning of the inbox.  
 
@@ -93,8 +93,11 @@ The process ends in an interactive web interface. Here, the human remains in ful
 - [Configuration](../configuration.md): How to customize paths and LLM settings.  
 
 
-!!! info "SentItems Archiving"
-    Emails in the `SentItems` folder are always only archived. They never require a reply action, regardless of their age or the status of the conversation.
+!!! info "Automatic Archiving"
+    The system automatically suggests the action **"4) Archive Only"** for specific emails:
+    - **Old Emails:** Emails older than the configured threshold (e.g., 6 months).
+    - **SentItems:** Emails in the `SentItems` folder never require a reply action.
+    - **Already Answered:** Emails where the system detects no need for further action.
 
 ### Diagnosis and Logging
 The system logs every step of email processing in detail in `process_emails.log`. If the GUI does not display any emails even though they are listed in `sorted_emails.md`, check the log file for warnings regarding missing model files or access issues.

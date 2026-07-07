@@ -45,6 +45,7 @@ Dieser Tab ist für die massenweise Verarbeitung von E-Mails optimiert, bei dene
 - **Scan & Klassifizierung:** Liest alle E-Mails aus dem Quellordner ein und weist ihnen mittels Modell eine Klasse zu, ohne sie physisch zu verschieben.  
 - **Listenansicht:** Getrennte Anzeige von `Inbox` und `SentItems`.  
 - **Entfernen:** Mails, die eine genauere Betrachtung erfordern, können per Index-Auswahl in den zweiten Tab verschoben werden.  
+- **Anhänge:** Für jede Mail kann bereits hier ausgewählt werden, ob Anhänge beim Archivieren gespeichert werden sollen.
 - **Archivieren:** Alle verbleibenden Mails in den Listen werden mit einem Klick direkt in ihre jeweiligen Archiv-Pfade verschoben.  
 
 ### Tab 2: Detail-Ansicht & Verarbeitung
@@ -127,8 +128,11 @@ Diese Aktion kombiniert mehrere Schritte für Abschlussarbeiten:
 - [Konfiguration](../configuration.md): So passen Sie Pfade und LLM-Einstellungen an.  
 
 
-!!! info "SentItems Archivierung"
-    E-Mails im Ordner `SentItems` werden grundsätzlich nur archiviert. Sie benötigen nie eine Antwort-Aktion, unabhängig von ihrem Alter oder dem Status der Konversation.
+!!! info "Automatische Archivierung"
+    Das System schlägt für bestimmte E-Mails automatisch die Aktion **"4) Nur archivieren"** vor:
+    - **Alte E-Mails:** E-Mails, die älter als der konfigurierte Schwellenwert (z.B. 6 Monate) sind.
+    - **SentItems:** E-Mails im Ordner `SentItems` benötigen nie eine Antwort-Aktion.
+    - **Bereits beantwortet:** E-Mails, für die das System erkennt, dass kein Handlungsbedarf besteht.
 ---
 
 

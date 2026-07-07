@@ -106,3 +106,24 @@ def test_process_all_emails_sets_suggested_action():
             assert len(emails) == 1
             assert emails[0]["suggested_action"] == 2
             controller.get_suggested_action.assert_called_once()
+
+def test_get_suggested_action_sent_items_explicit():
+    """Prüft explizit die SentItems Logik."""
+    with patch('email_classifier.controller.MailParser') as mock_parser_cls,          patch('email_classifier.controller.Agent'),          patch('email_classifier.controller.PersonProfiler'):
+
+        mock_parser = mock_parser_cls.return_value
+        mock_parser.get_email_date.return_value = datetime.now()
+
+        controller = EmailController()
+        mail_path = Path("some/path/test.msg")
+
+        # Test case: folder is SentItems
+        email_data = {"folder": "SentItems", "lastname": "Tester"}
+        action = controller.get_suggested_action(mail_path, email_data)
+        assert action == 3
+
+        # Test case: folder is Inbox, should call classifier or default to 0
+        email_data = {"folder": "Inbox", "lastname": "Tester"}
+        controller.use_action_classifier = False
+        action = controller.get_suggested_action(mail_path, email_data)
+        assert action == 0

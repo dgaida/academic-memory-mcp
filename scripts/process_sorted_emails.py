@@ -97,6 +97,7 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
                     sent_indices = [i for i, m in enumerate(mails) if m.get("folder") != "Inbox"]
 
                     checkboxes = []
+                    attachment_checkboxes = []
 
                     with gr.Row():
                         with gr.Column():
@@ -107,6 +108,8 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
                                     with gr.Row():
                                         cb = gr.Checkbox(label=f"{mail['lastname']} ({mail['class']})", value=False)
                                         checkboxes.append(cb)
+                                        att_cb = gr.Checkbox(label="Anhang speichern", value=mail.get("save_attachments", False))
+                                        attachment_checkboxes.append(att_cb)
                                         gr.Markdown(f"`{Path(mail['path']).name}`")
                                     with gr.Row():
                                         open_m_btn = gr.Button("📧 Öffnen", size="sm")
@@ -122,6 +125,8 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
                                     with gr.Row():
                                         cb = gr.Checkbox(label=f"{mail['lastname']} ({mail['class']})", value=False)
                                         checkboxes.append(cb)
+                                        att_cb = gr.Checkbox(label="Anhang speichern", value=mail.get("save_attachments", False))
+                                        attachment_checkboxes.append(att_cb)
                                         gr.Markdown(f"`{Path(mail['path']).name}`")
                                     with gr.Row():
                                         open_m_btn = gr.Button("📧 Öffnen", size="sm")
@@ -133,17 +138,22 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
                         remove_btn = gr.Button("Markierte Mail nach Tab 2 schieben", variant="primary")
                         relocate_btn = gr.Button("Verbleibende Mails archivieren")
 
-                    def handle_remove_to_tab2(t1_mails, t2_mails, *selected_states):
+                    def handle_remove_to_tab2(t1_mails, t2_mails, *all_states):
+                        """Verarbeitet das Verschieben von Mails von Tab 1 nach Tab 2."""
+                        num_main = len(checkboxes)
+                        selected_states = all_states[:num_main]
+                        attachment_states = all_states[num_main:]
+
                         actual_selections = []
                         # Map states back to original indices
                         state_idx = 0
                         for idx in inbox_indices:
                             if selected_states[state_idx]:
-                                actual_selections.append(idx)
+                                actual_selections.append((idx, attachment_states[state_idx]))
                             state_idx += 1
                         for idx in sent_indices:
                             if selected_states[state_idx]:
-                                actual_selections.append(idx)
+                                actual_selections.append((idx, attachment_states[state_idx]))
                             state_idx += 1
 
                         if not actual_selections:
@@ -154,13 +164,13 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
 
                     remove_btn.click(
                         handle_remove_to_tab2,
-                        inputs=[tab1_mails, tab2_mails] + checkboxes,
+                        inputs=[tab1_mails, tab2_mails] + checkboxes + attachment_checkboxes,
                         outputs=[tab1_mails, tab2_mails, tab1_status, tabs]
                     )
 
                     relocate_btn.click(
                         relocate_remaining,
-                        inputs=[tab1_mails],
+                        inputs=[tab1_mails] + attachment_checkboxes,
                         outputs=[tab1_mails, tab1_status]
                     )
 
@@ -211,12 +221,13 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
                                 action_dd = gr.Dropdown(choices=controller.ACTION_OPTIONS, value=action_val, label="Aktion", interactive=True)
                                 action_dropdowns.append(action_dd)
 
-                                att_cb = gr.Checkbox(label="Anhang speichern", value=False)
+                                att_cb = gr.Checkbox(label="Anhang speichern", value=mail.get("save_attachments", False))
                                 checkboxes.append(att_cb)
 
                     process_btn = gr.Button("Mails in Tab 2 verarbeiten", variant="primary")
 
                     def handle_tab2_process(*args: Any) -> str:
+                        """Verarbeitet die E-Mails in Tab 2."""
                         num = num_mails
                         if len(args) < 3 * num:
                             return f"Fehler: Erwartete {3 * num} Argumente, erhielt {len(args)}."
@@ -267,20 +278,21 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
 
         demo.load(scan_emails, outputs=[tab1_mails, tab2_mails, tab1_status])
 
-        def remove_to_tab2_logic(t1_mails: List[Dict[str, Any]], t2_mails: List[Dict[str, Any]], selected_indices: List[int]) -> Generator:
+        def remove_to_tab2_logic(t1_mails: List[Dict[str, Any]], t2_mails: List[Dict[str, Any]], selected_info: List[Tuple[int, bool]]) -> Generator:
             """Verschiebt markierte E-Mails von Tab 1 nach Tab 2 und startet die Verarbeitung."""
-            selected_indices = sorted(list(set(selected_indices)), reverse=True)
+            selected_info = sorted(list(set(selected_info)), key=lambda x: x[0], reverse=True)
 
             new_t1 = list(t1_mails)
             new_t2 = list(t2_mails)
             moved_this_session = []
 
-            for idx in selected_indices:
+            for idx, att_save in selected_info:
                 if 0 <= idx < len(new_t1):
                     mail = new_t1.pop(idx)
                     mail_copy = mail.copy()
                     mail_copy["summary"] = "Wird verarbeitet..."
                     mail_copy["similarity_info"] = "Suche ähnliche Mails..."
+                    mail_copy["save_attachments"] = att_save
                     moved_this_session.append(mail_copy)
 
             current_t2 = new_t2 + moved_this_session
@@ -298,20 +310,25 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
                 logger.info(f"Generiere Zusammenfassung für {mail['lastname']}...")
                 mail["summary"] = controller.generate_short_summary(mail_path)
                 mail["similarity_info"] = controller.get_similarity_info(mail_path, mail["lastname"])
+                logger.info(f"Bestimme empfohlene Aktion für {mail['lastname']}...")
+                action_idx = controller.get_suggested_action(mail_path, mail, age_months=age_months)
+                mail["suggested_action"] = controller.ACTION_OPTIONS[action_idx]
 
                 yield new_t1, list(final_t2), f"Verarbeitet: {mail['lastname']} ({i - len(new_t2) + 1}/{len(moved_this_session)})", gr.update(selected=1)
 
             yield new_t1, final_t2, "Verarbeitung abgeschlossen.", gr.update(selected=1)
 
-        def relocate_remaining(t1_mails: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], str]:
+        def relocate_remaining(t1_mails: List[Dict[str, Any]], *att_states: Any) -> Tuple[List[Dict[str, Any]], str]:
             """Archiviert alle verbleibenden E-Mails in Tab 1."""
             if not t1_mails:
                 return [], "Keine Mails zum Verschieben."
 
             changes = []
-            for m in t1_mails:
+            for i, m in enumerate(t1_mails):
                 change = m.copy()
                 change["new_class"] = m["class"]
+                if i < len(att_states):
+                    change["save_attachments"] = att_states[i]
                 changes.append(change)
 
             try:
