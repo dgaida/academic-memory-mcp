@@ -2509,6 +2509,7 @@
 <li><strong>Scan &amp; Klassifizierung:</strong> Liest alle E-Mails aus dem Quellordner ein und weist ihnen mittels Modell eine Klasse zu, ohne sie physisch zu verschieben.  </li>
 <li><strong>Listenansicht:</strong> Getrennte Anzeige von <code>Inbox</code> und <code>SentItems</code>.  </li>
 <li><strong>Entfernen:</strong> Mails, die eine genauere Betrachtung erfordern, können per Index-Auswahl in den zweiten Tab verschoben werden.  </li>
+<li><strong>Anhänge:</strong> Für jede Mail kann bereits hier ausgewählt werden, ob Anhänge beim Archivieren gespeichert werden sollen.</li>
 <li><strong>Archivieren:</strong> Alle verbleibenden Mails in den Listen werden mit einem Klick direkt in ihre jeweiligen Archiv-Pfade verschoben.  </li>
 </ul>
 <h3 id="tab-2-detail-ansicht-verarbeitung">Tab 2: Detail-Ansicht &amp; Verarbeitung<a class="headerlink" href="#tab-2-detail-ansicht-verarbeitung" title="Permanent link">&para;</a></h3>
@@ -2602,8 +2603,11 @@
 <li><a href="../../configuration/">Konfiguration</a>: So passen Sie Pfade und LLM-Einstellungen an.  </li>
 </ul>
 <div class="admonition info">
-<p class="admonition-title">SentItems Archivierung</p>
-<p>E-Mails im Ordner <code>SentItems</code> werden grundsätzlich nur archiviert. Sie benötigen nie eine Antwort-Aktion, unabhängig von ihrem Alter oder dem Status der Konversation.</p>
+<p class="admonition-title">Automatische Archivierung</p>
+<p>Das System schlägt für bestimmte E-Mails automatisch die Aktion <strong>"4) Nur archivieren"</strong> vor:
+- <strong>Alte E-Mails:</strong> E-Mails, die älter als der konfigurierte Schwellenwert (z.B. 6 Monate) sind.
+- <strong>SentItems:</strong> E-Mails im Ordner <code>SentItems</code> benötigen nie eine Antwort-Aktion.
+- <strong>Bereits beantwortet:</strong> E-Mails, für die das System erkennt, dass kein Handlungsbedarf besteht.</p>
 </div>
 <hr />
 <h3 id="diagnose-und-logging">Diagnose und Logging<a class="headerlink" href="#diagnose-und-logging" title="Permanent link">&para;</a></h3>

@@ -2227,7 +2227,7 @@
 <p><strong>Correction of Classification:</strong> If an email was incorrectly sorted, you can change the class via a dropdown. The system automatically moves the files physically on the disk when saving.  </p>
 </li>
 <li><strong>Action Review:</strong> Check which action the LLM suggests and change it if necessary.  </li>
-<li><strong>Extract Attachments:</strong> Via a checkbox, you can decide whether attachments of the email should be saved directly in the student folder.  </li>
+<li><strong>Extract Attachments:</strong> Use the "Anhang speichern" checkbox (available on Tab 1 and Tab 2) to save attachments to the student folder.</li>
 <li><strong>Quick Links:</strong> Open the corresponding Windows folder or the email file with one click directly from the browser.  </li>
 <li><strong>Summaries:</strong> Each email is briefly summarized to allow for quick scanning of the inbox.  </li>
 </ul>
@@ -2239,8 +2239,11 @@
 <li><a href="../../configuration/">Configuration</a>: How to customize paths and LLM settings.  </li>
 </ul>
 <div class="admonition info">
-<p class="admonition-title">SentItems Archiving</p>
-<p>Emails in the <code>SentItems</code> folder are always only archived. They never require a reply action, regardless of their age or the status of the conversation.</p>
+<p class="admonition-title">Automatic Archiving</p>
+<p>The system automatically suggests the action <strong>"4) Archive Only"</strong> for specific emails:
+- <strong>Old Emails:</strong> Emails older than the configured threshold (e.g., 6 months).
+- <strong>SentItems:</strong> Emails in the <code>SentItems</code> folder never require a reply action.
+- <strong>Already Answered:</strong> Emails where the system detects no need for further action.</p>
 </div>
 <h3 id="diagnosis-and-logging">Diagnosis and Logging<a class="headerlink" href="#diagnosis-and-logging" title="Permanent link">&para;</a></h3>
 <p>The system logs every step of email processing in detail in <code>process_emails.log</code>. If the GUI does not display any emails even though they are listed in <code>sorted_emails.md</code>, check the log file for warnings regarding missing model files or access issues.</p>
