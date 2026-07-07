@@ -3,20 +3,15 @@ import pytest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 from typer.testing import CliRunner
-from datetime import datetime
-import numpy as np
 
 from mcp_university.cli.db import db_app
 from mcp_university.cli.main import app as main_app
 from mcp_university.mcp_server.server import create_server
 from mcp_university.agent.engine import Agent
 from mcp_university.summarizer.engine import Summarizer
-from mcp_university.metadata.profile_store import ProfileStore
 from mcp_university.metadata.store import MetadataStore
 from mcp_university.parser.pdf_parser import PDFParser
-from mcp_university.parser.mail_parser import MailParser
 from mcp_university.retrieval.index import SearchIndex
-from mcp_university.utils.email_search import EmailSearchEngine
 
 runner = CliRunner()
 
