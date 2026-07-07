@@ -298,6 +298,9 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
                 logger.info(f"Generiere Zusammenfassung für {mail['lastname']}...")
                 mail["summary"] = controller.generate_short_summary(mail_path)
                 mail["similarity_info"] = controller.get_similarity_info(mail_path, mail["lastname"])
+                logger.info(f"Bestimme empfohlene Aktion für {mail["lastname"]}...")
+                action_idx = controller.get_suggested_action(mail_path, mail, age_months=age_months)
+                mail["suggested_action"] = controller.ACTION_OPTIONS[action_idx]
 
                 yield new_t1, list(final_t2), f"Verarbeitet: {mail['lastname']} ({i - len(new_t2) + 1}/{len(moved_this_session)})", gr.update(selected=1)
 
