@@ -1,4 +1,5 @@
 """Module for generating and updating person profiles."""
+import re
 import email.utils
 import json
 import logging

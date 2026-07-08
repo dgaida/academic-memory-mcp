@@ -264,8 +264,8 @@ def save_to_markdown(data: List[Dict[str, Any]], filename: str) -> None:
     with open(filename, "w", encoding="utf-8") as f:
         f.write("# Personen TH Köln\n\n")
 
-| Name | Akademischer Grad | E-Mail | Fakultät oder Einrichtung | Institut | PA-Vorsitz | DekanIn | Senat | InstitutsdirektorIn | Präsidiumsmitglied | Studiengangsleitung |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+        f.write("| Name | Akademischer Grad | E-Mail | Fakultät oder Einrichtung | Institut | PA-Vorsitz | DekanIn | Senat | InstitutsdirektorIn | Präsidiumsmitglied | Studiengangsleitung |\n")
+        f.write("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n")
         for person in data:
             name = person.get("name") or ""
             degree = person.get("academic_degree") or ""
