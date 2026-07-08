@@ -3,7 +3,7 @@ name = "mcp-university"
 version = "2.4.1"
 description = "Agentic University Memory System with MCP"
 dependencies = [
-    "tzlocal<5.0",
+    "tzlocal<6.0",
     "liteparse",
     "networkx",
     "pyvis",
