@@ -86,12 +86,12 @@ def test_fix_email_folders_logic(tmp_path):
     mock_details_1 = {
         "date": "2024-05-01",
         "from_name": "A B C D",
-        "from_email": "a_b.c_d@smail.th-koeln.de"
+        "from_email": "a_b.c_d@smail.th-koeln.de", "to": [], "cc": []
     }
     mock_details_2 = {
         "date": "2024-05-01",
         "from_name": "TH Köln",
-        "from_email": "nils_karl.mode@smail.th-koeln.de"
+        "from_email": "nils_karl.mode@smail.th-koeln.de", "to": [], "cc": []
     }
     
     with patch("scripts.fix_email_folders.MailParser") as mock_parser_class,          patch("scripts.fix_email_folders.get_config") as mock_get_config,          patch("scripts.fix_email_folders.get_semester") as mock_get_semester:
