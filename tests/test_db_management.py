@@ -1,11 +1,10 @@
 """Tests for test_db_management.py."""
 import pytest
-import numpy as np
 from mcp_university.metadata.store import MetadataStore
 from mcp_university.retrieval.index import SearchIndex
 from typer.testing import CliRunner
 from mcp_university.cli.main import app
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 import mcp_university.cli.db as db_module
 
 @pytest.fixture
