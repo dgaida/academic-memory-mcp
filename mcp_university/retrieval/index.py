@@ -341,11 +341,12 @@ class SearchIndex:
         query_vector = self.model.encode(query).tolist()
 
         logger.debug("Querying Qdrant...")
-        dense_results = self.client.query_points(
+        query_res = self.client.query_points(
             collection_name=self.collection_name,
             query=query_vector,
             limit=top_k * 2
-        ).points
+        )
+        dense_results = getattr(query_res, "points", query_res)
 
         results_map = {}
         for res in dense_results:
