@@ -8,7 +8,7 @@ sys.modules['dotenv'] = MagicMock()
 sys.modules['yaml'] = MagicMock()
 
 # Import after mocks
-from mcp_university.summarizer.profiler import PersonProfiler
+from mcp_university.summarizer.profiler import PersonProfiler  # noqa: E402
 
 @pytest.fixture
 def profiler():

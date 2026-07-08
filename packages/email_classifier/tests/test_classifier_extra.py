@@ -1,8 +1,8 @@
 """Tests for test_classifier_extra.py."""
 from unittest.mock import MagicMock, patch
-
-
 from email_classifier.scripts.xai_analysis import run_xai_analysis, main as xai_main
+from email_classifier.scripts.plot_data_distribution import count_emails, main as plot_main
+
 
 # XAI Analysis tests
 @patch("email_classifier.scripts.xai_analysis.EmailClassifier")
