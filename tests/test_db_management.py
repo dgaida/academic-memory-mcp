@@ -5,45 +5,43 @@ from mcp_university.metadata.store import MetadataStore
 from mcp_university.retrieval.index import SearchIndex
 from typer.testing import CliRunner
 from mcp_university.cli.main import app
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 import mcp_university.cli.db as db_module
 
 @pytest.fixture
 def db_path(tmp_path):
-    """Test function docstring."""
+    """Provides a temporary database path."""
     return tmp_path / "test_university.db"
 
 @pytest.fixture
 def store(db_path):
-    """Test function docstring."""
+    """Provides a MetadataStore instance."""
     return MetadataStore(db_path)
 
 @pytest.fixture
 def qdrant_path(tmp_path):
-    """Test function docstring."""
+    """Provides a temporary Qdrant path."""
     path = tmp_path / "qdrant"
     path.mkdir()
     return path
 
 @pytest.fixture
 def search_index(qdrant_path, store):
-    """Test function docstring."""
-    # We must patch where SearchIndex looks for SentenceTransformer
+    """Provides a SearchIndex instance with mocked model."""
     with patch("mcp_university.retrieval.index.SentenceTransformer", create=True) as mock_st:
         mock_model = mock_st.return_value
-        # Mock encode to return a vector of size 384 (MiniLM standard)
-        mock_model.encode.return_value = np.zeros(384)
+        # Ensure tolist() returns a real list of floats
+        mock_model.encode.return_value.tolist.return_value = [0.0] * 384
         return SearchIndex(str(qdrant_path), "all-MiniLM-L6-v2", store=store)
 
 def test_metadata_store_retrieval(store):
-    """Test function docstring."""
+    """Test metadata store retrieval."""
     fid = store.upsert_file("/path/to/file.txt", "hash1", 123.45, ".txt")
     store.upsert_folder("/path/to/folder")
     store.add_summary("file", fid, "Test summary")
 
     files = store.get_all_files()
     assert len(files) == 1
-    # Check dict/Row behavior
     assert files[0]['path'] == "/path/to/file.txt"
 
     folders = store.get_all_folders()
@@ -55,7 +53,7 @@ def test_metadata_store_retrieval(store):
     assert summaries[0]['content'] == "Test summary"
 
 def test_metadata_store_deletion(store):
-    """Test function docstring."""
+    """Test metadata store deletion."""
     folder_id = store.upsert_folder("/path/to/folder")
     fid = store.upsert_file("/path/to/file.txt", "hash1", 123.45, ".txt", folder_id=folder_id)
     store.add_summary("file", fid, "File summary")
@@ -68,7 +66,7 @@ def test_metadata_store_deletion(store):
     assert len(store.get_all_summaries()) == 0
 
 def test_search_index_deletion(search_index):
-    """Test function docstring."""
+    """Test search index deletion."""
     doc_id = "/path/to/doc.txt"
     content = "This is a test document content."
     metadata = {"type": "text"}
@@ -85,7 +83,7 @@ def test_search_index_deletion(search_index):
     assert len(results) == 0 or all(r['path'] != doc_id for r in results)
 
 def test_cli_list_files(store, search_index, monkeypatch):
-    """Test function docstring."""
+    """Test CLI list-files command."""
     monkeypatch.setattr(db_module, "get_store_and_index", lambda: (store, search_index))
     runner = CliRunner()
     result = runner.invoke(app, ["db", "list-files"])
@@ -97,7 +95,7 @@ def test_cli_list_files(store, search_index, monkeypatch):
     assert "/test/path.txt" in result.stdout
 
 def test_cli_delete_file(store, search_index, monkeypatch):
-    """Test function docstring."""
+    """Test CLI delete-file command."""
     monkeypatch.setattr(db_module, "get_store_and_index", lambda: (store, search_index))
     fid = store.upsert_file("/test/delete_me.txt", "hash", 1.0, ".txt")
     search_index.add_document("/test/delete_me.txt", "content", {})
@@ -110,7 +108,7 @@ def test_cli_delete_file(store, search_index, monkeypatch):
     assert all(r['path'] != "/test/delete_me.txt" for r in results)
 
 def test_cli_delete_folder(store, search_index, monkeypatch):
-    """Test function docstring."""
+    """Test CLI delete-folder command."""
     monkeypatch.setattr(db_module, "get_store_and_index", lambda: (store, search_index))
     folder_id = store.upsert_folder("/test/folder")
     store.upsert_file("/test/folder/file.txt", "hash", 1.0, ".txt", folder_id=folder_id)

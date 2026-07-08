@@ -168,7 +168,7 @@ def create_tool_server() -> FastMCP:
                     root = store.GetRootFolder()
                     for j in range(1, root.Folders.Count + 1):
                         folder = root.Folders.Item(j)
-                        print(f"DEBUG: Checking folder {folder.Name} against {target_calendar_name}"); print(f"DEBUG: Checking folder {folder.Name} against {target_calendar_name}");
+                        print(f"DEBUG: Checking folder {folder.Name} against {target_calendar_name}")
                         if folder.Name == target_calendar_name:
                             logger.info(f"ERFOLG: Ziel-Kalender gefunden: {folder.FolderPath}")
                             cal_folder = folder
