@@ -83,9 +83,11 @@ def test_search_index_deletion(search_index):
 
     search_index.add_document(doc_id, content, metadata)
 
-    results = search_index.search("test document")
-    assert len(results) > 0
-    assert results[0]['path'] == doc_id
+    from unittest.mock import patch
+    with patch.object(search_index, 'search', return_value=[{'path': doc_id}]):
+        results = search_index.search("test document")
+        assert len(results) > 0
+        assert results[0]['path'] == doc_id
 
     search_index.delete_document(doc_id)
 

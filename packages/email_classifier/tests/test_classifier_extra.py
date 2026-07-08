@@ -19,11 +19,11 @@ def test_run_xai_analysis(mock_anon, mock_shap, mock_classifier_cls):
     mock_explainer = mock_shap.return_value
     mock_explainer.shap_values.return_value = [MagicMock()] # Values for one class
     
-    model_path = MagicMock(spec=Path)
+    model_path = MagicMock()
     model_path.exists.return_value = True
-    model_path.parent = MagicMock(spec=Path)
+    model_path.parent = MagicMock()
     
-    test_dir = MagicMock(spec=Path)
+    test_dir = MagicMock()
     test_dir.exists.return_value = True
     
     with patch("email_classifier.scripts.xai_analysis.open", mock_open()):
@@ -53,9 +53,9 @@ def test_count_emails(tmp_path):
 def test_plot_distribution():
     """Test function docstring."""
     df = pd.DataFrame([{"Klasse": "C1", "Inbox": 1, "SentItems": 1}])
-    with patch("email_classifier.scripts.plot_data_distribution.plt") as mock_plt:
+    with patch("matplotlib.pyplot.savefig") as mock_save, patch("matplotlib.pyplot.show"), patch("matplotlib.pyplot.close"):
         plot_distribution(df, "Title", Path("out.png"))
-        assert mock_plt.savefig.called
+        assert mock_save.called
 
 def test_plot_main():
     """Test function docstring."""

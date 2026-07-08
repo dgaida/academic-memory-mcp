@@ -1,7 +1,6 @@
 """Tests for test_classifier_train.py."""
 import pytest
 from unittest.mock import MagicMock, patch, mock_open
-from pathlib import Path
 import numpy as np
 import torch
 from email_classifier.scripts.train import evaluate_and_save, main as train_main
@@ -16,12 +15,12 @@ def mock_classifier():
         classifier_inst.label_encoder.transform.side_effect = lambda x: np.array([0 if val == 'Class1' else 1 for val in x])
         classifier_inst.method = 'transformer'
         classifier_inst.tokenizer.side_effect = lambda texts, **kwargs: {
-            'input_ids': torch.zeros((len(texts), 10)), 
-            'attention_mask': torch.ones((len(texts), 10))
+            'input_ids': torch.zeros((len(texts), 1)),
+            'attention_mask': torch.ones((len(texts), 1))
         }
 
         mock_nn = MagicMock()
-        mock_nn.return_value = torch.tensor([[1.0, 0.0], [0.0, 1.0]])
+        mock_nn.side_effect = lambda *args, **kwargs: torch.tensor([[1.0, 0.0], [0.0, 1.0]])
         mock_nn.predict.return_value = np.array([0, 1])
         classifier_inst.classifier = mock_nn
 
@@ -29,9 +28,9 @@ def mock_classifier():
 
 def test_evaluate_and_save(mock_classifier):
     """Test function docstring."""
-    with patch('email_classifier.scripts.train.plt'),          patch('email_classifier.scripts.train.sns'),          patch('email_classifier.scripts.train.open', mock_open()):
+    with patch('matplotlib.pyplot.savefig'), patch('matplotlib.pyplot.show'), patch('matplotlib.pyplot.close'),                    patch('email_classifier.scripts.train.open', mock_open()):
         
-        output_dir = MagicMock(spec=Path)
+        output_dir = MagicMock()
         evaluate_and_save(mock_classifier, ['text', 'text2'], ['Class1', 'Class2'], output_dir)
         assert output_dir.mkdir.called
 
@@ -49,8 +48,8 @@ def test_train_main():
         # Return 4 lists of size 2 each
         mock_split.return_value = (['t1', 't3'], ['t2', 't4'], ['Class1', 'Class1'], ['Class2', 'Class2'])
         
-        resolved_path = MagicMock(spec=Path)
-        resolved_path.parent = MagicMock(spec=Path)
+        resolved_path = MagicMock()
+        resolved_path.parent = MagicMock()
         resolved_path.exists.return_value = False
         mock_resolve.return_value = resolved_path
         
@@ -77,8 +76,8 @@ def test_train_main_rf():
         mock_grid_inst.best_score_ = 0.9
         mock_grid_inst.cv_results_ = {}
         
-        resolved_path = MagicMock(spec=Path)
-        resolved_path.parent = MagicMock(spec=Path)
+        resolved_path = MagicMock()
+        resolved_path.parent = MagicMock()
         resolved_path.exists.return_value = False
         mock_resolve.return_value = resolved_path
         

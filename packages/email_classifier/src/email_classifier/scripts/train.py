@@ -56,7 +56,7 @@ def evaluate_and_save(classifier: EmailClassifier, texts: list, labels: list, ou
         X = classifier.get_features(texts, train=False)
         y_pred_idx = classifier.classifier.predict(X)
 
-    y_pred = classifier.label_encoder.inverse_transform(y_pred_idx.astype(int))
+    y_pred = [str(val) for val in classifier.label_encoder.inverse_transform(y_pred_idx.astype(int))]
 
     # Metriken berechnen
     accuracy = accuracy_score(labels, y_pred)

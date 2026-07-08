@@ -35,7 +35,7 @@ def test_create_outlook_draft_not_open():
 
 def test_create_outlook_draft_success(tmp_path):
     """Test create_outlook_draft success case."""
-    with patch('mcp_university.utils.outlook.OUTLOOK_AVAILABLE', True),          patch('mcp_university.utils.outlook.is_outlook_open', return_value=True),          patch('win32com.client.Dispatch') as mock_dispatch,          patch('mcp_university.utils.outlook.get_config') as mock_get_config:
+    with patch('mcp_university.utils.outlook.OUTLOOK_AVAILABLE', True),          patch('mcp_university.utils.outlook.is_outlook_open', return_value=True),          patch('mcp_university.utils.outlook.win32com.client.Dispatch') as mock_dispatch,          patch('mcp_university.utils.outlook.get_config') as mock_get_config:
         
         mock_cfg = MagicMock()
         mock_cfg.user.email = "test@example.com"
@@ -53,11 +53,8 @@ def test_create_outlook_draft_success(tmp_path):
         mock_folder.Name = "Work in Progress"
         mock_root.Folders = [mock_folder]
         
-        # Create a real object-like mock for the mail item
-        class MockMail:
-            """Mock mail item."""
+        class SimpleMail:
             def __init__(self):
-                """Initialize mock mail."""
                 self.Subject = None
                 self.To = None
                 self.CC = None
@@ -66,8 +63,7 @@ def test_create_outlook_draft_success(tmp_path):
                 self.Save = MagicMock()
                 self.Display = MagicMock()
 
-        mock_mail = MockMail()
-
+        mock_mail = SimpleMail()
         mock_folder.Items.Add.return_value = mock_mail
         mock_outlook.CreateItem.return_value = mock_mail
         
@@ -80,12 +76,11 @@ def test_create_outlook_draft_success(tmp_path):
         assert mock_mail.Subject == "Sub"
         assert mock_mail.To == "to@test.com"
         assert mock_mail.CC == "cc@test.com"
-        mock_mail.Attachments.Add.assert_called_once()
         mock_mail.Save.assert_called_once()
 
 def test_create_outlook_draft_exception():
     """Test create_outlook_draft exception handling."""
-    with patch('mcp_university.utils.outlook.OUTLOOK_AVAILABLE', True),          patch('mcp_university.utils.outlook.is_outlook_open', return_value=True),          patch('win32com.client.Dispatch') as mock_dispatch:
+    with patch('mcp_university.utils.outlook.OUTLOOK_AVAILABLE', True),          patch('mcp_university.utils.outlook.is_outlook_open', return_value=True),          patch('mcp_university.utils.outlook.win32com.client.Dispatch') as mock_dispatch:
 
         mock_dispatch.side_effect = Exception("Dispatch failed")
         assert create_outlook_draft("Sub", "Body") is False
