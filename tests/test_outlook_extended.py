@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 from mcp_university.utils.outlook import is_outlook_open, create_outlook_draft
 
 def test_is_outlook_open_windows():
-    """Test function docstring."""
+    """Test is_outlook_open on Windows."""
     with patch('platform.system', return_value='Windows'):
         with patch('subprocess.check_output', return_value=b'outlook.exe 1234'):
             assert is_outlook_open() is True
@@ -11,7 +11,7 @@ def test_is_outlook_open_windows():
             assert is_outlook_open() is False
 
 def test_is_outlook_open_darwin():
-    """Test function docstring."""
+    """Test is_outlook_open on macOS."""
     with patch('platform.system', return_value='Darwin'):
         with patch('subprocess.check_call', return_value=0):
             assert is_outlook_open() is True
@@ -19,22 +19,22 @@ def test_is_outlook_open_darwin():
             assert is_outlook_open() is False
 
 def test_is_outlook_open_other():
-    """Test function docstring."""
+    """Test is_outlook_open on other systems."""
     with patch('platform.system', return_value='Linux'):
         assert is_outlook_open() is False
 
 def test_create_outlook_draft_no_outlook_available():
-    """Test function docstring."""
+    """Test create_outlook_draft when Outlook is not available."""
     with patch('mcp_university.utils.outlook.OUTLOOK_AVAILABLE', False):
         assert create_outlook_draft("Sub", "Body") is False
 
 def test_create_outlook_draft_not_open():
-    """Test function docstring."""
+    """Test create_outlook_draft when Outlook is not open."""
     with patch('mcp_university.utils.outlook.OUTLOOK_AVAILABLE', True),          patch('mcp_university.utils.outlook.is_outlook_open', return_value=False):
         assert create_outlook_draft("Sub", "Body") is False
 
 def test_create_outlook_draft_success(tmp_path):
-    """Test function docstring."""
+    """Test create_outlook_draft success case."""
     with patch('mcp_university.utils.outlook.OUTLOOK_AVAILABLE', True),          patch('mcp_university.utils.outlook.is_outlook_open', return_value=True),          patch('win32com.client.Dispatch') as mock_dispatch,          patch('mcp_university.utils.outlook.get_config') as mock_get_config:
         
         mock_cfg = MagicMock()
@@ -53,8 +53,23 @@ def test_create_outlook_draft_success(tmp_path):
         mock_folder.Name = "Work in Progress"
         mock_root.Folders = [mock_folder]
         
-        mock_mail = MagicMock()
+        # Create a real object-like mock for the mail item
+        class MockMail:
+            """Mock mail item."""
+            def __init__(self):
+                """Initialize mock mail."""
+                self.Subject = None
+                self.To = None
+                self.CC = None
+                self.Body = None
+                self.Attachments = MagicMock()
+                self.Save = MagicMock()
+                self.Display = MagicMock()
+
+        mock_mail = MockMail()
+
         mock_folder.Items.Add.return_value = mock_mail
+        mock_outlook.CreateItem.return_value = mock_mail
         
         attachment = tmp_path / "test.txt"
         attachment.write_text("hello")
@@ -69,6 +84,8 @@ def test_create_outlook_draft_success(tmp_path):
         mock_mail.Save.assert_called_once()
 
 def test_create_outlook_draft_exception():
-    """Test function docstring."""
-    with patch('mcp_university.utils.outlook.OUTLOOK_AVAILABLE', True),          patch('mcp_university.utils.outlook.is_outlook_open', return_value=True),          patch('win32com.client.Dispatch', side_effect=Exception("Dispatch failed")):
+    """Test create_outlook_draft exception handling."""
+    with patch('mcp_university.utils.outlook.OUTLOOK_AVAILABLE', True),          patch('mcp_university.utils.outlook.is_outlook_open', return_value=True),          patch('win32com.client.Dispatch') as mock_dispatch:
+
+        mock_dispatch.side_effect = Exception("Dispatch failed")
         assert create_outlook_draft("Sub", "Body") is False
