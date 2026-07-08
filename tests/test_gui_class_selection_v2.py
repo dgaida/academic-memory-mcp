@@ -1,6 +1,5 @@
 import pytest
 from unittest.mock import MagicMock, patch
-from pathlib import Path
 
 # Mock dependencies before import to avoid errors
 with patch('mcp_university.config.get_config'),      patch('mcp_university.summarizer.engine.LLMClientWrapper'),      patch('mcp_university.summarizer.profiler.PersonProfiler'),      patch('mcp_university.parser.mail_parser.MailParser'):
@@ -39,7 +38,7 @@ def test_execute_action_respects_new_class(mock_controller, tmp_path):
     # Mock generate_reply to capture arguments
     mock_controller.generate_reply = MagicMock(return_value=("Subject", "Reply", False))
 
-    with patch("email_classifier.controller.create_outlook_draft") as mock_draft,          patch("email_classifier.controller.extract_msg.openMsg") as mock_open:
+    with patch("email_classifier.controller.create_outlook_draft"),          patch("email_classifier.controller.extract_msg.openMsg") as mock_open:
 
         mock_msg = MagicMock()
         mock_msg.sender = "student@example.com"

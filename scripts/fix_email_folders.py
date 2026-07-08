@@ -27,6 +27,8 @@ def fix_folders(config_path: Path, dry_run: bool = False, full_verify: bool = Fa
     with open(config_path, "r", encoding="utf-8") as f:
         config_data = yaml.safe_load(f)
 
+    if config_data is None:
+        config_data = {}
     config = config_data.get("class_paths", config_data)
 
     parser = MailParser()
