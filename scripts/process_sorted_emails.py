@@ -200,7 +200,7 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
                             similarity_info = mail.get("similarity_info", "")
 
                             gr.Markdown(
-                                f"**Student:** {mail['lastname']} | **Klasse:** {mail['class']}\n"
+                                f"**Student:** {mail['lastname']} ({mail.get('folder', 'Unknown')}) | **Klasse:** {mail['class']}\n"
                                 f"**Datei:** `{mail_path.name}`\n\n"
                                 f"*Zusammenfassung:* {summary}\n\n"
                                 f"{similarity_info}"
@@ -259,6 +259,7 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
                             msg += "\nFehler: " + "; ".join(errors)
                         if results:
                             msg += "\nAktionen:\n" + "\n".join(results)
+                        logger.info(f"Tab 2 Verarbeitungsergebnis:\n{msg}")
                         return msg
 
                     process_btn.click(
@@ -334,8 +335,12 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
             try:
                 errors = controller.relocate_emails(changes)
                 if errors:
-                    return t1_mails, "Fehler beim Verschieben: " + "; ".join(errors)
-                return [], "Mails erfolgreich archiviert."
+                    msg = "Fehler beim Verschieben: " + "; ".join(errors)
+                    logger.error(msg)
+                    return t1_mails, msg
+                msg = "Mails erfolgreich archiviert."
+                logger.info(msg)
+                return [], msg
             except Exception as e:
                 logger.error(f"Fehler beim Archivieren: {e}")
                 return t1_mails, f"Fehler: {str(e)}"
