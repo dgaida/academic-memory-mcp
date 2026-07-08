@@ -29,8 +29,19 @@ def search_index(qdrant_path, store):
     """Provides a SearchIndex instance with mocked model."""
     with patch("mcp_university.retrieval.index.SentenceTransformer", create=True) as mock_st:
         mock_model = mock_st.return_value
-        # Ensure tolist() returns a real list of floats
-        mock_model.encode.return_value.tolist.return_value = [0.0] * 384
+        # Mock encode to return an object that behaves like a list of 384 zeros
+        # but also supports tolist() and __len__
+        mock_vector = [0.0] * 384
+
+        class MockVector(list):
+            """Mock vector class for testing."""
+            def tolist(self):
+                """Return the list representation of the vector."""
+                return self
+
+        vector_inst = MockVector(mock_vector)
+        mock_model.encode.return_value = vector_inst
+
         return SearchIndex(str(qdrant_path), "all-MiniLM-L6-v2", store=store)
 
 def test_metadata_store_retrieval(store):
