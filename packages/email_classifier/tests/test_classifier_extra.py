@@ -1,9 +1,8 @@
 """Tests for test_classifier_extra.py."""
-from unittest.mock import MagicMock, patch, mock_open
-from pathlib import Path
-import pandas as pd
+from unittest.mock import MagicMock, patch
+
+
 from email_classifier.scripts.xai_analysis import run_xai_analysis, main as xai_main
-from email_classifier.scripts.plot_data_distribution import count_emails, plot_distribution, main as plot_main
 
 # XAI Analysis tests
 @patch("email_classifier.scripts.xai_analysis.EmailClassifier")
@@ -26,7 +25,7 @@ def test_run_xai_analysis(mock_anon, mock_shap, mock_classifier_cls):
     test_dir = MagicMock()
     test_dir.exists.return_value = True
     
-    with patch("email_classifier.scripts.xai_analysis.open", mock_open()):
+    with patch("email_classifier.scripts.xai_analysis.open"()):
         run_xai_analysis(model_path, test_dir)
         assert mock_classifier.load.called
 

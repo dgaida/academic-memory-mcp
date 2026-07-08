@@ -1,13 +1,13 @@
 import pytest
 from unittest.mock import MagicMock
 from datetime import datetime
-from pathlib import Path
+import sys
 
 # Mock dependencies to avoid import issues
-import sys
 sys.modules['dotenv'] = MagicMock()
 sys.modules['yaml'] = MagicMock()
 
+# Import after mocks
 from mcp_university.summarizer.profiler import PersonProfiler
 
 @pytest.fixture
@@ -54,7 +54,7 @@ def test_determine_honorific_filters_direct_and_ignores_sammelmail(profiler):
     res = profiler._determine_honorific(emails, "person@test.com")
     assert res == "Du"
 
-    # Verify LLM was called with the direct mail content
+    # Verify LLM was called with the correct email content
     assert profiler.llm.chat.call_count == 1
     prompt = profiler.llm.chat.call_args[0][0][0]["content"]
     assert "Direkt" in prompt

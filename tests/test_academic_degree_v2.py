@@ -1,6 +1,6 @@
-import pytest
+
 from bs4 import BeautifulSoup
-from unittest.mock import MagicMock
+
 
 def test_academic_degree_extraction_logic():
     """Tests the logic for academic degree extraction as implemented in the crawler."""

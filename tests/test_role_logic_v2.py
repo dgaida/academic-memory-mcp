@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import MagicMock
+
 from mcp_university.summarizer.profiler import PersonProfiler
 
 @pytest.fixture

@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import MagicMock, patch
-from pathlib import Path
+
 
 # Mock dependencies before import to avoid errors
 with patch('mcp_university.config.get_config'),      patch('mcp_university.summarizer.engine.LLMClientWrapper'),      patch('mcp_university.summarizer.profiler.PersonProfiler'),      patch('mcp_university.parser.mail_parser.MailParser'):

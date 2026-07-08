@@ -1,7 +1,7 @@
 """Tests for test_transformer_classifier.py."""
 import pytest
 from unittest.mock import MagicMock, patch
-import torch
+
 from email_classifier.engine import EmailClassifier
 
 @pytest.fixture

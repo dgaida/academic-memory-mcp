@@ -1,6 +1,6 @@
 """Tests for test_classifier_scripts.py."""
 import pytest
-from unittest.mock import MagicMock, patch, mock_open
+from unittest.mock import MagicMock, patch
 from pathlib import Path
 import numpy as np
 import torch
@@ -32,7 +32,7 @@ def mock_classifier():
     # FAILING: RuntimeError: profiler::_record_function_exit() Expected a value of type ScriptObject
 #     """Test function docstring."""
 #     with patch('matplotlib.pyplot.savefig'), patch('matplotlib.pyplot.show'), patch('matplotlib.pyplot.close'), \
-#          patch('email_classifier.scripts.evaluate.open', mock_open()) as _mock_file:
+#          patch('email_classifier.scripts.evaluate.open'()) as _mock_file:
 #
 #         model_path = MagicMock()
 #         model_path.exists.return_value = True
@@ -59,7 +59,7 @@ def mock_classifier():
 #     mock_classifier.classifier.predict.return_value = np.array([0, 1])
 #
 #     with patch('matplotlib.pyplot.savefig'), patch('matplotlib.pyplot.show'), patch('matplotlib.pyplot.close'), \
-#          patch('email_classifier.scripts.evaluate.open', mock_open()):
+#          patch('email_classifier.scripts.evaluate.open'()):
 #
 #         model_path = MagicMock()
 #         model_path.exists.return_value = True

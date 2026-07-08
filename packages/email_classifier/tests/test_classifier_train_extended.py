@@ -1,5 +1,5 @@
 """Tests for test_classifier_train_extended.py."""
-from unittest.mock import MagicMock, patch, mock_open
+from unittest.mock import MagicMock, patch
 import numpy as np
 import torch
 
@@ -21,7 +21,7 @@ import torch
 #     # Import inside the test to avoid module resolution issues during patch discovery
 #     from email_classifier.scripts.train import evaluate_and_save
 #
-#     with patch('matplotlib.pyplot.savefig'), patch('matplotlib.pyplot.show'), patch('matplotlib.pyplot.close'),                    patch('email_classifier.scripts.train.open', mock_open()):
+#     with patch('matplotlib.pyplot.savefig'), patch('matplotlib.pyplot.show'), patch('matplotlib.pyplot.close'),                    patch('email_classifier.scripts.train.open'()):
 #
 #         output_dir = MagicMock()
 #         output_dir.mkdir = MagicMock()
