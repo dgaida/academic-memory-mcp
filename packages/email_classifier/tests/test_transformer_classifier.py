@@ -54,7 +54,7 @@ def test_transformer_predict(mock_open_msg, mock_nn_class, transformer_classifie
 
     # Mock tokenizer
     transformer_classifier.tokenizer = MagicMock()
-    transformer_classifier.tokenizer.return_value = {
+    transformer_classifier.tokenizer.side_effect = lambda *args, **kwargs: {
         "input_ids": torch.tensor([[1, 2, 3]]),
         "attention_mask": torch.tensor([[1, 1, 1]])
     }

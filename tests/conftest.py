@@ -20,9 +20,15 @@ except Exception:
 # Mock sentence_transformers if not available
 try:
     if importlib.util.find_spec("sentence_transformers") is None:
-        sys.modules["sentence_transformers"] = MagicMock()
+        mock_st = MagicMock()
+        mock_st.__path__ = []
+        sys.modules["sentence_transformers"] = mock_st
+        sys.modules["sentence_transformers.models"] = MagicMock()
 except Exception:
-    sys.modules["sentence_transformers"] = MagicMock()
+    mock_st = MagicMock()
+    mock_st.__path__ = []
+    sys.modules["sentence_transformers"] = mock_st
+    sys.modules["sentence_transformers.models"] = MagicMock()
 
 @pytest.fixture
 def mock_llm_client_wrapper():

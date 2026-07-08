@@ -53,9 +53,9 @@ def test_count_emails(tmp_path):
 def test_plot_distribution():
     """Test function docstring."""
     df = pd.DataFrame([{"Klasse": "C1", "Inbox": 1, "SentItems": 1}])
-    with patch("email_classifier.scripts.plot_data_distribution.plt") as mock_plt:
+    with patch("email_classifier.scripts.plot_data_distribution.plt.savefig") as mock_save, patch("email_classifier.scripts.plot_data_distribution.plt.show"), patch("email_classifier.scripts.plot_data_distribution.plt.close"):
         plot_distribution(df, "Title", Path("out.png"))
-        assert mock_plt.savefig.called
+        assert mock_save.called
 
 def test_plot_main():
     """Test function docstring."""

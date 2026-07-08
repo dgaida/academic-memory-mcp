@@ -53,20 +53,11 @@ def test_create_outlook_draft_success(tmp_path):
         mock_folder.Name = "Work in Progress"
         mock_root.Folders = [mock_folder]
         
-        # Create a real object-like mock for the mail item
-        class MockMail:
-            """Mock mail item."""
-            def __init__(self):
-                """Initialize mock mail."""
-                self.Subject = None
-                self.To = None
-                self.CC = None
-                self.Body = None
-                self.Attachments = MagicMock()
-                self.Save = MagicMock()
-                self.Display = MagicMock()
-
-        mock_mail = MockMail()
+        # Use MagicMock for the mail item
+        mock_mail = MagicMock()
+        mock_mail.Attachments = MagicMock()
+        mock_mail.Save = MagicMock()
+        mock_mail.Display = MagicMock()
 
         mock_folder.Items.Add.return_value = mock_mail
         mock_outlook.CreateItem.return_value = mock_mail
@@ -87,5 +78,8 @@ def test_create_outlook_draft_exception():
     """Test create_outlook_draft exception handling."""
     with patch('mcp_university.utils.outlook.OUTLOOK_AVAILABLE', True),          patch('mcp_university.utils.outlook.is_outlook_open', return_value=True),          patch('win32com.client.Dispatch') as mock_dispatch:
 
-        mock_dispatch.side_effect = Exception("Dispatch failed")
+        # Mock Dispatch to succeed but GetNamespace to fail
+        mock_outlook = mock_dispatch.return_value
+        mock_outlook.GetNamespace.side_effect = Exception("Namespace failed")
+
         assert create_outlook_draft("Sub", "Body") is False

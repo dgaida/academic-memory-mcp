@@ -14,7 +14,7 @@ def mock_classifier():
         classifier_inst.label_encoder.classes_ = np.array(['Class1', 'Class2'])
         classifier_inst.label_encoder.inverse_transform.side_effect = lambda x: np.array(['Class1', 'Class2'])[x.astype(int)]
         classifier_inst.preprocess_data.return_value = (['text1', 'text2'], ['Class1', 'Class2'])
-        classifier_inst.tokenizer.return_value = {'input_ids': torch.tensor([[1]]), 'attention_mask': torch.tensor([[1]])}
+        classifier_inst.tokenizer.side_effect = lambda *args, **kwargs: {'input_ids': torch.tensor([[1]]), 'attention_mask': torch.tensor([[1]])}
         classifier_inst.method = 'transformer'
 
         mock_nn = MagicMock()
