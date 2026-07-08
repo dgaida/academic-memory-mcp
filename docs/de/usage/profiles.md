@@ -14,6 +14,13 @@ Diese Steckbriefe werden im Markdown-Format gespeichert und dienen als zusätzli
 
 ## Funktionsweise
 
+### Bestimmung der Anrede (Du/Sie)
+Die bevorzugte Anrede wird intelligent bestimmt:
+- Es werden die letzten 4 direkt gesendeten E-Mails vom Nutzer an die Person und umgekehrt analysiert.
+- "Sammelmails" (z.B. mit "Liebe Kolleg*innen" oder "Hallo zusammen") werden dabei ignoriert.
+- Wenn keine direkten E-Mails gefunden werden, erfolgt ein Fallback auf die neuesten verfügbaren Mails.
+
+
 ### Erstellung
 Wenn für eine E-Mail-Adresse noch kein Steckbrief existiert, wird dieser beim Versuch, eine E-Mail zu beantworten (oder manuell via CLI), automatisch erstellt. Dabei werden alle verfügbaren E-Mails dieser Person analysiert sowie Informationen aus dem Wissensgraphen einbezogen. Ein Steckbrief kann auch dann erstellt werden, wenn noch keine E-Mails vorhanden sind, sofern Informationen im Wissensgraphen vorliegen.
 

@@ -155,6 +155,7 @@ class THKoelnCrawler:
 
         soup = BeautifulSoup(response.text, "html.parser")
         details = {
+            "academic_degree": None,
             "faculty": None,
             "institute": None,
             "is_pa_vorsitz": False,
@@ -167,6 +168,19 @@ class THKoelnCrawler:
 
         intro_div = soup.find("div", class_="introduction-personal")
         if intro_div:
+            # Extract academic degree
+            degree_span = intro_div.find("span", class_="academic-degree")
+            if degree_span:
+                details["academic_degree"] = degree_span.get_text(strip=True)
+
+            # Check name for Prof. / Prof. Dr.
+            name_h1 = intro_div.find("h1")
+            if name_h1:
+                full_name = name_h1.get_text(strip=True)
+                if "Prof. Dr." in full_name:
+                    details["academic_degree"] = "Prof. Dr."
+                elif "Prof." in full_name:
+                    details["academic_degree"] = "Prof."
             # Faculty is usually in a link with class 'link internal'
             faculty_link = intro_div.find("a", class_="link internal")
             if faculty_link:
@@ -250,10 +264,11 @@ def save_to_markdown(data: List[Dict[str, Any]], filename: str) -> None:
     with open(filename, "w", encoding="utf-8") as f:
         f.write("# Personen TH Köln\n\n")
 
-        f.write("| Name | E-Mail | Fakultät oder Einrichtung | Institut | PA-Vorsitz | DekanIn | Senat | InstitutsdirektorIn | Präsidiumsmitglied | Studiengangsleitung |\n")
-        f.write("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n")
+| Name | Akademischer Grad | E-Mail | Fakultät oder Einrichtung | Institut | PA-Vorsitz | DekanIn | Senat | InstitutsdirektorIn | Präsidiumsmitglied | Studiengangsleitung |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
         for person in data:
             name = person.get("name") or ""
+            degree = person.get("academic_degree") or ""
             email = person.get("email") or ""
             faculty = person.get("faculty") or ""
             institute = person.get("institute") or ""
@@ -263,7 +278,7 @@ def save_to_markdown(data: List[Dict[str, Any]], filename: str) -> None:
             inst_dir = "X" if person.get("is_institutsdirektor") else ""
             praesidium = "X" if person.get("is_praesidium") else ""
             studiengangsleitung = person.get("studiengangsleitung") or ""
-            f.write(f"| {name} | {email} | {faculty} | {institute} | {pa} | {dekan} | {senat} | {inst_dir} | {praesidium} | {studiengangsleitung} |\n")
+            f.write(f"| {name} | {degree} | {email} | {faculty} | {institute} | {pa} | {dekan} | {senat} | {inst_dir} | {praesidium} | {studiengangsleitung} |\n")
 
 
 def parse_markdown_files(directory: Path) -> List[Dict[str, Any]]:
@@ -288,15 +303,16 @@ def parse_markdown_files(directory: Path) -> List[Dict[str, Any]]:
                 if len(parts) >= 10:
                     person = {
                         "name": parts[1],
-                        "email": parts[2],
-                        "faculty": parts[3] if parts[3] != "None" and parts[3] != "" else None,
-                        "institute": parts[4] if parts[4] != "None" and parts[4] != "" else None,
-                        "is_pa_vorsitz": parts[5] == "X",
-                        "is_dekan": parts[6] == "X",
-                        "is_senat": parts[7] == "X",
-                        "is_institutsdirektor": parts[8] == "X",
-                        "is_praesidium": parts[9] == "X",
-                        "studiengangsleitung": parts[10] if len(parts) > 10 and parts[10] != "" else None
+                        "academic_degree": parts[2] if parts[2] != "None" and parts[2] != "" else None,
+                        "email": parts[3],
+                        "faculty": parts[4] if parts[4] != "None" and parts[4] != "" else None,
+                        "institute": parts[5] if parts[5] != "None" and parts[5] != "" else None,
+                        "is_pa_vorsitz": parts[6] == "X",
+                        "is_dekan": parts[7] == "X",
+                        "is_senat": parts[8] == "X",
+                        "is_institutsdirektor": parts[9] == "X",
+                        "is_praesidium": parts[10] == "X",
+                        "studiengangsleitung": parts[11] if len(parts) > 11 and parts[11] != "" else None
                     }
                     all_persons.append(person)
     return all_persons
@@ -325,6 +341,7 @@ def save_to_database(data: List[Dict[str, Any]], db_path: Path) -> None:
         properties = {
             "email": email,
             "is_pa_vorsitz": person.get("is_pa_vorsitz", False),
+            "academic_degree": person.get("academic_degree"),
             "is_dekan": person.get("is_dekan", False),
             "is_senat": person.get("is_senat", False),
             "is_institutsdirektor": person.get("is_institutsdirektor", False),

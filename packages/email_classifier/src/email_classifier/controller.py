@@ -341,12 +341,12 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
 
         persona_path = Path("skills/SKILL_persona.md")
         apt_skill_path = Path("skills/SKILL_Appointment.md")
-        skill_path = Path(f"skills/SKILL_{email_data.get('class', 'Other')}.md")
+        skill_path = Path(f"skills/SKILL_{email_data.get('new_class', email_data.get('class', 'Other'))}.md")
         if not skill_path.exists():
             skill_path = (
                 Path(__file__).parent.parent
                 / "skills"
-                / f"SKILL_{email_data.get('class', 'Other')}.md"
+                / f"SKILL_{email_data.get('new_class', email_data.get('class', 'Other'))}.md"
             )
 
         # Action Logic Mapping
@@ -407,7 +407,7 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
             action_idx=action_idx,
             detected_language=detected_language,
             honorific=honorific,
-            email_class=email_data.get("class"),
+            email_class=email_data.get("new_class", email_data.get("class")),
         )
 
         if reply_subject == "NO_REPLY_NEEDED":
@@ -444,7 +444,7 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
             pass
 
         attachments = [latest_mail]
-        if should_attach and email_data.get("class") == "PO-Wechsel":
+        if should_attach and email_data.get("new_class", email_data.get("class")) == "PO-Wechsel":
             pdf = Path(
                 r"D:\TH_Koeln\PAV\Studierende\PO-Wechsel\InfosPOWechselHärtefall.pdf"
             )
@@ -1031,7 +1031,7 @@ TEXT:
 
         if self.use_action_classifier:
             return self.classify_action(
-                mail_path, email_class=email_data.get("class")
+                mail_path, email_class=email_data.get("new_class", email_data.get("class"))
             )
 
         return 0  # Default: Antwort schreiben

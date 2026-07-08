@@ -165,3 +165,9 @@ The script `scripts/crawl_th_koeln_persons.py` is used to fetch personnel data.
 ## Email Processing & GUI Rules (Update 2026-07)  
 - **Automatic Suggestions:** The system must automatically suggest "4) E-Mail nur archivieren" for emails that are older than the configured threshold or are located in the `SentItems` folder.  
 - **Attachment Handling:** The Gradio GUI (`scripts/process_sorted_emails.py`) must provide a checkbox for "Anhang speichern" on both Tab 1 and Tab 2. The selection state from Tab 1 must be preserved when moving a mail to Tab 2.  
+
+### Honorific Determination (Du/Sie)
+The preferred honorific (Du/Sie) is determined by analyzing:
+1. The last 4 emails sent directly from the tool user to the person (person in "To").
+2. The last 4 emails sent directly from the person to the tool user (user in "To").
+Sammelmails (bulk emails) identified by salutations like "Liebe Kolleg*innen" or "Hallo zusammen" are explicitly ignored to ensure the determination is based on individual interaction.

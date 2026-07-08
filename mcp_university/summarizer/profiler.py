@@ -329,7 +329,7 @@ class PersonProfiler:
 
         batches = self.create_batches(emails) if emails else [[]]
         current_profile = ""
-        honorific = self._determine_honorific(emails)
+        honorific = self._determine_honorific(emails, email_address)
 
         for i, batch in enumerate(batches):
             logger.info(f"Verarbeite Batch {i+1}/{len(batches)} für {email_address}")
@@ -427,7 +427,7 @@ class PersonProfiler:
         kg_context = self._get_knowledge_graph_context(email_address)
         batches = self.create_batches(new_emails)
         current_profile = existing_profile
-        honorific = self._determine_honorific(all_emails)
+        honorific = self._determine_honorific(all_emails, email_address)
 
         for i, batch in enumerate(batches):
             logger.info(f"Verarbeite Update-Batch {i+1}/{len(batches)} für {email_address}")
@@ -476,40 +476,80 @@ class PersonProfiler:
         """
         return self.update_profile(email_address)
 
-    def _determine_honorific(self, emails: List[Dict[str, Any]]) -> str:
-        """Bestimmt die bevorzugte Anrede (Du/Sie) basierend auf den 3 neuesten E-Mails.
+    def _determine_honorific(self, emails: List[Dict[str, Any]], target_email: str) -> str:
+        """Bestimmt die bevorzugte Anrede (Du/Sie) basierend auf direkten E-Mails.
 
-        Args:
-            emails (List[Dict[str, Any]]): Liste der E-Mails.
-
-        Returns:
-            str: "Du" oder "Sie".
+        Berücksichtigt die letzten 4 Mails vom User an die Person (direkt)
+        und die letzten 4 Mails von der Person an den User (direkt).
+        Sammelmails werden ignoriert.
         """
         if not emails:
             return "Sie"
 
-        # Sortieren nach Datum absteigend und die neuesten 3 nehmen
-        # Wir schauen sowohl in 'date' (für find_emails_for_address Ergebnisse)
-        # als auch in 'details'['date'] (für Batch-Inhalte)
+        user_emails = [e.lower() for e in self.config.user.emails]
+        target_email = target_email.lower()
+
         def get_date(m):
-            """Hilfsfunktion zum Auslesen des Datums."""
             if "date" in m:
                 return m["date"]
-            return m["details"].get("date", datetime.min)
+            return m.get("details", {}).get("date", datetime.min)
 
+        # Sortiere alle Mails absteigend
         sorted_emails = sorted(emails, key=get_date, reverse=True)
-        latest_emails = sorted_emails[:3]
 
-        for mail in latest_emails:
+        def is_sammelmail(body):
+            sammel_indicators = [
+                r"Liebe Kolleg\*innen",
+                r"Hallo zusammen",
+                r"Sehr geehrte Damen und Herren",
+                r"Liebe Alle",
+                r"Hallo Alle"
+            ]
+            for indicator in sammel_indicators:
+                if re.search(indicator, body, re.IGNORECASE):
+                    return True
+            return False
+
+        filtered_user_to_person = []
+        filtered_person_to_user = []
+
+        for mail in sorted_emails:
+            details = mail.get("details", mail)
+            body = details.get("body", "")
+            sender = details.get("from_email", "").lower()
+            recipients = [r.get("email", "").lower() for r in details.get("to", [])]
+
+            if is_sammelmail(body):
+                continue
+
+            # User -> Person (direkt, Person in "To")
+            if sender in user_emails:
+                if target_email in recipients:
+                    filtered_user_to_person.append(mail)
+            # Person -> User (direkt, User in "To")
+            elif sender == target_email:
+                if any(u in recipients for u in user_emails):
+                    filtered_person_to_user.append(mail)
+
+            if len(filtered_user_to_person) >= 4 and len(filtered_person_to_user) >= 4:
+                break
+
+        relevant_emails = filtered_user_to_person[:4] + filtered_person_to_user[:4]
+
+        if not relevant_emails:
+            # Fallback to the original logic if no direct match found
+            relevant_emails = sorted_emails[:3]
+
+        for mail in relevant_emails:
             details = mail.get("details", mail)
             body = details.get("body", "")
             subject = details.get("subject", "")
 
-            prompt = f"""Analysiere die folgende E-Mail und bestimme, ob die Person mit "Du" oder "Sie" angesprochen wird (oder selbst "Du" oder "Sie" verwendet).
+            prompt = f"""Analysiere die folgende E-Mail und bestimme, ob die Person mit \"Du\" oder \"Sie\" angesprochen wird (oder selbst \"Du\" oder \"Sie\" verwendet).
 Betreff: {subject}
 Inhalt: {body[:1000]}
 
-Antworte NUR mit "Du", "Sie" oder "Unklar".
+Antworte NUR mit \"Du\", \"Sie\" oder \"Unklar\".
 """
             try:
                 response = self.llm.chat([{"role": "user", "content": prompt}])
@@ -519,7 +559,7 @@ Antworte NUR mit "Du", "Sie" oder "Unklar".
                 if "sie" in res:
                     return "Sie"
             except Exception as e:
-                logger.warning(f"Fehler bei der Honorific-Bestimmung für eine Mail: {e}")
+                logger.warning(f"Fehler bei der Honorific-Bestimmung: {e}")
 
         return "Sie"
 
@@ -585,7 +625,7 @@ Falls die E-Mailadresse NICHT "th-koeln" enthält, handelt es sich um eine exter
 
 Erstelle einen strukturierten Steckbrief in Markdown mit folgenden Punkten:
 1. Name und E-Mailadresse
-2. Rolle (z.B. Studierende, Lehrende, Mitarbeiter, Professor, externer Partner, ...)
+2. Rolle (z.B. Studierende, Lehrende, Mitarbeiter, Professor, externer Partner, ...)\n   - WICHTIG: Wenn Informationen aus dem Wissensgraphen vorliegen (kg_info), handelt es sich in der Regel um einen Mitarbeiter oder Lehrenden, NICHT um einen Studierenden. Falls kg_info vorhanden ist, schließe die Rolle "Studierender" aus, es sei denn, die E-Mails belegen eindeutig das Gegenteil.
 3. Bevorzugte Anrede (Setze hier zwingend den Wert: {honorific_preference})
 4. Datum des ersten Kontakts
 5. Bei externen Personen: Unternehmensname, Branche und Kontaktdaten (falls bekannt)
