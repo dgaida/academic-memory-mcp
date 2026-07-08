@@ -258,11 +258,11 @@ class EmailClassifier:
             y_pred = self.classifier.predict(X)[0]
             y_prob = self.classifier.predict_proba(X)[0]
 
-        label = self.label_encoder.inverse_transform([int(y_pred)])[0]
+        label = str(self.label_encoder.inverse_transform([int(y_pred)])[0])
 
         # Mapping von Label zu Wahrscheinlichkeit
         probs = {
-            self.label_encoder.inverse_transform([i])[0]: float(prob)
+            str(self.label_encoder.inverse_transform([i])[0]): float(prob)
             for i, prob in enumerate(y_prob)
         }
 

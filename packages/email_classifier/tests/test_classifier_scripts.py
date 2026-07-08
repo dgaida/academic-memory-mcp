@@ -23,14 +23,14 @@ def mock_classifier():
 
         # Mock the classifier as a callable that returns a tensor
         mock_nn = MagicMock()
-        mock_nn.return_value = torch.tensor([[1.0, 0.0], [0.0, 1.0]])
+        mock_nn.side_effect = lambda *args, **kwargs: torch.tensor([[1.0, 0.0], [0.0, 1.0]])
         classifier_inst.classifier = mock_nn
 
         yield classifier_inst
 
 def test_evaluate_transformer(mock_classifier):
     """Test function docstring."""
-    with patch('email_classifier.scripts.evaluate.plt'),          patch('email_classifier.scripts.evaluate.sns'),          patch('email_classifier.scripts.evaluate.open', mock_open()) as _mock_file:
+    with patch('matplotlib.pyplot.savefig'), patch('matplotlib.pyplot.show'), patch('matplotlib.pyplot.close'),                    patch('email_classifier.scripts.evaluate.open', mock_open()) as _mock_file:
         
         model_path = MagicMock(spec=Path)
         model_path.exists.return_value = True
@@ -55,7 +55,7 @@ def test_evaluate_non_transformer(mock_classifier):
     # For non-transformer, it calls predict() on the classifier member
     mock_classifier.classifier.predict.return_value = np.array([0, 1])
     
-    with patch('email_classifier.scripts.evaluate.plt'),          patch('email_classifier.scripts.evaluate.sns'),          patch('email_classifier.scripts.evaluate.open', mock_open()):
+    with patch('matplotlib.pyplot.savefig'), patch('matplotlib.pyplot.show'), patch('matplotlib.pyplot.close'),                    patch('email_classifier.scripts.evaluate.open', mock_open()):
         
         model_path = MagicMock(spec=Path)
         model_path.exists.return_value = True

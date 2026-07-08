@@ -29,5 +29,5 @@ def test_plot_dist(tmp_path):
     (d / "Inbox" / "m.msg").touch()
     df = count_emails(str(tmp_path))
     assert len(df) == 1
-    with patch("email_classifier.scripts.plot_data_distribution.plt.savefig"), patch("email_classifier.scripts.plot_data_distribution.plt.show"), patch("email_classifier.scripts.plot_data_distribution.plt.close"):
+    with patch("matplotlib.pyplot.savefig"), patch("matplotlib.pyplot.show"), patch("matplotlib.pyplot.close"):
         plot_distribution(df, "T", tmp_path / "out.png")

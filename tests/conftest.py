@@ -1,34 +1,32 @@
 """Tests for conftest.py."""
 import pytest
 import sys
+import types
 from unittest.mock import MagicMock, patch
 
+def mock_package(name):
+    m = types.ModuleType(name)
+    m.__path__ = []
+    sys.modules[name] = m
+    return m
+
 # Global mocks for non-existent libraries
-mock_win32 = MagicMock()
-sys.modules["win32com"] = mock_win32
-sys.modules["win32com.client"] = mock_win32.client
-sys.modules["ollama"] = MagicMock()
+if "win32com" not in sys.modules:
+    mock_win32 = mock_package("win32com")
+    mock_win32_client = mock_package("win32com.client")
+    mock_win32.client = mock_win32_client
+    mock_win32_client.Dispatch = MagicMock()
 
-# Mock xgboost if not available
-try:
-    import importlib.util
-    if importlib.util.find_spec("xgboost") is None:
-        sys.modules["xgboost"] = MagicMock()
-except Exception:
-    sys.modules["xgboost"] = MagicMock()
+if "ollama" not in sys.modules:
+    mock_ollama = mock_package("ollama")
+    mock_ollama.Client = MagicMock()
 
-# Mock sentence_transformers if not available
-try:
-    if importlib.util.find_spec("sentence_transformers") is None:
-        mock_st = MagicMock()
-        mock_st.__path__ = []
-        sys.modules["sentence_transformers"] = mock_st
-        sys.modules["sentence_transformers.models"] = MagicMock()
-except Exception:
-    mock_st = MagicMock()
-    mock_st.__path__ = []
-    sys.modules["sentence_transformers"] = mock_st
-    sys.modules["sentence_transformers.models"] = MagicMock()
+if "xgboost" not in sys.modules:
+    mock_package("xgboost")
+
+if "sentence_transformers" not in sys.modules:
+    mock_package("sentence_transformers")
+    mock_package("sentence_transformers.models")
 
 @pytest.fixture
 def mock_llm_client_wrapper():
@@ -40,7 +38,6 @@ def mock_llm_client_wrapper():
         'message': {'role': 'assistant', 'content': 'Default mock response', 'tool_calls': None}
     }
 
-    # We patch it in all locations to be safe
     targets = [
         'mcp_university.utils.llm_client_wrapper.LLMClientWrapper',
         'mcp_university.summarizer.engine.LLMClientWrapper',

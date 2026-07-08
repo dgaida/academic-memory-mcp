@@ -71,7 +71,7 @@ def evaluate(model_path: Path, test_dir: Path) -> None:
         # Merkmale extrahieren für klassische Modelle
         X = classifier.get_features(texts, train=False)
         y_pred_idx = classifier.classifier.predict(X)
-    y_pred = classifier.label_encoder.inverse_transform(y_pred_idx.astype(int))
+    y_pred = [str(val) for val in classifier.label_encoder.inverse_transform(y_pred_idx.astype(int))]
 
     # Metriken berechnen
     accuracy = accuracy_score(y_true, y_pred)

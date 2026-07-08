@@ -15,13 +15,13 @@ def test_evaluate_and_save():
 
     # Mock the classifier as a callable that returns a tensor
     mock_nn = MagicMock()
-    mock_nn.return_value = torch.tensor([[1.0, 0.0]])
+    mock_nn.side_effect = lambda *args, **kwargs: torch.tensor([[1.0, 0.0]])
     mock_classifier.classifier = mock_nn
     
     # Import inside the test to avoid module resolution issues during patch discovery
     from email_classifier.scripts.train import evaluate_and_save
 
-    with patch('email_classifier.scripts.train.plt'),          patch('email_classifier.scripts.train.sns'),          patch('email_classifier.scripts.train.open', mock_open()):
+    with patch('matplotlib.pyplot.savefig'), patch('matplotlib.pyplot.show'), patch('matplotlib.pyplot.close'),                    patch('email_classifier.scripts.train.open', mock_open()):
 
         output_dir = MagicMock(spec=Path)
         output_dir.mkdir = MagicMock()

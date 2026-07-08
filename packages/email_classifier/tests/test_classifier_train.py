@@ -21,7 +21,7 @@ def mock_classifier():
         }
 
         mock_nn = MagicMock()
-        mock_nn.return_value = torch.tensor([[1.0, 0.0], [0.0, 1.0]])
+        mock_nn.side_effect = lambda *args, **kwargs: torch.tensor([[1.0, 0.0], [0.0, 1.0]])
         mock_nn.predict.return_value = np.array([0, 1])
         classifier_inst.classifier = mock_nn
 
@@ -29,7 +29,7 @@ def mock_classifier():
 
 def test_evaluate_and_save(mock_classifier):
     """Test function docstring."""
-    with patch('email_classifier.scripts.train.plt'),          patch('email_classifier.scripts.train.sns'),          patch('email_classifier.scripts.train.open', mock_open()):
+    with patch('matplotlib.pyplot.savefig'), patch('matplotlib.pyplot.show'), patch('matplotlib.pyplot.close'),                    patch('email_classifier.scripts.train.open', mock_open()):
         
         output_dir = MagicMock(spec=Path)
         evaluate_and_save(mock_classifier, ['text', 'text2'], ['Class1', 'Class2'], output_dir)

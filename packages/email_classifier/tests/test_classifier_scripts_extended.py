@@ -18,14 +18,14 @@ def mock_classifier():
         classifier_inst.method = 'transformer'
 
         mock_nn = MagicMock()
-        mock_nn.return_value = torch.tensor([[1.0, 0.0], [0.0, 1.0]])
+        mock_nn.side_effect = lambda *args, **kwargs: torch.tensor([[1.0, 0.0], [0.0, 1.0]])
         classifier_inst.classifier = mock_nn
 
         yield classifier_inst
 
 def test_evaluate_transformer(mock_classifier):
     """Test function docstring."""
-    with patch('email_classifier.scripts.evaluate.plt'),          patch('email_classifier.scripts.evaluate.sns'),          patch('email_classifier.scripts.evaluate.open', mock_open()):
+    with patch('matplotlib.pyplot.savefig'), patch('matplotlib.pyplot.show'), patch('matplotlib.pyplot.close'),                    patch('email_classifier.scripts.evaluate.open', mock_open()):
 
         model_path = MagicMock(spec=Path)
         model_path.exists.return_value = True
