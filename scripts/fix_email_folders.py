@@ -47,6 +47,9 @@ def fix_folders(config_path: Path, dry_run: bool = False, full_verify: bool = Fa
         else:
             email_files = list(base_path.glob("*.msg")) + list(base_path.glob("*.eml"))
 
+        # Sort files to ensure deterministic processing order (important for tests with mock side effects)
+        email_files.sort()
+
         for email_file in email_files:
             try:
                 details = parser.get_email_details(email_file)
