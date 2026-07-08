@@ -93,7 +93,7 @@ python scripts/build_knowledge_graph.py
 ```
 
 ### TH Köln Personen-Crawler
-Crawlt das Personenverzeichnis der TH Köln nach Namen, E-Mails, Fakultäten und Instituten.
+Crawlt das Personenverzeichnis der TH Köln nach Namen, akademischen Graden, E-Mails, Fakultäten und Instituten.
 ```bash
 python scripts/crawl_th_koeln_persons.py A B C
 ```
