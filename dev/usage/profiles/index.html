@@ -2103,10 +2103,10 @@
 <p>Diese Steckbriefe werden im Markdown-Format gespeichert und dienen als zusätzlicher Kontext für das LLM, wenn eine E-Mail beantwortet werden soll. Dabei wird nicht nur der Steckbrief des Absenders (z.B. Student), sondern auch der Steckbrief des Nutzers des Tools (wie in <code>config/user.yaml</code> definiert) an das LLM übergeben, um eine konsistente Tonalität und korrekten Kontext zu gewährleisten.</p>
 <h2 id="funktionsweise">Funktionsweise<a class="headerlink" href="#funktionsweise" title="Permanent link">&para;</a></h2>
 <h3 id="bestimmung-der-anrede-dusie">Bestimmung der Anrede (Du/Sie)<a class="headerlink" href="#bestimmung-der-anrede-dusie" title="Permanent link">&para;</a></h3>
-<p>Die bevorzugte Anrede wird intelligent bestimmt:
-- Es werden die letzten 4 direkt gesendeten E-Mails vom Nutzer an die Person und umgekehrt analysiert.
-- "Sammelmails" (z.B. mit "Liebe Kolleg*innen" oder "Hallo zusammen") werden dabei ignoriert.
-- Wenn keine direkten E-Mails gefunden werden, erfolgt ein Fallback auf die neuesten verfügbaren Mails.</p>
+<p>Die bevorzugte Anrede wird intelligent bestimmt:<br />
+- Es werden die letzten 4 direkt gesendeten E-Mails vom Nutzer an die Person und umgekehrt analysiert.<br />
+- "Sammelmails" (z.B. mit "Liebe Kolleg*innen" oder "Hallo zusammen") werden dabei ignoriert.<br />
+- Wenn keine direkten E-Mails gefunden werden, erfolgt ein Fallback auf die neuesten verfügbaren Mails.  </p>
 <h3 id="erstellung">Erstellung<a class="headerlink" href="#erstellung" title="Permanent link">&para;</a></h3>
 <p>Wenn für eine E-Mail-Adresse noch kein Steckbrief existiert, wird dieser beim Versuch, eine E-Mail zu beantworten (oder manuell via CLI), automatisch erstellt. Dabei werden alle verfügbaren E-Mails dieser Person analysiert sowie Informationen aus dem Wissensgraphen einbezogen. Ein Steckbrief kann auch dann erstellt werden, wenn noch keine E-Mails vorhanden sind, sofern Informationen im Wissensgraphen vorliegen.</p>
 <h3 id="automatische-aktualisierung">Automatische Aktualisierung<a class="headerlink" href="#automatische-aktualisierung" title="Permanent link">&para;</a></h3>
