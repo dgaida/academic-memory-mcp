@@ -105,11 +105,12 @@ def test_fix_email_folders_logic(tmp_path):
         "cc": []
     }
     
-    with patch("scripts.fix_email_folders.MailParser") as mock_parser_class, \
-          patch("scripts.fix_email_folders.get_config") as mock_get_config, \
-          patch("scripts.fix_email_folders.get_semester") as mock_get_semester, \
-          patch("scripts.fix_email_folders.extract_lastname") as mock_extract, \
-          patch("scripts.fix_email_folders.find_student_folder") as mock_find:
+    mod = fix_folders.__module__
+    with patch(f"{mod}.MailParser") as mock_parser_class, \
+          patch(f"{mod}.get_config") as mock_get_config, \
+          patch(f"{mod}.get_semester") as mock_get_semester, \
+          patch(f"{mod}.extract_lastname") as mock_extract, \
+          patch(f"{mod}.find_student_folder") as mock_find:
         
         mock_parser = mock_parser_class.return_value
 
