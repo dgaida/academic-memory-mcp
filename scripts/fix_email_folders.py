@@ -27,6 +27,8 @@ def fix_folders(config_path: Path, dry_run: bool = False, full_verify: bool = Fa
     with open(config_path, "r", encoding="utf-8") as f:
         config_data = yaml.safe_load(f)
 
+    if config_data is None:
+        config_data = {}
     config = config_data.get("class_paths", config_data)
 
     parser = MailParser()
@@ -44,6 +46,9 @@ def fix_folders(config_path: Path, dry_run: bool = False, full_verify: bool = Fa
             email_files = list(base_path.rglob("*.msg")) + list(base_path.rglob("*.eml"))
         else:
             email_files = list(base_path.glob("*.msg")) + list(base_path.glob("*.eml"))
+
+        # Sort files to ensure deterministic processing order (important for tests with mock side effects)
+        email_files.sort()
 
         for email_file in email_files:
             try:

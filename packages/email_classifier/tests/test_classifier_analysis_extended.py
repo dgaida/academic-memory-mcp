@@ -16,7 +16,7 @@ def test_run_xai_analysis(mock_shap, mock_classifier_cls):
     model_path, test_dir = MagicMock(), MagicMock()
     model_path.exists.return_value = True
     test_dir.exists.return_value = True
-    with patch("email_classifier.scripts.xai_analysis.open"()):
+    with patch("email_classifier.scripts.xai_analysis.open"):
         run_xai_analysis(model_path, test_dir)
         assert mock_classifier.load.called
 
