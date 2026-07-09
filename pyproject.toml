@@ -1,6 +1,6 @@
 [project]
 name = "mcp-university"
-version = "2.4.4"
+version = "2.4.5"
 description = "Agentic University Memory System with MCP"
 dependencies = [
     "tzlocal<6.0",
