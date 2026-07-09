@@ -94,13 +94,15 @@ def test_fix_email_folders_logic(tmp_path):
         "date": datetime(2024, 5, 1),
         "from_name": "A B C D",
         "from_email": "a_b.c_d@smail.th-koeln.de",
-        "to": [], "cc": [], "from_name": "A B C D"
+        "to": [],
+        "cc": []
     }
     mock_details_2 = {
         "date": datetime(2024, 5, 1),
         "from_name": "TH Köln",
         "from_email": "nils_karl.mode@smail.th-koeln.de",
-        "to": [], "cc": [], "from_name": "A B C D"
+        "to": [],
+        "cc": []
     }
     
     with patch("scripts.fix_email_folders.MailParser") as mock_parser_class, \
@@ -125,7 +127,8 @@ def test_fix_email_folders_logic(tmp_path):
         
         # Robust mock for extract_lastname based on input
         def extract_ln(name_input):
-            if name_input is None: return "Unknown"
+            if name_input is None:
+                return "Unknown"
             name_str = str(name_input)
             if "A B C D" in name_str:
                 return "C D"
