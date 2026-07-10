@@ -410,7 +410,7 @@ def test_agent_chat_with_exceptions_and_edge_cases(mock_agent_deps_v2):
             'tool_calls': [{'id': 'call1', 'function': {'name': 'read_file', 'arguments': {'wrong_arg': 'val'}}}]
         }
     }
-    res = agent.chat([{'role': 'user', 'content': 'Test'}])
+    agent.chat([{'role': 'user', 'content': 'Test'}])
     assert agent.last_tool_error is not None
     assert "Falsche Argumente" in agent.last_tool_error
 
@@ -422,7 +422,7 @@ def test_agent_chat_with_exceptions_and_edge_cases(mock_agent_deps_v2):
         }
     }
     with patch.dict(agent.available_tools, {"read_file": MagicMock(side_effect=Exception("Critical tool failure"))}):
-        res = agent.chat([{'role': 'user', 'content': 'Test'}])
+        agent.chat([{'role': 'user', 'content': 'Test'}])
         assert agent.last_tool_error is not None
         assert "Critical tool failure" in agent.last_tool_error
 
@@ -433,7 +433,7 @@ def test_agent_chat_with_exceptions_and_edge_cases(mock_agent_deps_v2):
             'tool_calls': [{'id': 'call3', 'function': {'name': 'non_existent_tool', 'arguments': {}}}]
         }
     }
-    res = agent.chat([{'role': 'user', 'content': 'Test'}])
+    agent.chat([{'role': 'user', 'content': 'Test'}])
     # Check that loop completes successfully when tool is not found (appends warning to response)
 
 def test_agent_chat_system_prompt_anonymization(mock_agent_deps_v2):
@@ -466,7 +466,7 @@ def test_agent_chat_system_prompt_anonymization(mock_agent_deps_v2):
         ]
 
         # Mock read_file tool to return ORIGINAL
-        with patch.object(agent, "_tool_read_file", return_value="Result containing ORIGINAL") as mock_tool:
+        with patch.object(agent, "_tool_read_file", return_value="Result containing ORIGINAL"):
             res = agent.chat([{'role': 'user', 'content': 'Hello'}], system_prompt="System rules", sender_name="N", sender_email="e@e.com")
 
             # Anonymize should have been called on system prompt and user message

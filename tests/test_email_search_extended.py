@@ -1,7 +1,6 @@
 """Tests for extended features of EmailSearchEngine, including recipient indexing, caching and speed."""
 
 import pytest
-import json
 import yaml
 from pathlib import Path
 from datetime import datetime
