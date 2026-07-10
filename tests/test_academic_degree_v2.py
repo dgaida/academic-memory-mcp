@@ -81,12 +81,17 @@ def test_personal_site_extraction_th_koeln():
     Returns:
         None
     """
-    html_content = """<div class="article">
-                    <article>
-
-<div class="personal-site">
+    html_content = """<div class="personal-site">
         <h1>Prof. Dr. Daniel Müller</h1>
-            <span class="academic-degree">Dr.</span>"""
+            <span class="academic-degree">Dr.</span>
+
+    <div class="introduction-personal">
+
+                                    <a href="/informatik-und-ingenieurwissenschaften/" class="link internal">
+                        Fakult&auml;t f&uuml;r Informatik und Ingenieurwissenschaften                    </a>
+                                                    <p>Institut f&uuml;r Informatik (INF)</p>
+                                    <p></p>
+            </div>"""
 
     crawler = THKoelnCrawler()
     mock_response = MagicMock()
