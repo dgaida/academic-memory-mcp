@@ -3,12 +3,26 @@ from unittest.mock import MagicMock
 from datetime import datetime
 import sys
 
-# Mock dependencies to avoid import issues
-sys.modules['dotenv'] = MagicMock()
-sys.modules['yaml'] = MagicMock()
+# Mock dependencies to avoid import issues temporarily
+orig_dotenv = sys.modules.get("dotenv")
+orig_yaml = sys.modules.get("yaml")
+
+sys.modules["dotenv"] = MagicMock()
+sys.modules["yaml"] = MagicMock()
 
 # Import after mocks
 from mcp_university.summarizer.profiler import PersonProfiler  # noqa: E402
+
+# Restore original modules to prevent leakage to other tests
+if orig_dotenv is not None:
+    sys.modules["dotenv"] = orig_dotenv
+else:
+    del sys.modules["dotenv"]
+
+if orig_yaml is not None:
+    sys.modules["yaml"] = orig_yaml
+else:
+    del sys.modules["yaml"]
 
 @pytest.fixture
 def profiler():

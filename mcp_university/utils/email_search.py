@@ -18,7 +18,7 @@ class EmailSearchEngine:
     """Engine für die schnelle Suche nach E-Mails mit Caching."""
 
     def __init__(self, cache_file: Optional[Path] = None) -> None:
-        """Initialisiert die Search Engine.
+        """Initialisiert die Search Engine und den Vorschlags-Cache.
 
         Args:
             cache_file (Path, optional): Pfad zur Cache-Datei.
@@ -34,8 +34,16 @@ class EmailSearchEngine:
         self.index: List[Dict[str, Any]] = []
         self._load_cache()
 
+        # Vorschlags-Cache initialisieren
+        self.suggestions_cache_file = self.cache_file.parent / "suggestions_cache.json"
+        self._load_suggestions_cache()
+
     def _load_cache(self) -> None:
-        """Lädt den Index aus dem Cache."""
+        """Lädt den Index aus dem Cache.
+
+        Returns:
+            None
+        """
         if self.cache_file.exists():
             try:
                 with open(self.cache_file, "r", encoding="utf-8") as f:
@@ -46,15 +54,91 @@ class EmailSearchEngine:
                 self.index = []
 
     def _save_cache(self) -> None:
-        """Speichert den Index im Cache."""
+        """Speichert den Index im Cache.
+
+        Returns:
+            None
+        """
         try:
             with open(self.cache_file, "w", encoding="utf-8") as f:
                 json.dump(self.index, f, ensure_ascii=False, indent=2)
             logger.info("Cache gespeichert.")
-            # Cache für Vorschläge leeren, wenn sich der Index ändert
-            self.get_suggestions.cache_clear()
         except Exception as e:
             logger.error(f"Fehler beim Speichern des Caches: {e}")
+
+    def _load_suggestions_cache(self) -> None:
+        """Lädt den Vorschlags-Cache aus der JSON-Datei oder initialisiert ihn mit Defaults.
+
+        Returns:
+            None
+        """
+        self.suggestions_cache: Set[str] = set()
+
+        # Standardbegriffe im Hochschulkontext
+        default_university_terms = {
+            "Informatik", "Bachelor", "Master", "Thesis", "Bachelorarbeit", "Masterarbeit",
+            "Projektarbeit", "Prüfung", "Klausur", "Kolloquium", "Forschung", "Vorlesung",
+            "Seminar", "Übung", "Professor", "Prüfungsordnung", "Studiengang",
+            "Nachteilsausgleich", "Sprechstunde", "Zulassung", "Anmeldung", "Abgabe",
+            "Note", "Zweitprüfer", "Erstprüfer", "Praxissemester", "Modul", "Hochschule",
+            "Studierende", "Mitarbeiter", "Dekanat", "Präsidium", "Lehrveranstaltung"
+        }
+
+        if self.suggestions_cache_file.exists():
+            try:
+                with open(self.suggestions_cache_file, "r", encoding="utf-8") as f:
+                    cached_list = json.load(f)
+                    self.suggestions_cache = set(cached_list)
+                logger.info(f"Vorschlags-Cache geladen: {len(self.suggestions_cache)} Begriffe.")
+            except Exception as e:
+                logger.error(f"Fehler beim Laden des Vorschlags-Caches: {e}")
+                self.suggestions_cache = set()
+
+        if not self.suggestions_cache:
+            self.suggestions_cache.update(default_university_terms)
+            self._add_index_elements_to_suggestions()
+            self._save_suggestions_cache()
+
+    def _add_index_elements_to_suggestions(self) -> None:
+        """Fügt alle Namen und E-Mail-Adressen aus dem Index zum Vorschlags-Cache hinzu.
+
+        Returns:
+            None
+        """
+        for item in self.index:
+            if item.get("from_name"):
+                self.suggestions_cache.add(item["from_name"])
+            if item.get("from"):
+                self.suggestions_cache.add(item["from"])
+
+            # Empfänger ebenfalls hinzufügen (to)
+            to_list = item.get("to", [])
+            for rec in to_list:
+                if isinstance(rec, dict):
+                    if rec.get("name"):
+                        self.suggestions_cache.add(rec["name"])
+                    if rec.get("email"):
+                        self.suggestions_cache.add(rec["email"])
+                elif isinstance(rec, str):
+                    self.suggestions_cache.add(rec)
+
+    def _save_suggestions_cache(self) -> None:
+        """Speichert den Vorschlags-Cache in der JSON-Datei und leert den LRU-Cache.
+
+        Returns:
+            None
+        """
+        try:
+            self.suggestions_cache_file.parent.mkdir(parents=True, exist_ok=True)
+            with open(self.suggestions_cache_file, "w", encoding="utf-8") as f:
+                json.dump(sorted(list(self.suggestions_cache)), f, ensure_ascii=False, indent=2)
+            logger.info("Vorschlags-Cache gespeichert.")
+            try:
+                self.get_suggestions.cache_clear()
+            except AttributeError:
+                pass
+        except Exception as e:
+            logger.error(f"Fehler beim Speichern des Vorschlags-Caches: {e}")
 
     def get_search_paths(self) -> List[Path]:
         """Ermittelt alle zu durchsuchenden Pfade aus der Konfiguration.
@@ -103,6 +187,9 @@ class EmailSearchEngine:
 
         Args:
             force (bool): Wenn True, wird der Index komplett neu aufgebaut.
+
+        Returns:
+            None
         """
         search_paths = self.get_search_paths()
         logger.info(f"Aktualisiere Index für Pfade: {search_paths}")
@@ -128,13 +215,19 @@ class EmailSearchEngine:
 
                         # Ordner bestimmen (Inbox oder SentItems)
                         folder_type = "Inbox"
-                        if any(p in file_path.parts for p in ["SentItems", "Sent Items", "Gesendete Elemente", "Gesendete Objekte", "Sent"]):
+                        parts_lower = [p.lower() for p in file_path.parts]
+                        sent_folder_names_lower = [
+                            "sentitems", "sent items", "gesendete elemente",
+                            "gesendete objekte", "sent"
+                        ]
+                        if any(sf in parts_lower for sf in sent_folder_names_lower):
                             folder_type = "SentItems"
 
                         new_index.append({
                             "subject": details.get("subject", ""),
                             "from": details.get("from_email", ""),
                             "from_name": details.get("from_name", ""),
+                            "to": details.get("to", []),
                             "date": date_str,
                             "path": path_str,
                             "filename": file_path.name,
@@ -146,6 +239,9 @@ class EmailSearchEngine:
 
         self.index = new_index
         self._save_cache()
+        # Aktualisiere Vorschlags-Cache mit den neuen Elementen
+        self._add_index_elements_to_suggestions()
+        self._save_suggestions_cache()
 
     def search(self, query: str) -> List[Dict[str, Any]]:
         """Sucht nach E-Mails im Index.
@@ -159,22 +255,46 @@ class EmailSearchEngine:
         if not query:
             return []
 
-        query = query.lower()
+        # Neuen Suchbegriff zum Cache hinzufügen
+        stripped_query = query.strip()
+        if len(stripped_query) >= 2:
+            if stripped_query not in self.suggestions_cache:
+                self.suggestions_cache.add(stripped_query)
+                self._save_suggestions_cache()
+
+        query_lower = query.lower()
         results = []
         for item in self.index:
-            if (query in item["subject"].lower() or
-                query in item["from"].lower() or
-                query in item["from_name"].lower() or
-                query in item["filename"].lower()):
+            found = (query_lower in item.get("subject", "").lower() or
+                     query_lower in item.get("from", "").lower() or
+                     query_lower in item.get("from_name", "").lower() or
+                     query_lower in item.get("filename", "").lower() or
+                     query_lower in item.get("path", "").lower())
+
+            if not found and "to" in item:
+                to_list = item["to"]
+                for rec in to_list:
+                    if isinstance(rec, dict):
+                        rec_name = rec.get("name", "")
+                        rec_email = rec.get("email", "")
+                        if query_lower in rec_name.lower() or query_lower in rec_email.lower():
+                            found = True
+                            break
+                    elif isinstance(rec, str):
+                        if query_lower in rec.lower():
+                            found = True
+                            break
+
+            if found:
                 results.append(item)
 
         # Sortiere nach Datum absteigend (neueste zuerst)
-        results.sort(key=lambda x: x["date"], reverse=True)
+        results.sort(key=lambda x: x.get("date", ""), reverse=True)
         return results
 
     @functools.lru_cache(maxsize=128)
     def get_suggestions(self, partial_query: str) -> List[str]:
-        """Gibt Vorschläge für die Suche zurück.
+        """Gibt Vorschläge für die Suche aus dem Cache und dem aktuellen Index zurück.
 
         Args:
             partial_query (str): Der bisher eingegebene Suchbegriff.
@@ -185,27 +305,58 @@ class EmailSearchEngine:
         if not partial_query or len(partial_query) < 2:
             return []
 
-        partial_query = partial_query.lower()
+        partial_query_lower = partial_query.lower()
         suggestions: Set[str] = set()
 
-        for item in self.index:
-            # Vorschläge aus Absendernamen
-            name = item["from_name"]
-            if name and partial_query in name.lower():
-                suggestions.add(name)
+        # 1. Aus dem Vorschlags-Cache suchen
+        for term in self.suggestions_cache:
+            if partial_query_lower in term.lower():
+                suggestions.add(term)
 
-            # Vorschläge aus E-Mail-Adressen
-            email = item["from"]
-            if email and partial_query in email.lower():
+        # 2. Aus dem aktuellen In-Memory-Index suchen (falls dort neue/ungespeicherte Objekte sind)
+        for item in self.index:
+            # Senders
+            name = item.get("from_name", "")
+            if name and partial_query_lower in name.lower():
+                suggestions.add(name)
+            email = item.get("from", "")
+            if email and partial_query_lower in email.lower():
                 suggestions.add(email)
 
-            # Vorschläge aus Betreff (Wörter)
-            subject = item["subject"]
-            if subject and partial_query in subject.lower():
+            # Subjects
+            subject = item.get("subject", "")
+            if subject and partial_query_lower in subject.lower():
                 words = re.findall(r'\w+', subject)
                 for word in words:
-                    if len(word) > 3 and partial_query in word.lower():
+                    if len(word) > 3 and partial_query_lower in word.lower():
                         suggestions.add(word)
 
+            # Recipients
+            to_list = item.get("to", [])
+            for rec in to_list:
+                if isinstance(rec, dict):
+                    rec_name = rec.get("name", "")
+                    rec_email = rec.get("email", "")
+                    if rec_name and partial_query_lower in rec_name.lower():
+                        suggestions.add(rec_name)
+                    if rec_email and partial_query_lower in rec_email.lower():
+                        suggestions.add(rec_email)
+                elif isinstance(rec, str):
+                    if partial_query_lower in rec.lower():
+                        suggestions.add(rec)
+
+        # Sortieren nach Priorität:
+        # 1. Begriffe, die mit der Eingabe starten (case-insensitiv)
+        # 2. Andere Begriffe, die die Eingabe enthalten
+        starts_with = []
+        contains = []
+        for term in suggestions:
+            if term.lower().startswith(partial_query_lower):
+                starts_with.append(term)
+            else:
+                contains.append(term)
+
+        sorted_suggestions = sorted(starts_with) + sorted(contains)
+
         # Limitiere auf 10 Vorschläge
-        return sorted(list(suggestions), key=len)[:10]
+        return sorted_suggestions[:10]
