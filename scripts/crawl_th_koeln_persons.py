@@ -167,6 +167,8 @@ class THKoelnCrawler:
         }
 
         intro_div = soup.find("div", class_="introduction-personal")
+        if not intro_div:
+            intro_div = soup.find("div", class_="personal-site")
         if intro_div:
             # Extract academic degree
             degree_span = intro_div.find("span", class_="academic-degree")
