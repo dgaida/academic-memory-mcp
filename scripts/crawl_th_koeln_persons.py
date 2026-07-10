@@ -166,21 +166,29 @@ class THKoelnCrawler:
             "studiengangsleitung": None
         }
 
-        intro_div = soup.find("div", class_="introduction-personal")
-        if intro_div:
+        # Extracted container for personal details (name and academic degree)
+        personal_div = soup.find("div", class_="personal-site")
+        if not personal_div:
+            personal_div = soup.find("div", class_="introduction-personal")
+
+        if personal_div:
             # Extract academic degree
-            degree_span = intro_div.find("span", class_="academic-degree")
+            degree_span = personal_div.find("span", class_="academic-degree")
             if degree_span:
                 details["academic_degree"] = degree_span.get_text(strip=True)
 
             # Check name for Prof. / Prof. Dr.
-            name_h1 = intro_div.find("h1")
+            name_h1 = personal_div.find("h1")
             if name_h1:
                 full_name = name_h1.get_text(strip=True)
                 if "Prof. Dr." in full_name:
                     details["academic_degree"] = "Prof. Dr."
                 elif "Prof." in full_name:
                     details["academic_degree"] = "Prof."
+
+        # Extracted container for the rest (faculty and institute)
+        intro_div = soup.find("div", class_="introduction-personal")
+        if intro_div:
             # Faculty is usually in a link with class 'link internal'
             faculty_link = intro_div.find("a", class_="link internal")
             if faculty_link:
