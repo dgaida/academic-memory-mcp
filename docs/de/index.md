@@ -8,7 +8,7 @@ Das **MCP University Memory System** ist ein lokales, agentisches Wissens- und G
 
 Es nutzt lokale Large Language Models (LLMs) und moderne Retrieval-Technologien, um eine datenschutzkonforme und leistungsstarke Wissensbasis aufzubauen.
 
-<div class="grid cards" border>
+<div class="grid cards" markdown>
 
 -   :material-email-fast:{ .lg .middle } __Automatisiertes Verfassen von E-Mails__  
 
