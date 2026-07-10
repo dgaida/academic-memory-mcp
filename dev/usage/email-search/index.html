@@ -1956,18 +1956,18 @@
 <p>Dies ermöglicht eine extrem performante Suche, da nicht bei jeder Anfrage das Dateisystem durchsucht werden muss.</p>
 <h3 id="intelligente-zuordnung-und-sentitems-erkennung">Intelligente Zuordnung und SentItems-Erkennung<a class="headerlink" href="#intelligente-zuordnung-und-sentitems-erkennung" title="Permanent link">&para;</a></h3>
 <p>Eine besondere Herausforderung bei der Suche nach gesendeten E-Mails besteht darin, dass der Absender (<code>From</code>) bei diesen E-Mails stets der Benutzer selbst (z. B. "Daniel Gaida") ist. Sucht man nun nach einem Studierenden (z. B. "Mustermann"), würde eine reine Absendersuche diese E-Mails nicht finden.</p>
-<p>Die Schnellsuche löst dies wie folgt:
-1. <strong>Empfänger-Indizierung:</strong> Beim Indizieren von E-Mails werden auch die Empfänger (<code>To</code>) mit Name und E-Mail-Adresse erfasst und im Index gespeichert.
-2. <strong>Pfad-basierte Suche:</strong> Die Suchanfrage wird zusätzlich gegen den gesamten Dateipfad (der den Ordnernamen des Studierenden enthält) abgeglichen.
-3. <strong>Erweiterter Abgleich:</strong> Eine E-Mail gilt als Treffer, wenn der Suchbegriff im Betreff, im Absender, im Empfänger, im Dateinamen oder im gesamten Dateipfad vorkommt. Dadurch werden gesendete Mails an Studierende zuverlässig gefunden.</p>
+<p>Die Schnellsuche löst dies wie folgt:<br />
+1. <strong>Empfänger-Indizierung:</strong> Beim Indizieren von E-Mails werden auch die Empfänger (<code>To</code>) mit Name und E-Mail-Adresse erfasst und im Index gespeichert.<br />
+2. <strong>Pfad-basierte Suche:</strong> Die Suchanfrage wird zusätzlich gegen den gesamten Dateipfad (der den Ordnernamen des Studierenden enthält) abgeglichen.<br />
+3. <strong>Erweiterter Abgleich:</strong> Eine E-Mail gilt als Treffer, wenn der Suchbegriff im Betreff, im Absender, im Empfänger, im Dateinamen oder im gesamten Dateipfad vorkommt. Dadurch werden gesendete Mails an Studierende zuverlässig gefunden.  </p>
 <p>Die Bestimmung, ob eine E-Mail in <strong>Inbox</strong> oder <strong>SentItems</strong> liegt, erfolgt anhand der Pfad-Segmente. Ordner mit Bezeichnungen wie <code>SentItems</code>, <code>Sent Items</code>, <code>Gesendete Elemente</code>, <code>Gesendete Objekte</code> oder <code>Sent</code> (case-insensitiv) werden automatisch als <strong>SentItems</strong> klassifiziert.</p>
 <h3 id="performanter-suchbegriff-cache-suggestions-cache">Performanter Suchbegriff-Cache (Suggestions Cache)<a class="headerlink" href="#performanter-suchbegriff-cache-suggestions-cache" title="Permanent link">&para;</a></h3>
 <p>Um Verzögerungen bei der Eingabe von Suchbegriffen zu vermeiden, verwendet die GUI einen dedizierten, persistierten Cache für Vorschläge (<code>data/cache/suggestions_cache.json</code>).</p>
 <ul>
-<li><strong>Initialisierung:</strong> Beim ersten Start wird der Cache mit einer Liste von im Hochschulkontext üblichen Standardbegriffen (z. B. <em>Informatik</em>, <em>Bachelorarbeit</em>, <em>Masterarbeit</em>, <em>Kolloquium</em>, <em>Prüfung</em>, etc.) sowie allen im Index vorhandenen Namen und E-Mail-Adressen (von Absendern und Empfängern) vorbefüllt.</li>
-<li><strong>Unter-Millisekunden-Antworten:</strong> Die Autovervollständigung sucht direkt in diesem optimierten In-Memory-Set, was eine nahezu verzögerungsfreie Anzeige von Vorschlägen ermöglicht.</li>
-<li><strong>Präfix-Priorisierung:</strong> Suchbegriffe, die mit der Eingabe starten, werden priorisiert vor Begriffen angezeigt, die die Eingabe an einer anderen Stelle enthalten.</li>
-<li><strong>Dynamische Erweiterung:</strong> Sobald Sie eine neue Suche über den "Suchen"-Button ausführen, wird der eingegebene Suchbegriff automatisch in den Cache übernommen und dauerhaft gespeichert. Bei zukünftigen Suchen steht dieser Begriff sofort zur Verfügung.</li>
+<li><strong>Initialisierung:</strong> Beim ersten Start wird der Cache mit einer Liste von im Hochschulkontext üblichen Standardbegriffen (z. B. <em>Informatik</em>, <em>Bachelorarbeit</em>, <em>Masterarbeit</em>, <em>Kolloquium</em>, <em>Prüfung</em>, etc.) sowie allen im Index vorhandenen Namen und E-Mail-Adressen (von Absendern und Empfängern) vorbefüllt.  </li>
+<li><strong>Unter-Millisekunden-Antworten:</strong> Die Autovervollständigung sucht direkt in diesem optimierten In-Memory-Set, was eine nahezu verzögerungsfreie Anzeige von Vorschlägen ermöglicht.  </li>
+<li><strong>Präfix-Priorisierung:</strong> Suchbegriffe, die mit der Eingabe starten, werden priorisiert vor Begriffen angezeigt, die die Eingabe an einer anderen Stelle enthalten.  </li>
+<li><strong>Dynamische Erweiterung:</strong> Sobald Sie eine neue Suche über den "Suchen"-Button ausführen, wird der eingegebene Suchbegriff automatisch in den Cache übernommen und dauerhaft gespeichert. Bei zukünftigen Suchen steht dieser Begriff sofort zur Verfügung.  </li>
 </ul>
 
 

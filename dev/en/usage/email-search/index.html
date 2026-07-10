@@ -1947,29 +1947,29 @@
 <p>The GUI will automatically open in your default browser.</p>
 <h2 id="features">Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Quick Search:</strong> Search by names, email addresses, subject lines, or filenames.</li>
-<li><strong>Automatic Suggestions:</strong> Suitable senders or terms are suggested as you type.</li>
-<li><strong>Separate Views:</strong> Results are clearly separated into <strong>Inbox</strong> and <strong>Sent Items (SentItems)</strong>.</li>
-<li><strong>Preview:</strong> Click an email in the list to view an HTML preview of the content directly in the GUI.</li>
-<li><strong>Integration:</strong> Open the found email with a single click directly in Outlook or jump to the corresponding folder in Windows Explorer.</li>
+<li><strong>Quick Search:</strong> Search by names, email addresses, subject lines, or filenames.  </li>
+<li><strong>Automatic Suggestions:</strong> Suitable senders or terms are suggested as you type.  </li>
+<li><strong>Separate Views:</strong> Results are clearly separated into <strong>Inbox</strong> and <strong>Sent Items (SentItems)</strong>.  </li>
+<li><strong>Preview:</strong> Click an email in the list to view an HTML preview of the content directly in the GUI.  </li>
+<li><strong>Integration:</strong> Open the found email with a single click directly in Outlook or jump to the corresponding folder in Windows Explorer.  </li>
 </ul>
 <h2 id="how-it-works">How it works<a class="headerlink" href="#how-it-works" title="Permanent link">&para;</a></h2>
 <p>The search is based on a local JSON index (<code>data/cache/email_search_cache.json</code>). The index is updated automatically upon the first start or when new emails are moved into the configured paths (see <a href="../../configuration/">Configuration</a>).</p>
 <p>This enables an extremely high-performance search because the file system does not have to be scanned for every single query.</p>
 <h3 id="intelligent-association-and-sentitems-detection">Intelligent Association and SentItems Detection<a class="headerlink" href="#intelligent-association-and-sentitems-detection" title="Permanent link">&para;</a></h3>
 <p>A particular challenge when searching for sent emails is that the sender (<code>From</code>) of these emails is always the user themselves (e.g., "Daniel Gaida"). If you search for a student's name (e.g., "Mustermann"), a search solely based on the sender would not find these emails.</p>
-<p>The quick search solves this as follows:
-1. <strong>Recipient Indexing:</strong> When indexing emails, the recipients (<code>To</code>) are also captured with their name and email address and saved in the index.
-2. <strong>Path-Based Search:</strong> The search query is additionally matched against the entire file path (which contains the student's folder name).
-3. <strong>Extended Matching:</strong> An email is considered a match if the search term occurs in the subject, sender, recipient, filename, or the entire file path. This reliably finds sent emails to students.</p>
+<p>The quick search solves this as follows:<br />
+1. <strong>Recipient Indexing:</strong> When indexing emails, the recipients (<code>To</code>) are also captured with their name and email address and saved in the index.<br />
+2. <strong>Path-Based Search:</strong> The search query is additionally matched against the entire file path (which contains the student's folder name).<br />
+3. <strong>Extended Matching:</strong> An email is considered a match if the search term occurs in the subject, sender, recipient, filename, or the entire file path. This reliably finds sent emails to students.  </p>
 <p>Determining whether an email is in the <strong>Inbox</strong> or <strong>SentItems</strong> is done based on path segments. Folders with names like <code>SentItems</code>, <code>Sent Items</code>, <code>Gesendete Elemente</code>, <code>Gesendete Objekte</code>, or <code>Sent</code> (case-insensitive) are automatically classified as <strong>SentItems</strong>.</p>
 <h3 id="high-performance-suggestions-cache">High-Performance Suggestions Cache<a class="headerlink" href="#high-performance-suggestions-cache" title="Permanent link">&para;</a></h3>
 <p>To avoid delays when entering search terms, the GUI uses a dedicated, persisted suggestions cache (<code>data/cache/suggestions_cache.json</code>).</p>
 <ul>
-<li><strong>Initialization:</strong> Upon the first start, the cache is pre-populated with a list of standard terms common in a university context (e.g., <em>Informatik</em>, <em>Bachelorarbeit</em>, <em>Masterarbeit</em>, <em>Kolloquium</em>, <em>Prüfung</em>, etc.) as well as all names and email addresses (of senders and recipients) present in the index.</li>
-<li><strong>Sub-Millisecond Responses:</strong> Autocomplete searches directly inside this optimized in-memory set, enabling a virtually lag-free display of suggestions.</li>
-<li><strong>Prefix Prioritization:</strong> Search terms that start with the input are prioritized over terms that contain the input at another position.</li>
-<li><strong>Dynamic Extension:</strong> As soon as you perform a new search using the "Search" button, the entered search term is automatically added to the cache and saved permanently. This term will be immediately available in future searches.</li>
+<li><strong>Initialization:</strong> Upon the first start, the cache is pre-populated with a list of standard terms common in a university context (e.g., <em>Informatik</em>, <em>Bachelorarbeit</em>, <em>Masterarbeit</em>, <em>Kolloquium</em>, <em>Prüfung</em>, etc.) as well as all names and email addresses (of senders and recipients) present in the index.  </li>
+<li><strong>Sub-Millisecond Responses:</strong> Autocomplete searches directly inside this optimized in-memory set, enabling a virtually lag-free display of suggestions.  </li>
+<li><strong>Prefix Prioritization:</strong> Search terms that start with the input are prioritized over terms that contain the input at another position.  </li>
+<li><strong>Dynamic Extension:</strong> As soon as you perform a new search using the "Search" button, the entered search term is automatically added to the cache and saved permanently. This term will be immediately available in future searches.  </li>
 </ul>
 
 
