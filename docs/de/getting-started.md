@@ -7,11 +7,11 @@ Diese Anleitung führt Sie durch die Einrichtung und die ersten Schritte mit dem
 Stellen Sie sicher, dass die folgende Software installiert ist:
 
 *   **Python 3.10+**  
-*   **Ollama:** Installieren Sie Ollama und laden Sie das Standardmodell herunter:  
+*   **Ollama:** Installieren Sie Ollama und laden Sie das Standardmodell [gemma4:e2b](https://ollama.com/library/gemma4) herunter:
     ```bash
-    ollama pull gemma2:2b
+    ollama pull gemma4:e2b
     ```
-*   **Docling:** Für das PDF-Parsing (wird über pip installiert).  
+*   **Docling:** Für das PDF-Parsing (wird bei `pip install -e .` automatisch mitinstalliert).
 
 ## Installation
 

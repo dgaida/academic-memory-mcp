@@ -26,7 +26,8 @@ MCP University is an offline-first system for managing academic data (students, 
    - Hybrid search using Qdrant (vector) and BM25 (text).  
    - **Embedding Loading:** Always attempt `local_files_only=True` first. Log `ERFOLG: Modell ... wurde LOKAL geladen.` on success.  
 5. **Summarizer (`mcp_university/summarizer/`)**:  
-   - German-localized summarization and Q&A using Ollama via `LLMClientWrapper`.  
+   - German-localized summarization and Q&A using Ollama via `LLMClientWrapper`.
+   - **Standard LLM-Modell:** Als Standard-Modell wird [gemma4:e2b](https://ollama.com/library/gemma4) (`gemma4:e2b`) verwendet.
    - **Persona:** Daniel Gaida, Professor at TH Köln. Signature: Dependent on user name and honorific.  
    - **Person Profiler:** Generates Markdown profiles (`Steckbriefe`) in `D:\Steckbriefe\<email>.md` based on email history.  
 6. **Metadata Store (`mcp_university/metadata/`)**:  

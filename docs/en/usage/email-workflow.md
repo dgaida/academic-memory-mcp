@@ -11,28 +11,12 @@ The process begins directly in Microsoft Outlook. Since the system works locally
 Use the VBA macros provided in the project to export data into the `inbox` folder:
 
 - **Emails:** Exports emails (mostly from students) as `.msg` files. The system automatically detects the sender, date, and subject.  
-- **Calendar Data:** Exports free time slots from your Outlook calendar into a file named `free_slots.yaml`. This serves as the basis for automated appointment suggestions.  
+- **Calendar Data / Appointments:** Exports free time slots from your Outlook calendar into a file named `free_slots.yaml`. Additionally, existing calendar appointments are also exported, which are required for the calendar GUI to provide an overview and assist in scheduling.
 
 ---
 
-## Phase 2: Classification and Sorting
-Before a content analysis takes place, the emails are sorted by topic.
-
-### Automatic Sorting
-Run the sorting script:
-```bash
-python -m email_classifier.sort_emails --source ./inbox --target ./sorted_mails
-```
-
-**What happens here?**
-
-1. **Topic Recognition:** The [Email Classification](../packages/email-classifier/index.md) system uses a machine learning model (transformer-based) to assign the content of the email to a category (e.g., *Bachelor Thesis*, *Project*, *PO-Change*).  
-2. **File System Structure:** The emails are moved into a three-level hierarchy: `Semester (e.g., 2023_24_WS) / Lastname / (Inbox or SentItems)`.  
-3. **Lastname Extraction:** The lastname is automatically extracted from the email address or display name.  
-    - *Example 1:* `max.mustermann@th-koeln.de` -> Folder: `Mustermann`  
-    - *Example 2:* `mustermann@stud.th-koeln.de` -> Folder: `Mustermann`  
-    - *Example 3:* `Mustermann-Schmidt, Erika <erika.mustermann@...>` -> Folder: `Mustermann_Schmidt`  
-4. **Normalization:** Names are normalized (umlauts replaced, special characters cleaned) to ensure compatibility with the file system.  
+## Phase 2: Automatic Classification and Pre-sorting
+Running sorting scripts manually via the command line is **no longer required**, as reading, classification, and sorting are now handled entirely through the Gradio GUI (see Phase 3). The system performs all topic recognition and name resolution in the background when you start the GUI or trigger the scanning process there.
 
 ---
 
