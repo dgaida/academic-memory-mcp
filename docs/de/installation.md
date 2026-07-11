@@ -32,6 +32,36 @@ pip install pytest pytest-asyncio mkdocs-material mkdocs-static-i18n mkdocstring
 ```
 
 
+## Installation mit Anaconda / Conda (Alternativ)
+
+Als Alternative zur standardmäßigen Python-Umgebung können Sie das System auch über ein Anaconda/Miniconda Environment installieren. Das Projekt enthält eine vorkonfigurierte `environment.yml` Datei.
+
+### Prozess der Conda-Installation:
+
+1. **Conda-Umgebung erstellen:**
+   Erstellen Sie die neue Umgebung mit allen Abhängigkeiten (einschließlich Python, PyTorch und aller Bibliotheken wie Docling):
+   ```bash
+   conda env create -f environment.yml
+   ```
+
+2. **Umgebung aktivieren:**
+   Aktivieren Sie die erstellte Umgebung:
+   ```bash
+   conda activate mcp-university
+   ```
+
+3. **Installieren des Projekts im Entwicklungsmodus (Editable):**
+   Damit die CLI-Befehle und die Python-Pfade korrekt registriert sind, installieren Sie das Paket in der aktivierten Conda-Umgebung im editierbaren Modus:
+   ```bash
+   pip install -e .
+   ```
+
+4. **Installation verifizieren:**
+   Überprüfen Sie anschließend die korrekte Installation:
+   ```bash
+   mcp-uni --help
+   ```
+
 ## GPU Unterstützung (Optional)
 
 Für das Training und die Ausführung der Transformer-Modelle kann eine GPU verwendet werden. Dafür muss die entsprechende Version von PyTorch installiert sein.
@@ -51,13 +81,14 @@ Auf Macs mit M1/M2/M3 Chips wird die GPU (Metal Performance Shaders) automatisch
 
 Das System setzt eine laufende Ollama-Instanz voraus.  
 - **Download:** [ollama.com](https://ollama.com)  
-- **Modelle:** Standardmäßig wird `gemma2:2b` verwendet. Sie können dies in `config/models.yaml` ändern.  
+- **Modelle:** Standardmäßig wird das Modell [gemma4:e2b](https://ollama.com/library/gemma4) (`gemma4:e2b`) verwendet. Sie können dies in `config/models.yaml` ändern.
 
 
 
 ### Docling (PDF Parsing)
 
-Für eine optimale PDF-Extraktion nutzt das System Docling.
+Für eine optimale PDF-Extraktion nutzt das System Docling. Dieses wird bereits bei der Installation von `mcp-university` (mittels `pip install -e .`) automatisch mitinstalliert.
+Sollte es dennoch separat benötigt werden:
 ```bash
 pip install "docling"
 ```
