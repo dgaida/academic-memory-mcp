@@ -9,11 +9,11 @@ Ensure the following software is installed:
 *   **Python 3.10+**  
 *   **Node.js >= 22:** Required for `qmd`.  
 *   **qmd:** `npm install -g @tobilu/qmd`  
-*   **Ollama:** Install Ollama and pull the default model [gemma4:e2b](https://ollama.com/library/gemma4):
+*   **Ollama:** Install Ollama and pull the default model [gemma4:e2b](https://ollama.com/library/gemma4):  
     ```bash
     ollama pull gemma4:e2b
     ```
-*   **Docling:** For PDF parsing (automatically installed as a dependency via `pip install -e .`).
+*   **Docling:** For PDF parsing (automatically installed as a dependency via `pip install -e .`).  
 
 ## Installation
 

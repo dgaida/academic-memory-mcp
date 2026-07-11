@@ -38,25 +38,25 @@ As an alternative to the standard Python virtual environment, you can install th
 
 ### Conda Installation Process:
 
-1. **Create Conda Environment:**
+1. **Create Conda Environment:**  
    Create the new environment with all dependencies (including Python, PyTorch, and libraries such as Docling):
    ```bash
    conda env create -f environment.yml
    ```
 
-2. **Activate Environment:**
+2. **Activate Environment:**  
    Activate the created environment:
    ```bash
    conda activate mcp-university
    ```
 
-3. **Install the Project in Editable Mode:**
+3. **Install the Project in Editable Mode:**  
    To correctly register the CLI commands and Python paths, install the package in the activated Conda environment in editable mode:
    ```bash
    pip install -e .
    ```
 
-4. **Verify Installation:**
+4. **Verify Installation:**  
    Check if the installation was successful:
    ```bash
    mcp-uni --help
@@ -81,7 +81,7 @@ On Macs with M1/M2/M3 chips, the GPU (Metal Performance Shaders) is automaticall
 
 The system requires a running Ollama instance.  
 - **Download:** [ollama.com](https://ollama.com)  
-- **Models:** By default, the model [gemma4:e2b](https://ollama.com/library/gemma4) (`gemma4:e2b`) is used. You can change this in `config/models.yaml`.
+- **Models:** By default, the model [gemma4:e2b](https://ollama.com/library/gemma4) (`gemma4:e2b`) is used. You can change this in `config/models.yaml`.  
 
 
 ### Docling (PDF Parsing)

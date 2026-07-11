@@ -38,25 +38,25 @@ Als Alternative zur standardmäßigen Python-Umgebung können Sie das System auc
 
 ### Prozess der Conda-Installation:
 
-1. **Conda-Umgebung erstellen:**
+1. **Conda-Umgebung erstellen:**  
    Erstellen Sie die neue Umgebung mit allen Abhängigkeiten (einschließlich Python, PyTorch und aller Bibliotheken wie Docling):
    ```bash
    conda env create -f environment.yml
    ```
 
-2. **Umgebung aktivieren:**
+2. **Umgebung aktivieren:**  
    Aktivieren Sie die erstellte Umgebung:
    ```bash
    conda activate mcp-university
    ```
 
-3. **Installieren des Projekts im Entwicklungsmodus (Editable):**
+3. **Installieren des Projekts im Entwicklungsmodus (Editable):**  
    Damit die CLI-Befehle und die Python-Pfade korrekt registriert sind, installieren Sie das Paket in der aktivierten Conda-Umgebung im editierbaren Modus:
    ```bash
    pip install -e .
    ```
 
-4. **Installation verifizieren:**
+4. **Installation verifizieren:**  
    Überprüfen Sie anschließend die korrekte Installation:
    ```bash
    mcp-uni --help
@@ -81,7 +81,7 @@ Auf Macs mit M1/M2/M3 Chips wird die GPU (Metal Performance Shaders) automatisch
 
 Das System setzt eine laufende Ollama-Instanz voraus.  
 - **Download:** [ollama.com](https://ollama.com)  
-- **Modelle:** Standardmäßig wird das Modell [gemma4:e2b](https://ollama.com/library/gemma4) (`gemma4:e2b`) verwendet. Sie können dies in `config/models.yaml` ändern.
+- **Modelle:** Standardmäßig wird das Modell [gemma4:e2b](https://ollama.com/library/gemma4) (`gemma4:e2b`) verwendet. Sie können dies in `config/models.yaml` ändern.  
 
 
 
