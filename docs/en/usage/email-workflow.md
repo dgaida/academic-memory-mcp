@@ -120,10 +120,12 @@ Used when a student has confirmed an appointment. The system extracts the date a
 The email is saved in the student's archive folder. No further technical actions (such as a reply draft) are taken.
 
 #### 5) Create Task in Calendar (Final Submission)
-This action combines multiple steps for final theses:  
-1. Attachments are saved in the student's folder via `save_email_attachments`.  
-2. A calendar entry is created for **7 days later** to remind you of grading.  
-3. A reply draft confirming receipt is generated.  
+**This is the central action where the final submission of a thesis is automatically detected and processed.** When the email classifier or the user in the GUI classifies an email as a final submission, this action is selected. It combines several automated steps for final theses:
+
+1. **Save Attachments:** All email attachments are automatically saved in the student's parent directory (`Semester / Lastname /`) via `save_email_attachments`.
+2. **Colloquium Configuration (`config.json`):** A `config.json` configuration file is automatically created in the student's main directory via `create_colloquium_config` (or updated with the filename of the PDF thesis from the attachment). This file is used for the *colloquium-protocol-creator*.
+3. **Calendar Reminder:** A calendar entry is created via `manage_calendar_appointment` exactly **7 days after the email is received (at 08:00 AM)** to remind you to read and grade the thesis.
+4. **Reply Draft:** A reply draft confirming receipt of the thesis is automatically generated.
 
 #### 6) Colloquium Appointment (with `config.json` Automation)
 Similar to action 3, but the duration is fixed at **60 minutes** and a special subject is chosen. In addition, this action has been significantly enhanced to automate the entire colloquium process:

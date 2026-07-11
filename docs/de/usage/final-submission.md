@@ -18,7 +18,7 @@ Dies ermöglicht einen nahtlosen Übergang zur Protokollerstellung und Bewertung
 
 Die erstellte Datei hat folgendes Format:
 
-\`\`\`json
+```json
 {
   "task": "colloquium",
   "description": "Kolloquium auf dem Campus Gummersbach mit automatischer Gemini-Bewertung",
@@ -33,4 +33,10 @@ Die erstellte Datei hat folgendes Format:
   },
   ...
 }
-\`\`\`
+```
+
+## Zuordnung im E-Mail-Workflow
+
+Die automatische Erkennung und Verarbeitung der finalen Abgabe ist direkt an den E-Mail-Workflow gekoppelt. Unter den 6 verfügbaren Aktionen des Systems entspricht dies **Aktion 5: Aufgabe im Kalender anlegen (Finale Abgabe)** (bzw. in der GUI als `5) Aufgabe im Kalender anlegen zum Lesen des Anhangs.` bezeichnet).
+
+Sobald diese E-Mail über die Gradio GUI oder das Hintergrundskript verarbeitet wird, führt das System die oben genannten automatisierten Schritte (Anhänge speichern, `config.json` erstellen, Kalender-Erinnerung in 7 Tagen eintragen) aus.

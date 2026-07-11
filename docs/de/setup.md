@@ -1,6 +1,6 @@
 # Einrichtung der Software
 
-Diese Seite beschreibt die notwendigen Schritte zur Einrichtung des MCP University Systems.
+Diese Seite beschreibt die notwendigen Schritte zur ersten Einrichtung und Installation des MCP University Systems.
 
 ## Voraussetzungen
 
@@ -24,71 +24,25 @@ conda env create -f environment.yml
 conda activate mcp-university
 ```
 
-## Konfiguration
+## Erst-Einrichtung (Initialer Setup-Ablauf)
 
-Das System nutzt YAML-Dateien im Verzeichnis `config/` für die Konfiguration. Kopieren Sie die Beispiel-Dateien und passen Sie diese an.
+Um das System betriebsbereit zu machen, führen Sie folgende Schritte aus:
 
-### 1. Nutzer-Konfiguration (`user.yaml`)
+1. **Konfigurationsdateien vorbereiten:**
+   Kopieren Sie die `.example` Konfigurationsdateien im Verzeichnis `config/`:
+   ```bash
+   cp config/user.yaml.example config/user.yaml
+   cp config/ontology.yaml.example config/ontology.yaml
+   cp config/classifier_paths.yaml.example config/classifier_paths.yaml
+   ```
 
-Erstellen Sie eine Datei `config/user.yaml` basierend auf `config/user.yaml.example`:
+2. **Benutzerdaten anpassen:**
+   Tragen Sie Ihren Namen und Ihre Hochschul-E-Mail in `config/user.yaml` ein.
 
-```yaml
-name: "Ihr Name"
-email: "ihre.email@th-koeln.de"
-```
+3. **Studierendendaten synchronisieren:**
+   Falls Sie bereits eine `students.yaml` (z.B. über die Outlook-Makros) erstellt haben, synchronisieren Sie diese mit der SQLite-Datenbank:
+   ```bash
+   mcp-uni db sync-students
+   ```
 
-Diese Information wird für die Anonymisierung, die Kalenderbuchung und das Sortieren von E-Mails verwendet.
-
-### 2. Ordner-Konfiguration (`folders.yaml`)
-
-Geben Sie an, welche Ordner überwacht werden sollen:
-
-```yaml
-folders:
-  - "C:/Pfad/zu/Ihren/Dokumenten"
-```
-
-### 3. Klassifikator-Pfade (`classifier_paths.yaml`)
-
-Definieren Sie die Zielpfade für die E-Mail-Einsortierung:
-
-```yaml
-class_paths:
-  BachelorThesis: "D:/BachelorThesis"
-  MasterThesis: "D:/MasterThesis"
-  # ... weitere Klassen
-```
-
-### 4. Modell-Konfiguration (`models.yaml`)
-
-Konfigurieren Sie die zu verwendenden LLM- und Embedding-Modelle.
-
-## Nutzung der Skripte
-
-### E-Mails nach Richtung sortieren
-
-Wenn Sie einen Ordner mit E-Mails haben, die noch nicht in Inbox/SentItems unterteilt sind, nutzen Sie:
-
-```bash
-python -m email_classifier.sort_by_direction /pfad/zu/emails
-```
-
-### E-Mails nach Klassen sortieren
-
-Um E-Mails basierend auf ihrem Inhalt in die entsprechenden Projektordner zu sortieren:
-
-```bash
-python -m email_classifier.sort_emails /pfad/zu/emails --config config/classifier_paths.yaml
-```
-
-### 5. Hugging Face Authentifizierung (Optional)
-
-Falls Sie auf private Modelle zugreifen müssen oder Ratelimits bei Hugging Face umgehen möchten, können Sie einen Token hinterlegen.
-
-Erstellen Sie dazu eine Datei `.env` oder `secrets.env` im Wurzelverzeichnis des Projekts:
-
-```env
-HF_TOKEN=your_huggingface_token_here
-```
-
-Das System lädt diese Variablen automatisch beim Start.
+Eine detaillierte Beschreibung aller Konfigurationsoptionen und der verschiedenen `.yaml` Dateien finden Sie auf der Seite **[Konfiguration](configuration.md)**.

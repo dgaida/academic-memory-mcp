@@ -18,7 +18,7 @@ This allows for a seamless transition to protocol creation and evaluation of the
 
 The created file has the following format:
 
-\`\`\`json
+```json
 {
   "task": "colloquium",
   "description": "Colloquium on Campus Gummersbach with automatic Gemini evaluation",
@@ -33,4 +33,10 @@ The created file has the following format:
   },
   ...
 }
-\`\`\`
+```
+
+## Connection to the Email Workflow
+
+The automatic detection and processing of the final thesis submission is directly linked to the email workflow. Among the 6 available actions in the system, this corresponds to **Action 5: Create Task in Calendar (Final Submission)** (also displayed in the GUI as `5) Aufgabe im Kalender anlegen zum Lesen des Anhangs.`).
+
+As soon as this email is processed via the Gradio GUI or the background script, the system executes the automated steps listed above (saving attachments, creating `config.json`, scheduling a calendar reminder for 7 days later).

@@ -8,10 +8,6 @@ import asyncio
 # Ensure mocks are in place for the test environment
 sys.modules["win32com"] = MagicMock()
 sys.modules["win32com.client"] = MagicMock()
-sys.modules["torch"] = MagicMock()
-sys.modules["sentence_transformers"] = MagicMock()
-sys.modules["dotenv"] = MagicMock()
-sys.modules["numpy"] = MagicMock()
 
 @pytest.fixture
 def temp_dir(tmp_path):
