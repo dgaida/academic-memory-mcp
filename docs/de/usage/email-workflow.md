@@ -108,11 +108,12 @@ Wird genutzt, wenn der Student einen Termin bestätigt hat. Das System extrahier
 Die E-Mail wird im entsprechenden studentischen Archiv-Ordner gespeichert. Es erfolgt keine weitere technische Aktion (wie z.B. ein Antwort-Entwurf).
 
 #### 5) Aufgabe im Kalender anlegen (Finale Abgabe)
-Diese Aktion kombiniert mehrere Schritte für Abschlussarbeiten:
+**Dies ist die zentrale Aktion, bei der die Abgabe einer Abschlussarbeit automatisch verarbeitet und detektiert wird.** Wenn der E-Mail-Klassifizierer oder der Benutzer in der GUI eine E-Mail als finale Abgabe einstuft, wird diese Aktion ausgewählt. Sie kombiniert folgende automatisierte Schritte für Abschlussarbeiten:
 
-1. Anhänge werden via `save_email_attachments` im Studentenordner gespeichert.  
-2. Ein Kalendereintrag wird für in **7 Tagen** angelegt, um an die Korrektur zu erinnern.  
-3. Ein Antwortentwurf zur Bestätigung des Empfangs wird erstellt.  
+1. **Anhänge speichern:** Alle E-Mail-Anhänge werden via `save_email_attachments` automatisch direkt im übergeordneten studentischen Ordner (`Semester / Nachname /`) abgelegt.
+2. **Kolloquium-Konfiguration (`config.json`):** Es wird automatisch eine `config.json` Datei im Hauptordner des Studenten mittels `create_colloquium_config` angelegt (bzw. aktualisiert mit dem Dateinamen der PDF-Arbeit aus dem Anhang). Diese Datei dient als Konfiguration für den *colloquium-protocol-creator*.
+3. **Kalender-Erinnerung:** Ein Kalendereintrag (Sprechstundentermin/Erinnerung) wird via `manage_calendar_appointment` für genau **7 Tage nach E-Mail-Eingang (um 08:00 Uhr)** angelegt, um an das Lesen und Bewerten der Arbeit zu erinnern.
+4. **Antwort-Entwurf:** Ein Outlook-Antwortentwurf zur Bestätigung des Empfangs der Abschlussarbeit wird automatisch erstellt.
 
 #### 6) Termin für Kolloquium (mit `config.json` Automatisierung)
 Ähnlich wie Aktion 3, jedoch wird hierbei die Dauer fest auf **60 Minuten** eingestellt und ein spezieller Betreff gewählt. Zudem wurde diese Aktion erheblich weiterentwickelt, um den gesamten Kolloquiumsprozess zu automatisieren:
