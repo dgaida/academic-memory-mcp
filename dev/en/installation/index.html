@@ -732,6 +732,34 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#installation-with-anaconda-conda-alternative" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation with Anaconda / Conda (Alternative)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation with Anaconda / Conda (Alternative)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#conda-installation-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conda Installation Process:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#gpu-support-optional" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1984,6 +2012,34 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#installation-with-anaconda-conda-alternative" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation with Anaconda / Conda (Alternative)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation with Anaconda / Conda (Alternative)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#conda-installation-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conda Installation Process:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#gpu-support-optional" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2125,11 +2181,40 @@
 <p>For testing and documentation generation:</p>
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>pip<span class="w"> </span>install<span class="w"> </span>pytest<span class="w"> </span>pytest-asyncio<span class="w"> </span>mkdocs-material<span class="w"> </span>mkdocs-static-i18n<span class="w"> </span>mkdocstrings<span class="o">[</span>python<span class="o">]</span><span class="w"> </span>interrogate<span class="w"> </span>git-cliff<span class="w"> </span>mike
 </code></pre></div>
+<h2 id="installation-with-anaconda-conda-alternative">Installation with Anaconda / Conda (Alternative)<a class="headerlink" href="#installation-with-anaconda-conda-alternative" title="Permanent link">&para;</a></h2>
+<p>As an alternative to the standard Python virtual environment, you can install the system using an Anaconda/Miniconda environment. The project contains a pre-configured <code>environment.yml</code> file.</p>
+<h3 id="conda-installation-process">Conda Installation Process:<a class="headerlink" href="#conda-installation-process" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p><strong>Create Conda Environment:</strong>
+   Create the new environment with all dependencies (including Python, PyTorch, and libraries such as Docling):
+   <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>conda<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>environment.yml
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Activate Environment:</strong>
+   Activate the created environment:
+   <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>conda<span class="w"> </span>activate<span class="w"> </span>mcp-university
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Install the Project in Editable Mode:</strong>
+   To correctly register the CLI commands and Python paths, install the package in the activated Conda environment in editable mode:
+   <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Verify Installation:</strong>
+   Check if the installation was successful:
+   <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>mcp-uni<span class="w"> </span>--help
+</code></pre></div></p>
+</li>
+</ol>
 <h2 id="gpu-support-optional">GPU Support (Optional)<a class="headerlink" href="#gpu-support-optional" title="Permanent link">&para;</a></h2>
 <p>A GPU can be used for training and running the transformer models. For this, the corresponding version of PyTorch must be installed.</p>
 <h3 id="nvidia-gpu-cuda">NVIDIA GPU (CUDA)<a class="headerlink" href="#nvidia-gpu-cuda" title="Permanent link">&para;</a></h3>
 <p>Visit <a href="https://pytorch.org/get-started/locally/">pytorch.org</a> to get the appropriate installation command for your CUDA version. Example for CUDA 12.1:
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>pip<span class="w"> </span>install<span class="w"> </span>torch<span class="w"> </span>torchvision<span class="w"> </span>torchaudio<span class="w"> </span>--index-url<span class="w"> </span>https://download.pytorch.org/whl/cu121
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>pip<span class="w"> </span>install<span class="w"> </span>torch<span class="w"> </span>torchvision<span class="w"> </span>torchaudio<span class="w"> </span>--index-url<span class="w"> </span>https://download.pytorch.org/whl/cu121
 </code></pre></div></p>
 <h3 id="apple-silicon-mps">Apple Silicon (MPS)<a class="headerlink" href="#apple-silicon-mps" title="Permanent link">&para;</a></h3>
 <p>On Macs with M1/M2/M3 chips, the GPU (Metal Performance Shaders) is automatically supported if a current PyTorch version is installed.</p>
@@ -2137,24 +2222,25 @@
 <h3 id="ollama-llm-backend">Ollama (LLM Backend)<a class="headerlink" href="#ollama-llm-backend" title="Permanent link">&para;</a></h3>
 <p>The system requires a running Ollama instance.<br />
 - <strong>Download:</strong> <a href="https://ollama.com">ollama.com</a><br />
-- <strong>Models:</strong> By default, <code>gemma2:2b</code> is used. You can change this in <code>config/models.yaml</code>.  </p>
+- <strong>Models:</strong> By default, the model <a href="https://ollama.com/library/gemma4">gemma4:e2b</a> (<code>gemma4:e2b</code>) is used. You can change this in <code>config/models.yaml</code>.</p>
 <h3 id="docling-pdf-parsing">Docling (PDF Parsing)<a class="headerlink" href="#docling-pdf-parsing" title="Permanent link">&para;</a></h3>
-<p>The system uses Docling for optimal PDF extraction.
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;docling&quot;</span>
+<p>The system uses Docling for optimal PDF extraction. This is automatically installed as a dependency during the installation of <code>mcp-university</code> (via <code>pip install -e .</code>).
+If you still need to install it separately:
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;docling&quot;</span>
 </code></pre></div>
 Ensure that the necessary model weights for Docling are initialized (usually happens automatically on the first run).</p>
 <h2 id="verify-installation">Verify Installation<a class="headerlink" href="#verify-installation" title="Permanent link">&para;</a></h2>
 <p>Check if the CLI tool was installed correctly:</p>
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>mcp-uni<span class="w"> </span>--help
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>mcp-uni<span class="w"> </span>--help
 </code></pre></div>
 <h3 id="qmd-search-backend">qmd (Search Backend)<a class="headerlink" href="#qmd-search-backend" title="Permanent link">&para;</a></h3>
 <p><code>qmd</code> is required for high-quality hybrid search. It is a Node.js-based tool that must be installed globally.</p>
 <p><strong>Prerequisites:</strong><br />
 - Node.js &gt;= 22 or Bun &gt;= 1.0.0  </p>
 <p><strong>Installation:</strong>
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>npm<span class="w"> </span>install<span class="w"> </span>-g<span class="w"> </span>@tobilu/qmd
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="c1"># or</span>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>bun<span class="w"> </span>install<span class="w"> </span>-g<span class="w"> </span>@tobilu/qmd
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>npm<span class="w"> </span>install<span class="w"> </span>-g<span class="w"> </span>@tobilu/qmd
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="c1"># or</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>bun<span class="w"> </span>install<span class="w"> </span>-g<span class="w"> </span>@tobilu/qmd
 </code></pre></div></p>
 <p>If <code>qmd</code> is not found, the system will automatically fall back to a native Python search implementation (Qdrant + BM25), but features like LLM re-ranking and query expansion will be unavailable.</p>
 

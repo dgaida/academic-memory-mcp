@@ -730,6 +730,34 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#installation-mit-anaconda-conda-alternativ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation mit Anaconda / Conda (Alternativ)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation mit Anaconda / Conda (Alternativ)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prozess-der-conda-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prozess der Conda-Installation:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#gpu-unterstutzung-optional" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1982,6 +2010,34 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#installation-mit-anaconda-conda-alternativ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation mit Anaconda / Conda (Alternativ)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation mit Anaconda / Conda (Alternativ)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prozess-der-conda-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prozess der Conda-Installation:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#gpu-unterstutzung-optional" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2123,11 +2179,40 @@
 <p>Für Tests und Dokumentationserstellung:</p>
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>pip<span class="w"> </span>install<span class="w"> </span>pytest<span class="w"> </span>pytest-asyncio<span class="w"> </span>mkdocs-material<span class="w"> </span>mkdocs-static-i18n<span class="w"> </span>mkdocstrings<span class="o">[</span>python<span class="o">]</span><span class="w"> </span>interrogate<span class="w"> </span>git-cliff<span class="w"> </span>mike
 </code></pre></div>
+<h2 id="installation-mit-anaconda-conda-alternativ">Installation mit Anaconda / Conda (Alternativ)<a class="headerlink" href="#installation-mit-anaconda-conda-alternativ" title="Permanent link">&para;</a></h2>
+<p>Als Alternative zur standardmäßigen Python-Umgebung können Sie das System auch über ein Anaconda/Miniconda Environment installieren. Das Projekt enthält eine vorkonfigurierte <code>environment.yml</code> Datei.</p>
+<h3 id="prozess-der-conda-installation">Prozess der Conda-Installation:<a class="headerlink" href="#prozess-der-conda-installation" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p><strong>Conda-Umgebung erstellen:</strong>
+   Erstellen Sie die neue Umgebung mit allen Abhängigkeiten (einschließlich Python, PyTorch und aller Bibliotheken wie Docling):
+   <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>conda<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>environment.yml
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Umgebung aktivieren:</strong>
+   Aktivieren Sie die erstellte Umgebung:
+   <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>conda<span class="w"> </span>activate<span class="w"> </span>mcp-university
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Installieren des Projekts im Entwicklungsmodus (Editable):</strong>
+   Damit die CLI-Befehle und die Python-Pfade korrekt registriert sind, installieren Sie das Paket in der aktivierten Conda-Umgebung im editierbaren Modus:
+   <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Installation verifizieren:</strong>
+   Überprüfen Sie anschließend die korrekte Installation:
+   <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>mcp-uni<span class="w"> </span>--help
+</code></pre></div></p>
+</li>
+</ol>
 <h2 id="gpu-unterstutzung-optional">GPU Unterstützung (Optional)<a class="headerlink" href="#gpu-unterstutzung-optional" title="Permanent link">&para;</a></h2>
 <p>Für das Training und die Ausführung der Transformer-Modelle kann eine GPU verwendet werden. Dafür muss die entsprechende Version von PyTorch installiert sein.</p>
 <h3 id="nvidia-gpu-cuda">NVIDIA GPU (CUDA)<a class="headerlink" href="#nvidia-gpu-cuda" title="Permanent link">&para;</a></h3>
 <p>Besuchen Sie <a href="https://pytorch.org/get-started/locally/">pytorch.org</a>, um den passenden Installationsbefehl für Ihre CUDA-Version zu erhalten. Beispiel für CUDA 12.1:
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>pip<span class="w"> </span>install<span class="w"> </span>torch<span class="w"> </span>torchvision<span class="w"> </span>torchaudio<span class="w"> </span>--index-url<span class="w"> </span>https://download.pytorch.org/whl/cu121
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>pip<span class="w"> </span>install<span class="w"> </span>torch<span class="w"> </span>torchvision<span class="w"> </span>torchaudio<span class="w"> </span>--index-url<span class="w"> </span>https://download.pytorch.org/whl/cu121
 </code></pre></div></p>
 <h3 id="apple-silicon-mps">Apple Silicon (MPS)<a class="headerlink" href="#apple-silicon-mps" title="Permanent link">&para;</a></h3>
 <p>Auf Macs mit M1/M2/M3 Chips wird die GPU (Metal Performance Shaders) automatisch unterstützt, sofern eine aktuelle PyTorch-Version installiert ist.</p>
@@ -2135,24 +2220,25 @@
 <h3 id="ollama-llm-backend">Ollama (LLM Backend)<a class="headerlink" href="#ollama-llm-backend" title="Permanent link">&para;</a></h3>
 <p>Das System setzt eine laufende Ollama-Instanz voraus.<br />
 - <strong>Download:</strong> <a href="https://ollama.com">ollama.com</a><br />
-- <strong>Modelle:</strong> Standardmäßig wird <code>gemma2:2b</code> verwendet. Sie können dies in <code>config/models.yaml</code> ändern.  </p>
+- <strong>Modelle:</strong> Standardmäßig wird das Modell <a href="https://ollama.com/library/gemma4">gemma4:e2b</a> (<code>gemma4:e2b</code>) verwendet. Sie können dies in <code>config/models.yaml</code> ändern.</p>
 <h3 id="docling-pdf-parsing">Docling (PDF Parsing)<a class="headerlink" href="#docling-pdf-parsing" title="Permanent link">&para;</a></h3>
-<p>Für eine optimale PDF-Extraktion nutzt das System Docling.
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;docling&quot;</span>
+<p>Für eine optimale PDF-Extraktion nutzt das System Docling. Dieses wird bereits bei der Installation von <code>mcp-university</code> (mittels <code>pip install -e .</code>) automatisch mitinstalliert.
+Sollte es dennoch separat benötigt werden:
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;docling&quot;</span>
 </code></pre></div>
 Stellen Sie sicher, dass die notwendigen Modellgewichte für Docling initialisiert sind (geschieht meist automatisch beim ersten Start).</p>
 <h2 id="installation-verifizieren">Installation verifizieren<a class="headerlink" href="#installation-verifizieren" title="Permanent link">&para;</a></h2>
 <p>Prüfen Sie, ob das CLI-Tool korrekt installiert wurde:</p>
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>mcp-uni<span class="w"> </span>--help
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>mcp-uni<span class="w"> </span>--help
 </code></pre></div>
 <h3 id="qmd-suchindex-backend">qmd (Suchindex-Backend)<a class="headerlink" href="#qmd-suchindex-backend" title="Permanent link">&para;</a></h3>
 <p><code>qmd</code> ist für eine hochwertige hybride Suche erforderlich. Es handelt sich um ein Node.js-basiertes Tool, das global installiert sein muss.</p>
 <p><strong>Voraussetzungen:</strong><br />
 - Node.js &gt;= 22 oder Bun &gt;= 1.0.0  </p>
 <p><strong>Installation:</strong>
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>npm<span class="w"> </span>install<span class="w"> </span>-g<span class="w"> </span>@tobilu/qmd
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="c1"># oder</span>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>bun<span class="w"> </span>install<span class="w"> </span>-g<span class="w"> </span>@tobilu/qmd
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>npm<span class="w"> </span>install<span class="w"> </span>-g<span class="w"> </span>@tobilu/qmd
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="c1"># oder</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>bun<span class="w"> </span>install<span class="w"> </span>-g<span class="w"> </span>@tobilu/qmd
 </code></pre></div></p>
 <p>Falls <code>qmd</code> nicht gefunden wird, nutzt das System automatisch eine native Python-Suche (Qdrant + BM25). Funktionen wie LLM-Re-Ranking und Query-Expansion stehen dann jedoch nicht zur Verfügung.</p>
 
