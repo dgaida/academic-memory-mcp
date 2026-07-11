@@ -669,6 +669,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#connection-to-the-email-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connection to the Email Workflow
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1865,6 +1876,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#connection-to-the-email-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connection to the Email Workflow
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1895,22 +1917,24 @@
 <p>This allows for a seamless transition to protocol creation and evaluation of the colloquium.</p>
 <h2 id="configuration-file-example">Configuration File Example<a class="headerlink" href="#configuration-file-example" title="Permanent link">&para;</a></h2>
 <p>The created file has the following format:</p>
-<p>```json
-{
-  "task": "colloquium",
-  "description": "Colloquium on Campus Gummersbach with automatic Gemini evaluation",
-  "pdf": {
-    "filename": "Bachelor_Thesis_Mustermann.pdf"
-  },
-  "colloquium": {
-    "date": "DD.MM.YYYY",
-    "time": "hh:mm",
-    "location_type": "campus",
-    "room": "3.228"
-  },
-  ...
-}
-```</p>
+<div class="language-json highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">&quot;task&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;colloquium&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Colloquium on Campus Gummersbach with automatic Gemini evaluation&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="nt">&quot;pdf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="nt">&quot;filename&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Bachelor_Thesis_Mustermann.pdf&quot;</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">  </span><span class="nt">&quot;colloquium&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DD.MM.YYYY&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;hh:mm&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="nt">&quot;location_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;campus&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="nt">&quot;room&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3.228&quot;</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">  </span><span class="err">...</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="connection-to-the-email-workflow">Connection to the Email Workflow<a class="headerlink" href="#connection-to-the-email-workflow" title="Permanent link">&para;</a></h2>
+<p>The automatic detection and processing of the final thesis submission is directly linked to the email workflow. Among the 6 available actions in the system, this corresponds to <strong>Action 5: Create Task in Calendar (Final Submission)</strong> (also displayed in the GUI as <code>5) Aufgabe im Kalender anlegen zum Lesen des Anhangs.</code>).</p>
+<p>As soon as this email is processed via the Gradio GUI or the background script, the system executes the automated steps listed above (saving attachments, creating <code>config.json</code>, scheduling a calendar reminder for 7 days later).</p>
 
 
 

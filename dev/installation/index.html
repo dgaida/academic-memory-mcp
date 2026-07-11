@@ -2184,25 +2184,25 @@
 <h3 id="prozess-der-conda-installation">Prozess der Conda-Installation:<a class="headerlink" href="#prozess-der-conda-installation" title="Permanent link">&para;</a></h3>
 <ol>
 <li>
-<p><strong>Conda-Umgebung erstellen:</strong>
+<p><strong>Conda-Umgebung erstellen:</strong><br />
    Erstellen Sie die neue Umgebung mit allen Abhängigkeiten (einschließlich Python, PyTorch und aller Bibliotheken wie Docling):
    <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>conda<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>environment.yml
 </code></pre></div></p>
 </li>
 <li>
-<p><strong>Umgebung aktivieren:</strong>
+<p><strong>Umgebung aktivieren:</strong><br />
    Aktivieren Sie die erstellte Umgebung:
    <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>conda<span class="w"> </span>activate<span class="w"> </span>mcp-university
 </code></pre></div></p>
 </li>
 <li>
-<p><strong>Installieren des Projekts im Entwicklungsmodus (Editable):</strong>
+<p><strong>Installieren des Projekts im Entwicklungsmodus (Editable):</strong><br />
    Damit die CLI-Befehle und die Python-Pfade korrekt registriert sind, installieren Sie das Paket in der aktivierten Conda-Umgebung im editierbaren Modus:
    <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
 </code></pre></div></p>
 </li>
 <li>
-<p><strong>Installation verifizieren:</strong>
+<p><strong>Installation verifizieren:</strong><br />
    Überprüfen Sie anschließend die korrekte Installation:
    <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>mcp-uni<span class="w"> </span>--help
 </code></pre></div></p>
@@ -2220,7 +2220,7 @@
 <h3 id="ollama-llm-backend">Ollama (LLM Backend)<a class="headerlink" href="#ollama-llm-backend" title="Permanent link">&para;</a></h3>
 <p>Das System setzt eine laufende Ollama-Instanz voraus.<br />
 - <strong>Download:</strong> <a href="https://ollama.com">ollama.com</a><br />
-- <strong>Modelle:</strong> Standardmäßig wird das Modell <a href="https://ollama.com/library/gemma4">gemma4:e2b</a> (<code>gemma4:e2b</code>) verwendet. Sie können dies in <code>config/models.yaml</code> ändern.</p>
+- <strong>Modelle:</strong> Standardmäßig wird das Modell <a href="https://ollama.com/library/gemma4">gemma4:e2b</a> (<code>gemma4:e2b</code>) verwendet. Sie können dies in <code>config/models.yaml</code> ändern.  </p>
 <h3 id="docling-pdf-parsing">Docling (PDF Parsing)<a class="headerlink" href="#docling-pdf-parsing" title="Permanent link">&para;</a></h3>
 <p>Für eine optimale PDF-Extraktion nutzt das System Docling. Dieses wird bereits bei der Installation von <code>mcp-university</code> (mittels <code>pip install -e .</code>) automatisch mitinstalliert.
 Sollte es dennoch separat benötigt werden:

@@ -2479,7 +2479,7 @@
 <p>Verwenden Sie die im Projekt bereitgestellten VBA-Makros, um Daten in den <code>inbox</code>-Ordner zu exportieren. Eine detaillierte Beschreibung aller verfügbaren Makros und deren Installation finden Sie unter <a href="../outlook-macros/">Outlook VBA-Makros</a>.</p>
 <ul>
 <li><strong>E-Mails:</strong> Exportiert E-Mails (meist von Studierenden) als <code>.msg</code> Dateien. Das System erkennt dabei automatisch Absender, Datum und Betreff.  </li>
-<li><strong>Kalenderdaten / Termine:</strong> Exportiert freie Zeitfenster aus Ihrem Outlook-Kalender in eine Datei namens <code>free_slots.md</code>. Zudem werden auch bestehende Termine im Kalender exportiert, die für die Kalender-GUI zur Übersicht und Planung benötigt werden.</li>
+<li><strong>Kalenderdaten / Termine:</strong> Exportiert freie Zeitfenster aus Ihrem Outlook-Kalender in eine Datei namens <code>free_slots.md</code>. Zudem werden auch bestehende Termine im Kalender exportiert, die für die Kalender-GUI zur Übersicht und Planung benötigt werden.  </li>
 </ul>
 <hr />
 <h2 id="2-phase-automatische-klassifizierung-und-vorsortierung">2. Phase: Automatische Klassifizierung und Vorsortierung<a class="headerlink" href="#2-phase-automatische-klassifizierung-und-vorsortierung" title="Permanent link">&para;</a></h2>
@@ -2491,16 +2491,16 @@
 <p>Dieser Tab ist für die massenweise Verarbeitung von E-Mails optimiert, bei denen die automatische Klassifizierung bereits ausreicht. Sie müssen keine CLI-Skripte mehr manuell aufrufen; alle Schritte geschehen per Knopfdruck in der GUI.</p>
 <h4 id="wie-die-automatische-klassifizierung-sortierung-funktioniert">Wie die automatische Klassifizierung &amp; Sortierung funktioniert:<a class="headerlink" href="#wie-die-automatische-klassifizierung-sortierung-funktioniert" title="Permanent link">&para;</a></h4>
 <ol>
-<li><strong>Themen-Erkennung:</strong> Der <a href="../../packages/email-classifier/">EmailClassifier</a> nutzt ein hochentwickeltes Machine-Learning-Modell (Transformer-basiert), um den Inhalt der E-Mail einer Kategorie zuzuordnen (z.B. <em>Bachelor Thesis</em>, <em>Projekt</em>, <em>PO-Wechsel</em>).</li>
-<li><strong>Dateisystem-Struktur:</strong> Nach der Freigabe in der GUI werden die E-Mails automatisch in eine dreistufige Archiv-Hierarchie verschoben: <code>Semester (z.B. 2023_24_WS) / Nachname / (Inbox oder SentItems)</code>.</li>
-<li><strong>Extraktion des Nachnamens:</strong> Der Nachname wird automatisch aus der E-Mail-Adresse oder dem Anzeigenamen ermittelt (Greedy Name Matching / Dot-Separated Fallback).<ul>
-<li><em>Beispiel 1:</em> <code>max.mustermann@th-koeln.de</code> -&gt; Ordner: <code>Mustermann</code></li>
-<li><em>Beispiel 2:</em> <code>mustermann@stud.th-koeln.de</code> -&gt; Ordner: <code>Mustermann</code></li>
-<li><em>Beispiel 3:</em> <code>Mustermann-Schmidt, Erika &lt;erika.mustermann@...&gt;</code> -&gt; Ordner: <code>Mustermann_Schmidt</code></li>
+<li><strong>Themen-Erkennung:</strong> Der <a href="../../packages/email-classifier/">EmailClassifier</a> nutzt ein hochentwickeltes Machine-Learning-Modell (Transformer-basiert), um den Inhalt der E-Mail einer Kategorie zuzuordnen (z.B. <em>Bachelor Thesis</em>, <em>Projekt</em>, <em>PO-Wechsel</em>).  </li>
+<li><strong>Dateisystem-Struktur:</strong> Nach der Freigabe in der GUI werden die E-Mails automatisch in eine dreistufige Archiv-Hierarchie verschoben: <code>Semester (z.B. 2023_24_WS) / Nachname / (Inbox oder SentItems)</code>.  </li>
+<li><strong>Extraktion des Nachnamens:</strong> Der Nachname wird automatisch aus der E-Mail-Adresse oder dem Anzeigenamen ermittelt (Greedy Name Matching / Dot-Separated Fallback).  <ul>
+<li><em>Beispiel 1:</em> <code>max.mustermann@th-koeln.de</code> -&gt; Ordner: <code>Mustermann</code>  </li>
+<li><em>Beispiel 2:</em> <code>mustermann@stud.th-koeln.de</code> -&gt; Ordner: <code>Mustermann</code>  </li>
+<li><em>Beispiel 3:</em> <code>Mustermann-Schmidt, Erika &lt;erika.mustermann@...&gt;</code> -&gt; Ordner: <code>Mustermann_Schmidt</code>  </li>
 </ul>
 </li>
 <li>
-<p><strong>Normalisierung:</strong> Namen werden normalisiert (Umlaute ersetzt, Sonderzeichen bereinigt), um Kompatibilität mit dem Dateisystem zu gewährleisten.</p>
+<p><strong>Normalisierung:</strong> Namen werden normalisiert (Umlaute ersetzt, Sonderzeichen bereinigt), um Kompatibilität mit dem Dateisystem zu gewährleisten.  </p>
 </li>
 <li>
 <p><strong>Scan &amp; Klassifizierung:</strong> Liest alle E-Mails aus dem Quellordner ein und weist ihnen mittels Modell eine Klasse zu, ohne sie physisch zu verschieben.  </p>
@@ -2508,9 +2508,9 @@
 <li><strong>Listenansicht:</strong> Getrennte Anzeige von <code>Inbox</code> und <code>SentItems</code>.  </li>
 <li><strong>Entfernen:</strong> Mails, die eine genauere Betrachtung erfordern, können per Index-Auswahl in den zweiten Tab verschoben werden.  </li>
 <li><strong>Anhänge:</strong> Für jede Mail kann bereits hier ausgewählt werden, ob Anhänge beim Archivieren gespeichert werden sollen.  </li>
-<li><strong>Speicherort &amp; Pfad der Anhänge:</strong> Wenn die Option ausgewählt ist, werden die Anhänge automatisch direkt im studentischen Hauptordner (<code>Semester / Nachname /</code>) abgelegt (Elternordner des archivierten E-Mail-Ordners).</li>
-<li><em>Beispiel:</em> Wenn eine Mail als <code>Bachelor Thesis</code> für den Studenten <code>Mustermann</code> im Semester <code>2023_24_WS</code> archiviert wird (E-Mail-Pfad: <code>2023_24_WS/Mustermann/Inbox/20231120_143000_Expose.msg</code>), wird der Anhang (z.B. <code>Expose_Max_Mustermann.pdf</code>) im folgenden Ordner gespeichert:
-    <code>2023_24_WS/Mustermann/Expose_Max_Mustermann.pdf</code></li>
+<li><strong>Speicherort &amp; Pfad der Anhänge:</strong> Wenn die Option ausgewählt ist, werden die Anhänge automatisch direkt im studentischen Hauptordner (<code>Semester / Nachname /</code>) abgelegt (Elternordner des archivierten E-Mail-Ordners).  </li>
+<li><em>Beispiel:</em> Wenn eine Mail als <code>Bachelor Thesis</code> für den Studenten <code>Mustermann</code> im Semester <code>2023_24_WS</code> archiviert wird (E-Mail-Pfad: <code>2023_24_WS/Mustermann/Inbox/20231120_143000_Expose.msg</code>), wird der Anhang (z.B. <code>Expose_Max_Mustermann.pdf</code>) im folgenden Ordner gespeichert:<br />
+<code>2023_24_WS/Mustermann/Expose_Max_Mustermann.pdf</code>  </li>
 <li><strong>Archivieren:</strong> Alle verbleibenden Mails in den Listen werden mit einem Klick direkt in ihre jeweiligen Archiv-Pfade verschoben.  </li>
 </ol>
 <h3 id="tab-2-detail-ansicht-verarbeitung">Tab 2: Detail-Ansicht &amp; Verarbeitung<a class="headerlink" href="#tab-2-detail-ansicht-verarbeitung" title="Permanent link">&para;</a></h3>
@@ -2525,10 +2525,10 @@
 <h2 id="4-phase-ki-gestutzte-analyse-hintergrund-rag">4. Phase: KI-gestützte Analyse (Hintergrund &amp; RAG)<a class="headerlink" href="#4-phase-ki-gestutzte-analyse-hintergrund-rag" title="Permanent link">&para;</a></h2>
 <p>Während der Arbeit in der GUI (insbesondere im Detail-Tab 2) führt das System im Hintergrund eine tiefgehende KI-Analyse der E-Mails durch. Ein zentrales Element ist hierbei der <strong>RAG-Prozess (Retrieval Augmented Generation)</strong>:</p>
 <ul>
-<li><strong>Semantische Suche:</strong> Auf Basis des E-Mail-Inhalts sucht das System in einer lokalen Vektordatenbank (Qdrant) nach hochrelevanten Dokumenten wie Prüfungsordnungen, Modulhandbüchern oder früheren E-Mail-Konversationen.</li>
-<li><strong>Wissens-Injektion:</strong> Diese gefundenen Informationen werden als zusätzlicher Kontext in den Prompt für das LLM injiziert. Dadurch ist die KI in der Lage, hochgradig präzise und fachlich korrekte Antworten zu entwerfen, die genau auf den aktuellen Fall und die Regularien der TH Köln abgestimmt sind.</li>
-<li><strong>Erhöhte Antwortqualität:</strong> Durch den RAG-Prozess werden Halluzinationen des LLMs minimiert und es können konkrete Paragraphen oder Fristen korrekt genannt werden.</li>
-<li><strong>Verlinkung zur Technik:</strong> Eine detaillierte Erläuterung der mehrstufigen Filterung, Vektorsuche und des gesamten technischen Ablaufs finden Sie in der technischen Dokumentation unter <a href="../rag-process/">RAG Prozess</a>.</li>
+<li><strong>Semantische Suche:</strong> Auf Basis des E-Mail-Inhalts sucht das System in einer lokalen Vektordatenbank (Qdrant) nach hochrelevanten Dokumenten wie Prüfungsordnungen, Modulhandbüchern oder früheren E-Mail-Konversationen.  </li>
+<li><strong>Wissens-Injektion:</strong> Diese gefundenen Informationen werden als zusätzlicher Kontext in den Prompt für das LLM injiziert. Dadurch ist die KI in der Lage, hochgradig präzise und fachlich korrekte Antworten zu entwerfen, die genau auf den aktuellen Fall und die Regularien der TH Köln abgestimmt sind.  </li>
+<li><strong>Erhöhte Antwortqualität:</strong> Durch den RAG-Prozess werden Halluzinationen des LLMs minimiert und es können konkrete Paragraphen oder Fristen korrekt genannt werden.  </li>
+<li><strong>Verlinkung zur Technik:</strong> Eine detaillierte Erläuterung der mehrstufigen Filterung, Vektorsuche und des gesamten technischen Ablaufs finden Sie in der technischen Dokumentation unter <a href="../rag-process/">RAG Prozess</a>.  </li>
 </ul>
 <hr />
 <h2 id="5-phase-aktions-vorschlage-gui-interaktion">5. Phase: Aktions-Vorschläge &amp; GUI-Interaktion<a class="headerlink" href="#5-phase-aktions-vorschlage-gui-interaktion" title="Permanent link">&para;</a></h2>
@@ -2589,21 +2589,22 @@
 <h4 id="4-e-mail-nur-archivieren">4) E-Mail nur archivieren<a class="headerlink" href="#4-e-mail-nur-archivieren" title="Permanent link">&para;</a></h4>
 <p>Die E-Mail wird im entsprechenden studentischen Archiv-Ordner gespeichert. Es erfolgt keine weitere technische Aktion (wie z.B. ein Antwort-Entwurf).</p>
 <h4 id="5-aufgabe-im-kalender-anlegen-finale-abgabe">5) Aufgabe im Kalender anlegen (Finale Abgabe)<a class="headerlink" href="#5-aufgabe-im-kalender-anlegen-finale-abgabe" title="Permanent link">&para;</a></h4>
-<p>Diese Aktion kombiniert mehrere Schritte für Abschlussarbeiten:</p>
+<p><strong>Dies ist die zentrale Aktion, bei der die Abgabe einer Abschlussarbeit automatisch verarbeitet und detektiert wird.</strong> Wenn der E-Mail-Klassifizierer oder der Benutzer in der GUI eine E-Mail als finale Abgabe einstuft, wird diese Aktion ausgewählt. Sie kombiniert folgende automatisierte Schritte für Abschlussarbeiten:</p>
 <ol>
-<li>Anhänge werden via <code>save_email_attachments</code> im Studentenordner gespeichert.  </li>
-<li>Ein Kalendereintrag wird für in <strong>7 Tagen</strong> angelegt, um an die Korrektur zu erinnern.  </li>
-<li>Ein Antwortentwurf zur Bestätigung des Empfangs wird erstellt.  </li>
+<li><strong>Anhänge speichern:</strong> Alle E-Mail-Anhänge werden via <code>save_email_attachments</code> automatisch direkt im übergeordneten studentischen Ordner (<code>Semester / Nachname /</code>) abgelegt.</li>
+<li><strong>Kolloquium-Konfiguration (<code>config.json</code>):</strong> Es wird automatisch eine <code>config.json</code> Datei im Hauptordner des Studenten mittels <code>create_colloquium_config</code> angelegt (bzw. aktualisiert mit dem Dateinamen der PDF-Arbeit aus dem Anhang). Diese Datei dient als Konfiguration für den <em>colloquium-protocol-creator</em>.</li>
+<li><strong>Kalender-Erinnerung:</strong> Ein Kalendereintrag (Sprechstundentermin/Erinnerung) wird via <code>manage_calendar_appointment</code> für genau <strong>7 Tage nach E-Mail-Eingang (um 08:00 Uhr)</strong> angelegt, um an das Lesen und Bewerten der Arbeit zu erinnern.</li>
+<li><strong>Antwort-Entwurf:</strong> Ein Outlook-Antwortentwurf zur Bestätigung des Empfangs der Abschlussarbeit wird automatisch erstellt.</li>
 </ol>
 <h4 id="6-termin-fur-kolloquium-mit-configjson-automatisierung">6) Termin für Kolloquium (mit <code>config.json</code> Automatisierung)<a class="headerlink" href="#6-termin-fur-kolloquium-mit-configjson-automatisierung" title="Permanent link">&para;</a></h4>
 <p>Ähnlich wie Aktion 3, jedoch wird hierbei die Dauer fest auf <strong>60 Minuten</strong> eingestellt und ein spezieller Betreff gewählt. Zudem wurde diese Aktion erheblich weiterentwickelt, um den gesamten Kolloquiumsprozess zu automatisieren:</p>
 <ol>
 <li>
-<p><strong>Erstellung/Aktualisierung der <code>config.json</code>:</strong>
+<p><strong>Erstellung/Aktualisierung der <code>config.json</code>:</strong><br />
    Das System legt im Ordner des Studenten automatisch eine Konfigurationsdatei namens <code>config.json</code> an (oder aktualisiert eine bestehende). Diese enthält alle wichtigen Parameter für den Vortrag und optionale Folgeprozesse (wie z.B. eine automatisierte Folien-Bewertung mittels Gemini oder das Kompilieren von PDFs).</p>
 </li>
 <li>
-<p><strong>Automatische Termin-Eintragung:</strong>
+<p><strong>Automatische Termin-Eintragung:</strong><br />
    Datum (Format: <code>DD.MM.YYYY</code>) und Uhrzeit (Format: <code>HH:MM</code>) des Kolloquiums werden automatisch aus der E-Mail extrahiert, im Outlook-Kalender verbucht (Dauer: 60 Minuten) und direkt in die <code>config.json</code> des Studenten eingetragen.</p>
 </li>
 </ol>

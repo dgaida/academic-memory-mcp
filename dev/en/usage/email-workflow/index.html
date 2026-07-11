@@ -2405,7 +2405,7 @@
 <p>Use the VBA macros provided in the project to export data into the <code>inbox</code> folder:</p>
 <ul>
 <li><strong>Emails:</strong> Exports emails (mostly from students) as <code>.msg</code> files. The system automatically detects the sender, date, and subject.  </li>
-<li><strong>Calendar Data / Appointments:</strong> Exports free time slots from your Outlook calendar into a file named <code>free_slots.yaml</code>. Additionally, existing calendar appointments are also exported, which are required for the calendar GUI to provide an overview and assist in scheduling.</li>
+<li><strong>Calendar Data / Appointments:</strong> Exports free time slots from your Outlook calendar into a file named <code>free_slots.yaml</code>. Additionally, existing calendar appointments are also exported, which are required for the calendar GUI to provide an overview and assist in scheduling.  </li>
 </ul>
 <hr />
 <h2 id="phase-2-automatic-classification-and-pre-sorting">Phase 2: Automatic Classification and Pre-sorting<a class="headerlink" href="#phase-2-automatic-classification-and-pre-sorting" title="Permanent link">&para;</a></h2>
@@ -2429,11 +2429,11 @@
 <li>If an email is reclassified in the GUI, the <code>.emails_summary.md</code> is automatically moved to the new target folder.  </li>
 </ul>
 </li>
-<li><strong>RAG Context (Retrieval Augmented Generation):</strong> The system performs a deep AI analysis of emails in the background using a RAG process.<ul>
-<li><strong>Semantic Search:</strong> Based on the email content, the system searches a local vector database (Qdrant) for highly relevant documents such as examination regulations, module handbooks, or past email conversations.</li>
-<li><strong>Knowledge Injection:</strong> These retrieved documents are injected as additional context into the prompt for the LLM. This enables the AI to draft highly accurate and context-sensitive replies tailored to the rules and regulations of TH Köln.</li>
-<li><strong>Enhanced Response Quality:</strong> The RAG process minimizes hallucinations and ensures that specific deadlines or examination rules are mentioned correctly.</li>
-<li><strong>Technical Details Link:</strong> For a detailed explanation of multi-stage filtering, vector search, and the technical workflow, see the technical documentation under <a href="../rag-process/">RAG Process</a>.</li>
+<li><strong>RAG Context (Retrieval Augmented Generation):</strong> The system performs a deep AI analysis of emails in the background using a RAG process.  <ul>
+<li><strong>Semantic Search:</strong> Based on the email content, the system searches a local vector database (Qdrant) for highly relevant documents such as examination regulations, module handbooks, or past email conversations.  </li>
+<li><strong>Knowledge Injection:</strong> These retrieved documents are injected as additional context into the prompt for the LLM. This enables the AI to draft highly accurate and context-sensitive replies tailored to the rules and regulations of TH Köln.  </li>
+<li><strong>Enhanced Response Quality:</strong> The RAG process minimizes hallucinations and ensures that specific deadlines or examination rules are mentioned correctly.  </li>
+<li><strong>Technical Details Link:</strong> For a detailed explanation of multi-stage filtering, vector search, and the technical workflow, see the technical documentation under <a href="../rag-process/">RAG Process</a>.  </li>
 </ul>
 </li>
 <li><strong>Similarity Search:</strong> The system searches for the 3 most recent, thematically similar emails from the same student in the archive to ensure consistent responses.  </li>
@@ -2490,44 +2490,44 @@
 <p>This tab is optimized for bulk processing of emails where the automatic classification is already sufficient. You no longer need to run CLI scripts manually; all steps are executed at the click of a button in the GUI.</p>
 <h4 id="how-automatic-classification-sorting-works">How Automatic Classification &amp; Sorting Works:<a class="headerlink" href="#how-automatic-classification-sorting-works" title="Permanent link">&para;</a></h4>
 <ol>
-<li><strong>Topic Recognition:</strong> The <a href="../../packages/email-classifier/">Email Classification</a> system uses an advanced machine learning model (transformer-based) to assign the content of the email to a category (e.g., <em>Bachelor Thesis</em>, <em>Project</em>, <em>PO-Change</em>).</li>
-<li><strong>File System Structure:</strong> Once approved in the GUI, the emails are automatically moved into a three-level archive hierarchy: <code>Semester (e.g., 2023_24_WS) / Lastname / (Inbox or SentItems)</code>.</li>
-<li><strong>Lastname Extraction:</strong> The lastname is automatically extracted from the email address or display name (using Greedy Name Matching / Dot-Separated Fallback).<ul>
-<li><em>Example 1:</em> <code>max.mustermann@th-koeln.de</code> -&gt; Folder: <code>Mustermann</code></li>
-<li><em>Example 2:</em> <code>mustermann@stud.th-koeln.de</code> -&gt; Folder: <code>Mustermann</code></li>
-<li><em>Example 3:</em> <code>Mustermann-Schmidt, Erika &lt;erika.mustermann@...&gt;</code> -&gt; Folder: <code>Mustermann_Schmidt</code></li>
+<li><strong>Topic Recognition:</strong> The <a href="../../packages/email-classifier/">Email Classification</a> system uses an advanced machine learning model (transformer-based) to assign the content of the email to a category (e.g., <em>Bachelor Thesis</em>, <em>Project</em>, <em>PO-Change</em>).  </li>
+<li><strong>File System Structure:</strong> Once approved in the GUI, the emails are automatically moved into a three-level archive hierarchy: <code>Semester (e.g., 2023_24_WS) / Lastname / (Inbox or SentItems)</code>.  </li>
+<li><strong>Lastname Extraction:</strong> The lastname is automatically extracted from the email address or display name (using Greedy Name Matching / Dot-Separated Fallback).  <ul>
+<li><em>Example 1:</em> <code>max.mustermann@th-koeln.de</code> -&gt; Folder: <code>Mustermann</code>  </li>
+<li><em>Example 2:</em> <code>mustermann@stud.th-koeln.de</code> -&gt; Folder: <code>Mustermann</code>  </li>
+<li><em>Example 3:</em> <code>Mustermann-Schmidt, Erika &lt;erika.mustermann@...&gt;</code> -&gt; Folder: <code>Mustermann_Schmidt</code>  </li>
 </ul>
 </li>
 <li>
-<p><strong>Normalization:</strong> Names are normalized (umlauts replaced, special characters cleaned) to ensure compatibility with the file system.</p>
+<p><strong>Normalization:</strong> Names are normalized (umlauts replaced, special characters cleaned) to ensure compatibility with the file system.  </p>
 </li>
 <li>
-<p><strong>Scan &amp; Classification:</strong> Reads all emails from the source folder and assigns them a class using the model without physically moving them.</p>
+<p><strong>Scan &amp; Classification:</strong> Reads all emails from the source folder and assigns them a class using the model without physically moving them.  </p>
 </li>
-<li><strong>List View:</strong> Separate display of <code>Inbox</code> and <code>SentItems</code>.</li>
-<li><strong>Remove:</strong> Emails that require closer inspection can be moved to the second tab by selecting their index.</li>
-<li><strong>Attachments:</strong> For each email, you can already select here whether attachments should be saved during archiving.</li>
-<li><strong>Storage Location &amp; Path of Attachments:</strong> If the option is selected, attachments are automatically saved directly in the student's main directory (<code>Semester / Lastname /</code>) (which is the parent directory of the archived email folder).</li>
-<li><em>Example:</em> If an email is archived as <code>Bachelor Thesis</code> for the student <code>Mustermann</code> in the semester <code>2023_24_WS</code> (email path: <code>2023_24_WS/Mustermann/Inbox/20231120_143000_Expose.msg</code>), the attachment (e.g., <code>Expose_Max_Mustermann.pdf</code>) will be saved in the following folder:
-    <code>2023_24_WS/Mustermann/Expose_Max_Mustermann.pdf</code></li>
-<li><strong>Archive:</strong> All remaining emails in the lists are moved directly to their respective archive paths with one click.</li>
+<li><strong>List View:</strong> Separate display of <code>Inbox</code> and <code>SentItems</code>.  </li>
+<li><strong>Remove:</strong> Emails that require closer inspection can be moved to the second tab by selecting their index.  </li>
+<li><strong>Attachments:</strong> For each email, you can already select here whether attachments should be saved during archiving.  </li>
+<li><strong>Storage Location &amp; Path of Attachments:</strong> If the option is selected, attachments are automatically saved directly in the student's main directory (<code>Semester / Lastname /</code>) (which is the parent directory of the archived email folder).  </li>
+<li><em>Example:</em> If an email is archived as <code>Bachelor Thesis</code> for the student <code>Mustermann</code> in the semester <code>2023_24_WS</code> (email path: <code>2023_24_WS/Mustermann/Inbox/20231120_143000_Expose.msg</code>), the attachment (e.g., <code>Expose_Max_Mustermann.pdf</code>) will be saved in the following folder:<br />
+<code>2023_24_WS/Mustermann/Expose_Max_Mustermann.pdf</code>  </li>
+<li><strong>Archive:</strong> All remaining emails in the lists are moved directly to their respective archive paths with one click.  </li>
 </ol>
 <h3 id="tab-2-detail-view-processing">Tab 2: Detail View &amp; Processing<a class="headerlink" href="#tab-2-detail-view-processing" title="Permanent link">&para;</a></h3>
 <p>This is where emails go that were removed from Tab 1 or that require a deeper analysis.</p>
 <ul>
-<li><strong>AI Summary:</strong> A concise 2-sentence summary is generated for each email.</li>
-<li><strong>Context &amp; Similarity:</strong> Displays the most similar emails from the archive (Similarity Search).</li>
-<li><strong>Action Selection:</strong> Manual selection of the action (Reply, book appointment, etc.) and target folder.</li>
-<li><strong>Attachments:</strong> Option to selectively save email attachments.</li>
+<li><strong>AI Summary:</strong> A concise 2-sentence summary is generated for each email.  </li>
+<li><strong>Context &amp; Similarity:</strong> Displays the most similar emails from the archive (Similarity Search).  </li>
+<li><strong>Action Selection:</strong> Manual selection of the action (Reply, book appointment, etc.) and target folder.  </li>
+<li><strong>Attachments:</strong> Option to selectively save email attachments.  </li>
 </ul>
 <hr />
 <h2 id="phase-6-execution-of-actions-details">Phase 6: Execution of Actions (Details)<a class="headerlink" href="#phase-6-execution-of-actions-details" title="Permanent link">&para;</a></h2>
 <p>As soon as you click "Save &amp; Execute" in the GUI, the selected action is technically implemented. This is where the <strong>Person Profiles</strong> (Student &amp; User Persona) and <strong>Skills</strong> (expertise Markdown files) are integrated.</p>
 <h3 id="detailed-logic-of-actions">Detailed Logic of Actions:<a class="headerlink" href="#detailed-logic-of-actions" title="Permanent link">&para;</a></h3>
 <h4 id="preparation-conversation-summary">Preparation: Conversation Summary<a class="headerlink" href="#preparation-conversation-summary" title="Permanent link">&para;</a></h4>
-<p>Before a reply is generated, the system creates a concise summary of the previous conversation history in the student folder (<code>.emails_summary.md</code>). This serves as crucial context for the LLM to stay informed about prior agreements.
-- An example of the resulting structure can be found under <a href="../indexing-details/#example-email-structures">Example Email Structures</a>.
-- If an email is reclassified in the GUI, the summary automatically adapts to the new folder structure.</p>
+<p>Before a reply is generated, the system creates a concise summary of the previous conversation history in the student folder (<code>.emails_summary.md</code>). This serves as crucial context for the LLM to stay informed about prior agreements.<br />
+- An example of the resulting structure can be found under <a href="../indexing-details/#example-email-structures">Example Email Structures</a>.<br />
+- If an email is reclassified in the GUI, the summary automatically adapts to the new folder structure.  </p>
 <h4 id="1-write-reply">1) Write Reply<a class="headerlink" href="#1-write-reply" title="Permanent link">&para;</a></h4>
 <p>The LLM generates a reply taking into account your own <strong>Person Profile</strong> (tone, role), the <strong>Student Profile</strong>, and the aforementioned <strong>Conversation Summary</strong>. Details can be found under <a href="../profiles/">Person Profiles</a>. A draft is automatically created in Outlook with the original email attached.</p>
 <h4 id="2-write-reply-with-appointment-proposal">2) Write Reply with Appointment Proposal<a class="headerlink" href="#2-write-reply-with-appointment-proposal" title="Permanent link">&para;</a></h4>
@@ -2541,19 +2541,22 @@
 <h4 id="4-archive-only">4) Archive Only<a class="headerlink" href="#4-archive-only" title="Permanent link">&para;</a></h4>
 <p>The email is saved in the student's archive folder. No further technical actions (such as a reply draft) are taken.</p>
 <h4 id="5-create-task-in-calendar-final-submission">5) Create Task in Calendar (Final Submission)<a class="headerlink" href="#5-create-task-in-calendar-final-submission" title="Permanent link">&para;</a></h4>
-<p>This action combines multiple steps for final theses:
-1. Attachments are saved in the student's folder via <code>save_email_attachments</code>.
-2. A calendar entry is created for <strong>7 days later</strong> to remind you of grading.
-3. A reply draft confirming receipt is generated.</p>
+<p><strong>This is the central action where the final submission of a thesis is automatically detected and processed.</strong> When the email classifier or the user in the GUI classifies an email as a final submission, this action is selected. It combines several automated steps for final theses:</p>
+<ol>
+<li><strong>Save Attachments:</strong> All email attachments are automatically saved in the student's parent directory (<code>Semester / Lastname /</code>) via <code>save_email_attachments</code>.</li>
+<li><strong>Colloquium Configuration (<code>config.json</code>):</strong> A <code>config.json</code> configuration file is automatically created in the student's main directory via <code>create_colloquium_config</code> (or updated with the filename of the PDF thesis from the attachment). This file is used for the <em>colloquium-protocol-creator</em>.</li>
+<li><strong>Calendar Reminder:</strong> A calendar entry is created via <code>manage_calendar_appointment</code> exactly <strong>7 days after the email is received (at 08:00 AM)</strong> to remind you to read and grade the thesis.</li>
+<li><strong>Reply Draft:</strong> A reply draft confirming receipt of the thesis is automatically generated.</li>
+</ol>
 <h4 id="6-colloquium-appointment-with-configjson-automation">6) Colloquium Appointment (with <code>config.json</code> Automation)<a class="headerlink" href="#6-colloquium-appointment-with-configjson-automation" title="Permanent link">&para;</a></h4>
 <p>Similar to action 3, but the duration is fixed at <strong>60 minutes</strong> and a special subject is chosen. In addition, this action has been significantly enhanced to automate the entire colloquium process:</p>
 <ol>
 <li>
-<p><strong>Creation/Update of <code>config.json</code>:</strong>
+<p><strong>Creation/Update of <code>config.json</code>:</strong><br />
    The system automatically creates a configuration file named <code>config.json</code> in the student's folder (or updates an existing one). This file contains all crucial parameters for the presentation and optional downstream processes (such as automated slide evaluation using Gemini or compiling PDFs).</p>
 </li>
 <li>
-<p><strong>Automated Appointment Entry:</strong>
+<p><strong>Automated Appointment Entry:</strong><br />
    The date (format: <code>DD.MM.YYYY</code>) and time (format: <code>HH:MM</code>) of the colloquium are automatically extracted from the email, booked in the Outlook calendar (duration: 60 minutes), and written directly into the student's <code>config.json</code>.</p>
 </li>
 </ol>
