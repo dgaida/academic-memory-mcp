@@ -28,7 +28,7 @@ conda activate mcp-university
 
 Um das System betriebsbereit zu machen, führen Sie folgende Schritte aus:
 
-1. **Konfigurationsdateien vorbereiten:**
+1. **Konfigurationsdateien vorbereiten:**  
    Kopieren Sie die `.example` Konfigurationsdateien im Verzeichnis `config/`:
    ```bash
    cp config/user.yaml.example config/user.yaml
@@ -36,10 +36,10 @@ Um das System betriebsbereit zu machen, führen Sie folgende Schritte aus:
    cp config/classifier_paths.yaml.example config/classifier_paths.yaml
    ```
 
-2. **Benutzerdaten anpassen:**
+2. **Benutzerdaten anpassen:**  
    Tragen Sie Ihren Namen und Ihre Hochschul-E-Mail in `config/user.yaml` ein.
 
-3. **Studierendendaten synchronisieren:**
+3. **Studierendendaten synchronisieren:**  
    Falls Sie bereits eine `students.yaml` (z.B. über die Outlook-Makros) erstellt haben, synchronisieren Sie diese mit der SQLite-Datenbank:
    ```bash
    mcp-uni db sync-students

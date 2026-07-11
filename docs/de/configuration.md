@@ -121,9 +121,9 @@ test_path: "data/classifier/test"
 ## 6. ontology.yaml
 Definiert das Schema des semantischen Wissensgraphen (Knotentypen, Beziehungstypen und Kantenprioritäten). Dies steuert, wie Alias-Namen gelernt und Edge-Konflikte (z.B. Überschreiben einer "angefragt" Beziehung durch eine "schreibt" Beziehung) aufgelöst werden.
 
-*   `node_types`: Gültige Entitätstypen (z.B. Studierende, Modul, Fakultät).
-*   `edge_types`: Gültige Beziehungstypen (z.B. schreibt Bachelorarbeit, ist Erstprüfer).
-*   `edge_priorities`: Definiert die Priorität von Kanten, sodass höherwertige Beziehungen (z.B. "hat Bachelorarbeit abgeschlossen") geringerwertige Vorgängerbeziehungen ("schreibt Bachelorarbeit") im Graphen automatisch überschreiben oder ersetzen dürfen.
+*   `node_types`: Gültige Entitätstypen (z.B. Studierende, Modul, Fakultät).  
+*   `edge_types`: Gültige Beziehungstypen (z.B. schreibt Bachelorarbeit, ist Erstprüfer).  
+*   `edge_priorities`: Definiert die Priorität von Kanten, sodass höherwertige Beziehungen (z.B. "hat Bachelorarbeit abgeschlossen") geringerwertige Vorgängerbeziehungen ("schreibt Bachelorarbeit") im Graphen automatisch überschreiben oder ersetzen dürfen.  
 
 ---
 
