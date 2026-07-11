@@ -76,6 +76,13 @@ select = ["E", "F", "D"]
 ignore = [
     "D100",  # Missing docstring in public module
     "D104",  # Missing docstring in public package
+    "E501",  # Line too long
+    "D107",  # Missing docstring in __init__
+    "D202",  # No blank lines allowed after function docstring
+    "D205",  # 1 blank line required between summary line and description
+    "D212",  # Multi-line docstring summary should start at the first line
+    "D301",  # Use r""" if any backslashes in a docstring
+    "D415",  # First line should end with a period, question mark, or exclamation point
 ]
 
 [tool.ruff.lint.pydocstyle]
