@@ -72,6 +72,7 @@ class EmailController:
             cloud_model (str): Cloud-LLM Modell.
             api_key (str): Cloud-LLM API-Key.
             debug (bool): Speichert LLM Prompts als Markdown.
+            use_action_classifier (bool): Ob der Klassifizierer für Folgeaktionen genutzt werden soll.
         """
         self.config = get_config()
         self.config_path = config_path

@@ -58,3 +58,25 @@ ignore-magic = true
 fail-under = 99
 verbose = 1
 exclude = ["setup.py", "docs", "build"]
+
+
+[tool.ruff]
+exclude = [
+    "tests",
+    "test_*.py",
+    "docs",
+    "build",
+    "dist",
+    "venv",
+    ".git"
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "D"]
+ignore = [
+    "D100",  # Missing docstring in public module
+    "D104",  # Missing docstring in public package
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"

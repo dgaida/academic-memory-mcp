@@ -13,6 +13,12 @@ class OntologyLearner:
     """Lernt Alias-Beziehungen für Personen und Module."""
 
     def __init__(self, store: MetadataStore, summarizer: Summarizer) -> None:
+        """Initialisiert den OntologyLearner.
+
+        Args:
+            store (MetadataStore): Metadatenspeicher für den Graphen.
+            summarizer (Summarizer): LLM Summarizer.
+        """
         self.store = store
         self.summarizer = summarizer
         self.mail_parser = MailParser()

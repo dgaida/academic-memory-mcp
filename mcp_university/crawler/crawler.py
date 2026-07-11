@@ -73,6 +73,7 @@ class Crawler:
         Args:
             dir_path (Path): Pfad zum Ordner.
             parent_id (Optional[int]): ID des übergeordneten Ordners in der DB.
+            relative_path (Optional[Path]): Relativer Pfad zum Wurzelverzeichnis.
 
         Returns:
             Tuple[Optional[str], bool]: (Zusammenfassung des Ordners, Wurde etwas geändert?)
@@ -373,6 +374,7 @@ class Crawler:
         Args:
             dir_path (Path): Pfad zum zusammengefassten Ordner.
             summary (str): Der Inhalt der Zusammenfassung.
+            parent_id (Optional[int]): ID des Ordners in der DB.
         """
         summary_path = self._get_summary_path(dir_path, parent_id)
 
