@@ -94,7 +94,10 @@ def evaluate_and_save(classifier: EmailClassifier, texts: list, labels: list, ou
             f.write(cv_df[cols].sort_values('rank_test_score').to_markdown(index=False))
             f.write("\n\n")
 
-        f.write(f"**Genauigkeit auf Trainingsdaten (Accuracy):** {accuracy:.2%}\n\n")
+        if prefix == "train":
+            f.write(f"**Genauigkeit auf Trainingsdaten (Accuracy):** {accuracy:.2%}\n\n")
+        else:
+            f.write(f"**Genauigkeit auf Validierungsdaten (Accuracy):** {accuracy:.2%}\n\n")
         f.write("## Klassifizierungsbericht\n\n")
         f.write("```\n")
         f.write(report)
