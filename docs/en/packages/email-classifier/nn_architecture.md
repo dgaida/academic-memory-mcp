@@ -6,10 +6,10 @@ This documentation describes the fully functional, integrated Transformer-based 
 
 The implementation is based on a **Transformer-based model** (default: `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`). Unlike classical bag-of-words methods, this architecture captures the semantic context and relationships between words within sentences (e.g., in the email subject and body).
 
-### Core Components:
-1. **Encoder Backbone**: The pre-trained multilingual MiniLM model serves as the feature extractor.
-2. **Input Structuring**: Preprocessing and merging of metadata and email body into a structured, unified input text.
-3. **Classification Head**: A Fully Connected Layer (MLP) with dropout, applied directly to the `[CLS]` token (the representation vector of the entire sequence) to calculate the target class probabilities.
+### Core Components:  
+1. **Encoder Backbone**: The pre-trained multilingual MiniLM model serves as the feature extractor.  
+2. **Input Structuring**: Preprocessing and merging of metadata and email body into a structured, unified input text.  
+3. **Classification Head**: A Fully Connected Layer (MLP) with dropout, applied directly to the `[CLS]` token (the representation vector of the entire sequence) to calculate the target class probabilities.  
 
 ## 2. Data Preparation & Input Format
 
@@ -20,9 +20,9 @@ To explicitly integrate important metadata and leverage its strong signal effect
 SUBJECT: <Subject> | ATTACHMENTS: <file1.pdf, file2.docx> [SEP] <Email Body (anonymized)>
 ```
 
-- **Subject**: Often holds the highest information density for classifying emails into categories such as colloquia or Bachelor's theses.
-- **Attachments**: Filenames like "Antrag_BA.pdf" provide extremely strong indicators for specific classes (e.g., `BachelorThesis`).
-- **Anonymization**: Personally identifiable information (PII) is replaced with placeholders using the `anonymize_th_koeln_names` logic before processing.
+- **Subject**: Often holds the highest information density for classifying emails into categories such as colloquia or Bachelor's theses.  
+- **Attachments**: Filenames like "Antrag_BA.pdf" provide extremely strong indicators for specific classes (e.g., `BachelorThesis`).  
+- **Anonymization**: Personally identifiable information (PII) is replaced with placeholders using the `anonymize_th_koeln_names` logic before processing.  
 
 ## 3. Comparison of Approaches
 
@@ -74,19 +74,19 @@ class EmailTransformerClassifier(nn.Module):
 
 ## 5. Training & Validation Strategy
 
-- **Fine-Tuning**: The weights of both the Transformer backbone and the classification head are updated with a low learning rate on TH-Köln-specific email classes.
-- **Class Weighting (Weighted Cross-Entropy)**: To handle class imbalance (e.g., many `Others` vs. few `SHK` emails), weighted cross-entropy loss is employed to improve performance on minority classes.
-- **Max Sequence Length**: Capped at 512 tokens, which provides an optimal trade-off between context representation and training/inference speed.
+- **Fine-Tuning**: The weights of both the Transformer backbone and the classification head are updated with a low learning rate on TH-Köln-specific email classes.  
+- **Class Weighting (Weighted Cross-Entropy)**: To handle class imbalance (e.g., many `Others` vs. few `SHK` emails), weighted cross-entropy loss is employed to improve performance on minority classes.  
+- **Max Sequence Length**: Capped at 512 tokens, which provides an optimal trade-off between context representation and training/inference speed.  
 
 ## 6. Future Improvement Opportunities
 
 While the system is fully operational, several optimization paths remain for future iterations:
 
-1. **Model Quantization**:
-   - Convert the model to an 8-bit integer format (INT8) using PyTorch to halve memory footprint on offline/client machines (e.g., laptops without dedicated GPUs) and increase inference speed.
-2. **LoRA Fine-Tuning for Larger Local Models**:
-   - Instead of a MiniLM model, larger multilingual LLMs (e.g., Llama 3 or Mistral) could be fine-tuned using Low-Rank Adaptation (LoRA) for classification, provided sufficient hardware resources are available.
-3. **Advanced Hyperparameter Tuning**:
-   - Systematic search for optimal learning rates, dropout rates, and batch sizes using frameworks like Optuna to further maximize classification performance (F1-score).
-4. **Knowledge Distillation**:
-   - Distill knowledge from a very large model into a smaller, highly efficient Transformer model that maintains high predictive accuracy but runs at extremely fast speeds.
+1. **Model Quantization**:  
+   - Convert the model to an 8-bit integer format (INT8) using PyTorch to halve memory footprint on offline/client machines (e.g., laptops without dedicated GPUs) and increase inference speed.  
+2. **LoRA Fine-Tuning for Larger Local Models**:  
+   - Instead of a MiniLM model, larger multilingual LLMs (e.g., Llama 3 or Mistral) could be fine-tuned using Low-Rank Adaptation (LoRA) for classification, provided sufficient hardware resources are available.  
+3. **Advanced Hyperparameter Tuning**:  
+   - Systematic search for optimal learning rates, dropout rates, and batch sizes using frameworks like Optuna to further maximize classification performance (F1-score).  
+4. **Knowledge Distillation**:  
+   - Distill knowledge from a very large model into a smaller, highly efficient Transformer model that maintains high predictive accuracy but runs at extremely fast speeds.  
