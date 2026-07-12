@@ -1,15 +1,15 @@
 # MOCOGI Datenextraktion
 
-Dieses Skript ermöglicht den Export von Modulinformationen aus der MOCOGI-API der TH Köln in eine strukturierte Markdown-Datei.
+Diese Seite beschreibt die Datenextraktion aus der MOCOGI-API der TH Köln und deren Integration in die `th_personal.db`.
 
 ## Zweck
-Das Skript `scripts/extract_mocogi_data.py` durchläuft alle aktiven Studiengänge und deren Prüfungsordnungen (POs). Für jedes Modul werden die folgenden Informationen extrahiert:  
+Das Skript `extract_mocogi_data.py` (aufgerufen als ausführbares Modul `python -m th_personal_graph.scripts.extract_mocogi_data`) durchläuft alle aktiven Studiengänge und deren Prüfungsordnungen (POs). Für jedes Modul werden die folgenden Informationen extrahiert:
 * Modulname  
 * Modulverantwortliche(r) (volle Namen)  
 * Erstprüfer(in)  
 * Zweitprüfer(in)  
 
-Die Daten werden in Tabellenform gruppiert nach Studiengang und PO in der Datei `mocogi_modules.md` gespeichert.
+Die Daten werden in Tabellenform gruppiert nach Studiengang und PO in der Datei `data/mocogi_modules.md` gespeichert.
 
 ## Voraussetzungen  
 * Ein gültiger `MOCOGI_API_TOKEN` muss in einer `.env` oder `secrets.env` Datei im Hauptverzeichnis oder im `config/` Ordner hinterlegt sein.  
@@ -18,11 +18,11 @@ Die Daten werden in Tabellenform gruppiert nach Studiengang und PO in der Datei 
 Führen Sie das Skript aus dem Hauptverzeichnis des Projekts aus:
 
 ```bash
-PYTHONPATH=. python3 scripts/extract_mocogi_data.py
+python -m th_personal_graph.scripts.extract_mocogi_data
 ```
 
 ## Ausgabeformat
-Die generierte Datei `mocogi_modules.md` folgt diesem Schema:
+Die generierte Datei `data/mocogi_modules.md` folgt diesem Schema:
 
 ```markdown
 # MOCOGI Modulübersicht
@@ -40,7 +40,7 @@ Die generierte Datei `mocogi_modules.md` folgt diesem Schema:
 ---
 
 ## Integration in den Knowledge Graph
-Das Skript integriert die extrahierten Daten automatisch in den SQLite-basierten Knowledge Graph (siehe [Datenbank-Management](database-management.md)).
+Das Skript integriert die extrahierten Daten automatisch in den SQLite-basierten Knowledge Graph der Personal-Datenbank (`th_personal.db`).
 
 ### Erstellte Knoten und Kanten
 Für jeden extrahierten Datensatz werden folgende Entitäten im Graphen angelegt oder aktualisiert:

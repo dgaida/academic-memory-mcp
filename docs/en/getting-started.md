@@ -1,71 +1,52 @@
-# Getting Started
+# Getting Started & Use Cases
 
-This guide will walk you through the setup and initial steps with the MCP University Memory System.
+Welcome to the **MCP University Memory System**! This system serves as your intelligent, local memory, assisting you in your daily tasks in university teaching and student administration.
 
-## Prerequisites
+This Getting Started page provides a quick overview of the central use cases covered by the system and links to the respective detailed guides in the manual.
 
-Ensure the following software is installed:
+---
 
-*   **Python 3.10+**  
-*   **Node.js >= 22:** Required for `qmd`.  
-*   **qmd:** `npm install -g @tobilu/qmd`  
-*   **Ollama:** Install Ollama and pull the default model [gemma4:e2b](https://ollama.com/library/gemma4):  
-    ```bash
-    ollama pull gemma4:e2b
-    ```
-*   **Docling:** For PDF parsing (automatically installed as a dependency via `pip install -e .`).  
+## Overview of Use Cases
 
-## Installation
+The system is built around six main use cases designed to simplify your academic routine:
 
-Clone the repository and install the dependencies:
+### 1. [Quick Email Search](usage/email-search.md)
+*   **What is it?** Search through thousands of archived emails in a fraction of a second using a dedicated graphical user interface (Gradio GUI).
+*   **Key Features:** Autocomplete, full-text search, direct jump to emails in Outlook or File Explorer.
+*   **Learn more:** [Email Search Guide](usage/email-search.md).
 
-```bash
-git clone https://github.com/example/mcp-university.git
-cd mcp-university
-pip install -e .
-```
+### 2. [Appointment Management](usage/appointment-management.md)
+*   **What is it?** Efficiently prepare for your weekly meetings and office hours.
+*   **Key Features:** The system bundles all relevant context information (documents, theses, email history of participants) at a single glance.
+*   **Learn more:** [Appointment Management Guide](usage/appointment-management.md).
 
-## Configuration
+### 3. [Automated Email Replies (Email Workflow)](usage/email-workflow.md)
+*   **What is it?** Accelerate your daily correspondence. E-mails are automatically classified, and the system suggests appropriate actions.
+*   **Key Features:** Automatic generation of precise, context-aware draft replies in the correct tone (Du/Sie), based on email history and the knowledge graph.
+*   **Learn more:** [Email Workflow Guide](usage/email-workflow.md).
 
-Adjust the folders to be monitored in `config/folders.yaml`:
+### 4. [Personnel Database & Person Profiles](usage/profiles.md)
+*   **What is it?** Manage university staff, contacts, and responsibilities, as well as individual profiles (Steckbriefe) of your students.
+*   **Key Features:** Automatic determination of the preferred salutation (Du/Sie). Import module responsibilities and examiners via the official MOCOGI API and the TH Köln crawler.
+*   **Learn more:** [Profiles & Personnel Database Guide](usage/profiles.md).
 
-```yaml
-folders:
-  - /path/to/your/lectures
-  - /path/to/student/records
-exclude_patterns:
-  - ".git"
-  - "node_modules"
-```
+### 5. [Final Submission of Theses](usage/final-submission.md)
+*   **What is it?** Accompany the final submission process of bachelor's and master's theses seamlessly and automatically.
+*   **Key Features:** JIT archiving of submission documents, fully automated colloquium scheduling including room booking and automatic reminders in your calendar.
+*   **Learn more:** [Final Submission Guide](usage/final-submission.md).
 
-## First Index Run
+### 6. [Outlook Macros](usage/outlook-macros.md)
+*   **What is it?** Seamless integration into your familiar Windows workstation.
+*   **Key Features:** Export emails, appointment data, and free slots directly from Outlook into the system to make them available to the local AI.
+*   **Learn more:** [Outlook Macros Guide](usage/outlook-macros.md).
 
-Start the crawler to analyze your documents and create summaries:
+---
 
-```bash
-mcp-uni index
-```
+## Getting Started with Setup
 
-The process performs the following steps:  
-1. Scans the configured folders.  
-2. Extracts text from PDF, DOCX, MD, etc.  
-3. Generates summaries using Ollama.  
-4. Stores metadata in SQLite and indexes the text in the search index.  
+To get the system up and running, please follow our structured setup guides:
 
-## Using Search
-
-Test the search directly via the CLI:
-
-```bash
-mcp-uni search "When is the deadline for Max Mustermann's master's thesis?"
-```
-
-## Start MCP Server
-
-Provide the tools for your AI agents (e.g., in Claude Desktop):
-
-```bash
-mcp-uni serve-mcp
-```
-
-Now your agent can access documents, draft email replies, and retrieve student context.
+1. **[Installation](installation.md):** Learn how to install the Python environment, Conda, or system components like `qmd`.
+2. **[Setup](setup.md):** Copy and configure example files to customize the system for your local directory paths.
+3. **[Configuration](configuration.md):** Learn about all configuration options for folders, classification paths, and local LLMs (Ollama).
+4. **[Troubleshooting](troubleshooting.md):** Quick help with known issues or encoding errors.

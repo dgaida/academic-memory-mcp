@@ -1,11 +1,13 @@
-# Hilfsskripte
+# Hilfsskripte (Helper Scripts)
 
-Das System enthält verschiedene nützliche Skripte im Ordner `scripts/` zur Vorbereitung und Verwaltung Ihrer Daten.
+Das System enthält verschiedene nützliche Hilfsskripte zur Vorbereitung, Migration und Verwaltung Ihrer Daten.
 
-## Verzeichnisbereinigung
+---
+
+## Verzeichnisbereinigung & Dateisystem
 
 ### Leere Ordner entfernen
-Löscht rekursiv alle leeren Ordner in einem Verzeichnis.
+Löscht rekursiv alle leeren Ordner in einem Zielverzeichnis.
 ```bash
 python scripts/remove_empty_folders.py /pfad/zu/daten
 ```
@@ -16,7 +18,9 @@ Flacht eine Ordnerstruktur ab, indem alle Dateien in das Wurzelverzeichnis versc
 python scripts/flatten_directory.py /pfad/zu/daten
 ```
 
-## E-Mail Management & Klassifizierung
+---
+
+## E-Mail-Management & Klassifizierung
 
 ### E-Mail-Ordnerstruktur korrigieren
 Migriert E-Mails in die Standardstruktur: `Semester/Nachname/Inbox|SentItems/`. Dies ist besonders wichtig für die korrekte Zuordnung im System.
@@ -24,9 +28,9 @@ Migriert E-Mails in die Standardstruktur: `Semester/Nachname/Inbox|SentItems/`. 
 python scripts/fix_email_folders.py data/classifier_paths.yaml
 ```
 
-**Argumente:**  
+**Optionen:**
 - `--dry-run`: Zeigt nur die erkannten Fehler an, ohne sie zu beheben.  
-- `--verify`: Prüft rekursiv alle E-Mails in allen Unterordnern auf korrekte Semester-, Namens- und Ordnerzuordnung. Ohne dieses Argument werden nur E-Mails im Basisverzeichnis verarbeitet.  
+- `--verify`: Prüft rekursiv alle E-Mails in allen Unterordnern auf korrekte Semester-, Namens- und Ordnerzuordnung.
 
 ### Klassifikator-Daten umstrukturieren
 Strukturiert die Trainings- und Testdaten des Klassifikators um, um sie für das Training vorzubereiten.
@@ -34,27 +38,11 @@ Strukturiert die Trainings- und Testdaten des Klassifikators um, um sie für das
 python scripts/restructure_classifier_data.py
 ```
 
-### Trainingsdaten auffüllen
+### Trainingsdaten auffüllen (Replenish Datasets)
 Füllt Trainings- und Testdaten mit alten E-Mails aus den Originalverzeichnissen auf, wenn ein Mindestbestand unterschritten wird.
 ```bash
 python scripts/replenish_datasets.py -n 100
 ```
-Das Skript prüft für jede Klasse in den Trainings- und Testordnern, ob mindestens `N` (Default: 100) E-Mails in den Unterordnern `Inbox` und `SentItems` liegen. Ist dies nicht der Fall, sucht das Skript rekursiv in den in `config/classifier_paths.yaml` definierten Quellverzeichnissen nach Unterordnern namens `Inbox` und `SentItems`. Dies unterstützt hierarchische Strukturen wie:
-
-```text
-SourcePath/
-├── 2025_SoSe/
-│   ├── Peters/
-│   │   ├── Inbox/
-│   │   └── SentItems/
-│   └── Meier/
-│       ├── Inbox/
-│       └── SentItems/
-└── 2024_25_WS/
-    └── ...
-```
-
-Das Skript findet alle passenden Ordner und verschiebt E-Mails, die älter als ein Jahr sind, bis das Zielkontingent erreicht ist. Quellverzeichnisse, die danach nur noch Zusammenfassungsdateien enthalten, werden gelöscht.
 
 ### Klassen zusammenfassen (Data Augmentation)
 Analysiert Trainingsordner und erstellt LLM-Zusammenfassungen für Klassen mit wenigen Daten (<= 50 E-Mails). Diese Zusammenfassungen enthalten Informationen über Themen, Stil und beteiligtes Personal aus der `th_personal.db`.
@@ -68,77 +56,53 @@ Generiert künstliche E-Mails basierend auf den zuvor erstellten Klassenzusammen
 python scripts/generate_synthetic_emails.py
 ```
 
-## Wissensgraph & Personen
+---
 
-### Wissensgraph visualisieren
-Generiert eine interaktive HTML-Visualisierung des Wissensgraphen.
-```bash
-mcp-uni graph visualize
-```
-Alternativ kann das Skript direkt aufgerufen werden:
-```bash
-python scripts/visualize_knowledge_graph.py
-```
-Die Ausgabe erfolgt in `knowledge_graph.html`.
+## Wissensgraph & Personaldatenbank
 
-**Offline-Unterstützung:**
-Das Skript ist vollständig offline-fähig, da alle Ressourcen (vis-network) in die HTML-Datei eingebettet werden.
+Diese Skripte wurden in das eigenständige Package `th_personal_graph` ausgelagert und werden als ausführbare Module aufgerufen.
 
-Unterstützt den Parameter `--filter <Name>` (oder `-f` in der CLI), um den Graphen auf einen bestimmten Knoten und seinen Kontext zu beschränken.
+- **TH Personal Crawler (`python -m th_personal_graph.scripts.crawl_th_koeln_persons`):**
+  Crawlt das Personenverzeichnis der TH Köln nach Kontaktdaten, Fakultäten und Instituten.
+- **MOCOGI Datenextraktion (`python -m th_personal_graph.scripts.extract_mocogi_data`):**
+  Extrahiert Modulinformationen (Verantwortliche, Prüfer) aus der MOCOGI-API und verknüpft diese im Wissensgraphen.
+- **Wissensgraph visualisieren (`python -m th_personal_graph.scripts.visualize_knowledge_graph`):**
+  Generiert eine interaktive HTML-Visualisierung der Personaldatenbank.
 
-### Wissensgraph aufbauen
-Baut den Wissensgraphen aus extrahierten E-Mail-Zusammenfassungen und anderen Quellen auf.
-```bash
-python scripts/build_knowledge_graph.py
-```
+Detaillierte Informationen zur Nutzung und den Parametern dieser Skripte finden Sie auf der Seite **[Personaldatenbank & Personen-Steckbriefe](profiles.md)** sowie in der **[Dokumentation des TH Personal Graph Packages](../packages/th-personal-graph/index.md)**.
 
-### TH Köln Personen-Crawler
-Crawlt das Personenverzeichnis der TH Köln nach Namen, akademischen Graden, E-Mails, Fakultäten und Instituten.
-```bash
-python scripts/crawl_th_koeln_persons.py A B C
-```
-
-Unterstützt Filter nach Fakultät oder Einrichtung:
-```bash
-python scripts/crawl_th_koeln_persons.py --institution "Präsidium"
-python scripts/crawl_th_koeln_persons.py --faculty "Informatik und Ingenieurwissenschaften"
-```
-
-Mit `--list-institutions` oder `--list-faculties` können alle verfügbaren Optionen angezeigt werden. Für einen vollständigen Crawl aller Bereiche:
-```bash
-python scripts/crawl_th_koeln_persons.py --crawl-all both
-```
-
-Unterstützt mehrere Anfangsbuchstaben als Argumente.
-
-### Personen-Steckbriefe erstellen
-Erstellt manuell einen Steckbrief für eine bestimmte E-Mail-Adresse basierend auf vorhandenen E-Mails.
-```bash
-python scripts/create_person_profiles.py student@smail.th-koeln.de
-```
-
-### MOCOGI Datenextraktion
-Extrahiert Modulinformationen (Verantwortliche, Prüfer) aus der MOCOGI-API und verknüpft diese im Wissensgraphen.
-```bash
-python scripts/extract_mocogi_data.py
-```
+---
 
 ## Wissensbasis & Memory
 
-### Memory indexieren
+### Memory indexieren (Crawler)
 Indexiert Dokumente aus den in der Konfiguration definierten Pfaden in die Vektordatenbank.
 ```bash
 mcp-uni memory update
 ```
-Oder direkt:
+Oder direkt über das Skript:
 ```bash
 python scripts/index_memory.py
 ```
 
-## Termine & Kolloquien
+### Vorlesungsskripte zusammenfassen
+Sucht nach PDFs in einem Ordner und generiert kompakte Markdown-Zusammenfassungen. Überspringt Dateien, die bereits verarbeitet wurden.
+```bash
+python scripts/summarize_lectures.py /pfad/zu/vorlesungen
+```
 
-### Termin-Verwaltung (GUI)
-Öffnet eine Gradio-Oberfläche zur Verwaltung von wöchentlichen Terminen, basierend auf `data/appointments.md`.
+### Wissensgraph der Dokumentenmetadaten aufbauen
+Baut den Wissensgraphen aus extrahierten E-Mail-Zusammenfassungen und anderen Quellen in `university.db` auf.
+```bash
+python scripts/build_knowledge_graph.py
+```
+
+---
+
+## Termine, Kolloquien & Sonstiges
+
+### Termin-Verwaltung (Gradio GUI)
+Öffnet eine Gradio-Benutzeroberfläche zur Visualisierung und schnellen Verwaltung von wöchentlichen Terminen basierend auf `data/appointments.md`.
 ```bash
 python scripts/appointment_gui.py
 ```
@@ -149,18 +113,8 @@ Erstellt JSON-Konfigurationsdateien für den `colloquium-protocol-creator`.
 python scripts/create_colloquium_config.py "Name des Kandidaten" --date "2023-10-27" --time "10:00" --location-type campus --room "R3.14"
 ```
 
-## Analyse & Visualisierung
-
 ### Embeddings visualisieren
-Erstellt eine 2D-Visualisierung der E-Mail-Embeddings mittels t-SNE, um die Trennbarkeit der Klassen zu analysieren.
+Erstellt eine 2D-Visualisierung der E-Mail-Embeddings mittels t-SNE zur Analyse der Trennbarkeit der E-Mail-Klassen.
 ```bash
 python scripts/visualize_embeddings.py
-```
-
-## Vorlesungen & Lehre
-
-### Vorlesungsskripte zusammenfassen
-Sucht nach PDFs in einem Ordner und generiert kompakte Markdown-Zusammenfassungen. Überspringt Dateien, die bereits verarbeitet wurden.
-```bash
-python scripts/summarize_lectures.py /pfad/zu/vorlesungen
 ```

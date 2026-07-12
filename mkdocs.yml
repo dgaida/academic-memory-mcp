@@ -100,17 +100,20 @@ nav:
   - Home: index.md
   - Endnutzer-Handbuch:
       - Start: getting-started.md
-      - E-Mail Suche: usage/email-search.md
-      - Terminverwaltung: usage/appointment-management.md
-      - E-Mail Workflow: usage/email-workflow.md
-      - Personen-Steckbriefe: usage/profiles.md
-      - Finale Abgabe: usage/final-submission.md
-      - Outlook Makros: usage/outlook-macros.md
-      - Installation: installation.md
-      - Einrichtung: setup.md
-      - Konfiguration: configuration.md
-      - Hilfsskripte: usage/scripts.md
-      - Fehlerbehebung: troubleshooting.md
+      - Use Cases:
+          - E-Mail Suche: usage/email-search.md
+          - Terminverwaltung: usage/appointment-management.md
+          - Automatisiertes Beantworten von E-Mails: usage/email-workflow.md
+          - Personaldatenbank: usage/profiles.md
+          - Finale Abgabe: usage/final-submission.md
+          - Outlook Makros: usage/outlook-macros.md
+      - Installation & Einrichtung:
+          - Installation: installation.md
+          - Einrichtung: setup.md
+          - Konfiguration: configuration.md
+          - Fehlerbehandlung: troubleshooting.md
+      - Sonstiges:
+          - Hilfsskripte: usage/scripts.md
   - Technische Dokumentation:
       - Architektur: architecture/index.md
       - Nutzung (Expert): usage/index.md
@@ -118,7 +121,6 @@ nav:
       - Datenbank-Management: usage/database-management.md
       - Datenbank-Prozesse: usage/database-processes.md
       - MCP Integration: usage/mcp.md
-      - MOCOGI Extraktion: usage/mocogi-extraction.md
       - E-Mail Parsing: usage/email-parsing.md
       - RAG Prozess: usage/rag-process.md
       - Memory Update: usage/memory.md
@@ -135,6 +137,7 @@ nav:
           - TH Personal Graph:
               - Übersicht: packages/th-personal-graph/index.md
               - Nutzung der Skripte: packages/th-personal-graph/usage.md
+              - MOCOGI Extraktion: packages/th-personal-graph/mocogi.md
               - Architektur & Logik: packages/th-personal-graph/architecture.md
       - Entwicklung:
           - Übersicht: development/index.md

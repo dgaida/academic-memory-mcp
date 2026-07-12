@@ -4,7 +4,8 @@ Die Architektur des `th_personal_graph`-Packages kombiniert Web-Crawling, API-In
 
 ## Datenmodell & Knoten-Typen
 
-Der Wissensgraph unterscheidet mehrere Knotentypen, um die universitäre Hierarchie präzise abzubilden:  
+Der Wissensgraph unterscheidet mehrere Knotentypen, um die universitäre Hierarchie präzise abzubilden:
+
 - **Person:** Hochschulmitarbeiter (Farbe: Blau).  
 - **Modul:** Lehrfächer und Prüfungsmodule (Farbe: Gelb).  
 - **Fakultät / Einrichtung / Institut:** Organisationseinheiten der Hochschule (Farben: Orange/Orchidee/Hellgrün).  
@@ -12,7 +13,8 @@ Der Wissensgraph unterscheidet mehrere Knotentypen, um die universitäre Hierarc
 
 ## Modulzuordnungen & MOCOGI API
 
-Der `extract_mocogi_data`-Prozess nutzt folgende Pipeline:  
+Der `extract_mocogi_data`-Prozess nutzt folgende Pipeline:
+
 1. **API-Abruf:** Ruft `/studyPrograms` und `/modules` ab.  
 2. **Personen-Auflösung:** Nutzt `/identities` der MOCOGI-API, um IDs in Klarnamen aufzulösen.  
 3. **Titel-Stripping:** Entfernt akademische Grade ("Prof", "Dr", "M.Sc") für einen sauberen Namensabgleich.  
