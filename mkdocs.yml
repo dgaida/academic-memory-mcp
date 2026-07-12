@@ -132,6 +132,10 @@ nav:
               - XAI & Visualisierung: packages/email-classifier/analysis.md
               - Architektur: packages/email-classifier/architecture.md
               - Neuronale Netzarchitektur: packages/email-classifier/nn_architecture.md
+          - TH Personal Graph:
+              - Übersicht: packages/th-personal-graph/index.md
+              - Nutzung der Skripte: packages/th-personal-graph/usage.md
+              - Architektur & Logik: packages/th-personal-graph/architecture.md
       - Entwicklung:
           - Übersicht: development/index.md
           - Docstring Guide: development/docstring-guide.md
