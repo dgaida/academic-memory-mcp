@@ -134,6 +134,27 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/deven/packages/email-classifier/usage/"/>
     </url>
     <url>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/packages/th-personal-graph/</loc>
+        <lastmod>2026-07-12</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/dev/packages/th-personal-graph/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/deven/packages/th-personal-graph/"/>
+    </url>
+    <url>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/packages/th-personal-graph/architecture/</loc>
+        <lastmod>2026-07-12</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/dev/packages/th-personal-graph/architecture/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/deven/packages/th-personal-graph/architecture/"/>
+    </url>
+    <url>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/packages/th-personal-graph/usage/</loc>
+        <lastmod>2026-07-12</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/dev/packages/th-personal-graph/usage/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/deven/packages/th-personal-graph/usage/"/>
+    </url>
+    <url>
         <loc>https://dgaida.github.io/academic-memory-mcp/dev/usage/</loc>
         <lastmod>2026-07-12</lastmod>
         <changefreq>daily</changefreq>
@@ -384,6 +405,27 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/dev/en/packages/email-classifier/usage/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/devpackages/email-classifier/usage/"/>
+    </url>
+    <url>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/en/packages/th-personal-graph/</loc>
+        <lastmod>2026-07-12</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/dev/en/packages/th-personal-graph/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/devpackages/th-personal-graph/"/>
+    </url>
+    <url>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/en/packages/th-personal-graph/architecture/</loc>
+        <lastmod>2026-07-12</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/dev/en/packages/th-personal-graph/architecture/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/devpackages/th-personal-graph/architecture/"/>
+    </url>
+    <url>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/en/packages/th-personal-graph/usage/</loc>
+        <lastmod>2026-07-12</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/dev/en/packages/th-personal-graph/usage/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/devpackages/th-personal-graph/usage/"/>
     </url>
     <url>
         <loc>https://dgaida.github.io/academic-memory-mcp/dev/en/usage/</loc>

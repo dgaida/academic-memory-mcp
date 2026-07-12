@@ -18,7 +18,7 @@
         <link rel="prev" href="../architecture/">
       
       
-        <link rel="next" href="../../../development/">
+        <link rel="next" href="../../th-personal-graph/">
       
       
         
@@ -1578,6 +1578,152 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_13_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_13_2" id="__nav_3_13_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TH Personal Graph
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_13_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_13_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    TH Personal Graph
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../th-personal-graph/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Übersicht
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../th-personal-graph/usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nutzung der Skripte
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../th-personal-graph/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architektur & Logik
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1930,9 +2076,9 @@
 <p>Die Implementierung basiert auf einem <strong>Transformer-basierten Modell</strong> (Standard: <code>sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2</code>). Im Gegensatz zu klassischen Bag-of-Words-Verfahren erfasst diese Architektur den semantischen Kontext und die Beziehungen zwischen den Wörtern im Satzgefüge (z. B. im E-Mail-Betreff und -Inhalt).</p>
 <h3 id="hauptkomponenten">Hauptkomponenten:<a class="headerlink" href="#hauptkomponenten" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Encoder-Backbone</strong>: Das vortrainierte multilinguale MiniLM-Modell dient als Feature-Extractor.</li>
-<li><strong>Input-Strukturierung</strong>: Vorverarbeitung und Zusammenführung von Metadaten und E-Mail-Body in einen zusammenhängenden Eingabetext.</li>
-<li><strong>Classification Head</strong>: Ein Fully Connected Layer (MLP) mit Dropout, das direkt auf das <code>[CLS]</code>-Token (den Repräsentationsvektor der gesamten Sequenz) angewendet wird, um die Wahrscheinlichkeiten für die Zielklassen zu berechnen.</li>
+<li><strong>Encoder-Backbone</strong>: Das vortrainierte multilinguale MiniLM-Modell dient als Feature-Extractor.  </li>
+<li><strong>Input-Strukturierung</strong>: Vorverarbeitung und Zusammenführung von Metadaten und E-Mail-Body in einen zusammenhängenden Eingabetext.  </li>
+<li><strong>Classification Head</strong>: Ein Fully Connected Layer (MLP) mit Dropout, das direkt auf das <code>[CLS]</code>-Token (den Repräsentationsvektor der gesamten Sequenz) angewendet wird, um die Wahrscheinlichkeiten für die Zielklassen zu berechnen.  </li>
 </ol>
 <h2 id="2-datenaufbereitung-input-format">2. Datenaufbereitung &amp; Input-Format<a class="headerlink" href="#2-datenaufbereitung-input-format" title="Permanent link">&para;</a></h2>
 <p>Um wichtige Metadaten explizit zu berücksichtigen und deren starke Signalwirkung (z. B. von Betreffzeilen oder Dateianhängen) zu nutzen, wird der Input vor der Tokenisierung wie folgt strukturiert:</p>
@@ -1940,9 +2086,9 @@
 <div class="language-text highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>SUBJECT: &lt;Betreff&gt; | ATTACHMENTS: &lt;Datei1.pdf, Datei2.docx&gt; [SEP] &lt;Inhalt der E-Mail (anonymisiert)&gt;
 </code></pre></div></p>
 <ul>
-<li><strong>Betreff (Subject)</strong>: Besitzt die höchste Informationsdichte für die Zuordnung zu Kategorien wie z. B. Kolloquien oder Bachelorarbeiten.</li>
-<li><strong>Anhänge (Attachments)</strong>: Dateinamen wie "Antrag_BA.pdf" liefern extrem starke Merkmale für spezifische Klassen (z. B. <code>BachelorThesis</code>).</li>
-<li><strong>Anonymisierung</strong>: Personenbezogene Daten (PII) werden durch die <code>anonymize_th_koeln_names</code>-Logik vor der Weiterverarbeitung durch Platzhalter ersetzt.</li>
+<li><strong>Betreff (Subject)</strong>: Besitzt die höchste Informationsdichte für die Zuordnung zu Kategorien wie z. B. Kolloquien oder Bachelorarbeiten.  </li>
+<li><strong>Anhänge (Attachments)</strong>: Dateinamen wie "Antrag_BA.pdf" liefern extrem starke Merkmale für spezifische Klassen (z. B. <code>BachelorThesis</code>).  </li>
+<li><strong>Anonymisierung</strong>: Personenbezogene Daten (PII) werden durch die <code>anonymize_th_koeln_names</code>-Logik vor der Weiterverarbeitung durch Platzhalter ersetzt.  </li>
 </ul>
 <h2 id="3-vergleich-der-ansatze">3. Vergleich der Ansätze<a class="headerlink" href="#3-vergleich-der-ansatze" title="Permanent link">&para;</a></h2>
 <table>
@@ -2017,21 +2163,21 @@
 </code></pre></div>
 <h2 id="5-trainings-validierungsstrategie">5. Trainings- &amp; Validierungsstrategie<a class="headerlink" href="#5-trainings-validierungsstrategie" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Fine-Tuning</strong>: Die Gewichte des Transformer-Backbones sowie des Klassifikationskopfes werden mit einer niedrigen Learning Rate auf den TH-Köln-spezifischen E-Mail-Klassen trainiert.</li>
-<li><strong>Klassen-Gewichtung (Weighted Cross-Entropy)</strong>: Da einige Klassen deutlich seltener vorkommen (z. B. <code>SHK</code> vs. <code>Others</code>), wird ein gewichteter Cross-Entropy-Loss verwendet, um die Klassifizierung seltener Klassen zu verbessern.</li>
-<li><strong>Maximale Sequenzlänge</strong>: Auf 512 Token begrenzt, was für E-Mails einen optimalen Kompromiss aus Kontextgröße und Trainingsgeschwindigkeit darstellt.</li>
+<li><strong>Fine-Tuning</strong>: Die Gewichte des Transformer-Backbones sowie des Klassifikationskopfes werden mit einer niedrigen Learning Rate auf den TH-Köln-spezifischen E-Mail-Klassen trainiert.  </li>
+<li><strong>Klassen-Gewichtung (Weighted Cross-Entropy)</strong>: Da einige Klassen deutlich seltener vorkommen (z. B. <code>SHK</code> vs. <code>Others</code>), wird ein gewichteter Cross-Entropy-Loss verwendet, um die Klassifizierung seltener Klassen zu verbessern.  </li>
+<li><strong>Maximale Sequenzlänge</strong>: Auf 512 Token begrenzt, was für E-Mails einen optimalen Kompromiss aus Kontextgröße und Trainingsgeschwindigkeit darstellt.  </li>
 </ul>
 <h2 id="6-zukunftige-verbesserungsmoglichkeiten">6. Zukünftige Verbesserungsmöglichkeiten<a class="headerlink" href="#6-zukunftige-verbesserungsmoglichkeiten" title="Permanent link">&para;</a></h2>
 <p>Obwohl das System bereits vollständig einsatzbereit ist, bieten sich für zukünftige Iterationen folgende Optimierungen an:</p>
 <ol>
-<li><strong>Modell-Quantisierung (Quantization)</strong>:</li>
-<li>Konvertierung des Modells in ein 8-Bit-Format (INT8) mittels PyTorch, um den Speicherbedarf auf Offline-Systemen (z. B. Laptops ohne dedizierte GPU) zu halbieren und die Inferenzgeschwindigkeit zu steigern.</li>
-<li><strong>LoRA Fine-Tuning für größere lokale Modelle</strong>:</li>
-<li>Statt eines MiniLM-Modells könnten größere multilinguale LLMs (z. B. Llama 3 oder Mistral) über Low-Rank Adaptation (LoRA) auf Klassifikation trainiert werden, sofern ausreichend Rechenressourcen vorhanden sind.</li>
-<li><strong>Erweitertes Hyperparameter-Tuning</strong>:</li>
-<li>Systematische Suche nach optimalen Learning Rates, Dropout-Raten und Batch-Sizes mittels Frameworks wie Optuna, um die Klassifikationsleistung (F1-Score) noch weiter zu maximieren.</li>
-<li><strong>Knowledge Distillation</strong>:</li>
-<li>Destillieren eines sehr großen Modells in ein kleineres, hocheffizientes Transformer-Modell, das die hohe Vorhersagegenauigkeit beibehält, aber extrem schnell ausgeführt werden kann.</li>
+<li><strong>Modell-Quantisierung (Quantization)</strong>:  </li>
+<li>Konvertierung des Modells in ein 8-Bit-Format (INT8) mittels PyTorch, um den Speicherbedarf auf Offline-Systemen (z. B. Laptops ohne dedizierte GPU) zu halbieren und die Inferenzgeschwindigkeit zu steigern.  </li>
+<li><strong>LoRA Fine-Tuning für größere lokale Modelle</strong>:  </li>
+<li>Statt eines MiniLM-Modells könnten größere multilinguale LLMs (z. B. Llama 3 oder Mistral) über Low-Rank Adaptation (LoRA) auf Klassifikation trainiert werden, sofern ausreichend Rechenressourcen vorhanden sind.  </li>
+<li><strong>Erweitertes Hyperparameter-Tuning</strong>:  </li>
+<li>Systematische Suche nach optimalen Learning Rates, Dropout-Raten und Batch-Sizes mittels Frameworks wie Optuna, um die Klassifikationsleistung (F1-Score) noch weiter zu maximieren.  </li>
+<li><strong>Knowledge Distillation</strong>:  </li>
+<li>Destillieren eines sehr großen Modells in ein kleineres, hocheffizientes Transformer-Modell, das die hohe Vorhersagegenauigkeit beibehält, aber extrem schnell ausgeführt werden kann.  </li>
 </ol>
 
 
@@ -2087,7 +2233,7 @@
         
         
           
-          <a href="../../../development/" class="md-footer__link md-footer__link--next" aria-label="Weiter: Übersicht">
+          <a href="../../th-personal-graph/" class="md-footer__link md-footer__link--next" aria-label="Weiter: Übersicht">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Weiter
