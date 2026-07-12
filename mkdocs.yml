@@ -124,8 +124,6 @@ nav:
       - Memory Update: usage/memory.md
       - Ontology & Aliase: usage/ontology-learning.md
       - API: api/index.md
-      - Vorschläge:
-          - Neuronale Netzarchitektur: proposals/nn_architecture_proposal.md
       - Packages:
           - E-Mail Klassifizierer:
               - Übersicht: packages/email-classifier/index.md
@@ -133,6 +131,7 @@ nav:
               - Training & Evaluierung: packages/email-classifier/training.md
               - XAI & Visualisierung: packages/email-classifier/analysis.md
               - Architektur: packages/email-classifier/architecture.md
+              - Neuronale Netzarchitektur: packages/email-classifier/nn_architecture.md
       - Entwicklung:
           - Übersicht: development/index.md
           - Docstring Guide: development/docstring-guide.md

@@ -288,6 +288,8 @@ class Agent:
             subject (str): Betreff des Kalendereintrags.
             student_email (str): E-Mail-Adresse des Studenten.
             original_mail_date (str, optional): Datum der studentischen Mail (DD.MM.YY). Defaults to None.
+            body (str, optional): Der Inhalt der E-Mail für den Kalendereintrag. Defaults to None.
+            is_colloquium (bool): Gibt an, ob es sich um ein Kolloquium handelt. Defaults to False.
 
         Returns:
             str: Erfolgs- oder Fehlermeldung.

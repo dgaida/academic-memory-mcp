@@ -12,6 +12,13 @@ class KnowledgeGraphEngine:
     """Extrahiert Entitäten und Beziehungen aus Zusammenfassungen für den Wissensgraphen."""
 
     def __init__(self, store: MetadataStore, summarizer: Summarizer, ontology: Optional[OntologyConfig] = None) -> None:
+        """Initialisiert die KnowledgeGraphEngine.
+
+        Args:
+            store (MetadataStore): Metadatenspeicher für den Graphen.
+            summarizer (Summarizer): LLM Summarizer für Extraktion.
+            ontology (Optional[OntologyConfig]): Ontologie-Konfiguration.
+        """
         self.store = store
         self.summarizer = summarizer
         self.ontology = ontology or get_config().ontology

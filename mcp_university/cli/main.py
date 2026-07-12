@@ -206,6 +206,7 @@ def search(
 
     Args:
         query: Der Suchbegriff oder die Frage.
+        debug: Wenn True, wird Debug-Logging aktiviert.
     """
     setup_logging(debug)
     cfg = get_config()

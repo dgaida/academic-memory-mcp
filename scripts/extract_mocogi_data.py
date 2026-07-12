@@ -33,6 +33,11 @@ class PersonResolver:
     """Resolves person IDs or abbreviations to full names and handles title stripping."""
 
     def __init__(self, base_url: str) -> None:
+        """Initialisiert den PersonResolver.
+
+        Args:
+            base_url (str): Die Basis-URL der MOCOGI-API.
+        """
         self.base_url = base_url
         self.identity_map: Dict[str, str] = {}
         self.loaded = False

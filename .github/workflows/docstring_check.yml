@@ -1,0 +1,29 @@
+name: Docstring Check
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  docstring-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+
+      - name: Install Ruff
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff
+
+      - name: Run Docstring Check
+        run: |
+          ruff check --select D101,D102,D103,D107,D417 mcp_university/ packages/email_classifier/src/ scripts/

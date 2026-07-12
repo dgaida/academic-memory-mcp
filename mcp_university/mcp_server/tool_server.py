@@ -130,6 +130,8 @@ def create_tool_server() -> FastMCP:
             subject: Der Betreff des Kalendereintrags.
             student_email: Die E-Mail-Adresse des Studenten, der eingeladen werden soll.
             original_mail_date: Das Datum der ursprünglichen E-Mail des Studenten (Format DD.MM.YY), wird im Body des Termins vermerkt.
+            body: Der Inhalt der E-Mail für den Kalendereintrag (optional).
+            is_colloquium: Gibt an, ob es sich um ein Kolloquium handelt (optional).
 
         Returns:
             Eine Erfolgsmeldung mit Details zum Termin oder eine Fehlermeldung, falls der Slot belegt ist oder ein technisches Problem auftrat.
