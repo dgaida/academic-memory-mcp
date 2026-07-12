@@ -1532,7 +1532,7 @@
   <span class="md-ellipsis">
     
   
-    Vorschläge
+    Packages
   
 
     
@@ -1548,96 +1548,6 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Vorschläge
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../proposals/nn_architecture_proposal/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Neuronale Netzarchitektur
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_14" >
-        
-          
-          <label class="md-nav__link" for="__nav_3_14" id="__nav_3_14_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Packages
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_14_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_14">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
     Packages
   
 
@@ -1666,10 +1576,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_14_1" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_13_1" >
         
           
-          <label class="md-nav__link" for="__nav_3_14_1" id="__nav_3_14_1_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_13_1" id="__nav_3_13_1_label" tabindex="0">
             
   
   
@@ -1687,8 +1597,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_14_1_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_14_1">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_13_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_13_1">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1838,6 +1748,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../packages/email-classifier/nn_architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Neuronale Netzarchitektur
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1876,10 +1814,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_15" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_14" >
         
           
-          <label class="md-nav__link" for="__nav_3_15" id="__nav_3_15_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_14" id="__nav_3_14_label" tabindex="0">
             
   
   
@@ -1897,8 +1835,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_15_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_15">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_14_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_14">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2543,10 +2481,10 @@
 <h4 id="5-create-task-in-calendar-final-submission">5) Create Task in Calendar (Final Submission)<a class="headerlink" href="#5-create-task-in-calendar-final-submission" title="Permanent link">&para;</a></h4>
 <p><strong>This is the central action where the final submission of a thesis is automatically detected and processed.</strong> When the email classifier or the user in the GUI classifies an email as a final submission, this action is selected. It combines several automated steps for final theses:</p>
 <ol>
-<li><strong>Save Attachments:</strong> All email attachments are automatically saved in the student's parent directory (<code>Semester / Lastname /</code>) via <code>save_email_attachments</code>.</li>
-<li><strong>Colloquium Configuration (<code>config.json</code>):</strong> A <code>config.json</code> configuration file is automatically created in the student's main directory via <code>create_colloquium_config</code> (or updated with the filename of the PDF thesis from the attachment). This file is used for the <em>colloquium-protocol-creator</em>.</li>
-<li><strong>Calendar Reminder:</strong> A calendar entry is created via <code>manage_calendar_appointment</code> exactly <strong>7 days after the email is received (at 08:00 AM)</strong> to remind you to read and grade the thesis.</li>
-<li><strong>Reply Draft:</strong> A reply draft confirming receipt of the thesis is automatically generated.</li>
+<li><strong>Save Attachments:</strong> All email attachments are automatically saved in the student's parent directory (<code>Semester / Lastname /</code>) via <code>save_email_attachments</code>.  </li>
+<li><strong>Colloquium Configuration (<code>config.json</code>):</strong> A <code>config.json</code> configuration file is automatically created in the student's main directory via <code>create_colloquium_config</code> (or updated with the filename of the PDF thesis from the attachment). This file is used for the <em>colloquium-protocol-creator</em>.  </li>
+<li><strong>Calendar Reminder:</strong> A calendar entry is created via <code>manage_calendar_appointment</code> exactly <strong>7 days after the email is received (at 08:00 AM)</strong> to remind you to read and grade the thesis.  </li>
+<li><strong>Reply Draft:</strong> A reply draft confirming receipt of the thesis is automatically generated.  </li>
 </ol>
 <h4 id="6-colloquium-appointment-with-configjson-automation">6) Colloquium Appointment (with <code>config.json</code> Automation)<a class="headerlink" href="#6-colloquium-appointment-with-configjson-automation" title="Permanent link">&para;</a></h4>
 <p>Similar to action 3, but the duration is fixed at <strong>60 minutes</strong> and a special subject is chosen. In addition, this action has been significantly enhanced to automate the entire colloquium process:</p>

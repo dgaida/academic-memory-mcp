@@ -1367,7 +1367,7 @@
   <span class="md-ellipsis">
     
   
-    Vorschläge
+    Packages
   
 
     
@@ -1383,96 +1383,6 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Vorschläge
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../proposals/nn_architecture_proposal/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Neuronale Netzarchitektur
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_14" >
-        
-          
-          <label class="md-nav__link" for="__nav_3_14" id="__nav_3_14_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Packages
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_14_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_14">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
     Packages
   
 
@@ -1501,10 +1411,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_14_1" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_13_1" >
         
           
-          <label class="md-nav__link" for="__nav_3_14_1" id="__nav_3_14_1_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_13_1" id="__nav_3_13_1_label" tabindex="0">
             
   
   
@@ -1522,8 +1432,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_14_1_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_14_1">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_13_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_13_1">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1673,6 +1583,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../packages/email-classifier/nn_architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Neuronale Netzarchitektur
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1711,10 +1649,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_15" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_14" >
         
           
-          <label class="md-nav__link" for="__nav_3_15" id="__nav_3_15_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_14" id="__nav_3_14_label" tabindex="0">
             
   
   
@@ -1732,8 +1670,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_15_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_15">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_14_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_14">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2260,9 +2198,9 @@
 <h2 id="6-ontologyyaml">6. ontology.yaml<a class="headerlink" href="#6-ontologyyaml" title="Permanent link">&para;</a></h2>
 <p>Definiert das Schema des semantischen Wissensgraphen (Knotentypen, Beziehungstypen und Kantenprioritäten). Dies steuert, wie Alias-Namen gelernt und Edge-Konflikte (z.B. Überschreiben einer "angefragt" Beziehung durch eine "schreibt" Beziehung) aufgelöst werden.</p>
 <ul>
-<li><code>node_types</code>: Gültige Entitätstypen (z.B. Studierende, Modul, Fakultät).</li>
-<li><code>edge_types</code>: Gültige Beziehungstypen (z.B. schreibt Bachelorarbeit, ist Erstprüfer).</li>
-<li><code>edge_priorities</code>: Definiert die Priorität von Kanten, sodass höherwertige Beziehungen (z.B. "hat Bachelorarbeit abgeschlossen") geringerwertige Vorgängerbeziehungen ("schreibt Bachelorarbeit") im Graphen automatisch überschreiben oder ersetzen dürfen.</li>
+<li><code>node_types</code>: Gültige Entitätstypen (z.B. Studierende, Modul, Fakultät).  </li>
+<li><code>edge_types</code>: Gültige Beziehungstypen (z.B. schreibt Bachelorarbeit, ist Erstprüfer).  </li>
+<li><code>edge_priorities</code>: Definiert die Priorität von Kanten, sodass höherwertige Beziehungen (z.B. "hat Bachelorarbeit abgeschlossen") geringerwertige Vorgängerbeziehungen ("schreibt Bachelorarbeit") im Graphen automatisch überschreiben oder ersetzen dürfen.  </li>
 </ul>
 <hr />
 <h2 id="7-secretsenv-und-env-umgebungsvariablen">7. secrets.env und .env (Umgebungsvariablen)<a class="headerlink" href="#7-secretsenv-und-env-umgebungsvariablen" title="Permanent link">&para;</a></h2>

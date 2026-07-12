@@ -12,23 +12,23 @@
         <meta name="author" content="Senior Python Architect">
       
       
-        <link rel="canonical" href="https://dgaida.github.io/academic-memory-mcp/dev/proposals/nn_architecture_proposal/">
+        <link rel="canonical" href="https://dgaida.github.io/academic-memory-mcp/dev/packages/email-classifier/nn_architecture/">
       
       
-        <link rel="prev" href="../../api/">
+        <link rel="prev" href="../architecture/">
       
       
-        <link rel="next" href="../../packages/email-classifier/">
+        <link rel="next" href="../../../development/">
       
       
         
           <link rel="alternate" href="./" hreflang="de">
         
-          <link rel="alternate" href="../../en/proposals/nn_architecture_proposal/" hreflang="en">
+          <link rel="alternate" href="../../../en/packages/email-classifier/nn_architecture/" hreflang="en">
         
       
       
-      <link rel="icon" href="../../assets/images/favicon.png">
+      <link rel="icon" href="../../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
@@ -37,10 +37,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -59,9 +59,9 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#vorschlag-neuronale-netzarchitektur-zur-e-mail-klassifizierung" class="md-skip">
+        <a href="#neuronale-netzarchitektur-zur-e-mail-klassifizierung" class="md-skip">
           Zum Inhalt
         </a>
       
@@ -104,7 +104,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Kopfzeile">
-    <a href="../.." title="MCP University Memory System" class="md-header__button md-logo" aria-label="MCP University Memory System" data-md-component="logo">
+    <a href="../../.." title="MCP University Memory System" class="md-header__button md-logo" aria-label="MCP University Memory System" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -177,7 +177,7 @@
           </li>
         
           <li class="md-select__item">
-            <a href="../../en/proposals/nn_architecture_proposal/" hreflang="en" class="md-select__link">
+            <a href="../../../en/packages/email-classifier/nn_architecture/" hreflang="en" class="md-select__link">
               English
             </a>
           </li>
@@ -256,7 +256,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../.." class="md-tabs__link">
+      <a href="../../.." class="md-tabs__link">
         
   
   
@@ -277,7 +277,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../getting-started/" class="md-tabs__link">
+        <a href="../../../getting-started/" class="md-tabs__link">
           
   
   
@@ -299,7 +299,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="../../architecture/" class="md-tabs__link">
+        <a href="../../../architecture/" class="md-tabs__link">
           
   
   
@@ -333,7 +333,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="MCP University Memory System" class="md-nav__button md-logo" aria-label="MCP University Memory System" data-md-component="logo">
+    <a href="../../.." title="MCP University Memory System" class="md-nav__button md-logo" aria-label="MCP University Memory System" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -351,7 +351,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href="../../.." class="md-nav__link">
         
   
   
@@ -432,7 +432,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/" class="md-nav__link">
+      <a href="../../../getting-started/" class="md-nav__link">
         
   
   
@@ -460,7 +460,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/email-search/" class="md-nav__link">
+      <a href="../../../usage/email-search/" class="md-nav__link">
         
   
   
@@ -488,7 +488,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/appointment-management/" class="md-nav__link">
+      <a href="../../../usage/appointment-management/" class="md-nav__link">
         
   
   
@@ -516,7 +516,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/email-workflow/" class="md-nav__link">
+      <a href="../../../usage/email-workflow/" class="md-nav__link">
         
   
   
@@ -544,7 +544,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/profiles/" class="md-nav__link">
+      <a href="../../../usage/profiles/" class="md-nav__link">
         
   
   
@@ -572,7 +572,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/final-submission/" class="md-nav__link">
+      <a href="../../../usage/final-submission/" class="md-nav__link">
         
   
   
@@ -600,7 +600,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/outlook-macros/" class="md-nav__link">
+      <a href="../../../usage/outlook-macros/" class="md-nav__link">
         
   
   
@@ -628,7 +628,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../installation/" class="md-nav__link">
+      <a href="../../../installation/" class="md-nav__link">
         
   
   
@@ -656,7 +656,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../setup/" class="md-nav__link">
+      <a href="../../../setup/" class="md-nav__link">
         
   
   
@@ -684,7 +684,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../configuration/" class="md-nav__link">
+      <a href="../../../configuration/" class="md-nav__link">
         
   
   
@@ -712,7 +712,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/scripts/" class="md-nav__link">
+      <a href="../../../usage/scripts/" class="md-nav__link">
         
   
   
@@ -740,7 +740,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../troubleshooting/" class="md-nav__link">
+      <a href="../../../troubleshooting/" class="md-nav__link">
         
   
   
@@ -832,7 +832,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../architecture/" class="md-nav__link">
+      <a href="../../../architecture/" class="md-nav__link">
         
   
   
@@ -860,7 +860,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/" class="md-nav__link">
+      <a href="../../../usage/" class="md-nav__link">
         
   
   
@@ -888,7 +888,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/indexing-details/" class="md-nav__link">
+      <a href="../../../usage/indexing-details/" class="md-nav__link">
         
   
   
@@ -916,7 +916,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/database-management/" class="md-nav__link">
+      <a href="../../../usage/database-management/" class="md-nav__link">
         
   
   
@@ -944,7 +944,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/database-processes/" class="md-nav__link">
+      <a href="../../../usage/database-processes/" class="md-nav__link">
         
   
   
@@ -972,7 +972,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/mcp/" class="md-nav__link">
+      <a href="../../../usage/mcp/" class="md-nav__link">
         
   
   
@@ -1000,7 +1000,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/mocogi-extraction/" class="md-nav__link">
+      <a href="../../../usage/mocogi-extraction/" class="md-nav__link">
         
   
   
@@ -1028,7 +1028,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/email-parsing/" class="md-nav__link">
+      <a href="../../../usage/email-parsing/" class="md-nav__link">
         
   
   
@@ -1056,7 +1056,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/rag-process/" class="md-nav__link">
+      <a href="../../../usage/rag-process/" class="md-nav__link">
         
   
   
@@ -1084,7 +1084,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/memory/" class="md-nav__link">
+      <a href="../../../usage/memory/" class="md-nav__link">
         
   
   
@@ -1112,7 +1112,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/ontology-learning/" class="md-nav__link">
+      <a href="../../../usage/ontology-learning/" class="md-nav__link">
         
   
   
@@ -1140,7 +1140,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/" class="md-nav__link">
+      <a href="../../../api/" class="md-nav__link">
         
   
   
@@ -1196,7 +1196,7 @@
   <span class="md-ellipsis">
     
   
-    Vorschläge
+    Packages
   
 
     
@@ -1212,11 +1212,205 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Vorschläge
+    Packages
   
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_13_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_13_1" id="__nav_3_13_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    E-Mail Klassifizierer
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_13_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_13_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    E-Mail Klassifizierer
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Übersicht
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nutzung der Skripte
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../training/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Training & Evaluierung
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    XAI & Visualisierung
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architektur
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -1324,10 +1518,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#3-warum-diese-architektur" class="md-nav__link">
+  <a href="#3-vergleich-der-ansatze" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Warum diese Architektur?
+        3. Vergleich der Ansätze
       
     </span>
   </a>
@@ -1335,10 +1529,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#4-implementierungsskizze-pytorch-stil" class="md-nav__link">
+  <a href="#4-implementierungsdetails-enginepy" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. Implementierungsskizze (PyTorch-Stil)
+        4. Implementierungsdetails (engine.py)
       
     </span>
   </a>
@@ -1346,10 +1540,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#5-trainingsstrategie" class="md-nav__link">
+  <a href="#5-trainings-validierungsstrategie" class="md-nav__link">
     <span class="md-ellipsis">
       
-        5. Trainingsstrategie
+        5. Trainings- &amp; Validierungsstrategie
       
     </span>
   </a>
@@ -1357,10 +1551,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#6-nachste-schritte" class="md-nav__link">
+  <a href="#6-zukunftige-verbesserungsmoglichkeiten" class="md-nav__link">
     <span class="md-ellipsis">
       
-        6. Nächste Schritte
+        6. Zukünftige Verbesserungsmöglichkeiten
       
     </span>
   </a>
@@ -1370,6 +1564,14 @@
     </ul>
   
 </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
       
     </li>
   
@@ -1419,7 +1621,7 @@
   <span class="md-ellipsis">
     
   
-    Packages
+    Entwicklung
   
 
     
@@ -1435,61 +1637,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Packages
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_14_1" >
-        
-          
-          <label class="md-nav__link" for="__nav_3_14_1" id="__nav_3_14_1_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    E-Mail Klassifizierer
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_14_1_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_14_1">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    E-Mail Klassifizierer
+    Entwicklung
   
 
           </label>
@@ -1502,7 +1650,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../packages/email-classifier/" class="md-nav__link">
+      <a href="../../../development/" class="md-nav__link">
         
   
   
@@ -1530,220 +1678,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../packages/email-classifier/usage/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Nutzung der Skripte
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../packages/email-classifier/training/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Training & Evaluierung
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../packages/email-classifier/analysis/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    XAI & Visualisierung
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../packages/email-classifier/architecture/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Architektur
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-        
-          
-          
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
-      
-        
-        
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_15" >
-        
-          
-          <label class="md-nav__link" for="__nav_3_15" id="__nav_3_15_label" tabindex="">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Entwicklung
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_15_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_15">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Entwicklung
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../development/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Übersicht
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../development/docstring-guide/" class="md-nav__link">
+      <a href="../../../development/docstring-guide/" class="md-nav__link">
         
   
   
@@ -1771,7 +1706,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/changelog/" class="md-nav__link">
+      <a href="../../../development/changelog/" class="md-nav__link">
         
   
   
@@ -1799,7 +1734,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/versioning/" class="md-nav__link">
+      <a href="../../../development/versioning/" class="md-nav__link">
         
   
   
@@ -1827,7 +1762,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../metrics/" class="md-nav__link">
+      <a href="../../../metrics/" class="md-nav__link">
         
   
   
@@ -1929,10 +1864,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#3-warum-diese-architektur" class="md-nav__link">
+  <a href="#3-vergleich-der-ansatze" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Warum diese Architektur?
+        3. Vergleich der Ansätze
       
     </span>
   </a>
@@ -1940,10 +1875,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#4-implementierungsskizze-pytorch-stil" class="md-nav__link">
+  <a href="#4-implementierungsdetails-enginepy" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. Implementierungsskizze (PyTorch-Stil)
+        4. Implementierungsdetails (engine.py)
       
     </span>
   </a>
@@ -1951,10 +1886,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#5-trainingsstrategie" class="md-nav__link">
+  <a href="#5-trainings-validierungsstrategie" class="md-nav__link">
     <span class="md-ellipsis">
       
-        5. Trainingsstrategie
+        5. Trainings- &amp; Validierungsstrategie
       
     </span>
   </a>
@@ -1962,10 +1897,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#6-nachste-schritte" class="md-nav__link">
+  <a href="#6-zukunftige-verbesserungsmoglichkeiten" class="md-nav__link">
     <span class="md-ellipsis">
       
-        6. Nächste Schritte
+        6. Zukünftige Verbesserungsmöglichkeiten
       
     </span>
   </a>
@@ -1989,88 +1924,115 @@
 
 
 
-<h1 id="vorschlag-neuronale-netzarchitektur-zur-e-mail-klassifizierung">Vorschlag: Neuronale Netzarchitektur zur E-Mail-Klassifizierung<a class="headerlink" href="#vorschlag-neuronale-netzarchitektur-zur-e-mail-klassifizierung" title="Permanent link">&para;</a></h1>
-<p>Dieser Vorschlag beschreibt eine Alternative zu den aktuellen Modellen (XGBoost/Random Forest), die direkt auf den (anonymisierten) Rohdaten der E-Mails arbeitet, anstatt auf statistischen Merkmalen wie TF-IDF.</p>
+<h1 id="neuronale-netzarchitektur-zur-e-mail-klassifizierung">Neuronale Netzarchitektur zur E-Mail-Klassifizierung<a class="headerlink" href="#neuronale-netzarchitektur-zur-e-mail-klassifizierung" title="Permanent link">&para;</a></h1>
+<p>Diese Dokumentation beschreibt die im Package <code>email-classifier</code> integrierte und voll funktionsfähige Transformer-basierte Neuronale Netzarchitektur zur E-Mail-Klassifizierung. Sie dient als leistungsstarke Alternative zu den klassischen Klassifikationsmodellen (wie Random Forest oder XGBoost).</p>
 <h2 id="1-architektur-ubersicht">1. Architektur-Übersicht<a class="headerlink" href="#1-architektur-ubersicht" title="Permanent link">&para;</a></h2>
-<p>Als Architektur wird ein <strong>Transformer-basiertes Modell</strong> (z. B. DistilBERT oder ein multilinguales MiniLM) vorgeschlagen. Im Gegensatz zu klassischen Verfahren, die Wortfrequenzen zählen, erfassen Transformer den semantischen Kontext und die Beziehung zwischen Wörtern (wie z. B. in Betreffzeilen und Body).</p>
+<p>Die Implementierung basiert auf einem <strong>Transformer-basierten Modell</strong> (Standard: <code>sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2</code>). Im Gegensatz zu klassischen Bag-of-Words-Verfahren erfasst diese Architektur den semantischen Kontext und die Beziehungen zwischen den Wörtern im Satzgefüge (z. B. im E-Mail-Betreff und -Inhalt).</p>
 <h3 id="hauptkomponenten">Hauptkomponenten:<a class="headerlink" href="#hauptkomponenten" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Encoder</strong>: Ein vortrainiertes Modell wie <code>sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2</code>.  </li>
-<li><strong>Input-Formatting</strong>: Strukturierung der Rohdaten in ein für Transformer optimiertes Format.  </li>
-<li><strong>Classification Head</strong>: Ein Fully Connected Layer (MLP) mit Softmax-Aktivierung über dem <code>[CLS]</code>-Token oder einem Mean-Pooling-Vektor.  </li>
+<li><strong>Encoder-Backbone</strong>: Das vortrainierte multilinguale MiniLM-Modell dient als Feature-Extractor.</li>
+<li><strong>Input-Strukturierung</strong>: Vorverarbeitung und Zusammenführung von Metadaten und E-Mail-Body in einen zusammenhängenden Eingabetext.</li>
+<li><strong>Classification Head</strong>: Ein Fully Connected Layer (MLP) mit Dropout, das direkt auf das <code>[CLS]</code>-Token (den Repräsentationsvektor der gesamten Sequenz) angewendet wird, um die Wahrscheinlichkeiten für die Zielklassen zu berechnen.</li>
 </ol>
 <h2 id="2-datenaufbereitung-input-format">2. Datenaufbereitung &amp; Input-Format<a class="headerlink" href="#2-datenaufbereitung-input-format" title="Permanent link">&para;</a></h2>
-<p>Anstatt den Text einfach flach zu übergeben, werden die Metadaten und der Inhalt strukturiert tokenisiert:</p>
+<p>Um wichtige Metadaten explizit zu berücksichtigen und deren starke Signalwirkung (z. B. von Betreffzeilen oder Dateianhängen) zu nutzen, wird der Input vor der Tokenisierung wie folgt strukturiert:</p>
 <p><strong>Format:</strong>
-<div class="language-text highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>[CLS] SUBJECT: &lt;Betreff&gt; | ATTACHMENTS: &lt;Datei1.pdf, Datei2.docx&gt; [SEP] &lt;Inhalt der E-Mail (anonymisiert)&gt; [SEP]
+<div class="language-text highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>SUBJECT: &lt;Betreff&gt; | ATTACHMENTS: &lt;Datei1.pdf, Datei2.docx&gt; [SEP] &lt;Inhalt der E-Mail (anonymisiert)&gt;
 </code></pre></div></p>
 <ul>
-<li><strong>Betreff</strong>: Hat oft die höchste Informationsdichte für die Klassifizierung.  </li>
-<li><strong>Anhänge</strong>: Die Dateinamen (z. B. "Antrag_BA.pdf") geben starke Hinweise auf Klassen wie "BachelorThesis".  </li>
-<li><strong>Anonymisierung</strong>: Die bereits implementierte <code>anonymize_th_koeln_names</code>-Logik bleibt erhalten, um PII zu schützen, während die Struktur (z. B. Vorhandensein einer TH-Köln Adresse vs. Externe) durch Platzhalter wie <code>max.mustermann@student.th-koeln.de</code> erhalten bleibt.  </li>
+<li><strong>Betreff (Subject)</strong>: Besitzt die höchste Informationsdichte für die Zuordnung zu Kategorien wie z. B. Kolloquien oder Bachelorarbeiten.</li>
+<li><strong>Anhänge (Attachments)</strong>: Dateinamen wie "Antrag_BA.pdf" liefern extrem starke Merkmale für spezifische Klassen (z. B. <code>BachelorThesis</code>).</li>
+<li><strong>Anonymisierung</strong>: Personenbezogene Daten (PII) werden durch die <code>anonymize_th_koeln_names</code>-Logik vor der Weiterverarbeitung durch Platzhalter ersetzt.</li>
 </ul>
-<h2 id="3-warum-diese-architektur">3. Warum diese Architektur?<a class="headerlink" href="#3-warum-diese-architektur" title="Permanent link">&para;</a></h2>
+<h2 id="3-vergleich-der-ansatze">3. Vergleich der Ansätze<a class="headerlink" href="#3-vergleich-der-ansatze" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
 <th style="text-align: left;">Merkmal</th>
-<th style="text-align: left;">Klassisch (TF-IDF + XGBoost)</th>
+<th style="text-align: left;">Klassisch (TF-IDF + XGBoost/RF)</th>
 <th style="text-align: left;">Transformer (NN)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
+<td style="text-align: left;"><strong>Status</strong></td>
+<td style="text-align: left;">Implementiert (Standard offline)</td>
+<td style="text-align: left;">Implementiert und einsatzbereit</td>
+</tr>
+<tr>
 <td style="text-align: left;"><strong>Kontext</strong></td>
 <td style="text-align: left;">Ignoriert Wortreihenfolge (Bag-of-Words).</td>
-<td style="text-align: left;">Erfasst semantische Zusammenhänge.</td>
+<td style="text-align: left;">Erfasst komplexe semantische Zusammenhänge.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Vokabular</strong></td>
-<td style="text-align: left;">Begrenzt auf Trainingsvokabular.</td>
-<td style="text-align: left;">Nutzt Subword-Tokenisierung (handhabt OOV Wörter besser).</td>
+<td style="text-align: left;">Begrenzt auf das im Training gesehene Vokabular.</td>
+<td style="text-align: left;">Nutzt Subword-Tokenisierung (bessere Handhabung von OOV-Wörtern).</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Metadaten</strong></td>
-<td style="text-align: left;">Muss manuell als Features hinzugefügt werden.</td>
-<td style="text-align: left;">Kann Metadaten (Anhänge) direkt im Textfluss lernen.</td>
+<td style="text-align: left;">Müssen manuell als zusätzliche Features extrahiert werden.</td>
+<td style="text-align: left;">Werden über das strukturierte Input-Format direkt im Textfluss gelernt.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Transfer Learning</strong></td>
 <td style="text-align: left;">Nicht möglich.</td>
-<td style="text-align: left;">Nutzt vortrainiertes Wissen über Sprache.</td>
+<td style="text-align: left;">Nutzt vortrainiertes, tiefes Sprachwissen.</td>
 </tr>
 </tbody>
 </table>
-<h2 id="4-implementierungsskizze-pytorch-stil">4. Implementierungsskizze (PyTorch-Stil)<a class="headerlink" href="#4-implementierungsskizze-pytorch-stil" title="Permanent link">&para;</a></h2>
-<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoModel</span>
+<h2 id="4-implementierungsdetails-enginepy">4. Implementierungsdetails (<code>engine.py</code>)<a class="headerlink" href="#4-implementierungsdetails-enginepy" title="Permanent link">&para;</a></h2>
+<p>Die tatsächliche PyTorch-Implementierung ist in <code>packages/email_classifier/src/email_classifier/engine.py</code> unter der Klasse <code>EmailTransformerClassifier</code> realisiert:</p>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">EmailTransformerClassifier</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Transformer-basiertes Modell zur E-Mail-Klassifizierung.&quot;&quot;&quot;</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="k">class</span><span class="w"> </span><span class="nc">EmailTransformerClassifier</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">):</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">transformer</span> <span class="o">=</span> <span class="n">AutoModel</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">classifier</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transformer</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">hidden_size</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">)</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_ids</span><span class="p">,</span> <span class="n">attention_mask</span><span class="p">):</span>
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>        <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transformer</span><span class="p">(</span><span class="n">input_ids</span><span class="o">=</span><span class="n">input_ids</span><span class="p">,</span> <span class="n">attention_mask</span><span class="o">=</span><span class="n">attention_mask</span><span class="p">)</span>
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>        <span class="c1"># Nutze das [CLS] Token (index 0) für die Klassifizierung</span>
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>        <span class="n">cls_output</span> <span class="o">=</span> <span class="n">outputs</span><span class="o">.</span><span class="n">last_hidden_state</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>        <span class="n">cls_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="n">cls_output</span><span class="p">)</span>
-<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">classifier</span><span class="p">(</span><span class="n">cls_output</span><span class="p">)</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialisiert das Transformer-Modell.</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="sd">        Args:</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="sd">            model_name (str): Name des Modells.</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="sd">            num_classes (int): Anzahl der Klassen.</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="sd">            token (Optional[str]): HuggingFace Token.</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">transformer</span> <span class="o">=</span> <span class="n">AutoModel</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">)</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">classifier</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transformer</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">hidden_size</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">)</span>
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_ids</span><span class="p">,</span> <span class="n">attention_mask</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Führt den Forward-Pass des Modells aus.</span>
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="sd">        Args:</span>
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="sd">            input_ids (torch.Tensor): Input token IDs.</span>
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="sd">            attention_mask (torch.Tensor): Attention mask.</span>
+<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>
+<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="sd">        Returns:</span>
+<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="sd">            torch.Tensor: Die Logits des Modells für die Klassen.</span>
+<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>        <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transformer</span><span class="p">(</span><span class="n">input_ids</span><span class="o">=</span><span class="n">input_ids</span><span class="p">,</span> <span class="n">attention_mask</span><span class="o">=</span><span class="n">attention_mask</span><span class="p">)</span>
+<a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>        <span class="c1"># Nutze das [CLS] Token (erster Vektor der Sequenz) für die Klassifizierung</span>
+<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>        <span class="n">cls_output</span> <span class="o">=</span> <span class="n">outputs</span><span class="o">.</span><span class="n">last_hidden_state</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+<a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>        <span class="n">cls_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="n">cls_output</span><span class="p">)</span>
+<a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">classifier</span><span class="p">(</span><span class="n">cls_output</span><span class="p">)</span>
 </code></pre></div>
-<h2 id="5-trainingsstrategie">5. Trainingsstrategie<a class="headerlink" href="#5-trainingsstrategie" title="Permanent link">&para;</a></h2>
-<ol>
-<li><strong>Fine-Tuning</strong>: Das gesamte Modell wird mit einer niedrigen Learning Rate auf den spezifischen E-Mail-Klassen der TH Köln trainiert.  </li>
-<li><strong>Weighted Cross-Entropy</strong>: Um Klassenungleichgewichte (z. B. viele "Others", wenige "SHK") auszugleichen.  </li>
-<li><strong>Data Augmentation</strong>: Leichtes Rauschen in den Text einfügen oder Synonym-Ersetzung, um die Robustheit zu erhöhen.  </li>
-</ol>
-<h2 id="6-nachste-schritte">6. Nächste Schritte<a class="headerlink" href="#6-nachste-schritte" title="Permanent link">&para;</a></h2>
+<h2 id="5-trainings-validierungsstrategie">5. Trainings- &amp; Validierungsstrategie<a class="headerlink" href="#5-trainings-validierungsstrategie" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Integration von <code>transformers</code> und <code>torch</code> in die <code>EmailClassifier</code>-Engine.  </li>
-<li>Anpassung von <code>train.py</code>, um das Fine-Tuning des Modells zu ermöglichen.  </li>
-<li>Vergleich der Precision/Recall-Werte gegen das aktuelle XGBoost-Modell.  </li>
+<li><strong>Fine-Tuning</strong>: Die Gewichte des Transformer-Backbones sowie des Klassifikationskopfes werden mit einer niedrigen Learning Rate auf den TH-Köln-spezifischen E-Mail-Klassen trainiert.</li>
+<li><strong>Klassen-Gewichtung (Weighted Cross-Entropy)</strong>: Da einige Klassen deutlich seltener vorkommen (z. B. <code>SHK</code> vs. <code>Others</code>), wird ein gewichteter Cross-Entropy-Loss verwendet, um die Klassifizierung seltener Klassen zu verbessern.</li>
+<li><strong>Maximale Sequenzlänge</strong>: Auf 512 Token begrenzt, was für E-Mails einen optimalen Kompromiss aus Kontextgröße und Trainingsgeschwindigkeit darstellt.</li>
 </ul>
+<h2 id="6-zukunftige-verbesserungsmoglichkeiten">6. Zukünftige Verbesserungsmöglichkeiten<a class="headerlink" href="#6-zukunftige-verbesserungsmoglichkeiten" title="Permanent link">&para;</a></h2>
+<p>Obwohl das System bereits vollständig einsatzbereit ist, bieten sich für zukünftige Iterationen folgende Optimierungen an:</p>
+<ol>
+<li><strong>Modell-Quantisierung (Quantization)</strong>:</li>
+<li>Konvertierung des Modells in ein 8-Bit-Format (INT8) mittels PyTorch, um den Speicherbedarf auf Offline-Systemen (z. B. Laptops ohne dedizierte GPU) zu halbieren und die Inferenzgeschwindigkeit zu steigern.</li>
+<li><strong>LoRA Fine-Tuning für größere lokale Modelle</strong>:</li>
+<li>Statt eines MiniLM-Modells könnten größere multilinguale LLMs (z. B. Llama 3 oder Mistral) über Low-Rank Adaptation (LoRA) auf Klassifikation trainiert werden, sofern ausreichend Rechenressourcen vorhanden sind.</li>
+<li><strong>Erweitertes Hyperparameter-Tuning</strong>:</li>
+<li>Systematische Suche nach optimalen Learning Rates, Dropout-Raten und Batch-Sizes mittels Frameworks wie Optuna, um die Klassifikationsleistung (F1-Score) noch weiter zu maximieren.</li>
+<li><strong>Knowledge Distillation</strong>:</li>
+<li>Destillieren eines sehr großen Modells in ein kleineres, hocheffizientes Transformer-Modell, das die hohe Vorhersagegenauigkeit beibehält, aber extrem schnell ausgeführt werden kann.</li>
+</ol>
 
 
 
@@ -2108,7 +2070,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Fußzeile" >
         
           
-          <a href="../../api/" class="md-footer__link md-footer__link--prev" aria-label="Zurück: API">
+          <a href="../architecture/" class="md-footer__link md-footer__link--prev" aria-label="Zurück: Architektur">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -2118,14 +2080,14 @@
                 Zurück
               </span>
               <div class="md-ellipsis">
-                API
+                Architektur
               </div>
             </div>
           </a>
         
         
           
-          <a href="../../packages/email-classifier/" class="md-footer__link md-footer__link--next" aria-label="Weiter: Übersicht">
+          <a href="../../../development/" class="md-footer__link md-footer__link--next" aria-label="Weiter: Übersicht">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Weiter
@@ -2168,10 +2130,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "content.tabs.link", "content.code.annotate", "content.code.copy", "content.tooltips", "content.code.annotate", "navigation.footer"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "content.tabs.link", "content.code.annotate", "content.code.copy", "content.tooltips", "content.code.annotate", "navigation.footer"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>
