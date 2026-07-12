@@ -7,7 +7,7 @@ extracted with appropriate priority.
 
 from unittest.mock import MagicMock, patch
 from bs4 import BeautifulSoup
-from scripts.crawl_th_koeln_persons import THKoelnCrawler
+from th_personal_graph.scripts.crawl_th_koeln_persons import THKoelnCrawler
 
 
 def test_academic_degree_extraction_logic():
