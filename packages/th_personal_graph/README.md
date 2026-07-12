@@ -2,15 +2,15 @@
 
 Dieses Package enthält alle Funktionalitäten und Skripte zur Extraktion, Speicherung und interaktiven Visualisierung des TH Köln Personal- und Modulzuordnungsgraphen.
 
-## Features
-- **TH Köln Personal-Crawler:** Durchsucht das TH-Personalverzeichnis und extrahiert Namen, E-Mails, Fakultäten, Institute und besondere Funktionen (z. B. DekanIn, PA-Vorsitz, Senat, Präsidium). Speichert Daten in Markdown-Dateien und der lokalen SQLite-Datenbank `th_personal.db`.
-- **MOCOGI API Extraktor:** Extrahiert alle Studiengänge, Prüfungsordnungen (PO) sowie Module samt Modulverantwortlichen, Erstprüfern und Zweitprüfern über die MOCOGI-API und integriert sie in den Graphen von `th_personal.db`.
-- **Pyvis Visualisierung:** Generiert eine interaktive 2D-HTML-Visualisierung des Graphen aus `th_personal.db` mit Filter- und Zoommöglichkeiten.
+## Features  
+- **TH Köln Personal-Crawler:** Durchsucht das TH-Personalverzeichnis und extrahiert Namen, E-Mails, Fakultäten, Institute und besondere Funktionen (z. B. DekanIn, PA-Vorsitz, Senat, Präsidium). Speichert Daten in Markdown-Dateien und der lokalen SQLite-Datenbank `th_personal.db`.  
+- **MOCOGI API Extraktor:** Extrahiert alle Studiengänge, Prüfungsordnungen (PO) sowie Module samt Modulverantwortlichen, Erstprüfern und Zweitprüfern über die MOCOGI-API und integriert sie in den Graphen von `th_personal.db`.  
+- **Pyvis Visualisierung:** Generiert eine interaktive 2D-HTML-Visualisierung des Graphen aus `th_personal.db` mit Filter- und Zoommöglichkeiten.  
 
-## Ordnerstruktur
-- `src/th_personal_graph/`: Kernmodule und Logik.
-- `src/th_personal_graph/scripts/`: Benutzerorientierte CLI-Skripte zur Ausführung der Workflows.
-- `tests/`: Umfassende Testsuite für den Crawler und MOCOGI-Extraktor.
+## Ordnerstruktur  
+- `src/th_personal_graph/`: Kernmodule und Logik.  
+- `src/th_personal_graph/scripts/`: Benutzerorientierte CLI-Skripte zur Ausführung der Workflows.  
+- `tests/`: Umfassende Testsuite für den Crawler und MOCOGI-Extraktor.  
 
 ## Wichtige Skripte
 
