@@ -3,7 +3,7 @@
 Diese Seite beschreibt die Datenextraktion aus der MOCOGI-API der TH Köln und deren Integration in die `th_personal.db`.
 
 ## Zweck
-Das Skript `extract_mocogi_data.py` (aufgerufen als ausführbares Modul `python -m th_personal_graph.scripts.extract_mocogi_data`) durchläuft alle aktiven Studiengänge und deren Prüfungsordnungen (POs). Für jedes Modul werden die folgenden Informationen extrahiert:
+Das Skript `extract_mocogi_data.py` (aufgerufen als ausführbares Modul `python -m th_personal_graph.scripts.extract_mocogi_data`) durchläuft alle aktiven Studiengänge und deren Prüfungsordnungen (POs). Für jedes Modul werden die folgenden Informationen extrahiert:  
 * Modulname  
 * Modulverantwortliche(r) (volle Namen)  
 * Erstprüfer(in)  

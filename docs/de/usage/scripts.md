@@ -28,9 +28,9 @@ Migriert E-Mails in die Standardstruktur: `Semester/Nachname/Inbox|SentItems/`. 
 python scripts/fix_email_folders.py data/classifier_paths.yaml
 ```
 
-**Optionen:**
+**Optionen:**  
 - `--dry-run`: Zeigt nur die erkannten Fehler an, ohne sie zu beheben.  
-- `--verify`: Prüft rekursiv alle E-Mails in allen Unterordnern auf korrekte Semester-, Namens- und Ordnerzuordnung.
+- `--verify`: Prüft rekursiv alle E-Mails in allen Unterordnern auf korrekte Semester-, Namens- und Ordnerzuordnung.  
 
 ### Klassifikator-Daten umstrukturieren
 Strukturiert die Trainings- und Testdaten des Klassifikators um, um sie für das Training vorzubereiten.
@@ -62,11 +62,11 @@ python scripts/generate_synthetic_emails.py
 
 Diese Skripte wurden in das eigenständige Package `th_personal_graph` ausgelagert und werden als ausführbare Module aufgerufen.
 
-- **TH Personal Crawler (`python -m th_personal_graph.scripts.crawl_th_koeln_persons`):**
-  Crawlt das Personenverzeichnis der TH Köln nach Kontaktdaten, Fakultäten und Instituten.
-- **MOCOGI Datenextraktion (`python -m th_personal_graph.scripts.extract_mocogi_data`):**
-  Extrahiert Modulinformationen (Verantwortliche, Prüfer) aus der MOCOGI-API und verknüpft diese im Wissensgraphen.
-- **Wissensgraph visualisieren (`python -m th_personal_graph.scripts.visualize_knowledge_graph`):**
+- **TH Personal Crawler (`python -m th_personal_graph.scripts.crawl_th_koeln_persons`):**  
+  Crawlt das Personenverzeichnis der TH Köln nach Kontaktdaten, Fakultäten und Instituten.  
+- **MOCOGI Datenextraktion (`python -m th_personal_graph.scripts.extract_mocogi_data`):**  
+  Extrahiert Modulinformationen (Verantwortliche, Prüfer) aus der MOCOGI-API und verknüpft diese im Wissensgraphen.  
+- **Wissensgraph visualisieren (`python -m th_personal_graph.scripts.visualize_knowledge_graph`):**  
   Generiert eine interaktive HTML-Visualisierung der Personaldatenbank.
 
 Detaillierte Informationen zur Nutzung und den Parametern dieser Skripte finden Sie auf der Seite **[Personaldatenbank & Personen-Steckbriefe](profiles.md)** sowie in der **[Dokumentation des TH Personal Graph Packages](../packages/th-personal-graph/index.md)**.

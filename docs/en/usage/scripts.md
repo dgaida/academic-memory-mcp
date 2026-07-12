@@ -28,9 +28,9 @@ Migrates emails to the standard structure: `Semester/Lastname/Inbox|SentItems/`.
 python scripts/fix_email_folders.py data/classifier_paths.yaml
 ```
 
-**Options:**
-- `--dry-run`: Shows only detected errors without fixing them.
-- `--verify`: Recursively checks all emails in all subfolders for correct semester, name, and folder assignment.
+**Options:**  
+- `--dry-run`: Shows only detected errors without fixing them.  
+- `--verify`: Recursively checks all emails in all subfolders for correct semester, name, and folder assignment.  
 
 ### Restructure Classifier Data
 Restructures the classifier's training and test data to prepare it for training.
@@ -62,11 +62,11 @@ python scripts/generate_synthetic_emails.py
 
 These scripts have been refactored into the standalone `th_personal_graph` package and are invoked as executable modules.
 
-- **TH Personnel Crawler (`python -m th_personal_graph.scripts.crawl_th_koeln_persons`):**
-  Crawls the TH Köln directory for contact details, faculties, and institutes.
-- **MOCOGI Data Extraction (`python -m th_personal_graph.scripts.extract_mocogi_data`):**
-  Extracts module information (coordinators, examiners) from the MOCOGI API and links them in the graph.
-- **Visualize Knowledge Graph (`python -m th_personal_graph.scripts.visualize_knowledge_graph`):**
+- **TH Personnel Crawler (`python -m th_personal_graph.scripts.crawl_th_koeln_persons`):**  
+  Crawls the TH Köln directory for contact details, faculties, and institutes.  
+- **MOCOGI Data Extraction (`python -m th_personal_graph.scripts.extract_mocogi_data`):**  
+  Extracts module information (coordinators, examiners) from the MOCOGI API and links them in the graph.  
+- **Visualize Knowledge Graph (`python -m th_personal_graph.scripts.visualize_knowledge_graph`):**  
   Generates an interactive HTML visualization of the personnel database.
 
 Detailed information on the usage and parameters of these scripts can be found on the **[Personnel Database & Person Profiles](profiles.md)** page as well as in the **[TH Personal Graph Package Documentation](../packages/th-personal-graph/index.md)**.
