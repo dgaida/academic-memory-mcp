@@ -85,6 +85,7 @@ class Config:
         self.user = self._load_yaml(config_dir / "user.yaml", UserConfig)
         if not self.user.emails:
             self.user.emails = [self.user.email]
+        self._sync_vba_macros()
         self.ontology = self._load_yaml(config_dir / "ontology.yaml", OntologyConfig)
 
         models_data = self._load_raw_yaml(config_dir / "models.yaml")
@@ -92,6 +93,35 @@ class Config:
         self.llm = LLMConfig(**models_data.get("llm", {}))
         self.embeddings = EmbeddingConfig(**models_data.get("embeddings", {}))
         self.reranker = RerankerConfig(**models_data.get("reranker", {}))
+
+    def _sync_vba_macros(self) -> None:
+        """Synchronisiert das VBA-Konto in den .bas Dateien mit der Benutzerkonfiguration."""
+        try:
+            macro_dir = self.config_dir.parent / "outlook_macro"
+            if not macro_dir.exists():
+                return
+
+            user_email = self.user.email
+            if not user_email:
+                return
+
+            import re
+            pattern = re.compile(
+                r'(Private\s+Const\s+ACCOUNT_NAME\s+(?:As\s+String\s+)?=\s*")[^"]*(")',
+                re.IGNORECASE
+            )
+
+            for bas_file in macro_dir.glob("*.bas"):
+                try:
+                    content = bas_file.read_text(encoding="utf-8", errors="replace")
+                    if pattern.search(content):
+                        new_content = pattern.sub(r'\g<1>' + user_email + r'\g<2>', content)
+                        if new_content != content:
+                            bas_file.write_text(new_content, encoding="utf-8")
+                except Exception:
+                    pass
+        except Exception:
+            pass
 
     def _load_yaml(self, path: Path, model_class: Type[T]) -> T:
         """Lädt eine YAML-Datei in ein Pydantic-Modell.

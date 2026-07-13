@@ -2,7 +2,6 @@
 from email_classifier.stopwords import ALL_STOP_WORDS
 from mcp_university.config import get_config
 from mcp_university.parser.mail_parser import MailParser
-from mcp_university.utils.anonymizer import anonymize_th_koeln_names
 from mcp_university.utils.torch_utils import get_device
 from pathlib import Path
 from sklearn.ensemble import RandomForestClassifier
@@ -152,11 +151,11 @@ class EmailClassifier:
 
                 attachments_str = ", ".join(attachment_names) if attachment_names else "None"
                 formatted = f"SUBJECT: {subject} | ATTACHMENTS: {attachments_str} [SEP] {body}"
-                return anonymize_th_koeln_names(formatted)
+                return formatted
         except Exception as e:
             logger.warning(f"Error formatting transformer input for {file_path}: {e}")
             text = self._extract_text(file_path)
-            return anonymize_th_koeln_names(text) if text else ""
+            return text if text else ""
 
     def preprocess_data(self, root_dir: Union[str, Path]) -> Tuple[List[str], List[str]]:
         """Liest E-Mails aus Ordnerstrukturen ein.
@@ -181,8 +180,6 @@ class EmailClassifier:
                         text = self._format_transformer_input(file_path)
                     else:
                         text = self._extract_text(file_path)
-                        if text:
-                            text = anonymize_th_koeln_names(text)
 
                     if text:
                         texts.append(text)
@@ -253,7 +250,6 @@ class EmailClassifier:
             text = self._extract_text(Path(file_path))
             if not text:
                 raise ValueError(f"Konnte Text aus {file_path} nicht extrahieren.")
-            text = anonymize_th_koeln_names(text)
             X = self.get_features([text], train=False)
             y_pred = self.classifier.predict(X)[0]
             y_prob = self.classifier.predict_proba(X)[0]

@@ -45,3 +45,22 @@ def test_transformer_input_formatting(transformer_classifier, tmp_path):
         assert "SUBJECT: Hilfe beim Projekt" in formatted
         assert "ATTACHMENTS: plan.pdf" in formatted
         assert "Ich habe eine Frage." in formatted
+
+
+def test_transformer_input_no_anonymization(transformer_classifier, tmp_path):
+    """Verify that formatting transformer input does not use rule-based anonymization for local models."""
+    with patch("extract_msg.openMsg") as mock_open_msg:
+        mock_msg = MagicMock()
+        mock_msg.subject = "Frage von Sibel"
+        mock_msg.body = "Hallo Herr Gaida, mein Name ist Sibel Sözer."
+        mock_msg.attachments = []
+        mock_open_msg.return_value.__enter__.return_value = mock_msg
+
+        test_file = tmp_path / "test_no_anon.msg"
+        test_file.touch()
+
+        formatted = transformer_classifier._format_transformer_input(test_file)
+
+        # It must preserve "Sibel Sözer", not replace it with "Max Mustermann"
+        assert "Sibel Sözer" in formatted
+        assert "Max Mustermann" not in formatted

@@ -22,7 +22,7 @@ Das System folgt einem strikten **Offline-First-Ansatz**, um den Schutz personen
 *   **FA-1.5 (Ordner-Zusammenfassung):** Das System muss hierarchische Zusammenfassungen von Dateiebene bis zur Root-Verzeichnisebene generieren und in der Datenbank speichern.  
 
 ### FA-2: Dokumenten- & E-Mail-Parsing  
-*   **FA-2.1 (PDF-Parsing):** PDFs müssen primär über die Bibliothek `Docling` strukturiert eingelesen werden (mit Fallback auf ein einfacheres Parsing, falls Docling nicht verfügbar ist).  
+*   **FA-2.1 (PDF-Parsing):** PDFs müssen standardmäßig mit `LiteParse` eingelesen werden. `Docling` dient dabei als Backup/Fallback-Lösung.
 *   **FA-2.2 (E-Mail-Parsing):** Das System muss Outlook-Mails im `.msg`-Format (via `extract-msg`) und `.eml`-Format fehlerfrei parsen.  
 *   **FA-2.3 (Ressourcenschonung):** Um Performance-Engpässe zu vermeiden, dürfen standardmäßig nur die ersten **3 Seiten** eines Dokuments analysiert werden.  
 *   **FA-2.4 (Unterdrückung von Warnungen):** Rauschen und nicht-kritische Warnungen von Drittanbieter-Bibliotheken (wie `extract-msg`) müssen unterdrückt werden.  
@@ -30,22 +30,22 @@ Das System folgt einem strikten **Offline-First-Ansatz**, um den Schutz personen
 
 ### FA-3: E-Mail-Klassifizierung & Sortierung  
 *   **FA-3.1 (ML-Modelle):** E-Mails müssen automatisch mittels XGBoost, RandomForest oder einem PyTorch-basierten Transformer-Modell (z.B. MiniLM) klassifiziert werden.  
-*   **FA-3.2 (Eingabe-Formatierung):** Das Modell-Eingabeformat muss exakt der Struktur `SUBJECT: <Betreff> | ATTACHMENTS: <Datei1, ...> [SEP] <E-Mail-Body (anonymisiert)>` entsprechen.  
-*   **FA-3.3 (Klassen-Remapping):** Klassifizierungen der Kategorie `'Other'` müssen automatisch auf die standardisierte Klasse `'Others'` umgemappt werden.  
+*   **FA-3.2 (Eingabe-Formatierung):** Das Modell-Eingabeformat muss exakt der Struktur `SUBJECT: <Betreff> | ATTACHMENTS: <Datei1, ...> [SEP] <E-Mail-Body>` entsprechen. Der E-Mail-Body muss für die Klassifizierung nicht standardmäßig anonymisiert werden; eine Anonymisierung des E-Mail-Bodys erfolgt ausschließlich dann, wenn ein Cloud-LLM verwendet wird (gemäß FA-10).
+*   **FA-3.3 (Klassendefinition durch Benutzer):** Die E-Mail-Klassen werden dynamisch durch die vom Benutzer über die Ordnerstruktur der Trainingsdaten definierten Ordnernamen festgelegt. Es gibt keine fest vordefinierten Klassen im Code, sodass der Benutzer die Klassennamen flexibel anpassen kann.
 *   **FA-3.4 (Pfad-Hierarchie):** Archivierte E-Mails müssen automatisch in eine dreistufige Struktur verschoben werden: `Semester (z.B. 2023_24_WS) / Nachname / (Inbox oder SentItems)`.  
-*   **FA-3.5 (Spezial-Routing):** E-Mail-Klassen, die mit `BA_` (Bachelor Thesis) oder `MA_` (Master Thesis) beginnen, müssen direkt in `Semester/Inbox` oder `Semester/SentItems` einsortiert werden.  
+*   **FA-3.5 (Spezial-Routing):** Für E-Mail-Klassen, die mit `BA_` oder `MA_` beginnen, gilt dieselbe dreistufige Struktur wie in FA-3.4 (`Semester (z.B. 2023_24_WS) / Nachname / (Inbox oder SentItems)`).
 *   **FA-3.6 (Namensextraktion):** Die Ermittlung des Nachnamens eines Studierenden aus E-Mail-Metadaten muss über eine hierarchische Logik erfolgen:  
     1.  Prüfung von "im Auftrag von"-Headern.  
     2.  *Greedy Name Matching:* Abgleich von Teilen des Anzeigenamens (Display Name) mit dem Local-Part der E-Mail-Adresse. Findet sich der Name im Local-Part, ist dies der Nachname (z.B. `Mustermann Max <mustermann@example.com>` -> "Mustermann").  
     3.  *Dot-Separated Fallback:* Aufteilung des Local-Parts an Punkten (`.`) und Prüfung der Segmente von hinten nach vorne (unter Ignorierung generischer Begriffe).  
     4.  *Generische Fallbacks:* Komma-Trennung (`Nachname, Vorname`), letztes Wort des Anzeigenamens oder Großbuchstaben-Erkennung.  
 *   **FA-3.7 (Namen-Normalisierung):** Extrahierte Namen müssen in *Title Case* zurückgegeben werden. Umlaute müssen für Verzeichnispfade normalisiert werden (z.B. "Müller" -> "Mueller" für das Dateisystem), der Originalname muss jedoch erhalten bleiben.  
-*   **FA-3.8 (GUI Sichtbarkeit):** Alle sortierten E-Mails müssen in der Gradio GUI vollständig sichtbar sein (keine versteckten oder standardmäßig eingeklappten Zeilen).  
+*   **FA-3.8 (GUI Sichtbarkeit & Benennung):** Alle sortierten E-Mails müssen in der **E-Mail-Workflow-GUI** vollständig sichtbar sein (keine versteckten oder standardmäßig eingeklappten Zeilen). Die verschiedenen Gradio GUIs im System besitzen eindeutige Namen zur Unterscheidung: **E-Mail-Workflow-GUI** (für die E-Mail-Verarbeitung und Archivierung), **E-Mail-Schnellsuche-GUI** (für E-Mail-Suche und Anzeige) und **Terminkalender-GUI** (für die Kalender- und Terminverwaltung).
 
 ### FA-4: Hybrid-Suche & RAG-Prozess  
 *   **FA-4.1 (Hybrid-Suche):** Das System muss eine hybride Suche anbieten, die BM25-Volltextsuche mit Qdrant-Vektorsuche kombiniert.  
 *   **FA-4.2 (Lokales Laden):** Einbettungs- und Sprachmodelle müssen primär lokal geladen werden (`local_files_only=True`). Bei erfolgreichem Laden muss der Log-Eintrag `ERFOLG: Modell <Modellname> wurde LOKAL geladen.` ausgegeben werden.  
-*   **FA-4.3 (RAG-Ablauf):** Der RAG-Prozess (Retrieval Augmented Generation) must mehrstufig aufgebaut sein:  
+*   **FA-4.3 (RAG-Ablauf):** Der RAG-Prozess (Retrieval Augmented Generation) muss mehrstufig aufgebaut sein:
     1.  Generierung von **3 präzisen Suchanfragen (Fragen)** durch das LLM basierend auf der E-Mail.  
     2.  Abruf relevanter Chunks aus der klassenspezifischen Vektordatenbank (z.B. `data/memory/<Klasse>`).  
     3.  Auswahl der **Top 3 eindeutigen Chunks** basierend auf dem Ähnlichkeits-Score.  
@@ -57,7 +57,7 @@ Das System folgt einem strikten **Offline-First-Ansatz**, um den Schutz personen
     *   *Tab 1 (Schnell-Einsortierung):* Massenverarbeitung und Archivierung bereits korrekt klassifizierter Mails.  
     *   *Tab 2 (Detail-Ansicht):* Detailanalyse einer ausgewählten Mail mit KI-Zusammenfassung (max. 2 Sätze), Kontext-Anzeige und Aktions-Auswahl.  
 *   **FA-5.2 (Aktions-Vorschläge):** Basierend auf dem E-Mail-Inhalt und dem RAG-Kontext muss das System eine von sechs Aktionen vorschlagen:  
-    1.  *Antwort schreiben:* Entwurf basierend auf Thema und Personas.  
+    1.  *Antwort schreiben:* Entwurf basierend auf Thema, Personas und der bisherigen Konversation. Die Zusammenfassung des Ordners (aus der Datei `.emails_summary.md`), in dem die E-Mail archiviert wird, soll dem LLM ebenfalls übergeben werden, damit das LLM Kontext über die bisherige Konversation hat.
     2.  *Antwort mit Terminvorschlag:* Ermittelt freie Slots aus `free_slots.md` via `get_appointment_slots` und integriert sie.  
     3.  *Termin direkt buchen:* Erstellt einen Kalendereintrag bei Terminbestätigungen.  
     4.  *Nur archivieren:* Verschiebt die Mail ins Archiv.  
@@ -89,7 +89,8 @@ Das System folgt einem strikten **Offline-First-Ansatz**, um den Schutz personen
 *   **FA-7.1 (Datenexport):** VBA-Makros müssen E-Mails im standardisierten Format `YYYYMMDD_HHMMSS - Subject.msg` in den `inbox`-Ordner exportieren.  
 *   **FA-7.2 (Freie Zeitfenster):** Freie Terminfenster müssen in eine Datei `free_slots.md` exportiert werden.  
 *   **FA-7.3 (Outlook-Fehlervermeidung):** Zum Verschieben von Elementen in Outlook muss `target_folder.Items.Add(0)` anstelle von `mail.Move()` verwendet werden, um spezifische VBA-Laufzeitfehler zu vermeiden.  
-*   **FA-7.4 (Konto-Festlegung):** Die Makros müssen fest auf das Benutzerkonto `daniel.gaida@th-koeln.de` ausgelegt sein.  
+*   **FA-7.4 (Konto-Festlegung):** Die Makros müssen auf das in `config/user.yaml` definierte Benutzerkonto des Users ausgelegt sein. Bei Laden der Konfiguration werden die VBA-Dateien automatisch auf die konfigurierte E-Mail-Adresse des Benutzers angepasst.
+*   **FA-7.5 (Benutzer-Konfiguration):** Die Benutzerdaten (Name, primäre E-Mail-Adresse und alternative E-Mail-Adressen) müssen vom Benutzer über eine YAML-Konfigurationsdatei (`config/user.yaml`) flexibel definiert werden können.
 
 ### FA-8: Model Context Protocol (MCP) Server  
 *   **FA-8.1 (Server-Start):** Das System muss einen MCP-Server über das CLI-Kommando `mcp-uni serve-mcp` bereitstellen.  
