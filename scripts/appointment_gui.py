@@ -2,6 +2,8 @@
 import os
 import platform
 import subprocess
+import urllib.parse
+from fastapi.responses import HTMLResponse
 import re
 import yaml
 import pandas as pd
@@ -410,6 +412,158 @@ with gr.Blocks(title="Appointment Manager") as demo:
         return open_file(str(full_path))
 
     explorer.select(open_selected_file, inputs=[student_path_display], outputs=[open_status])
+
+
+@demo.app.get("/open-folder")
+def open_folder_endpoint(path: str) -> HTMLResponse:
+    """FastAPI endpoint to open a folder in the native file explorer.
+
+    It decodes the path, checks its existence, and opens it on Windows
+    using os.startfile, or open/xdg-open on macOS/Linux.
+
+    Args:
+        path (str): The URL-encoded absolute path of the folder to open.
+
+    Returns:
+        HTMLResponse: An HTML page indicating success or failure.
+    """
+    decoded_path = urllib.parse.unquote(path)
+
+    if not decoded_path or not Path(decoded_path).exists():
+        html_content = f"""
+        <html>
+        <head>
+            <title>Fehler</title>
+            <style>
+                body {{
+                    font-family: Arial, sans-serif;
+                    text-align: center;
+                    padding: 50px;
+                    background-color: #fff0f0;
+                    color: #a00;
+                }}
+                .card {{
+                    background: white;
+                    padding: 30px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                    display: inline-block;
+                    max-width: 500px;
+                    width: 100%;
+                    border: 1px solid #fcc;
+                }}
+                button {{
+                    background: #f44336;
+                    color: white;
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: 16px;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="card">
+                <h3>Ordner nicht gefunden!</h3>
+                <p>Der Pfad existiert nicht oder ist ung&uuml;ltig.</p>
+                <p><code>{decoded_path}</code></p>
+                <button onclick="window.close()">Fenster schlie&szlig;en</button>
+            </div>
+        </body>
+        </html>
+        """
+        return HTMLResponse(content=html_content, status_code=404)
+
+    try:
+        if platform.system() == "Windows":
+            os.startfile(decoded_path)
+        elif platform.system() == "Darwin":
+            subprocess.run(["open", decoded_path])
+        else:
+            subprocess.run(["xdg-open", decoded_path])
+
+        html_content = f"""
+        <html>
+        <head>
+            <title>Ordner ge&ouml;ffnet</title>
+            <style>
+                body {{
+                    font-family: Arial, sans-serif;
+                    text-align: center;
+                    padding: 50px;
+                    background-color: #f4f4f9;
+                    color: #333;
+                }}
+                .card {{
+                    background: white;
+                    padding: 30px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                    display: inline-block;
+                    max-width: 500px;
+                    width: 100%;
+                }}
+                h3 {{ color: #2e7d32; }}
+                code {{
+                    display: block;
+                    background: #eee;
+                    padding: 10px;
+                    border-radius: 4px;
+                    margin: 15px 0;
+                    word-break: break-all;
+                }}
+                button {{
+                    background: #2196f3;
+                    color: white;
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: 16px;
+                }}
+            </style>
+            <script>
+                setTimeout(function() {{
+                    window.close();
+                }}, 2000);
+            </script>
+        </head>
+        <body>
+            <div class="card">
+                <h3>Ordner erfolgreich ge&ouml;ffnet!</h3>
+                <p>Der folgende Ordner wurde im Explorer ge&ouml;ffnet:</p>
+                <code>{decoded_path}</code>
+                <p><small>Dieses Fenster schlie&szlig;t sich in K&uuml;rze automatisch.</small></p>
+                <button onclick="window.close()">Fenster schlie&szlig;en</button>
+            </div>
+        </body>
+        </html>
+        """
+        return HTMLResponse(content=html_content)
+    except Exception as e:
+        html_content = f"""
+        <html>
+        <head>
+            <title>Fehler</title>
+            <style>
+                body {{
+                    font-family: Arial, sans-serif;
+                    text-align: center;
+                    padding: 50px;
+                    background-color: #fff0f0;
+                }}
+            </style>
+        </head>
+        <body>
+            <h3>Fehler beim &Ouml;ffnen des Ordners</h3>
+            <p>{e}</p>
+            <button onclick="window.close()">Fenster schlie&szlig;en</button>
+        </body>
+        </html>
+        """
+        return HTMLResponse(content=html_content, status_code=500)
+
 
 if __name__ == "__main__":
     demo.launch(inbrowser=True)

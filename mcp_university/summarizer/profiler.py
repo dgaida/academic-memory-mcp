@@ -574,6 +574,8 @@ Antworte NUR mit \"Du\", \"Sie\" oder \"Unklar\".
         Returns:
             str: Formatierter Quellen-Text.
         """
+        import urllib.parse
+
         sources = []
         if kg_context:
             sources.append("- Wissensgraph")
@@ -584,7 +586,8 @@ Antworte NUR mit \"Du\", \"Sie\" oder \"Unklar\".
             folders.add(str(path.parent))
 
         for folder in sorted(list(folders)):
-            sources.append(f"- Ordner: {folder}")
+            quoted_folder = urllib.parse.quote(folder)
+            sources.append(f"- Ordner: [{folder}](/open-folder?path={quoted_folder})")
 
         if not sources:
             return ""
