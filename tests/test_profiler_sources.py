@@ -47,8 +47,8 @@ def test_generate_profile_includes_sources(profiler, mock_store):
 
             assert "## Quellen" in profile
             assert "- Wissensgraph" in profile
-            assert "- Ordner: /data/folder1" in profile
-            assert "- Ordner: /data/folder2" in profile
+            assert "- Ordner: [/data/folder1](/open-folder?path=/data/folder1)" in profile
+            assert "- Ordner: [/data/folder2](/open-folder?path=/data/folder2)" in profile
 
 def test_update_profile_updates_sources(profiler, mock_store, mock_profile_store, tmp_path):
     """Test function docstring."""
@@ -86,8 +86,8 @@ def test_update_profile_updates_sources(profiler, mock_store, mock_profile_store
             assert "# Updated Profile" in profile
             assert "## Quellen" in profile
             assert "- Wissensgraph" in profile
-            assert "- Ordner: /data/folder1" in profile
-            assert "- Ordner: /data/folder2" in profile
+            assert "- Ordner: [/data/folder1](/open-folder?path=/data/folder1)" in profile
+            assert "- Ordner: [/data/folder2](/open-folder?path=/data/folder2)" in profile
 
 def test_find_emails_includes_cc(profiler):
     """Test function docstring."""
