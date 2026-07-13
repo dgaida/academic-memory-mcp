@@ -115,6 +115,7 @@ nav:
       - Sonstiges:
           - Hilfsskripte: usage/scripts.md
   - Technische Dokumentation:
+      - Systemanforderungen: requirements.md
       - Architektur: architecture/index.md
       - Nutzung (Expert): usage/index.md
       - Indexierung im Detail: usage/indexing-details.md
