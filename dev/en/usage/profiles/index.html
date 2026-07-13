@@ -2325,14 +2325,14 @@
 <h3 id="scripts-for-creating-and-updating-the-database">Scripts for Creating and Updating the Database<a class="headerlink" href="#scripts-for-creating-and-updating-the-database" title="Permanent link">&para;</a></h3>
 <p>The database <code>th_personal.db</code> is populated using two central scripts from the <code>th_personal_graph</code> package:</p>
 <ol>
-<li><strong>TH Personal Crawler (<code>python -m th_personal_graph.scripts.crawl_th_koeln_persons</code>):</strong>
+<li><strong>TH Personal Crawler (<code>python -m th_personal_graph.scripts.crawl_th_koeln_persons</code>):</strong><br />
    Crawls the official TH Köln directory for names, contact information, faculties, institutes, and academic degrees. It stores them in the local SQLite database <code>th_personal.db</code> as well as Markdown files in <code>data/th_koeln/</code>.</li>
 </ol>
 <p><em>Example Command:</em>
    <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python<span class="w"> </span>-m<span class="w"> </span>th_personal_graph.scripts.crawl_th_koeln_persons<span class="w"> </span>--faculty<span class="w"> </span><span class="s2">&quot;Fakultät für Informatik und Ingenieurwissenschaften&quot;</span>
 </code></pre></div></p>
 <ol>
-<li><strong>MOCOGI Extractor (<code>python -m th_personal_graph.scripts.extract_mocogi_data</code>):</strong>
+<li><strong>MOCOGI Extractor (<code>python -m th_personal_graph.scripts.extract_mocogi_data</code>):</strong><br />
    Fetches study programs, exam regulations, and module descriptions via the MOCOGI API. It extracts module coordinators, first/second examiners, and links them automatically with person nodes in <code>th_personal.db</code> using robust fuzzy name matching.</li>
 </ol>
 <p><em>Example Command:</em>
@@ -2342,7 +2342,7 @@
 <p>To interactively explore the imported relationships and data structures, use the visualization script:</p>
 <ul>
 <li>
-<p><strong>Knowledge Graph Visualization (<code>python -m th_personal_graph.scripts.visualize_knowledge_graph</code>):</strong>
+<p><strong>Knowledge Graph Visualization (<code>python -m th_personal_graph.scripts.visualize_knowledge_graph</code>):</strong><br />
     Generates an interactive 2D network visualization of the graph as an HTML file (<code>knowledge_graph.html</code>). You can filter nodes or explore the entire graph in your browser.</p>
 <p><em>Example Command (filtered by name):</em>
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>python<span class="w"> </span>-m<span class="w"> </span>th_personal_graph.scripts.visualize_knowledge_graph<span class="w"> </span>--filter<span class="w"> </span><span class="s2">&quot;Informatik&quot;</span><span class="w"> </span><span class="s2">&quot;Mustermann&quot;</span>
@@ -2354,20 +2354,20 @@
 <h2 id="2-person-profiles-steckbriefe">2. Person Profiles (Steckbriefe)<a class="headerlink" href="#2-person-profiles-steckbriefe" title="Permanent link">&para;</a></h2>
 <p>A person profile summarizes important, individual information about a person. These profiles are dynamically generated and serve as valuable context for the LLM when automatically drafting email replies.</p>
 <h3 id="content-of-a-profile">Content of a Profile<a class="headerlink" href="#content-of-a-profile" title="Permanent link">&para;</a></h3>
-<p>A profile in Markdown format summarizes:
-- <strong>Role:</strong> Students, faculty, etc.
-- <strong>Preferred Salutation:</strong> (Du or Sie)
-- <strong>First Contact:</strong> Date and context.
-- <strong>Relevant Projects, Theses, or Tasks:</strong> Assignment based on email history and the graph.</p>
+<p>A profile in Markdown format summarizes:<br />
+- <strong>Role:</strong> Students, faculty, etc.<br />
+- <strong>Preferred Salutation:</strong> (Du or Sie)<br />
+- <strong>First Contact:</strong> Date and context.<br />
+- <strong>Relevant Projects, Theses, or Tasks:</strong> Assignment based on email history and the graph.  </p>
 <h3 id="determining-salutation-dusie">Determining Salutation (Du/Sie)<a class="headerlink" href="#determining-salutation-dusie" title="Permanent link">&para;</a></h3>
-<p>The preferred salutation is intelligently determined from the past email history:
-- The last 4 emails sent directly from the user to the person and vice versa are analyzed.
-- Bulk emails (e.g., beginning with "Liebe Kolleg*innen" or "Hallo zusammen") are ignored to prevent incorrect determinations.
-- If no direct emails are found, the system falls back to the latest available individual emails.</p>
+<p>The preferred salutation is intelligently determined from the past email history:<br />
+- The last 4 emails sent directly from the user to the person and vice versa are analyzed.<br />
+- Bulk emails (e.g., beginning with "Liebe Kolleg*innen" or "Hallo zusammen") are ignored to prevent incorrect determinations.<br />
+- If no direct emails are found, the system falls back to the latest available individual emails.  </p>
 <h3 id="creation-and-update">Creation and Update<a class="headerlink" href="#creation-and-update" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>Automatic Creation:</strong> If no profile exists for an email address, it is automatically generated in the background when attempting to reply to an email. All available emails of the person (up to the 100 newest for optimal performance) are analyzed.</li>
-<li><strong>Dynamic Updates:</strong> The system tracks which emails have already been processed in <code>profiles_tracking.db</code>. When new emails arrive, the profile is updated by the LLM by seamlessly integrating the new details into the existing profile.</li>
+<li><strong>Automatic Creation:</strong> If no profile exists for an email address, it is automatically generated in the background when attempting to reply to an email. All available emails of the person (up to the 100 newest for optimal performance) are analyzed.  </li>
+<li><strong>Dynamic Updates:</strong> The system tracks which emails have already been processed in <code>profiles_tracking.db</code>. When new emails arrive, the profile is updated by the LLM by seamlessly integrating the new details into the existing profile.  </li>
 </ul>
 <h3 id="manual-management-via-the-cli">Manual Management via the CLI<a class="headerlink" href="#manual-management-via-the-cli" title="Permanent link">&para;</a></h3>
 <p>You can also manage profiles manually via the CLI:</p>
@@ -2379,8 +2379,8 @@
 </code></pre></div>
 <h3 id="file-paths">File Paths<a class="headerlink" href="#file-paths" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>Profile Files:</strong> Saved under the path defined in the configuration (e.g., <code>D:\Steckbriefe\</code>).</li>
-<li><strong>Tracking Database:</strong> <code>data/profiles_tracking.db</code>.</li>
+<li><strong>Profile Files:</strong> Saved under the path defined in the configuration (e.g., <code>D:\Steckbriefe\</code>).  </li>
+<li><strong>Tracking Database:</strong> <code>data/profiles_tracking.db</code>.  </li>
 </ul>
 
 

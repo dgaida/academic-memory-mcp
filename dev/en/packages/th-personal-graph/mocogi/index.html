@@ -2261,15 +2261,15 @@
 <h1 id="mocogi-data-extraction">MOCOGI Data Extraction<a class="headerlink" href="#mocogi-data-extraction" title="Permanent link">&para;</a></h1>
 <p>This page describes the data extraction from the MOCOGI API of TH Köln and its integration into the <code>th_personal.db</code>.</p>
 <h2 id="purpose">Purpose<a class="headerlink" href="#purpose" title="Permanent link">&para;</a></h2>
-<p>The script <code>extract_mocogi_data.py</code> (invoked as an executable module <code>python -m th_personal_graph.scripts.extract_mocogi_data</code>) iterates through all active study programs and their examination regulations (POs). For each module, the following information is extracted:
-* Module Name
-* Module Coordinator (full names)
-* First Examiner
-* Second Examiner</p>
+<p>The script <code>extract_mocogi_data.py</code> (invoked as an executable module <code>python -m th_personal_graph.scripts.extract_mocogi_data</code>) iterates through all active study programs and their examination regulations (POs). For each module, the following information is extracted:<br />
+<em> Module Name<br />
+</em> Module Coordinator (full names)<br />
+<em> First Examiner<br />
+</em> Second Examiner  </p>
 <p>The data is saved in tabular form grouped by study program and PO in the file <code>data/mocogi_modules.md</code>.</p>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
 <ul>
-<li>A valid <code>MOCOGI_API_TOKEN</code> must be stored in a <code>.env</code> or <code>secrets.env</code> file in the root directory or the <code>config/</code> folder.</li>
+<li>A valid <code>MOCOGI_API_TOKEN</code> must be stored in a <code>.env</code> or <code>secrets.env</code> file in the root directory or the <code>config/</code> folder.  </li>
 </ul>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
 <p>Run the script from the project's root directory:</p>
@@ -2294,16 +2294,16 @@
 <h3 id="created-nodes-and-edges">Created Nodes and Edges<a class="headerlink" href="#created-nodes-and-edges" title="Permanent link">&para;</a></h3>
 <p>For each extracted record, the following entities are created or updated in the graph:</p>
 <ul>
-<li><strong>Nodes:</strong><ul>
-<li><code>Study Program</code> (Studiengang): The name of the study program (e.g., "Informatik").</li>
-<li><code>Examination Regulation</code> (Prüfungsordnung): The specific PO version (e.g., "Informatik (PO 2024)").</li>
-<li><code>Module</code>: The individual subject (e.g., "Algorithmics").</li>
+<li><strong>Nodes:</strong>  <ul>
+<li><code>Study Program</code> (Studiengang): The name of the study program (e.g., "Informatik").  </li>
+<li><code>Examination Regulation</code> (Prüfungsordnung): The specific PO version (e.g., "Informatik (PO 2024)").  </li>
+<li><code>Module</code>: The individual subject (e.g., "Algorithmics").  </li>
 </ul>
 </li>
-<li><strong>Edges (Relationships):</strong><ul>
-<li><code>is element of</code> (ist Element von): Links modules to examination regulations, and examination regulations to study programs.</li>
-<li><code>is module coordinator</code> (ist Modulverantwortlicher): Links a person to a module.</li>
-<li><code>is first examiner</code> / <code>is second examiner</code> (ist Erstprüfer / ist Zweitprüfer): Links examiners to modules.</li>
+<li><strong>Edges (Relationships):</strong>  <ul>
+<li><code>is element of</code> (ist Element von): Links modules to examination regulations, and examination regulations to study programs.  </li>
+<li><code>is module coordinator</code> (ist Modulverantwortlicher): Links a person to a module.  </li>
+<li><code>is first examiner</code> / <code>is second examiner</code> (ist Erstprüfer / ist Zweitprüfer): Links examiners to modules.  </li>
 </ul>
 </li>
 </ul>

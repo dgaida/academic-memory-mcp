@@ -2557,9 +2557,9 @@
 <p>Migrates emails to the standard structure: <code>Semester/Lastname/Inbox|SentItems/</code>. This is particularly important for correct assignment within the system.
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>python<span class="w"> </span>scripts/fix_email_folders.py<span class="w"> </span>data/classifier_paths.yaml
 </code></pre></div></p>
-<p><strong>Options:</strong>
-- <code>--dry-run</code>: Shows only detected errors without fixing them.
-- <code>--verify</code>: Recursively checks all emails in all subfolders for correct semester, name, and folder assignment.</p>
+<p><strong>Options:</strong><br />
+- <code>--dry-run</code>: Shows only detected errors without fixing them.<br />
+- <code>--verify</code>: Recursively checks all emails in all subfolders for correct semester, name, and folder assignment.  </p>
 <h3 id="restructure-classifier-data">Restructure Classifier Data<a class="headerlink" href="#restructure-classifier-data" title="Permanent link">&para;</a></h3>
 <p>Restructures the classifier's training and test data to prepare it for training.
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python<span class="w"> </span>scripts/restructure_classifier_data.py
@@ -2580,11 +2580,11 @@
 <h2 id="knowledge-graph-personnel-database">Knowledge Graph &amp; Personnel Database<a class="headerlink" href="#knowledge-graph-personnel-database" title="Permanent link">&para;</a></h2>
 <p>These scripts have been refactored into the standalone <code>th_personal_graph</code> package and are invoked as executable modules.</p>
 <ul>
-<li><strong>TH Personnel Crawler (<code>python -m th_personal_graph.scripts.crawl_th_koeln_persons</code>):</strong>
-  Crawls the TH Köln directory for contact details, faculties, and institutes.</li>
-<li><strong>MOCOGI Data Extraction (<code>python -m th_personal_graph.scripts.extract_mocogi_data</code>):</strong>
-  Extracts module information (coordinators, examiners) from the MOCOGI API and links them in the graph.</li>
-<li><strong>Visualize Knowledge Graph (<code>python -m th_personal_graph.scripts.visualize_knowledge_graph</code>):</strong>
+<li><strong>TH Personnel Crawler (<code>python -m th_personal_graph.scripts.crawl_th_koeln_persons</code>):</strong><br />
+  Crawls the TH Köln directory for contact details, faculties, and institutes.  </li>
+<li><strong>MOCOGI Data Extraction (<code>python -m th_personal_graph.scripts.extract_mocogi_data</code>):</strong><br />
+  Extracts module information (coordinators, examiners) from the MOCOGI API and links them in the graph.  </li>
+<li><strong>Visualize Knowledge Graph (<code>python -m th_personal_graph.scripts.visualize_knowledge_graph</code>):</strong><br />
   Generates an interactive HTML visualization of the personnel database.</li>
 </ul>
 <p>Detailed information on the usage and parameters of these scripts can be found on the <strong><a href="../profiles/">Personnel Database &amp; Person Profiles</a></strong> page as well as in the <strong><a href="../../packages/th-personal-graph/">TH Personal Graph Package Documentation</a></strong>.</p>

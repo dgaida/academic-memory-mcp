@@ -2323,14 +2323,14 @@
 <h3 id="skripte-zur-erstellung-und-aktualisierung-der-datenbank">Skripte zur Erstellung und Aktualisierung der Datenbank<a class="headerlink" href="#skripte-zur-erstellung-und-aktualisierung-der-datenbank" title="Permanent link">&para;</a></h3>
 <p>Die Datenbank <code>th_personal.db</code> wird über zwei zentrale Skripte aus dem Package <code>th_personal_graph</code> befüllt:</p>
 <ol>
-<li><strong>TH Personal Crawler (<code>python -m th_personal_graph.scripts.crawl_th_koeln_persons</code>):</strong>
+<li><strong>TH Personal Crawler (<code>python -m th_personal_graph.scripts.crawl_th_koeln_persons</code>):</strong><br />
    Crawlt das offizielle Personenverzeichnis der TH Köln nach Namen, Kontaktdaten, Fakultäten, Instituten und akademischen Graden und speichert sie sowohl in der lokalen SQLite-Datenbank <code>th_personal.db</code> als auch als Markdown-Dateien in <code>data/th_koeln/</code>.</li>
 </ol>
 <p><em>Beispiel-Aufruf:</em>
    <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python<span class="w"> </span>-m<span class="w"> </span>th_personal_graph.scripts.crawl_th_koeln_persons<span class="w"> </span>--faculty<span class="w"> </span><span class="s2">&quot;Fakultät für Informatik und Ingenieurwissenschaften&quot;</span>
 </code></pre></div></p>
 <ol>
-<li><strong>MOCOGI Extraktor (<code>python -m th_personal_graph.scripts.extract_mocogi_data</code>):</strong>
+<li><strong>MOCOGI Extraktor (<code>python -m th_personal_graph.scripts.extract_mocogi_data</code>):</strong><br />
    Ruft über die MOCOGI-API Studiengänge, Prüfungsordnungen und Modulbeschreibungen ab. Das Skript extrahiert Modulverantwortliche sowie Erst- und Zweitprüfer und verknüpft sie über ein robustes Fuzzy-Name-Matching automatisch mit den Personen-Knoten in <code>th_personal.db</code>.</li>
 </ol>
 <p><em>Beispiel-Aufruf:</em>
@@ -2340,7 +2340,7 @@
 <p>Zur interaktiven Erkundung der importierten Beziehungen und Datenstrukturen dient das Visualisierungsskript:</p>
 <ul>
 <li>
-<p><strong>Wissensgraph-Visualisierung (<code>python -m th_personal_graph.scripts.visualize_knowledge_graph</code>):</strong>
+<p><strong>Wissensgraph-Visualisierung (<code>python -m th_personal_graph.scripts.visualize_knowledge_graph</code>):</strong><br />
     Generiert eine interaktive 2D-Netzwerk-Visualisierung des Graphen als HTML-Datei (<code>knowledge_graph.html</code>). Sie können Knoten filtern oder den gesamten Graphen im Browser erforschen.</p>
 <p><em>Beispiel-Aufruf (gefiltert nach Name):</em>
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>python<span class="w"> </span>-m<span class="w"> </span>th_personal_graph.scripts.visualize_knowledge_graph<span class="w"> </span>--filter<span class="w"> </span><span class="s2">&quot;Informatik&quot;</span><span class="w"> </span><span class="s2">&quot;Mustermann&quot;</span>
@@ -2352,20 +2352,20 @@
 <h2 id="2-personen-steckbriefe-person-profiles">2. Personen-Steckbriefe (Person Profiles)<a class="headerlink" href="#2-personen-steckbriefe-person-profiles" title="Permanent link">&para;</a></h2>
 <p>Ein Personen-Steckbrief (Profil) fasst wichtige, individuelle Informationen über eine Person zusammen. Diese Profile werden dynamisch generiert und dienen dem LLM als wertvoller Kontext beim automatisierten Verfassen von E-Mails.</p>
 <h3 id="inhalt-eines-steckbriefs">Inhalt eines Steckbriefs<a class="headerlink" href="#inhalt-eines-steckbriefs" title="Permanent link">&para;</a></h3>
-<p>Ein Steckbrief im Markdown-Format fasst zusammen:
-- <strong>Rolle:</strong> Studierende, Lehrende, etc.
-- <strong>Bevorzugte Anrede:</strong> (Du oder Sie)
-- <strong>Erster Kontakt:</strong> Datum und Kontext
-- <strong>Relevante Projekte, Thesen oder Aufgaben:</strong> Zuordnung basierend auf dem E-Mail-Verlauf und dem Graphen.</p>
+<p>Ein Steckbrief im Markdown-Format fasst zusammen:<br />
+- <strong>Rolle:</strong> Studierende, Lehrende, etc.<br />
+- <strong>Bevorzugte Anrede:</strong> (Du oder Sie)<br />
+- <strong>Erster Kontakt:</strong> Datum und Kontext<br />
+- <strong>Relevante Projekte, Thesen oder Aufgaben:</strong> Zuordnung basierend auf dem E-Mail-Verlauf und dem Graphen.  </p>
 <h3 id="bestimmung-der-anrede-dusie">Bestimmung der Anrede (Du/Sie)<a class="headerlink" href="#bestimmung-der-anrede-dusie" title="Permanent link">&para;</a></h3>
-<p>Die bevorzugte Anrede wird intelligent über den bisherigen E-Mail-Verlauf ermittelt:
-- Es werden die letzten 4 direkt gesendeten E-Mails vom Nutzer an die Person und umgekehrt analysiert.
-- "Sammelmails" (z.B. mit "Liebe Kolleg*innen" oder "Hallo zusammen") werden dabei ignoriert, um Verfälschungen zu vermeiden.
-- Wenn keine direkten E-Mails gefunden werden, erfolgt ein Fallback auf die neuesten verfügbaren individuellen Mails.</p>
+<p>Die bevorzugte Anrede wird intelligent über den bisherigen E-Mail-Verlauf ermittelt:<br />
+- Es werden die letzten 4 direkt gesendeten E-Mails vom Nutzer an die Person und umgekehrt analysiert.<br />
+- "Sammelmails" (z.B. mit "Liebe Kolleg*innen" oder "Hallo zusammen") werden dabei ignoriert, um Verfälschungen zu vermeiden.<br />
+- Wenn keine direkten E-Mails gefunden werden, erfolgt ein Fallback auf die neuesten verfügbaren individuellen Mails.  </p>
 <h3 id="erstellung-und-aktualisierung">Erstellung und Aktualisierung<a class="headerlink" href="#erstellung-und-aktualisierung" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>Automatische Erstellung:</strong> Wenn für eine E-Mail-Adresse noch kein Steckbrief existiert, wird dieser beim Versuch, eine E-Mail zu beantworten, automatisch im Hintergrund generiert. Dabei werden alle verfügbaren E-Mails der Person (maximal die 100 neuesten für optimale Performance) analysiert.</li>
-<li><strong>Dynamische Aktualisierung:</strong> Das System trackt in <code>profiles_tracking.db</code>, welche E-Mails bereits verarbeitet wurden. Bei Eintreffen neuer E-Mails wird der Steckbrief durch das LLM aktualisiert, indem neue Details nahtlos in das bestehende Profil integriert werden.</li>
+<li><strong>Automatische Erstellung:</strong> Wenn für eine E-Mail-Adresse noch kein Steckbrief existiert, wird dieser beim Versuch, eine E-Mail zu beantworten, automatisch im Hintergrund generiert. Dabei werden alle verfügbaren E-Mails der Person (maximal die 100 neuesten für optimale Performance) analysiert.  </li>
+<li><strong>Dynamische Aktualisierung:</strong> Das System trackt in <code>profiles_tracking.db</code>, welche E-Mails bereits verarbeitet wurden. Bei Eintreffen neuer E-Mails wird der Steckbrief durch das LLM aktualisiert, indem neue Details nahtlos in das bestehende Profil integriert werden.  </li>
 </ul>
 <h3 id="manuelle-verwaltung-uber-das-cli">Manuelle Verwaltung über das CLI<a class="headerlink" href="#manuelle-verwaltung-uber-das-cli" title="Permanent link">&para;</a></h3>
 <p>Sie können Steckbriefe auch manuell über das CLI verwalten:</p>
@@ -2377,8 +2377,8 @@
 </code></pre></div>
 <h3 id="dateipfade">Dateipfade<a class="headerlink" href="#dateipfade" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>Steckbrief-Dateien:</strong> Gespeichert unter dem in der Konfiguration definierten Pfad (z.B. <code>D:\Steckbriefe\</code>).</li>
-<li><strong>Tracking-Datenbank:</strong> <code>data/profiles_tracking.db</code>.</li>
+<li><strong>Steckbrief-Dateien:</strong> Gespeichert unter dem in der Konfiguration definierten Pfad (z.B. <code>D:\Steckbriefe\</code>).  </li>
+<li><strong>Tracking-Datenbank:</strong> <code>data/profiles_tracking.db</code>.  </li>
 </ul>
 
 

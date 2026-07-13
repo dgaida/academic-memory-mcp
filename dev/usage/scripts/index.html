@@ -2555,9 +2555,9 @@
 <p>Migriert E-Mails in die Standardstruktur: <code>Semester/Nachname/Inbox|SentItems/</code>. Dies ist besonders wichtig für die korrekte Zuordnung im System.
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>python<span class="w"> </span>scripts/fix_email_folders.py<span class="w"> </span>data/classifier_paths.yaml
 </code></pre></div></p>
-<p><strong>Optionen:</strong>
+<p><strong>Optionen:</strong><br />
 - <code>--dry-run</code>: Zeigt nur die erkannten Fehler an, ohne sie zu beheben.<br />
-- <code>--verify</code>: Prüft rekursiv alle E-Mails in allen Unterordnern auf korrekte Semester-, Namens- und Ordnerzuordnung.</p>
+- <code>--verify</code>: Prüft rekursiv alle E-Mails in allen Unterordnern auf korrekte Semester-, Namens- und Ordnerzuordnung.  </p>
 <h3 id="klassifikator-daten-umstrukturieren">Klassifikator-Daten umstrukturieren<a class="headerlink" href="#klassifikator-daten-umstrukturieren" title="Permanent link">&para;</a></h3>
 <p>Strukturiert die Trainings- und Testdaten des Klassifikators um, um sie für das Training vorzubereiten.
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python<span class="w"> </span>scripts/restructure_classifier_data.py
@@ -2578,11 +2578,11 @@
 <h2 id="wissensgraph-personaldatenbank">Wissensgraph &amp; Personaldatenbank<a class="headerlink" href="#wissensgraph-personaldatenbank" title="Permanent link">&para;</a></h2>
 <p>Diese Skripte wurden in das eigenständige Package <code>th_personal_graph</code> ausgelagert und werden als ausführbare Module aufgerufen.</p>
 <ul>
-<li><strong>TH Personal Crawler (<code>python -m th_personal_graph.scripts.crawl_th_koeln_persons</code>):</strong>
-  Crawlt das Personenverzeichnis der TH Köln nach Kontaktdaten, Fakultäten und Instituten.</li>
-<li><strong>MOCOGI Datenextraktion (<code>python -m th_personal_graph.scripts.extract_mocogi_data</code>):</strong>
-  Extrahiert Modulinformationen (Verantwortliche, Prüfer) aus der MOCOGI-API und verknüpft diese im Wissensgraphen.</li>
-<li><strong>Wissensgraph visualisieren (<code>python -m th_personal_graph.scripts.visualize_knowledge_graph</code>):</strong>
+<li><strong>TH Personal Crawler (<code>python -m th_personal_graph.scripts.crawl_th_koeln_persons</code>):</strong><br />
+  Crawlt das Personenverzeichnis der TH Köln nach Kontaktdaten, Fakultäten und Instituten.  </li>
+<li><strong>MOCOGI Datenextraktion (<code>python -m th_personal_graph.scripts.extract_mocogi_data</code>):</strong><br />
+  Extrahiert Modulinformationen (Verantwortliche, Prüfer) aus der MOCOGI-API und verknüpft diese im Wissensgraphen.  </li>
+<li><strong>Wissensgraph visualisieren (<code>python -m th_personal_graph.scripts.visualize_knowledge_graph</code>):</strong><br />
   Generiert eine interaktive HTML-Visualisierung der Personaldatenbank.</li>
 </ul>
 <p>Detaillierte Informationen zur Nutzung und den Parametern dieser Skripte finden Sie auf der Seite <strong><a href="../profiles/">Personaldatenbank &amp; Personen-Steckbriefe</a></strong> sowie in der <strong><a href="../../packages/th-personal-graph/">Dokumentation des TH Personal Graph Packages</a></strong>.</p>
