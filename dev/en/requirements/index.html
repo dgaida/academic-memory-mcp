@@ -2572,182 +2572,182 @@
 <h2 id="2-functional-requirements-fr">2. Functional Requirements (FR)<a class="headerlink" href="#2-functional-requirements-fr" title="Permanent link">&para;</a></h2>
 <h3 id="fr-1-crawler-filesystem-scanning">FR-1: Crawler &amp; Filesystem Scanning<a class="headerlink" href="#fr-1-crawler-filesystem-scanning" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>FR-1.1 (Recursive Scan):</strong> The system must recursively scan directories and automatically detect new, modified, or deleted files (PDF, DOCX, MSG, EML, etc.).</li>
-<li><strong>FR-1.2 (Change Detection):</strong> File changes must be detected by comparing SHA-256 hashes against values stored in the metadata database.</li>
-<li><strong>FR-1.3 (Real-time Monitoring):</strong> The system must provide a watcher module (<code>mcp-uni watch</code>) to monitor the filesystem in real time and index changes immediately.</li>
-<li><strong>FR-1.4 (Database Cleanup):</strong> When a file is deleted from the filesystem, its corresponding metadata records must be automatically removed from the central database.</li>
-<li><strong>FR-1.5 (Folder Summarization):</strong> The system must generate hierarchical summaries from file level up to the root folder level and store them in the database.</li>
+<li><strong>FR-1.1 (Recursive Scan):</strong> The system must recursively scan directories and automatically detect new, modified, or deleted files (PDF, DOCX, MSG, EML, etc.).  </li>
+<li><strong>FR-1.2 (Change Detection):</strong> File changes must be detected by comparing SHA-256 hashes against values stored in the metadata database.  </li>
+<li><strong>FR-1.3 (Real-time Monitoring):</strong> The system must provide a watcher module (<code>mcp-uni watch</code>) to monitor the filesystem in real time and index changes immediately.  </li>
+<li><strong>FR-1.4 (Database Cleanup):</strong> When a file is deleted from the filesystem, its corresponding metadata records must be automatically removed from the central database.  </li>
+<li><strong>FR-1.5 (Folder Summarization):</strong> The system must generate hierarchical summaries from file level up to the root folder level and store them in the database.  </li>
 </ul>
 <h3 id="fr-2-document-email-parsing">FR-2: Document &amp; Email Parsing<a class="headerlink" href="#fr-2-document-email-parsing" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>FR-2.1 (PDF Parsing):</strong> PDFs must be parsed using <code>Docling</code> as the primary engine (with a simpler fallback parsing if Docling is not available).</li>
-<li><strong>FR-2.2 (Email Parsing):</strong> The system must flawlessly parse Outlook emails in <code>.msg</code> format (via <code>extract-msg</code>) and <code>.eml</code> format.</li>
-<li><strong>FR-2.3 (Resource Constraints):</strong> To prevent performance bottlenecks, only the first <strong>3 pages</strong> of a document shall be parsed/analyzed by default.</li>
-<li><strong>FR-2.4 (Warning Suppression):</strong> Noise and non-critical warnings from third-party libraries (such as <code>extract-msg</code>) must be suppressed.</li>
-<li><strong>FR-2.5 (Signed Attachments):</strong> During <code>.msg</code> file parsing, signed attachment objects (<code>SignedAttachment</code>) must be handled safely and without errors.</li>
+<li><strong>FR-2.1 (PDF Parsing):</strong> PDFs must be parsed using <code>Docling</code> as the primary engine (with a simpler fallback parsing if Docling is not available).  </li>
+<li><strong>FR-2.2 (Email Parsing):</strong> The system must flawlessly parse Outlook emails in <code>.msg</code> format (via <code>extract-msg</code>) and <code>.eml</code> format.  </li>
+<li><strong>FR-2.3 (Resource Constraints):</strong> To prevent performance bottlenecks, only the first <strong>3 pages</strong> of a document shall be parsed/analyzed by default.  </li>
+<li><strong>FR-2.4 (Warning Suppression):</strong> Noise and non-critical warnings from third-party libraries (such as <code>extract-msg</code>) must be suppressed.  </li>
+<li><strong>FR-2.5 (Signed Attachments):</strong> During <code>.msg</code> file parsing, signed attachment objects (<code>SignedAttachment</code>) must be handled safely and without errors.  </li>
 </ul>
 <h3 id="fr-3-email-classification-sorting">FR-3: Email Classification &amp; Sorting<a class="headerlink" href="#fr-3-email-classification-sorting" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>FR-3.1 (ML Models):</strong> Emails must be automatically classified using XGBoost, RandomForest, or PyTorch-based Transformer models (e.g., MiniLM).</li>
-<li><strong>FR-3.2 (Input Formatting):</strong> The model input format must exactly match the structure: <code>SUBJECT: &lt;Subject&gt; | ATTACHMENTS: &lt;File1, ...&gt; [SEP] &lt;Email Body (anonymized)&gt;</code>.</li>
-<li><strong>FR-3.3 (Class Remapping):</strong> Classifications of the category <code>'Other'</code> must be automatically mapped to the standardized class <code>'Others'</code>.</li>
-<li><strong>FR-3.4 (Path Hierarchy):</strong> Archived emails must be automatically relocated into a three-tier directory structure: <code>Semester / Last Name / (Inbox or SentItems)</code>.</li>
-<li><strong>FR-3.5 (Special Routing):</strong> Email classes starting with <code>BA_</code> (Bachelor Thesis) or <code>MA_</code> (Master Thesis) must be sorted directly into <code>Semester/Inbox</code> or <code>Semester/SentItems</code>.</li>
-<li><strong>FR-3.6 (Name Extraction):</strong> Determining a student's last name from email metadata must follow a strict hierarchical logic:<ol>
-<li>Check for "on behalf of" ("im Auftrag von") headers.</li>
-<li><em>Greedy Name Matching:</em> Cross-reference parts of the display name with the local-part of the email address. If a part of the display name is found in the local-part, it is identified as the last name (e.g., <code>Mustermann Max &lt;mustermann@example.com&gt;</code> -&gt; "Mustermann").</li>
-<li><em>Dot-Separated Fallback:</em> Split the local-part by dots (<code>.</code>) and inspect the segments from back to front (ignoring generic terms).</li>
-<li><em>Generic Fallbacks:</em> Comma separation (<code>Lastname, Firstname</code>), last word of the display name, or uppercase letter detection.</li>
+<li><strong>FR-3.1 (ML Models):</strong> Emails must be automatically classified using XGBoost, RandomForest, or PyTorch-based Transformer models (e.g., MiniLM).  </li>
+<li><strong>FR-3.2 (Input Formatting):</strong> The model input format must exactly match the structure: <code>SUBJECT: &lt;Subject&gt; | ATTACHMENTS: &lt;File1, ...&gt; [SEP] &lt;Email Body (anonymized)&gt;</code>.  </li>
+<li><strong>FR-3.3 (Class Remapping):</strong> Classifications of the category <code>'Other'</code> must be automatically mapped to the standardized class <code>'Others'</code>.  </li>
+<li><strong>FR-3.4 (Path Hierarchy):</strong> Archived emails must be automatically relocated into a three-tier directory structure: <code>Semester / Last Name / (Inbox or SentItems)</code>.  </li>
+<li><strong>FR-3.5 (Special Routing):</strong> Email classes starting with <code>BA_</code> (Bachelor Thesis) or <code>MA_</code> (Master Thesis) must be sorted directly into <code>Semester/Inbox</code> or <code>Semester/SentItems</code>.  </li>
+<li><strong>FR-3.6 (Name Extraction):</strong> Determining a student's last name from email metadata must follow a strict hierarchical logic:  <ol>
+<li>Check for "on behalf of" ("im Auftrag von") headers.  </li>
+<li><em>Greedy Name Matching:</em> Cross-reference parts of the display name with the local-part of the email address. If a part of the display name is found in the local-part, it is identified as the last name (e.g., <code>Mustermann Max &lt;mustermann@example.com&gt;</code> -&gt; "Mustermann").  </li>
+<li><em>Dot-Separated Fallback:</em> Split the local-part by dots (<code>.</code>) and inspect the segments from back to front (ignoring generic terms).  </li>
+<li><em>Generic Fallbacks:</em> Comma separation (<code>Lastname, Firstname</code>), last word of the display name, or uppercase letter detection.  </li>
 </ol>
 </li>
-<li><strong>FR-3.7 (Name Normalization):</strong> Extracted names must be returned in <em>Title Case</em>. Umlauts must be normalized for directory paths (e.g., "Müller" -&gt; "Mueller" for the filesystem), but the original name must be preserved in records.</li>
-<li><strong>FR-3.8 (GUI Visibility):</strong> All sorted emails must be fully visible in the Gradio GUI (no hidden or collapsed rows by default).</li>
+<li><strong>FR-3.7 (Name Normalization):</strong> Extracted names must be returned in <em>Title Case</em>. Umlauts must be normalized for directory paths (e.g., "Müller" -&gt; "Mueller" for the filesystem), but the original name must be preserved in records.  </li>
+<li><strong>FR-3.8 (GUI Visibility):</strong> All sorted emails must be fully visible in the Gradio GUI (no hidden or collapsed rows by default).  </li>
 </ul>
 <h3 id="fr-4-hybrid-search-rag-process">FR-4: Hybrid Search &amp; RAG Process<a class="headerlink" href="#fr-4-hybrid-search-rag-process" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>FR-4.1 (Hybrid Search):</strong> The system must provide a hybrid search engine combining BM25 keyword search with Qdrant vector search.</li>
-<li><strong>FR-4.2 (Local Loading):</strong> Embeddings and language models must be loaded locally by default (<code>local_files_only=True</code>). On successful load, the log entry <code>ERFOLG: Modell &lt;Model Name&gt; wurde LOKAL geladen.</code> must be emitted.</li>
-<li><strong>FR-4.3 (RAG Workflow):</strong> The Retrieval-Augmented Generation (RAG) process must follow a multi-step workflow:<ol>
-<li>Generate <strong>3 precise search queries (questions)</strong> using the LLM based on the email content.</li>
-<li>Retrieve relevant chunks from the class-specific vector database (e.g., <code>data/memory/&lt;Class&gt;</code>).</li>
-<li>Select the <strong>top 3 unique chunks</strong> based on similarity score.</li>
-<li>Inject these chunks as "additional context" into the prompt for response generation.</li>
+<li><strong>FR-4.1 (Hybrid Search):</strong> The system must provide a hybrid search engine combining BM25 keyword search with Qdrant vector search.  </li>
+<li><strong>FR-4.2 (Local Loading):</strong> Embeddings and language models must be loaded locally by default (<code>local_files_only=True</code>). On successful load, the log entry <code>ERFOLG: Modell &lt;Model Name&gt; wurde LOKAL geladen.</code> must be emitted.  </li>
+<li><strong>FR-4.3 (RAG Workflow):</strong> The Retrieval-Augmented Generation (RAG) process must follow a multi-step workflow:  <ol>
+<li>Generate <strong>3 precise search queries (questions)</strong> using the LLM based on the email content.  </li>
+<li>Retrieve relevant chunks from the class-specific vector database (e.g., <code>data/memory/&lt;Class&gt;</code>).  </li>
+<li>Select the <strong>top 3 unique chunks</strong> based on similarity score.  </li>
+<li>Inject these chunks as "additional context" into the prompt for response generation.  </li>
 </ol>
 </li>
-<li><strong>FR-4.4 (qmd Integration):</strong> The system must optionally use the globally installed Node.js CLI <code>qmd</code> for query expansion and re-ranking. If <code>qmd</code> is missing, it must fall back to native Python search (Qdrant + BM25).</li>
+<li><strong>FR-4.4 (qmd Integration):</strong> The system must optionally use the globally installed Node.js CLI <code>qmd</code> for query expansion and re-ranking. If <code>qmd</code> is missing, it must fall back to native Python search (Qdrant + BM25).  </li>
 </ul>
 <h3 id="fr-5-email-workflow-control-gui">FR-5: Email Workflow Control &amp; GUI<a class="headerlink" href="#fr-5-email-workflow-control-gui" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>FR-5.1 (Gradio GUI):</strong> The interface must be powered by Gradio, divided into two tabs:<ul>
-<li><em>Tab 1 (Fast Sorting):</em> Bulk processing and archiving of already correctly classified emails.</li>
-<li><em>Tab 2 (Detail View):</em> Detailed analysis of a selected email with an AI summary (max. 2 sentences), context display, and action selection.</li>
+<li><strong>FR-5.1 (Gradio GUI):</strong> The interface must be powered by Gradio, divided into two tabs:  <ul>
+<li><em>Tab 1 (Fast Sorting):</em> Bulk processing and archiving of already correctly classified emails.  </li>
+<li><em>Tab 2 (Detail View):</em> Detailed analysis of a selected email with an AI summary (max. 2 sentences), context display, and action selection.  </li>
 </ul>
 </li>
-<li><strong>FR-5.2 (Action Suggestions):</strong> Based on the email content and RAG context, the system must suggest one of six actions:<ol>
-<li><em>Write reply:</em> Generate draft based on topic and personas.</li>
-<li><em>Reply with appointment suggestion:</em> Retrieve free slots from <code>free_slots.md</code> via <code>get_appointment_slots</code> and integrate them.</li>
-<li><em>Book appointment directly:</em> Create a calendar entry upon receiving appointment confirmation emails.</li>
-<li><em>Archive only:</em> Move the email directly to the archive without drafting a reply.</li>
-<li><em>Task "Read Attachment" (Thesis submissions):</em> Automatic processing of final thesis submissions.</li>
-<li><em>Colloquium appointment:</em> Special booking for final colloquium presentations.</li>
+<li><strong>FR-5.2 (Action Suggestions):</strong> Based on the email content and RAG context, the system must suggest one of six actions:  <ol>
+<li><em>Write reply:</em> Generate draft based on topic and personas.  </li>
+<li><em>Reply with appointment suggestion:</em> Retrieve free slots from <code>free_slots.md</code> via <code>get_appointment_slots</code> and integrate them.  </li>
+<li><em>Book appointment directly:</em> Create a calendar entry upon receiving appointment confirmation emails.  </li>
+<li><em>Archive only:</em> Move the email directly to the archive without drafting a reply.  </li>
+<li><em>Task "Read Attachment" (Thesis submissions):</em> Automatic processing of final thesis submissions.  </li>
+<li><em>Colloquium appointment:</em> Special booking for final colloquium presentations.  </li>
 </ol>
 </li>
-<li><strong>FR-5.3 (Archiving Suggestion):</strong> The system must automatically suggest the action "Archive only" for:<ul>
-<li>Emails older than the configured threshold (e.g., 6 months).</li>
-<li>Emails located in the <code>SentItems</code> folder.</li>
-<li>Emails that have already been replied to.</li>
+<li><strong>FR-5.3 (Archiving Suggestion):</strong> The system must automatically suggest the action "Archive only" for:  <ul>
+<li>Emails older than the configured threshold (e.g., 6 months).  </li>
+<li>Emails located in the <code>SentItems</code> folder.  </li>
+<li>Emails that have already been replied to.  </li>
 </ul>
 </li>
-<li><strong>FR-5.4 (Attachment Handling in GUI):</strong> The GUI must provide a checkbox for "Anhang speichern" (Save Attachment) in both Tab 1 and Tab 2. The selection state from Tab 1 must be preserved when switching to Tab 2.</li>
-<li><strong>FR-5.5 (Action "Read Attachment" - Automation):</strong> When an email is classified as a final thesis submission, the following steps must be executed automatically:<ol>
-<li>Save all attachments directly in the student's main folder (<code>Semester / Last Name /</code>).</li>
-<li>Create/update the <code>config.json</code> configuration file in the student's folder, including the PDF filename.</li>
-<li>Create an Outlook calendar reminder for <strong>exactly 7 days after email receipt at 08:00 AM</strong>.</li>
-<li>Automatically generate an Outlook reply draft confirming receipt.</li>
+<li><strong>FR-5.4 (Attachment Handling in GUI):</strong> The GUI must provide a checkbox for "Anhang speichern" (Save Attachment) in both Tab 1 and Tab 2. The selection state from Tab 1 must be preserved when switching to Tab 2.  </li>
+<li><strong>FR-5.5 (Action "Read Attachment" - Automation):</strong> When an email is classified as a final thesis submission, the following steps must be executed automatically:  <ol>
+<li>Save all attachments directly in the student's main folder (<code>Semester / Last Name /</code>).  </li>
+<li>Create/update the <code>config.json</code> configuration file in the student's folder, including the PDF filename.  </li>
+<li>Create an Outlook calendar reminder for <strong>exactly 7 days after email receipt at 08:00 AM</strong>.  </li>
+<li>Automatically generate an Outlook reply draft confirming receipt.  </li>
 </ol>
 </li>
-<li><strong>FR-5.6 (Action "Colloquium Appointment" - Automation):</strong><ol>
-<li>Create/update the <code>config.json</code> in the student's folder with presentation parameters (date, time, room, location type).</li>
-<li>Automatically book the colloquium in the Outlook calendar (duration fixed at 60 minutes) and export these details to the <code>config.json</code>.</li>
+<li><strong>FR-5.6 (Action "Colloquium Appointment" - Automation):</strong>  <ol>
+<li>Create/update the <code>config.json</code> in the student's folder with presentation parameters (date, time, room, location type).  </li>
+<li>Automatically book the colloquium in the Outlook calendar (duration fixed at 60 minutes) and export these details to the <code>config.json</code>.  </li>
 </ol>
 </li>
 </ul>
 <h3 id="fr-6-person-profiles-personprofiler">FR-6: Person Profiles &amp; PersonProfiler<a class="headerlink" href="#fr-6-person-profiles-personprofiler" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>FR-6.1 (Profile Generation):</strong> The system must generate and update Markdown-based person profiles at <code>D:\Steckbriefe\&lt;email&gt;.md</code>.</li>
-<li><strong>FR-6.2 (Profile Content):</strong> The profile must contain role, preferred honorific (Du/Sie), first contact, and relevant projects/theses.</li>
-<li><strong>FR-6.3 (Honorific Determination - Du/Sie):</strong> The preferred honorific must be determined by analyzing the last 4 direct emails sent to the person and the last 4 received from them. Bulk/Sammelmails (e.g., "Hallo zusammen") must be ignored.</li>
-<li><strong>FR-6.4 (Performance Limits):</strong> A maximum of the <strong>100 newest emails</strong> of a person may be analyzed when generating or updating a profile.</li>
-<li><strong>FR-6.5 (Incremental Updates):</strong> When updating an existing profile, only emails newer than the modification date of the profile file shall be processed.</li>
-<li><strong>FR-6.6 (Tracking):</strong> Processed emails must be tracked in the SQLite database <code>profiles_tracking.db</code>.</li>
+<li><strong>FR-6.1 (Profile Generation):</strong> The system must generate and update Markdown-based person profiles at <code>D:\Steckbriefe\&lt;email&gt;.md</code>.  </li>
+<li><strong>FR-6.2 (Profile Content):</strong> The profile must contain role, preferred honorific (Du/Sie), first contact, and relevant projects/theses.  </li>
+<li><strong>FR-6.3 (Honorific Determination - Du/Sie):</strong> The preferred honorific must be determined by analyzing the last 4 direct emails sent to the person and the last 4 received from them. Bulk/Sammelmails (e.g., "Hallo zusammen") must be ignored.  </li>
+<li><strong>FR-6.4 (Performance Limits):</strong> A maximum of the <strong>100 newest emails</strong> of a person may be analyzed when generating or updating a profile.  </li>
+<li><strong>FR-6.5 (Incremental Updates):</strong> When updating an existing profile, only emails newer than the modification date of the profile file shall be processed.  </li>
+<li><strong>FR-6.6 (Tracking):</strong> Processed emails must be tracked in the SQLite database <code>profiles_tracking.db</code>.  </li>
 </ul>
 <h3 id="fr-7-outlook-vba-macros">FR-7: Outlook VBA Macros<a class="headerlink" href="#fr-7-outlook-vba-macros" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>FR-7.1 (Data Export):</strong> VBA macros must export emails to the <code>inbox</code> folder in the format <code>YYYYMMDD_HHMMSS - Subject.msg</code>.</li>
-<li><strong>FR-7.2 (Free Slots):</strong> Free slots must be exported to a file named <code>free_slots.md</code>.</li>
-<li><strong>FR-7.3 (Outlook Error Avoidance):</strong> To move items within Outlook, <code>target_folder.Items.Add(0)</code> must be used instead of <code>mail.Move()</code> to avoid specific VBA runtime errors.</li>
-<li><strong>FR-7.4 (Account Mapping):</strong> The macros must be designed strictly for the account <code>daniel.gaida@th-koeln.de</code>.</li>
+<li><strong>FR-7.1 (Data Export):</strong> VBA macros must export emails to the <code>inbox</code> folder in the format <code>YYYYMMDD_HHMMSS - Subject.msg</code>.  </li>
+<li><strong>FR-7.2 (Free Slots):</strong> Free slots must be exported to a file named <code>free_slots.md</code>.  </li>
+<li><strong>FR-7.3 (Outlook Error Avoidance):</strong> To move items within Outlook, <code>target_folder.Items.Add(0)</code> must be used instead of <code>mail.Move()</code> to avoid specific VBA runtime errors.  </li>
+<li><strong>FR-7.4 (Account Mapping):</strong> The macros must be designed strictly for the account <code>daniel.gaida@th-koeln.de</code>.  </li>
 </ul>
 <h3 id="fr-8-model-context-protocol-mcp-server">FR-8: Model Context Protocol (MCP) Server<a class="headerlink" href="#fr-8-model-context-protocol-mcp-server" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>FR-8.1 (Server Start):</strong> The system must provide an MCP server started via the CLI command <code>mcp-uni serve-mcp</code>.</li>
-<li><strong>FR-8.2 (Tools for Agents):</strong> The server must expose the following tools to clients (e.g., Claude Desktop):<ul>
-<li><code>search_documents</code>: Semantic search in documents.</li>
-<li><code>get_folder_summary</code>: Fetch aggregated folder information.</li>
-<li><code>get_student_context</code>: Full history and status of a student.</li>
-<li><code>generate_mail_reply</code>: Draft email based on context and skills.</li>
-<li><code>get_open_tasks</code>: Extract open tasks.</li>
+<li><strong>FR-8.1 (Server Start):</strong> The system must provide an MCP server started via the CLI command <code>mcp-uni serve-mcp</code>.  </li>
+<li><strong>FR-8.2 (Tools for Agents):</strong> The server must expose the following tools to clients (e.g., Claude Desktop):  <ul>
+<li><code>search_documents</code>: Semantic search in documents.  </li>
+<li><code>get_folder_summary</code>: Fetch aggregated folder information.  </li>
+<li><code>get_student_context</code>: Full history and status of a student.  </li>
+<li><code>generate_mail_reply</code>: Draft email based on context and skills.  </li>
+<li><code>get_open_tasks</code>: Extract open tasks.  </li>
 </ul>
 </li>
 </ul>
 <h3 id="fr-9-metadata-knowledge-graph-th-personal-graph">FR-9: Metadata, Knowledge Graph &amp; TH Personal Graph<a class="headerlink" href="#fr-9-metadata-knowledge-graph-th-personal-graph" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>FR-9.1 (Database Separation):</strong> The system must maintain two separate SQLite databases:<ol>
-<li><code>university.db</code>: File metadata, folder structures, student sync, and email conversations.</li>
-<li><code>th_personal.db</code>: Organizational hierarchy, TH Köln staff, and module responsibilities.</li>
+<li><strong>FR-9.1 (Database Separation):</strong> The system must maintain two separate SQLite databases:  <ol>
+<li><code>university.db</code>: File metadata, folder structures, student sync, and email conversations.  </li>
+<li><code>th_personal.db</code>: Organizational hierarchy, TH Köln staff, and module responsibilities.  </li>
 </ol>
 </li>
-<li><strong>FR-9.2 (Ontology Learner):</strong> The system must automatically learn name-email pairs and module variations (e.g., "KI" vs. "Künstliche Intelligenz") and store them in the <code>aliases</code> table.</li>
-<li><strong>FR-9.3 (Edge Priorities):</strong> Knowledge graph relationships must have priorities defined in <code>ontology.yaml</code>. Higher-priority relationships must overwrite lower-priority ones.</li>
-<li><strong>FR-9.4 (TH Personal Crawler):</strong> A crawler script must scrape the TH Köln directory and create people and organization nodes in <code>th_personal.db</code>.</li>
-<li><strong>FR-9.5 (MOCOGI Extraction):</strong> Degree programs, examination regulations, modules, and examiners must be extracted via the MOCOGI API, mapped using fuzzy matching to persons, and saved in <code>th_personal.db</code>.</li>
-<li><strong>FR-9.6 (Visualization):</strong> The knowledge graph must be visualizable as an interactive HTML file (<code>knowledge_graph.html</code>).</li>
+<li><strong>FR-9.2 (Ontology Learner):</strong> The system must automatically learn name-email pairs and module variations (e.g., "KI" vs. "Künstliche Intelligenz") and store them in the <code>aliases</code> table.  </li>
+<li><strong>FR-9.3 (Edge Priorities):</strong> Knowledge graph relationships must have priorities defined in <code>ontology.yaml</code>. Higher-priority relationships must overwrite lower-priority ones.  </li>
+<li><strong>FR-9.4 (TH Personal Crawler):</strong> A crawler script must scrape the TH Köln directory and create people and organization nodes in <code>th_personal.db</code>.  </li>
+<li><strong>FR-9.5 (MOCOGI Extraction):</strong> Degree programs, examination regulations, modules, and examiners must be extracted via the MOCOGI API, mapped using fuzzy matching to persons, and saved in <code>th_personal.db</code>.  </li>
+<li><strong>FR-9.6 (Visualization):</strong> The knowledge graph must be visualizable as an interactive HTML file (<code>knowledge_graph.html</code>).  </li>
 </ul>
 <h3 id="fr-10-anonymization-privacy">FR-10: Anonymization &amp; Privacy<a class="headerlink" href="#fr-10-anonymization-privacy" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>FR-10.1 (Local Anonymization):</strong> Personally Identifiable Information (PII) like student names must be anonymized locally (using local Ollama models via <code>Anonymizer</code>) before sending to optional Cloud LLMs.</li>
-<li><strong>FR-10.2 (Bidirectionality):</strong> Anonymized data must be de-anonymized locally before executing local actions/tools.</li>
+<li><strong>FR-10.1 (Local Anonymization):</strong> Personally Identifiable Information (PII) like student names must be anonymized locally (using local Ollama models via <code>Anonymizer</code>) before sending to optional Cloud LLMs.  </li>
+<li><strong>FR-10.2 (Bidirectionality):</strong> Anonymized data must be de-anonymized locally before executing local actions/tools.  </li>
 </ul>
 <hr />
 <h2 id="3-non-functional-requirements-nfr">3. Non-Functional Requirements (NFR)<a class="headerlink" href="#3-non-functional-requirements-nfr" title="Permanent link">&para;</a></h2>
 <h3 id="nfr-1-security-privacy">NFR-1: Security &amp; Privacy<a class="headerlink" href="#nfr-1-security-privacy" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>NFR-1.1 (Local Execution):</strong> All core components (Ollama LLM, Qdrant vector database, SQLite metadata, parsing, indexing) must run completely offline without an active internet connection.</li>
-<li><strong>NFR-1.2 (Data Isolation):</strong> Student data, emails, and notes must never leave the local machine unencrypted or unanonymized.</li>
+<li><strong>NFR-1.1 (Local Execution):</strong> All core components (Ollama LLM, Qdrant vector database, SQLite metadata, parsing, indexing) must run completely offline without an active internet connection.  </li>
+<li><strong>NFR-1.2 (Data Isolation):</strong> Student data, emails, and notes must never leave the local machine unencrypted or unanonymized.  </li>
 </ul>
 <h3 id="nfr-2-performance-scalability">NFR-2: Performance &amp; Scalability<a class="headerlink" href="#nfr-2-performance-scalability" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>NFR-2.1 (Parser Limits):</strong> To conserve RAM and CPU, document parsing (PDF, DOCX) must be strictly limited to the first <strong>3 pages</strong>.</li>
-<li><strong>NFR-2.2 (LLM Context Window Protection):</strong> A maximum of the <strong>100 newest emails</strong> of a person may be analyzed during profile generation/updates to protect the context window limit of local LLMs.</li>
-<li><strong>NFR-2.3 (GUI Response Times):</strong> Search results in the email search GUI must return in under 1 second by utilizing an indexing cache (<code>data/cache/email_search_cache.json</code>).</li>
+<li><strong>NFR-2.1 (Parser Limits):</strong> To conserve RAM and CPU, document parsing (PDF, DOCX) must be strictly limited to the first <strong>3 pages</strong>.  </li>
+<li><strong>NFR-2.2 (LLM Context Window Protection):</strong> A maximum of the <strong>100 newest emails</strong> of a person may be analyzed during profile generation/updates to protect the context window limit of local LLMs.  </li>
+<li><strong>NFR-2.3 (GUI Response Times):</strong> Search results in the email search GUI must return in under 1 second by utilizing an indexing cache (<code>data/cache/email_search_cache.json</code>).  </li>
 </ul>
 <h3 id="nfr-3-reliability-robustness">NFR-3: Reliability &amp; Robustness<a class="headerlink" href="#nfr-3-reliability-robustness" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>NFR-3.1 (Windows File Locks):</strong> Because the system runs on Windows, files opened in code (e.g., via context managers) must be closed before moving, renaming, or deleting them to prevent <code>[WinError 32]</code>.</li>
-<li><strong>NFR-3.2 (Crawler Fault Tolerance):</strong> Folder summarization must feature a one-time retry logic with detailed debug output (<code>.folder_summary_items_debug.txt</code>).</li>
-<li><strong>NFR-3.3 (Summary Verification):</strong> After writing folder summaries, the system must verify the physical existence of the generated files.</li>
-<li><strong>NFR-3.4 (Past-Date Appointments):</strong> Appointments with dates in the past must be automatically detected, skipped during calendar booking, and directly archived as <code>Archiviert (Termin in Vergangenheit)</code>.</li>
+<li><strong>NFR-3.1 (Windows File Locks):</strong> Because the system runs on Windows, files opened in code (e.g., via context managers) must be closed before moving, renaming, or deleting them to prevent <code>[WinError 32]</code>.  </li>
+<li><strong>NFR-3.2 (Crawler Fault Tolerance):</strong> Folder summarization must feature a one-time retry logic with detailed debug output (<code>.folder_summary_items_debug.txt</code>).  </li>
+<li><strong>NFR-3.3 (Summary Verification):</strong> After writing folder summaries, the system must verify the physical existence of the generated files.  </li>
+<li><strong>NFR-3.4 (Past-Date Appointments):</strong> Appointments with dates in the past must be automatically detected, skipped during calendar booking, and directly archived as <code>Archiviert (Termin in Vergangenheit)</code>.  </li>
 </ul>
 <h3 id="nfr-4-compatibility-platform-support">NFR-4: Compatibility &amp; Platform Support<a class="headerlink" href="#nfr-4-compatibility-platform-support" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>NFR-4.1 (Platforms):</strong> The system must run flawlessly on Windows 10/11, macOS (Intel and Apple Silicon), and Linux.</li>
-<li><strong>NFR-4.2 (Python Compatibility):</strong> The system must be compatible with Python 3.10+. F-strings must not contain nested quotes of the same type to maintain Python 3.10 compatibility.</li>
-<li><strong>NFR-4.3 (Environment Support):</strong> The project must natively support both standard virtual environments (<code>venv</code>) and Anaconda environments (<code>environment.yml</code>).</li>
-<li><strong>NFR-4.4 (GPU Support):</strong> The system must optionally support NVIDIA GPUs via CUDA and Apple Silicon GPUs via MPS to accelerate transformer models.</li>
-<li><strong>NFR-4.5 (Timezone Locking):</strong> All calendar appointments must be booked in the <code>Europe/Berlin</code> timezone. Default appointment duration is 30 minutes (colloquia excluded: 60 minutes).</li>
+<li><strong>NFR-4.1 (Platforms):</strong> The system must run flawlessly on Windows 10/11, macOS (Intel and Apple Silicon), and Linux.  </li>
+<li><strong>NFR-4.2 (Python Compatibility):</strong> The system must be compatible with Python 3.10+. F-strings must not contain nested quotes of the same type to maintain Python 3.10 compatibility.  </li>
+<li><strong>NFR-4.3 (Environment Support):</strong> The project must natively support both standard virtual environments (<code>venv</code>) and Anaconda environments (<code>environment.yml</code>).  </li>
+<li><strong>NFR-4.4 (GPU Support):</strong> The system must optionally support NVIDIA GPUs via CUDA and Apple Silicon GPUs via MPS to accelerate transformer models.  </li>
+<li><strong>NFR-4.5 (Timezone Locking):</strong> All calendar appointments must be booked in the <code>Europe/Berlin</code> timezone. Default appointment duration is 30 minutes (colloquia excluded: 60 minutes).  </li>
 </ul>
 <h3 id="nfr-5-maintainability-quality-standards">NFR-5: Maintainability &amp; Quality Standards<a class="headerlink" href="#nfr-5-maintainability-quality-standards" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>NFR-5.1 (Google-Style Docstrings):</strong> All classes, methods, and functions must be fully documented using Google-Style Docstrings. These must include <code>Args:</code> and <code>Returns:</code> sections when applicable.</li>
-<li><strong>NFR-5.2 (Docstring Coverage):</strong> Docstring coverage (verified using <code>interrogate</code>) must be maintained at <strong>99%</strong> or above.</li>
-<li><strong>NFR-5.3 (Typing):</strong> Explicit Python type hints are mandatory for all function parameters and return types (including <code>-&gt; None</code> for <code>__init__</code>).</li>
-<li><strong>NFR-5.4 (Variable Names):</strong> Highly descriptive and self-explanatory variable names must be used (e.g., <code>local_part</code> instead of <code>lp</code>, <code>display_name</code> instead of <code>dn</code>). Abbreviations must be avoided.</li>
-<li><strong>NFR-5.5 (Preservation Policy):</strong> Existing comments, docstrings, and logging statements must never be deleted unless they are proven incorrect or completely obsolete.</li>
-<li><strong>NFR-5.6 (Code Formatting &amp; Linting):</strong> Code must be ruff-compliant. Run <code>ruff check . --fix</code> before committing. Violations of error classes E741, E402, F401, F541 are disallowed.</li>
-<li><strong>NFR-5.7 (Detailed Logging):</strong> Every email processing step must be logged densely and traceably in <code>process_emails.log</code>.</li>
-<li><strong>NFR-5.8 (Test Coverage):</strong> The system must have a comprehensive test suite (pytest) with at least 95% test coverage, respecting these mocking requirements:<ul>
-<li><code>SentenceTransformer.encode</code> must be mocked to return a dummy vector of size 384.</li>
-<li>Outlook collections must use 1-based indexing.</li>
-<li><code>extract_msg</code> must use <code>side_effect</code> for sequential <code>openMsg</code> calls.</li>
+<li><strong>NFR-5.1 (Google-Style Docstrings):</strong> All classes, methods, and functions must be fully documented using Google-Style Docstrings. These must include <code>Args:</code> and <code>Returns:</code> sections when applicable.  </li>
+<li><strong>NFR-5.2 (Docstring Coverage):</strong> Docstring coverage (verified using <code>interrogate</code>) must be maintained at <strong>99%</strong> or above.  </li>
+<li><strong>NFR-5.3 (Typing):</strong> Explicit Python type hints are mandatory for all function parameters and return types (including <code>-&gt; None</code> for <code>__init__</code>).  </li>
+<li><strong>NFR-5.4 (Variable Names):</strong> Highly descriptive and self-explanatory variable names must be used (e.g., <code>local_part</code> instead of <code>lp</code>, <code>display_name</code> instead of <code>dn</code>). Abbreviations must be avoided.  </li>
+<li><strong>NFR-5.5 (Preservation Policy):</strong> Existing comments, docstrings, and logging statements must never be deleted unless they are proven incorrect or completely obsolete.  </li>
+<li><strong>NFR-5.6 (Code Formatting &amp; Linting):</strong> Code must be ruff-compliant. Run <code>ruff check . --fix</code> before committing. Violations of error classes E741, E402, F401, F541 are disallowed.  </li>
+<li><strong>NFR-5.7 (Detailed Logging):</strong> Every email processing step must be logged densely and traceably in <code>process_emails.log</code>.  </li>
+<li><strong>NFR-5.8 (Test Coverage):</strong> The system must have a comprehensive test suite (pytest) with at least 95% test coverage, respecting these mocking requirements:  <ul>
+<li><code>SentenceTransformer.encode</code> must be mocked to return a dummy vector of size 384.  </li>
+<li>Outlook collections must use 1-based indexing.  </li>
+<li><code>extract_msg</code> must use <code>side_effect</code> for sequential <code>openMsg</code> calls.  </li>
 </ul>
 </li>
 </ul>
 <h3 id="nfr-6-internationalization-documentation">NFR-6: Internationalization &amp; Documentation<a class="headerlink" href="#nfr-6-internationalization-documentation" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>NFR-6.1 (Bilingual Documentation):</strong> The documentation must be bilingual (German/English) using the MkDocs ecosystem, <code>mkdocs-static-i18n</code> plugin, and <code>docs_structure: folder</code> configuration.</li>
-<li><strong>NFR-6.2 (Authoritative Language):</strong> German is the authoritative and leading language for all user manuals, interfaces, and LLM instructions. English serves as a full translation.</li>
-<li><strong>NFR-6.3 (Relative Paths):</strong> All links and images in Markdown documents must use relative paths (e.g., <code>../assets/</code>) to ensure the portability of the built documentation.</li>
-<li><strong>NFR-6.4 (Clean-up Policy):</strong> Before any release or submission, all temporary development artifacts (<code>__pycache__</code>, <code>.pytest_cache</code>, <code>.coverage</code>, <code>htmlcov</code>, <code>*.log</code>, temporary test files like <code>test.docx</code>, build directories <code>dist/</code>, <code>build/</code> and <code>*.egg-info</code>) must be completely cleaned up.</li>
+<li><strong>NFR-6.1 (Bilingual Documentation):</strong> The documentation must be bilingual (German/English) using the MkDocs ecosystem, <code>mkdocs-static-i18n</code> plugin, and <code>docs_structure: folder</code> configuration.  </li>
+<li><strong>NFR-6.2 (Authoritative Language):</strong> German is the authoritative and leading language for all user manuals, interfaces, and LLM instructions. English serves as a full translation.  </li>
+<li><strong>NFR-6.3 (Relative Paths):</strong> All links and images in Markdown documents must use relative paths (e.g., <code>../assets/</code>) to ensure the portability of the built documentation.  </li>
+<li><strong>NFR-6.4 (Clean-up Policy):</strong> Before any release or submission, all temporary development artifacts (<code>__pycache__</code>, <code>.pytest_cache</code>, <code>.coverage</code>, <code>htmlcov</code>, <code>*.log</code>, temporary test files like <code>test.docx</code>, build directories <code>dist/</code>, <code>build/</code> and <code>*.egg-info</code>) must be completely cleaned up.  </li>
 </ul>
 
 
