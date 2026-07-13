@@ -12,19 +12,19 @@
         <meta name="author" content="Senior Python Architect">
       
       
-        <link rel="canonical" href="https://dgaida.github.io/academic-memory-mcp/dev/development/">
+        <link rel="canonical" href="https://dgaida.github.io/academic-memory-mcp/dev/requirements/">
       
       
-        <link rel="prev" href="../packages/th-personal-graph/architecture/">
+        <link rel="prev" href="../usage/scripts/">
       
       
-        <link rel="next" href="docstring-guide/">
+        <link rel="next" href="../architecture/">
       
       
         
           <link rel="alternate" href="./" hreflang="de">
         
-          <link rel="alternate" href="../en/development/" hreflang="en">
+          <link rel="alternate" href="../en/requirements/" hreflang="en">
         
       
       
@@ -33,7 +33,7 @@
     
     
       
-        <title>Übersicht - MCP University Memory System</title>
+        <title>Systemanforderungen - MCP University Memory System</title>
       
     
     
@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#entwickler-dokumentation" class="md-skip">
+        <a href="#systemanforderungen-requirements" class="md-skip">
           Zum Inhalt
         </a>
       
@@ -124,7 +124,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Übersicht
+              Systemanforderungen
             
           </span>
         </div>
@@ -177,7 +177,7 @@
           </li>
         
           <li class="md-select__item">
-            <a href="../en/development/" hreflang="en" class="md-select__link">
+            <a href="../en/requirements/" hreflang="en" class="md-select__link">
               English
             </a>
           </li>
@@ -299,7 +299,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="../requirements/" class="md-tabs__link">
+        <a href="./" class="md-tabs__link">
           
   
   
@@ -1015,10 +1015,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../requirements/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Systemanforderungen
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1034,6 +1061,247 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Inhaltsverzeichnis">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Inhaltsverzeichnis
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-einleitung-und-systemubersicht" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Einleitung und Systemübersicht
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-funktionale-anforderungen-fa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Funktionale Anforderungen (FA)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Funktionale Anforderungen (FA)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fa-1-crawler-dateisystem-scanning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FA-1: Crawler &amp; Dateisystem-Scanning
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fa-2-dokumenten-e-mail-parsing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FA-2: Dokumenten- &amp; E-Mail-Parsing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fa-3-e-mail-klassifizierung-sortierung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FA-3: E-Mail-Klassifizierung &amp; Sortierung
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fa-4-hybrid-suche-rag-prozess" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FA-4: Hybrid-Suche &amp; RAG-Prozess
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fa-5-e-mail-workflow-steuerung-gui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FA-5: E-Mail-Workflow-Steuerung &amp; GUI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fa-6-personen-profile-personprofiler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FA-6: Personen-Profile &amp; PersonProfiler
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fa-7-outlook-vba-makros" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FA-7: Outlook VBA-Makros
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fa-8-model-context-protocol-mcp-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FA-8: Model Context Protocol (MCP) Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fa-9-metadaten-wissensgraph-th-personal-graph" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FA-9: Metadaten, Wissensgraph &amp; TH Personal Graph
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fa-10-anonymisierung-datenschutz-datenschutz-first" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FA-10: Anonymisierung &amp; Datenschutz (Datenschutz-First)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-nicht-funktionale-anforderungen-nfa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Nicht-funktionale Anforderungen (NFA)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Nicht-funktionale Anforderungen (NFA)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#nfa-1-sicherheit-privatsphare" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NFA-1: Sicherheit &amp; Privatsphäre
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nfa-2-performance-skalierbarkeit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NFA-2: Performance &amp; Skalierbarkeit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nfa-3-zuverlassigkeit-robustheit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NFA-3: Zuverlässigkeit &amp; Robustheit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nfa-4-kompatibilitat-plattformunterstutzung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NFA-4: Kompatibilität &amp; Plattformunterstützung
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nfa-5-wartbarkeit-qualitatsstandards" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NFA-5: Wartbarkeit &amp; Qualitätsstandards
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nfa-6-internationalisierung-dokumentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NFA-6: Internationalisierung &amp; Dokumentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1820,8 +2088,6 @@
                 
   
   
-    
-  
   
   
     
@@ -1837,11 +2103,13 @@
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_14" checked>
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_14" >
         
           
           <label class="md-nav__link" for="__nav_3_14" id="__nav_3_14_label" tabindex="">
@@ -1862,7 +2130,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_14_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_14_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3_14">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1877,37 +2145,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Übersicht
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../development/" class="md-nav__link">
         
   
   
@@ -1923,109 +2164,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Inhaltsverzeichnis">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Inhaltsverzeichnis
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#architektur-prinzipien" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Architektur-Prinzipien
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#lokales-setup" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Lokales Setup
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#coding-standards" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Coding Standards
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Coding Standards">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#docstrings" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Docstrings
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#testing" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Testing
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#qualitatssicherung" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Qualitätssicherung
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dokumentation-bauen" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Dokumentation bauen
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -2038,7 +2176,7 @@
   
   
     <li class="md-nav__item">
-      <a href="docstring-guide/" class="md-nav__link">
+      <a href="../development/docstring-guide/" class="md-nav__link">
         
   
   
@@ -2066,7 +2204,7 @@
   
   
     <li class="md-nav__item">
-      <a href="changelog/" class="md-nav__link">
+      <a href="../development/changelog/" class="md-nav__link">
         
   
   
@@ -2094,7 +2232,7 @@
   
   
     <li class="md-nav__item">
-      <a href="versioning/" class="md-nav__link">
+      <a href="../development/versioning/" class="md-nav__link">
         
   
   
@@ -2185,10 +2323,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#architektur-prinzipien" class="md-nav__link">
+  <a href="#1-einleitung-und-systemubersicht" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Architektur-Prinzipien
+        1. Einleitung und Systemübersicht
       
     </span>
   </a>
@@ -2196,33 +2334,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#lokales-setup" class="md-nav__link">
+  <a href="#2-funktionale-anforderungen-fa" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Lokales Setup
+        2. Funktionale Anforderungen (FA)
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#coding-standards" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Coding Standards
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Coding Standards">
+    <nav class="md-nav" aria-label="2. Funktionale Anforderungen (FA)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#docstrings" class="md-nav__link">
+  <a href="#fa-1-crawler-dateisystem-scanning" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Docstrings
+        FA-1: Crawler &amp; Dateisystem-Scanning
       
     </span>
   </a>
@@ -2230,10 +2357,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#testing" class="md-nav__link">
+  <a href="#fa-2-dokumenten-e-mail-parsing" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Testing
+        FA-2: Dokumenten- &amp; E-Mail-Parsing
       
     </span>
   </a>
@@ -2241,10 +2368,87 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#qualitatssicherung" class="md-nav__link">
+  <a href="#fa-3-e-mail-klassifizierung-sortierung" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Qualitätssicherung
+        FA-3: E-Mail-Klassifizierung &amp; Sortierung
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fa-4-hybrid-suche-rag-prozess" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FA-4: Hybrid-Suche &amp; RAG-Prozess
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fa-5-e-mail-workflow-steuerung-gui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FA-5: E-Mail-Workflow-Steuerung &amp; GUI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fa-6-personen-profile-personprofiler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FA-6: Personen-Profile &amp; PersonProfiler
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fa-7-outlook-vba-makros" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FA-7: Outlook VBA-Makros
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fa-8-model-context-protocol-mcp-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FA-8: Model Context Protocol (MCP) Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fa-9-metadaten-wissensgraph-th-personal-graph" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FA-9: Metadaten, Wissensgraph &amp; TH Personal Graph
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fa-10-anonymisierung-datenschutz-datenschutz-first" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FA-10: Anonymisierung &amp; Datenschutz (Datenschutz-First)
       
     </span>
   </a>
@@ -2257,13 +2461,85 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#dokumentation-bauen" class="md-nav__link">
+  <a href="#3-nicht-funktionale-anforderungen-nfa" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Dokumentation bauen
+        3. Nicht-funktionale Anforderungen (NFA)
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="3. Nicht-funktionale Anforderungen (NFA)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#nfa-1-sicherheit-privatsphare" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NFA-1: Sicherheit &amp; Privatsphäre
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nfa-2-performance-skalierbarkeit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NFA-2: Performance &amp; Skalierbarkeit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nfa-3-zuverlassigkeit-robustheit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NFA-3: Zuverlässigkeit &amp; Robustheit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nfa-4-kompatibilitat-plattformunterstutzung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NFA-4: Kompatibilität &amp; Plattformunterstützung
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nfa-5-wartbarkeit-qualitatsstandards" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NFA-5: Wartbarkeit &amp; Qualitätsstandards
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nfa-6-internationalisierung-dokumentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NFA-6: Internationalisierung &amp; Dokumentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2284,36 +2560,193 @@
 
 
 
-<h1 id="entwickler-dokumentation">Entwickler-Dokumentation<a class="headerlink" href="#entwickler-dokumentation" title="Permanent link">&para;</a></h1>
-<p>Willkommen zur Entwicklung am MCP University Memory System.</p>
-<h2 id="architektur-prinzipien">Architektur-Prinzipien<a class="headerlink" href="#architektur-prinzipien" title="Permanent link">&para;</a></h2>
-<ol>
-<li><strong>Offline-First:</strong> Keine Abhängigkeit von Cloud-APIs (außer optional für Modell-Downloads).  </li>
-<li><strong>Modularität:</strong> Parser, Crawler und Summarizer sind entkoppelt.  </li>
-<li><strong>Typsicherheit:</strong> Konsequente Nutzung von Python Type Hints und Pydantic.  </li>
+<h1 id="systemanforderungen-requirements">Systemanforderungen (Requirements)<a class="headerlink" href="#systemanforderungen-requirements" title="Permanent link">&para;</a></h1>
+<p>Dieses Dokument definiert die funktionalen und nicht-funktionalen Anforderungen für das <strong>MCP University Memory System</strong>. Es dient als Grundlage für die Entwicklung, Qualitätssicherung und Systemarchitektur.</p>
+<hr />
+<h2 id="1-einleitung-und-systemubersicht">1. Einleitung und Systemübersicht<a class="headerlink" href="#1-einleitung-und-systemubersicht" title="Permanent link">&para;</a></h2>
+<p>Das <strong>MCP University Memory System</strong> ist ein lokal laufendes, agentenbasiertes Wissens- und Gedächtnissystem für den Einsatz im Hochschul- und Forschungsbetrieb (speziell optimiert für die TH Köln). Es ermöglicht die automatisierte Verarbeitung von E-Mails, die Verwaltung von Studierendendaten, die semantische Suche in lokalen Dokumenten sowie die automatisierte Generierung von E-Mail-Antworten und Kalendereinträgen.</p>
+<p>Das System folgt einem strikten <strong>Offline-First-Ansatz</strong>, um den Schutz personenbezogener Daten von Studierenden und Lehrenden zu gewährleisten.</p>
+<hr />
+<h2 id="2-funktionale-anforderungen-fa">2. Funktionale Anforderungen (FA)<a class="headerlink" href="#2-funktionale-anforderungen-fa" title="Permanent link">&para;</a></h2>
+<h3 id="fa-1-crawler-dateisystem-scanning">FA-1: Crawler &amp; Dateisystem-Scanning<a class="headerlink" href="#fa-1-crawler-dateisystem-scanning" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>FA-1.1 (Rekursiver Scan):</strong> Das System muss Verzeichnisse rekursiv scannen und neue, geänderte oder gelöschte Dateien (PDF, DOCX, MSG, EML, etc.) automatisch erkennen.</li>
+<li><strong>FA-1.2 (Änderungserkennung):</strong> Die Erkennung von Dateiänderungen muss über einen SHA-256-Hash-Vergleich mit den in der Metadatendatenbank gespeicherten Werten erfolgen.</li>
+<li><strong>FA-1.3 (Echtzeit-Überwachung):</strong> Das System muss über ein Watcher-Modul (<code>mcp-uni watch</code>) verfügen, das das Dateisystem in Echtzeit überwacht und Dateiänderungen sofort indiziert.</li>
+<li><strong>FA-1.4 (Datenbank-Bereinigung):</strong> Wenn eine Datei im Dateisystem gelöscht wird, müssen die entsprechenden Metadatensätze automatisch aus der zentralen Datenbank entfernt werden.</li>
+<li><strong>FA-1.5 (Ordner-Zusammenfassung):</strong> Das System muss hierarchische Zusammenfassungen von Dateiebene bis zur Root-Verzeichnisebene generieren und in der Datenbank speichern.</li>
+</ul>
+<h3 id="fa-2-dokumenten-e-mail-parsing">FA-2: Dokumenten- &amp; E-Mail-Parsing<a class="headerlink" href="#fa-2-dokumenten-e-mail-parsing" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>FA-2.1 (PDF-Parsing):</strong> PDFs müssen primär über die Bibliothek <code>Docling</code> strukturiert eingelesen werden (mit Fallback auf ein einfacheres Parsing, falls Docling nicht verfügbar ist).</li>
+<li><strong>FA-2.2 (E-Mail-Parsing):</strong> Das System muss Outlook-Mails im <code>.msg</code>-Format (via <code>extract-msg</code>) und <code>.eml</code>-Format fehlerfrei parsen.</li>
+<li><strong>FA-2.3 (Ressourcenschonung):</strong> Um Performance-Engpässe zu vermeiden, dürfen standardmäßig nur die ersten <strong>3 Seiten</strong> eines Dokuments analysiert werden.</li>
+<li><strong>FA-2.4 (Unterdrückung von Warnungen):</strong> Rauschen und nicht-kritische Warnungen von Drittanbieter-Bibliotheken (wie <code>extract-msg</code>) müssen unterdrückt werden.</li>
+<li><strong>FA-2.5 (Signierte Anhänge):</strong> Beim Parsing von <code>.msg</code>-Dateien müssen signierte Anhänge (<code>SignedAttachment</code>) sicher und fehlerfrei behandelt werden.</li>
+</ul>
+<h3 id="fa-3-e-mail-klassifizierung-sortierung">FA-3: E-Mail-Klassifizierung &amp; Sortierung<a class="headerlink" href="#fa-3-e-mail-klassifizierung-sortierung" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>FA-3.1 (ML-Modelle):</strong> E-Mails müssen automatisch mittels XGBoost, RandomForest oder einem PyTorch-basierten Transformer-Modell (z.B. MiniLM) klassifiziert werden.</li>
+<li><strong>FA-3.2 (Eingabe-Formatierung):</strong> Das Modell-Eingabeformat muss exakt der Struktur <code>SUBJECT: &lt;Betreff&gt; | ATTACHMENTS: &lt;Datei1, ...&gt; [SEP] &lt;E-Mail-Body (anonymisiert)&gt;</code> entsprechen.</li>
+<li><strong>FA-3.3 (Klassen-Remapping):</strong> Klassifizierungen der Kategorie <code>'Other'</code> müssen automatisch auf die standardisierte Klasse <code>'Others'</code> umgemappt werden.</li>
+<li><strong>FA-3.4 (Pfad-Hierarchie):</strong> Archivierte E-Mails müssen automatisch in eine dreistufige Struktur verschoben werden: <code>Semester / Nachname / (Inbox oder SentItems)</code>.</li>
+<li><strong>FA-3.5 (Spezial-Routing):</strong> E-Mail-Klassen, die mit <code>BA_</code> (Bachelor Thesis) oder <code>MA_</code> (Master Thesis) beginnen, müssen direkt in <code>Semester/Inbox</code> oder <code>Semester/SentItems</code> einsortiert werden.</li>
+<li><strong>FA-3.6 (Namensextraktion):</strong> Die Ermittlung des Nachnamens eines Studierenden aus E-Mail-Metadaten muss über eine hierarchische Logik erfolgen:<ol>
+<li>Prüfung von "im Auftrag von"-Headern.</li>
+<li><em>Greedy Name Matching:</em> Abgleich von Teilen des Anzeigenamens (Display Name) mit dem Local-Part der E-Mail-Adresse. Findet sich der Name im Local-Part, ist dies der Nachname (z.B. <code>Mustermann Max &lt;mustermann@example.com&gt;</code> -&gt; "Mustermann").</li>
+<li><em>Dot-Separated Fallback:</em> Aufteilung des Local-Parts an Punkten (<code>.</code>) und Prüfung der Segmente von hinten nach vorne (unter Ignorierung generischer Begriffe).</li>
+<li><em>Generische Fallbacks:</em> Komma-Trennung (<code>Nachname, Vorname</code>), letztes Wort des Anzeigenamens oder Großbuchstaben-Erkennung.</li>
 </ol>
-<h2 id="lokales-setup">Lokales Setup<a class="headerlink" href="#lokales-setup" title="Permanent link">&para;</a></h2>
-<ol>
-<li>Repository klonen.  </li>
-<li>Virtuelle Umgebung erstellen und aktivieren.  </li>
-<li>Editierbare Installation: <code>pip install -e ".[dev]"</code>  </li>
+</li>
+<li><strong>FA-3.7 (Namen-Normalisierung):</strong> Extrahierte Namen müssen in <em>Title Case</em> zurückgegeben werden. Umlaute müssen für Verzeichnispfade normalisiert werden (z.B. "Müller" -&gt; "Mueller" für das Dateisystem), der Originalname muss jedoch erhalten bleiben.</li>
+<li><strong>FA-3.8 (GUI Sichtbarkeit):</strong> Alle sortierten E-Mails müssen in der Gradio GUI vollständig sichtbar sein (keine versteckten oder standardmäßig eingeklappten Zeilen).</li>
+</ul>
+<h3 id="fa-4-hybrid-suche-rag-prozess">FA-4: Hybrid-Suche &amp; RAG-Prozess<a class="headerlink" href="#fa-4-hybrid-suche-rag-prozess" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>FA-4.1 (Hybrid-Suche):</strong> Das System muss eine hybride Suche anbieten, die BM25-Volltextsuche mit Qdrant-Vektorsuche kombiniert.</li>
+<li><strong>FA-4.2 (Lokales Laden):</strong> Einbettungs- und Sprachmodelle müssen primär lokal geladen werden (<code>local_files_only=True</code>). Bei erfolgreichem Laden muss der Log-Eintrag <code>ERFOLG: Modell &lt;Modellname&gt; wurde LOKAL geladen.</code> ausgegeben werden.</li>
+<li><strong>FA-4.3 (RAG-Ablauf):</strong> Der RAG-Prozess (Retrieval Augmented Generation) muss mehrstufig aufgebaut sein:<ol>
+<li>Generierung von <strong>3 präzisen Suchanfragen (Fragen)</strong> durch das LLM basierend auf der E-Mail.</li>
+<li>Abruf relevanter Chunks aus der klassenspezifischen Vektordatenbank (z.B. <code>data/memory/&lt;Klasse&gt;</code>).</li>
+<li>Auswahl der <strong>Top 3 eindeutigen Chunks</strong> basierend auf dem Ähnlichkeits-Score.</li>
+<li>Injektion dieser Chunks als "Zusätzlicher Kontext" in den Prompt für die Antwortgenerierung.</li>
 </ol>
-<h2 id="coding-standards">Coding Standards<a class="headerlink" href="#coding-standards" title="Permanent link">&para;</a></h2>
-<h3 id="docstrings">Docstrings<a class="headerlink" href="#docstrings" title="Permanent link">&para;</a></h3>
-<p>Wir nutzen konsequent das <strong>Google-Style</strong> Format für alle Funktionen und Klassen. Siehe <a href="docstring-guide/">Docstring Guide</a>.</p>
-<h3 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h3>
-<p>Tests werden mit <code>pytest</code> durchgeführt:
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python3<span class="w"> </span>-m<span class="w"> </span>pytest
-</code></pre></div></p>
-<h3 id="qualitatssicherung">Qualitätssicherung<a class="headerlink" href="#qualitatssicherung" title="Permanent link">&para;</a></h3>
-<p>Vor jedem Commit sollten folgende Tools laufen:<br />
-<em>   <code>interrogate</code>: Prüft die Docstring-Abdeckung (Ziel: &gt;95%).<br />
-</em>   <code>markdownlint</code>: Prüft die Dokumentations-Dateien.  </p>
-<h2 id="dokumentation-bauen">Dokumentation bauen<a class="headerlink" href="#dokumentation-bauen" title="Permanent link">&para;</a></h2>
-<p>Lokal können Sie die Dokumentation wie folgt ansehen:
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>mkdocs<span class="w"> </span>serve
-</code></pre></div></p>
-<p>Dies startet einen Server auf <code>http://127.0.0.1:8000</code> mit Live-Reload.</p>
+</li>
+<li><strong>FA-4.4 (qmd-Integration):</strong> Das System muss optional die global installierte Node.js CLI <code>qmd</code> zur Query-Expansion und zum Re-Ranking nutzen. Falls <code>qmd</code> fehlt, muss ein automatischer Fallback auf die native Python-Suche (Qdrant + BM25) erfolgen.</li>
+</ul>
+<h3 id="fa-5-e-mail-workflow-steuerung-gui">FA-5: E-Mail-Workflow-Steuerung &amp; GUI<a class="headerlink" href="#fa-5-e-mail-workflow-steuerung-gui" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>FA-5.1 (Gradio GUI):</strong> Die Interaktion muss über eine Gradio-basierte Benutzeroberfläche erfolgen, aufgeteilt in zwei Tabs:<ul>
+<li><em>Tab 1 (Schnell-Einsortierung):</em> Massenverarbeitung und Archivierung bereits korrekt klassifizierter Mails.</li>
+<li><em>Tab 2 (Detail-Ansicht):</em> Detailanalyse einer ausgewählten Mail mit KI-Zusammenfassung (max. 2 Sätze), Kontext-Anzeige und Aktions-Auswahl.</li>
+</ul>
+</li>
+<li><strong>FA-5.2 (Aktions-Vorschläge):</strong> Basierend auf dem E-Mail-Inhalt und dem RAG-Kontext muss das System eine von sechs Aktionen vorschlagen:<ol>
+<li><em>Antwort schreiben:</em> Entwurf basierend auf Thema und Personas.</li>
+<li><em>Antwort mit Terminvorschlag:</em> Ermittelt freie Slots aus <code>free_slots.md</code> via <code>get_appointment_slots</code> und integriert sie.</li>
+<li><em>Termin direkt buchen:</em> Erstellt einen Kalendereintrag bei Terminbestätigungen.</li>
+<li><em>Nur archivieren:</em> Verschiebt die Mail ins Archiv.</li>
+<li><em>Aufgabe "Anhang lesen" (Abschlussarbeiten):</em> Automatische Verarbeitung finaler Abgaben.</li>
+<li><em>Kolloquium-Termin:</em> Spezielle Buchung für Abschlussvorträge.</li>
+</ol>
+</li>
+<li><strong>FA-5.3 (Archivierungs-Vorschlag):</strong> Das System muss automatisch die Aktion "Nur archivieren" vorschlagen für:<ul>
+<li>E-Mails, die älter als der konfigurierte Schwellenwert (z.B. 6 Monate) sind.</li>
+<li>E-Mails, die sich im <code>SentItems</code>-Ordner befinden.</li>
+<li>Bereits beantwortete E-Mails.</li>
+</ul>
+</li>
+<li><strong>FA-5.4 (Anhänge-Handhabung in der GUI):</strong> Die GUI muss eine Checkbox für "Anhang speichern" in Tab 1 und Tab 2 bereitstellen. Der Auswahlzustand von Tab 1 muss beim Wechsel zu Tab 2 erhalten bleiben.</li>
+<li><strong>FA-5.5 (Aktion "Anhang lesen" - Automatisierung):</strong> Bei der Einstufung als finale Abgabe müssen folgende Schritte vollautomatisch ausgeführt werden:<ol>
+<li>Speichern aller E-Mail-Anhänge direkt im studentischen Hauptordner (<code>Semester / Nachname /</code>).</li>
+<li>Erstellen/Aktualisieren der Konfigurationsdatei <code>config.json</code> im Hauptordner des Studenten mit dem Dateinamen der PDF-Arbeit.</li>
+<li>Erstellen einer Kalender-Erinnerung in Outlook für <strong>genau 7 Tage nach E-Mail-Eingang um 08:00 Uhr</strong>.</li>
+<li>Automatisches Generieren eines Outlook-Antwortentwurfs zur Bestätigung des Empfangs.</li>
+</ol>
+</li>
+<li><strong>FA-5.6 (Aktion "Kolloquium-Termin" - Automatisierung):</strong><ol>
+<li>Erstellen/Aktualisieren der <code>config.json</code> im Ordner des Studenten mit Vortragsparametern (Datum, Uhrzeit, Raum, Ortstyp).</li>
+<li>Automatisches Eintragen des Kolloquiums in den Outlook-Kalender (Dauer fest auf 60 Minuten eingestellt) und Übertrag der Daten in die <code>config.json</code>.</li>
+</ol>
+</li>
+</ul>
+<h3 id="fa-6-personen-profile-personprofiler">FA-6: Personen-Profile &amp; PersonProfiler<a class="headerlink" href="#fa-6-personen-profile-personprofiler" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>FA-6.1 (Profil-Generierung):</strong> Das System muss Markdown-basierte Personen-Steckbriefe in <code>D:\Steckbriefe\&lt;email&gt;.md</code> generieren und aktualisieren.</li>
+<li><strong>FA-6.2 (Profil-Inhalt):</strong> Der Steckbrief muss Rolle, bevorzugte Anrede (Du/Sie), den ersten Kontakt sowie relevante Projekte/Thesen enthalten.</li>
+<li><strong>FA-6.3 (Anrede-Bestimmung - Du/Sie):</strong> Die bevorzugte Anrede muss durch Analyse der letzten 4 gesendeten E-Mails an die Person und der letzten 4 empfangenen E-Mails von der Person ermittelt werden. Massenmails/Sammelmails (z.B. "Hallo zusammen") müssen dabei ignoriert werden.</li>
+<li><strong>FA-6.4 (Performance-Grenze):</strong> Für die Profilerstellung dürfen maximal die <strong>100 neuesten E-Mails</strong> einer Person herangezogen werden.</li>
+<li><strong>FA-6.5 (Inkrementelle Updates):</strong> Bei Updates eines bestehenden Profils dürfen nur E-Mails berücksichtigt werden, die neuer sind als das Änderungsdatum der Steckbrief-Datei.</li>
+<li><strong>FA-6.6 (Tracking):</strong> Verarbeitete E-Mails müssen in der SQLite-Datenbank <code>profiles_tracking.db</code> getrackt werden.</li>
+</ul>
+<h3 id="fa-7-outlook-vba-makros">FA-7: Outlook VBA-Makros<a class="headerlink" href="#fa-7-outlook-vba-makros" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>FA-7.1 (Datenexport):</strong> VBA-Makros müssen E-Mails im standardisierten Format <code>YYYYMMDD_HHMMSS - Subject.msg</code> in den <code>inbox</code>-Ordner exportieren.</li>
+<li><strong>FA-7.2 (Freie Zeitfenster):</strong> Freie Terminfenster müssen in eine Datei <code>free_slots.md</code> exportiert werden.</li>
+<li><strong>FA-7.3 (Outlook-Fehlervermeidung):</strong> Zum Verschieben von Elementen in Outlook muss <code>target_folder.Items.Add(0)</code> anstelle von <code>mail.Move()</code> verwendet werden, um spezifische VBA-Laufzeitfehler zu vermeiden.</li>
+<li><strong>FA-7.4 (Konto-Festlegung):</strong> Die Makros müssen fest auf das Benutzerkonto <code>daniel.gaida@th-koeln.de</code> ausgelegt sein.</li>
+</ul>
+<h3 id="fa-8-model-context-protocol-mcp-server">FA-8: Model Context Protocol (MCP) Server<a class="headerlink" href="#fa-8-model-context-protocol-mcp-server" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>FA-8.1 (Server-Start):</strong> Das System muss einen MCP-Server über das CLI-Kommando <code>mcp-uni serve-mcp</code> bereitstellen.</li>
+<li><strong>FA-8.2 (Tools für Agenten):</strong> Der Server muss folgende Tools für externe Clients (z.B. Claude Desktop) bereitstellen:<ul>
+<li><code>search_documents</code>: Semantische Suche in Dokumenten.</li>
+<li><code>get_folder_summary</code>: Abfrage aggregierter Ordner-Informationen.</li>
+<li><code>get_student_context</code>: Vollständige Historie und Status eines Studenten.</li>
+<li><code>generate_mail_reply</code>: Entwurf einer E-Mail basierend auf Kontext und Skills.</li>
+<li><code>get_open_tasks</code>: Extraktion offener Aufgaben.</li>
+</ul>
+</li>
+</ul>
+<h3 id="fa-9-metadaten-wissensgraph-th-personal-graph">FA-9: Metadaten, Wissensgraph &amp; TH Personal Graph<a class="headerlink" href="#fa-9-metadaten-wissensgraph-th-personal-graph" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>FA-9.1 (Datenbank-Trennung):</strong> Das System muss zwei getrennte SQLite-Datenbanken pflegen:<ol>
+<li><code>university.db</code>: Dateimetadaten, Ordnerstrukturen, Studenten-Synchronisierung (<code>sync-students</code>), E-Mail-Konversationen.</li>
+<li><code>th_personal.db</code>: Organisationshierarchie, Hochschulpersonal der TH Köln und Modulverantwortlichkeiten.</li>
+</ol>
+</li>
+<li><strong>FA-9.2 (Ontology Learner):</strong> Das System muss automatisch Name-E-Mail-Paare sowie Modulnamen-Variationen (z.B. "KI" vs. "Künstliche Intelligenz") lernen und in der Tabelle <code>aliases</code> speichern.</li>
+<li><strong>FA-9.3 (Kanten-Prioritäten):</strong> Beziehungen im Wissensgraphen müssen Prioritäten besitzen (definiert in <code>ontology.yaml</code>). Beziehungen mit höherer Priorität müssen bestehende Beziehungen niedrigerer Priorität überschreiben.</li>
+<li><strong>FA-9.4 (TH Personal Crawler):</strong> Ein Crawler-Skript muss das Personenverzeichnis der TH Köln crawlen und Personen sowie Organisationseinheiten in <code>th_personal.db</code> anlegen.</li>
+<li><strong>FA-9.5 (MOCOGI Extraktion):</strong> Studiengänge, POs, Module und Prüfer müssen über die MOCOGI-API extrahiert, mittels Fuzzy-Matching Personen zugeordnet und in <code>th_personal.db</code> gespeichert werden.</li>
+<li><strong>FA-9.6 (Visualisierung):</strong> Der Wissensgraph muss als interaktive HTML-Datei (<code>knowledge_graph.html</code>) visualisiert werden können.</li>
+</ul>
+<h3 id="fa-10-anonymisierung-datenschutz-datenschutz-first">FA-10: Anonymisierung &amp; Datenschutz (Datenschutz-First)<a class="headerlink" href="#fa-10-anonymisierung-datenschutz-datenschutz-first" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>FA-10.1 (Lokale Anonymisierung):</strong> Personenbezogene Daten (PII) wie Namen von Studierenden müssen vor der Übermittlung an optionale Cloud-LLMs lokal anonymisiert werden (unter Verwendung des lokalen Ollama-Modells via <code>Anonymizer</code>).</li>
+<li><strong>FA-10.2 (Bidirektionalität):</strong> Vor der Ausführung von lokalen Tools (z.B. Kalendereinträge, Suchen) müssen die Daten lokal wieder de-anonymisiert werden.</li>
+</ul>
+<hr />
+<h2 id="3-nicht-funktionale-anforderungen-nfa">3. Nicht-funktionale Anforderungen (NFA)<a class="headerlink" href="#3-nicht-funktionale-anforderungen-nfa" title="Permanent link">&para;</a></h2>
+<h3 id="nfa-1-sicherheit-privatsphare">NFA-1: Sicherheit &amp; Privatsphäre<a class="headerlink" href="#nfa-1-sicherheit-privatsphare" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>NFA-1.1 (Lokale Ausführung):</strong> Alle Kernkomponenten (LLM via Ollama, Vektordatenbank Qdrant, Metadaten-Datenbanken SQLite, Parsing, Indexierung) müssen vollständig offline und lokal ohne Internetverbindung lauffähig sein.</li>
+<li><strong>NFA-1.2 (Datenisolierung):</strong> Studentendaten, E-Mails und Notizen dürfen den lokalen Computer des Benutzers niemals unverschlüsselt oder unanonymisiert verlassen.</li>
+</ul>
+<h3 id="nfa-2-performance-skalierbarkeit">NFA-2: Performance &amp; Skalierbarkeit<a class="headerlink" href="#nfa-2-performance-skalierbarkeit" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>NFA-2.1 (Parser-Begrenzung):</strong> Um RAM- und CPU-Ressourcen zu schonen, muss das Parsing von Dokumenten (PDFs, DOCX) hart auf die ersten <strong>3 Seiten</strong> limitiert sein.</li>
+<li><strong>NFA-2.2 (LLM-Kontextfenster-Schonung):</strong> Bei der Steckbrieferstellung und -aktualisierung dürfen maximal die <strong>100 neuesten E-Mails</strong> einer Person herangezogen werden, um das Kontextfenster lokaler LLMs nicht zu überschreiten.</li>
+<li><strong>NFA-2.3 (Antwortzeiten der GUI):</strong> Suchergebnisse in der E-Mail-Schnellsuche-GUI müssen durch die Nutzung eines Index-Caches (<code>data/cache/email_search_cache.json</code>) in unter 1 Sekunde geliefert werden.</li>
+</ul>
+<h3 id="nfa-3-zuverlassigkeit-robustheit">NFA-3: Zuverlässigkeit &amp; Robustheit<a class="headerlink" href="#nfa-3-zuverlassigkeit-robustheit" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>NFA-3.1 (Dateisperren auf Windows):</strong> Da das System unter Windows läuft, müssen alle im Code geöffneten Dateien (z.B. via Context Manager) zwingend geschlossen werden, bevor sie verschoben, umbenannt oder gelöscht werden, um <code>[WinError 32]</code> zu verhindern.</li>
+<li><strong>NFA-3.2 (Fehlertoleranz des Crawlers):</strong> Die Ordnerzusammenfassung des Crawlers muss über eine automatische Ein-Mal-Wiederholungslogik (Retry-Logik) mit detaillierter Debug-Ausgabe (<code>.folder_summary_items_debug.txt</code>) verfügen.</li>
+<li><strong>NFA-3.3 (Zusammenfassungs-Verifizierung):</strong> Das System muss nach dem Schreiben von Ordnerzusammenfassungen die tatsächliche Existenz der erzeugten Dateien auf dem Dateisystem verifizieren.</li>
+<li><strong>NFA-3.4 (Vergangenheits-Termine):</strong> Bei der Buchung von Terminen müssen Termine in der Vergangenheit automatisch erkannt, nicht im Kalender eingetragen und direkt als <code>Archiviert (Termin in Vergangenheit)</code> markiert werden.</li>
+</ul>
+<h3 id="nfa-4-kompatibilitat-plattformunterstutzung">NFA-4: Kompatibilität &amp; Plattformunterstützung<a class="headerlink" href="#nfa-4-kompatibilitat-plattformunterstutzung" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>NFA-4.1 (Plattformen):</strong> Das System muss uneingeschränkt auf Windows 10/11, macOS (Intel und Apple Silicon) sowie Linux lauffähig sein.</li>
+<li><strong>NFA-4.2 (Python-Kompatibilität):</strong> Das System muss mit Python 3.10+ kompatibel sein. F-Strings dürfen keine verschachtelten Anführungszeichen desselben Typs enthalten, um die Kompatibilität mit Python 3.10 zu wahren.</li>
+<li><strong>NFA-4.3 (Umgebungs-Support):</strong> Das Projekt muss sowohl Standard-Pip-Virtual-Environments (<code>venv</code>) als auch Anaconda-Umgebungen (<code>environment.yml</code>) nativ unterstützen.</li>
+<li><strong>NFA-4.4 (GPU-Unterstützung):</strong> Das System muss optional NVIDIA GPUs via CUDA sowie Apple Silicon GPUs via MPS für die Beschleunigung von Transformer-Modellen unterstützen.</li>
+<li><strong>NFA-4.5 (Zeitzonen-Sperre):</strong> Alle Kalendereinträge und Termine müssen zwingend in der Zeitzone <code>Europe/Berlin</code> angelegt werden. Die Standarddauer für Termine beträgt 30 Minuten (Kolloquien ausgenommen: 60 Minuten).</li>
+</ul>
+<h3 id="nfa-5-wartbarkeit-qualitatsstandards">NFA-5: Wartbarkeit &amp; Qualitätsstandards<a class="headerlink" href="#nfa-5-wartbarkeit-qualitatsstandards" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>NFA-5.1 (Google-Style Docstrings):</strong> Alle Klassen, Methoden und Funktionen müssen lückenlos mit Google-Style Docstrings versehen sein. Diese müssen zwingend die Sektionen <code>Args:</code> und <code>Returns:</code> (sofern Parameter/Rückgabewerte vorhanden) enthalten.</li>
+<li><strong>NFA-5.2 (Docstring-Abdeckung):</strong> Die Docstring-Abdeckung (überprüft mit dem Tool <code>interrogate</code>) muss dauerhaft bei mindestens <strong>99%</strong> liegen.</li>
+<li><strong>NFA-5.3 (Typisierung):</strong> Die Verwendung von expliziten Python-Typ-Hints für alle Funktionsparameter sowie Rückgabewerte (einschließlich <code>-&gt; None</code> für <code>__init__</code>) ist verpflichtend.</li>
+<li><strong>NFA-5.4 (Variablennamen):</strong> Es müssen sprechende, selbsterklärende Variablennamen verwendet werden (z.B. <code>local_part</code> statt <code>lp</code>, <code>display_name</code> statt <code>dn</code>). Abkürzungen sind zu vermeiden.</li>
+<li><strong>NFA-5.5 (Erhaltungs-Richtlinie):</strong> Vorhandene Kommentare, Docstrings und Logging-Statements dürfen niemals gelöscht werden, es sei denn, sie sind nachweislich fehlerhaft oder obsolet.</li>
+<li><strong>NFA-5.6 (Code-Formatierung &amp; Linting):</strong> Der Code muss ruff-konform sein. Vor jedem Commit muss <code>ruff check . --fix</code> ausgeführt werden. Fehlerklassen wie E741, E402, F401, F541 sind unzulässig.</li>
+<li><strong>NFA-5.7 (Detailliertes Logging):</strong> Jeder Verarbeitungsschritt von E-Mails muss detailliert und nachvollziehbar in <code>process_emails.log</code> protokolliert werden.</li>
+<li><strong>NFA-5.8 (Testabdeckung):</strong> Das System muss über eine umfassende Testsuite (pytest) mit einer Testabdeckung von mindestens 95% verfügen. Dabei gelten folgende Mocking-Regeln:<ul>
+<li><code>SentenceTransformer.encode</code> muss so gemockt werden, dass ein Dummy-Vektor der Größe 384 zurückgegeben wird.</li>
+<li>Outlook-Kollektionen müssen ein 1-basiertes Indexing verwenden.</li>
+<li><code>extract_msg</code> muss via <code>side_effect</code> für aufeinanderfolgende Aufrufe von <code>openMsg</code> gemockt werden.</li>
+</ul>
+</li>
+</ul>
+<h3 id="nfa-6-internationalisierung-dokumentation">NFA-6: Internationalisierung &amp; Dokumentation<a class="headerlink" href="#nfa-6-internationalisierung-dokumentation" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>NFA-6.1 (Bilinguale Dokumentation):</strong> Die Dokumentation muss zweisprachig (Deutsch und Englisch) aufgebaut sein. Hierfür wird das MkDocs-Ecosystem mit dem Plugin <code>mkdocs-static-i18n</code> und der Konfiguration <code>docs_structure: folder</code> verwendet.</li>
+<li><strong>NFA-6.2 (Autoritative Sprache):</strong> Deutsch ist die führende und autoritative Sprache für alle Benutzerdokumentationen, Benutzeroberflächen und LLM-Instruktionen. Englisch dient als vollständige Übersetzung.</li>
+<li><strong>NFA-6.3 (Relative Pfade):</strong> In allen Markdown-Dokumenten müssen relative Pfade (z.B. <code>../assets/</code>) für Links und Bilder verwendet werden, um die Portabilität der Dokumentationsseite zu gewährleisten.</li>
+<li><strong>NFA-6.4 (Clean-Up-Richtlinie):</strong> Vor jeder Veröffentlichung oder Abgabe müssen alle temporären Entwicklungsartefakte (<code>__pycache__</code>, <code>.pytest_cache</code>, <code>.coverage</code>, <code>htmlcov</code>, <code>*.log</code>, temporäre Testdateien wie <code>test.docx</code>, Build-Ordner <code>dist/</code>, <code>build/</code> und <code>*.egg-info</code>) vollständig gelöscht werden.</li>
+</ul>
 
 
 
@@ -2351,7 +2784,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Fußzeile" >
         
           
-          <a href="../packages/th-personal-graph/architecture/" class="md-footer__link md-footer__link--prev" aria-label="Zurück: Architektur &amp; Logik">
+          <a href="../usage/scripts/" class="md-footer__link md-footer__link--prev" aria-label="Zurück: Hilfsskripte">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -2361,20 +2794,20 @@
                 Zurück
               </span>
               <div class="md-ellipsis">
-                Architektur & Logik
+                Hilfsskripte
               </div>
             </div>
           </a>
         
         
           
-          <a href="docstring-guide/" class="md-footer__link md-footer__link--next" aria-label="Weiter: Docstring Guide">
+          <a href="../architecture/" class="md-footer__link md-footer__link--next" aria-label="Weiter: Architektur">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Weiter
               </span>
               <div class="md-ellipsis">
-                Docstring Guide
+                Architektur
               </div>
             </div>
             <div class="md-footer__button md-icon">
