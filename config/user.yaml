@@ -1,0 +1,15 @@
+# Konfiguration des Nutzers des Tools
+name: "Daniel Gaida"
+
+# Die primäre E-Mail-Adresse
+email: "daniel.gaida@th-koeln.de"
+
+# Optional: Weitere E-Mail-Adressen, die dem Nutzer gehören
+# Falls 'email' als Liste angegeben wird, wird das erste Element als primäre Adresse verwendet
+# und die gesamte Liste in 'emails' übernommen.
+# email:
+#   - daniel.gaida@th-koeln.de
+#   - daniel.gaida@fh-koeln.de
+
+# Explizite Liste aller E-Mail-Adressen (optional, wird automatisch befüllt falls email eine Liste ist)
+# emails: ["daniel.gaida@th-koeln.de", "daniel.gaida@fh-koeln.de"]

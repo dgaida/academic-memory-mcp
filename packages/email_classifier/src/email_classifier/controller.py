@@ -943,7 +943,7 @@ E-MAIL: {mail_content}
             if skill_path and skill_path.exists()
             else ""
         )
-        reg_prompt = f"""Verfasse eine Antwort auf die folgende E-Mail auf {detected_language} basierend auf der PERSONA und dem SKILL. Nutze die Anrede '{honorific}'.
+        reg_prompt = f"""Verfasse eine Antwort auf die folgende E-Mail auf {detected_language} basierend auf der PERSONA, dem SKILL und dem bisherigen Konversationskontext. Nutze die Anrede '{honorific}'.
 
 PERSONA:
 {persona_content}
@@ -951,14 +951,17 @@ PERSONA:
 SKILL:
 {skill_content}
 
-KONTEXT:
+ZUSÄTZLICHER KONTEXT:
 {additional_context}
+
+ZUSAMMENFASSUNG DER BISHERIGEN KONVERSATION (ORDNER-ZUSAMMENFASSUNG):
 {summary_content}
 
 AKTUELLE E-MAIL:
 {mail_content}
 
 WICHTIGE ANWEISUNGEN:
+- Beziehe dich bei der Formulierung der Antwort zwingend auf den bisherigen Konversationskontext aus der obigen Ordner-Zusammenfassung, um den roten Faden der Kommunikation beizubehalten.
 - Formatiere die Antwort im folgenden Format:
 ANHANG: [JA/NEIN]
 BETREFF: [Passender Betreff]
