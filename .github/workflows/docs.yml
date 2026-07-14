@@ -45,9 +45,15 @@ jobs:
           globs: "docs/**/*.md"
 
       - name: Check broken links
+        uses: lycheeverse/lychee-action@v2
+        id: lychee
+        with:
+          args: --verbose --no-progress "docs/**/*.md" "README.md" "requirements.md"
+          fail: false
+
+      - name: Set broken links count
         run: |
-          # In a real environment, we would use lychee or similar
-          echo "BROKEN_LINKS=0" >> $GITHUB_ENV
+          echo "BROKEN_LINKS=${ steps.lychee.outputs.num_failures }" >> $GITHUB_ENV
 
       - name: Build MkDocs and Capture Warnings
         run: |
@@ -59,13 +65,20 @@ jobs:
         run: |
           cat <<JSON > docs/assets/metrics.json
           {
-            "interrogate_coverage": "${{ env.INTERROGATE_VAL }}",
-            "markdownlint_errors": "${{ env.LINT_ERRORS || 0 }}",
-            "broken_links": "${{ env.BROKEN_LINKS || 0 }}",
-            "build_warnings": "${{ env.BUILD_WARNINGS || 0 }}",
+            "interrogate_coverage": "${ env.INTERROGATE_VAL }",
+            "markdownlint_errors": "${ env.LINT_ERRORS || 0 }",
+            "broken_links": "${ env.BROKEN_LINKS || 0 }",
+            "build_warnings": "${ env.BUILD_WARNINGS || 0 }",
             "timestamp": $(date +%s)
           }
           JSON
+
+      - name: Verify no broken links
+        run: |
+          if [ "${ steps.lychee.outputs.num_failures }" -gt 0 ]; then
+            echo "Error: Found ${ steps.lychee.outputs.num_failures } broken links!"
+            exit 1
+          fi
 
       - name: Generate Changelog (Tags only)
         if: startsWith(github.ref, 'refs/tags/')
@@ -78,11 +91,11 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git fetch origin gh-pages --depth=1 || true
 
-          if [[ ${{ github.ref }} == refs/tags/* ]]; then
+          if [[ ${ github.ref } == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/}
             mike deploy --push --update-aliases $VERSION latest
             mike set-default --push latest
-          elif [[ ${{ github.ref }} == refs/heads/main || ${{ github.ref }} == refs/heads/master ]]; then
+          elif [[ ${ github.ref } == refs/heads/main || ${ github.ref } == refs/heads/master ]]; then
             mike deploy --push --update-aliases dev
             if mike list | grep -q "latest"; then
               mike set-default --push latest

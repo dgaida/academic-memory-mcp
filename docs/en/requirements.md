@@ -4,4 +4,4 @@ The authoritative and current system requirements for the **MCP University Memor
 
 Please use the following link to access the current authoritative version:
 
-*   [System Requirements (requirements.md in main repo - German)](../../requirements.md)  
+*   [System Requirements (requirements.md in main repo - German)](https://github.com/dgaida/academic-memory-mcp/blob/master/requirements.md)
