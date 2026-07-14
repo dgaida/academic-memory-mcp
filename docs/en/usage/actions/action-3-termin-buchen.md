@@ -6,11 +6,11 @@ This action is executed when an email contains an appointment confirmation from 
 
 The system performs the following steps during this action:
 
-1.  **Extract Date and Time:** The AI extracts the requested and confirmed date and time from the email.
-2.  **Validity Check (Past):** It checks if the proposed appointment lies in the past.
-    *   **If in the past:** No calendar entry is created. The email is archived directly (Status: `Archiviert (Termin in Vergangenheit)`).
-3.  **Create Calendar Entry:** If the appointment is in the future, the system books the appointment in the user's Outlook calendar via the `manage_calendar_appointment` tool. The default duration is **30 minutes**, and the timezone is set to `Europe/Berlin`.
-4.  **Archiving:** The email is filed in the corresponding student archive folder.
+1.  **Extract Date and Time:** The AI extracts the requested and confirmed date and time from the email.  
+2.  **Validity Check (Past):** It checks if the proposed appointment lies in the past.  
+    *   **If in the past:** No calendar entry is created. The email is archived directly (Status: `Archiviert (Termin in Vergangenheit)`).  
+3.  **Create Calendar Entry:** If the appointment is in the future, the system books the appointment in the user's Outlook calendar via the `manage_calendar_appointment` tool. The default duration is **30 minutes**, and the timezone is set to `Europe/Berlin`.  
+4.  **Archiving:** The email is filed in the corresponding student archive folder.  
 
 ---
 

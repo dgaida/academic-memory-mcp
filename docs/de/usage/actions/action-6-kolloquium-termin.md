@@ -6,10 +6,10 @@ Diese Aktion automatisiert den gesamten Prozess der Terminplanung und Daten-Vorb
 
 Sobald ein Termin für das Kolloquium per E-Mail vereinbart und bestätigt wird, stößt diese Aktion folgende Prozesse an:
 
-1.  **Datum- und Uhrzeitextraktion:** Das System extrahiert das Datum (im Format `DD.MM.YYYY`) und die Uhrzeit (im Format `HH:MM`) des Kolloquiums aus der E-Mail.
-2.  **Erstellung/Aktualisierung der `config.json`:**
-    Das System legt im Hauptordner des Studenten automatisch eine Konfigurationsdatei namens `config.json` an (bzw. aktualisiert eine bestehende). In diese Datei werden die extrahierten Termindaten (Datum, Uhrzeit, Ort, Raum) eingetragen. Sie dient nachgelagert zur automatisierten Bewertung von Präsentationsfolien oder zum Ausfüllen von Formularen.
-3.  **Kalendereintrag erstellen:**
+1.  **Datum- und Uhrzeitextraktion:** Das System extrahiert das Datum (im Format `DD.MM.YYYY`) und die Uhrzeit (im Format `HH:MM`) des Kolloquiums aus der E-Mail.  
+2.  **Erstellung/Aktualisierung der `config.json`:**  
+    Das System legt im Hauptordner des Studenten automatisch eine Konfigurationsdatei namens `config.json` an (bzw. aktualisiert eine bestehende). In diese Datei werden die extrahierten Termindaten (Datum, Uhrzeit, Ort, Raum) eingetragen. Sie dient nachgelagert zur automatisierten Bewertung von Präsentationsfolien oder zum Ausfüllen von Formularen.  
+3.  **Kalendereintrag erstellen:**  
     Das System trägt einen speziellen **60-minütigen** Termin direkt in Ihren Outlook-Kalender über das Tool `manage_calendar_appointment` ein, damit der Zeitraum für die Prüfung geblockt ist.
 
 ---

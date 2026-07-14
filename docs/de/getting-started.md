@@ -32,7 +32,7 @@ Das System ist um sechs Hauptanwendungsfälle herum aufgebaut, die Ihren univers
 
 ### 5. [Finale Abgabe von Abschlussarbeiten](usage/final-submission.md)  
 *   **Worum geht es?** Begleiten Sie den Prozess der finalen Abgabe von Bachelor- und Masterthesen lückenlos und automatisiert.  
-*   **Key Features:** JIT-Archivierung von Abgabedokumenten, Kalender-Erinnerung zur Korrektur und automatische Generierung der Kolloquium-Konfiguration (`config.json`).
+*   **Key Features:** JIT-Archivierung von Abgabedokumenten, Kalender-Erinnerung zur Korrektur und automatische Generierung der Kolloquium-Konfiguration (`config.json`).  
 *   **Mehr erfahren:** [Anleitung zur Finalen Abgabe](usage/final-submission.md).  
 
 ### 6. [Outlook Makros](usage/outlook-macros.md)  
