@@ -35,7 +35,7 @@ jobs:
         run: |
           mkdir -p docs/assets
           interrogate mcp_university/ --fail-under 99 --generate-badge docs/assets/interrogate.svg
-          INTERROGATE_VAL=$(interrogate mcp_university/ --fail-under 99 | grep -oP 'actual: \d+(\.\d+)?%' | grep -oP '\d+(\.\d+)?' || true)
+          INTERROGATE_VAL=$(interrogate mcp_university/ --fail-under 99 | grep -oP "actual: \d+(\.\d+)?%" | grep -oP "\d+(\.\d+)?" || true)
           echo "INTERROGATE_VAL=$INTERROGATE_VAL" >> $GITHUB_ENV
 
       - name: Lint Markdown
@@ -53,7 +53,7 @@ jobs:
 
       - name: Set broken links count
         run: |
-          echo "BROKEN_LINKS=${ steps.lychee.outputs.num_failures }" >> $GITHUB_ENV
+          echo "BROKEN_LINKS=${{ steps.lychee.outputs.num_failures }}" >> $GITHUB_ENV
 
       - name: Build MkDocs and Capture Warnings
         run: |
@@ -65,18 +65,18 @@ jobs:
         run: |
           cat <<JSON > docs/assets/metrics.json
           {
-            "interrogate_coverage": "${ env.INTERROGATE_VAL }",
-            "markdownlint_errors": "${ env.LINT_ERRORS || 0 }",
-            "broken_links": "${ env.BROKEN_LINKS || 0 }",
-            "build_warnings": "${ env.BUILD_WARNINGS || 0 }",
+            "interrogate_coverage": "${{ env.INTERROGATE_VAL }}",
+            "markdownlint_errors": "${{ env.LINT_ERRORS || 0 }}",
+            "broken_links": "${{ env.BROKEN_LINKS || 0 }}",
+            "build_warnings": "${{ env.BUILD_WARNINGS || 0 }}",
             "timestamp": $(date +%s)
           }
           JSON
 
       - name: Verify no broken links
         run: |
-          if [ "${ steps.lychee.outputs.num_failures }" -gt 0 ]; then
-            echo "Error: Found ${ steps.lychee.outputs.num_failures } broken links!"
+          if [ "${{ steps.lychee.outputs.num_failures }}" -gt 0 ]; then
+            echo "Error: Found ${{ steps.lychee.outputs.num_failures }} broken links!"
             exit 1
           fi
 
@@ -91,11 +91,11 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git fetch origin gh-pages --depth=1 || true
 
-          if [[ ${ github.ref } == refs/tags/* ]]; then
-            VERSION=${GITHUB_REF#refs/tags/}
+          if [[ ${{ github.ref }} == refs/tags/* ]]; then
+            VERSION=${{ GITHUB_REF#refs/tags/ }}
             mike deploy --push --update-aliases $VERSION latest
             mike set-default --push latest
-          elif [[ ${ github.ref } == refs/heads/main || ${ github.ref } == refs/heads/master ]]; then
+          elif [[ ${{ github.ref }} == refs/heads/main || ${{ github.ref }} == refs/heads/master ]]; then
             mike deploy --push --update-aliases dev
             if mike list | grep -q "latest"; then
               mike set-default --push latest
