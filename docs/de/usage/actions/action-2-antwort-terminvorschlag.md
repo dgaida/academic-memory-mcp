@@ -6,11 +6,12 @@ Diese Aktion wird verwendet, wenn auf eine Anfrage geantwortet werden soll und g
 
 Das System führt bei dieser Aktion folgende Schritte aus:
 
-1.  **Auslesen der freien Zeiten:** Das System nutzt das Tool `get_appointment_slots`, welches die Datei `free_slots.md` einliest. Diese Datei wurde zuvor über Outlook-VBA-Makros mit Ihren aktuellen freien Zeiten gefüllt.  
-2.  **Formatierung und Filterung:** Die freien Zeitfenster werden ausgelesen und übersichtlich formatiert.  
-3.  **KI-Generierung:** Das lokale LLM entwirft das Antwortschreiben, bindet die gefundenen freien Slots ansprechend in die E-Mail ein und bittet den Empfänger um Bestätigung eines der Termine.  
-4.  **Anrede und Tonfall:** Auch hier werden die Steckbriefe und die ermittelte Anredeform (Du/Sie) berücksichtigt.  
-5.  **Entwurfserstellung:** Es wird ein Antwortentwurf in Outlook mit den integrierten Terminvorschlägen und der Original-Mail im Anhang angelegt.  
+1.  **Konversationsanalyse:** Es wird eine prägnante Zusammenfassung des bisherigen E-Mail-Verlaufs im Ordner des Studenten erstellt bzw. aktualisiert (`.emails_summary.md`), um den Kontext für das Sprachmodell (LLM) bereitgestellt zu bekommen.
+2.  **Auslesen der freien Zeiten:** Das System nutzt das Tool `get_appointment_slots`, welches die Datei `free_slots.md` einliest. Diese Datei wurde zuvor über Outlook-VBA-Makros mit Ihren aktuellen freien Zeiten gefüllt.
+3.  **Formatierung und Filterung:** Die freien Zeitfenster werden ausgelesen und übersichtlich formatiert.
+4.  **KI-Generierung:** Das lokale LLM entwirft das Antwortschreiben, bindet die gefundenen freien Slots ansprechend in die E-Mail ein und bittet den Empfänger um Bestätigung eines der Termine.
+5.  **Anrede und Tonfall:** Auch hier werden die Steckbriefe und die ermittelte Anredeform (Du/Sie) berücksichtigt.
+6.  **Entwurfserstellung:** Es wird ein Antwortentwurf in Outlook mit den integrierten Terminvorschlägen und der Original-Mail im Anhang angelegt.
 
 ---
 

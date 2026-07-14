@@ -20,7 +20,7 @@ The system performs the following steps during this action:
 graph TD
     A[Email with appointment confirmation received] --> B[Extract date & time of the appointment]
     B --> C{Is appointment in the past?}
-    C -- Yes --> D[No booking & archive email directly <br> Status: Archiviert (Termin in Vergangenheit)]
+    C -- Yes --> D["No booking & archive email directly <br> Status: Archiviert (Termin in Vergangenheit)"]
     C -- No --> E[Book appointment in Outlook calendar via manage_calendar_appointment]
     E --> F[Process completed]
 ```

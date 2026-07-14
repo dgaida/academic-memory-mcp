@@ -87,74 +87,14 @@ Sobald Sie in der GUI auf "Speichern & Ausführen" klicken, wird die gewählte A
 
 ### Detail-Logik der Aktionen:
 
-#### Vorbereitung: Konversations-Zusammenfassung
-Bevor eine Antwort generiert wird, erstellt das System eine prägnante Zusammenfassung des bisherigen Konversationsverlaufs im Studentenordner (`.emails_summary.md`). Diese dient als wichtiger Kontext für das LLM, um über bisherige Absprachen informiert zu sein.  
-- Ein Beispiel für die resultierende Struktur finden Sie unter [Beispiel E-Mail-Strukturen](indexing-details.md#beispiel-e-mail-strukturen).  
-- Falls eine E-Mail in der GUI umklassifiziert wurde, bezieht die Zusammenfassung automatisch die neue Ordnerstruktur mit ein.  
+Bevor eine Antwort generiert wird, erstellt das System eine prägnante Zusammenfassung des bisherigen Konversationsverlaufs im Studentenordner (`.emails_summary.md`). Diese dient als wichtiger Kontext für das LLM, um über bisherige Absprachen informiert zu sein. Details zur Funktionsweise und Umsetzung der einzelnen Aktionen finden Sie direkt in den jeweiligen Beschreibungen:
 
-#### 1) Antwort schreiben
-Das LLM generiert einen Antworttext unter Berücksichtigung Ihres eigenen **Personen-Steckbriefs** (Tonalität, Rolle), des **Studenten-Steckbriefs** und der oben genannten **Konversations-Zusammenfassung**. Details zur Erstellung und Nutzung der Steckbriefe finden Sie unter [Personen-Profile](profiles.md). Es wird automatisch ein Entwurf in Outlook erstellt, der die Original-Mail als Anhang enthält.
-
-#### 2) Antwort schreiben mit einem Terminvorschlag
-Das System ruft das Tool `get_appointment_slots` auf, welches die `free_slots.md` ausliest. Die gefundenen Zeiten werden formatiert in den Antwortentwurf integriert.
-
-#### 3) Termin im Kalender anlegen
-Wird genutzt, wenn der Student einen Termin bestätigt hat. Das System extrahiert Datum und Uhrzeit und nutzt das Tool `manage_calendar_appointment`, um einen echten Eintrag in Ihrem Outlook-Kalender zu erstellen.
-
-!!! info "Termine in der Vergangenheit"
-    Sollte ein Termin in der Vergangenheit liegen, wird dieser automatisch erkannt. In diesem Fall wird kein Kalendereintrag erstellt und die E-Mail wird direkt archiviert (Status: `Archiviert (Termin in Vergangenheit)`).
-
-#### 4) E-Mail nur archivieren
-Die E-Mail wird im entsprechenden studentischen Archiv-Ordner gespeichert. Es erfolgt keine weitere technische Aktion (wie z.B. ein Antwort-Entwurf).
-
-#### 5) Aufgabe im Kalender anlegen (Finale Abgabe)
-**Dies ist die zentrale Aktion, bei der die Abgabe einer Abschlussarbeit automatisch verarbeitet und detektiert wird.** Wenn der E-Mail-Klassifizierer oder der Benutzer in der GUI eine E-Mail als finale Abgabe einstuft, wird diese Aktion ausgewählt. Sie kombiniert folgende automatisierte Schritte für Abschlussarbeiten:
-
-1. **Anhänge speichern:** Alle E-Mail-Anhänge werden via `save_email_attachments` automatisch direkt im übergeordneten studentischen Ordner (`Semester / Nachname /`) abgelegt.  
-2. **Kolloquium-Konfiguration (`config.json`):** Es wird automatisch eine `config.json` Datei im Hauptordner des Studenten mittels `create_colloquium_config` angelegt (bzw. aktualisiert mit dem Dateinamen der PDF-Arbeit aus dem Anhang). Diese Datei dient als Konfiguration für den *colloquium-protocol-creator*.  
-3. **Kalender-Erinnerung:** Ein Kalendereintrag (Sprechstundentermin/Erinnerung) wird via `manage_calendar_appointment` für genau **7 Tage nach E-Mail-Eingang (um 08:00 Uhr)** angelegt, um an das Lesen und Bewerten der Arbeit zu erinnern.  
-4. **Antwort-Entwurf:** Ein Outlook-Antwortentwurf zur Bestätigung des Empfangs der Abschlussarbeit wird automatisch erstellt.  
-
-#### 6) Termin für Kolloquium (mit `config.json` Automatisierung)
-Ähnlich wie Aktion 3, jedoch wird hierbei die Dauer fest auf **60 Minuten** eingestellt und ein spezieller Betreff gewählt. Zudem wurde diese Aktion erheblich weiterentwickelt, um den gesamten Kolloquiumsprozess zu automatisieren:
-
-1. **Erstellung/Aktualisierung der `config.json`:**  
-   Das System legt im Ordner des Studenten automatisch eine Konfigurationsdatei namens `config.json` an (oder aktualisiert eine bestehende). Diese enthält alle wichtigen Parameter für den Vortrag und optionale Folgeprozesse (wie z.B. eine automatisierte Folien-Bewertung mittels Gemini oder das Kompilieren von PDFs).
-
-2. **Automatische Termin-Eintragung:**  
-   Datum (Format: `DD.MM.YYYY`) und Uhrzeit (Format: `HH:MM`) des Kolloquiums werden automatisch aus der E-Mail extrahiert, im Outlook-Kalender verbucht (Dauer: 60 Minuten) und direkt in die `config.json` des Studenten eingetragen.
-
-**Beispiel für die erzeugte/aktualisierte `config.json`:**
-```json
-{
-  "task": "colloquium",
-  "description": "Kolloquium auf dem Campus Gummersbach mit automatischer Gemini-Bewertung",
-  "pdf": {
-    "filename": "Bachelorarbeit.pdf"
-  },
-  "colloquium": {
-    "date": "15.11.2026",
-    "time": "14:00",
-    "location_type": "campus",
-    "room": "3.228"
-  },
-  "llm": {
-    "api_choice": null,
-    "model": null,
-    "groq_free": true
-  },
-  "gemini_evaluation": {
-    "enabled": false,
-    "model": "gemini-2.0-flash-exp"
-  },
-  "output": {
-    "folder": null,
-    "compile_pdf": true,
-    "fill_form_only": true
-  }
-}
-```
-Diese Datei dient nachgelagert auch zur automatisierten Bewertung von Präsentationsfolien oder dem Ausfüllen von Formularen.
+*   **[Aktion 1: Antwort schreiben](actions/action-1-antwort-schreiben.md)**
+*   **[Aktion 2: Antwort mit Terminvorschlag](actions/action-2-antwort-terminvorschlag.md)**
+*   **[Aktion 3: Termin direkt buchen](actions/action-3-termin-buchen.md)**
+*   **[Aktion 4: Nur archivieren](actions/action-4-nur-archivieren.md)**
+*   **[Aktion 5: Aufgabe im Kalender anlegen (Finale Abgabe)](actions/action-5-aufgabe-kalender.md)**
+*   **[Aktion 6: Kolloquium-Termin](actions/action-6-kolloquium-termin.md)**
 
 ---
 
