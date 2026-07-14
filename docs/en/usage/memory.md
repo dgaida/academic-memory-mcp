@@ -16,20 +16,20 @@ mcp-uni memory update
 
 ### Options
 
-- `--config` / `-c`: Path to memory path configuration (default: `config/classifier_memory_paths.yaml`).
-- `--debug` / `-d`: Enables detailed debug logs during the indexing process.
+- `--config` / `-c`: Path to memory path configuration (default: `config/classifier_memory_paths.yaml`).  
+- `--debug` / `-d`: Enables detailed debug logs during the indexing process.  
 
 ### How It Works
 
-The script performs the following steps:
-1. **Path Resolution**: It reads the configuration and determines which folders are mapped to which vector databases.
-2. **Parsing**: All supported files (`.pdf`, `.docx`, `.md`, `.txt`, `.eml`, `.msg`, `.py`, `.ipynb`, `.json`, `.html`) are read.
-3. **Chunking**: Long texts are split into smaller segments (chunks).
-4. **Indexing**: The chunks are vectorized using the configured embedding model and stored in the Qdrant vector database under `data/memory/<ClassName>`.
+The script performs the following steps:  
+1. **Path Resolution**: It reads the configuration and determines which folders are mapped to which vector databases.  
+2. **Parsing**: All supported files (`.pdf`, `.docx`, `.md`, `.txt`, `.eml`, `.msg`, `.py`, `.ipynb`, `.json`, `.html`) are read.  
+3. **Chunking**: Long texts are split into smaller segments (chunks).  
+4. **Indexing**: The chunks are vectorized using the configured embedding model and stored in the Qdrant vector database under `data/memory/<ClassName>`.  
 
 Since absolute paths are used as document IDs, running the update again will update existing documents and add new ones.
 
 ---
-See also:
-- [RAG Process](rag-process.md)
-- [Document Indexing Details](indexing-details.md)
+See also:  
+- [RAG Process](rag-process.md)  
+- [Document Indexing Details](indexing-details.md)  

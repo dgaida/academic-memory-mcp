@@ -12,11 +12,11 @@ python scripts/appointment_gui.py
 
 ## Features
 
-*   **Weekly Overview:** Displays all appointments for the current week, read from `data/appointments.md`.
-*   **Student Context:** Selecting an appointment automatically searches for the matching student folder.
-*   **Summaries:** Displays the AI-generated conversation summary (`.emails_summary.md`) of the student.
-*   **Student Profiles (Steckbriefe):** Displays the student's current profile (interests, previous topics, etc.).
-*   **File Explorer:** Allows direct access to all files in the student's folder (e.g., exposés, drafts).
+*   **Weekly Overview:** Displays all appointments for the current week, read from `data/appointments.md`.  
+*   **Student Context:** Selecting an appointment automatically searches for the matching student folder.  
+*   **Summaries:** Displays the AI-generated conversation summary (`.emails_summary.md`) of the student.  
+*   **Student Profiles (Steckbriefe):** Displays the student's current profile (interests, previous topics, etc.).  
+*   **File Explorer:** Allows direct access to all files in the student's folder (e.g., exposés, drafts).  
 
 ## Data Source
 

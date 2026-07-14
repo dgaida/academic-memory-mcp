@@ -4,14 +4,14 @@ This page describes the necessary steps for the initial setup and installation o
 
 ## Prerequisites
 
-- Python 3.10 or higher
-- Ollama (for local LLM support)
-- Outlook (for working with .msg files and calendar integration under Windows)
+- Python 3.10 or higher  
+- Ollama (for local LLM support)  
+- Outlook (for working with .msg files and calendar integration under Windows)  
 
 ## Installation
 
-1. Clone the repository.
-2. Create a virtual environment and install the dependencies:
+1. Clone the repository.  
+2. Create a virtual environment and install the dependencies:  
 
 ```bash
 pip install -e .
@@ -28,7 +28,7 @@ conda activate mcp-university
 
 To get the system up and running, perform the following steps:
 
-1. **Prepare Configuration Files:**
+1. **Prepare Configuration Files:**  
    Copy the `.example` configuration files in the `config/` directory:
    ```bash
    cp config/user.yaml.example config/user.yaml
@@ -36,10 +36,10 @@ To get the system up and running, perform the following steps:
    cp config/classifier_paths.yaml.example config/classifier_paths.yaml
    ```
 
-2. **Customize User Data:**
+2. **Customize User Data:**  
    Enter your name and your university email in `config/user.yaml`.
 
-3. **Synchronize Student Data:**
+3. **Synchronize Student Data:**  
    If you have already created a `students.yaml` (e.g., via the Outlook macros), synchronize it with the SQLite database:
    ```bash
    mcp-uni db sync-students
