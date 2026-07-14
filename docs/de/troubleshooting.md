@@ -46,13 +46,13 @@ Die Metriken werden während des CI-Laufs generiert. Lokal müssen Sie das Metri
 **Bedeutung:**
 Der E-Mail-Klassifizierer hat eine E-Mail als Klasse `'XY'` (z. B. `BachelorThesis`, `MasterThesis`, `Other` etc.) eingestuft. In der Konfigurationsdatei (z. B. `config/folders.yaml` oder `config/classifier_paths.yaml`) fehlt jedoch unter `class_paths` die Zuweisung eines Zielverzeichnisses für diese Klasse `'XY'`. Daher wird die entsprechende E-Mail-Datei übersprungen und nicht einsortiert.
 
-**Fehlerbehebung:**
-1. **Zielordner konfigurieren:** Öffnen Sie die Konfigurationsdatei (standardmäßig `config/folders.yaml` oder die in Ihrem Befehl angegebene Konfigurationsdatei wie `config/classifier_paths.yaml`) und prüfen Sie den Abschnitt `class_paths`.
-2. **Klasse hinzufügen:** Ergänzen Sie den fehlenden Eintrag für die Klasse `'XY'`. Zum Beispiel:
+**Fehlerbehebung:**  
+1. **Zielordner konfigurieren:** Öffnen Sie die Konfigurationsdatei (standardmäßig `config/folders.yaml` oder die in Ihrem Befehl angegebene Konfigurationsdatei wie `config/classifier_paths.yaml`) und prüfen Sie den Abschnitt `class_paths`.  
+2. **Klasse hinzufügen:** Ergänzen Sie den fehlenden Eintrag für die Klasse `'XY'`. Zum Beispiel:  
    ```yaml
    class_paths:
      # ... andere Klassen ...
      XY: "D:/Pfad/zu/XY"
    ```
-3. **Einstufung prüfen:** Wenn die E-Mail fälschlicherweise als Klasse `'XY'` erkannt wurde, überprüfen Sie die Trainingsdaten des Klassifizierers oder korrigieren Sie die Klassifizierung im manuellen Schritt (z. B. über das Gradio-Webinterface).
-4. **Skript erneut ausführen:** Starten Sie das E-Mail-Sortier-Skript erneut, um die übersprungenen E-Mails zu verarbeiten.
+3. **Einstufung prüfen:** Wenn die E-Mail fälschlicherweise als Klasse `'XY'` erkannt wurde, überprüfen Sie die Trainingsdaten des Klassifizierers oder korrigieren Sie die Klassifizierung im manuellen Schritt (z. B. über das Gradio-Webinterface).  
+4. **Skript erneut ausführen:** Starten Sie das E-Mail-Sortier-Skript erneut, um die übersprungenen E-Mails zu verarbeiten.  
