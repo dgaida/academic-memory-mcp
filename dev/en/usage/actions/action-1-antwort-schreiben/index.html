@@ -1072,11 +1072,11 @@
 <h2 id="how-it-works-and-details">How it Works and Details<a class="headerlink" href="#how-it-works-and-details" title="Permanent link">¶</a></h2>
 <p>The system performs the following steps during this action:</p>
 <ol>
-<li><strong>Conversation Analysis:</strong> A concise summary of the previous email history is created or updated in the student's folder (<code>.emails_summary.md</code>) to provide context for the Language Model (LLM).</li>
-<li><strong>Profile Integration:</strong> The LLM takes into account both your own lecturer profile (your role, signature, and tone) and the student's profile.</li>
-<li><strong>Salutation Determination (Du/Sie):</strong> The preferred form of address (Du/informal or Sie/formal) is automatically determined based on the history of the last 8 emails (4 sent, 4 received).</li>
-<li><strong>Generation:</strong> The local LLM (by default <code>gemma4:e2b</code>) drafts a precise, context-aware, and polite response in German.</li>
-<li><strong>Draft Creation:</strong> An email draft is automatically created directly in Microsoft Outlook. The original email is attached to preserve the conversation history.</li>
+<li><strong>Conversation Analysis:</strong> A concise summary of the previous email history is created or updated in the student's folder (<code>.emails_summary.md</code>) to provide context for the Language Model (LLM).  </li>
+<li><strong>Profile Integration:</strong> The LLM takes into account both your own lecturer profile (your role, signature, and tone) and the student's profile.  </li>
+<li><strong>Salutation Determination (Du/Sie):</strong> The preferred form of address (Du/informal or Sie/formal) is automatically determined based on the history of the last 8 emails (4 sent, 4 received).  </li>
+<li><strong>Generation:</strong> The local LLM (by default <code>gemma4:e2b</code>) drafts a precise, context-aware, and polite response in German.  </li>
+<li><strong>Draft Creation:</strong> An email draft is automatically created directly in Microsoft Outlook. The original email is attached to preserve the conversation history.  </li>
 </ol>
 <hr/>
 <h2 id="process-flow-mermaid-diagram">Process Flow (Mermaid Diagram)<a class="headerlink" href="#process-flow-mermaid-diagram" title="Permanent link">¶</a></h2>

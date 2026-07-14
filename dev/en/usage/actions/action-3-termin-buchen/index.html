@@ -1072,13 +1072,13 @@
 <h2 id="how-it-works-and-details">How it Works and Details<a class="headerlink" href="#how-it-works-and-details" title="Permanent link">¶</a></h2>
 <p>The system performs the following steps during this action:</p>
 <ol>
-<li><strong>Extract Date and Time:</strong> The AI extracts the requested and confirmed date and time from the email.</li>
-<li><strong>Validity Check (Past):</strong> It checks if the proposed appointment lies in the past.<ul>
-<li><strong>If in the past:</strong> No calendar entry is created. The email is archived directly (Status: <code>Archiviert (Termin in Vergangenheit)</code>).</li>
+<li><strong>Extract Date and Time:</strong> The AI extracts the requested and confirmed date and time from the email.  </li>
+<li><strong>Validity Check (Past):</strong> It checks if the proposed appointment lies in the past.  <ul>
+<li><strong>If in the past:</strong> No calendar entry is created. The email is archived directly (Status: <code>Archiviert (Termin in Vergangenheit)</code>).  </li>
 </ul>
 </li>
-<li><strong>Create Calendar Entry:</strong> If the appointment is in the future, the system books the appointment in the user's Outlook calendar via the <code>manage_calendar_appointment</code> tool. The default duration is <strong>30 minutes</strong>, and the timezone is set to <code>Europe/Berlin</code>.</li>
-<li><strong>Archiving:</strong> The email is filed in the corresponding student archive folder.</li>
+<li><strong>Create Calendar Entry:</strong> If the appointment is in the future, the system books the appointment in the user's Outlook calendar via the <code>manage_calendar_appointment</code> tool. The default duration is <strong>30 minutes</strong>, and the timezone is set to <code>Europe/Berlin</code>.  </li>
+<li><strong>Archiving:</strong> The email is filed in the corresponding student archive folder.  </li>
 </ol>
 <hr/>
 <h2 id="process-flow-mermaid-diagram">Process Flow (Mermaid Diagram)<a class="headerlink" href="#process-flow-mermaid-diagram" title="Permanent link">¶</a></h2>

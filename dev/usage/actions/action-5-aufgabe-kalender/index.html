@@ -1071,10 +1071,10 @@
 <h2 id="funktionsweise-und-details">Funktionsweise und Details<a class="headerlink" href="#funktionsweise-und-details" title="Permanent link">¶</a></h2>
 <p>Sobald diese Aktion ausgeführt wird, führt das System vollautomatisch folgende Schritte durch:</p>
 <ol>
-<li><strong>Speichern von Anhängen:</strong> Alle Anhänge der E-Mail (wie die finale PDF-Arbeit) werden automatisch via <code>save_email_attachments</code> direkt im studentischen Hauptordner (<code>Semester / Nachname /</code>) abgelegt.</li>
-<li><strong>Kolloquium-Konfiguration (<code>config.json</code>):</strong> Es wird automatisch eine <code>config.json</code> Datei im Hauptordner des Studenten mittels <code>create_colloquium_config</code> angelegt oder aktualisiert. Diese Datei enthält den genauen Dateinamen des PDF-Dokuments aus dem Anhang und dient als Konfigurationsschnittstelle für den <a href="https://dgaida.github.io/colloquium-protocol-creator/">colloquium-protocol-creator</a>.</li>
-<li><strong>Kalender-Erinnerung in 7 Tagen:</strong> Über das Tool <code>manage_calendar_appointment</code> wird ein Kalendereintrag (Erinnerungstermin) in Ihrem Outlook-Kalender für <strong>exakt 7 Tage nach E-Mail-Eingang um 08:00 Uhr</strong> angelegt. Dies erinnert Sie rechtzeitig an das Lesen und Bewerten der eingegangenen Abschlussarbeit.</li>
-<li><strong>Bestätigungs-Antwortentwurf:</strong> Es wird automatisch ein E-Mail-Entwurf in Outlook erzeugt, um dem Studierenden den offiziellen Empfang der Arbeit zu bestätigen.</li>
+<li><strong>Speichern von Anhängen:</strong> Alle Anhänge der E-Mail (wie die finale PDF-Arbeit) werden automatisch via <code>save_email_attachments</code> direkt im studentischen Hauptordner (<code>Semester / Nachname /</code>) abgelegt.  </li>
+<li><strong>Kolloquium-Konfiguration (<code>config.json</code>):</strong> Es wird automatisch eine <code>config.json</code> Datei im Hauptordner des Studenten mittels <code>create_colloquium_config</code> angelegt oder aktualisiert. Diese Datei enthält den genauen Dateinamen des PDF-Dokuments aus dem Anhang und dient als Konfigurationsschnittstelle für den <a href="https://dgaida.github.io/colloquium-protocol-creator/">colloquium-protocol-creator</a>.  </li>
+<li><strong>Kalender-Erinnerung in 7 Tagen:</strong> Über das Tool <code>manage_calendar_appointment</code> wird ein Kalendereintrag (Erinnerungstermin) in Ihrem Outlook-Kalender für <strong>exakt 7 Tage nach E-Mail-Eingang um 08:00 Uhr</strong> angelegt. Dies erinnert Sie rechtzeitig an das Lesen und Bewerten der eingegangenen Abschlussarbeit.  </li>
+<li><strong>Bestätigungs-Antwortentwurf:</strong> Es wird automatisch ein E-Mail-Entwurf in Outlook erzeugt, um dem Studierenden den offiziellen Empfang der Arbeit zu bestätigen.  </li>
 </ol>
 <hr/>
 <h2 id="prozessablauf-mermaid-diagramm">Prozessablauf (Mermaid Diagramm)<a class="headerlink" href="#prozessablauf-mermaid-diagramm" title="Permanent link">¶</a></h2>

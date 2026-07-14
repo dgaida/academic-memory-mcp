@@ -1072,10 +1072,10 @@
 <h2 id="how-it-works-and-details">How it Works and Details<a class="headerlink" href="#how-it-works-and-details" title="Permanent link">¶</a></h2>
 <p>Once executed, the system automatically performs the following steps:</p>
 <ol>
-<li><strong>Save Attachments:</strong> All email attachments (such as the final thesis PDF) are automatically saved via <code>save_email_attachments</code> directly in the student's main folder (<code>Semester / Lastname /</code>).</li>
-<li><strong>Colloquium Configuration (<code>config.json</code>):</strong> A <code>config.json</code> file is automatically created or updated in the student's main folder via <code>create_colloquium_config</code>. This file contains the exact filename of the PDF document from the attachment and serves as the configuration interface for the <a href="https://dgaida.github.io/colloquium-protocol-creator/">colloquium-protocol-creator</a>.</li>
-<li><strong>Calendar Reminder in 7 Days:</strong> A calendar entry (reminder) is created in your Outlook calendar via the <code>manage_calendar_appointment</code> tool for <strong>exactly 7 days after the email is received, at 08:00 AM</strong>. This reminds you in a timely manner to read and evaluate the submitted thesis.</li>
-<li><strong>Draft Receipt Confirmation:</strong> An email draft is automatically created in Outlook to confirm the official receipt of the thesis to the student.</li>
+<li><strong>Save Attachments:</strong> All email attachments (such as the final thesis PDF) are automatically saved via <code>save_email_attachments</code> directly in the student's main folder (<code>Semester / Lastname /</code>).  </li>
+<li><strong>Colloquium Configuration (<code>config.json</code>):</strong> A <code>config.json</code> file is automatically created or updated in the student's main folder via <code>create_colloquium_config</code>. This file contains the exact filename of the PDF document from the attachment and serves as the configuration interface for the <a href="https://dgaida.github.io/colloquium-protocol-creator/">colloquium-protocol-creator</a>.  </li>
+<li><strong>Calendar Reminder in 7 Days:</strong> A calendar entry (reminder) is created in your Outlook calendar via the <code>manage_calendar_appointment</code> tool for <strong>exactly 7 days after the email is received, at 08:00 AM</strong>. This reminds you in a timely manner to read and evaluate the submitted thesis.  </li>
+<li><strong>Draft Receipt Confirmation:</strong> An email draft is automatically created in Outlook to confirm the official receipt of the thesis to the student.  </li>
 </ol>
 <hr/>
 <h2 id="process-flow-mermaid-diagram">Process Flow (Mermaid Diagram)<a class="headerlink" href="#process-flow-mermaid-diagram" title="Permanent link">¶</a></h2>

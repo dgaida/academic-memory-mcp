@@ -1071,13 +1071,13 @@
 <h2 id="funktionsweise-und-details">Funktionsweise und Details<a class="headerlink" href="#funktionsweise-und-details" title="Permanent link">¶</a></h2>
 <p>Das System führt bei dieser Aktion folgende Schritte aus:</p>
 <ol>
-<li><strong>Datum- und Uhrzeitextraktion:</strong> Die KI extrahiert das gewünschte und bestätigte Datum sowie die Uhrzeit aus der E-Mail.</li>
-<li><strong>Prüfung auf Gültigkeit (Vergangenheit):</strong> Es wird überprüft, ob der vorgeschlagene Termin in der Vergangenheit liegt.<ul>
-<li><strong>Falls in der Vergangenheit:</strong> Es wird kein Kalendereintrag erstellt. Die E-Mail wird direkt archiviert (Status: <code>Archiviert (Termin in Vergangenheit)</code>).</li>
+<li><strong>Datum- und Uhrzeitextraktion:</strong> Die KI extrahiert das gewünschte und bestätigte Datum sowie die Uhrzeit aus der E-Mail.  </li>
+<li><strong>Prüfung auf Gültigkeit (Vergangenheit):</strong> Es wird überprüft, ob der vorgeschlagene Termin in der Vergangenheit liegt.  <ul>
+<li><strong>Falls in der Vergangenheit:</strong> Es wird kein Kalendereintrag erstellt. Die E-Mail wird direkt archiviert (Status: <code>Archiviert (Termin in Vergangenheit)</code>).  </li>
 </ul>
 </li>
-<li><strong>Kalendereintrag erstellen:</strong> Liegt der Termin in der Zukunft, bucht das System den Termin über das Tool <code>manage_calendar_appointment</code> direkt im Outlook-Kalender des Benutzers. Die Standarddauer beträgt <strong>30 Minuten</strong>, und die Zeitzone ist auf <code>Europe/Berlin</code> eingestellt.</li>
-<li><strong>Archivierung:</strong> Die E-Mail wird im entsprechenden studentischen Archiv-Ordner abgelegt.</li>
+<li><strong>Kalendereintrag erstellen:</strong> Liegt der Termin in der Zukunft, bucht das System den Termin über das Tool <code>manage_calendar_appointment</code> direkt im Outlook-Kalender des Benutzers. Die Standarddauer beträgt <strong>30 Minuten</strong>, und die Zeitzone ist auf <code>Europe/Berlin</code> eingestellt.  </li>
+<li><strong>Archivierung:</strong> Die E-Mail wird im entsprechenden studentischen Archiv-Ordner abgelegt.  </li>
 </ol>
 <hr/>
 <h2 id="prozessablauf-mermaid-diagramm">Prozessablauf (Mermaid Diagramm)<a class="headerlink" href="#prozessablauf-mermaid-diagramm" title="Permanent link">¶</a></h2>

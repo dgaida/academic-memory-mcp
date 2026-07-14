@@ -1090,10 +1090,10 @@
 <h2 id="how-it-works-and-details">How it Works and Details<a class="headerlink" href="#how-it-works-and-details" title="Permanent link">¶</a></h2>
 <p>Once a date for the colloquium is agreed upon and confirmed via email, this action triggers the following processes:</p>
 <ol>
-<li><strong>Date and Time Extraction:</strong> The system extracts the date (in <code>DD.MM.YYYY</code> format) and time (in <code>HH:MM</code> format) of the colloquium from the email.</li>
-<li><strong>Create/Update <code>config.json</code>:</strong>
-    The system automatically creates a configuration file named <code>config.json</code> (or updates an existing one) in the student's main folder. The extracted appointment data (date, time, location type, room) is written into this file. It is subsequently used for downstream tasks like automated presentation slide evaluation or filling out forms.</li>
-<li><strong>Create Calendar Entry:</strong>
+<li><strong>Date and Time Extraction:</strong> The system extracts the date (in <code>DD.MM.YYYY</code> format) and time (in <code>HH:MM</code> format) of the colloquium from the email.  </li>
+<li><strong>Create/Update <code>config.json</code>:</strong><br/>
+    The system automatically creates a configuration file named <code>config.json</code> (or updates an existing one) in the student's main folder. The extracted appointment data (date, time, location type, room) is written into this file. It is subsequently used for downstream tasks like automated presentation slide evaluation or filling out forms.  </li>
+<li><strong>Create Calendar Entry:</strong><br/>
     The system books a specific <strong>60-minute</strong> appointment directly in your Outlook calendar using the <code>manage_calendar_appointment</code> tool to block out the exam period.</li>
 </ol>
 <hr/>

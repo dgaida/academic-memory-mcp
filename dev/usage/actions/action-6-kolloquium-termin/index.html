@@ -1089,10 +1089,10 @@
 <h2 id="funktionsweise-und-details">Funktionsweise und Details<a class="headerlink" href="#funktionsweise-und-details" title="Permanent link">¶</a></h2>
 <p>Sobald ein Termin für das Kolloquium per E-Mail vereinbart und bestätigt wird, stößt diese Aktion folgende Prozesse an:</p>
 <ol>
-<li><strong>Datum- und Uhrzeitextraktion:</strong> Das System extrahiert das Datum (im Format <code>DD.MM.YYYY</code>) und die Uhrzeit (im Format <code>HH:MM</code>) des Kolloquiums aus der E-Mail.</li>
-<li><strong>Erstellung/Aktualisierung der <code>config.json</code>:</strong>
-    Das System legt im Hauptordner des Studenten automatisch eine Konfigurationsdatei namens <code>config.json</code> an (bzw. aktualisiert eine bestehende). In diese Datei werden die extrahierten Termindaten (Datum, Uhrzeit, Ort, Raum) eingetragen. Sie dient nachgelagert zur automatisierten Bewertung von Präsentationsfolien oder zum Ausfüllen von Formularen.</li>
-<li><strong>Kalendereintrag erstellen:</strong>
+<li><strong>Datum- und Uhrzeitextraktion:</strong> Das System extrahiert das Datum (im Format <code>DD.MM.YYYY</code>) und die Uhrzeit (im Format <code>HH:MM</code>) des Kolloquiums aus der E-Mail.  </li>
+<li><strong>Erstellung/Aktualisierung der <code>config.json</code>:</strong><br/>
+    Das System legt im Hauptordner des Studenten automatisch eine Konfigurationsdatei namens <code>config.json</code> an (bzw. aktualisiert eine bestehende). In diese Datei werden die extrahierten Termindaten (Datum, Uhrzeit, Ort, Raum) eingetragen. Sie dient nachgelagert zur automatisierten Bewertung von Präsentationsfolien oder zum Ausfüllen von Formularen.  </li>
+<li><strong>Kalendereintrag erstellen:</strong><br/>
     Das System trägt einen speziellen <strong>60-minütigen</strong> Termin direkt in Ihren Outlook-Kalender über das Tool <code>manage_calendar_appointment</code> ein, damit der Zeitraum für die Prüfung geblockt ist.</li>
 </ol>
 <hr/>
