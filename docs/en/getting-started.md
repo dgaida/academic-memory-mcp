@@ -32,7 +32,7 @@ The system is built around six main use cases designed to simplify your academic
 
 ### 5. [Final Submission of Theses](usage/final-submission.md)  
 *   **What is it?** Accompany the final submission process of bachelor's and master's theses seamlessly and automatically.  
-*   **Key Features:** JIT archiving of submission documents, fully automated colloquium scheduling including room booking and automatic reminders in your calendar.  
+*   **Key Features:** JIT archiving of submission documents, calendar reminders for reading the thesis, and automatic generation of the colloquium configuration (`config.json`).
 *   **Learn more:** [Final Submission Guide](usage/final-submission.md).  
 
 ### 6. [Outlook Macros](usage/outlook-macros.md)  
