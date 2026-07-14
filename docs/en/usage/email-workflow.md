@@ -99,74 +99,14 @@ As soon as you click "Save & Execute" in the GUI, the selected action is technic
 
 ### Detailed Logic of Actions:
 
-#### Preparation: Conversation Summary
-Before a reply is generated, the system creates a concise summary of the previous conversation history in the student folder (`.emails_summary.md`). This serves as crucial context for the LLM to stay informed about prior agreements.  
-- An example of the resulting structure can be found under [Example Email Structures](indexing-details.md#example-email-structures).  
-- If an email is reclassified in the GUI, the summary automatically adapts to the new folder structure.  
+Before a reply is generated, the system creates a concise summary of the previous conversation history in the student folder (`.emails_summary.md`). This serves as crucial context for the LLM to stay informed about prior agreements. Details on how each action works and is executed can be found directly in their respective descriptions:
 
-#### 1) Write Reply
-The LLM generates a reply taking into account your own **Person Profile** (tone, role), the **Student Profile**, and the aforementioned **Conversation Summary**. Details can be found under [Person Profiles](profiles.md). A draft is automatically created in Outlook with the original email attached.
-
-#### 2) Write Reply with Appointment Proposal
-The system calls the `get_appointment_slots` tool, which reads `free_slots.yaml`. The retrieved free slots are formatted and integrated into the reply draft.
-
-#### 3) Book Appointment Directly
-Used when a student has confirmed an appointment. The system extracts the date and time and uses the `manage_calendar_appointment` tool to create a real entry in your Outlook calendar.
-
-!!! info "Appointments in the Past"
-    If an appointment lies in the past, it is automatically detected. In this case, no calendar entry is created and the email is archived directly (Status: `Archived (Appointment in Past)`).
-
-#### 4) Archive Only
-The email is saved in the student's archive folder. No further technical actions (such as a reply draft) are taken.
-
-#### 5) Create Task in Calendar (Final Submission)
-**This is the central action where the final submission of a thesis is automatically detected and processed.** When the email classifier or the user in the GUI classifies an email as a final submission, this action is selected. It combines several automated steps for final theses:
-
-1. **Save Attachments:** All email attachments are automatically saved in the student's parent directory (`Semester / Lastname /`) via `save_email_attachments`.  
-2. **Colloquium Configuration (`config.json`):** A `config.json` configuration file is automatically created in the student's main directory via `create_colloquium_config` (or updated with the filename of the PDF thesis from the attachment). This file is used for the *colloquium-protocol-creator*.  
-3. **Calendar Reminder:** A calendar entry is created via `manage_calendar_appointment` exactly **7 days after the email is received (at 08:00 AM)** to remind you to read and grade the thesis.  
-4. **Reply Draft:** A reply draft confirming receipt of the thesis is automatically generated.  
-
-#### 6) Colloquium Appointment (with `config.json` Automation)
-Similar to action 3, but the duration is fixed at **60 minutes** and a special subject is chosen. In addition, this action has been significantly enhanced to automate the entire colloquium process:
-
-1. **Creation/Update of `config.json`:**  
-   The system automatically creates a configuration file named `config.json` in the student's folder (or updates an existing one). This file contains all crucial parameters for the presentation and optional downstream processes (such as automated slide evaluation using Gemini or compiling PDFs).
-
-2. **Automated Appointment Entry:**  
-   The date (format: `DD.MM.YYYY`) and time (format: `HH:MM`) of the colloquium are automatically extracted from the email, booked in the Outlook calendar (duration: 60 minutes), and written directly into the student's `config.json`.
-
-**Example of the generated/updated `config.json`:**
-```json
-{
-  "task": "colloquium",
-  "description": "Kolloquium auf dem Campus Gummersbach mit automatischer Gemini-Bewertung",
-  "pdf": {
-    "filename": "Bachelorarbeit.pdf"
-  },
-  "colloquium": {
-    "date": "15.11.2026",
-    "time": "14:00",
-    "location_type": "campus",
-    "room": "3.228"
-  },
-  "llm": {
-    "api_choice": null,
-    "model": null,
-    "groq_free": true
-  },
-  "gemini_evaluation": {
-    "enabled": false,
-    "model": "gemini-2.0-flash-exp"
-  },
-  "output": {
-    "folder": null,
-    "compile_pdf": true,
-    "fill_form_only": true
-  }
-}
-```
-This file is used downstream for automated evaluation of presentation slides or automatically filling out grading forms.
+*   **[Action 1: Write Reply](actions/action-1-antwort-schreiben.md)**
+*   **[Action 2: Reply with Appointment Suggestion](actions/action-2-antwort-terminvorschlag.md)**
+*   **[Action 3: Book Appointment](actions/action-3-termin-buchen.md)**
+*   **[Action 4: Archive Only](actions/action-4-nur-archivieren.md)**
+*   **[Action 5: Create Task in Calendar (Final Submission)](actions/action-5-aufgabe-kalender.md)**
+*   **[Action 6: Colloquium Appointment](actions/action-6-kolloquium-termin.md)**
 
 ---
 

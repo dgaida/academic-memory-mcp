@@ -20,7 +20,7 @@ Das System führt bei dieser Aktion folgende Schritte aus:
 graph TD
     A[E-Mail mit Terminbestätigung empfangen] --> B[Extrahiere Datum & Uhrzeit des Termins]
     B --> C{Liegt Termin in der Vergangenheit?}
-    C -- Ja --> D[Keine Buchung & Mail direkt archivieren <br> Status: Archiviert (Termin in Vergangenheit)]
+    C -- Ja --> D["Keine Buchung & Mail direkt archivieren <br> Status: Archiviert (Termin in Vergangenheit)"]
     C -- Nein --> E[Buche Termin im Outlook-Kalender via manage_calendar_appointment]
     E --> F[Vorgang abgeschlossen]
 ```

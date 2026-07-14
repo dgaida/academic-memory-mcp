@@ -788,6 +788,10 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
             elif force_colloquium:
                 forced_instr = "\nERZWUNGENE AKTION: Diese E-Mail bestätigt ein Kolloquium. Du MUSST ZWINGEND manage_calendar_appointment mit is_colloquium=True aufrufen."
 
+            summary_part = ""
+            if summary_content:
+                summary_part = f"\nZUSAMMENFASSUNG DER BISHERIGEN KONVERSATION (ORDNER-ZUSAMMENFASSUNG):\n{summary_content}\n"
+
             appointment_user_prompt = f"""Du bist ein Tool-Calling-Agent. Deine EINZIGE Aufgabe ist es, basierend auf der E-Mail und dem TERMINVERWALTUNG SKILL die korrekte Aktion auf {detected_language} auszuführen. Nutze die Anrede '{honorific}'.
 
 HEUTE IST: {datetime.now(ZoneInfo("Europe/Berlin")).strftime("%A, den %d.%m.%Y %H:%M")}
@@ -800,7 +804,7 @@ TERMINVERWALTUNG SKILL:
 
 ZUSÄTZLICHER KONTEXT:
 {additional_context}
-
+{summary_part}
 AKTUELLE E-MAIL:
 {mail_content}{forced_instr}
 
