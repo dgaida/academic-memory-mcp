@@ -286,19 +286,39 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
             new_t1 = list(t1_mails)
             new_t2 = list(t2_mails)
             moved_this_session = []
+            missing_names = []
 
             for idx, att_save in selected_info:
                 if 0 <= idx < len(new_t1):
                     mail = new_t1.pop(idx)
+                    mail_path = Path(mail["path"])
+                    if not mail_path.exists():
+                        missing_names.append(mail["lastname"])
+                        continue
+
                     mail_copy = mail.copy()
                     mail_copy["summary"] = "Wird verarbeitet..."
                     mail_copy["similarity_info"] = "Suche ähnliche Mails..."
                     mail_copy["save_attachments"] = att_save
                     moved_this_session.append(mail_copy)
 
+            # Bereinige new_t1 von nicht mehr existierenden Mails
+            new_t1 = [m for m in new_t1 if Path(m["path"]).exists()]
+
+            if not moved_this_session:
+                status_msg = "Keine der ausgewählten Mails existiert noch auf der Festplatte."
+                if missing_names:
+                    status_msg += f" (Fehlende Mails von: {', '.join(missing_names)})"
+                yield new_t1, new_t2, status_msg, gr.update()
+                return
+
             current_t2 = new_t2 + moved_this_session
 
-            yield new_t1, current_t2, f"{len(moved_this_session)} Mails nach Tab 2 geschoben. Verarbeite...", gr.update(selected=1)
+            status_msg = f"{len(moved_this_session)} Mails nach Tab 2 geschoben. Verarbeite..."
+            if missing_names:
+                status_msg += f" (Fehlende Mails übersprungen: {', '.join(missing_names)})"
+
+            yield new_t1, current_t2, status_msg, gr.update(selected=1)
 
             final_t2 = list(new_t2)
             for m in moved_this_session:
@@ -308,12 +328,18 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
                 mail = final_t2[i]
                 mail_path = Path(mail["path"])
 
-                logger.info(f"Generiere Zusammenfassung für {mail['lastname']}...")
-                mail["summary"] = controller.generate_short_summary(mail_path)
-                mail["similarity_info"] = controller.get_similarity_info(mail_path, mail["lastname"])
-                logger.info(f"Bestimme empfohlene Aktion für {mail['lastname']}...")
-                action_idx = controller.get_suggested_action(mail_path, mail, age_months=age_months)
-                mail["suggested_action"] = controller.ACTION_OPTIONS[action_idx]
+                try:
+                    logger.info(f"Generiere Zusammenfassung für {mail['lastname']}...")
+                    mail["summary"] = controller.generate_short_summary(mail_path)
+                    mail["similarity_info"] = controller.get_similarity_info(mail_path, mail["lastname"])
+                    logger.info(f"Bestimme empfohlene Aktion für {mail['lastname']}...")
+                    action_idx = controller.get_suggested_action(mail_path, mail, age_months=age_months)
+                    mail["suggested_action"] = controller.ACTION_OPTIONS[action_idx]
+                except Exception as ex:
+                    logger.exception(f"Fehler bei der Hintergrundverarbeitung für {mail['lastname']}")
+                    mail["summary"] = f"Fehler bei Verarbeitung: {ex}"
+                    mail["similarity_info"] = ""
+                    mail["suggested_action"] = controller.ACTION_OPTIONS[3] # Fallback: Nur archivieren
 
                 yield new_t1, list(final_t2), f"Verarbeitet: {mail['lastname']} ({i - len(new_t2) + 1}/{len(moved_this_session)})", gr.update(selected=1)
 
@@ -324,8 +350,20 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
             if not t1_mails:
                 return [], "Keine Mails zum Verschieben."
 
+            # Bereinige verbleibende Mails von nicht existierenden
+            existing_t1 = []
+            cleaned_any = False
+            for m in t1_mails:
+                if Path(m["path"]).exists():
+                    existing_t1.append(m)
+                else:
+                    cleaned_any = True
+
+            if not existing_t1:
+                return [], "Keine der verbleibenden Mails existiert noch auf der Festplatte."
+
             changes = []
-            for i, m in enumerate(t1_mails):
+            for i, m in enumerate(existing_t1):
                 change = m.copy()
                 change["new_class"] = m["class"]
                 if i < len(att_states):
@@ -337,13 +375,15 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
                 if errors:
                     msg = "Fehler beim Verschieben: " + "; ".join(errors)
                     logger.error(msg)
-                    return t1_mails, msg
+                    return existing_t1, msg
                 msg = "Mails erfolgreich archiviert."
+                if cleaned_any:
+                    msg += " (Einige nicht-existierende Mails wurden aus der Liste entfernt.)"
                 logger.info(msg)
                 return [], msg
             except Exception as e:
                 logger.error(f"Fehler beim Archivieren: {e}")
-                return t1_mails, f"Fehler: {str(e)}"
+                return existing_t1, f"Fehler: {str(e)}"
 
     demo.launch(inbrowser=True)
 

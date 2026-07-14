@@ -6,6 +6,10 @@ from unittest.mock import MagicMock, patch
 # Add project root to sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+# Pre-import modules to avoid AttributeError during patch resolution
+import mcp_university.agent.engine
+import mcp_university.agent.mcp_agent
+
 # Mock dependencies to avoid side effects during import/init
 with patch('mcp_university.agent.engine.SearchIndex'),      patch('mcp_university.agent.engine.MetadataStore'),      patch('mcp_university.agent.engine.ParserFactory'),      patch('mcp_university.agent.mcp_agent.MCPAgent'):
     from email_classifier.controller import EmailController
