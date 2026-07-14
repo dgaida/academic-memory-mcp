@@ -22,7 +22,7 @@ Das System ist um sechs Hauptanwendungsfälle herum aufgebaut, die Ihren univers
 
 ### 3. [Automatisiertes Beantworten von E-Mails (E-Mail Workflow)](usage/email-workflow.md)  
 *   **Worum geht es?** Beschleunigen Sie Ihre tägliche Korrespondenz. Das System klassifiziert eingehende E-Mails automatisch und schlägt passende Aktionen vor.  
-*   **Key Features:** Automatische Generierung von präzisen, kontextbezogenen Antwortentwürfen im korrekten Tonfall (Du/Sie), basierend auf dem E-Mail-Verlauf und dem Wissensgraphen. Zudem existiert ein Workflow, der bei der Abgabe einer Arbeit bzw. dem Planen des Kolloquiums unterstützt und eine Schnittstelle zu [colloquium-protocol-creator](https://dgaida.github.io/colloquium-protocol-creator/) darstellt.
+*   **Key Features:** Automatische Generierung von präzisen, kontextbezogenen Antwortentwürfen im korrekten Tonfall (Du/Sie), basierend auf dem E-Mail-Verlauf und dem Wissensgraphen. Zudem existiert ein Workflow, der bei der Abgabe einer Arbeit bzw. dem Planen des Kolloquiums unterstützt und eine Schnittstelle zu [colloquium-protocol-creator](https://dgaida.github.io/colloquium-protocol-creator/) darstellt.  
 *   **Mehr erfahren:** [Anleitung zum E-Mail Workflow](usage/email-workflow.md).  
 
 ### 4. [Personaldatenbank & Personen-Steckbriefe](usage/profiles.md)  
@@ -30,7 +30,7 @@ Das System ist um sechs Hauptanwendungsfälle herum aufgebaut, die Ihren univers
 *   **Key Features:** Automatische Bestimmung der bevorzugten Anrede (Du/Sie). Import von Modulverantwortlichkeiten und Prüfern über die offizielle MOCOGI-API und den Personen-Crawler der TH Köln.  
 *   **Mehr erfahren:** [Anleitung zu Steckbriefen & Personaldatenbank](usage/profiles.md).  
 
-### 5. [Outlook Makros](usage/outlook-macros.md)
+### 5. [Outlook Makros](usage/outlook-macros.md)  
 *   **Worum geht es?** Nahtlose Integration in Ihren gewohnten Windows-Arbeitsplatz.  
 *   **Key Features:** Exportieren Sie E-Mails, Termindaten und freie Zeitfenster direkt aus Outlook in das System, um sie der lokalen KI zur Verfügung zu stellen.  
 *   **Mehr erfahren:** [Anleitung zu Outlook Makros](usage/outlook-macros.md).  
