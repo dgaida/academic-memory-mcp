@@ -37,3 +37,22 @@ This happens when multiple processes try to write to the database simultaneously
 **Symptom:** The `metrics.md` page shows no data.
 **Solution:**
 Metrics are generated during the CI run. Locally, you need to run the metrics script manually (see Developer Guide).
+
+## Missing Path Configuration for Email Classes
+
+**Symptom:** A warning in the log like:
+`2026-07-14 10:30:22,637 - WARNING - Keine Pfad-Konfiguration für 'XY' gefunden. Überspringe 20250826_093612 - Mail.msg`
+
+**Meaning:**
+The email classifier classified an email into the class `'XY'` (e.g., `BachelorThesis`, `MasterThesis`, `Other` etc.). However, in the configuration file (e.g., `config/folders.yaml` or `config/classifier_paths.yaml`), under `class_paths`, there is no mapping to a destination folder for class `'XY'`. As a result, the corresponding email file is skipped and not sorted.
+
+**Solution:**
+1. **Configure destination folder:** Open the configuration file (by default `config/folders.yaml` or the configuration file specified in your command like `config/classifier_paths.yaml`) and check the `class_paths` section.
+2. **Add the class:** Add the missing entry for class `'XY'`. For example:
+   ```yaml
+   class_paths:
+     # ... other classes ...
+     XY: "D:/path/to/XY"
+   ```
+3. **Verify classification:** If the email was incorrectly classified as class `'XY'`, check the training data of the classifier or correct the classification in the manual step (e.g., via the Gradio web interface).
+4. **Re-run the script:** Start the email sorting script again to process the skipped emails.
