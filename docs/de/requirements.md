@@ -4,4 +4,4 @@ Die maßgeblichen und aktuellen Systemanforderungen (Requirements) für das **MC
 
 Bitte nutzen Sie den folgenden Link, um die aktuelle Version einzusehen:
 
-*   [Systemanforderungen (requirements.md im Hauptrepo)](../../requirements.md)
+*   [Systemanforderungen (requirements.md im Hauptrepo)](../../requirements.md)  
