@@ -86,7 +86,7 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
                 gr.Markdown("Wähle die E-Mails aus, die du detailliert prüfen möchtest.")
                 tab1_status = gr.Textbox(label="Status")
 
-                @gr.render(inputs=tab1_mails)
+                @gr.render(inputs=tab1_mails, concurrency_limit=1, concurrency_id="mail_render")
                 def render_tab1(mails: List[Dict[str, Any]]) -> None:
                     """Rendert die Übersicht der E-Mails in Tab 1."""
                     if not mails:
@@ -178,7 +178,7 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
                 gr.Markdown("Hier können Mails detailliert geprüft und verarbeitet werden.")
                 tab2_status_local = gr.Textbox(label="Status")
 
-                @gr.render(inputs=tab2_mails)
+                @gr.render(inputs=tab2_mails, concurrency_limit=1, concurrency_id="mail_render")
                 def render_tab2(mails: List[Dict[str, Any]]) -> None:
                     """Rendert die Detail-Ansicht für E-Mails in Tab 2."""
                     if not mails:
