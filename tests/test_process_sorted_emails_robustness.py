@@ -141,3 +141,99 @@ def test_gui_handlers_with_missing_files(tmp_path):
         assert called_args[0]["lastname"] == "Muster"
         assert res_t1 == [] # Muster was successfully relocated, list of t1 is empty now!
         assert "Schulz" not in [m["lastname"] for m in res_t1]
+
+
+# We will subclass DummyBlock and capture handle_tab2_process from process_btn.click
+class CapturingDummyBlock(DummyBlock):
+    def click(self, fn, *args, **kwargs):
+        super().click(fn, *args, **kwargs)
+        if fn.__name__ == "handle_tab2_process":
+            click_handlers["handle_tab2_process"] = fn
+        return MagicMock()
+
+
+def test_handle_tab2_process_updates_state(tmp_path):
+    """Testet, dass handle_tab2_process die t2_mails-Liste mit neuen Pfaden und Klassen aktualisiert.
+
+    Args:
+        tmp_path: Pytest Fixture für ein temporäres Verzeichnis.
+
+    Returns:
+        None
+    """
+    controller = MagicMock()
+    controller.ACTION_OPTIONS = [
+        "1) Antwort schreiben.",
+        "2) Antwort schreiben mit einem Terminvorschlag.",
+        "3) Termin im Kalender anlegen und Person dazu einladen.",
+        "4) E-Mail nur archivieren.",
+        "5) Aufgabe im Kalender anlegen zum Lesen des Anhangs.",
+        "6) Termin für Kolloquium in Kalender anlegen.",
+    ]
+    # Mock relocate_emails to simulate updating the change with new_path and new_identifier_path
+    def mock_relocate(changes):
+        for change in changes:
+            change["new_path"] = tmp_path / "new_existing.msg"
+            change["new_identifier_path"] = tmp_path
+        return []
+    controller.relocate_emails.side_effect = mock_relocate
+    controller.execute_action.return_value = "Aktion erfolgreich ausgeführt"
+
+    # Capture decorated render function
+    def mock_render(*args, **kwargs):
+        def decorator(fn):
+            captured_funcs[fn.__name__] = fn
+            return fn
+        return decorator
+
+    with patch("gradio.render", side_effect=mock_render), \
+         patch("gradio.Row", CapturingDummyBlock), \
+         patch("gradio.Column", CapturingDummyBlock), \
+         patch("gradio.Group", CapturingDummyBlock), \
+         patch("gradio.Checkbox", CapturingDummyBlock), \
+         patch("gradio.Button", CapturingDummyBlock), \
+         patch("gradio.Markdown", CapturingDummyBlock), \
+         patch("gradio.State", CapturingDummyBlock), \
+         patch("gradio.Textbox", CapturingDummyBlock), \
+         patch("gradio.Tabs", CapturingDummyBlock), \
+         patch("gradio.Tab", CapturingDummyBlock), \
+         patch("gradio.Blocks.launch"):
+
+        from scripts.process_sorted_emails import run_gradio_gui
+        run_gradio_gui(controller, tmp_path)
+
+        assert "render_tab2" in captured_funcs
+
+        # Setup initial t2_mails list
+        initial_t2_mails = [
+            {
+                "lastname": "Muster",
+                "class": "Other",
+                "folder": "Inbox",
+                "path": str(tmp_path / "existing.msg"),
+                "latest_mail": str(tmp_path / "existing.msg")
+            }
+        ]
+
+        # Call render_tab2 to bind states and capture click handler
+        captured_funcs["render_tab2"](initial_t2_mails)
+
+        assert "handle_tab2_process" in click_handlers
+        handle_tab2_process = click_handlers["handle_tab2_process"]
+
+        # Arguments of handle_tab2_process: t2_mails, *args (sels, acts, atts)
+        # Sels = ["Klausuren"], Acts = ["1) Antwort schreiben."], Atts = [False]
+        updated_t2_mails, msg = handle_tab2_process(initial_t2_mails, "Klausuren", "1) Antwort schreiben.", False)
+
+        # Verify that the returned state is updated correctly
+        assert len(updated_t2_mails) == 1
+        updated_mail = updated_t2_mails[0]
+        assert updated_mail["lastname"] == "Muster"
+        assert updated_mail["class"] == "Klausuren"
+        assert updated_mail["path"] == Path(tmp_path / "new_existing.msg")
+        assert updated_mail["latest_mail"] == Path(tmp_path / "new_existing.msg")
+        assert updated_mail["identifier_path"] == Path(tmp_path)
+        assert updated_mail["suggested_action"] == "1) Antwort schreiben."
+        assert updated_mail["save_attachments"] is False
+        assert "Aktionen:" in msg
+        assert "Muster: Aktion erfolgreich ausgeführt" in msg
