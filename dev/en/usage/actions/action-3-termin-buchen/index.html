@@ -417,18 +417,6 @@
   </span>
 </a>
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../final-submission/">
-<span class="md-ellipsis">
-    
-  
-    Finale Abgabe von Abschlussarbeiten
-  
-
-    
-  </span>
-</a>
-</li>
 </ul>
 </nav>
 </li>
@@ -1085,7 +1073,7 @@
 <div class="mermaid">graph TD
     A[Email with appointment confirmation received] --&gt; B[Extract date &amp; time of the appointment]
     B --&gt; C{Is appointment in the past?}
-    C -- Yes --&gt; D[No booking &amp; archive email directly <br/> Status: Archiviert (Termin in Vergangenheit)]
+    C -- Yes --&gt; D["No booking &amp; archive email directly <br/> Status: Archiviert (Termin in Vergangenheit)"]
     C -- No --&gt; E[Book appointment in Outlook calendar via manage_calendar_appointment]
     E --&gt; F[Process completed]
 </div>

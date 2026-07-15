@@ -863,89 +863,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Detailed Logic of Actions:">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#preparation-conversation-summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Preparation: Conversation Summary
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#1-write-reply" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        1) Write Reply
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2-write-reply-with-appointment-proposal" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        2) Write Reply with Appointment Proposal
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-book-appointment-directly" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        3) Book Appointment Directly
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#4-archive-only" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        4) Archive Only
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#5-create-task-in-calendar-final-submission" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        5) Create Task in Calendar (Final Submission)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#6-colloquium-appointment-with-configjson-automation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        6) Colloquium Appointment (with config.json Automation)
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
         
       </ul>
@@ -1145,34 +1062,6 @@
     
   
     Aktion 6 - Kolloquium-Termin
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../final-submission/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Finale Abgabe von Abschlussarbeiten
   
 
     
@@ -2798,89 +2687,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Detailed Logic of Actions:">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#preparation-conversation-summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Preparation: Conversation Summary
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#1-write-reply" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        1) Write Reply
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2-write-reply-with-appointment-proposal" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        2) Write Reply with Appointment Proposal
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-book-appointment-directly" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        3) Book Appointment Directly
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#4-archive-only" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        4) Archive Only
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#5-create-task-in-calendar-final-submission" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        5) Create Task in Calendar (Final Submission)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#6-colloquium-appointment-with-configjson-automation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        6) Colloquium Appointment (with config.json Automation)
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
         
       </ul>
@@ -3061,72 +2867,15 @@
 <h2 id="phase-6-execution-of-actions-details">Phase 6: Execution of Actions (Details)<a class="headerlink" href="#phase-6-execution-of-actions-details" title="Permanent link">&para;</a></h2>
 <p>As soon as you click "Save &amp; Execute" in the GUI, the selected action is technically implemented. This is where the <strong>Person Profiles</strong> (Student &amp; User Persona) and <strong>Skills</strong> (expertise Markdown files) are integrated.</p>
 <h3 id="detailed-logic-of-actions">Detailed Logic of Actions:<a class="headerlink" href="#detailed-logic-of-actions" title="Permanent link">&para;</a></h3>
-<h4 id="preparation-conversation-summary">Preparation: Conversation Summary<a class="headerlink" href="#preparation-conversation-summary" title="Permanent link">&para;</a></h4>
-<p>Before a reply is generated, the system creates a concise summary of the previous conversation history in the student folder (<code>.emails_summary.md</code>). This serves as crucial context for the LLM to stay informed about prior agreements.<br />
-- An example of the resulting structure can be found under <a href="../indexing-details/#example-email-structures">Example Email Structures</a>.<br />
-- If an email is reclassified in the GUI, the summary automatically adapts to the new folder structure.  </p>
-<h4 id="1-write-reply">1) Write Reply<a class="headerlink" href="#1-write-reply" title="Permanent link">&para;</a></h4>
-<p>The LLM generates a reply taking into account your own <strong>Person Profile</strong> (tone, role), the <strong>Student Profile</strong>, and the aforementioned <strong>Conversation Summary</strong>. Details can be found under <a href="../profiles/">Person Profiles</a>. A draft is automatically created in Outlook with the original email attached.</p>
-<h4 id="2-write-reply-with-appointment-proposal">2) Write Reply with Appointment Proposal<a class="headerlink" href="#2-write-reply-with-appointment-proposal" title="Permanent link">&para;</a></h4>
-<p>The system calls the <code>get_appointment_slots</code> tool, which reads <code>free_slots.yaml</code>. The retrieved free slots are formatted and integrated into the reply draft.</p>
-<h4 id="3-book-appointment-directly">3) Book Appointment Directly<a class="headerlink" href="#3-book-appointment-directly" title="Permanent link">&para;</a></h4>
-<p>Used when a student has confirmed an appointment. The system extracts the date and time and uses the <code>manage_calendar_appointment</code> tool to create a real entry in your Outlook calendar.</p>
-<div class="admonition info">
-<p class="admonition-title">Appointments in the Past</p>
-<p>If an appointment lies in the past, it is automatically detected. In this case, no calendar entry is created and the email is archived directly (Status: <code>Archived (Appointment in Past)</code>).</p>
-</div>
-<h4 id="4-archive-only">4) Archive Only<a class="headerlink" href="#4-archive-only" title="Permanent link">&para;</a></h4>
-<p>The email is saved in the student's archive folder. No further technical actions (such as a reply draft) are taken.</p>
-<h4 id="5-create-task-in-calendar-final-submission">5) Create Task in Calendar (Final Submission)<a class="headerlink" href="#5-create-task-in-calendar-final-submission" title="Permanent link">&para;</a></h4>
-<p><strong>This is the central action where the final submission of a thesis is automatically detected and processed.</strong> When the email classifier or the user in the GUI classifies an email as a final submission, this action is selected. It combines several automated steps for final theses:</p>
-<ol>
-<li><strong>Save Attachments:</strong> All email attachments are automatically saved in the student's parent directory (<code>Semester / Lastname /</code>) via <code>save_email_attachments</code>.  </li>
-<li><strong>Colloquium Configuration (<code>config.json</code>):</strong> A <code>config.json</code> configuration file is automatically created in the student's main directory via <code>create_colloquium_config</code> (or updated with the filename of the PDF thesis from the attachment). This file is used for the <em>colloquium-protocol-creator</em>.  </li>
-<li><strong>Calendar Reminder:</strong> A calendar entry is created via <code>manage_calendar_appointment</code> exactly <strong>7 days after the email is received (at 08:00 AM)</strong> to remind you to read and grade the thesis.  </li>
-<li><strong>Reply Draft:</strong> A reply draft confirming receipt of the thesis is automatically generated.  </li>
-</ol>
-<h4 id="6-colloquium-appointment-with-configjson-automation">6) Colloquium Appointment (with <code>config.json</code> Automation)<a class="headerlink" href="#6-colloquium-appointment-with-configjson-automation" title="Permanent link">&para;</a></h4>
-<p>Similar to action 3, but the duration is fixed at <strong>60 minutes</strong> and a special subject is chosen. In addition, this action has been significantly enhanced to automate the entire colloquium process:</p>
-<ol>
-<li>
-<p><strong>Creation/Update of <code>config.json</code>:</strong><br />
-   The system automatically creates a configuration file named <code>config.json</code> in the student's folder (or updates an existing one). This file contains all crucial parameters for the presentation and optional downstream processes (such as automated slide evaluation using Gemini or compiling PDFs).</p>
-</li>
-<li>
-<p><strong>Automated Appointment Entry:</strong><br />
-   The date (format: <code>DD.MM.YYYY</code>) and time (format: <code>HH:MM</code>) of the colloquium are automatically extracted from the email, booked in the Outlook calendar (duration: 60 minutes), and written directly into the student's <code>config.json</code>.</p>
-</li>
-</ol>
-<p><strong>Example of the generated/updated <code>config.json</code>:</strong>
-<div class="language-json highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">&quot;task&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;colloquium&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Kolloquium auf dem Campus Gummersbach mit automatischer Gemini-Bewertung&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="nt">&quot;pdf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="nt">&quot;filename&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Bachelorarbeit.pdf&quot;</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">  </span><span class="p">},</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">  </span><span class="nt">&quot;colloquium&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;15.11.2026&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;14:00&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="nt">&quot;location_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;campus&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="nt">&quot;room&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3.228&quot;</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">  </span><span class="p">},</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">  </span><span class="nt">&quot;llm&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">    </span><span class="nt">&quot;api_choice&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">    </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">    </span><span class="nt">&quot;groq_free&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">  </span><span class="p">},</span>
-<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">  </span><span class="nt">&quot;gemini_evaluation&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">    </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">    </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;gemini-2.0-flash-exp&quot;</span>
-<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">  </span><span class="p">},</span>
-<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">  </span><span class="nt">&quot;output&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">    </span><span class="nt">&quot;folder&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">    </span><span class="nt">&quot;compile_pdf&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">    </span><span class="nt">&quot;fill_form_only&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
-<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">  </span><span class="p">}</span>
-<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="p">}</span>
-</code></pre></div>
-This file is used downstream for automated evaluation of presentation slides or automatically filling out grading forms.</p>
+<p>Before a reply is generated, the system creates a concise summary of the previous conversation history in the student folder (<code>.emails_summary.md</code>). This serves as crucial context for the LLM to stay informed about prior agreements. Details on how each action works and is executed can be found directly in their respective descriptions:</p>
+<ul>
+<li><strong><a href="../actions/action-1-antwort-schreiben/">Action 1: Write Reply</a></strong>  </li>
+<li><strong><a href="../actions/action-2-antwort-terminvorschlag/">Action 2: Reply with Appointment Suggestion</a></strong>  </li>
+<li><strong><a href="../actions/action-3-termin-buchen/">Action 3: Book Appointment</a></strong>  </li>
+<li><strong><a href="../actions/action-4-nur-archivieren/">Action 4: Archive Only</a></strong>  </li>
+<li><strong><a href="../actions/action-5-aufgabe-kalender/">Action 5: Create Task in Calendar (Final Submission)</a></strong>  </li>
+<li><strong><a href="../actions/action-6-kolloquium-termin/">Action 6: Colloquium Appointment</a></strong>  </li>
+</ul>
 <hr />
 <h2 id="further-links">Further Links<a class="headerlink" href="#further-links" title="Permanent link">&para;</a></h2>
 <ul>

@@ -88,7 +88,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#terminverwaltung-appointment-gui" class="md-skip">
+        <a href="#appointment-management-appointment-gui" class="md-skip">
           Skip to content
         </a>
       
@@ -610,10 +610,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#starten-der-gui" class="md-nav__link">
+  <a href="#starting-the-gui" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Starten der GUI
+        Starting the GUI
       
     </span>
   </a>
@@ -621,10 +621,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#funktionen" class="md-nav__link">
+  <a href="#features" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Funktionen
+        Features
       
     </span>
   </a>
@@ -632,10 +632,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#datenquelle" class="md-nav__link">
+  <a href="#data-source" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Datenquelle
+        Data Source
       
     </span>
   </a>
@@ -888,34 +888,6 @@
     
   
     Aktion 6 - Kolloquium-Termin
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../final-submission/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Finale Abgabe von Abschlussarbeiten
   
 
     
@@ -2370,10 +2342,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#starten-der-gui" class="md-nav__link">
+  <a href="#starting-the-gui" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Starten der GUI
+        Starting the GUI
       
     </span>
   </a>
@@ -2381,10 +2353,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#funktionen" class="md-nav__link">
+  <a href="#features" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Funktionen
+        Features
       
     </span>
   </a>
@@ -2392,10 +2364,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#datenquelle" class="md-nav__link">
+  <a href="#data-source" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Datenquelle
+        Data Source
       
     </span>
   </a>
@@ -2419,22 +2391,22 @@
 
 
 
-<h1 id="terminverwaltung-appointment-gui">Terminverwaltung (Appointment GUI)<a class="headerlink" href="#terminverwaltung-appointment-gui" title="Permanent link">&para;</a></h1>
-<p>Der Appointment Manager dient zur Vorbereitung von Terminen mit Studierenden. Er verknüpft die Termine aus Ihrem Kalender mit den im System vorhandenen Informationen über den jeweiligen Studierenden.</p>
-<h2 id="starten-der-gui">Starten der GUI<a class="headerlink" href="#starten-der-gui" title="Permanent link">&para;</a></h2>
-<p>Führen Sie das folgende Skript aus:</p>
+<h1 id="appointment-management-appointment-gui">Appointment Management (Appointment GUI)<a class="headerlink" href="#appointment-management-appointment-gui" title="Permanent link">&para;</a></h1>
+<p>The Appointment Manager is used to prepare for appointments with students. It links the appointments from your calendar with the information available in the system about the respective student.</p>
+<h2 id="starting-the-gui">Starting the GUI<a class="headerlink" href="#starting-the-gui" title="Permanent link">&para;</a></h2>
+<p>Run the following script:</p>
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python<span class="w"> </span>scripts/appointment_gui.py
 </code></pre></div>
-<h2 id="funktionen">Funktionen<a class="headerlink" href="#funktionen" title="Permanent link">&para;</a></h2>
+<h2 id="features">Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Wochenübersicht:</strong> Zeigt alle Termine der aktuellen Woche an, die aus <code>data/appointments.md</code> eingelesen werden.  </li>
-<li><strong>Studenten-Kontext:</strong> Bei Auswahl eines Termins sucht das System automatisch nach dem passenden Studenten-Ordner.  </li>
-<li><strong>Zusammenfassungen:</strong> Zeigt die KI-generierte Konversationszusammenfassung (<code>.emails_summary.md</code>) des Studenten an.  </li>
-<li><strong>Steckbriefe:</strong> Zeigt den aktuellen Steckbrief des Studierenden (Interessen, bisherige Themen, etc.) an.  </li>
-<li><strong>Datei-Explorer:</strong> Ermöglicht den direkten Zugriff auf alle Dateien im Ordner des Studierenden (z.B. Exposés, Entwürfe).  </li>
+<li><strong>Weekly Overview:</strong> Displays all appointments for the current week, read from <code>data/appointments.md</code>.  </li>
+<li><strong>Student Context:</strong> Selecting an appointment automatically searches for the matching student folder.  </li>
+<li><strong>Summaries:</strong> Displays the AI-generated conversation summary (<code>.emails_summary.md</code>) of the student.  </li>
+<li><strong>Student Profiles (Steckbriefe):</strong> Displays the student's current profile (interests, previous topics, etc.).  </li>
+<li><strong>File Explorer:</strong> Allows direct access to all files in the student's folder (e.g., exposés, drafts).  </li>
 </ul>
-<h2 id="datenquelle">Datenquelle<a class="headerlink" href="#datenquelle" title="Permanent link">&para;</a></h2>
-<p>Die Termine werden üblicherweise über das Outlook-VBA-Makro <code>AppointmentExport.bas</code> exportiert. Das System liest diese exportierten Daten ein und reichert sie mit dem Wissen aus der lokalen Wissensbasis an.</p>
+<h2 id="data-source">Data Source<a class="headerlink" href="#data-source" title="Permanent link">&para;</a></h2>
+<p>The appointments are usually exported via the Outlook VBA macro <code>AppointmentExport.bas</code>. The system reads this exported data and enriches it with knowledge from the local knowledge base.</p>
 
 
 

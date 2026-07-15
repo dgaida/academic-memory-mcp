@@ -88,7 +88,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#einrichtung-der-software" class="md-skip">
+        <a href="#setting-up-the-software" class="md-skip">
           Skip to content
         </a>
       
@@ -821,34 +821,6 @@
 
               
             
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../usage/final-submission/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Finale Abgabe von Abschlussarbeiten
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
           </ul>
         </nav>
       
@@ -1073,10 +1045,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#voraussetzungen" class="md-nav__link">
+  <a href="#prerequisites" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Voraussetzungen
+        Prerequisites
       
     </span>
   </a>
@@ -1095,10 +1067,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#erst-einrichtung-initialer-setup-ablauf" class="md-nav__link">
+  <a href="#initial-setup-setup-workflow" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Erst-Einrichtung (Initialer Setup-Ablauf)
+        Initial Setup (Setup Workflow)
       
     </span>
   </a>
@@ -2370,10 +2342,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#voraussetzungen" class="md-nav__link">
+  <a href="#prerequisites" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Voraussetzungen
+        Prerequisites
       
     </span>
   </a>
@@ -2392,10 +2364,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#erst-einrichtung-initialer-setup-ablauf" class="md-nav__link">
+  <a href="#initial-setup-setup-workflow" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Erst-Einrichtung (Initialer Setup-Ablauf)
+        Initial Setup (Setup Workflow)
       
     </span>
   </a>
@@ -2419,48 +2391,48 @@
 
 
 
-<h1 id="einrichtung-der-software">Einrichtung der Software<a class="headerlink" href="#einrichtung-der-software" title="Permanent link">&para;</a></h1>
-<p>Diese Seite beschreibt die notwendigen Schritte zur ersten Einrichtung und Installation des MCP University Systems.</p>
-<h2 id="voraussetzungen">Voraussetzungen<a class="headerlink" href="#voraussetzungen" title="Permanent link">&para;</a></h2>
+<h1 id="setting-up-the-software">Setting Up the Software<a class="headerlink" href="#setting-up-the-software" title="Permanent link">&para;</a></h1>
+<p>This page describes the necessary steps for the initial setup and installation of the MCP University System.</p>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Python 3.10 oder höher  </li>
-<li>Ollama (für lokale LLM-Unterstützung)  </li>
-<li>Outlook (für die Arbeit mit .msg Dateien und Kalenderintegration unter Windows)  </li>
+<li>Python 3.10 or higher  </li>
+<li>Ollama (for local LLM support)  </li>
+<li>Outlook (for working with .msg files and calendar integration under Windows)  </li>
 </ul>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
 <ol>
-<li>Klonen Sie das Repository.  </li>
-<li>Erstellen Sie eine virtuelle Umgebung und installieren Sie die Abhängigkeiten:  </li>
+<li>Clone the repository.  </li>
+<li>Create a virtual environment and install the dependencies:  </li>
 </ol>
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
 </code></pre></div>
-<p>Oder nutzen Sie die bereitgestellte <code>environment.yml</code> mit Conda:</p>
+<p>Or use the provided <code>environment.yml</code> with Conda:</p>
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>conda<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>environment.yml
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>conda<span class="w"> </span>activate<span class="w"> </span>mcp-university
 </code></pre></div>
-<h2 id="erst-einrichtung-initialer-setup-ablauf">Erst-Einrichtung (Initialer Setup-Ablauf)<a class="headerlink" href="#erst-einrichtung-initialer-setup-ablauf" title="Permanent link">&para;</a></h2>
-<p>Um das System betriebsbereit zu machen, führen Sie folgende Schritte aus:</p>
+<h2 id="initial-setup-setup-workflow">Initial Setup (Setup Workflow)<a class="headerlink" href="#initial-setup-setup-workflow" title="Permanent link">&para;</a></h2>
+<p>To get the system up and running, perform the following steps:</p>
 <ol>
 <li>
-<p><strong>Konfigurationsdateien vorbereiten:</strong><br />
-   Kopieren Sie die <code>.example</code> Konfigurationsdateien im Verzeichnis <code>config/</code>:
+<p><strong>Prepare Configuration Files:</strong><br />
+   Copy the <code>.example</code> configuration files in the <code>config/</code> directory:
    <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>cp<span class="w"> </span>config/user.yaml.example<span class="w"> </span>config/user.yaml
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>cp<span class="w"> </span>config/ontology.yaml.example<span class="w"> </span>config/ontology.yaml
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>cp<span class="w"> </span>config/classifier_paths.yaml.example<span class="w"> </span>config/classifier_paths.yaml
 </code></pre></div></p>
 </li>
 <li>
-<p><strong>Benutzerdaten anpassen:</strong><br />
-   Tragen Sie Ihren Namen und Ihre Hochschul-E-Mail in <code>config/user.yaml</code> ein.</p>
+<p><strong>Customize User Data:</strong><br />
+   Enter your name and your university email in <code>config/user.yaml</code>.</p>
 </li>
 <li>
-<p><strong>Studierendendaten synchronisieren:</strong><br />
-   Falls Sie bereits eine <code>students.yaml</code> (z.B. über die Outlook-Makros) erstellt haben, synchronisieren Sie diese mit der SQLite-Datenbank:
+<p><strong>Synchronize Student Data:</strong><br />
+   If you have already created a <code>students.yaml</code> (e.g., via the Outlook macros), synchronize it with the SQLite database:
    <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>mcp-uni<span class="w"> </span>db<span class="w"> </span>sync-students
 </code></pre></div></p>
 </li>
 </ol>
-<p>Eine detaillierte Beschreibung aller Konfigurationsoptionen und der verschiedenen <code>.yaml</code> Dateien finden Sie auf der Seite <strong><a href="../configuration/">Konfiguration</a></strong>.</p>
+<p>A detailed description of all configuration options and the various <code>.yaml</code> files can be found on the <strong><a href="../configuration/">Configuration</a></strong> page.</p>
 
 
 

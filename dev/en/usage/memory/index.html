@@ -88,7 +88,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#memory-system-vektordatenbanken" class="md-skip">
+        <a href="#memory-system-vector-databases" class="md-skip">
           Skip to content
         </a>
       
@@ -802,34 +802,6 @@
     
   
     Aktion 6 - Kolloquium-Termin
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../final-submission/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Finale Abgabe von Abschlussarbeiten
   
 
     
@@ -1562,22 +1534,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#aktualisierung-der-vektordatenbanken" class="md-nav__link">
+  <a href="#updating-vector-databases" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Aktualisierung der Vektordatenbanken
+        Updating Vector Databases
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Aktualisierung der Vektordatenbanken">
+    <nav class="md-nav" aria-label="Updating Vector Databases">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#nutzung-uber-das-cli" class="md-nav__link">
+  <a href="#cli-usage" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Nutzung über das CLI
+        CLI Usage
       
     </span>
   </a>
@@ -1585,10 +1557,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#optionen" class="md-nav__link">
+  <a href="#options" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Optionen
+        Options
       
     </span>
   </a>
@@ -1596,10 +1568,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#funktionsweise" class="md-nav__link">
+  <a href="#how-it-works" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Funktionsweise
+        How It Works
       
     </span>
   </a>
@@ -2384,22 +2356,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#aktualisierung-der-vektordatenbanken" class="md-nav__link">
+  <a href="#updating-vector-databases" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Aktualisierung der Vektordatenbanken
+        Updating Vector Databases
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Aktualisierung der Vektordatenbanken">
+    <nav class="md-nav" aria-label="Updating Vector Databases">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#nutzung-uber-das-cli" class="md-nav__link">
+  <a href="#cli-usage" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Nutzung über das CLI
+        CLI Usage
       
     </span>
   </a>
@@ -2407,10 +2379,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#optionen" class="md-nav__link">
+  <a href="#options" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Optionen
+        Options
       
     </span>
   </a>
@@ -2418,10 +2390,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#funktionsweise" class="md-nav__link">
+  <a href="#how-it-works" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Funktionsweise
+        How It Works
       
     </span>
   </a>
@@ -2450,30 +2422,30 @@
 
 
 
-<h1 id="memory-system-vektordatenbanken">Memory-System (Vektordatenbanken)<a class="headerlink" href="#memory-system-vektordatenbanken" title="Permanent link">&para;</a></h1>
-<p>Das Memory-System des MCP University Systems ermöglicht es dem Agenten, auf spezifisches Fachwissen zuzugreifen, das in verschiedenen Dokumenten (PDFs, Word, Markdown etc.) gespeichert ist. Dieses Wissen ist in verschiedene Klassen unterteilt (z.B. Bachelor Thesis, Prüfungsordnungen), die jeweils ihre eigene Vektordatenbank besitzen.</p>
-<h2 id="aktualisierung-der-vektordatenbanken">Aktualisierung der Vektordatenbanken<a class="headerlink" href="#aktualisierung-der-vektordatenbanken" title="Permanent link">&para;</a></h2>
-<p>Wenn neue Dokumente in die konfigurierten Memory-Ordner (definiert in <code>config/classifier_memory_paths.yaml</code>) hinzugefügt werden, müssen die Vektordatenbanken aktualisiert werden. Dies geschieht über das CLI-Kommando <code>memory update</code>.</p>
-<h3 id="nutzung-uber-das-cli">Nutzung über das CLI<a class="headerlink" href="#nutzung-uber-das-cli" title="Permanent link">&para;</a></h3>
-<p>Um alle konfigurierten Memory-Ordner zu scannen und die Vektordatenbanken zu aktualisieren, führen Sie folgenden Befehl aus:</p>
+<h1 id="memory-system-vector-databases">Memory System (Vector Databases)<a class="headerlink" href="#memory-system-vector-databases" title="Permanent link">&para;</a></h1>
+<p>The memory system of the MCP University System allows the agent to access specific domain knowledge stored in various documents (PDFs, Word, Markdown, etc.). This knowledge is divided into different classes (e.g., Bachelor Thesis, exam regulations), each of which has its own vector database.</p>
+<h2 id="updating-vector-databases">Updating Vector Databases<a class="headerlink" href="#updating-vector-databases" title="Permanent link">&para;</a></h2>
+<p>When new documents are added to the configured memory folders (defined in <code>config/classifier_memory_paths.yaml</code>), the vector databases must be updated. This is done via the CLI command <code>memory update</code>.</p>
+<h3 id="cli-usage">CLI Usage<a class="headerlink" href="#cli-usage" title="Permanent link">&para;</a></h3>
+<p>To scan all configured memory folders and update the vector databases, run the following command:</p>
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>mcp-uni<span class="w"> </span>memory<span class="w"> </span>update
 </code></pre></div>
-<h3 id="optionen">Optionen<a class="headerlink" href="#optionen" title="Permanent link">&para;</a></h3>
+<h3 id="options">Options<a class="headerlink" href="#options" title="Permanent link">&para;</a></h3>
 <ul>
-<li><code>--config</code> / <code>-c</code>: Pfad zur Speicherpfad-Konfiguration (Standard: <code>config/classifier_memory_paths.yaml</code>).  </li>
-<li><code>--debug</code> / <code>-d</code>: Aktiviert detaillierte Debug-Logs während des Indexierungsprozesses.  </li>
+<li><code>--config</code> / <code>-c</code>: Path to memory path configuration (default: <code>config/classifier_memory_paths.yaml</code>).  </li>
+<li><code>--debug</code> / <code>-d</code>: Enables detailed debug logs during the indexing process.  </li>
 </ul>
-<h3 id="funktionsweise">Funktionsweise<a class="headerlink" href="#funktionsweise" title="Permanent link">&para;</a></h3>
-<p>Das Skript führt folgende Schritte aus:<br />
-1. <strong>Pfad-Auflösung</strong>: Es liest die Konfiguration und bestimmt, welche Ordner welchen Vektordatenbanken zugeordnet sind.<br />
-2. <strong>Parsing</strong>: Alle unterstützten Dateien (<code>.pdf</code>, <code>.docx</code>, <code>.md</code>, <code>.txt</code>, <code>.eml</code>, <code>.msg</code>, <code>.py</code>, <code>.ipynb</code>, <code>.json</code>, <code>.html</code>) werden eingelesen.<br />
-3. <strong>Chunking</strong>: Lange Texte werden in kleinere Abschnitte (Chunks) unterteilt.<br />
-4. <strong>Indizierung</strong>: Die Chunks werden mittels des konfigurierten Embedding-Modells vektorisiert und in der Qdrant-Vektordatenbank unter <code>data/memory/&lt;Klassenname&gt;</code> gespeichert.  </p>
-<p>Da absolute Pfade als Dokument-IDs verwendet werden, führt ein erneuter Lauf dazu, dass bestehende Dokumente aktualisiert und neue Dokumente hinzugefügt werden.</p>
+<h3 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">&para;</a></h3>
+<p>The script performs the following steps:<br />
+1. <strong>Path Resolution</strong>: It reads the configuration and determines which folders are mapped to which vector databases.<br />
+2. <strong>Parsing</strong>: All supported files (<code>.pdf</code>, <code>.docx</code>, <code>.md</code>, <code>.txt</code>, <code>.eml</code>, <code>.msg</code>, <code>.py</code>, <code>.ipynb</code>, <code>.json</code>, <code>.html</code>) are read.<br />
+3. <strong>Chunking</strong>: Long texts are split into smaller segments (chunks).<br />
+4. <strong>Indexing</strong>: The chunks are vectorized using the configured embedding model and stored in the Qdrant vector database under <code>data/memory/&lt;ClassName&gt;</code>.  </p>
+<p>Since absolute paths are used as document IDs, running the update again will update existing documents and add new ones.</p>
 <hr />
-<p>Siehe auch:<br />
-- <a href="../rag-process/">RAG-Prozess</a><br />
-- <a href="../indexing-details/">Indizierung von Dokumenten</a>  </p>
+<p>See also:<br />
+- <a href="../rag-process/">RAG Process</a><br />
+- <a href="../indexing-details/">Document Indexing Details</a>  </p>
 
 
 

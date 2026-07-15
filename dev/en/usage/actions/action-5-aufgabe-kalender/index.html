@@ -402,6 +402,24 @@
     </span>
 </a>
 </li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#integration-with-the-colloquium-protocol-creator">
+<span class="md-ellipsis">
+      
+        Integration with the Colloquium Protocol Creator
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#configuration-file-example">
+<span class="md-ellipsis">
+      
+        Configuration File Example
+      
+    </span>
+</a>
+</li>
 </ul>
 </nav>
 </li>
@@ -411,18 +429,6 @@
     
   
     Aktion 6 - Kolloquium-Termin
-  
-
-    
-  </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../final-submission/">
-<span class="md-ellipsis">
-    
-  
-    Finale Abgabe von Abschlussarbeiten
   
 
     
@@ -1060,6 +1066,24 @@
     </span>
 </a>
 </li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#integration-with-the-colloquium-protocol-creator">
+<span class="md-ellipsis">
+      
+        Integration with the Colloquium Protocol Creator
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#configuration-file-example">
+<span class="md-ellipsis">
+      
+        Configuration File Example
+      
+    </span>
+</a>
+</li>
 </ul>
 </nav>
 </div>
@@ -1072,7 +1096,7 @@
 <h2 id="how-it-works-and-details">How it Works and Details<a class="headerlink" href="#how-it-works-and-details" title="Permanent link">¶</a></h2>
 <p>Once executed, the system automatically performs the following steps:</p>
 <ol>
-<li><strong>Save Attachments:</strong> All email attachments (such as the final thesis PDF) are automatically saved via <code>save_email_attachments</code> directly in the student's main folder (<code>Semester / Lastname /</code>).  </li>
+<li><strong>Save Attachments:</strong> All email attachments (such as the final thesis PDF) are automatically saved via <code>save_email_attachments</code> directly in the student's main folder (<code>Semester / Lastname /</code>). Existing files are not overwritten; if necessary, the suffix <code>_final</code> is added.  </li>
 <li><strong>Colloquium Configuration (<code>config.json</code>):</strong> A <code>config.json</code> file is automatically created or updated in the student's main folder via <code>create_colloquium_config</code>. This file contains the exact filename of the PDF document from the attachment and serves as the configuration interface for the <a href="https://dgaida.github.io/colloquium-protocol-creator/">colloquium-protocol-creator</a>.  </li>
 <li><strong>Calendar Reminder in 7 Days:</strong> A calendar entry (reminder) is created in your Outlook calendar via the <code>manage_calendar_appointment</code> tool for <strong>exactly 7 days after the email is received, at 08:00 AM</strong>. This reminds you in a timely manner to read and evaluate the submitted thesis.  </li>
 <li><strong>Draft Receipt Confirmation:</strong> An email draft is automatically created in Outlook to confirm the official receipt of the thesis to the student.  </li>
@@ -1086,6 +1110,27 @@
     D --&gt; E[Create Outlook draft for receipt confirmation]
     E --&gt; F[Process completed]
 </div>
+<hr/>
+<h2 id="integration-with-the-colloquium-protocol-creator">Integration with the Colloquium Protocol Creator<a class="headerlink" href="#integration-with-the-colloquium-protocol-creator" title="Permanent link">¶</a></h2>
+<p>The generated <code>config.json</code> already contains the name of the PDF thesis. As soon as a colloquium date is agreed upon and confirmed with the student, the system automatically enters the date and time into this configuration file.</p>
+<p>This allows for a seamless transition to protocol creation and evaluation of the colloquium.</p>
+<h2 id="configuration-file-example">Configuration File Example<a class="headerlink" href="#configuration-file-example" title="Permanent link">¶</a></h2>
+<p>The created file has the following format:</p>
+<div class="language-json highlight"><pre><span></span><code><a href="#__codelineno-0-1" id="__codelineno-0-1" name="__codelineno-0-1"></a><span class="p">{</span>
+<a href="#__codelineno-0-2" id="__codelineno-0-2" name="__codelineno-0-2"></a><span class="w">  </span><span class="nt">"task"</span><span class="p">:</span><span class="w"> </span><span class="s2">"colloquium"</span><span class="p">,</span>
+<a href="#__codelineno-0-3" id="__codelineno-0-3" name="__codelineno-0-3"></a><span class="w">  </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Colloquium on Campus Gummersbach with automatic Gemini evaluation"</span><span class="p">,</span>
+<a href="#__codelineno-0-4" id="__codelineno-0-4" name="__codelineno-0-4"></a><span class="w">  </span><span class="nt">"pdf"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a href="#__codelineno-0-5" id="__codelineno-0-5" name="__codelineno-0-5"></a><span class="w">    </span><span class="nt">"filename"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Bachelor_Thesis_Mustermann.pdf"</span>
+<a href="#__codelineno-0-6" id="__codelineno-0-6" name="__codelineno-0-6"></a><span class="w">  </span><span class="p">},</span>
+<a href="#__codelineno-0-7" id="__codelineno-0-7" name="__codelineno-0-7"></a><span class="w">  </span><span class="nt">"colloquium"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a href="#__codelineno-0-8" id="__codelineno-0-8" name="__codelineno-0-8"></a><span class="w">    </span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"DD.MM.YYYY"</span><span class="p">,</span>
+<a href="#__codelineno-0-9" id="__codelineno-0-9" name="__codelineno-0-9"></a><span class="w">    </span><span class="nt">"time"</span><span class="p">:</span><span class="w"> </span><span class="s2">"hh:mm"</span><span class="p">,</span>
+<a href="#__codelineno-0-10" id="__codelineno-0-10" name="__codelineno-0-10"></a><span class="w">    </span><span class="nt">"location_type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"campus"</span><span class="p">,</span>
+<a href="#__codelineno-0-11" id="__codelineno-0-11" name="__codelineno-0-11"></a><span class="w">    </span><span class="nt">"room"</span><span class="p">:</span><span class="w"> </span><span class="s2">"3.228"</span>
+<a href="#__codelineno-0-12" id="__codelineno-0-12" name="__codelineno-0-12"></a><span class="w">  </span><span class="p">},</span>
+<a href="#__codelineno-0-13" id="__codelineno-0-13" name="__codelineno-0-13"></a><span class="w">  </span><span class="err">...</span>
+<a href="#__codelineno-0-14" id="__codelineno-0-14" name="__codelineno-0-14"></a><span class="p">}</span>
+</code></pre></div>
 </article>
 </div>
 <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>

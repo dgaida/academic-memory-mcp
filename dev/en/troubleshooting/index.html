@@ -821,34 +821,6 @@
 
               
             
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../usage/final-submission/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Finale Abgabe von Abschlussarbeiten
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
           </ul>
         </nav>
       
@@ -2518,15 +2490,15 @@ Metrics are generated during the CI run. Locally, you need to run the metrics sc
 <code>2026-07-14 10:30:22,637 - WARNING - Keine Pfad-Konfiguration für 'XY' gefunden. Überspringe 20250826_093612 - Mail.msg</code></p>
 <p><strong>Meaning:</strong>
 The email classifier classified an email into the class <code>'XY'</code> (e.g., <code>BachelorThesis</code>, <code>MasterThesis</code>, <code>Other</code> etc.). However, in the configuration file (e.g., <code>config/folders.yaml</code> or <code>config/classifier_paths.yaml</code>), under <code>class_paths</code>, there is no mapping to a destination folder for class <code>'XY'</code>. As a result, the corresponding email file is skipped and not sorted.</p>
-<p><strong>Solution:</strong>
-1. <strong>Configure destination folder:</strong> Open the configuration file (by default <code>config/folders.yaml</code> or the configuration file specified in your command like <code>config/classifier_paths.yaml</code>) and check the <code>class_paths</code> section.
-2. <strong>Add the class:</strong> Add the missing entry for class <code>'XY'</code>. For example:
+<p><strong>Solution:</strong><br />
+1. <strong>Configure destination folder:</strong> Open the configuration file (by default <code>config/folders.yaml</code> or the configuration file specified in your command like <code>config/classifier_paths.yaml</code>) and check the <code>class_paths</code> section.<br />
+2. <strong>Add the class:</strong> Add the missing entry for class <code>'XY'</code>. For example:<br />
    <div class="language-yaml highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">class_paths</span><span class="p">:</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="c1"># ... other classes ...</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nt">XY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;D:/path/to/XY&quot;</span>
 </code></pre></div>
-3. <strong>Verify classification:</strong> If the email was incorrectly classified as class <code>'XY'</code>, check the training data of the classifier or correct the classification in the manual step (e.g., via the Gradio web interface).
-4. <strong>Re-run the script:</strong> Start the email sorting script again to process the skipped emails.</p>
+3. <strong>Verify classification:</strong> If the email was incorrectly classified as class <code>'XY'</code>, check the training data of the classifier or correct the classification in the manual step (e.g., via the Gradio web interface).<br />
+4. <strong>Re-run the script:</strong> Start the email sorting script again to process the skipped emails.  </p>
 
 
 

@@ -819,34 +819,6 @@
 
               
             
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../usage/final-submission/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Finale Abgabe von Abschlussarbeiten
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
           </ul>
         </nav>
       
@@ -2516,15 +2488,15 @@ Die Metriken werden während des CI-Laufs generiert. Lokal müssen Sie das Metri
 <code>2026-07-14 10:30:22,637 - WARNING - Keine Pfad-Konfiguration für 'XY' gefunden. Überspringe 20250826_093612 - Mail.msg</code></p>
 <p><strong>Bedeutung:</strong>
 Der E-Mail-Klassifizierer hat eine E-Mail als Klasse <code>'XY'</code> (z. B. <code>BachelorThesis</code>, <code>MasterThesis</code>, <code>Other</code> etc.) eingestuft. In der Konfigurationsdatei (z. B. <code>config/folders.yaml</code> oder <code>config/classifier_paths.yaml</code>) fehlt jedoch unter <code>class_paths</code> die Zuweisung eines Zielverzeichnisses für diese Klasse <code>'XY'</code>. Daher wird die entsprechende E-Mail-Datei übersprungen und nicht einsortiert.</p>
-<p><strong>Fehlerbehebung:</strong>
-1. <strong>Zielordner konfigurieren:</strong> Öffnen Sie die Konfigurationsdatei (standardmäßig <code>config/folders.yaml</code> oder die in Ihrem Befehl angegebene Konfigurationsdatei wie <code>config/classifier_paths.yaml</code>) und prüfen Sie den Abschnitt <code>class_paths</code>.
-2. <strong>Klasse hinzufügen:</strong> Ergänzen Sie den fehlenden Eintrag für die Klasse <code>'XY'</code>. Zum Beispiel:
+<p><strong>Fehlerbehebung:</strong><br />
+1. <strong>Zielordner konfigurieren:</strong> Öffnen Sie die Konfigurationsdatei (standardmäßig <code>config/folders.yaml</code> oder die in Ihrem Befehl angegebene Konfigurationsdatei wie <code>config/classifier_paths.yaml</code>) und prüfen Sie den Abschnitt <code>class_paths</code>.<br />
+2. <strong>Klasse hinzufügen:</strong> Ergänzen Sie den fehlenden Eintrag für die Klasse <code>'XY'</code>. Zum Beispiel:<br />
    <div class="language-yaml highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">class_paths</span><span class="p">:</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="c1"># ... andere Klassen ...</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nt">XY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;D:/Pfad/zu/XY&quot;</span>
 </code></pre></div>
-3. <strong>Einstufung prüfen:</strong> Wenn die E-Mail fälschlicherweise als Klasse <code>'XY'</code> erkannt wurde, überprüfen Sie die Trainingsdaten des Klassifizierers oder korrigieren Sie die Klassifizierung im manuellen Schritt (z. B. über das Gradio-Webinterface).
-4. <strong>Skript erneut ausführen:</strong> Starten Sie das E-Mail-Sortier-Skript erneut, um die übersprungenen E-Mails zu verarbeiten.</p>
+3. <strong>Einstufung prüfen:</strong> Wenn die E-Mail fälschlicherweise als Klasse <code>'XY'</code> erkannt wurde, überprüfen Sie die Trainingsdaten des Klassifizierers oder korrigieren Sie die Klassifizierung im manuellen Schritt (z. B. über das Gradio-Webinterface).<br />
+4. <strong>Skript erneut ausführen:</strong> Starten Sie das E-Mail-Sortier-Skript erneut, um die übersprungenen E-Mails zu verarbeiten.  </p>
 
 
 
