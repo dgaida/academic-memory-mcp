@@ -13,9 +13,23 @@ python scripts/appointment_gui.py
 ## Funktionen
 
 *   **Wochenübersicht:** Zeigt alle Termine der aktuellen Woche an, die aus `data/appointments.md` eingelesen werden.  
-*   **Studenten-Kontext:** Bei Auswahl eines Termins sucht das System automatisch nach dem passenden Studenten-Ordner.  
-*   **Zusammenfassungen:** Zeigt die KI-generierte Konversationszusammenfassung (`.emails_summary.md`) des Studenten an.  
-*   **Steckbriefe:** Zeigt den aktuellen Steckbrief des Studierenden (Interessen, bisherige Themen, etc.) an.  
+*   **Studenten-Kontext:** Bei Auswahl eines Termins sucht das System automatisch nach dem passenden Studenten-Ordner.
+    *   **Wie findet er den Ordner?**
+        Das System extrahiert zunächst den Teilnehmernamen (bzw. Nachnamen) und die E-Mail-Adresse aus den Teilnehmerinformationen des Termins. Anschließend wird anhand der E-Mail-Klasse und des Nachnamens der entsprechende Pfad gesucht:
+        1. **Namensextraktion:** Der Nachname wird über reguläre Ausdrücke und Textmuster aus dem Teilnehmer-String gefiltert (z. B. "Mustermann" aus `max.mustermann@th-koeln.de` oder "Mustermann" aus `Mustermann Max <... >`).
+        2. **Klassenpfad-Mapping:** Jede E-Mail-Klasse (z. B. *Bachelor Thesis*, *Projekt*) hat in der Konfiguration `classifier_paths.yaml` einen definierten Basispfad. Das System bestimmt die Klasse des Termins (siehe unten) und schaut zuerst im entsprechenden Basispfad nach einem Ordner, der den Nachnamen des Studenten enthält.
+        3. **Fallback-Suche:** Wird im spezifischen Klassenpfad kein Ordner gefunden (z. B. weil die Klasse des Termins nicht übereinstimmt oder der Ordner an einer anderen Stelle liegt), durchsucht das System alle anderen konfigurierten Basispfade nach einem passenden Ordner für diesen Nachnamen.
+    *   **Woher kennt das Tool das Thema des Termins bzw. bestimmt die E-Mail-Klasse?**
+        Die Bestimmung erfolgt über den Betreff (Titel) des Kalendertermins:
+        *   Das System liest die konfigurierten E-Mail-Klassen und deren Pfade aus der Datei `classifier_paths.yaml` ein.
+        *   Es gleicht den Betreff des Termins mit den Klassennamen ab (Groß-/Kleinschreibung wird ignoriert). Wenn der Name einer Klasse (z. B. "Bachelor Thesis" oder "Projekt") im Betreff vorkommt, wird dem Termin diese E-Mail-Klasse zugewiesen.
+        *   Wird keine Übereinstimmung im Betreff gefunden, fällt das System auf die Standardklasse `"Other"` zurück.
+*   **Zusammenfassungen:** Zeigt die KI-generierte Konversationszusammenfassung (`.emails_summary.md`) des gefundenen studentischen Hauptordners an.
+    *   **Erstellt die GUI die Zusammenfassung, falls es noch keine gibt?**
+        Ja! Wenn für den gefundenen Studentenordner noch keine Zusammenfassung existiert oder diese veraltet ist (d. h. wenn das Dateidatum von `.emails_summary.md` älter ist als die neueste E-Mail-Datei `.msg` / `.eml` im Ordner), generiert bzw. aktualisiert die GUI die Zusammenfassung automatisch im Hintergrund. Dazu liest sie die gesamte E-Mail-Historie des Studenten ein und lässt über das lokale LLM eine aktuelle, strukturierte Zusammenfassung generieren, die als `.emails_summary.md` im Studentenordner gespeichert wird.
+*   **Steckbriefe:** Zeigt den aktuellen Steckbrief des Studierenden (Interessen, bisherige Themen, bevorzugte Anrede etc.) an.
+    *   **Wird dieser durch die GUI auch erstellt, wenn es noch keinen gibt?**
+        Ja! Wenn beim Auswählen des Termins die E-Mail-Adresse des Teilnehmers bekannt ist, ruft das System den `PersonProfiler` auf. Dieser prüft, ob bereits ein Steckbrief unter `D:\Steckbriefe\<email>.md` (oder alternativ im lokalen Ordner `Steckbriefe/`) existiert. Gibt es noch keinen Steckbrief, sucht der Profiler nach allen E-Mails dieser Person (bis zu 100 der neuesten E-Mails aus allen Archiv-Pfaden), bezieht Informationen aus dem Wissensgraphen (z. B. Rollen, Zugehörigkeiten) ein, bestimmt die bevorzugte Anrede ("Du" oder "Sie") durch LLM-Analyse der letzten Direkt-E-Mails und erstellt vollautomatisch einen neuen, detaillierten Steckbrief in Markdown. Sollte bereits ein Steckbrief existieren, wird dieser bei neuen E-Mails ebenfalls automatisch aktualisiert.
 *   **Datei-Explorer:** Ermöglicht den direkten Zugriff auf alle Dateien im Ordner des Studierenden (z.B. Exposés, Entwürfe).  
 
 ## Datenquelle
