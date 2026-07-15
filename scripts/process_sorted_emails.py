@@ -223,14 +223,21 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
 
                                 att_cb = gr.Checkbox(label="Anhang speichern", value=mail.get("save_attachments", False))
                                 checkboxes.append(att_cb)
-
                     process_btn = gr.Button("Mails in Tab 2 verarbeiten", variant="primary")
 
-                    def handle_tab2_process(*args: Any) -> str:
-                        """Verarbeitet die E-Mails in Tab 2."""
+                    def handle_tab2_process(t2_mails: List[Dict[str, Any]], *args: Any) -> Tuple[List[Dict[str, Any]], str]:
+                        """Verarbeitet die E-Mails in Tab 2.
+
+                        Args:
+                            t2_mails (List[Dict[str, Any]]): Die aktuelle Liste der E-Mails in Tab 2.
+                            *args (Any): Dropdown-Auswahlen, Aktions-Auswahlen und Checkboxes.
+
+                        Returns:
+                            Tuple[List[Dict[str, Any]], str]: Die aktualisierte Liste der E-Mails und die Statusmeldung.
+                        """
                         num = num_mails
                         if len(args) < 3 * num:
-                            return f"Fehler: Erwartete {3 * num} Argumente, erhielt {len(args)}."
+                            return t2_mails, f"Fehler: Erwartete {3 * num} Argumente, erhielt {len(args)}."
                         sels = args[:num]
                         acts = args[num:2 * num]
                         atts = args[2 * num:3 * num]
@@ -254,18 +261,39 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
                             except Exception as e:
                                 results.append(f"{change['lastname']}: Fehler {str(e)}")
 
+                        updated_t2 = []
+                        for i, m in enumerate(t2_mails):
+                            change_item = processed_list[i][0]
+                            updated_mail = m.copy()
+
+                            new_path = change_item.get("new_path")
+                            if new_path:
+                                updated_mail["path"] = Path(new_path)
+                                if "latest_mail" in updated_mail:
+                                    updated_mail["latest_mail"] = Path(new_path)
+
+                            new_id_path = change_item.get("new_identifier_path")
+                            if new_id_path:
+                                updated_mail["identifier_path"] = Path(new_id_path)
+
+                            updated_mail["class"] = change_item["new_class"]
+                            updated_mail["suggested_action"] = processed_list[i][1]
+                            updated_mail["save_attachments"] = change_item["save_attachments"]
+
+                            updated_t2.append(updated_mail)
+
                         msg = "Verarbeitung abgeschlossen."
                         if errors:
                             msg += "\nFehler: " + "; ".join(errors)
                         if results:
                             msg += "\nAktionen:\n" + "\n".join(results)
                         logger.info(f"Tab 2 Verarbeitungsergebnis:\n{msg}")
-                        return msg
+                        return updated_t2, msg
 
                     process_btn.click(
                         handle_tab2_process,
-                        inputs=dropdowns + action_dropdowns + checkboxes,
-                        outputs=tab2_status_local
+                        inputs=[tab2_mails] + dropdowns + action_dropdowns + checkboxes,
+                        outputs=[tab2_mails, tab2_status_local]
                     )
 
         def scan_emails() -> Tuple[List[Dict[str, Any]], List[Any], str]:
