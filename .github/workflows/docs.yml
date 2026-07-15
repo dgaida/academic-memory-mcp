@@ -92,7 +92,7 @@ jobs:
           git fetch origin gh-pages --depth=1 || true
 
           if [[ ${{ github.ref }} == refs/tags/* ]]; then
-            VERSION=${{ GITHUB_REF#refs/tags/ }}
+            VERSION=${GITHUB_REF#refs/tags/}
             mike deploy --push --update-aliases $VERSION latest
             mike set-default --push latest
           elif [[ ${{ github.ref }} == refs/heads/main || ${{ github.ref }} == refs/heads/master ]]; then
