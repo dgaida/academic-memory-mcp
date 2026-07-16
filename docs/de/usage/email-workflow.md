@@ -39,9 +39,9 @@ Dieser Tab ist für die massenweise Verarbeitung von E-Mails optimiert, bei dene
 - **Listenansicht:** Getrennte Anzeige von `Inbox` und `SentItems`.  
 - **Entfernen:** Mails, die eine genauere Betrachtung erfordern, können per Index-Auswahl in den zweiten Tab verschoben werden.  
 - **Anhänge:** Für jede Mail kann bereits hier ausgewählt werden, ob Anhänge beim Archivieren gespeichert werden sollen.  
-    - **Speicherort & Pfad der Anhänge:** Wenn die Option ausgewählt ist, werden die Anhänge automatisch direkt im studentischen Hauptordner (`Semester / Nachname /`) abgelegt (Elternordner des archivierten E-Mail-Ordners).
-        - *Beispiel:* Wenn eine Mail als `Bachelor Thesis` für den Studenten `Mustermann` im Semester `2023_24_WS` archiviert wird (E-Mail-Pfad: `2023_24_WS/Mustermann/Inbox/20231120_143000_Expose.msg`), wird der Anhang (z.B. `Expose_Max_Mustermann.pdf`) im folgenden Ordner gespeichert:
-          `2023_24_WS/Mustermann/Expose_Max_Mustermann.pdf`
+    - **Speicherort & Pfad der Anhänge:** Wenn die Option ausgewählt ist, werden die Anhänge automatisch direkt im studentischen Hauptordner (`Semester / Nachname /`) abgelegt (Elternordner des archivierten E-Mail-Ordners).  
+        - *Beispiel:* Wenn eine Mail als `Bachelor Thesis` für den Studenten `Mustermann` im Semester `2023_24_WS` archiviert wird (E-Mail-Pfad: `2023_24_WS/Mustermann/Inbox/20231120_143000_Expose.msg`), wird der Anhang (z.B. `Expose_Max_Mustermann.pdf`) im folgenden Ordner gespeichert:  
+          `2023_24_WS/Mustermann/Expose_Max_Mustermann.pdf`  
 - **Archivieren:** Alle verbleibenden Mails in den Listen werden mit einem Klick direkt in ihre jeweiligen Archiv-Pfade verschoben.  
 
 ### Tab 2: Detail-Ansicht & Verarbeitung
