@@ -144,5 +144,64 @@ def test_load_student_details_no_email(tmp_path):
         assert "Kein Steckbrief gefunden" in profile
         mock_profiler.get_profile.assert_not_called()
 
+
+
+def test_get_class_from_title_with_model_prediction(tmp_path):
+    """Test get_class_from_title when no substring match is found.
+
+    It should call Tools.classifier().predict_text and fall back to 'Other'
+    if predicted class folder doesn't contain participant emails.
+    If it does contain participant emails, it should return the predicted class.
+    """
+    class_paths = {
+        "BachelorThesis": str(tmp_path / "BachelorThesis"),
+        "Other": str(tmp_path / "OtherMails")
+    }
+
+    # Create predicted class folder structure
+    bt_dir = tmp_path / "BachelorThesis"
+    bt_dir.mkdir()
+
+    # Student subfolder
+    student_dir = bt_dir / "Mustermann"
+    student_dir.mkdir()
+
+    # Scenario A: Student folder exists but contains no emails -> falls back to 'Other'
+    with patch("scripts.appointment_gui.Tools") as mock_tools, \
+         patch("scripts.appointment_gui.find_student_folder") as mock_find_folder:
+
+        mock_classifier = MagicMock()
+        mock_classifier.predict_text.return_value = {"prediction": "BachelorThesis"}
+        mock_tools.classifier.return_value = mock_classifier
+        mock_find_folder.return_value = student_dir
+
+        # Call the function
+        cls = gui.get_class_from_title("Some Unmatched Subject", class_paths, "max.mustermann@th-koeln.de", "Mustermann")
+        assert cls == "Other"
+
+    # Scenario B: Student folder exists and contains matching emails -> returns predicted class
+    email_file = student_dir / "email.msg"
+    email_file.write_text("dummy")
+
+    with patch("scripts.appointment_gui.Tools") as mock_tools, \
+         patch("scripts.appointment_gui.find_student_folder") as mock_find_folder:
+
+        mock_classifier = MagicMock()
+        mock_classifier.predict_text.return_value = {"prediction": "BachelorThesis"}
+        mock_tools.classifier.return_value = mock_classifier
+
+        mock_mail_parser = MagicMock()
+        mock_mail_parser.get_email_details.return_value = {
+            "from_email": "max.mustermann@th-koeln.de",
+            "from_name": "Mustermann Max",
+            "to": [],
+            "cc": []
+        }
+        mock_tools.mail_parser.return_value = mock_mail_parser
+        mock_find_folder.return_value = student_dir
+
+        cls = gui.get_class_from_title("Some Unmatched Subject", class_paths, "max.mustermann@th-koeln.de", "Mustermann")
+        assert cls == "BachelorThesis"
+
 if __name__ == "__main__":
     pytest.main([__file__])

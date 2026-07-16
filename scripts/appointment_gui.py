@@ -23,6 +23,7 @@ class Tools:
     _parser: Optional[MailParser] = None
     _summarizer: Optional[Summarizer] = None
     _profiler: Optional[PersonProfiler] = None
+    _classifier: Optional[Any] = None
 
     @classmethod
     def mail_parser(cls) -> MailParser:
@@ -56,6 +57,51 @@ class Tools:
         if cls._profiler is None:
             cls._profiler = PersonProfiler()
         return cls._profiler
+
+    @classmethod
+    def classifier(cls) -> Optional[Any]:
+        """Gibt eine geladene Instanz des EmailClassifiers zurück oder None.
+
+        Returns:
+            Optional[Any]: Eine Instanz des EmailClassifiers oder None.
+        """
+        if cls._classifier is None:
+            try:
+                from email_classifier.engine import EmailClassifier, resolve_model_path
+                config = get_config()
+                model_path = None
+                for method in ["transformer", "xgboost", "randomforest"]:
+                    for mode in ["tfidf", "combined", "embedding"]:
+                        try_path = resolve_model_path(config.data_dir / "email_classifier.pkl", method, mode)
+                        if try_path.exists():
+                            model_path = try_path
+                            break
+                    if model_path:
+                        break
+
+                if not model_path:
+                    model_path = resolve_model_path(config.data_dir / "email_classifier.pkl", "transformer", "tfidf")
+
+                if model_path.exists():
+                    import torch
+                    try:
+                        data = torch.load(model_path, map_location="cpu", weights_only=False)
+                        method = data.get("method", "randomforest")
+                        mode = data.get("mode", "combined")
+                    except Exception:
+                        method = "transformer"
+                        mode = "tfidf"
+
+                    clf = EmailClassifier(method=method, mode=mode)
+                    clf.load(model_path)
+                    cls._classifier = clf
+                else:
+                    import logging
+                    logging.getLogger(__name__).warning(f"Klassifikator-Modell unter {model_path} nicht gefunden.")
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).error(f"Fehler beim Laden des EmailClassifiers: {e}")
+        return cls._classifier
 
 
 def open_file(filepath: str) -> str:
@@ -212,12 +258,87 @@ def get_class_paths() -> Dict[str, str]:
     return cp_data.get("class_paths", {})
 
 
-def get_class_from_title(title: str, class_paths: Dict[str, str]) -> str:
+def check_folder_contains_participant_emails(student_dir: Path, email: Optional[str], lastname: Optional[str]) -> bool:
+    """Überprüft, ob der Ordner E-Mails des Teilnehmers enthält.
+
+    Es wird nach .msg und .eml Dateien im Ordner gesucht. Falls vorhanden,
+    wird geprüft, ob der Absender oder Empfänger dem Teilnehmer (E-Mail oder Nachname) entspricht.
+
+    Args:
+        student_dir (Path): Der Pfad zum Studentenordner.
+        email (Optional[str]): Die E-Mail-Adresse des Teilnehmers.
+        lastname (Optional[str]): Der Nachname des Teilnehmers.
+
+    Returns:
+        bool: True, wenn passende E-Mails gefunden wurden, sonst False.
+    """
+    if not student_dir or not student_dir.exists():
+        return False
+
+    email_files = list(student_dir.rglob("*.msg")) + list(student_dir.rglob("*.eml"))
+    if not email_files:
+        return False
+
+    if not email and not lastname:
+        return True
+
+    parser = Tools.mail_parser()
+    for f in email_files:
+        try:
+            details = parser.get_email_details(f)
+
+            if email:
+                email_lower = email.lower()
+                from_email = details.get("from_email")
+                if from_email and email_lower in from_email.lower():
+                    return True
+                for recipient in details.get("to", []):
+                    rec_email = recipient.get("email")
+                    if rec_email and email_lower in rec_email.lower():
+                        return True
+                for recipient in details.get("cc", []):
+                    rec_email = recipient.get("email")
+                    if rec_email and email_lower in rec_email.lower():
+                        return True
+
+            if lastname:
+                lastname_lower = lastname.lower()
+                from_name = details.get("from_name")
+                if from_name and lastname_lower in from_name.lower():
+                    return True
+                for recipient in details.get("to", []):
+                    rec_name = recipient.get("name")
+                    if rec_name and lastname_lower in rec_name.lower():
+                        return True
+                for recipient in details.get("cc", []):
+                    rec_name = recipient.get("name")
+                    if rec_name and lastname_lower in rec_name.lower():
+                        return True
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning(f"Fehler beim Überprüfen der E-Mail {f}: {e}")
+
+    return False
+
+
+def get_class_from_title(
+    title: str,
+    class_paths: Dict[str, str],
+    email: Optional[str] = None,
+    lastname: Optional[str] = None
+) -> str:
     """Bestimmt die E-Mail-Klasse basierend auf dem Terminbetreff.
+
+    Wird keine Übereinstimmung im Betreff gefunden, dann wird der Betreff
+    an das Emailclassifier Modell übergeben, welches über die Klasse entscheidet.
+    Wenn im vorhergesagten Klassenordner keine Mails von dem Teilnehmer des Termins
+    gefunden werden, fällt das System auf die Standardklasse "Other" zurück.
 
     Args:
         title (str): Der Betreff des Termins.
         class_paths (Dict[str, str]): Die konfigurierten Pfade.
+        email (Optional[str]): Die E-Mail-Adresse des Teilnehmers.
+        lastname (Optional[str]): Der Nachname des Teilnehmers.
 
     Returns:
         str: Die gefundene Klasse oder 'Other'.
@@ -225,6 +346,24 @@ def get_class_from_title(title: str, class_paths: Dict[str, str]) -> str:
     for class_name in class_paths.keys():
         if class_name.lower() in title.lower():
             return class_name
+
+    # Keine direkte Übereinstimmung im Betreff -> Klassifikator verwenden
+    clf = Tools.classifier()
+    if clf:
+        try:
+            res = clf.predict_text(title)
+            pred_cls = res.get("prediction")
+            if pred_cls and pred_cls in class_paths:
+                # Wir prüfen, ob im vorhergesagten Klassenordner Mails vom Teilnehmer existieren
+                pred_base_path = Path(class_paths[pred_cls])
+                pred_student_dir = find_student_folder(pred_base_path, lastname) if lastname else None
+
+                if pred_student_dir and check_folder_contains_participant_emails(pred_student_dir, email, lastname):
+                    return pred_cls
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"Fehler bei der Klassifizierung des Betreffs: {e}")
+
     return "Other"
 
 
@@ -255,10 +394,10 @@ def load_student_details(evt: gr.SelectData, df: pd.DataFrame) -> Tuple[str, str
     title = df.iloc[row_idx]["Betreff"]
     participant_info = df.iloc[row_idx]["Teilnehmer"]
 
-    class_paths = get_class_paths()
-    cls = get_class_from_title(title, class_paths)
     lastname = extract_lastname(participant_info)
     email = extract_email(participant_info)
+    class_paths = get_class_paths()
+    cls = get_class_from_title(title, class_paths, email, lastname)
 
     student_dir = None
     if cls in class_paths:
