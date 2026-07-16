@@ -101,12 +101,6 @@ python scripts/build_knowledge_graph.py
 
 ## Appointments, Colloquia & Analytics
 
-### Appointment Management (Gradio GUI)
-Opens a Gradio user interface for visualizing and quickly managing weekly appointments based on `data/appointments.md`.
-```bash
-python scripts/appointment_gui.py
-```
-
 ### Create Colloquium Configuration
 Creates JSON configuration files for the `colloquium-protocol-creator`.
 ```bash
