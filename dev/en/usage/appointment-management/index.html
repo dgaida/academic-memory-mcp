@@ -2412,7 +2412,7 @@
     The determination is based on the subject (title) of the calendar appointment:  <ul>
 <li>The system reads the configured email classes and their paths from <code>classifier_paths.yaml</code>.  </li>
 <li>It matches the subject of the appointment with the class names (case-insensitive). If the name of a class (e.g., "Bachelor Thesis" or "Project") appears in the subject, that email class is assigned to the appointment.  </li>
-<li>If no match is found in the subject, the system falls back to the default class <code>"Other"</code>.  </li>
+<li>If no match is found in the subject, the subject is passed to the EmailClassifier model, which determines the class. If no emails from the appointment participant are found in the predicted class folder, the system falls back to the default class <code>"Other"</code>.</li>
 </ul>
 </li>
 </ul>
