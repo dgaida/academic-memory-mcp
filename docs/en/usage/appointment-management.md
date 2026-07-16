@@ -23,7 +23,7 @@ python scripts/appointment_gui.py
         The determination is based on the subject (title) of the calendar appointment:  
         *   The system reads the configured email classes and their paths from `classifier_paths.yaml`.  
         *   It matches the subject of the appointment with the class names (case-insensitive). If the name of a class (e.g., "Bachelor Thesis" or "Project") appears in the subject, that email class is assigned to the appointment.  
-        *   If no match is found in the subject, the system falls back to the default class `"Other"`.  
+        *   If no match is found in the subject, the subject is passed to the EmailClassifier model, which determines the class. If no emails from the appointment participant are found in the predicted class folder, the system falls back to the default class `"Other"`.
 *   **Summaries:** Displays the AI-generated conversation summary (`.emails_summary.md`) of the found main student directory.  
     *   **Does the GUI create the summary if it doesn't exist yet?**  
         Yes! If no summary exists yet for the found student folder or if the existing one is outdated (i.e., if the file date of `.emails_summary.md` is older than the newest email file `.msg` / `.eml` in the folder), the GUI automatically generates or updates the summary in the background. To do this, it reads the entire email history of the student and uses the local LLM to generate an up-to-date, structured summary, which is then saved as `.emails_summary.md` in the student's folder.  

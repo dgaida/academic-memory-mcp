@@ -23,7 +23,7 @@ python scripts/appointment_gui.py
         Die Bestimmung erfolgt über den Betreff (Titel) des Kalendertermins:  
         *   Das System liest die konfigurierten E-Mail-Klassen und deren Pfade aus der Datei `classifier_paths.yaml` ein.  
         *   Es gleicht den Betreff des Termins mit den Klassennamen ab (Groß-/Kleinschreibung wird ignoriert). Wenn der Name einer Klasse (z. B. "Bachelor Thesis" oder "Projekt") im Betreff vorkommt, wird dem Termin diese E-Mail-Klasse zugewiesen.  
-        *   Wird keine Übereinstimmung im Betreff gefunden, fällt das System auf die Standardklasse `"Other"` zurück.  
+        *   Wird keine Übereinstimmung im Betreff gefunden, dann soll der Betreff an das Emailclassifier Modell übergeben werden und dieses entscheidet über die Klasse. Wenn in dem vorhergesagten Klassenordner keine Mails von dem Teilnehmer des Termins gefunden werden, dann fällt das System auf die Standardklasse `"Other"` zurück.
 *   **Zusammenfassungen:** Zeigt die KI-generierte Konversationszusammenfassung (`.emails_summary.md`) des gefundenen studentischen Hauptordners an.  
     *   **Erstellt die GUI die Zusammenfassung, falls es noch keine gibt?**  
         Ja! Wenn für den gefundenen Studentenordner noch keine Zusammenfassung existiert oder diese veraltet ist (d. h. wenn das Dateidatum von `.emails_summary.md` älter ist als die neueste E-Mail-Datei `.msg` / `.eml` im Ordner), generiert bzw. aktualisiert die GUI die Zusammenfassung automatisch im Hintergrund. Dazu liest sie die gesamte E-Mail-Historie des Studenten ein und lässt über das lokale LLM eine aktuelle, strukturierte Zusammenfassung generieren, die als `.emails_summary.md` im Studentenordner gespeichert wird.  

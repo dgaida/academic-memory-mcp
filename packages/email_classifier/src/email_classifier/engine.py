@@ -268,6 +268,51 @@ class EmailClassifier:
             "confidence": float(np.max(y_prob))
         }
 
+    def predict_text(self, text: str) -> Dict[str, Any]:
+        """Klassifiziert einen einzelnen Text (z.B. den Betreff).
+
+        Args:
+            text (str): Der zu klassifizierende Text.
+
+        Returns:
+            Dict[str, Any]: Ein Dictionary mit der vorhergesagten Klasse und Wahrscheinlichkeiten.
+        """
+        if not self.is_trained:
+            raise RuntimeError("Modell muss zuerst trainiert oder geladen werden.")
+
+        if self.method == "transformer":
+            formatted_text = f"SUBJECT: {text} | ATTACHMENTS: None [SEP] "
+            device = get_device()
+            inputs = self.tokenizer(formatted_text, return_tensors="pt", padding=True, truncation=True, max_length=512)
+            inputs = {k: v.to(device) for k, v in inputs.items()}
+            self.classifier.to(device)
+            self.classifier.eval()
+            with torch.no_grad():
+                outputs = self.classifier(inputs["input_ids"], inputs["attention_mask"])
+                probs = torch.softmax(outputs, dim=1)[0]
+                y_pred = torch.argmax(probs).item()
+                y_prob = probs.cpu().numpy()
+        else:
+            if not text:
+                raise ValueError("Text darf nicht leer sein.")
+            X = self.get_features([text], train=False)
+            y_pred = self.classifier.predict(X)[0]
+            y_prob = self.classifier.predict_proba(X)[0]
+
+        label = str(self.label_encoder.inverse_transform([int(y_pred)])[0])
+
+        # Mapping von Label zu Wahrscheinlichkeit
+        probs = {
+            str(self.label_encoder.inverse_transform([i])[0]): float(prob)
+            for i, prob in enumerate(y_prob)
+        }
+
+        return {
+            "prediction": label,
+            "probabilities": probs,
+            "confidence": float(np.max(y_prob))
+        }
+
     def save(self, model_path: Union[str, Path]) -> None:
         """Speichert das Modell in einer Datei.
 
