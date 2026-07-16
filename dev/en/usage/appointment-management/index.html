@@ -2400,31 +2400,31 @@
 <h2 id="features">Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Weekly Overview:</strong> Displays all appointments for the current week, read from <code>data/appointments.md</code>.  </li>
-<li><strong>Student Context:</strong> Selecting an appointment automatically searches for the matching student folder.<ul>
-<li><strong>How does it find the folder?</strong>
-    The system first extracts the participant's name (or lastname) and email address from the appointment's participant information. Then, it searches for the folder based on the email class and the extracted lastname:<ol>
-<li><strong>Name Extraction:</strong> The lastname is filtered from the participant string using regular expressions and text patterns (e.g., "Mustermann" from <code>max.mustermann@th-koeln.de</code> or "Mustermann" from <code>Mustermann Max &lt;... &gt;</code>).</li>
-<li><strong>Class Path Mapping:</strong> Each email class (e.g., <em>Bachelor Thesis</em>, <em>Project</em>) has a defined base path in the <code>classifier_paths.yaml</code> configuration. The system determines the class of the appointment (see below) and first checks the corresponding base path for a folder containing the student's lastname.</li>
-<li><strong>Fallback Search:</strong> If no folder is found in the specific class path (e.g., because the class of the appointment does not match or the folder is located elsewhere), the system searches all other configured base paths for a matching folder containing that lastname.</li>
+<li><strong>Student Context:</strong> Selecting an appointment automatically searches for the matching student folder.  <ul>
+<li><strong>How does it find the folder?</strong><br />
+    The system first extracts the participant's name (or lastname) and email address from the appointment's participant information. Then, it searches for the folder based on the email class and the extracted lastname:  <ol>
+<li><strong>Name Extraction:</strong> The lastname is filtered from the participant string using regular expressions and text patterns (e.g., "Mustermann" from <code>max.mustermann@th-koeln.de</code> or "Mustermann" from <code>Mustermann Max &lt;... &gt;</code>).  </li>
+<li><strong>Class Path Mapping:</strong> Each email class (e.g., <em>Bachelor Thesis</em>, <em>Project</em>) has a defined base path in the <code>classifier_paths.yaml</code> configuration. The system determines the class of the appointment (see below) and first checks the corresponding base path for a folder containing the student's lastname.  </li>
+<li><strong>Fallback Search:</strong> If no folder is found in the specific class path (e.g., because the class of the appointment does not match or the folder is located elsewhere), the system searches all other configured base paths for a matching folder containing that lastname.  </li>
 </ol>
 </li>
-<li><strong>How does the tool know the theme of the appointment / determine the email class?</strong>
-    The determination is based on the subject (title) of the calendar appointment:<ul>
-<li>The system reads the configured email classes and their paths from <code>classifier_paths.yaml</code>.</li>
-<li>It matches the subject of the appointment with the class names (case-insensitive). If the name of a class (e.g., "Bachelor Thesis" or "Project") appears in the subject, that email class is assigned to the appointment.</li>
-<li>If no match is found in the subject, the system falls back to the default class <code>"Other"</code>.</li>
+<li><strong>How does the tool know the theme of the appointment / determine the email class?</strong><br />
+    The determination is based on the subject (title) of the calendar appointment:  <ul>
+<li>The system reads the configured email classes and their paths from <code>classifier_paths.yaml</code>.  </li>
+<li>It matches the subject of the appointment with the class names (case-insensitive). If the name of a class (e.g., "Bachelor Thesis" or "Project") appears in the subject, that email class is assigned to the appointment.  </li>
+<li>If no match is found in the subject, the system falls back to the default class <code>"Other"</code>.  </li>
 </ul>
 </li>
 </ul>
 </li>
-<li><strong>Summaries:</strong> Displays the AI-generated conversation summary (<code>.emails_summary.md</code>) of the found main student directory.<ul>
-<li><strong>Does the GUI create the summary if it doesn't exist yet?</strong>
-    Yes! If no summary exists yet for the found student folder or if the existing one is outdated (i.e., if the file date of <code>.emails_summary.md</code> is older than the newest email file <code>.msg</code> / <code>.eml</code> in the folder), the GUI automatically generates or updates the summary in the background. To do this, it reads the entire email history of the student and uses the local LLM to generate an up-to-date, structured summary, which is then saved as <code>.emails_summary.md</code> in the student's folder.</li>
+<li><strong>Summaries:</strong> Displays the AI-generated conversation summary (<code>.emails_summary.md</code>) of the found main student directory.  <ul>
+<li><strong>Does the GUI create the summary if it doesn't exist yet?</strong><br />
+    Yes! If no summary exists yet for the found student folder or if the existing one is outdated (i.e., if the file date of <code>.emails_summary.md</code> is older than the newest email file <code>.msg</code> / <code>.eml</code> in the folder), the GUI automatically generates or updates the summary in the background. To do this, it reads the entire email history of the student and uses the local LLM to generate an up-to-date, structured summary, which is then saved as <code>.emails_summary.md</code> in the student's folder.  </li>
 </ul>
 </li>
-<li><strong>Student Profiles (Steckbriefe):</strong> Displays the student's current profile (interests, previous topics, preferred salutation, etc.).<ul>
-<li><strong>Is this also created by the GUI if it doesn't exist yet?</strong>
-    Yes! When an appointment is selected and the participant's email address is known, the system calls the <code>PersonProfiler</code>. This checks whether a profile already exists under <code>D:\Steckbriefe\&lt;email&gt;.md</code> (or alternatively in the local folder <code>Steckbriefe/</code>). If no profile exists yet, the profiler searches for all emails from this person (up to 100 of the newest emails from all archive paths), incorporates information from the Knowledge Graph (e.g., roles, affiliations), determines the preferred salutation ("Du" or "Sie") through LLM analysis of recent direct emails, and automatically generates a new, detailed profile in Markdown. If a profile already exists, it is also automatically updated when new emails are found.</li>
+<li><strong>Student Profiles (Steckbriefe):</strong> Displays the student's current profile (interests, previous topics, preferred salutation, etc.).  <ul>
+<li><strong>Is this also created by the GUI if it doesn't exist yet?</strong><br />
+    Yes! When an appointment is selected and the participant's email address is known, the system calls the <code>PersonProfiler</code>. This checks whether a profile already exists under <code>D:\Steckbriefe\&lt;email&gt;.md</code> (or alternatively in the local folder <code>Steckbriefe/</code>). If no profile exists yet, the profiler searches for all emails from this person (up to 100 of the newest emails from all archive paths), incorporates information from the Knowledge Graph (e.g., roles, affiliations), determines the preferred salutation ("Du" or "Sie") through LLM analysis of recent direct emails, and automatically generates a new, detailed profile in Markdown. If a profile already exists, it is also automatically updated when new emails are found.  </li>
 </ul>
 </li>
 <li><strong>File Explorer:</strong> Allows direct access to all files in the student's folder (e.g., exposés, drafts).  </li>
