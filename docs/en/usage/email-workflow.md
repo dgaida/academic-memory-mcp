@@ -79,9 +79,9 @@ This tab is optimized for bulk processing of emails where the automatic classifi
 - **List View:** Separate display of `Inbox` and `SentItems`.  
 - **Remove:** Emails that require closer inspection can be moved to the second tab by selecting their index.  
 - **Attachments:** For each email, you can already select here whether attachments should be saved during archiving.  
-  - **Storage Location & Path of Attachments:** If the option is selected, attachments are automatically saved directly in the student's main directory (`Semester / Lastname /`) (which is the parent directory of the archived email folder).  
-  - *Example:* If an email is archived as `Bachelor Thesis` for the student `Mustermann` in the semester `2023_24_WS` (email path: `2023_24_WS/Mustermann/Inbox/20231120_143000_Expose.msg`), the attachment (e.g., `Expose_Max_Mustermann.pdf`) will be saved in the following folder:  
-    `2023_24_WS/Mustermann/Expose_Max_Mustermann.pdf`  
+    - **Storage Location & Path of Attachments:** If the option is selected, attachments are automatically saved directly in the student's main directory (`Semester / Lastname /`) (which is the parent directory of the archived email folder).
+        - *Example:* If an email is archived as `Bachelor Thesis` for the student `Mustermann` in the semester `2023_24_WS` (email path: `2023_24_WS/Mustermann/Inbox/20231120_143000_Expose.msg`), the attachment (e.g., `Expose_Max_Mustermann.pdf`) will be saved in the following folder:
+          `2023_24_WS/Mustermann/Expose_Max_Mustermann.pdf`
 - **Archive:** All remaining emails in the lists are moved directly to their respective archive paths with one click.  
 
 ### Tab 2: Detail View & Processing
