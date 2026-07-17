@@ -809,14 +809,17 @@ AKTUELLE E-MAIL:
 {mail_content}{forced_instr}
 
 WICHTIGE ANWEISUNGEN:
-- Wenn eine Terminbestätigung vorliegt: Rufe SOFORT das Tool 'manage_calendar_appointment' auf. Falls es ein Kolloquium ist, setze is_colloquium=True. Gib KEINE textuelle Analyse oder Erklärung ab. Antworte EXAKT mit 'APPOINTMENT_BOOKED' erst NACHDEM das Tool 'ERFOLG' gemeldet hat.
-- Wenn eine Terminanfrage vorliegt: Rufe SOFORT das Tool 'get_appointment_slots' auf. Gib KEINE textuelle Analyse oder Erklärung ab.
+- Wenn eine Terminbestätigung vorliegt:
+  1. Wende das Chain-of-Thought (Schritt-für-Schritt-Denken) laut Skill an.
+  2. Gib den Denkprozess und die JSON-Struktur deines Denkprozesses aus, um das korrekte Zieldatum logisch abzuleiten.
+  3. Rufe danach das Tool 'manage_calendar_appointment' auf. Falls es ein Kolloquium ist, setze is_colloquium=True.
+  4. Antworte EXAKT mit 'APPOINTMENT_BOOKED' erst NACHDEM das Tool 'ERFOLG' gemeldet hat.
+- Wenn eine Terminanfrage vorliegt: Rufe das Tool 'get_appointment_slots' auf.
 - Wenn KEIN Bezug zu Terminen vorliegt: Antworte EXAKT mit 'NO_APPOINTMENT_RELEVANCE'.
 
 VERBOTE:
-- Antworte NIEMALS mit einer Analyse des Skills.
-- Antworte NIEMALS mit Sätzen wie "Basierend auf der Analyse...".
-- Wenn ein Tool-Call nötig ist, darf deine Antwort NUR aus dem Tool-Call bestehen.
+- Antworte NIEMALS mit einer Analyse des Skills ohne konkrete Tool-Aktion.
+- Verwende NIEMALS das Sendedatum der vorherigen E-Mail im Mail-Header (z.B. 16.07.2026) als Terminzeitpunkt, sondern nutze den Wochentagsabgleich gemäß des Skills.
 """
             try:
                 content = self.agent.chat(
