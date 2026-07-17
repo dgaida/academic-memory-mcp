@@ -2,6 +2,12 @@
 
 Das MCP University Memory System kann auf verschiedene Arten installiert werden.
 
+## Voraussetzungen
+
+- Python 3.10 oder höher
+- Ollama (für lokale LLM-Unterstützung)
+- Outlook (für die Arbeit mit .msg Dateien und Kalenderintegration unter Windows)
+
 ## Standard Installation (User)
 
 Für die normale Nutzung empfehlen wir die Installation in einer virtuellen Umgebung:

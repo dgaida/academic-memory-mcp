@@ -101,12 +101,6 @@ python scripts/build_knowledge_graph.py
 
 ## Termine, Kolloquien & Sonstiges
 
-### Termin-Verwaltung (Gradio GUI)
-Öffnet eine Gradio-Benutzeroberfläche zur Visualisierung und schnellen Verwaltung von wöchentlichen Terminen basierend auf `data/appointments.md`.
-```bash
-python scripts/appointment_gui.py
-```
-
 ### Kolloquiums-Konfiguration erstellen
 Erstellt JSON-Konfigurationsdateien für den `colloquium-protocol-creator`.
 ```bash
