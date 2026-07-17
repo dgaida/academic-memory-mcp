@@ -2585,14 +2585,14 @@
 <h2 id="1-useryaml">1. user.yaml<a class="headerlink" href="#1-useryaml" title="Permanent link">&para;</a></h2>
 <p>Defines the personal data of the user (typically the professor or institute director). This data is used for several core functions of the system:</p>
 <ul>
-<li><strong><code>name</code></strong>: Full name of the user (e.g., <code>"Daniel Gaida"</code>). This name is used for:</li>
-<li>Automatic creation and placement of email signatures and greetings in draft replies.</li>
-<li>Anonymization of personal data if cloud-based LLMs are used.</li>
-<li><strong><code>email</code></strong>: The <strong>primary university email address</strong> (e.g., <code>"daniel.gaida@th-koeln.de"</code>). This setting is <strong>absolutely essential</strong> as the Outlook macro and backend scripts use this address to locate your Outlook mailbox on the system to export and process emails from it. Without the correct primary address, the mailbox in Outlook cannot be identified.</li>
-<li><strong><code>emails</code></strong>: A list of all your email addresses and aliases (e.g., <code>["daniel.gaida@th-koeln.de", "daniel.gaida@fh-koeln.de"]</code>). The system uses this list to:</li>
-<li>Recognize which emails were sent by you (e.g., in the <code>SentItems</code> folder).</li>
-<li>Distinguish your own sent emails from incoming emails to prevent infinite loops during processing.</li>
-<li>Ensure that emails sent to alternative aliases are also correctly assigned to your profile and processed.</li>
+<li><strong><code>name</code></strong>: Full name of the user (e.g., <code>"Daniel Gaida"</code>). This name is used for:  </li>
+<li>Automatic creation and placement of email signatures and greetings in draft replies.  </li>
+<li>Anonymization of personal data if cloud-based LLMs are used.  </li>
+<li><strong><code>email</code></strong>: The <strong>primary university email address</strong> (e.g., <code>"daniel.gaida@th-koeln.de"</code>). This setting is <strong>absolutely essential</strong> as the Outlook macro and backend scripts use this address to locate your Outlook mailbox on the system to export and process emails from it. Without the correct primary address, the mailbox in Outlook cannot be identified.  </li>
+<li><strong><code>emails</code></strong>: A list of all your email addresses and aliases (e.g., <code>["daniel.gaida@th-koeln.de", "daniel.gaida@fh-koeln.de"]</code>). The system uses this list to:  </li>
+<li>Recognize which emails were sent by you (e.g., in the <code>SentItems</code> folder).  </li>
+<li>Distinguish your own sent emails from incoming emails to prevent infinite loops during processing.  </li>
+<li>Ensure that emails sent to alternative aliases are also correctly assigned to your profile and processed.  </li>
 </ul>
 <table>
 <thead>
@@ -2781,9 +2781,9 @@
 <h2 id="6-ontologyyaml">6. ontology.yaml<a class="headerlink" href="#6-ontologyyaml" title="Permanent link">&para;</a></h2>
 <p>Defines the schema of the semantic knowledge graph (node types, relation types, and edge priorities). This controls how alias names are learned and how edge conflicts are resolved.</p>
 <ul>
-<li><code>node_types</code>: Valid entity types (e.g., Student, Module, Department).</li>
-<li><code>edge_types</code>: Valid relation types (e.g., writes BachelorThesis, is primary examiner).</li>
-<li><code>edge_priorities</code>: Defines the priority of edges, so that higher-value relationships (e.g., "completed BachelorThesis") automatically overwrite or replace preceding lower-value relationships ("writing BachelorThesis") in the graph.</li>
+<li><code>node_types</code>: Valid entity types (e.g., Student, Module, Department).  </li>
+<li><code>edge_types</code>: Valid relation types (e.g., writes BachelorThesis, is primary examiner).  </li>
+<li><code>edge_priorities</code>: Defines the priority of edges, so that higher-value relationships (e.g., "completed BachelorThesis") automatically overwrite or replace preceding lower-value relationships ("writing BachelorThesis") in the graph.  </li>
 </ul>
 <hr />
 <h2 id="7-secrets-and-environment-variables">7. Secrets and Environment Variables<a class="headerlink" href="#7-secrets-and-environment-variables" title="Permanent link">&para;</a></h2>

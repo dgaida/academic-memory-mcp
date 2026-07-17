@@ -2437,25 +2437,25 @@
 <h3 id="2-zwingend-erforderliche-anpassungen">2. Zwingend erforderliche Anpassungen<a class="headerlink" href="#2-zwingend-erforderliche-anpassungen" title="Permanent link">&para;</a></h3>
 <p>Folgende Konfigurationsdateien müssen Sie konkret anpassen, damit das System einsatzbereit ist:</p>
 <ol>
-<li><strong><code>config/user.yaml</code> (Persönliche Benutzerdaten):</strong>
-   Öffnen Sie diese Datei und passen Sie folgende Einträge an:</li>
-<li><strong><code>name</code></strong>: Ihr vollständiger Name (wird u. a. für die automatische Generierung von E-Mail-Signaturen verwendet).</li>
-<li><strong><code>email</code></strong>: Ihre <strong>primäre Hochschul-E-Mail-Adresse</strong>. Diese ist essenziell, da das Outlook-Makro und die Backend-Skripte diese Adresse verwenden, um Ihr Outlook-Postfach auf dem System zu lokalisieren und E-Mails daraus zu exportieren.</li>
-<li><strong><code>emails</code></strong>: Eine Liste all Ihrer E-Mail-Adressen und Aliase (z. B. falls Sie mehrere Hochschul-Adressen besitzen). Das System nutzt diese Liste, um eigene gesendete E-Mails zu identifizieren.</li>
+<li><strong><code>config/user.yaml</code> (Persönliche Benutzerdaten):</strong><br />
+   Öffnen Sie diese Datei und passen Sie folgende Einträge an:  </li>
+<li><strong><code>name</code></strong>: Ihr vollständiger Name (wird u. a. für die automatische Generierung von E-Mail-Signaturen verwendet).  </li>
+<li><strong><code>email</code></strong>: Ihre <strong>primäre Hochschul-E-Mail-Adresse</strong>. Diese ist essenziell, da das Outlook-Makro und die Backend-Skripte diese Adresse verwenden, um Ihr Outlook-Postfach auf dem System zu lokalisieren und E-Mails daraus zu exportieren.  </li>
+<li><strong><code>emails</code></strong>: Eine Liste all Ihrer E-Mail-Adressen und Aliase (z. B. falls Sie mehrere Hochschul-Adressen besitzen). Das System nutzt diese Liste, um eigene gesendete E-Mails zu identifizieren.  </li>
 </ol>
 <p><em>Erklärungen &amp; Optionen:</em> Siehe <strong><a href="../configuration/#1-useryaml">user.yaml in der Konfiguration</a></strong>.</p>
 <ol>
-<li><strong><code>config/folders.yaml</code> (Zu überwachende Verzeichnisse):</strong>
+<li><strong><code>config/folders.yaml</code> (Zu überwachende Verzeichnisse):</strong><br />
    Diese Datei existiert standardmäßig nicht als Template, sondern muss von Ihnen neu angelegt werden, falls Sie die Indexierungsfunktion (<code>mcp-uni memory update</code> bzw. <code>python scripts/index_memory.py</code>) nutzen möchten. Erstellen Sie die Datei <code>config/folders.yaml</code> und tragen Sie die gewünschten Pfade ein:
    <div class="language-yaml highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">folders</span><span class="p">:</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;D:/TH_Koeln/Lehre/Module&quot;</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;D:/TH_Koeln/PAV/Studierende&quot;</span>
 </code></pre></div></li>
-<li><strong><code>folders</code></strong>: Liste von absoluten Pfaden auf Ihrer Festplatte, die vom Crawler überwacht und in die Vektordatenbank indiziert werden sollen.</li>
+<li><strong><code>folders</code></strong>: Liste von absoluten Pfaden auf Ihrer Festplatte, die vom Crawler überwacht und in die Vektordatenbank indiziert werden sollen.  </li>
 </ol>
 <p><em>Erklärungen &amp; Optionen:</em> Siehe <strong><a href="../configuration/#2-foldersyaml">folders.yaml in der Konfiguration</a></strong>.</p>
 <ol>
-<li><strong><code>config/classifier_paths.yaml</code> (Archivierungspfade):</strong>
+<li><strong><code>config/classifier_paths.yaml</code> (Archivierungspfade):</strong><br />
    Öffnen Sie diese Datei und konfigurieren Sie die physischen Zielordner auf Ihrer Festplatte für die jeweiligen E-Mail-Klassen (z. B. <code>BachelorThesis</code>, <code>MasterThesis</code>, <code>Other</code>):
    <div class="language-yaml highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nt">class_paths</span><span class="p">:</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">BachelorThesis</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;D:/TH_Koeln/PAV/Studierende/Bachelorarbeit&quot;</span>

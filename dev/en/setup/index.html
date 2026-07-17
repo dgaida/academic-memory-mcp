@@ -2439,25 +2439,25 @@
 <h3 id="2-mandatory-customizations">2. Mandatory Customizations<a class="headerlink" href="#2-mandatory-customizations" title="Permanent link">&para;</a></h3>
 <p>You must explicitly customize the following configuration files for the system to be functional:</p>
 <ol>
-<li><strong><code>config/user.yaml</code> (Personal User Data):</strong>
-   Open this file and adjust the following entries:</li>
-<li><strong><code>name</code></strong>: Your full name (used, among other things, for automatic generation of email signatures).</li>
-<li><strong><code>email</code></strong>: Your <strong>primary university email address</strong>. This is essential as the Outlook macro and backend scripts use this address to locate your Outlook mailbox on the system and export emails from it.</li>
-<li><strong><code>emails</code></strong>: A list of all your email addresses and aliases (e.g., if you have multiple university addresses). The system uses this list to identify your own sent emails.</li>
+<li><strong><code>config/user.yaml</code> (Personal User Data):</strong><br />
+   Open this file and adjust the following entries:  </li>
+<li><strong><code>name</code></strong>: Your full name (used, among other things, for automatic generation of email signatures).  </li>
+<li><strong><code>email</code></strong>: Your <strong>primary university email address</strong>. This is essential as the Outlook macro and backend scripts use this address to locate your Outlook mailbox on the system and export emails from it.  </li>
+<li><strong><code>emails</code></strong>: A list of all your email addresses and aliases (e.g., if you have multiple university addresses). The system uses this list to identify your own sent emails.  </li>
 </ol>
 <p><em>Explanations &amp; Options:</em> See <strong><a href="../configuration/#1-useryaml">user.yaml in Configuration</a></strong>.</p>
 <ol>
-<li><strong><code>config/folders.yaml</code> (Directories to Monitor):</strong>
+<li><strong><code>config/folders.yaml</code> (Directories to Monitor):</strong><br />
    This file does not exist as a template by default, but must be created by you if you want to use the indexing function (<code>mcp-uni memory update</code> or <code>python scripts/index_memory.py</code>). Create the file <code>config/folders.yaml</code> and enter the desired paths:
    <div class="language-yaml highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">folders</span><span class="p">:</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;/path/to/teaching/modules&quot;</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;/path/to/student/files&quot;</span>
 </code></pre></div></li>
-<li><strong><code>folders</code></strong>: A list of absolute paths on your hard drive to be monitored by the crawler and indexed into the vector database.</li>
+<li><strong><code>folders</code></strong>: A list of absolute paths on your hard drive to be monitored by the crawler and indexed into the vector database.  </li>
 </ol>
 <p><em>Explanations &amp; Options:</em> See <strong><a href="../configuration/#2-foldersyaml">folders.yaml in Configuration</a></strong>.</p>
 <ol>
-<li><strong><code>config/classifier_paths.yaml</code> (Archiving Paths):</strong>
+<li><strong><code>config/classifier_paths.yaml</code> (Archiving Paths):</strong><br />
    Open this file and configure the physical target folders on your hard drive for the respective email classes (e.g., <code>BachelorThesis</code>, <code>MasterThesis</code>, <code>Other</code>):
    <div class="language-yaml highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nt">class_paths</span><span class="p">:</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">BachelorThesis</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/path/to/student/bachelor-thesis&quot;</span>

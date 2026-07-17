@@ -2583,14 +2583,14 @@
 <h2 id="1-useryaml">1. user.yaml<a class="headerlink" href="#1-useryaml" title="Permanent link">&para;</a></h2>
 <p>Definiert die persönlichen Daten des Benutzers (meist des Professors oder Institutsleiters). Diese Daten werden für verschiedene Kernfunktionen des Systems genutzt:</p>
 <ul>
-<li><strong><code>name</code></strong>: Vollständiger Name des Benutzers (z. B. <code>"Daniel Gaida"</code>). Dieser Name wird verwendet für:</li>
-<li>Die automatische Erstellung und Platzierung von E-Mail-Signaturen und Grußformeln in Antwort-Entwürfen.</li>
-<li>Die Anonymisierung von personenbezogenen Daten, falls Cloud-basierte LLMs verwendet werden.</li>
-<li><strong><code>email</code></strong>: Die <strong>primäre Hochschul-E-Mail-Adresse</strong> (z. B. <code>"daniel.gaida@th-koeln.de"</code>). Diese Angabe ist <strong>absolut essenziell</strong>, da das Outlook-Makro und die Backend-Skripte diese Adresse verwenden, um Ihr Outlook-Postfach auf dem System zu lokalisieren, um E-Mails daraus zu exportieren und zu verarbeiten. Ohne die korrekte primäre Adresse kann das Postfach in Outlook nicht identifiziert werden.</li>
-<li><strong><code>emails</code></strong>: Eine Liste all Ihrer E-Mail-Adressen und Aliase (z. B. <code>["daniel.gaida@th-koeln.de", "daniel.gaida@fh-koeln.de"]</code>). Das System nutzt diese Liste, um:</li>
-<li>Zu erkennen, welche E-Mails von Ihnen selbst gesendet wurden (z. B. im <code>SentItems</code>-Ordner).</li>
-<li>Eigene gesendete E-Mails von eingehenden E-Mails zu unterscheiden, um Endlosschleifen bei der Verarbeitung zu verhindern.</li>
-<li>Sicherzustellen, dass E-Mails an alternative Aliase ebenfalls korrekt Ihrem Profil zugeordnet und verarbeitet werden.</li>
+<li><strong><code>name</code></strong>: Vollständiger Name des Benutzers (z. B. <code>"Daniel Gaida"</code>). Dieser Name wird verwendet für:  </li>
+<li>Die automatische Erstellung und Platzierung von E-Mail-Signaturen und Grußformeln in Antwort-Entwürfen.  </li>
+<li>Die Anonymisierung von personenbezogenen Daten, falls Cloud-basierte LLMs verwendet werden.  </li>
+<li><strong><code>email</code></strong>: Die <strong>primäre Hochschul-E-Mail-Adresse</strong> (z. B. <code>"daniel.gaida@th-koeln.de"</code>). Diese Angabe ist <strong>absolut essenziell</strong>, da das Outlook-Makro und die Backend-Skripte diese Adresse verwenden, um Ihr Outlook-Postfach auf dem System zu lokalisieren, um E-Mails daraus zu exportieren und zu verarbeiten. Ohne die korrekte primäre Adresse kann das Postfach in Outlook nicht identifiziert werden.  </li>
+<li><strong><code>emails</code></strong>: Eine Liste all Ihrer E-Mail-Adressen und Aliase (z. B. <code>["daniel.gaida@th-koeln.de", "daniel.gaida@fh-koeln.de"]</code>). Das System nutzt diese Liste, um:  </li>
+<li>Zu erkennen, welche E-Mails von Ihnen selbst gesendet wurden (z. B. im <code>SentItems</code>-Ordner).  </li>
+<li>Eigene gesendete E-Mails von eingehenden E-Mails zu unterscheiden, um Endlosschleifen bei der Verarbeitung zu verhindern.  </li>
+<li>Sicherzustellen, dass E-Mails an alternative Aliase ebenfalls korrekt Ihrem Profil zugeordnet und verarbeitet werden.  </li>
 </ul>
 <table>
 <thead>
