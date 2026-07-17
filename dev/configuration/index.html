@@ -2581,7 +2581,17 @@
 <p>Das MCP University Memory System wird über Konfigurationsdateien im Verzeichnis <code>config/</code> sowie Umgebungsvariablen gesteuert. Diese Seite dient als zentrale Referenz für alle Einstellungen.</p>
 <hr />
 <h2 id="1-useryaml">1. user.yaml<a class="headerlink" href="#1-useryaml" title="Permanent link">&para;</a></h2>
-<p>Definiert die persönlichen Daten des Benutzers (meist des Professors oder Institutsleiters). Diese Daten werden für die Anonymisierung (bei Cloud-LLMs), Kalenderbuchungen, E-Mail-Sortierung und Signatur-Generierung verwendet.</p>
+<p>Definiert die persönlichen Daten des Benutzers (meist des Professors oder Institutsleiters). Diese Daten werden für verschiedene Kernfunktionen des Systems genutzt:</p>
+<ul>
+<li><strong><code>name</code></strong>: Vollständiger Name des Benutzers (z. B. <code>"Daniel Gaida"</code>). Dieser Name wird verwendet für:</li>
+<li>Die automatische Erstellung und Platzierung von E-Mail-Signaturen und Grußformeln in Antwort-Entwürfen.</li>
+<li>Die Anonymisierung von personenbezogenen Daten, falls Cloud-basierte LLMs verwendet werden.</li>
+<li><strong><code>email</code></strong>: Die <strong>primäre Hochschul-E-Mail-Adresse</strong> (z. B. <code>"daniel.gaida@th-koeln.de"</code>). Diese Angabe ist <strong>absolut essenziell</strong>, da das Outlook-Makro und die Backend-Skripte diese Adresse verwenden, um Ihr Outlook-Postfach auf dem System zu lokalisieren, um E-Mails daraus zu exportieren und zu verarbeiten. Ohne die korrekte primäre Adresse kann das Postfach in Outlook nicht identifiziert werden.</li>
+<li><strong><code>emails</code></strong>: Eine Liste all Ihrer E-Mail-Adressen und Aliase (z. B. <code>["daniel.gaida@th-koeln.de", "daniel.gaida@fh-koeln.de"]</code>). Das System nutzt diese Liste, um:</li>
+<li>Zu erkennen, welche E-Mails von Ihnen selbst gesendet wurden (z. B. im <code>SentItems</code>-Ordner).</li>
+<li>Eigene gesendete E-Mails von eingehenden E-Mails zu unterscheiden, um Endlosschleifen bei der Verarbeitung zu verhindern.</li>
+<li>Sicherzustellen, dass E-Mails an alternative Aliase ebenfalls korrekt Ihrem Profil zugeordnet und verarbeitet werden.</li>
+</ul>
 <table>
 <thead>
 <tr>
@@ -2593,17 +2603,17 @@
 <tbody>
 <tr>
 <td><code>name</code></td>
-<td>Vollständiger Name für Signaturen</td>
+<td>Vollständiger Name für Signaturen, Anonymisierung und Vorlagen</td>
 <td><code>"Daniel Gaida"</code></td>
 </tr>
 <tr>
 <td><code>email</code></td>
-<td>Primäre Hochschul-E-Mail-Adresse</td>
+<td>Primäre Hochschul-E-Mail-Adresse (wichtig für die Outlook-Postfach-Erkennung)</td>
 <td><code>"daniel.gaida@th-koeln.de"</code></td>
 </tr>
 <tr>
 <td><code>emails</code></td>
-<td>Liste aller eigenen E-Mail-Adressen</td>
+<td>Liste aller eigenen E-Mail-Adressen und Aliase (zur Absender-Erkennung)</td>
 <td><code>["daniel.gaida@th-koeln.de", "prof.gaida@..."]</code></td>
 </tr>
 </tbody>

@@ -1045,28 +1045,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Prerequisites
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Installation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#initial-setup-setup-workflow" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1074,6 +1052,45 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Initial Setup (Setup Workflow)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-prepare-configuration-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Prepare Configuration Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-mandatory-customizations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Mandatory Customizations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-synchronize-student-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Synchronize Student Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2342,28 +2359,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Prerequisites
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Installation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#initial-setup-setup-workflow" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2371,6 +2366,45 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Initial Setup (Setup Workflow)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-prepare-configuration-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Prepare Configuration Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-mandatory-customizations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Mandatory Customizations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-synchronize-student-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Synchronize Student Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2392,46 +2426,51 @@
 
 
 <h1 id="setting-up-the-software">Setting Up the Software<a class="headerlink" href="#setting-up-the-software" title="Permanent link">&para;</a></h1>
-<p>This page describes the necessary steps for the initial setup and installation of the MCP University System.</p>
-<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
-<ul>
-<li>Python 3.10 or higher  </li>
-<li>Ollama (for local LLM support)  </li>
-<li>Outlook (for working with .msg files and calendar integration under Windows)  </li>
-</ul>
-<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
-<ol>
-<li>Clone the repository.  </li>
-<li>Create a virtual environment and install the dependencies:  </li>
-</ol>
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
-</code></pre></div>
-<p>Or use the provided <code>environment.yml</code> with Conda:</p>
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>conda<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>environment.yml
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>conda<span class="w"> </span>activate<span class="w"> </span>mcp-university
-</code></pre></div>
+<p>This page describes the necessary steps for the initial setup of the MCP University System after installation.</p>
+<p>For actual installation instructions and system prerequisites, please refer to the <strong><a href="../installation/">Installation</a></strong> page.</p>
 <h2 id="initial-setup-setup-workflow">Initial Setup (Setup Workflow)<a class="headerlink" href="#initial-setup-setup-workflow" title="Permanent link">&para;</a></h2>
-<p>To get the system up and running, perform the following steps:</p>
+<p>To get the system up and running, you need to prepare and adapt the configuration files. There are three files that you <strong>must</strong> configure. Configuration files that do not absolutely need to be modified (such as <code>models.yaml</code> or <code>ontology.yaml</code>) can be left as they are.</p>
+<h3 id="1-prepare-configuration-files">1. Prepare Configuration Files<a class="headerlink" href="#1-prepare-configuration-files" title="Permanent link">&para;</a></h3>
+<p>First, copy the <code>.example</code> templates in the <code>config/</code> directory:</p>
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>cp<span class="w"> </span>config/user.yaml.example<span class="w"> </span>config/user.yaml
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>cp<span class="w"> </span>config/ontology.yaml.example<span class="w"> </span>config/ontology.yaml
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>cp<span class="w"> </span>config/classifier_paths.yaml.example<span class="w"> </span>config/classifier_paths.yaml
+</code></pre></div>
+<h3 id="2-mandatory-customizations">2. Mandatory Customizations<a class="headerlink" href="#2-mandatory-customizations" title="Permanent link">&para;</a></h3>
+<p>You must explicitly customize the following configuration files for the system to be functional:</p>
 <ol>
-<li>
-<p><strong>Prepare Configuration Files:</strong><br />
-   Copy the <code>.example</code> configuration files in the <code>config/</code> directory:
-   <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>cp<span class="w"> </span>config/user.yaml.example<span class="w"> </span>config/user.yaml
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>cp<span class="w"> </span>config/ontology.yaml.example<span class="w"> </span>config/ontology.yaml
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>cp<span class="w"> </span>config/classifier_paths.yaml.example<span class="w"> </span>config/classifier_paths.yaml
-</code></pre></div></p>
-</li>
-<li>
-<p><strong>Customize User Data:</strong><br />
-   Enter your name and your university email in <code>config/user.yaml</code>.</p>
-</li>
-<li>
-<p><strong>Synchronize Student Data:</strong><br />
-   If you have already created a <code>students.yaml</code> (e.g., via the Outlook macros), synchronize it with the SQLite database:
-   <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>mcp-uni<span class="w"> </span>db<span class="w"> </span>sync-students
-</code></pre></div></p>
-</li>
+<li><strong><code>config/user.yaml</code> (Personal User Data):</strong>
+   Open this file and adjust the following entries:</li>
+<li><strong><code>name</code></strong>: Your full name (used, among other things, for automatic generation of email signatures).</li>
+<li><strong><code>email</code></strong>: Your <strong>primary university email address</strong>. This is essential as the Outlook macro and backend scripts use this address to locate your Outlook mailbox on the system and export emails from it.</li>
+<li><strong><code>emails</code></strong>: A list of all your email addresses and aliases (e.g., if you have multiple university addresses). The system uses this list to identify your own sent emails.</li>
 </ol>
+<p><em>Explanations &amp; Options:</em> See <strong><a href="../configuration/#1-useryaml">user.yaml in Configuration</a></strong>.</p>
+<ol>
+<li><strong><code>config/folders.yaml</code> (Directories to Monitor):</strong>
+   This file does not exist as a template by default, but must be created by you if you want to use the indexing function (<code>mcp-uni memory update</code> or <code>python scripts/index_memory.py</code>). Create the file <code>config/folders.yaml</code> and enter the desired paths:
+   <div class="language-yaml highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">folders</span><span class="p">:</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;/path/to/teaching/modules&quot;</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;/path/to/student/files&quot;</span>
+</code></pre></div></li>
+<li><strong><code>folders</code></strong>: A list of absolute paths on your hard drive to be monitored by the crawler and indexed into the vector database.</li>
+</ol>
+<p><em>Explanations &amp; Options:</em> See <strong><a href="../configuration/#2-foldersyaml">folders.yaml in Configuration</a></strong>.</p>
+<ol>
+<li><strong><code>config/classifier_paths.yaml</code> (Archiving Paths):</strong>
+   Open this file and configure the physical target folders on your hard drive for the respective email classes (e.g., <code>BachelorThesis</code>, <code>MasterThesis</code>, <code>Other</code>):
+   <div class="language-yaml highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nt">class_paths</span><span class="p">:</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">BachelorThesis</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/path/to/student/bachelor-thesis&quot;</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nt">MasterThesis</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/path/to/student/master-thesis&quot;</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="nt">Other</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/path/to/student/other-mails&quot;</span>
+</code></pre></div>
+   This is where the email classifier physically files emails.</li>
+</ol>
+<p><em>Explanations &amp; Options:</em> See <strong><a href="../configuration/#4-classifier_pathsyaml">classifier_paths.yaml in Configuration</a></strong>.</p>
+<h3 id="3-synchronize-student-data">3. Synchronize Student Data<a class="headerlink" href="#3-synchronize-student-data" title="Permanent link">&para;</a></h3>
+<p>If you have already created a <code>students.yaml</code> (e.g., via the Outlook macros), synchronize it with the SQLite database:</p>
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>mcp-uni<span class="w"> </span>db<span class="w"> </span>sync-students
+</code></pre></div>
 <p>A detailed description of all configuration options and the various <code>.yaml</code> files can be found on the <strong><a href="../configuration/">Configuration</a></strong> page.</p>
 
 
