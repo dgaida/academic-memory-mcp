@@ -7,14 +7,14 @@ Das MCP University Memory System wird über Konfigurationsdateien im Verzeichnis
 ## 1. user.yaml
 Definiert die persönlichen Daten des Benutzers (meist des Professors oder Institutsleiters). Diese Daten werden für verschiedene Kernfunktionen des Systems genutzt:
 
-- **`name`**: Vollständiger Name des Benutzers (z. B. `"Daniel Gaida"`). Dieser Name wird verwendet für:
-  - Die automatische Erstellung und Platzierung von E-Mail-Signaturen und Grußformeln in Antwort-Entwürfen.
-  - Die Anonymisierung von personenbezogenen Daten, falls Cloud-basierte LLMs verwendet werden.
-- **`email`**: Die **primäre Hochschul-E-Mail-Adresse** (z. B. `"daniel.gaida@th-koeln.de"`). Diese Angabe ist **absolut essenziell**, da das Outlook-Makro und die Backend-Skripte diese Adresse verwenden, um Ihr Outlook-Postfach auf dem System zu lokalisieren, um E-Mails daraus zu exportieren und zu verarbeiten. Ohne die korrekte primäre Adresse kann das Postfach in Outlook nicht identifiziert werden.
-- **`emails`**: Eine Liste all Ihrer E-Mail-Adressen und Aliase (z. B. `["daniel.gaida@th-koeln.de", "daniel.gaida@fh-koeln.de"]`). Das System nutzt diese Liste, um:
-  - Zu erkennen, welche E-Mails von Ihnen selbst gesendet wurden (z. B. im `SentItems`-Ordner).
-  - Eigene gesendete E-Mails von eingehenden E-Mails zu unterscheiden, um Endlosschleifen bei der Verarbeitung zu verhindern.
-  - Sicherzustellen, dass E-Mails an alternative Aliase ebenfalls korrekt Ihrem Profil zugeordnet und verarbeitet werden.
+- **`name`**: Vollständiger Name des Benutzers (z. B. `"Daniel Gaida"`). Dieser Name wird verwendet für:  
+  - Die automatische Erstellung und Platzierung von E-Mail-Signaturen und Grußformeln in Antwort-Entwürfen.  
+  - Die Anonymisierung von personenbezogenen Daten, falls Cloud-basierte LLMs verwendet werden.  
+- **`email`**: Die **primäre Hochschul-E-Mail-Adresse** (z. B. `"daniel.gaida@th-koeln.de"`). Diese Angabe ist **absolut essenziell**, da das Outlook-Makro und die Backend-Skripte diese Adresse verwenden, um Ihr Outlook-Postfach auf dem System zu lokalisieren, um E-Mails daraus zu exportieren und zu verarbeiten. Ohne die korrekte primäre Adresse kann das Postfach in Outlook nicht identifiziert werden.  
+- **`emails`**: Eine Liste all Ihrer E-Mail-Adressen und Aliase (z. B. `["daniel.gaida@th-koeln.de", "daniel.gaida@fh-koeln.de"]`). Das System nutzt diese Liste, um:  
+  - Zu erkennen, welche E-Mails von Ihnen selbst gesendet wurden (z. B. im `SentItems`-Ordner).  
+  - Eigene gesendete E-Mails von eingehenden E-Mails zu unterscheiden, um Endlosschleifen bei der Verarbeitung zu verhindern.  
+  - Sicherzustellen, dass E-Mails an alternative Aliase ebenfalls korrekt Ihrem Profil zugeordnet und verarbeitet werden.  
 
 | Option | Beschreibung | Beispiel |
 |---|---|---|

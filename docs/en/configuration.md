@@ -7,14 +7,14 @@ The MCP University Memory System is controlled via configuration files in the `c
 ## 1. user.yaml
 Defines the personal data of the user (typically the professor or institute director). This data is used for several core functions of the system:
 
-- **`name`**: Full name of the user (e.g., `"Daniel Gaida"`). This name is used for:
-  - Automatic creation and placement of email signatures and greetings in draft replies.
-  - Anonymization of personal data if cloud-based LLMs are used.
-- **`email`**: The **primary university email address** (e.g., `"daniel.gaida@th-koeln.de"`). This setting is **absolutely essential** as the Outlook macro and backend scripts use this address to locate your Outlook mailbox on the system to export and process emails from it. Without the correct primary address, the mailbox in Outlook cannot be identified.
-- **`emails`**: A list of all your email addresses and aliases (e.g., `["daniel.gaida@th-koeln.de", "daniel.gaida@fh-koeln.de"]`). The system uses this list to:
-  - Recognize which emails were sent by you (e.g., in the `SentItems` folder).
-  - Distinguish your own sent emails from incoming emails to prevent infinite loops during processing.
-  - Ensure that emails sent to alternative aliases are also correctly assigned to your profile and processed.
+- **`name`**: Full name of the user (e.g., `"Daniel Gaida"`). This name is used for:  
+  - Automatic creation and placement of email signatures and greetings in draft replies.  
+  - Anonymization of personal data if cloud-based LLMs are used.  
+- **`email`**: The **primary university email address** (e.g., `"daniel.gaida@th-koeln.de"`). This setting is **absolutely essential** as the Outlook macro and backend scripts use this address to locate your Outlook mailbox on the system to export and process emails from it. Without the correct primary address, the mailbox in Outlook cannot be identified.  
+- **`emails`**: A list of all your email addresses and aliases (e.g., `["daniel.gaida@th-koeln.de", "daniel.gaida@fh-koeln.de"]`). The system uses this list to:  
+  - Recognize which emails were sent by you (e.g., in the `SentItems` folder).  
+  - Distinguish your own sent emails from incoming emails to prevent infinite loops during processing.  
+  - Ensure that emails sent to alternative aliases are also correctly assigned to your profile and processed.  
 
 | Option | Description | Example |
 |---|---|---|
@@ -130,9 +130,9 @@ test_path: "data/classifier/test"
 ## 6. ontology.yaml
 Defines the schema of the semantic knowledge graph (node types, relation types, and edge priorities). This controls how alias names are learned and how edge conflicts are resolved.
 
-*   `node_types`: Valid entity types (e.g., Student, Module, Department).
-*   `edge_types`: Valid relation types (e.g., writes BachelorThesis, is primary examiner).
-*   `edge_priorities`: Defines the priority of edges, so that higher-value relationships (e.g., "completed BachelorThesis") automatically overwrite or replace preceding lower-value relationships ("writing BachelorThesis") in the graph.
+*   `node_types`: Valid entity types (e.g., Student, Module, Department).  
+*   `edge_types`: Valid relation types (e.g., writes BachelorThesis, is primary examiner).  
+*   `edge_priorities`: Defines the priority of edges, so that higher-value relationships (e.g., "completed BachelorThesis") automatically overwrite or replace preceding lower-value relationships ("writing BachelorThesis") in the graph.  
 
 ---
 
