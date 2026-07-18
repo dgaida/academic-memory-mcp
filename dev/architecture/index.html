@@ -1086,7 +1086,7 @@
 
     subgraph "Intelligence Layer"
         C --&gt; S[Summarizer]
-        S --&gt; LLM[Ollama / gemma2]
+        S --&gt; LLM[Ollama / gemma4:e2b]
         CL[Email Classifier] --&gt; P3
     end
 
