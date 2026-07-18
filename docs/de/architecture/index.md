@@ -17,7 +17,7 @@ graph TD
 
     subgraph "Intelligence Layer"
         C --> S[Summarizer]
-        S --> LLM[Ollama / gemma2]
+        S --> LLM[Ollama / gemma4:e2b]
         CL[Email Classifier] --> P3
     end
 
