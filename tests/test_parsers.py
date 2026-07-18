@@ -1,10 +1,22 @@
 """Tests für die Parser des MCP University Systems."""
+import sys
+import importlib
+from pathlib import Path
 from unittest.mock import MagicMock, patch
+import mcp_university.parser.pdf_parser
 from mcp_university.parser.pdf_parser import PDFParser
 from mcp_university.parser.mail_parser import MailParser
 
-def test_pdf_parser_docling(tmp_path):
-    """Testet den PDFParser mit docling als Fallback."""
+
+def test_pdf_parser_docling(tmp_path: Path) -> None:
+    """Testet den PDFParser mit docling als Fallback.
+
+    Args:
+        tmp_path: Temporärer Pfad für Test-Dateien.
+
+    Returns:
+        None
+    """
     cache_dir = tmp_path / "cache"
 
     with patch("mcp_university.parser.pdf_parser.DocumentConverter") as mock_converter_class, \
@@ -31,8 +43,16 @@ def test_pdf_parser_docling(tmp_path):
         assert content == "Parsed docling content"
         mock_converter.convert.assert_called_once_with(str(pdf_file), max_num_pages=3)
 
-def test_mail_parser_msg_handling(tmp_path):
-    """Testet die Verarbeitung von .msg Dateien im MailParser."""
+
+def test_mail_parser_msg_handling(tmp_path: Path) -> None:
+    """Testet die Verarbeitung von .msg Dateien im MailParser.
+
+    Args:
+        tmp_path: Temporärer Pfad für Test-Dateien.
+
+    Returns:
+        None
+    """
     parser = MailParser()
     msg_file = tmp_path / "test.msg"
     msg_file.touch()
@@ -49,8 +69,16 @@ def test_mail_parser_msg_handling(tmp_path):
         assert "Test Subject" in content
         assert "This is a test message body." in content
 
-def test_mail_parser_eml_fallback_on_decode_error(tmp_path):
-    """Testet den Fallback auf latin-1 bei Kodierungsfehlern in EML-Dateien."""
+
+def test_mail_parser_eml_fallback_on_decode_error(tmp_path: Path) -> None:
+    """Testet den Fallback auf latin-1 bei Kodierungsfehlern in EML-Dateien.
+
+    Args:
+        tmp_path: Temporärer Pfad für Test-Dateien.
+
+    Returns:
+        None
+    """
     parser = MailParser()
     eml_file = tmp_path / "test.eml"
     # Create a dummy EML with non-UTF-8 characters (e.g. 0xD0)
@@ -62,8 +90,16 @@ def test_mail_parser_eml_fallback_on_decode_error(tmp_path):
     assert content is not None
     assert "Subject: Test" in content
 
-def test_pdf_parser_priority_liteparse(tmp_path):
-    """Testet, dass der PDFParser liteparse bevorzugt."""
+
+def test_pdf_parser_priority_liteparse(tmp_path: Path) -> None:
+    """Testet, dass der PDFParser liteparse bevorzugt.
+
+    Args:
+        tmp_path: Temporärer Pfad für Test-Dateien.
+
+    Returns:
+        None
+    """
     cache_dir = tmp_path / "cache"
 
     with patch("mcp_university.parser.pdf_parser.DocumentConverter") as mock_docling_class, \
@@ -88,3 +124,208 @@ def test_pdf_parser_priority_liteparse(tmp_path):
         # Verifizieren, dass nur LiteParse aufgerufen wurde
         mock_lite_parser.parse.assert_called_once_with(str(pdf_file))
         mock_docling.convert.assert_not_called()
+
+
+def test_pdf_parser_docling_exception(tmp_path: Path) -> None:
+    """Testet die Exception-Behandlung bei Docling.
+
+    Args:
+        tmp_path: Temporärer Pfad für Test-Dateien.
+
+    Returns:
+        None
+    """
+    cache_dir = tmp_path / "cache"
+    parser = PDFParser(cache_dir)
+    pdf_file = tmp_path / "test_error.pdf"
+    pdf_file.touch()
+
+    with patch.object(parser, "converter") as mock_converter, \
+         patch.object(parser, "_parse_with_liteparse", return_value=None):
+        mock_converter.convert.side_effect = Exception("Docling conversion failed")
+        content = parser.parse(pdf_file)
+        assert content is None
+
+
+def test_pdf_parser_liteparse_not_installed(tmp_path: Path) -> None:
+    """Testet, dass der PDFParser LiteParse überspringt, wenn es nicht installiert ist.
+
+    Args:
+        tmp_path: Temporärer Pfad.
+
+    Returns:
+        None
+    """
+    cache_dir = tmp_path / "cache"
+    pdf_file = tmp_path / "test_no_lp.pdf"
+    pdf_file.touch()
+
+    with patch("mcp_university.parser.pdf_parser.LiteParse", None), \
+         patch("mcp_university.parser.pdf_parser.DocumentConverter") as mock_converter_class:
+        mock_converter = mock_converter_class.return_value
+        mock_result = MagicMock()
+        mock_result.document.export_to_markdown.return_value = "Docling markdown"
+        mock_converter.convert.return_value = mock_result
+
+        parser = PDFParser(cache_dir)
+        content = parser.parse(pdf_file)
+        assert content == "Docling markdown"
+
+
+def test_pdf_parser_liteparse_exception(tmp_path: Path) -> None:
+    """Testet die Exception-Behandlung bei LiteParse.
+
+    Args:
+        tmp_path: Temporärer Pfad.
+
+    Returns:
+        None
+    """
+    cache_dir = tmp_path / "cache"
+    pdf_file = tmp_path / "test_lp_error.pdf"
+    pdf_file.touch()
+
+    with patch("mcp_university.parser.pdf_parser.LiteParse") as mock_liteparse_class, \
+         patch("mcp_university.parser.pdf_parser.DocumentConverter") as mock_converter_class:
+        mock_liteparse = mock_liteparse_class.return_value
+        mock_liteparse.parse.side_effect = Exception("LiteParse crashed")
+
+        mock_converter = mock_converter_class.return_value
+        mock_result = MagicMock()
+        mock_result.document.export_to_markdown.return_value = "Fallback markdown"
+        mock_converter.convert.return_value = mock_result
+
+        parser = PDFParser(cache_dir)
+        content = parser.parse(pdf_file)
+        assert content == "Fallback markdown"
+
+
+def test_pdf_parser_docx_fallback_success(tmp_path: Path) -> None:
+    """Testet den Fallback für DOCX-Dateien bei Erfolg.
+
+    Args:
+        tmp_path: Temporärer Pfad.
+
+    Returns:
+        None
+    """
+    cache_dir = tmp_path / "cache"
+    docx_file = tmp_path / "test.docx"
+    docx_file.touch()
+
+    with patch("docx.Document") as mock_document_cls:
+        mock_doc = MagicMock()
+        mock_p1 = MagicMock()
+        mock_p1.text = "Paragraph 1"
+        mock_p2 = MagicMock()
+        mock_p2.text = "Paragraph 2"
+        mock_doc.paragraphs = [mock_p1, mock_p2]
+        mock_document_cls.return_value = mock_doc
+
+        parser = PDFParser(cache_dir)
+        content = parser.parse(docx_file)
+        assert content == "Paragraph 1\nParagraph 2"
+
+
+def test_pdf_parser_docx_fallback_exception(tmp_path: Path) -> None:
+    """Testet die Exception-Behandlung beim DOCX Fallback.
+
+    Args:
+        tmp_path: Temporärer Pfad.
+
+    Returns:
+        None
+    """
+    cache_dir = tmp_path / "cache"
+    docx_file = tmp_path / "test_err.docx"
+    docx_file.touch()
+
+    with patch("docx.Document") as mock_document_cls:
+        mock_document_cls.side_effect = Exception("docx library error")
+
+        parser = PDFParser(cache_dir)
+        content = parser.parse(docx_file)
+        assert content is None
+
+
+def test_get_parser_factory(tmp_path: Path) -> None:
+    """Testet die get_parser Hilfsfunktion.
+
+    Args:
+        tmp_path: Temporärer Pfad.
+
+    Returns:
+        None
+    """
+    cache_dir = tmp_path / "cache"
+    parser = mcp_university.parser.pdf_parser.get_parser(cache_dir)
+    assert isinstance(parser, PDFParser)
+    assert parser.cache_dir == cache_dir
+
+
+def test_pdf_parser_offline_mode(tmp_path: Path) -> None:
+    """Testet den Offline-Modus des PDFParsers.
+
+    Args:
+        tmp_path: Temporärer Pfad.
+
+    Returns:
+        None
+    """
+    cache_dir = tmp_path / "cache"
+    with patch("mcp_university.parser.pdf_parser.get_config") as mock_get_config:
+        mock_config = MagicMock()
+        mock_config.offline = True
+        mock_get_config.return_value = mock_config
+
+        parser = PDFParser(cache_dir)
+        assert parser.cache_dir == cache_dir
+
+
+def test_pdf_parser_import_errors(tmp_path: Path) -> None:
+    """Testet die Behandlung von ImportErrors bei docling und liteparse.
+
+    Args:
+        tmp_path: Temporärer Pfad.
+
+    Returns:
+        None
+    """
+    real_import = __builtins__["__import__"]
+
+    def mock_import(name, globals=None, locals=None, fromlist=(), level=0):
+        if name in ("docling.document_converter", "liteparse"):
+            raise ImportError(f"Simulated import error for {name}")
+        return real_import(name, globals, locals, fromlist, level)
+
+    with patch("builtins.__import__", side_effect=mock_import):
+        importlib.reload(mcp_university.parser.pdf_parser)
+
+        assert mcp_university.parser.pdf_parser.DocumentConverter is None
+        assert mcp_university.parser.pdf_parser.LiteParse is None
+
+    # Restore normal imports and run parser to trigger coverage on final compiled code
+    importlib.reload(mcp_university.parser.pdf_parser)
+
+    # Trigger offline check
+    with patch("mcp_university.parser.pdf_parser.get_config") as mock_get_config:
+        mock_config = MagicMock()
+        mock_config.offline = True
+        mock_get_config.return_value = mock_config
+        parser = mcp_university.parser.pdf_parser.get_parser(tmp_path / "dummy_cache")
+
+    # Trigger docling empty content:
+    parser.converter = MagicMock()
+    mock_result = MagicMock()
+    mock_result.document.export_to_markdown.return_value = ""
+    parser.converter.convert.return_value = mock_result
+    with patch.object(parser, "_parse_with_liteparse", return_value=None):
+        content = parser.parse(tmp_path / "empty_docling.pdf")
+        assert content is None
+
+    # Trigger docling exception (with non-existent file) on the final reloaded module instance
+    parser.converter = MagicMock()
+    parser.converter.convert.side_effect = Exception("Docling conversion crashed")
+    with patch.object(parser, "_parse_with_liteparse", return_value=None):
+        content = parser.parse(tmp_path / "non_existent_file.pdf")
+        assert content is None
