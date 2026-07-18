@@ -13,7 +13,7 @@ This project contains a sophisticated collection of Outlook VBA macros and Pytho
     2.  Exporting all new student emails (calls `ExportStudentEmails`).  
     *   *Interaction:* Upon start, the macro interactively asks how many days backward (default: 7) to search for new student emails.  
 *   **Downstream Usage of Exports:**  
-    *   The free time slots are saved in `D:\TH_Koeln\academic-memory-mcp\data\free_slots.md` and are used by the LLM for draft reply suggestions (Action 2).
+    *   The free time slots are saved in `D:\TH_Koeln\academic-memory-mcp\data\free_slots.md` and are used by the LLM for draft reply suggestions (Action 2).  
     *   The emails are saved in the Inbox folder and are directly available to the Gradio GUI for classification, summarization, and processing.  
 
 ---
@@ -35,7 +35,7 @@ This project contains a sophisticated collection of Outlook VBA macros and Pytho
 *   **Purpose:** Analyzes your Outlook calendars ("Calendar" and "Calendar (Only this computer)") for the next 14 days for free consultation hours.  
     *   *Consultation Logic:* Searches for free 30-minute time slots on weekdays between 1:30 PM and 4:00 PM.  
     *   *Exclusions:* Weekends, public holidays in NRW, and explicitly configured blocked weekdays (default: Wednesday, Friday) are automatically skipped.  
-*   **Storage Location:** `D:\TH_Koeln\academic-memory-mcp\data\free_slots.md`
+*   **Storage Location:** `D:\TH_Koeln\academic-memory-mcp\data\free_slots.md`  
 *   **Downstream Usage of Exports:** The generated Markdown file serves as a direct data basis for the email controller. When you select **Action 2) Write reply with appointment suggestion** in the GUI, the system reads this file. The LLM extracts the free slots and integrates them in a formatted and personalized way into your draft reply in Outlook.  
 
 ---
@@ -43,7 +43,7 @@ This project contains a sophisticated collection of Outlook VBA macros and Pytho
 ### 4. Appointment & Consultation Export (AppointmentExport)  
 *   **File:** `AppointmentExport.bas`  
 *   **Purpose:** Exports all existing calendar entries of the next 4 weeks (duration, location, subject, participants, etc.) from your Outlook calendars.  
-*   **Storage Location:** `D:\TH_Koeln\academic-memory-mcp\data\appointments.md`
+*   **Storage Location:** `D:\TH_Koeln\academic-memory-mcp\data\appointments.md`  
 *   **Downstream Usage of Exports:** This is the primary data source for the appointment GUI (**Appointment Manager**, started via `python scripts/appointment_gui.py`). The Appointment Manager reads this Markdown table and automatically links each calendar entry with the local university database. It immediately shows you the matching student folder, their AI conversation summary (`.emails_summary.md`), the student's profile (Steckbrief), and allows quick access to their submitted files, so you are perfectly prepared for meetings.  
 
 ---
@@ -51,7 +51,7 @@ This project contains a sophisticated collection of Outlook VBA macros and Pytho
 ### 5. Collect Students (CollectStudentEmails)  
 *   **File:** `CollectStudentEmails.bas`  
 *   **Purpose:** Scans your inbox for all senders with a student domain, extracts their display names and email addresses, and organizes them.  
-*   **Storage Location:** `D:\TH_Koeln\academic-memory-mcp\students.yaml`
+*   **Storage Location:** `D:\TH_Koeln\academic-memory-mcp\students.yaml`  
 *   **Downstream Usage of Exports:** Bootstrapping and maintaining the central student contact database. If the file already exists, only new students are added (existing entries are protected). The `students.yaml` is then transferred to the local SQLite metadata database via the CLI command `mcp-uni db sync-students` so that the system can reliably resolve names and aliases.  
 
 ---
@@ -67,7 +67,7 @@ This project contains a sophisticated collection of Outlook VBA macros and Pytho
 ### 7. Address Enrichment (EnrichStudentEmailsFromBody)  
 *   **File:** `EnrichStudentEmailsFromBody.bas`  
 *   **Purpose:** Searches the subject and the entire body of all Outlook emails for first and last names of already known students (from `students.yaml`).  
-*   **Storage Location:** Updates the file `D:\TH_Koeln\academic-memory-mcp\students.yaml`.
+*   **Storage Location:** Updates the file `D:\TH_Koeln\academic-memory-mcp\students.yaml`.  
 *   **Downstream Usage of Exports:** If the macro finds matches, it automatically enters the corresponding sender or recipient email address as an alternative address in `students.yaml`. This solves the problem of students often writing from private addresses (e.g., Gmail, GMX). The system enriches the profile so that subsequent email assignments and searches (in the index and the GUI) automatically map the private email address to the correct student.  
 
 ---
