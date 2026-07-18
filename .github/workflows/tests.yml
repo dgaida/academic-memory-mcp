@@ -29,5 +29,5 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v7
         with:
-          slug: dgaida/academic-memory-mcp
+          slug: ${{ github.repository }}
           use_oidc: true
