@@ -491,6 +491,14 @@ class PersonProfiler:
         target_email = target_email.lower()
 
         def get_date(m):
+            """Returns the date of a given email dict.
+
+            Args:
+                m: Email dict containing date or details.
+
+            Returns:
+                datetime: Date of the email or datetime.min fallback.
+            """
             if "date" in m:
                 return m["date"]
             return m.get("details", {}).get("date", datetime.min)
@@ -499,6 +507,14 @@ class PersonProfiler:
         sorted_emails = sorted(emails, key=get_date, reverse=True)
 
         def is_sammelmail(body):
+            """Checks if an email body indicates a bulk or sammelmail.
+
+            Args:
+                body: Content body of the email.
+
+            Returns:
+                bool: True if it contains bulk salutations, False otherwise.
+            """
             sammel_indicators = [
                 r"Liebe Kolleg\*innen",
                 r"Hallo zusammen",
