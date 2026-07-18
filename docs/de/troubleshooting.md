@@ -7,7 +7,7 @@ Hier finden Sie Lösungen für häufig auftretende Probleme.
 **Symptom:** Fehlermeldung beim Indexieren oder bei der Suche bezüglich der Verbindung zum LLM.
 **Lösung:**  
 1. Prüfen Sie, ob Ollama läuft: `curl http://localhost:11434/api/tags`  
-2. Stellen Sie sicher, dass das Modell geladen ist: `ollama pull gemma2:2b`  
+2. Stellen Sie sicher, dass das Modell geladen ist: `ollama pull gemma4:e2b`
 3. Prüfen Sie die `base_url` in `config/models.yaml`.  
 
 ## PDF-Parsing Fehler
