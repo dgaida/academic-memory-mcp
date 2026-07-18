@@ -249,7 +249,7 @@ def save_faq(faq_path: Path, new_qa_pairs: List[Tuple[str, str]], class_name: st
     faq_path.parent.mkdir(parents=True, exist_ok=True)
     with open(faq_path, "w", encoding="utf-8") as file:
         file.write(f"# FAQ - {class_name}\n\n")
-        file.write(f"Dieses Dokument enthält eine Liste von allgemeingültigen Fragen und Antworten, ")
+        file.write("Dieses Dokument enthält eine Liste von allgemeingültigen Fragen und Antworten, ")
         file.write(f"die aus dem E-Mail-Schriftverkehr der Klasse `{class_name}` extrahiert wurden.\n\n")
         file.write("## Fragen & Antworten\n\n")
 
