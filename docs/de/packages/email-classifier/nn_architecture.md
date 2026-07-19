@@ -4,10 +4,10 @@ Diese Dokumentation beschreibt die im Package `email-classifier` integrierte und
 
 ## 1. Architektur-Übersicht
 
-Die Implementierung basiert auf einem **Transformer-basierten Modell** (Standard: `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`). Im Gegensatz zu klassischen Bag-of-Words-Verfahren erfasst diese Architektur den semantischen Kontext und die Beziehungen zwischen den Wörtern im Satzgefüge (z. B. im E-Mail-Betreff und -Inhalt).
+Die Implementierung basiert auf einem **Transformer-basierten Modell** (Standard: `sentence-transformers/paraphrase-multilingual-mpnet-base-v2`). Im Gegensatz zu klassischen Bag-of-Words-Verfahren erfasst diese Architektur den semantischen Kontext und die Beziehungen zwischen den Wörtern im Satzgefüge (z. B. im E-Mail-Betreff und -Inhalt).
 
 ### Hauptkomponenten:  
-1. **Encoder-Backbone**: Das vortrainierte multilinguale MiniLM-Modell dient als Feature-Extractor.  
+1. **Encoder-Backbone**: Das vortrainierte multilinguale MPNet-Modell dient als Feature-Extractor.
 2. **Input-Strukturierung**: Vorverarbeitung und Zusammenführung von Metadaten und E-Mail-Body in einen zusammenhängenden Eingabetext.  
 3. **Classification Head**: Ein Fully Connected Layer (MLP) mit Dropout, das direkt auf das `[CLS]`-Token (den Repräsentationsvektor der gesamten Sequenz) angewendet wird, um die Wahrscheinlichkeiten für die Zielklassen zu berechnen.  
 
@@ -85,7 +85,7 @@ Obwohl das System bereits vollständig einsatzbereit ist, bieten sich für zukü
 1. **Modell-Quantisierung (Quantization)**:  
    - Konvertierung des Modells in ein 8-Bit-Format (INT8) mittels PyTorch, um den Speicherbedarf auf Offline-Systemen (z. B. Laptops ohne dedizierte GPU) zu halbieren und die Inferenzgeschwindigkeit zu steigern.  
 2. **LoRA Fine-Tuning für größere lokale Modelle**:  
-   - Statt eines MiniLM-Modells könnten größere multilinguale LLMs (z. B. Llama 3 oder Mistral) über Low-Rank Adaptation (LoRA) auf Klassifikation trainiert werden, sofern ausreichend Rechenressourcen vorhanden sind.  
+   - Statt eines MPNet-Modells könnten größere multilinguale LLMs (z. B. Llama 3 oder Mistral) über Low-Rank Adaptation (LoRA) auf Klassifikation trainiert werden, sofern ausreichend Rechenressourcen vorhanden sind.
 3. **Erweitertes Hyperparameter-Tuning**:  
    - Systematische Suche nach optimalen Learning Rates, Dropout-Raten und Batch-Sizes mittels Frameworks wie Optuna, um die Klassifikationsleistung (F1-Score) noch weiter zu maximieren.  
 4. **Knowledge Distillation**:  
