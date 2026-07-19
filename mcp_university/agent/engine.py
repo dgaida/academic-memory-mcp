@@ -271,9 +271,13 @@ class Agent:
         Returns:
             str: Freie Slots als Markdown oder Fehlermeldung.
         """
-        path = Path(r"D:\TH_Koeln\academic-memory-mcp\data\free_slots.md")
+        slots_config_path = self.cfg.calendar.appointment_slots_path
+        path = Path(slots_config_path)
+        if not path.is_absolute():
+            path = self.cfg.config_dir.parent / path
+
         if not path.exists():
-            return "Fehler: Die Datei mit freien Slots wurde nicht gefunden. Das Makro Freeslotexport.bas muss eventuell zuerst ausgeführt werden."
+            return f"Fehler: Die Datei mit freien Slots wurde unter {path.as_posix()} nicht gefunden. Das Makro Freeslotexport.bas muss eventuell zuerst ausgeführt werden."
         try:
             return path.read_text(encoding="utf-8")
         except Exception as e:

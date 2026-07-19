@@ -13,3 +13,4 @@ reranker:
 
 calendar:
   send_invitations_automatically: false
+  appointment_slots_path: "data/free_slots.md"
