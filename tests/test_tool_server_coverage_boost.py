@@ -21,6 +21,8 @@ def mcp_context():
         mock_config.qdrant_path = "/tmp/qdrant"
         mock_config.embeddings.model = "test-model"
         mock_config.data_dir = Path("/tmp/data")
+        mock_config.calendar.appointment_slots_path = "data/free_slots.md"
+        mock_config.config_dir = Path("/tmp")
         mock_config.user.email = "me@example.com"
         mock_get_config.return_value = mock_config
 

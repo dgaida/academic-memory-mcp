@@ -110,10 +110,13 @@ def create_tool_server() -> FastMCP:
         Returns:
             Eine Liste der freien Zeitfenster (Datum und Uhrzeit).
         """
-        slots_path = Path("D:/TH_Koeln/PAV/Termine/FreieSlots.md")
+        slots_config_path = cfg.calendar.appointment_slots_path
+        slots_path = Path(slots_config_path)
+        if not slots_path.is_absolute():
+            slots_path = cfg.config_dir.parent / slots_path
+
         if not slots_path.exists():
-             # Fallback/Mockup if path doesn't exist in sandbox
-             return "Keine freien Slots gefunden (Datei D:/TH_Koeln/PAV/Termine/FreieSlots.md nicht vorhanden)."
+             return f"Keine freien Slots gefunden (Datei {slots_path.as_posix()} nicht vorhanden)."
 
         try:
             return slots_path.read_text(encoding="utf-8")

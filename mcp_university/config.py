@@ -27,6 +27,7 @@ class RerankerConfig(BaseModel):
 class CalendarConfig(BaseModel):
     """Konfiguration für den Kalender."""
     send_invitations_automatically: bool = False
+    appointment_slots_path: str = "data/free_slots.md"
 
 class FolderConfig(BaseModel):
     """Konfiguration der zu überwachenden Ordner und Dateitypen."""

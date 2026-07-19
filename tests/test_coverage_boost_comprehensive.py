@@ -127,7 +127,11 @@ def mock_agent_deps():
         None
     """
     with patch('mcp_university.agent.engine.ParserFactory'),          patch('mcp_university.agent.engine.MetadataStore'),          patch('mcp_university.agent.engine.SearchIndex'),          patch('mcp_university.agent.engine.get_config') as mock_cfg,          patch('mcp_university.agent.engine.LLMClientWrapper'),          patch('mcp_university.agent.engine.Anonymizer'):
-        mock_cfg.return_value.llm.model = "m"
+        cfg = MagicMock()
+        cfg.llm.model = "m"
+        cfg.calendar.appointment_slots_path = "data/free_slots.md"
+        cfg.config_dir = Path("/tmp")
+        mock_cfg.return_value = cfg
         yield
 
 def test_agent_tools_not_found(mock_agent_deps):

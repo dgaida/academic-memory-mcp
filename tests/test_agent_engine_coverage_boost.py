@@ -29,6 +29,8 @@ def mock_agent_setup():
         mock_cfg.llm.base_url = "http://test"
         mock_cfg.user.email = "me@example.com"
         mock_cfg.calendar.send_invitations_automatically = False
+        mock_cfg.calendar.appointment_slots_path = "data/free_slots.md"
+        mock_cfg.config_dir = Path("/tmp")
         mock_cfg.data_dir = Path("/tmp")
         mock_cfg.sqlite_path = Path("/tmp/mock_sqlite.db")
         mock_cfg.qdrant_path = Path("/tmp/mock_qdrant")
