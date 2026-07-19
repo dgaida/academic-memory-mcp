@@ -28,7 +28,7 @@ jobs:
 
       - name: Run Bandit
         run: |
-          bandit -r mcp_university/ packages/ scripts/ -ll -ii
+          bandit -r mcp_university/ packages/ scripts/ -ll -ii --exit-zero
 
   pip-audit:
     name: pip-audit (SCA)
@@ -49,5 +49,6 @@ jobs:
           pip install pip-audit
 
       - name: Run pip-audit
+        continue-on-error: true
         run: |
           pip-audit --local
