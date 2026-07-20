@@ -2560,35 +2560,35 @@
 <h2 id="welche-informationen-werden-extrahiert">Welche Informationen werden extrahiert?<a class="headerlink" href="#welche-informationen-werden-extrahiert" title="Permanent link">&para;</a></h2>
 <p>Der Crawler durchläuft die Personenübersicht und besucht die individuellen Profilseiten der gefundenen Personen. Dabei werden folgende Detailinformationen extrahiert:</p>
 <ul>
-<li><strong>Stammdaten:</strong><ul>
-<li>Voller Name</li>
-<li>Akademischer Grad (z. B. Dr., Prof. Dr.)</li>
-<li>E-Mail-Adresse</li>
-<li>URL der persönlichen Profilseite bei der TH Köln</li>
+<li><strong>Stammdaten:</strong>  <ul>
+<li>Voller Name  </li>
+<li>Akademischer Grad (z. B. Dr., Prof. Dr.)  </li>
+<li>E-Mail-Adresse  </li>
+<li>URL der persönlichen Profilseite bei der TH Köln  </li>
 </ul>
 </li>
-<li><strong>Organisatorische Zuordnung:</strong><ul>
-<li>Fakultät (z. B. "Fakultät für Informatik und Ingenieurwissenschaften")</li>
-<li>Institut (z. B. "Institut für Informatik") oder andere Einrichtungen (z. B. "Campus IT")</li>
+<li><strong>Organisatorische Zuordnung:</strong>  <ul>
+<li>Fakultät (z. B. "Fakultät für Informatik und Ingenieurwissenschaften")  </li>
+<li>Institut (z. B. "Institut für Informatik") oder andere Einrichtungen (z. B. "Campus IT")  </li>
 </ul>
 </li>
-<li><strong>Rollen &amp; Funktionen (falls vorhanden):</strong><ul>
-<li>Prüfungsausschussvorsitz (<code>is_pa_vorsitz</code>)</li>
-<li>DekanIn (<code>is_dekan</code>)</li>
-<li>Senatsmitglied (<code>is_senat</code>)</li>
-<li>InstitutsdirektorIn (<code>is_institutsdirektor</code>)</li>
-<li>Präsidiumsmitglied (<code>is_praesidium</code>)</li>
-<li>Studiengangsleitung (Name des zugeordneten Studiengangs, falls im Profiltext hinterlegt)</li>
+<li><strong>Rollen &amp; Funktionen (falls vorhanden):</strong>  <ul>
+<li>Prüfungsausschussvorsitz (<code>is_pa_vorsitz</code>)  </li>
+<li>DekanIn (<code>is_dekan</code>)  </li>
+<li>Senatsmitglied (<code>is_senat</code>)  </li>
+<li>InstitutsdirektorIn (<code>is_institutsdirektor</code>)  </li>
+<li>Präsidiumsmitglied (<code>is_praesidium</code>)  </li>
+<li>Studiengangsleitung (Name des zugeordneten Studiengangs, falls im Profiltext hinterlegt)  </li>
 </ul>
 </li>
 </ul>
 <hr />
 <h2 id="datenquelle-von-welchen-webseiten-wird-extrahiert">Datenquelle: Von welchen Webseiten wird extrahiert?<a class="headerlink" href="#datenquelle-von-welchen-webseiten-wird-extrahiert" title="Permanent link">&para;</a></h2>
-<p>Die Extraktion erfolgt direkt aus dem offiziellen Webauftritt der TH Köln:
-1. <strong>Übersichtsseite (A-Z Suche):</strong>
-   <code>https://www.th-koeln.de/hochschule/personen_3850.php</code>
-   Hier werden die initialen Kontaktdaten (Name, E-Mail-Adresse) sowie die Links zu den Detailprofilen über Filterparameter (Anfangsbuchstaben, Fakultäten oder Einrichtungen) ermittelt.
-2. <strong>Individuelle Profilseiten:</strong>
+<p>Die Extraktion erfolgt direkt aus dem offiziellen Webauftritt der TH Köln:<br />
+1. <strong>Übersichtsseite (A-Z Suche):</strong><br />
+<code>https://www.th-koeln.de/hochschule/personen_3850.php</code>
+   Hier werden die initialen Kontaktdaten (Name, E-Mail-Adresse) sowie die Links zu den Detailprofilen über Filterparameter (Anfangsbuchstaben, Fakultäten oder Einrichtungen) ermittelt.<br />
+2. <strong>Individuelle Profilseiten:</strong><br />
    Die Detailseiten der Personen (z. B. <code>https://www.th-koeln.de/personen/[name]/</code>), um akademische Grade, Fakultäts-/Institutszugehörigkeiten sowie Funktionen und Verantwortlichkeiten auszulesen.</p>
 <hr />
 <h2 id="aufruf-und-parametermoglichkeiten">Aufruf- und Parametermöglichkeiten<a class="headerlink" href="#aufruf-und-parametermoglichkeiten" title="Permanent link">&para;</a></h2>
@@ -2622,7 +2622,7 @@
 <p>Wenn Sie den Crawler für eine spezifische Fakultät starten möchten:</p>
 <ol>
 <li>
-<p><strong>Verfügbare Fakultäten abfragen:</strong>
+<p><strong>Verfügbare Fakultäten abfragen:</strong><br />
    <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>python<span class="w"> </span>-m<span class="w"> </span>th_personal_graph.scripts.crawl_th_koeln_persons<span class="w"> </span>--list-faculties
 </code></pre></div>
    <em>Ausgabe (Auszug):</em>
@@ -2633,7 +2633,7 @@
 </code></pre></div></p>
 </li>
 <li>
-<p><strong>Crawl für die gewünschte Fakultät starten:</strong>
+<p><strong>Crawl für die gewünschte Fakultät starten:</strong><br />
    <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>python<span class="w"> </span>-m<span class="w"> </span>th_personal_graph.scripts.crawl_th_koeln_persons<span class="w"> </span>--faculty<span class="w"> </span><span class="s2">&quot;Fakultät für Informatik und Ingenieurwissenschaften&quot;</span>
 </code></pre></div>
    <em>Konsolen-Ausgabe:</em>
@@ -2643,10 +2643,10 @@
 </code></pre></div></p>
 </li>
 <li>
-<p><strong>Ergebnis überprüfen:</strong></p>
+<p><strong>Ergebnis überprüfen:</strong>  </p>
 </li>
-<li>Im Verzeichnis <code>data/th_koeln/</code> wird eine Datei namens <code>persons_Fakult_t_f_r_Informatik_und_Ingenieurwissenschaften.md</code> mit einer Tabelle aller Personen und deren extrahierten Rollen angelegt.</li>
-<li>Der SQLite-Wissensgraph in <code>th_personal.db</code> wird automatisch um die neuen Personen, deren Fakultäts- und Institutszugehörigkeiten sowie Funktionen erweitert.</li>
+<li>Im Verzeichnis <code>data/th_koeln/</code> wird eine Datei namens <code>persons_Fakult_t_f_r_Informatik_und_Ingenieurwissenschaften.md</code> mit einer Tabelle aller Personen und deren extrahierten Rollen angelegt.  </li>
+<li>Der SQLite-Wissensgraph in <code>th_personal.db</code> wird automatisch um die neuen Personen, deren Fakultäts- und Institutszugehörigkeiten sowie Funktionen erweitert.  </li>
 </ol>
 
 

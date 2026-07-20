@@ -632,6 +632,45 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#intelligent-appointment-booking-conflict-checking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intelligent Appointment Booking &amp; Conflict Checking
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Intelligent Appointment Booking &amp; Conflict Checking">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#action-unification-action-1-action-3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Action Unification (Action 1 &amp; Action 3)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#data-source" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2364,6 +2403,45 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#intelligent-appointment-booking-conflict-checking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intelligent Appointment Booking &amp; Conflict Checking
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Intelligent Appointment Booking &amp; Conflict Checking">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#action-unification-action-1-action-3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Action Unification (Action 1 &amp; Action 3)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#data-source" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2429,6 +2507,24 @@
 </li>
 <li><strong>File Explorer:</strong> Allows direct access to all files in the student's folder (e.g., exposés, drafts).  </li>
 </ul>
+<h2 id="intelligent-appointment-booking-conflict-checking">Intelligent Appointment Booking &amp; Conflict Checking<a class="headerlink" href="#intelligent-appointment-booking-conflict-checking" title="Permanent link">&para;</a></h2>
+<p>When the system responds to an email (Action 1: "Write reply"), it automatically checks the background for meeting proposals or meeting confirmations (acceptances) from the sender.</p>
+<h3 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Detection:</strong> The LLM analyzes the incoming email for concrete meeting proposals (e.g., "Can we meet on Tuesday at 14:00?") or confirmations (e.g., "I accept the appointment on Monday at 15:30").</li>
+<li><strong>Intelligent Calendar Matching:</strong></li>
+<li>The system reads existing appointments from the file <code>data/appointments.md</code>.</li>
+<li>It intelligently checks whether an appointment or blocker already exists at the proposed or confirmed time:<ul>
+<li><strong>Free:</strong> If there is no appointment or only a blocker specifically designated for this appointment/student, the system is free. The appointment is booked directly in the calendar via the <code>manage_calendar_appointment</code> tool, and the person is invited. The system responds with the signal word <code>APPOINTMENT_BOOKED</code>.</li>
+<li><strong>Busy (Conflict):</strong> If a completely different appointment or a generic blocker (e.g., another meeting, private event, etc.) is in the way, the system detects this as a conflict.</li>
+</ul>
+</li>
+<li><strong>Alternative Suggestions on Conflict:</strong></li>
+<li>If a conflict is detected, the system automatically reads free appointment slots from <code>data/free_slots.md</code> (via the <code>get_appointment_slots</code> tool).</li>
+<li>It suggests these free times as alternatives in the reply email and asks the sender to make a new selection.</li>
+</ol>
+<h3 id="action-unification-action-1-action-3">Action Unification (Action 1 &amp; Action 3)<a class="headerlink" href="#action-unification-action-1-action-3" title="Permanent link">&para;</a></h3>
+<p>Since regular reply generation (Action 1: "Write reply") now performs this intelligent appointment and conflict check by default, a separate action for "Create calendar appointment and invite person" (formerly Action 3) has become redundant and has been removed from the system. Action 1 covers both cases seamlessly.</p>
 <h2 id="data-source">Data Source<a class="headerlink" href="#data-source" title="Permanent link">&para;</a></h2>
 <p>The appointments are usually exported via the Outlook VBA macro <code>AppointmentExport.bas</code>. The system reads this exported data and enriches it with knowledge from the local knowledge base.</p>
 

@@ -630,6 +630,45 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#intelligente-terminbuchung-konfliktprufung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intelligente Terminbuchung &amp; Konfliktprüfung
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Intelligente Terminbuchung &amp; Konfliktprüfung">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#funktionsweise" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Funktionsweise
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vereinheitlichung-der-aktionen-aktion-1-aktion-3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vereinheitlichung der Aktionen (Aktion 1 &amp; Aktion 3)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#datenquelle" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2362,6 +2401,45 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#intelligente-terminbuchung-konfliktprufung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intelligente Terminbuchung &amp; Konfliktprüfung
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Intelligente Terminbuchung &amp; Konfliktprüfung">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#funktionsweise" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Funktionsweise
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vereinheitlichung-der-aktionen-aktion-1-aktion-3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vereinheitlichung der Aktionen (Aktion 1 &amp; Aktion 3)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#datenquelle" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2417,7 +2495,7 @@
 </li>
 <li><strong>Zusammenfassungen:</strong> Zeigt die KI-generierte Konversationszusammenfassung (<code>.emails_summary.md</code>) des gefundenen studentischen Hauptordners an.  <ul>
 <li><strong>Erstellt die GUI die Zusammenfassung, falls es noch keine gibt?</strong><br />
-    Ja! Wenn für den gefundenen Studentenordner noch keine Zusammenfassung existiert oder diese veraltet ist (d. h. wenn das Dateidatum von <code>.emails_summary.md</code> älter ist als die neueste E-Mail-Datei <code>.msg</code> / <code>.eml</code> im Ordner), generiert bzw. aktualisiert die GUI die Zusammenfassung automatisch im Hintergrund. Dazu liest sie die gesamte E-Mail-Historie des Studenten ein und lässt über das lokale LLM eine aktuelle, strukturierte Zusammenfassung generieren, die als <code>.emails_summary.md</code> im Studentenordner gespeichert wird.  </li>
+    Ja! Wenn für den gefundenen Studentenordner noch keine Zusammenfassung existiert oder diese veraltet ist (d h. wenn das Dateidatum von <code>.emails_summary.md</code> älter ist als die neueste E-Mail-Datei <code>.msg</code> / <code>.eml</code> im Ordner), generiert bzw. aktualisiert die GUI die Zusammenfassung automatisch im Hintergrund. Dazu liest sie die gesamte E-Mail-Historie des Studenten ein und lässt über das lokale LLM eine aktuelle, strukturierte Zusammenfassung generieren, die als <code>.emails_summary.md</code> im Studentenordner gespeichert wird.</li>
 </ul>
 </li>
 <li><strong>Steckbriefe:</strong> Zeigt den aktuellen Steckbrief des Studierenden (Interessen, bisherige Themen, bevorzugte Anrede etc.) an.  <ul>
@@ -2427,6 +2505,24 @@
 </li>
 <li><strong>Datei-Explorer:</strong> Ermöglicht den direkten Zugriff auf alle Dateien im Ordner des Studierenden (z.B. Exposés, Entwürfe).  </li>
 </ul>
+<h2 id="intelligente-terminbuchung-konfliktprufung">Intelligente Terminbuchung &amp; Konfliktprüfung<a class="headerlink" href="#intelligente-terminbuchung-konfliktprufung" title="Permanent link">&para;</a></h2>
+<p>Wenn das System eine E-Mail beantwortet (Aktion 1: "Antwort schreiben"), prüft es automatisch im Hintergrund auf Terminvorschläge oder Terminbestätigungen (Zusagen) seitens des Absenders.</p>
+<h3 id="funktionsweise">Funktionsweise<a class="headerlink" href="#funktionsweise" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Erkennung:</strong> Das LLM analysiert die eingehende Mail auf konkrete Terminvorschläge (z. B. "Passt es am Dienstag um 14:00?") oder Zusagen (z. B. "Ich nehme den Termin am Montag um 15:30 Uhr").</li>
+<li><strong>Intelligenter Kalenderabgleich:</strong></li>
+<li>Das System liest die bestehenden Termine aus der Datei <code>data/appointments.md</code>.</li>
+<li>Es prüft intelligent, ob zu dem vorgeschlagenen oder bestätigten Zeitpunkt bereits ein Termin oder ein Blocker existiert:<ul>
+<li><strong>Frei:</strong> Wenn kein Termin oder nur ein Blocker speziell für diesen Termin/Studenten eingetragen ist, ist das System frei. Der Termin wird über das Tool <code>manage_calendar_appointment</code> direkt im Kalender gebucht und die Person wird eingeladen. Das System antwortet mit dem Signalwort <code>APPOINTMENT_BOOKED</code>.</li>
+<li><strong>Belegt (Konflikt):</strong> Wenn ein ganz anderer Termin oder ein generischer Blocker (z. B. eine andere Besprechung, privat, etc.) im Weg steht, erkennt das System dies als Konflikt.</li>
+</ul>
+</li>
+<li><strong>Alternativenvorschlag bei Konflikten:</strong></li>
+<li>Falls ein Konflikt erkannt wird, liest das System automatisch die freien Terminslots aus <code>data/free_slots.md</code> (über das Tool <code>get_appointment_slots</code>) ein.</li>
+<li>Es schlägt diese freien Termine als Alternativen in der Antwort-E-Mail vor und bittet den Absender um eine neue Auswahl.</li>
+</ol>
+<h3 id="vereinheitlichung-der-aktionen-aktion-1-aktion-3">Vereinheitlichung der Aktionen (Aktion 1 &amp; Aktion 3)<a class="headerlink" href="#vereinheitlichung-der-aktionen-aktion-1-aktion-3" title="Permanent link">&para;</a></h3>
+<p>Da die reguläre Antwort-Generierung (Aktion 1: "Antwort schreiben") diese intelligente Termin- und Konfliktprüfung nun standardmäßig durchführt, ist eine separate Aktion für "Termin im Kalender anlegen und Person dazu einladen" (ehemals Aktion 3) hinfällig geworden und wurde aus dem System entfernt. Aktion 1 deckt beide Fälle nahtlos ab.</p>
 <h2 id="datenquelle">Datenquelle<a class="headerlink" href="#datenquelle" title="Permanent link">&para;</a></h2>
 <p>Die Termine werden üblicherweise über das Outlook-VBA-Makro <code>AppointmentExport.bas</code> exportiert. Das System liest diese exportierten Daten ein und reichert sie mit dem Wissen aus der lokalen Wissensbasis an.</p>
 
