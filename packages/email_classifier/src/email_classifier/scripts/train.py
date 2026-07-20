@@ -120,8 +120,8 @@ def main() -> None:
                         help="Modus der Merkmalsextraktion (default: tfidf).")
     parser.add_argument("--method", type=str, choices=["randomforest", "xgboost", "transformer"], default="transformer",
                         help="Klassifizierungsmethode (default: transformer).")
-    parser.add_argument("--embedding-model", type=str, default="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
-                        help="Sentence-Transformer Modell (default: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2).")
+    parser.add_argument("--embedding-model", type=str, default="sentence-transformers/paraphrase-multilingual-mpnet-base-v2",
+                        help="Sentence-Transformer Modell (default: sentence-transformers/paraphrase-multilingual-mpnet-base-v2).")
 
     args = parser.parse_args()
 

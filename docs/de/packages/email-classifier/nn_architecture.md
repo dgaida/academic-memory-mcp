@@ -4,10 +4,10 @@ Diese Dokumentation beschreibt die im Package `email-classifier` integrierte und
 
 ## 1. Architektur-Übersicht
 
-Die Implementierung basiert auf einem **Transformer-basierten Modell** (Standard: `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`). Im Gegensatz zu klassischen Bag-of-Words-Verfahren erfasst diese Architektur den semantischen Kontext und die Beziehungen zwischen den Wörtern im Satzgefüge (z. B. im E-Mail-Betreff und -Inhalt).
+Die Implementierung basiert auf einem **Transformer-basierten Modell** (Standard: `sentence-transformers/paraphrase-multilingual-mpnet-base-v2`). Im Gegensatz zu klassischen Bag-of-Words-Verfahren erfasst diese Architektur den semantischen Kontext und die Beziehungen zwischen den Wörtern im Satzgefüge (z. B. im E-Mail-Betreff und -Inhalt).
 
 ### Hauptkomponenten:  
-1. **Encoder-Backbone**: Das vortrainierte multilinguale MiniLM-Modell dient als Feature-Extractor.  
+1. **Encoder-Backbone**: Das vortrainierte multilinguale MPNet-Modell dient als Feature-Extractor.  
 2. **Input-Strukturierung**: Vorverarbeitung und Zusammenführung von Metadaten und E-Mail-Body in einen zusammenhängenden Eingabetext.  
 3. **Classification Head**: Ein Fully Connected Layer (MLP) mit Dropout, das direkt auf das `[CLS]`-Token (den Repräsentationsvektor der gesamten Sequenz) angewendet wird, um die Wahrscheinlichkeiten für die Zielklassen zu berechnen.  
 

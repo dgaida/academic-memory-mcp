@@ -10,7 +10,7 @@ def transformer_classifier():
     with patch("transformers.AutoModel.from_pretrained") as mock_model:
         with patch("transformers.AutoTokenizer.from_pretrained") as mock_tokenizer:
             # Mock model configuration
-            mock_model.return_value.config.hidden_size = 384
+            mock_model.return_value.config.hidden_size = 768
 
             # Create a mock tokenizer class and instance
             mock_tok_inst = MagicMock()

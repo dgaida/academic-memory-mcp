@@ -4,10 +4,10 @@ This documentation describes the fully functional, integrated Transformer-based 
 
 ## 1. Architecture Overview
 
-The implementation is based on a **Transformer-based model** (default: `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`). Unlike classical bag-of-words methods, this architecture captures the semantic context and relationships between words within sentences (e.g., in the email subject and body).
+The implementation is based on a **Transformer-based model** (default: `sentence-transformers/paraphrase-multilingual-mpnet-base-v2`). Unlike classical bag-of-words methods, this architecture captures the semantic context and relationships between words within sentences (e.g., in the email subject and body).
 
 ### Core Components:  
-1. **Encoder Backbone**: The pre-trained multilingual MiniLM model serves as the feature extractor.  
+1. **Encoder Backbone**: The pre-trained multilingual MPNet model serves as the feature extractor.  
 2. **Input Structuring**: Preprocessing and merging of metadata and email body into a structured, unified input text.  
 3. **Classification Head**: A Fully Connected Layer (MLP) with dropout, applied directly to the `[CLS]` token (the representation vector of the entire sequence) to calculate the target class probabilities.  
 
