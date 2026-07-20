@@ -90,9 +90,9 @@ Bevor eine Antwort generiert wird, erstellt das System eine prägnante Zusammenf
 
 *   **[Aktion 1: Antwort schreiben (inkl. Terminbuchung)](actions/action-1-antwort-schreiben.md)**
 *   **[Aktion 2: Antwort mit Terminvorschlag](actions/action-2-antwort-terminvorschlag.md)**  
-*   **[Aktion 4: Nur archivieren](actions/action-4-nur-archivieren.md)**  
-*   **[Aktion 5: Aufgabe im Kalender anlegen (Finale Abgabe)](actions/action-5-aufgabe-kalender.md)**  
-*   **[Aktion 6: Kolloquium-Termin](actions/action-6-kolloquium-termin.md)**  
+*   **[Aktion 3: Nur archivieren](actions/action-4-nur-archivieren.md)**
+*   **[Aktion 4: Aufgabe im Kalender anlegen (Finale Abgabe)](actions/action-5-aufgabe-kalender.md)**
+*   **[Aktion 5: Kolloquium-Termin](actions/action-6-kolloquium-termin.md)**
 
 ---
 

@@ -1,4 +1,4 @@
-# Action 4: Only Archive
+# Action 3: Only Archive
 
 This action is used when no reply is required for an email, and it should simply be stored in the student's archive folder.
 

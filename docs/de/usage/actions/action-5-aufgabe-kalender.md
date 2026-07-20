@@ -1,4 +1,4 @@
-# Aktion 5: Aufgabe im Kalender anlegen (Finale Abgabe)
+# Aktion 4: Aufgabe im Kalender anlegen (Finale Abgabe)
 
 Diese Aktion ist die zentrale Steuerung für die finale Abgabe von Abschlussarbeiten (Bachelor- und Masterthesen). Wenn das System eine finale Abgabe detektiert, koordiniert diese Aktion eine Reihe von automatisierten Schritten zur Begleitung des Bewertungsprozesses.
 

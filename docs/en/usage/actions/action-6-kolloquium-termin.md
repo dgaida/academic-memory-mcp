@@ -1,4 +1,4 @@
-# Action 6: Colloquium Appointment
+# Action 5: Colloquium Appointment
 
 This action automates the entire process of scheduling and data preparation for the colloquium (the oral defense of an academic thesis).
 

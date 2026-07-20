@@ -102,9 +102,9 @@ Before a reply is generated, the system creates a concise summary of the previou
 
 *   **[Action 1: Write Reply (including Appointment Booking)](actions/action-1-antwort-schreiben.md)**
 *   **[Action 2: Reply with Appointment Suggestion](actions/action-2-antwort-terminvorschlag.md)**  
-*   **[Action 4: Archive Only](actions/action-4-nur-archivieren.md)**  
-*   **[Action 5: Create Task in Calendar (Final Submission)](actions/action-5-aufgabe-kalender.md)**  
-*   **[Action 6: Colloquium Appointment](actions/action-6-kolloquium-termin.md)**  
+*   **[Action 3: Archive Only](actions/action-4-nur-archivieren.md)**
+*   **[Action 4: Create Task in Calendar (Final Submission)](actions/action-5-aufgabe-kalender.md)**
+*   **[Action 5: Colloquium Appointment](actions/action-6-kolloquium-termin.md)**
 
 ---
 
