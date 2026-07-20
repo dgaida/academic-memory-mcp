@@ -2489,10 +2489,10 @@
 <h1 id="neuronale-netzarchitektur-zur-e-mail-klassifizierung">Neuronale Netzarchitektur zur E-Mail-Klassifizierung<a class="headerlink" href="#neuronale-netzarchitektur-zur-e-mail-klassifizierung" title="Permanent link">&para;</a></h1>
 <p>Diese Dokumentation beschreibt die im Package <code>email-classifier</code> integrierte und voll funktionsfähige Transformer-basierte Neuronale Netzarchitektur zur E-Mail-Klassifizierung. Sie dient als leistungsstarke Alternative zu den klassischen Klassifikationsmodellen (wie Random Forest oder XGBoost).</p>
 <h2 id="1-architektur-ubersicht">1. Architektur-Übersicht<a class="headerlink" href="#1-architektur-ubersicht" title="Permanent link">&para;</a></h2>
-<p>Die Implementierung basiert auf einem <strong>Transformer-basierten Modell</strong> (Standard: <code>sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2</code>). Im Gegensatz zu klassischen Bag-of-Words-Verfahren erfasst diese Architektur den semantischen Kontext und die Beziehungen zwischen den Wörtern im Satzgefüge (z. B. im E-Mail-Betreff und -Inhalt).</p>
+<p>Die Implementierung basiert auf einem <strong>Transformer-basierten Modell</strong> (Standard: <code>sentence-transformers/paraphrase-multilingual-mpnet-base-v2</code>). Im Gegensatz zu klassischen Bag-of-Words-Verfahren erfasst diese Architektur den semantischen Kontext und die Beziehungen zwischen den Wörtern im Satzgefüge (z. B. im E-Mail-Betreff und -Inhalt).</p>
 <h3 id="hauptkomponenten">Hauptkomponenten:<a class="headerlink" href="#hauptkomponenten" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Encoder-Backbone</strong>: Das vortrainierte multilinguale MiniLM-Modell dient als Feature-Extractor.  </li>
+<li><strong>Encoder-Backbone</strong>: Das vortrainierte multilinguale MPNet-Modell dient als Feature-Extractor.</li>
 <li><strong>Input-Strukturierung</strong>: Vorverarbeitung und Zusammenführung von Metadaten und E-Mail-Body in einen zusammenhängenden Eingabetext.  </li>
 <li><strong>Classification Head</strong>: Ein Fully Connected Layer (MLP) mit Dropout, das direkt auf das <code>[CLS]</code>-Token (den Repräsentationsvektor der gesamten Sequenz) angewendet wird, um die Wahrscheinlichkeiten für die Zielklassen zu berechnen.  </li>
 </ol>
@@ -2589,7 +2589,7 @@
 <li><strong>Modell-Quantisierung (Quantization)</strong>:  </li>
 <li>Konvertierung des Modells in ein 8-Bit-Format (INT8) mittels PyTorch, um den Speicherbedarf auf Offline-Systemen (z. B. Laptops ohne dedizierte GPU) zu halbieren und die Inferenzgeschwindigkeit zu steigern.  </li>
 <li><strong>LoRA Fine-Tuning für größere lokale Modelle</strong>:  </li>
-<li>Statt eines MiniLM-Modells könnten größere multilinguale LLMs (z. B. Llama 3 oder Mistral) über Low-Rank Adaptation (LoRA) auf Klassifikation trainiert werden, sofern ausreichend Rechenressourcen vorhanden sind.  </li>
+<li>Statt eines MPNet-Modells könnten größere multilinguale LLMs (z. B. Llama 3 oder Mistral) über Low-Rank Adaptation (LoRA) auf Klassifikation trainiert werden, sofern ausreichend Rechenressourcen vorhanden sind.</li>
 <li><strong>Erweitertes Hyperparameter-Tuning</strong>:  </li>
 <li>Systematische Suche nach optimalen Learning Rates, Dropout-Raten und Batch-Sizes mittels Frameworks wie Optuna, um die Klassifikationsleistung (F1-Score) noch weiter zu maximieren.  </li>
 <li><strong>Knowledge Distillation</strong>:  </li>

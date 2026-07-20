@@ -2491,10 +2491,10 @@
 <h1 id="neural-network-architecture-for-email-classification">Neural Network Architecture for Email Classification<a class="headerlink" href="#neural-network-architecture-for-email-classification" title="Permanent link">&para;</a></h1>
 <p>This documentation describes the fully functional, integrated Transformer-based Neural Network architecture implemented in the <code>email-classifier</code> package. It serves as a powerful alternative to classical classification models (such as Random Forest or XGBoost).</p>
 <h2 id="1-architecture-overview">1. Architecture Overview<a class="headerlink" href="#1-architecture-overview" title="Permanent link">&para;</a></h2>
-<p>The implementation is based on a <strong>Transformer-based model</strong> (default: <code>sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2</code>). Unlike classical bag-of-words methods, this architecture captures the semantic context and relationships between words within sentences (e.g., in the email subject and body).</p>
+<p>The implementation is based on a <strong>Transformer-based model</strong> (default: <code>sentence-transformers/paraphrase-multilingual-mpnet-base-v2</code>). Unlike classical bag-of-words methods, this architecture captures the semantic context and relationships between words within sentences (e.g., in the email subject and body).</p>
 <h3 id="core-components">Core Components:<a class="headerlink" href="#core-components" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Encoder Backbone</strong>: The pre-trained multilingual MiniLM model serves as the feature extractor.  </li>
+<li><strong>Encoder Backbone</strong>: The pre-trained multilingual MPNet model serves as the feature extractor.</li>
 <li><strong>Input Structuring</strong>: Preprocessing and merging of metadata and email body into a structured, unified input text.  </li>
 <li><strong>Classification Head</strong>: A Fully Connected Layer (MLP) with dropout, applied directly to the <code>[CLS]</code> token (the representation vector of the entire sequence) to calculate the target class probabilities.  </li>
 </ol>
@@ -2591,7 +2591,7 @@
 <li><strong>Model Quantization</strong>:  </li>
 <li>Convert the model to an 8-bit integer format (INT8) using PyTorch to halve memory footprint on offline/client machines (e.g., laptops without dedicated GPUs) and increase inference speed.  </li>
 <li><strong>LoRA Fine-Tuning for Larger Local Models</strong>:  </li>
-<li>Instead of a MiniLM model, larger multilingual LLMs (e.g., Llama 3 or Mistral) could be fine-tuned using Low-Rank Adaptation (LoRA) for classification, provided sufficient hardware resources are available.  </li>
+<li>Instead of an MPNet model, larger multilingual LLMs (e.g., Llama 3 or Mistral) could be fine-tuned using Low-Rank Adaptation (LoRA) for classification, provided sufficient hardware resources are available.</li>
 <li><strong>Advanced Hyperparameter Tuning</strong>:  </li>
 <li>Systematic search for optimal learning rates, dropout rates, and batch sizes using frameworks like Optuna to further maximize classification performance (F1-score).  </li>
 <li><strong>Knowledge Distillation</strong>:  </li>
