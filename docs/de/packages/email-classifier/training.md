@@ -16,6 +16,9 @@ python -m email_classifier.scripts.train /pfad/zu/trainingsdaten --mode combined
 - `--method`: `xgboost`, `randomforest` oder `transformer`.  
 - `--model-path`: Optionaler Pfad zum Speichern des Modells.  
 
+#### Wichtiger Hinweis zum Transformer-Modell:
+Neben den klassischen Machine-Learning-Methoden (`xgboost`, `randomforest`) wird auch die Methode `transformer` unterstützt, die eine PyTorch-basierte feingetunte Transformer-Architektur trainiert. Details zu Aufbau, Datenfluss und Funktionsweise dieses Deep-Learning-Klassifikators finden Sie in der Dokumentation zur [Neuronalen Netzarchitektur](nn_architecture.md).
+
 Das Training erstellt automatisch Diagramme zur Confusion Matrix und zum Trainingsverlauf (bei Transformer).
 
 ---
@@ -36,7 +39,10 @@ python -m email_classifier.scripts.evaluate /pfad/zu/testdaten --mode combined
 
 ## Feature-Modellierung (Merkmalsextraktion)
 
-Der `EmailClassifier` unterstützt drei verschiedene Modi für die Merkmalsextraktion:
+Der `EmailClassifier` unterstützt drei verschiedene Modi für die Merkmalsextraktion.
+
+**Wichtiger Hinweis zur Merkmalsextraktion:**
+Die im Folgenden beschriebenen Feature-Modellierungs- und Extraktionsschritte werden **ausschließlich für die klassischen ML-Modelle** (XGBoost und Random Forest) benötigt. Beim **Transformer-Modell** (`--method transformer`) wird der strukturierte Text direkt tokenisiert und dem neuronalen Netz übergeben; eine vorherige explizite Featureberechnung (wie TF-IDF oder separate Satz-Embeddings) entfällt hierbei.
 
 1.  **TF-IDF (`tfidf`)**:  
     - **Funktionsweise:** Verwendet die Term Frequency-Inverse Document Frequency. Es werden Worthäufigkeiten gezählt und gewichtet.  
