@@ -45,10 +45,9 @@ class EmailController:
     ACTION_OPTIONS = [
         "1) Antwort schreiben.",
         "2) Antwort schreiben mit einem Terminvorschlag.",
-        "3) Termin im Kalender anlegen und Person dazu einladen.",
-        "4) E-Mail nur archivieren.",
-        "5) Aufgabe im Kalender anlegen zum Lesen des Anhangs.",
-        "6) Termin für Kolloquium in Kalender anlegen.",
+        "3) E-Mail nur archivieren.",
+        "4) Aufgabe im Kalender anlegen zum Lesen des Anhangs.",
+        "5) Termin für Kolloquium in Kalender anlegen.",
     ]
 
     def __init__(
@@ -281,7 +280,7 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
     def execute_action(self, action_idx: int, mail_path: Path, email_data: dict) -> str:
         """Führt die gewählte Aktion für eine E-Mail aus."""
         latest_mail = mail_path
-        if action_idx == 3:  # 4) Nur archivieren
+        if action_idx == 2:  # 3) Nur archivieren
             return "E-Mail archiviert."
 
         student_email = ""
@@ -357,7 +356,7 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
 
         # Delayed summary generation
         summary_content = ""
-        if action_idx in [0, 1, 2, 4, 5]:  # Reply-related actions
+        if action_idx in [0, 1, 3, 4]:  # Reply-related actions
             identifier_path = email_data.get("new_identifier_path") or email_data.get(
                 "identifier_path"
             )
@@ -731,7 +730,7 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
         """
         mail_content = self.mail_parser.parse(mail_path)
         mail_content = self.mail_parser.extract_latest_message(mail_content)
-        if action_idx == 3:  # 4) Nur archivieren
+        if action_idx == 2:  # 3) Nur archivieren
             return "NO_REPLY_NEEDED", "Archivieren", False
 
         if self.debug:
@@ -761,18 +760,15 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
 
         if action_idx is not None:
             if action_idx == 0:  # 1) Antwort schreiben
-                skip_step1 = True
+                skip_step1 = False
                 skip_step12 = True
             elif action_idx == 1:  # 2) Antwort schreiben mit Terminvorschlag
                 force_appointment_slots = True
                 skip_step12 = True
-            elif action_idx == 2:  # 3) Termin im Kalender anlegen
-                force_calendar_booking = True
-                skip_step12 = True
-            elif action_idx == 4:  # 5) Aufgabe im Kalender / Finale Abgabe
+            elif action_idx == 3:  # 4) Aufgabe im Kalender / Finale Abgabe
                 skip_step1 = True
                 force_final_submission = True
-            elif action_idx == 5:  # 6) Termin für Kolloquium
+            elif action_idx == 4:  # 5) Termin für Kolloquium
                 force_colloquium = True
                 skip_step12 = True
 
@@ -809,12 +805,14 @@ AKTUELLE E-MAIL:
 {mail_content}{forced_instr}
 
 WICHTIGE ANWEISUNGEN:
-- Wenn eine Terminbestätigung vorliegt:
-  1. Wende das Chain-of-Thought (Schritt-für-Schritt-Denken) laut Skill an.
-  2. Gib den Denkprozess und die JSON-Struktur deines Denkprozesses aus, um das korrekte Zieldatum logisch abzuleiten.
-  3. Rufe danach das Tool 'manage_calendar_appointment' auf. Falls es ein Kolloquium ist, setze is_colloquium=True.
-  4. Antworte EXAKT mit 'APPOINTMENT_BOOKED' erst NACHDEM das Tool 'ERFOLG' gemeldet hat.
-- Wenn eine Terminanfrage vorliegt: Rufe das Tool 'get_appointment_slots' auf.
+- Wenn eine Zusage (Terminbestätigung) oder ein konkreter Terminvorschlag vorliegt:
+  1. Wende das Chain-of-Thought (Schritt-für-Schritt-Denken) laut Skill an, um den gewünschten Termin zu bestimmen.
+  2. Rufe das Tool `read_file` mit dem Pfad `data/appointments.md` auf, um die bestehenden Termine und Blocker zu lesen.
+  3. Prüfe intelligent, ob zu dieser Zeit bereits ein anderer Termin vorliegt oder nur ein Blocker für genau diesen Termin.
+  4. Falls belegt (ein ganz anderer Termin steht im Wege): Rufe `get_appointment_slots` auf, um freie Alternativen aus `data/free_slots.md` zu laden, und schlage diese in deiner Antwort vor.
+  5. Falls frei (kein Termin oder nur der passende Blocker für diesen Termin): Rufe das Tool `manage_calendar_appointment` auf. Falls es ein Kolloquium ist, setze is_colloquium=True.
+  6. Antworte EXAKT mit 'APPOINTMENT_BOOKED' erst NACHDEM das Tool 'manage_calendar_appointment' erfolgreich aufgerufen wurde.
+- Wenn eine Terminanfrage vorliegt: Rufe das Tool 'get_appointment_slots' auf, um freie Terminslots aus `data/free_slots.md` vorzuschlagen.
 - Wenn KEIN Bezug zu Terminen vorliegt: Antworte EXAKT mit 'NO_APPOINTMENT_RELEVANCE'.
 
 VERBOTE:

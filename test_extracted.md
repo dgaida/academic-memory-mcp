@@ -1,1 +1,1 @@
-Ich lade ein am 8. Juli 2020 13:30 – 14:30 Uhr
+Ich lade ein am 8. Juli 2026 13:30 – 14:30 Uhr

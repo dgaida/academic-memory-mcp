@@ -32,6 +32,26 @@ python scripts/appointment_gui.py
         Yes! When an appointment is selected and the participant's email address is known, the system calls the `PersonProfiler`. This checks whether a profile already exists under `D:\Steckbriefe\<email>.md` (or alternatively in the local folder `Steckbriefe/`). If no profile exists yet, the profiler searches for all emails from this person (up to 100 of the newest emails from all archive paths), incorporates information from the Knowledge Graph (e.g., roles, affiliations), determines the preferred salutation ("Du" or "Sie") through LLM analysis of recent direct emails, and automatically generates a new, detailed profile in Markdown. If a profile already exists, it is also automatically updated when new emails are found.  
 *   **File Explorer:** Allows direct access to all files in the student's folder (e.g., exposés, drafts).  
 
+## Intelligent Appointment Booking & Conflict Checking
+
+When the system responds to an email (Action 1: "Write reply"), it automatically checks the background for meeting proposals or meeting confirmations (acceptances) from the sender.
+
+### How It Works
+
+1. **Detection:** The LLM analyzes the incoming email for concrete meeting proposals (e.g., "Can we meet on Tuesday at 14:00?") or confirmations (e.g., "I accept the appointment on Monday at 15:30").
+2. **Intelligent Calendar Matching:**
+   - The system reads existing appointments from the file `data/appointments.md`.
+   - It intelligently checks whether an appointment or blocker already exists at the proposed or confirmed time:
+     - **Free:** If there is no appointment or only a blocker specifically designated for this appointment/student, the system is free. The appointment is booked directly in the calendar via the `manage_calendar_appointment` tool, and the person is invited. The system responds with the signal word `APPOINTMENT_BOOKED`.
+     - **Busy (Conflict):** If a completely different appointment or a generic blocker (e.g., another meeting, private event, etc.) is in the way, the system detects this as a conflict.
+3. **Alternative Suggestions on Conflict:**
+   - If a conflict is detected, the system automatically reads free appointment slots from `data/free_slots.md` (via the `get_appointment_slots` tool).
+   - It suggests these free times as alternatives in the reply email and asks the sender to make a new selection.
+
+### Action Unification (Action 1 & Action 3)
+
+Since regular reply generation (Action 1: "Write reply") now performs this intelligent appointment and conflict check by default, a separate action for "Create calendar appointment and invite person" (formerly Action 3) has become redundant and has been removed from the system. Action 1 covers both cases seamlessly.
+
 ## Data Source
 
 The appointments are usually exported via the Outlook VBA macro `AppointmentExport.bas`. The system reads this exported data and enriches it with knowledge from the local knowledge base.

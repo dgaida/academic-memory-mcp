@@ -65,20 +65,15 @@ Während der Arbeit in der GUI (insbesondere im Detail-Tab 2) führt das System 
 ---
 
 ## 5. Phase: Aktions-Vorschläge & GUI-Interaktion
-Basierend auf der KI-gestützten Analyse schlägt das System eine von sechs Aktionen vor. Diese Auswahl wird in der GUI vorselektiert und kann vom Benutzer manuell überprüft, angepasst oder überschrieben werden.
+Basierend auf der KI-gestützten Analyse schlägt das System eine von fünf Aktionen vor. Diese Auswahl wird in der GUI vorselektiert und kann vom Benutzer manuell überprüft, angepasst oder überschrieben werden.
 
 | Aktion | Beschreibung |
 | :--- | :--- |
-| **1) Antwort schreiben** | Standard-Antwort basierend auf dem Thema. |
-| **2) Antwort mit Terminvorschlag** | Sucht freie Slots und schlägt diese vor. |
-| **3) Termin direkt buchen** | Erkennt eine Terminbestätigung und trägt diese ein. |
-| **4) Nur archivieren** | Einsortierung in den Archiv-Ordner; keine Antwort nötig. |
-| **5) Aufgabe "Anhang lesen"** | Speziell für finale Abgaben (Korrektur-Erinnerung). |
-| **6) Kolloquium-Termin** | Spezielle Buchung für Abschlussvorträge. |
-
----
-
-
+| **1) Antwort schreiben** | Standard-Antwort basierend auf dem Thema. **Integriert eine intelligente Terminprüfung:** Falls ein Terminvorschlag oder eine Zusage im Text erkannt wird, gleicht das System dies mit `data/appointments.md` ab. Bei Verfügbarkeit wird der Termin direkt im Kalender gebucht und eingeladen; andernfalls werden freie Alternativen aus `data/free_slots.md` vorgeschlagen. |
+| **2) Antwort mit Terminvorschlag** | Sucht freie Slots in `data/free_slots.md` und schlägt diese proaktiv vor. |
+| **3) E-Mail nur archivieren** | Einsortierung in den Archiv-Ordner; keine Antwort nötig. |
+| **4) Aufgabe im Kalender anlegen...** | Speziell für finale Abgaben (Korrektur-Erinnerung / Speichern von Anhängen). |
+| **5) Termin für Kolloquium in Kalender anlegen** | Spezielle Buchung für Abschlussvorträge (60 Minuten) inkl. Erstellung/Update der `config.json`. |
 
 ---
 
@@ -89,12 +84,11 @@ Sobald Sie in der GUI auf "Speichern & Ausführen" klicken, wird die gewählte A
 
 Bevor eine Antwort generiert wird, erstellt das System eine prägnante Zusammenfassung des bisherigen Konversationsverlaufs im Studentenordner (`.emails_summary.md`). Diese dient als wichtiger Kontext für das LLM, um über bisherige Absprachen informiert zu sein. Details zur Funktionsweise und Umsetzung der einzelnen Aktionen finden Sie direkt in den jeweiligen Beschreibungen:
 
-*   **[Aktion 1: Antwort schreiben](actions/action-1-antwort-schreiben.md)**  
+*   **[Aktion 1: Antwort schreiben (inkl. Terminbuchung / Konfliktprüfung)](actions/action-1-antwort-schreiben.md)**
 *   **[Aktion 2: Antwort mit Terminvorschlag](actions/action-2-antwort-terminvorschlag.md)**  
-*   **[Aktion 3: Termin direkt buchen](actions/action-3-termin-buchen.md)**  
-*   **[Aktion 4: Nur archivieren](actions/action-4-nur-archivieren.md)**  
-*   **[Aktion 5: Aufgabe im Kalender anlegen (Finale Abgabe)](actions/action-5-aufgabe-kalender.md)**  
-*   **[Aktion 6: Kolloquium-Termin](actions/action-6-kolloquium-termin.md)**  
+*   **[Aktion 3: Nur archivieren](actions/action-4-nur-archivieren.md)**
+*   **[Aktion 4: Aufgabe im Kalender anlegen (Finale Abgabe)](actions/action-5-aufgabe-kalender.md)**
+*   **[Aktion 5: Kolloquium-Termin](actions/action-6-kolloquium-termin.md)**
 
 ---
 
@@ -106,18 +100,14 @@ Bevor eine Antwort generiert wird, erstellt das System eine prägnante Zusammenf
 
 
 !!! info "Automatische Archivierung"
-    Das System schlägt für bestimmte E-Mails automatisch die Aktion **"4) Nur archivieren"** vor:  
+    Das System schlägt für bestimmte E-Mails automatisch die Aktion **"3) Nur archivieren"** vor:
     - **Alte E-Mails:** E-Mails, die älter als der konfigurierte Schwellenwert (z.B. 6 Monate) sind.  
     - **SentItems:** E-Mails im Ordner `SentItems` benötigen nie eine Antwort-Aktion.  
     - **Bereits beantwortet:** E-Mails, für die das System erkennt, dass kein Handlungsbedarf besteht.  
 ---
 
-
-
 ### Diagnose und Logging
 Das System protokolliert jeden Schritt der E-Mail-Verarbeitung detailliert in `process_emails.log`. Sollte die GUI keine E-Mails anzeigen, obwohl diese in `sorted_emails.md` gelistet sind, prüfen Sie die Log-Datei auf Warnungen bezüglich fehlender Modelldateien oder Zugriffsproblemen.
-
-
 
 ## Erstellte Berichte und Dateien
 
@@ -135,16 +125,7 @@ Dieser Bericht wird direkt nach der initialen Sortierung erstellt und listet all
 ```
 
 ### 2. `emails_to_process.md`
-Diese Datei enthält eine Liste aller E-Mails, die für die Bearbeitung in der Gradio GUI vorgesehen sind, inklusive Metadaten wie Klasse und Semester.
-
-**Beispiel:**
-```markdown
-# Zu beantwortende E-Mails
-
-| Student | Klasse | Semester |
-| :--- | :--- | :--- |
-| Mustermann | Bachelor Thesis | 2023_24_WS |
-```
+Diese Datei enthält eine KI-generierte Zusammenfassung des bisherigen Konversationsverlaufs mit dem Studenten. Diese Datei wird vor der Antwortgenerierung erstellt oder aktualisiert.
 
 ### 3. `processed_emails.md`
 Der Abschlussbericht, der nach der Verarbeitung (entweder automatisch oder via GUI) erstellt wird. Er dokumentiert, was mit jeder E-Mail geschehen ist.
