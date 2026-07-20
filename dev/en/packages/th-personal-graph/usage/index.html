@@ -15,7 +15,7 @@
         <link rel="canonical" href="https://dgaida.github.io/academic-memory-mcp/dev/en/packages/th-personal-graph/usage/">
       
       
-        <link rel="prev" href="../">
+        <link rel="prev" href="../crawler/">
       
       
         <link rel="next" href="../mocogi/">
@@ -1896,6 +1896,34 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../crawler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TH Personal Crawler
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -1971,10 +1999,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#parameters-examples" class="md-nav__link">
+  <a href="#short-example" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Parameters &amp; Examples
+        Short Example
       
     </span>
   </a>
@@ -2027,7 +2055,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#parameters-examples_1" class="md-nav__link">
+  <a href="#parameters-examples" class="md-nav__link">
     <span class="md-ellipsis">
       
         Parameters &amp; Examples
@@ -2374,10 +2402,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#parameters-examples" class="md-nav__link">
+  <a href="#short-example" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Parameters &amp; Examples
+        Short Example
       
     </span>
   </a>
@@ -2430,7 +2458,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#parameters-examples_1" class="md-nav__link">
+  <a href="#parameters-examples" class="md-nav__link">
     <span class="md-ellipsis">
       
         Parameters &amp; Examples
@@ -2465,44 +2493,31 @@
 <h1 id="script-usage">Script Usage<a class="headerlink" href="#script-usage" title="Permanent link">&para;</a></h1>
 <p>The features of the <code>th_personal_graph</code> package are controlled by three central CLI scripts. They should be invoked as executable modules.</p>
 <h2 id="1-th-personal-crawler">1. TH Personal Crawler<a class="headerlink" href="#1-th-personal-crawler" title="Permanent link">&para;</a></h2>
-<p>Crawls the personnel directory of TH Köln. Results are grouped by faculty/institution and stored as Markdown files in <code>data/th_koeln/</code>, and imported into the SQLite database <code>th_personal.db</code>.</p>
-<h3 id="parameters-examples">Parameters &amp; Examples<a class="headerlink" href="#parameters-examples" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>A-Z Crawl for the entire TH:</strong><br />
-  <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python<span class="w"> </span>-m<span class="w"> </span>th_personal_graph.scripts.crawl_th_koeln_persons
-</code></pre></div></li>
-<li><strong>Crawl a specific faculty:</strong><br />
-  <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>python<span class="w"> </span>-m<span class="w"> </span>th_personal_graph.scripts.crawl_th_koeln_persons<span class="w"> </span>--faculty<span class="w"> </span><span class="s2">&quot;Fakultät für Informatik und Ingenieurwissenschaften&quot;</span>
-</code></pre></div></li>
-<li><strong>Crawl a specific institution:</strong><br />
-  <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>python<span class="w"> </span>-m<span class="w"> </span>th_personal_graph.scripts.crawl_th_koeln_persons<span class="w"> </span>--institution<span class="w"> </span><span class="s2">&quot;Campus IT&quot;</span>
-</code></pre></div></li>
-<li><strong>List faculties/institutions:</strong><br />
-  <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python<span class="w"> </span>-m<span class="w"> </span>th_personal_graph.scripts.crawl_th_koeln_persons<span class="w"> </span>--list-faculties
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>python<span class="w"> </span>-m<span class="w"> </span>th_personal_graph.scripts.crawl_th_koeln_persons<span class="w"> </span>--list-institutions
-</code></pre></div></li>
-<li><strong>Rebuild database from existing Markdown files:</strong><br />
-  <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python<span class="w"> </span>-m<span class="w"> </span>th_personal_graph.scripts.crawl_th_koeln_persons<span class="w"> </span>--rebuild
-</code></pre></div></li>
-</ul>
+<p>Crawls the personnel directory of TH Köln, extracting contact details, faculties, and academic degrees. It stores the results as Markdown files and imports them into the local SQLite database <code>th_personal.db</code>.</p>
+<p>Detailed information regarding the extracted data, sources, and all available parameters can be found on the <a href="../crawler/">TH Personal Crawler</a> page.</p>
+<h3 id="short-example">Short Example<a class="headerlink" href="#short-example" title="Permanent link">&para;</a></h3>
+<p>A full A-Z crawl of the entire personnel directory can be executed with:
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python<span class="w"> </span>-m<span class="w"> </span>th_personal_graph.scripts.crawl_th_koeln_persons
+</code></pre></div></p>
 <hr />
 <h2 id="2-mocogi-extractor">2. MOCOGI Extractor<a class="headerlink" href="#2-mocogi-extractor" title="Permanent link">&para;</a></h2>
 <p>Fetches study programs, examination regulations (PO), and module assignments via the MOCOGI API, extracts responsibilities (module management, first/second examiners), and adds them to the graph in <code>th_personal.db</code>.</p>
+<p>For more details on functionality, prerequisites, and output formats, see <a href="../mocogi/">MOCOGI Extraction</a>.</p>
 <h3 id="execution">Execution<a class="headerlink" href="#execution" title="Permanent link">&para;</a></h3>
-<p><div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>python<span class="w"> </span>-m<span class="w"> </span>th_personal_graph.scripts.extract_mocogi_data
+<p><div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>python<span class="w"> </span>-m<span class="w"> </span>th_personal_graph.scripts.extract_mocogi_data
 </code></pre></div>
 <em>Note:</em> This script requires a valid API token in the <code>MOCOGI_API_TOKEN</code> (or <code>MOCOGI_API_KEY</code>) environment variable.</p>
 <hr />
 <h2 id="3-knowledge-graph-visualization">3. Knowledge Graph Visualization<a class="headerlink" href="#3-knowledge-graph-visualization" title="Permanent link">&para;</a></h2>
 <p>Creates an interactive Pyvis visualization of the knowledge graph as an HTML file (<code>knowledge_graph.html</code> in the root folder).</p>
-<h3 id="parameters-examples_1">Parameters &amp; Examples<a class="headerlink" href="#parameters-examples_1" title="Permanent link">&para;</a></h3>
+<h3 id="parameters-examples">Parameters &amp; Examples<a class="headerlink" href="#parameters-examples" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Visualize the entire graph:</strong><br />
-  <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>python<span class="w"> </span>-m<span class="w"> </span>th_personal_graph.scripts.visualize_knowledge_graph
+  <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>python<span class="w"> </span>-m<span class="w"> </span>th_personal_graph.scripts.visualize_knowledge_graph
 </code></pre></div></li>
 <li><strong>Filter by specific node names:</strong><br />
   Creates a subgraph displaying only the filtered node, its parent structures, and outgoing paths.
-  <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>python<span class="w"> </span>-m<span class="w"> </span>th_personal_graph.scripts.visualize_knowledge_graph<span class="w"> </span>--filter<span class="w"> </span><span class="s2">&quot;Informatik&quot;</span><span class="w"> </span><span class="s2">&quot;Mustermann&quot;</span>
+  <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python<span class="w"> </span>-m<span class="w"> </span>th_personal_graph.scripts.visualize_knowledge_graph<span class="w"> </span>--filter<span class="w"> </span><span class="s2">&quot;Informatik&quot;</span><span class="w"> </span><span class="s2">&quot;Mustermann&quot;</span>
 </code></pre></div></li>
 </ul>
 
@@ -2542,7 +2557,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../" class="md-footer__link md-footer__link--prev" aria-label="Previous: Übersicht">
+          <a href="../crawler/" class="md-footer__link md-footer__link--prev" aria-label="Previous: TH Personal Crawler">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -2552,7 +2567,7 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Übersicht
+                TH Personal Crawler
               </div>
             </div>
           </a>

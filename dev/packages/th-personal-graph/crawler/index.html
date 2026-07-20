@@ -1,6 +1,6 @@
 
 <!doctype html>
-<html lang="en" class="no-js">
+<html lang="de" class="no-js">
   <head>
     
       <meta charset="utf-8">
@@ -12,19 +12,19 @@
         <meta name="author" content="Senior Python Architect">
       
       
-        <link rel="canonical" href="https://dgaida.github.io/academic-memory-mcp/dev/en/usage/email-parsing/">
+        <link rel="canonical" href="https://dgaida.github.io/academic-memory-mcp/dev/packages/th-personal-graph/crawler/">
       
       
-        <link rel="prev" href="../mcp/">
+        <link rel="prev" href="../">
       
       
-        <link rel="next" href="../rag-process/">
+        <link rel="next" href="../usage/">
       
       
         
-          <link rel="alternate" href="../../../usage/email-parsing/" hreflang="de">
+          <link rel="alternate" href="./" hreflang="de">
         
-          <link rel="alternate" href="./" hreflang="en">
+          <link rel="alternate" href="../../../en/packages/th-personal-graph/crawler/" hreflang="en">
         
       
       
@@ -33,7 +33,7 @@
     
     
       
-        <title>E-Mail Parsing - MCP University Memory System</title>
+        <title>TH Personal Crawler - MCP University Memory System</title>
       
     
     
@@ -58,8 +58,6 @@
         <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
     
-    
-      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
     
       <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
     
@@ -88,8 +86,8 @@
     <div data-md-component="skip">
       
         
-        <a href="#email-parsing-and-name-extraction" class="md-skip">
-          Skip to content
+        <a href="#th-personal-crawler" class="md-skip">
+          Zum Inhalt
         </a>
       
     </div>
@@ -105,8 +103,8 @@
       
 
 <header class="md-header" data-md-component="header">
-  <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../" title="MCP University Memory System" class="md-header__button md-logo" aria-label="MCP University Memory System" data-md-component="logo">
+  <nav class="md-header__inner md-grid" aria-label="Kopfzeile">
+    <a href="../../.." title="MCP University Memory System" class="md-header__button md-logo" aria-label="MCP University Memory System" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -126,7 +124,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              E-Mail Parsing
+              TH Personal Crawler
             
           </span>
         </div>
@@ -166,20 +164,20 @@
       <div class="md-header__option">
   <div class="md-select">
     
-    <button class="md-header__button md-icon" aria-label="Select language">
+    <button class="md-header__button md-icon" aria-label="Sprache wechseln">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
     </button>
     <div class="md-select__inner">
       <ul class="md-select__list">
         
           <li class="md-select__item">
-            <a href="../../../usage/email-parsing/" hreflang="de" class="md-select__link">
+            <a href="./" hreflang="de" class="md-select__link">
               Deutsch
             </a>
           </li>
         
           <li class="md-select__item">
-            <a href="./" hreflang="en" class="md-select__link">
+            <a href="../../../en/packages/th-personal-graph/crawler/" hreflang="en" class="md-select__link">
               English
             </a>
           </li>
@@ -200,21 +198,21 @@
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <input type="text" class="md-search__input" name="query" aria-label="Suche" placeholder="Suche" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
         
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
         
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
       </label>
-      <nav class="md-search__options" aria-label="Search">
+      <nav class="md-search__options" aria-label="Suche">
         
-          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Teilen" aria-label="Teilen" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
             
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
           </a>
         
-        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+        <button type="reset" class="md-search__icon md-icon" title="Zurücksetzen" aria-label="Zurücksetzen" tabindex="-1">
           
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
         </button>
@@ -227,7 +225,7 @@
       <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
         <div class="md-search-result" data-md-component="search-result">
           <div class="md-search-result__meta">
-            Initializing search
+            Suche wird initialisiert
           </div>
           <ol class="md-search-result__list" role="presentation"></ol>
         </div>
@@ -248,7 +246,7 @@
         
           
             
-<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+<nav class="md-tabs" aria-label="Hauptnavigation" data-md-component="tabs">
   <div class="md-grid">
     <ul class="md-tabs__list">
       
@@ -258,7 +256,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../" class="md-tabs__link">
+      <a href="../../.." class="md-tabs__link">
         
   
   
@@ -279,7 +277,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../getting-started/" class="md-tabs__link">
+        <a href="../../../getting-started/" class="md-tabs__link">
           
   
   
@@ -301,7 +299,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="../../requirements/" class="md-tabs__link">
+        <a href="../../../requirements/" class="md-tabs__link">
           
   
   
@@ -335,7 +333,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../" title="MCP University Memory System" class="md-nav__button md-logo" aria-label="MCP University Memory System" data-md-component="logo">
+    <a href="../../.." title="MCP University Memory System" class="md-nav__button md-logo" aria-label="MCP University Memory System" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -353,7 +351,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../" class="md-nav__link">
+      <a href="../../.." class="md-nav__link">
         
   
   
@@ -434,7 +432,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/" class="md-nav__link">
+      <a href="../../../getting-started/" class="md-nav__link">
         
   
   
@@ -516,7 +514,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../email-search/" class="md-nav__link">
+      <a href="../../../usage/email-search/" class="md-nav__link">
         
   
   
@@ -544,7 +542,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../appointment-management/" class="md-nav__link">
+      <a href="../../../usage/appointment-management/" class="md-nav__link">
         
   
   
@@ -626,7 +624,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../email-workflow/" class="md-nav__link">
+      <a href="../../../usage/email-workflow/" class="md-nav__link">
         
   
   
@@ -654,7 +652,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../actions/action-1-antwort-schreiben/" class="md-nav__link">
+      <a href="../../../usage/actions/action-1-antwort-schreiben/" class="md-nav__link">
         
   
   
@@ -682,7 +680,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../actions/action-2-antwort-terminvorschlag/" class="md-nav__link">
+      <a href="../../../usage/actions/action-2-antwort-terminvorschlag/" class="md-nav__link">
         
   
   
@@ -710,7 +708,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../actions/action-3-termin-buchen/" class="md-nav__link">
+      <a href="../../../usage/actions/action-3-termin-buchen/" class="md-nav__link">
         
   
   
@@ -738,7 +736,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../actions/action-4-nur-archivieren/" class="md-nav__link">
+      <a href="../../../usage/actions/action-4-nur-archivieren/" class="md-nav__link">
         
   
   
@@ -766,7 +764,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../actions/action-5-aufgabe-kalender/" class="md-nav__link">
+      <a href="../../../usage/actions/action-5-aufgabe-kalender/" class="md-nav__link">
         
   
   
@@ -794,7 +792,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../actions/action-6-kolloquium-termin/" class="md-nav__link">
+      <a href="../../../usage/actions/action-6-kolloquium-termin/" class="md-nav__link">
         
   
   
@@ -830,7 +828,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../profiles/" class="md-nav__link">
+      <a href="../../../usage/profiles/" class="md-nav__link">
         
   
   
@@ -858,7 +856,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../outlook-macros/" class="md-nav__link">
+      <a href="../../../usage/outlook-macros/" class="md-nav__link">
         
   
   
@@ -948,7 +946,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../installation/" class="md-nav__link">
+      <a href="../../../installation/" class="md-nav__link">
         
   
   
@@ -976,7 +974,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../setup/" class="md-nav__link">
+      <a href="../../../setup/" class="md-nav__link">
         
   
   
@@ -1004,7 +1002,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../configuration/" class="md-nav__link">
+      <a href="../../../configuration/" class="md-nav__link">
         
   
   
@@ -1032,7 +1030,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../troubleshooting/" class="md-nav__link">
+      <a href="../../../troubleshooting/" class="md-nav__link">
         
   
   
@@ -1122,7 +1120,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../scripts/" class="md-nav__link">
+      <a href="../../../usage/scripts/" class="md-nav__link">
         
   
   
@@ -1222,7 +1220,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../requirements/" class="md-nav__link">
+      <a href="../../../requirements/" class="md-nav__link">
         
   
   
@@ -1250,7 +1248,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../architecture/" class="md-nav__link">
+      <a href="../../../architecture/" class="md-nav__link">
         
   
   
@@ -1278,7 +1276,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../" class="md-nav__link">
+      <a href="../../../usage/" class="md-nav__link">
         
   
   
@@ -1306,7 +1304,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../indexing-details/" class="md-nav__link">
+      <a href="../../../usage/indexing-details/" class="md-nav__link">
         
   
   
@@ -1334,7 +1332,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../database-management/" class="md-nav__link">
+      <a href="../../../usage/database-management/" class="md-nav__link">
         
   
   
@@ -1362,7 +1360,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../database-processes/" class="md-nav__link">
+      <a href="../../../usage/database-processes/" class="md-nav__link">
         
   
   
@@ -1390,7 +1388,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../mcp/" class="md-nav__link">
+      <a href="../../../usage/mcp/" class="md-nav__link">
         
   
   
@@ -1415,37 +1413,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    E-Mail Parsing
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../../usage/email-parsing/" class="md-nav__link">
         
   
   
@@ -1461,70 +1432,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#basic-logic-hierarchical" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Basic Logic (Hierarchical)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Examples
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#implementation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Implementation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#important-rules-for-developers" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Important Rules for Developers
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1537,7 +1444,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../rag-process/" class="md-nav__link">
+      <a href="../../../usage/rag-process/" class="md-nav__link">
         
   
   
@@ -1565,7 +1472,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../memory/" class="md-nav__link">
+      <a href="../../../usage/memory/" class="md-nav__link">
         
   
   
@@ -1593,7 +1500,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../ontology-learning/" class="md-nav__link">
+      <a href="../../../usage/ontology-learning/" class="md-nav__link">
         
   
   
@@ -1621,7 +1528,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/" class="md-nav__link">
+      <a href="../../../api/" class="md-nav__link">
         
   
   
@@ -1646,8 +1553,10 @@
                 
   
   
+    
   
   
+  
     
     
     
@@ -1661,13 +1570,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_13" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_13" checked>
         
           
           <label class="md-nav__link" for="__nav_3_13" id="__nav_3_13_label" tabindex="">
@@ -1688,7 +1595,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_13_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_13_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3_13">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1760,7 +1667,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../packages/email-classifier/" class="md-nav__link">
+      <a href="../../email-classifier/" class="md-nav__link">
         
   
   
@@ -1788,7 +1695,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../packages/email-classifier/usage/" class="md-nav__link">
+      <a href="../../email-classifier/usage/" class="md-nav__link">
         
   
   
@@ -1816,7 +1723,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../packages/email-classifier/training/" class="md-nav__link">
+      <a href="../../email-classifier/training/" class="md-nav__link">
         
   
   
@@ -1844,7 +1751,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../packages/email-classifier/analysis/" class="md-nav__link">
+      <a href="../../email-classifier/analysis/" class="md-nav__link">
         
   
   
@@ -1872,7 +1779,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../packages/email-classifier/nn_architecture/" class="md-nav__link">
+      <a href="../../email-classifier/nn_architecture/" class="md-nav__link">
         
   
   
@@ -1905,8 +1812,10 @@
                 
   
   
+    
   
   
+  
     
     
     
@@ -1917,13 +1826,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_13_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_13_2" checked>
         
           
           <label class="md-nav__link" for="__nav_3_13_2" id="__nav_3_13_2_label" tabindex="0">
@@ -1944,7 +1851,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_13_2_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_13_2_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3_13_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1962,7 +1869,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../packages/th-personal-graph/" class="md-nav__link">
+      <a href="../" class="md-nav__link">
         
   
   
@@ -1987,10 +1894,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../packages/th-personal-graph/crawler/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TH Personal Crawler
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -2006,6 +1940,142 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Inhaltsverzeichnis">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Inhaltsverzeichnis
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#zweck" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zweck
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#welche-informationen-werden-extrahiert" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Welche Informationen werden extrahiert?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#datenquelle-von-welchen-webseiten-wird-extrahiert" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Datenquelle: Von welchen Webseiten wird extrahiert?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aufruf-und-parametermoglichkeiten" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aufruf- und Parametermöglichkeiten
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Aufruf- und Parametermöglichkeiten">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-gesamten-wissensgraphen-aufbauen-a-z-crawl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Gesamten Wissensgraphen aufbauen (A-Z Crawl)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-nach-einer-bestimmten-fakultat-filtern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Nach einer bestimmten Fakultät filtern
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-nach-einer-bestimmten-einrichtung-filtern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Nach einer bestimmten Einrichtung filtern
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-filteroptionen-auflisten" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Filteroptionen auflisten
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-datenbank-aus-markdown-dateien-rekonstruieren" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Datenbank aus Markdown-Dateien rekonstruieren
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#beispielhafter-ablauf-anwendungsbeispiel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Beispielhafter Ablauf (Anwendungsbeispiel)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -2018,7 +2088,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../packages/th-personal-graph/usage/" class="md-nav__link">
+      <a href="../usage/" class="md-nav__link">
         
   
   
@@ -2046,7 +2116,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../packages/th-personal-graph/mocogi/" class="md-nav__link">
+      <a href="../mocogi/" class="md-nav__link">
         
   
   
@@ -2074,7 +2144,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../packages/th-personal-graph/architecture/" class="md-nav__link">
+      <a href="../architecture/" class="md-nav__link">
         
   
   
@@ -2175,7 +2245,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/" class="md-nav__link">
+      <a href="../../../development/" class="md-nav__link">
         
   
   
@@ -2203,7 +2273,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/docstring-guide/" class="md-nav__link">
+      <a href="../../../development/docstring-guide/" class="md-nav__link">
         
   
   
@@ -2231,7 +2301,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/changelog/" class="md-nav__link">
+      <a href="../../../development/changelog/" class="md-nav__link">
         
   
   
@@ -2259,7 +2329,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/versioning/" class="md-nav__link">
+      <a href="../../../development/versioning/" class="md-nav__link">
         
   
   
@@ -2287,7 +2357,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../metrics/" class="md-nav__link">
+      <a href="../../../metrics/" class="md-nav__link">
         
   
   
@@ -2336,7 +2406,7 @@
                   <div class="md-sidebar__inner">
                     
 
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+<nav class="md-nav md-nav--secondary" aria-label="Inhaltsverzeichnis">
   
   
   
@@ -2345,15 +2415,15 @@
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
-      Table of contents
+      Inhaltsverzeichnis
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#basic-logic-hierarchical" class="md-nav__link">
+  <a href="#zweck" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Basic Logic (Hierarchical)
+        Zweck
       
     </span>
   </a>
@@ -2361,10 +2431,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#examples" class="md-nav__link">
+  <a href="#welche-informationen-werden-extrahiert" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Examples
+        Welche Informationen werden extrahiert?
       
     </span>
   </a>
@@ -2372,10 +2442,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#implementation" class="md-nav__link">
+  <a href="#datenquelle-von-welchen-webseiten-wird-extrahiert" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Implementation
+        Datenquelle: Von welchen Webseiten wird extrahiert?
       
     </span>
   </a>
@@ -2383,10 +2453,82 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#important-rules-for-developers" class="md-nav__link">
+  <a href="#aufruf-und-parametermoglichkeiten" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Important Rules for Developers
+        Aufruf- und Parametermöglichkeiten
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Aufruf- und Parametermöglichkeiten">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-gesamten-wissensgraphen-aufbauen-a-z-crawl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Gesamten Wissensgraphen aufbauen (A-Z Crawl)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-nach-einer-bestimmten-fakultat-filtern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Nach einer bestimmten Fakultät filtern
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-nach-einer-bestimmten-einrichtung-filtern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Nach einer bestimmten Einrichtung filtern
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-filteroptionen-auflisten" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Filteroptionen auflisten
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-datenbank-aus-markdown-dateien-rekonstruieren" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Datenbank aus Markdown-Dateien rekonstruieren
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#beispielhafter-ablauf-anwendungsbeispiel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Beispielhafter Ablauf (Anwendungsbeispiel)
       
     </span>
   </a>
@@ -2410,85 +2552,102 @@
 
 
 
-<h1 id="email-parsing-and-name-extraction">Email Parsing and Name Extraction<a class="headerlink" href="#email-parsing-and-name-extraction" title="Permanent link">&para;</a></h1>
-<p>This page describes in detail how the system extracts names from email addresses and display names. This logic is crucial for correctly sorting emails into student folders.</p>
-<h2 id="basic-logic-hierarchical">Basic Logic (Hierarchical)<a class="headerlink" href="#basic-logic-hierarchical" title="Permanent link">&para;</a></h2>
-<p>The system follows a strict hierarchy to determine the surname of a sender or recipient:</p>
-<ol>
-<li><strong>"im Auftrag von" Recognition</strong>: If an email was sent on behalf of someone else, the actual sender is focused.  </li>
-<li><strong>Greedy Name Matching (Primary)</strong>:  <ul>
-<li>The display name (e.g., "Mustermann Max") is split into its individual parts.  </li>
-<li>These parts are matched against the "local part" of the email address (the part before the @).  </li>
-<li>If a part of the display name is found within the local part, it is identified as the surname.  </li>
-<li><em>Example</em>: <code>Mustermann Max &lt;mustermann@example.com&gt;</code> -&gt; "Mustermann" is found in the local part and is therefore the surname.  </li>
-</ul>
-</li>
-<li><strong>Dot-Separated Local Part (Fallback 1)</strong>:  <ul>
-<li>If no match with the display name is possible, the local part is split at dots (<code>.</code>).  </li>
-<li>The system checks the segments from back to front and ignores generic terms (such as "info", "studium").  </li>
-<li><em>Example</em>: <code>max.mustermann@smail.th-koeln.de</code> -&gt; "Mustermann".  </li>
-</ul>
-</li>
-<li><strong>Generic Fallbacks (Fallback 2)</strong>:  <ul>
-<li>Commas in the display name (<code>Surname, Firstname</code>).  </li>
-<li>Last word in the display name.  </li>
-<li>Local part formatting (uppercase recognition).  </li>
-</ul>
-</li>
-</ol>
-<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Input (Sender/Recipient)</th>
-<th style="text-align: left;">Extracted Surname</th>
-<th style="text-align: left;">Reason</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;"><code>Mustermann, Max</code></td>
-<td style="text-align: left;"><strong>Mustermann</strong></td>
-<td style="text-align: left;">Comma separation</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>Mustermann Max &lt;mustermann@example.com&gt;</code></td>
-<td style="text-align: left;"><strong>Mustermann</strong></td>
-<td style="text-align: left;">Greedy Match (Mustermann in local part)</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>max.mustermann@th-koeln.de</code></td>
-<td style="text-align: left;"><strong>Mustermann</strong></td>
-<td style="text-align: left;">Dot-separated local part</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>'Hans Müller' &lt;mueller@th-koeln.de&gt;</code></td>
-<td style="text-align: left;"><strong>Müller</strong></td>
-<td style="text-align: left;">Greedy Match (mueller in local part, umlaut normalization)</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>info@th-koeln.de</code></td>
-<td style="text-align: left;"><strong>Unknown</strong></td>
-<td style="text-align: left;">Generic local part</td>
-</tr>
-</tbody>
-</table>
-<h2 id="implementation">Implementation<a class="headerlink" href="#implementation" title="Permanent link">&para;</a></h2>
-<p>The logic is implemented in <code>mcp_university/classifier/sort_emails.py</code> in the function <code>extract_lastname</code>.</p>
-<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">extract_lastname</span><span class="p">(</span><span class="n">sender_raw</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="c1"># Hierarchical Logic:</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="c1"># 1. on behalf of</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="c1"># 2. Greedy Match (Display Name vs Local Part)</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="c1"># 3. Dot-Separated Local Part</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="c1"># 4. Generic Fallbacks</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="o">...</span>
-</code></pre></div>
-<h2 id="important-rules-for-developers">Important Rules for Developers<a class="headerlink" href="#important-rules-for-developers" title="Permanent link">&para;</a></h2>
+<h1 id="th-personal-crawler">TH Personal Crawler<a class="headerlink" href="#th-personal-crawler" title="Permanent link">&para;</a></h1>
+<p>Der TH Personal Crawler ist ein spezialisiertes CLI-Skript, das das offizielle Personalverzeichnis der TH Köln durchsucht und strukturierte Profildaten der Mitarbeiter extrahiert.</p>
+<h2 id="zweck">Zweck<a class="headerlink" href="#zweck" title="Permanent link">&para;</a></h2>
+<p>Das Skript <code>crawl_th_koeln_persons.py</code> (aufgerufen als ausführbares Modul <code>python -m th_personal_graph.scripts.crawl_th_koeln_persons</code>) dient dem automatisierten Aufbau und der Aktualisierung der lokalen Personen-Datenbank. Die extrahierten Profildaten werden sowohl als strukturierte Markdown-Dateien im Verzeichnis <code>data/th_koeln/</code> abgelegt als auch direkt in den SQLite-basierten Wissensgraphen (<code>th_personal.db</code>) importiert.</p>
+<hr />
+<h2 id="welche-informationen-werden-extrahiert">Welche Informationen werden extrahiert?<a class="headerlink" href="#welche-informationen-werden-extrahiert" title="Permanent link">&para;</a></h2>
+<p>Der Crawler durchläuft die Personenübersicht und besucht die individuellen Profilseiten der gefundenen Personen. Dabei werden folgende Detailinformationen extrahiert:</p>
 <ul>
-<li><strong>No deletion of comments</strong>: The explanatory comments in <code>extract_lastname</code> are essential for understanding edge cases.  </li>
-<li><strong>Google-Style Docstrings</strong>: Every change must be documented.  </li>
-<li><strong>Umlaut Handling</strong>: The system normalizes names for comparison (<code>Müller</code> vs <code>mueller</code>) but returns the original name (Title Case).  </li>
+<li><strong>Stammdaten:</strong><ul>
+<li>Voller Name</li>
+<li>Akademischer Grad (z. B. Dr., Prof. Dr.)</li>
+<li>E-Mail-Adresse</li>
+<li>URL der persönlichen Profilseite bei der TH Köln</li>
 </ul>
+</li>
+<li><strong>Organisatorische Zuordnung:</strong><ul>
+<li>Fakultät (z. B. "Fakultät für Informatik und Ingenieurwissenschaften")</li>
+<li>Institut (z. B. "Institut für Informatik") oder andere Einrichtungen (z. B. "Campus IT")</li>
+</ul>
+</li>
+<li><strong>Rollen &amp; Funktionen (falls vorhanden):</strong><ul>
+<li>Prüfungsausschussvorsitz (<code>is_pa_vorsitz</code>)</li>
+<li>DekanIn (<code>is_dekan</code>)</li>
+<li>Senatsmitglied (<code>is_senat</code>)</li>
+<li>InstitutsdirektorIn (<code>is_institutsdirektor</code>)</li>
+<li>Präsidiumsmitglied (<code>is_praesidium</code>)</li>
+<li>Studiengangsleitung (Name des zugeordneten Studiengangs, falls im Profiltext hinterlegt)</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="datenquelle-von-welchen-webseiten-wird-extrahiert">Datenquelle: Von welchen Webseiten wird extrahiert?<a class="headerlink" href="#datenquelle-von-welchen-webseiten-wird-extrahiert" title="Permanent link">&para;</a></h2>
+<p>Die Extraktion erfolgt direkt aus dem offiziellen Webauftritt der TH Köln:
+1. <strong>Übersichtsseite (A-Z Suche):</strong>
+   <code>https://www.th-koeln.de/hochschule/personen_3850.php</code>
+   Hier werden die initialen Kontaktdaten (Name, E-Mail-Adresse) sowie die Links zu den Detailprofilen über Filterparameter (Anfangsbuchstaben, Fakultäten oder Einrichtungen) ermittelt.
+2. <strong>Individuelle Profilseiten:</strong>
+   Die Detailseiten der Personen (z. B. <code>https://www.th-koeln.de/personen/[name]/</code>), um akademische Grade, Fakultäts-/Institutszugehörigkeiten sowie Funktionen und Verantwortlichkeiten auszulesen.</p>
+<hr />
+<h2 id="aufruf-und-parametermoglichkeiten">Aufruf- und Parametermöglichkeiten<a class="headerlink" href="#aufruf-und-parametermoglichkeiten" title="Permanent link">&para;</a></h2>
+<p>Das Skript bietet flexible Parameter zur Einschränkung des Crawling-Prozesses oder zur Wiederherstellung der Datenbank:</p>
+<h3 id="1-gesamten-wissensgraphen-aufbauen-a-z-crawl">1. Gesamten Wissensgraphen aufbauen (A-Z Crawl)<a class="headerlink" href="#1-gesamten-wissensgraphen-aufbauen-a-z-crawl" title="Permanent link">&para;</a></h3>
+<p>Durchsucht das gesamte Personalverzeichnis von A bis Z.
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python<span class="w"> </span>-m<span class="w"> </span>th_personal_graph.scripts.crawl_th_koeln_persons
+</code></pre></div></p>
+<h3 id="2-nach-einer-bestimmten-fakultat-filtern">2. Nach einer bestimmten Fakultät filtern<a class="headerlink" href="#2-nach-einer-bestimmten-fakultat-filtern" title="Permanent link">&para;</a></h3>
+<p>Extrahiert nur Personen einer bestimmten Fakultät.
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>python<span class="w"> </span>-m<span class="w"> </span>th_personal_graph.scripts.crawl_th_koeln_persons<span class="w"> </span>--faculty<span class="w"> </span><span class="s2">&quot;Fakultät für Informatik und Ingenieurwissenschaften&quot;</span>
+</code></pre></div></p>
+<h3 id="3-nach-einer-bestimmten-einrichtung-filtern">3. Nach einer bestimmten Einrichtung filtern<a class="headerlink" href="#3-nach-einer-bestimmten-einrichtung-filtern" title="Permanent link">&para;</a></h3>
+<p>Crawl eingeschränkt auf eine bestimmte zentrale Betriebseinheit oder Verwaltungseinrichtung.
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>python<span class="w"> </span>-m<span class="w"> </span>th_personal_graph.scripts.crawl_th_koeln_persons<span class="w"> </span>--institution<span class="w"> </span><span class="s2">&quot;Campus IT&quot;</span>
+</code></pre></div></p>
+<h3 id="4-filteroptionen-auflisten">4. Filteroptionen auflisten<a class="headerlink" href="#4-filteroptionen-auflisten" title="Permanent link">&para;</a></h3>
+<p>Gibt alle auf der Webseite verfügbaren Namen von Fakultäten und Einrichtungen aus. Dies ist nützlich, um die korrekten Strings für die Filterung zu ermitteln.
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Fakultäten auflisten</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>python<span class="w"> </span>-m<span class="w"> </span>th_personal_graph.scripts.crawl_th_koeln_persons<span class="w"> </span>--list-faculties
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># Einrichtungen auflisten</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>python<span class="w"> </span>-m<span class="w"> </span>th_personal_graph.scripts.crawl_th_koeln_persons<span class="w"> </span>--list-institutions
+</code></pre></div></p>
+<h3 id="5-datenbank-aus-markdown-dateien-rekonstruieren">5. Datenbank aus Markdown-Dateien rekonstruieren<a class="headerlink" href="#5-datenbank-aus-markdown-dateien-rekonstruieren" title="Permanent link">&para;</a></h3>
+<p>Falls die Markdown-Berichte in <code>data/th_koeln/</code> bereits existieren, kann die SQLite-Datenbank <code>th_personal.db</code> komplett neu aufgebaut werden, ohne die TH-Webseite erneut anfragen zu müssen (sehr schnell und ressourcenschonend).
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python<span class="w"> </span>-m<span class="w"> </span>th_personal_graph.scripts.crawl_th_koeln_persons<span class="w"> </span>--rebuild
+</code></pre></div></p>
+<hr />
+<h2 id="beispielhafter-ablauf-anwendungsbeispiel">Beispielhafter Ablauf (Anwendungsbeispiel)<a class="headerlink" href="#beispielhafter-ablauf-anwendungsbeispiel" title="Permanent link">&para;</a></h2>
+<p>Wenn Sie den Crawler für eine spezifische Fakultät starten möchten:</p>
+<ol>
+<li>
+<p><strong>Verfügbare Fakultäten abfragen:</strong>
+   <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>python<span class="w"> </span>-m<span class="w"> </span>th_personal_graph.scripts.crawl_th_koeln_persons<span class="w"> </span>--list-faculties
+</code></pre></div>
+   <em>Ausgabe (Auszug):</em>
+   <div class="language-text highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Available Faculties:
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>  - Fakultät für Angewandte Naturwissenschaften
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>  - Fakultät für Informatik und Ingenieurwissenschaften
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>  ...
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Crawl für die gewünschte Fakultät starten:</strong>
+   <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>python<span class="w"> </span>-m<span class="w"> </span>th_personal_graph.scripts.crawl_th_koeln_persons<span class="w"> </span>--faculty<span class="w"> </span><span class="s2">&quot;Fakultät für Informatik und Ingenieurwissenschaften&quot;</span>
+</code></pre></div>
+   <em>Konsolen-Ausgabe:</em>
+   <div class="language-text highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>Filter specified, crawling A-Z for this filter.
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>Crawling character: A (Faculty: Fakultät für Informatik und Ingenieurwissenschaften)
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>  Fetching details for: ...
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Ergebnis überprüfen:</strong></p>
+</li>
+<li>Im Verzeichnis <code>data/th_koeln/</code> wird eine Datei namens <code>persons_Fakult_t_f_r_Informatik_und_Ingenieurwissenschaften.md</code> mit einer Tabelle aller Personen und deren extrahierten Rollen angelegt.</li>
+<li>Der SQLite-Wissensgraph in <code>th_personal.db</code> wird automatisch um die neuen Personen, deren Fakultäts- und Institutszugehörigkeiten sowie Funktionen erweitert.</li>
+</ol>
 
 
 
@@ -2514,7 +2673,7 @@
           <button type="button" class="md-top md-icon" data-md-component="top" hidden>
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
-  Back to top
+  Zurück zum Seitenanfang
 </button>
         
       </main>
@@ -2523,33 +2682,33 @@
   
     
       
-      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      <nav class="md-footer__inner md-grid" aria-label="Fußzeile" >
         
           
-          <a href="../mcp/" class="md-footer__link md-footer__link--prev" aria-label="Previous: MCP Integration">
+          <a href="../" class="md-footer__link md-footer__link--prev" aria-label="Zurück: Übersicht">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
             </div>
             <div class="md-footer__title">
               <span class="md-footer__direction">
-                Previous
+                Zurück
               </span>
               <div class="md-ellipsis">
-                MCP Integration
+                Übersicht
               </div>
             </div>
           </a>
         
         
           
-          <a href="../rag-process/" class="md-footer__link md-footer__link--next" aria-label="Next: RAG Prozess">
+          <a href="../usage/" class="md-footer__link md-footer__link--next" aria-label="Weiter: Nutzung der Skripte">
             <div class="md-footer__title">
               <span class="md-footer__direction">
-                Next
+                Weiter
               </span>
               <div class="md-ellipsis">
-                RAG Prozess
+                Nutzung der Skripte
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -2586,7 +2745,7 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "content.tabs.link", "content.code.annotate", "content.code.copy", "content.tooltips", "content.code.annotate", "navigation.footer"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "content.tabs.link", "content.code.annotate", "content.code.copy", "content.tooltips", "content.code.annotate", "navigation.footer"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike"}}</script>
     
     
       <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>

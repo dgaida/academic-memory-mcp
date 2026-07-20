@@ -2033,6 +2033,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../th-personal-graph/crawler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TH Personal Crawler
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../th-personal-graph/usage/" class="md-nav__link">
         
   
@@ -2482,16 +2510,16 @@
 <h3 id="interne-module-kernmodule">Interne Module &amp; Kernmodule<a class="headerlink" href="#interne-module-kernmodule" title="Permanent link">&para;</a></h3>
 <p>Diese Module bilden den Kern des Systems und werden meist intern verwendet:  </p>
 <h4 id="enginepy"><code>engine.py</code><a class="headerlink" href="#enginepy" title="Permanent link">&para;</a></h4>
-<p>Enthält die Basisklassen für die Klassifizierung:
-- <strong><code>EmailClassifier</code></strong>: Verwaltet das Laden von Modellen, Vorverarbeitung und Vorhersagen für klassische Modelle (RandomForest, XGBoost).
-- <strong><code>EmailTransformerClassifier</code></strong>: Eine PyTorch-basierte Implementierung für Transformer-Modelle.
-- <strong>Vektorisierung</strong>: Unterstützt TF-IDF, Embeddings (BGE-M3) und eine Kombination aus beiden.</p>
+<p>Enthält die Basisklassen für die Klassifizierung:<br />
+- <strong><code>EmailClassifier</code></strong>: Verwaltet das Laden von Modellen, Vorverarbeitung und Vorhersagen für klassische Modelle (RandomForest, XGBoost).<br />
+- <strong><code>EmailTransformerClassifier</code></strong>: Eine PyTorch-basierte Implementierung für Transformer-Modelle.<br />
+- <strong>Vektorisierung</strong>: Unterstützt TF-IDF, Embeddings (BGE-M3) und eine Kombination aus beiden.  </p>
 <h4 id="controllerpy"><code>controller.py</code><a class="headerlink" href="#controllerpy" title="Permanent link">&para;</a></h4>
-<p>Der <code>EmailController</code> orchestriert den Prozess:
-1. Laden der Konfiguration und des Modells.
-2. Parsen eingehender E-Mails.
-3. Aufruf der Klassifizierung.
-4. Entscheidung über weitere Aktionen (Sortierung, Antwortgenerierung).</p>
+<p>Der <code>EmailController</code> orchestriert den Prozess:<br />
+1. Laden der Konfiguration und des Modells.<br />
+2. Parsen eingehender E-Mails.<br />
+3. Aufruf der Klassifizierung.<br />
+4. Entscheidung über weitere Aktionen (Sortierung, Antwortgenerierung).  </p>
 <h4 id="stopwordspy"><code>stopwords.py</code><a class="headerlink" href="#stopwordspy" title="Permanent link">&para;</a></h4>
 <p>Definition von Stoppwörtern für die Textverarbeitung.</p>
 <h2 id="dokumentationsubersicht">Dokumentationsübersicht<a class="headerlink" href="#dokumentationsubersicht" title="Permanent link">&para;</a></h2>
@@ -2499,7 +2527,7 @@
 <li><a href="usage/"><strong>Nutzung der Skripte</strong></a> - Beispiele und Anleitungen für die CLI-Tools.  </li>
 <li><a href="training/"><strong>Training &amp; Evaluierung</strong></a> - Details zum Training neuer Modelle.  </li>
 <li><a href="analysis/"><strong>XAI &amp; Visualisierung</strong></a> - Erklärbarkeit und Datenanalyse.  </li>
-<li><a href="nn_architecture/"><strong>Neuronale Netzarchitektur</strong></a> - Details zur Transformer-basierten Klassifizierung.</li>
+<li><a href="nn_architecture/"><strong>Neuronale Netzarchitektur</strong></a> - Details zur Transformer-basierten Klassifizierung.  </li>
 </ul>
 
 

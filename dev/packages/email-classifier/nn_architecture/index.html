@@ -931,6 +931,18 @@
 </a>
 </li>
 <li class="md-nav__item">
+<a class="md-nav__link" href="../../th-personal-graph/crawler/">
+<span class="md-ellipsis">
+    
+  
+    TH Personal Crawler
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
 <a class="md-nav__link" href="../../th-personal-graph/usage/">
 <span class="md-ellipsis">
     
@@ -1272,20 +1284,20 @@
 <h2 id="7-zukunftige-verbesserungsmoglichkeiten">7. Zukünftige Verbesserungsmöglichkeiten<a class="headerlink" href="#7-zukunftige-verbesserungsmoglichkeiten" title="Permanent link">¶</a></h2>
 <p>Obwohl das System bereits vollständig einsatzbereit ist, bieten sich für zukünftige Iterationen folgende Optimierungen an:</p>
 <ol>
-<li><strong>Modell-Quantisierung (Quantization)</strong>:<ul>
-<li>Konvertierung des Modells in ein 8-Bit-Format (INT8) mittels PyTorch, um den Speicherbedarf auf Offline-Systemen (z. B. Laptops ohne dedizierte GPU) zu halbieren und die Inferenzgeschwindigkeit zu steigern.</li>
+<li><strong>Modell-Quantisierung (Quantization)</strong>:  <ul>
+<li>Konvertierung des Modells in ein 8-Bit-Format (INT8) mittels PyTorch, um den Speicherbedarf auf Offline-Systemen (z. B. Laptops ohne dedizierte GPU) zu halbieren und die Inferenzgeschwindigkeit zu steigern.  </li>
 </ul>
 </li>
-<li><strong>LoRA Fine-Tuning für größere lokale Modelle</strong>:<ul>
-<li>Statt eines MiniLM-Modells könnten größere multilinguale LLMs (z. B. Llama 3 oder Mistral) über Low-Rank Adaptation (LoRA) auf Klassifikation trainiert werden, sofern ausreichend Rechenressourcen vorhanden sind.</li>
+<li><strong>LoRA Fine-Tuning für größere lokale Modelle</strong>:  <ul>
+<li>Statt eines MiniLM-Modells könnten größere multilinguale LLMs (z. B. Llama 3 oder Mistral) über Low-Rank Adaptation (LoRA) auf Klassifikation trainiert werden, sofern ausreichend Rechenressourcen vorhanden sind.  </li>
 </ul>
 </li>
-<li><strong>Erweitertes Hyperparameter-Tuning</strong>:<ul>
-<li>Systematische Suche nach optimalen Learning Rates, Dropout-Raten und Batch-Sizes mittels Frameworks wie Optuna, um die Klassifikationsleistung (F1-Score) noch weiter zu maximieren.</li>
+<li><strong>Erweitertes Hyperparameter-Tuning</strong>:  <ul>
+<li>Systematische Suche nach optimalen Learning Rates, Dropout-Raten und Batch-Sizes mittels Frameworks wie Optuna, um die Klassifikationsleistung (F1-Score) noch weiter zu maximieren.  </li>
 </ul>
 </li>
-<li><strong>Knowledge Distillation</strong>:<ul>
-<li>Destillieren eines sehr großen Modells in ein kleineres, hocheffizientes Transformer-Modell, das die hohe Vorhersagegenauigkeit beibehält, aber extrem schnell ausgeführt werden kann.</li>
+<li><strong>Knowledge Distillation</strong>:  <ul>
+<li>Destillieren eines sehr großen Modells in ein kleineres, hocheffizientes Transformer-Modell, das die hohe Vorhersagegenauigkeit beibehält, aber extrem schnell ausgeführt werden kann.  </li>
 </ul>
 </li>
 </ol>

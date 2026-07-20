@@ -148,6 +148,13 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/deven/packages/th-personal-graph/architecture/"/>
     </url>
     <url>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/packages/th-personal-graph/crawler/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/dev/packages/th-personal-graph/crawler/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/deven/packages/th-personal-graph/crawler/"/>
+    </url>
+    <url>
         <loc>https://dgaida.github.io/academic-memory-mcp/dev/packages/th-personal-graph/mocogi/</loc>
         <lastmod>2026-07-20</lastmod>
         <changefreq>daily</changefreq>
@@ -454,6 +461,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/dev/en/packages/th-personal-graph/architecture/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/devpackages/th-personal-graph/architecture/"/>
+    </url>
+    <url>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/en/packages/th-personal-graph/crawler/</loc>
+        <lastmod>2026-07-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/dev/en/packages/th-personal-graph/crawler/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/devpackages/th-personal-graph/crawler/"/>
     </url>
     <url>
         <loc>https://dgaida.github.io/academic-memory-mcp/dev/en/packages/th-personal-graph/mocogi/</loc>

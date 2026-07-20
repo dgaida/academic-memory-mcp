@@ -1977,6 +1977,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../th-personal-graph/crawler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TH Personal Crawler
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../th-personal-graph/usage/" class="md-nav__link">
         
   
@@ -2362,9 +2390,9 @@
 <p>Werkzeuge zur Analyse des Modells und der Datenverteilung.</p>
 <h2 id="xai-analyse-xai_analysispy">XAI Analyse (<code>xai_analysis.py</code>)<a class="headerlink" href="#xai-analyse-xai_analysispy" title="Permanent link">&para;</a></h2>
 <p>Nutzt SHAP (SHapley Additive exPlanations), um zu erklären, welche Wörter die Entscheidung des Modells am stärksten beeinflusst haben.</p>
-<p><strong>Wichtiger Hinweis zur Modellkompatibilität:</strong>
-- <strong>ML-Modelle (TF-IDF):</strong> Die XAI-Analyse funktioniert <strong>ausschließlich</strong> für die klassischen Machine-Learning-Modelle im <strong>TF-IDF-Modus</strong> (<code>--mode tfidf</code>), da hierfür der SHAP <code>TreeExplainer</code> auf dem Vektorizer aufbaut.
-- <strong>Transformer &amp; andere Modi:</strong> Die XAI-Analyse funktioniert <strong>nicht</strong> für das Transformer-Modell oder für ML-Modelle, die im <code>embedding</code>- oder <code>combined</code>-Modus trainiert wurden.</p>
+<p><strong>Wichtiger Hinweis zur Modellkompatibilität:</strong><br />
+- <strong>ML-Modelle (TF-IDF):</strong> Die XAI-Analyse funktioniert <strong>ausschließlich</strong> für die klassischen Machine-Learning-Modelle im <strong>TF-IDF-Modus</strong> (<code>--mode tfidf</code>), da hierfür der SHAP <code>TreeExplainer</code> auf dem Vektorizer aufbaut.<br />
+- <strong>Transformer &amp; andere Modi:</strong> Die XAI-Analyse funktioniert <strong>nicht</strong> für das Transformer-Modell oder für ML-Modelle, die im <code>embedding</code>- oder <code>combined</code>-Modus trainiert wurden.  </p>
 <p><strong>Befehl:</strong>
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python<span class="w"> </span>-m<span class="w"> </span>email_classifier.scripts.xai_analysis<span class="w"> </span>--test-data-path<span class="w"> </span>/pfad/zu/testdaten
 </code></pre></div></p>
@@ -2379,9 +2407,9 @@ Das Skript gibt für jede Klasse die Top 5 Wörter aus, die für eine positive V
 <hr />
 <h2 id="top-worter-finden-top_wordspy">Top Wörter finden (<code>top_words.py</code>)<a class="headerlink" href="#top-worter-finden-top_wordspy" title="Permanent link">&para;</a></h2>
 <p>Ein schnelles Skript, um die häufigsten Wörter pro Klasse statistisch zu ermitteln.</p>
-<p><strong>Wichtiger Hinweis zur Modellunabhängigkeit:</strong>
-- Dieses Skript arbeitet <strong>vollkommen modellunabhängig</strong> direkt auf den Rohdaten mittels statistischer TF-IDF-Berechnung.
-- Es wird <strong>kein trainiertes Modell</strong> (weder klassische ML-Modelle noch das Transformer-Modell) benötigt oder geladen. Es dient zur reinen Datenanalyse vor oder nach dem Training.</p>
+<p><strong>Wichtiger Hinweis zur Modellunabhängigkeit:</strong><br />
+- Dieses Skript arbeitet <strong>vollkommen modellunabhängig</strong> direkt auf den Rohdaten mittels statistischer TF-IDF-Berechnung.<br />
+- Es wird <strong>kein trainiertes Modell</strong> (weder klassische ML-Modelle noch das Transformer-Modell) benötigt oder geladen. Es dient zur reinen Datenanalyse vor oder nach dem Training.  </p>
 <p><strong>Befehl:</strong>
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>python<span class="w"> </span>-m<span class="w"> </span>email_classifier.scripts.top_words<span class="w"> </span>/pfad/zu/daten
 </code></pre></div></p>

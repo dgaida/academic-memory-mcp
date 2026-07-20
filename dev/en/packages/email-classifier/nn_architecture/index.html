@@ -932,6 +932,18 @@
 </a>
 </li>
 <li class="md-nav__item">
+<a class="md-nav__link" href="../../th-personal-graph/crawler/">
+<span class="md-ellipsis">
+    
+  
+    TH Personal Crawler
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
 <a class="md-nav__link" href="../../th-personal-graph/usage/">
 <span class="md-ellipsis">
     
@@ -1273,20 +1285,20 @@
 <h2 id="7-future-improvement-opportunities">7. Future Improvement Opportunities<a class="headerlink" href="#7-future-improvement-opportunities" title="Permanent link">¶</a></h2>
 <p>While the system is fully operational, several optimization paths remain for future iterations:</p>
 <ol>
-<li><strong>Model Quantization</strong>:<ul>
-<li>Convert the model to an 8-bit integer format (INT8) using PyTorch to halve memory footprint on offline/client machines (e.g., laptops without dedicated GPUs) and increase inference speed.</li>
+<li><strong>Model Quantization</strong>:  <ul>
+<li>Convert the model to an 8-bit integer format (INT8) using PyTorch to halve memory footprint on offline/client machines (e.g., laptops without dedicated GPUs) and increase inference speed.  </li>
 </ul>
 </li>
-<li><strong>LoRA Fine-Tuning for Larger Local Models</strong>:<ul>
-<li>Instead of a MiniLM model, larger multilingual LLMs (e.g., Llama 3 or Mistral) could be fine-tuned using Low-Rank Adaptation (LoRA) for classification, provided sufficient hardware resources are available.</li>
+<li><strong>LoRA Fine-Tuning for Larger Local Models</strong>:  <ul>
+<li>Instead of a MiniLM model, larger multilingual LLMs (e.g., Llama 3 or Mistral) could be fine-tuned using Low-Rank Adaptation (LoRA) for classification, provided sufficient hardware resources are available.  </li>
 </ul>
 </li>
-<li><strong>Advanced Hyperparameter Tuning</strong>:<ul>
-<li>Systematic search for optimal learning rates, dropout rates, and batch sizes using frameworks like Optuna to further maximize classification performance (F1-score).</li>
+<li><strong>Advanced Hyperparameter Tuning</strong>:  <ul>
+<li>Systematic search for optimal learning rates, dropout rates, and batch sizes using frameworks like Optuna to further maximize classification performance (F1-score).  </li>
 </ul>
 </li>
-<li><strong>Knowledge Distillation</strong>:<ul>
-<li>Distill knowledge from a very large model into a smaller, highly efficient Transformer model that maintains high predictive accuracy but runs at extremely fast speeds.</li>
+<li><strong>Knowledge Distillation</strong>:  <ul>
+<li>Distill knowledge from a very large model into a smaller, highly efficient Transformer model that maintains high predictive accuracy but runs at extremely fast speeds.  </li>
 </ul>
 </li>
 </ol>
