@@ -40,14 +40,14 @@ def test_generate_reply_triggers_appointment_tool(mock_controller_deps):
 
         subject, reply, attach = controller.generate_reply(
             mail_path,
-            action_idx=2 # 3) Termin im Kalender anlegen
+            action_idx=0 # 1) Antwort schreiben
         )
 
     assert subject == "APPOINTMENT_BOOKED"
     assert "2026-07-08 13:30" in reply
 
-    # Verify that the agent was called with the prompt containing the forced instruction
+    # Verify that the agent was called with the prompt containing the correct instruction
     args, kwargs = mock_agent.chat.call_args
     prompt = kwargs['messages'][0]['content']
-    assert "ERZWUNGENE AKTION: Diese E-Mail bestätigt einen Termin. Du MUSST ZWINGEND manage_calendar_appointment aufrufen." in prompt
+    assert "Wenn eine Zusage (Terminbestätigung) oder ein konkreter Terminvorschlag vorliegt:" in prompt
     assert "VERBOTE:" in prompt

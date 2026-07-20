@@ -41,7 +41,7 @@ def test_generate_reply_past_appointment_archived(mock_controller_deps):
 
         subject, reply, attach = controller.generate_reply(
             mail_path,
-            action_idx=2 # 3) Termin im Kalender anlegen
+            action_idx=0 # 1) Antwort schreiben
         )
 
     assert subject == "NO_REPLY_NEEDED"
