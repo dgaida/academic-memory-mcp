@@ -128,7 +128,7 @@ def test_classify_action_fallback(mock_controller_deps, tmp_path):
 def test_execute_action_archive(mock_controller_deps, tmp_path):
     """Test function docstring."""
     controller, _ = mock_controller_deps
-    res = controller.execute_action(3, tmp_path / "mail.msg", {})
+    res = controller.execute_action(2, tmp_path / "mail.msg", {})
     assert "archiviert" in res
 
 def test_execute_action_reply(mock_controller_deps, tmp_path):
@@ -146,8 +146,8 @@ def test_generate_reply_archive(mock_controller_deps, tmp_path):
     mail_path = tmp_path / "mail.msg"
     mail_path.write_text("content")
     
-    # 3 = archive
-    res = controller.generate_reply(mail_path, "summary", Path("skill"), "doc", Path("persona"), "ctx", Path("apt"), "Sender", "student@test.de", action_idx=3)
+    # 2 = archive
+    res = controller.generate_reply(mail_path, "summary", Path("skill"), "doc", Path("persona"), "ctx", Path("apt"), "Sender", "student@test.de", action_idx=2)
     assert res == ("NO_REPLY_NEEDED", "Archivieren", False)
 
 def test_run_sort_no_model(mock_controller_deps, tmp_path):
