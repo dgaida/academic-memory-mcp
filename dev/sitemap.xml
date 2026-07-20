@@ -288,13 +288,6 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/deven/usage/actions/action-2-antwort-terminvorschlag/"/>
     </url>
     <url>
-        <loc>https://dgaida.github.io/academic-memory-mcp/dev/usage/actions/action-3-termin-buchen/</loc>
-        <lastmod>2026-07-20</lastmod>
-        <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/dev/usage/actions/action-3-termin-buchen/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/deven/usage/actions/action-3-termin-buchen/"/>
-    </url>
-    <url>
         <loc>https://dgaida.github.io/academic-memory-mcp/dev/usage/actions/action-4-nur-archivieren/</loc>
         <lastmod>2026-07-20</lastmod>
         <changefreq>daily</changefreq>
@@ -601,13 +594,6 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/dev/en/usage/actions/action-2-antwort-terminvorschlag/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/devusage/actions/action-2-antwort-terminvorschlag/"/>
-    </url>
-    <url>
-        <loc>https://dgaida.github.io/academic-memory-mcp/dev/en/usage/actions/action-3-termin-buchen/</loc>
-        <lastmod>2026-07-20</lastmod>
-        <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/dev/en/usage/actions/action-3-termin-buchen/"/>
-        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/devusage/actions/action-3-termin-buchen/"/>
     </url>
     <url>
         <loc>https://dgaida.github.io/academic-memory-mcp/dev/en/usage/actions/action-4-nur-archivieren/</loc>

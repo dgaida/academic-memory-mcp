@@ -346,6 +346,28 @@
 </a>
 </li>
 <li class="md-nav__item">
+<a class="md-nav__link" href="#intelligent-appointment-booking-conflict-checking-integrated-logic">
+<span class="md-ellipsis">
+      
+        Intelligent Appointment Booking &amp; Conflict Checking (Integrated Logic)
+      
+    </span>
+</a>
+<nav aria-label="Intelligent Appointment Booking &amp; Conflict Checking (Integrated Logic)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#workflow-of-integrated-appointment-booking">
+<span class="md-ellipsis">
+      
+        Workflow of Integrated Appointment Booking:
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
 <a class="md-nav__link" href="#process-flow-mermaid-diagram">
 <span class="md-ellipsis">
       
@@ -370,23 +392,11 @@
 </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="../action-3-termin-buchen/">
-<span class="md-ellipsis">
-    
-  
-    Aktion 3 - Termin direkt buchen
-  
-
-    
-  </span>
-</a>
-</li>
-<li class="md-nav__item">
 <a class="md-nav__link" href="../action-4-nur-archivieren/">
 <span class="md-ellipsis">
     
   
-    Aktion 4 - Nur archivieren
+    Aktion 3 - Nur archivieren
   
 
     
@@ -398,7 +408,7 @@
 <span class="md-ellipsis">
     
   
-    Aktion 5 - Aufgabe "Anhang lesen" (Finale Abgabe)
+    Aktion 4 - Aufgabe "Anhang lesen" (Finale Abgabe)
   
 
     
@@ -410,7 +420,7 @@
 <span class="md-ellipsis">
     
   
-    Aktion 6 - Kolloquium-Termin
+    Aktion 5 - Kolloquium-Termin
   
 
     
@@ -1040,6 +1050,28 @@
 </a>
 </li>
 <li class="md-nav__item">
+<a class="md-nav__link" href="#intelligent-appointment-booking-conflict-checking-integrated-logic">
+<span class="md-ellipsis">
+      
+        Intelligent Appointment Booking &amp; Conflict Checking (Integrated Logic)
+      
+    </span>
+</a>
+<nav aria-label="Intelligent Appointment Booking &amp; Conflict Checking (Integrated Logic)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#workflow-of-integrated-appointment-booking">
+<span class="md-ellipsis">
+      
+        Workflow of Integrated Appointment Booking:
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
 <a class="md-nav__link" href="#process-flow-mermaid-diagram">
 <span class="md-ellipsis">
       
@@ -1067,13 +1099,52 @@
 <li><strong>Draft Creation:</strong> An email draft is automatically created directly in Microsoft Outlook. The original email is attached to preserve the conversation history.  </li>
 </ol>
 <hr/>
+<h2 id="intelligent-appointment-booking-conflict-checking-integrated-logic">Intelligent Appointment Booking &amp; Conflict Checking (Integrated Logic)<a class="headerlink" href="#intelligent-appointment-booking-conflict-checking-integrated-logic" title="Permanent link">¶</a></h2>
+<p>When the system responds to an email, it automatically checks the background for meeting proposals or meeting confirmations (acceptances) from the sender. As a result, the formerly separate <strong>Action 3: Book Appointment</strong> is now fully and seamlessly handled by Action 1.</p>
+<h3 id="workflow-of-integrated-appointment-booking">Workflow of Integrated Appointment Booking:<a class="headerlink" href="#workflow-of-integrated-appointment-booking" title="Permanent link">¶</a></h3>
+<ol>
+<li><strong>Detection:</strong> The LLM analyzes the incoming email for concrete meeting proposals (e.g., "Can we meet on Tuesday at 14:00?") or confirmations (e.g., "I accept the appointment on Monday at 15:30").</li>
+<li><strong>Date and Time Extraction:</strong> The AI extracts the requested and confirmed date and time from the email.</li>
+<li><strong>Validity Check (Past):</strong> It checks if the proposed appointment lies in the past.<ul>
+<li><strong>If in the past:</strong> No calendar entry is created. The email is archived directly (Status: <code>Archiviert (Termin in Vergangenheit)</code>).</li>
+</ul>
+</li>
+<li><strong>Intelligent Calendar Matching &amp; Conflict Checking:</strong><ul>
+<li>The system reads existing appointments from the file <code>data/appointments.md</code>.</li>
+<li>It checks whether an appointment or blocker already exists at the proposed or confirmed time:<ul>
+<li><strong>Free (Acceptance/Booking):</strong> If there is no appointment or only a blocker specifically designated for this appointment/student, the system books the appointment in the user's Outlook calendar via the <code>manage_calendar_appointment</code> tool. The default duration is <strong>30 minutes</strong>, and the timezone is set to <code>Europe/Berlin</code>. The system responds with the signal word <code>APPOINTMENT_BOOKED</code> and the email is filed in the corresponding student archive folder.</li>
+<li><strong>Busy (Conflict):</strong> If a completely different appointment or a generic blocker is in the way, the system detects this as a conflict.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Alternative Suggestions on Conflict:</strong><ul>
+<li>If a conflict is detected, the system automatically reads free appointment slots from <code>data/free_slots.md</code> (via the <code>get_appointment_slots</code> tool).</li>
+<li>It suggests these free times as alternatives in the reply email and asks the sender to make a new selection.</li>
+</ul>
+</li>
+</ol>
+<hr/>
 <h2 id="process-flow-mermaid-diagram">Process Flow (Mermaid Diagram)<a class="headerlink" href="#process-flow-mermaid-diagram" title="Permanent link">¶</a></h2>
 <div class="mermaid">graph TD
     A[Email received &amp; classified] --&gt; B[Create summary of previous history]
     B --&gt; C[Analyze profiles &amp; salutation Du/Sie]
-    C --&gt; D[LLM generates response in correct tone]
-    D --&gt; E[Create Outlook draft with original email attached]
-    E --&gt; F[Process completed]
+    C --&gt; D{Does email contain appointment confirmation/acceptance?}
+
+    D -- Yes --&gt; E[Extract date &amp; time of the appointment]
+    E --&gt; F{Is appointment in the past?}
+    F -- Yes --&gt; G["No booking &amp; archive email directly <br/> Status: Archiviert (Termin in Vergangenheit)"]
+    F -- No --&gt; H{Is calendar slot free?}
+    H -- Yes --&gt; I["Book appointment in Outlook calendar <br/> via manage_calendar_appointment <br/> Status: APPOINTMENT_BOOKED"]
+    H -- No (Conflict) --&gt; J[Read free slots &amp; generate reply with alternative proposals]
+
+    D -- No --&gt; K[LLM generates standard/topic-specific response]
+
+    I --&gt; L[Complete Outlook draft / booking]
+    J --&gt; L
+    K --&gt; L
+    G --&gt; M[Process completed]
+    L --&gt; M
 </div>
 </article>
 </div>

@@ -1006,34 +1006,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../actions/action-3-termin-buchen/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Aktion 3 - Termin direkt buchen
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../actions/action-4-nur-archivieren/" class="md-nav__link">
         
   
@@ -1041,7 +1013,7 @@
   <span class="md-ellipsis">
     
   
-    Aktion 4 - Nur archivieren
+    Aktion 3 - Nur archivieren
   
 
     
@@ -1069,7 +1041,7 @@
   <span class="md-ellipsis">
     
   
-    Aktion 5 - Aufgabe "Anhang lesen" (Finale Abgabe)
+    Aktion 4 - Aufgabe "Anhang lesen" (Finale Abgabe)
   
 
     
@@ -1097,7 +1069,7 @@
   <span class="md-ellipsis">
     
   
-    Aktion 6 - Kolloquium-Termin
+    Aktion 5 - Kolloquium-Termin
   
 
     
@@ -2879,7 +2851,7 @@
 </ul>
 <hr />
 <h2 id="5-phase-aktions-vorschlage-gui-interaktion">5. Phase: Aktions-Vorschläge &amp; GUI-Interaktion<a class="headerlink" href="#5-phase-aktions-vorschlage-gui-interaktion" title="Permanent link">&para;</a></h2>
-<p>Basierend auf der KI-gestützten Analyse schlägt das System eine von sechs Aktionen vor. Diese Auswahl wird in der GUI vorselektiert und kann vom Benutzer manuell überprüft, angepasst oder überschrieben werden.</p>
+<p>Basierend auf der KI-gestützten Analyse schlägt das System eine von fünf Aktionen vor. Diese Auswahl wird in der GUI vorselektiert und kann vom Benutzer manuell überprüft, angepasst oder überschrieben werden.</p>
 <table>
 <thead>
 <tr>
@@ -2890,26 +2862,22 @@
 <tbody>
 <tr>
 <td style="text-align: left;"><strong>1) Antwort schreiben</strong></td>
-<td style="text-align: left;">Standard-Antwort basierend auf dem Thema.</td>
+<td style="text-align: left;">Standard- oder themenspezifische Antwort. Beinhaltet auch die intelligente Termin- und Konfliktprüfung (Automatische Terminbuchung bei Zusagen / Alternativvorschläge bei Konflikten).</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>2) Antwort mit Terminvorschlag</strong></td>
 <td style="text-align: left;">Sucht freie Slots und schlägt diese vor.</td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>3) Termin direkt buchen</strong></td>
-<td style="text-align: left;">Erkennt eine Terminbestätigung und trägt diese ein.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>4) Nur archivieren</strong></td>
+<td style="text-align: left;"><strong>3) Nur archivieren</strong></td>
 <td style="text-align: left;">Einsortierung in den Archiv-Ordner; keine Antwort nötig.</td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>5) Aufgabe "Anhang lesen"</strong></td>
-<td style="text-align: left;">Speziell für finale Abgaben (Korrektur-Erinnerung).</td>
+<td style="text-align: left;"><strong>4) Aufgabe "Anhang lesen"</strong></td>
+<td style="text-align: left;">Speziell für finale Abgaben (Korrektur-Erinnerung im Kalender).</td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>6) Kolloquium-Termin</strong></td>
+<td style="text-align: left;"><strong>5) Kolloquium-Termin</strong></td>
 <td style="text-align: left;">Spezielle Buchung für Abschlussvorträge.</td>
 </tr>
 </tbody>
@@ -2921,12 +2889,11 @@
 <h3 id="detail-logik-der-aktionen">Detail-Logik der Aktionen:<a class="headerlink" href="#detail-logik-der-aktionen" title="Permanent link">&para;</a></h3>
 <p>Bevor eine Antwort generiert wird, erstellt das System eine prägnante Zusammenfassung des bisherigen Konversationsverlaufs im Studentenordner (<code>.emails_summary.md</code>). Diese dient als wichtiger Kontext für das LLM, um über bisherige Absprachen informiert zu sein. Details zur Funktionsweise und Umsetzung der einzelnen Aktionen finden Sie direkt in den jeweiligen Beschreibungen:</p>
 <ul>
-<li><strong><a href="../actions/action-1-antwort-schreiben/">Aktion 1: Antwort schreiben</a></strong>  </li>
+<li><strong><a href="../actions/action-1-antwort-schreiben/">Aktion 1: Antwort schreiben (inkl. Terminbuchung)</a></strong></li>
 <li><strong><a href="../actions/action-2-antwort-terminvorschlag/">Aktion 2: Antwort mit Terminvorschlag</a></strong>  </li>
-<li><strong><a href="../actions/action-3-termin-buchen/">Aktion 3: Termin direkt buchen</a></strong>  </li>
-<li><strong><a href="../actions/action-4-nur-archivieren/">Aktion 4: Nur archivieren</a></strong>  </li>
-<li><strong><a href="../actions/action-5-aufgabe-kalender/">Aktion 5: Aufgabe im Kalender anlegen (Finale Abgabe)</a></strong>  </li>
-<li><strong><a href="../actions/action-6-kolloquium-termin/">Aktion 6: Kolloquium-Termin</a></strong>  </li>
+<li><strong><a href="../actions/action-4-nur-archivieren/">Aktion 3: Nur archivieren</a></strong></li>
+<li><strong><a href="../actions/action-5-aufgabe-kalender/">Aktion 4: Aufgabe im Kalender anlegen (Finale Abgabe)</a></strong></li>
+<li><strong><a href="../actions/action-6-kolloquium-termin/">Aktion 5: Kolloquium-Termin</a></strong></li>
 </ul>
 <hr />
 <h2 id="weiterfuhrende-links">Weiterführende Links<a class="headerlink" href="#weiterfuhrende-links" title="Permanent link">&para;</a></h2>
