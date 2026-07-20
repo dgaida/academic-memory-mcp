@@ -88,11 +88,11 @@ Sobald Sie in der GUI auf "Speichern & Ausführen" klicken, wird die gewählte A
 
 Bevor eine Antwort generiert wird, erstellt das System eine prägnante Zusammenfassung des bisherigen Konversationsverlaufs im Studentenordner (`.emails_summary.md`). Diese dient als wichtiger Kontext für das LLM, um über bisherige Absprachen informiert zu sein. Details zur Funktionsweise und Umsetzung der einzelnen Aktionen finden Sie direkt in den jeweiligen Beschreibungen:
 
-*   **[Aktion 1: Antwort schreiben (inkl. Terminbuchung)](actions/action-1-antwort-schreiben.md)**
+*   **[Aktion 1: Antwort schreiben (inkl. Terminbuchung)](actions/action-1-antwort-schreiben.md)**  
 *   **[Aktion 2: Antwort mit Terminvorschlag](actions/action-2-antwort-terminvorschlag.md)**  
-*   **[Aktion 3: Nur archivieren](actions/action-4-nur-archivieren.md)**
-*   **[Aktion 4: Aufgabe im Kalender anlegen (Finale Abgabe)](actions/action-5-aufgabe-kalender.md)**
-*   **[Aktion 5: Kolloquium-Termin](actions/action-6-kolloquium-termin.md)**
+*   **[Aktion 3: Nur archivieren](actions/action-4-nur-archivieren.md)**  
+*   **[Aktion 4: Aufgabe im Kalender anlegen (Finale Abgabe)](actions/action-5-aufgabe-kalender.md)**  
+*   **[Aktion 5: Kolloquium-Termin](actions/action-6-kolloquium-termin.md)**  
 
 ---
 

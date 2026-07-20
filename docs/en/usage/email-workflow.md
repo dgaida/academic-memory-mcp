@@ -100,11 +100,11 @@ As soon as you click "Save & Execute" in the GUI, the selected action is technic
 
 Before a reply is generated, the system creates a concise summary of the previous conversation history in the student folder (`.emails_summary.md`). This serves as crucial context for the LLM to stay informed about prior agreements. Details on how each action works and is executed can be found directly in their respective descriptions:
 
-*   **[Action 1: Write Reply (including Appointment Booking)](actions/action-1-antwort-schreiben.md)**
+*   **[Action 1: Write Reply (including Appointment Booking)](actions/action-1-antwort-schreiben.md)**  
 *   **[Action 2: Reply with Appointment Suggestion](actions/action-2-antwort-terminvorschlag.md)**  
-*   **[Action 3: Archive Only](actions/action-4-nur-archivieren.md)**
-*   **[Action 4: Create Task in Calendar (Final Submission)](actions/action-5-aufgabe-kalender.md)**
-*   **[Action 5: Colloquium Appointment](actions/action-6-kolloquium-termin.md)**
+*   **[Action 3: Archive Only](actions/action-4-nur-archivieren.md)**  
+*   **[Action 4: Create Task in Calendar (Final Submission)](actions/action-5-aufgabe-kalender.md)**  
+*   **[Action 5: Colloquium Appointment](actions/action-6-kolloquium-termin.md)**  
 
 ---
 
