@@ -7,7 +7,7 @@ This documentation describes the fully functional, integrated Transformer-based 
 The implementation is based on a **Transformer-based model** (default: `sentence-transformers/paraphrase-multilingual-mpnet-base-v2`). Unlike classical bag-of-words methods, this architecture captures the semantic context and relationships between words within sentences (e.g., in the email subject and body).
 
 ### Core Components:  
-1. **Encoder Backbone**: The pre-trained multilingual MPNet model serves as the feature extractor.
+1. **Encoder Backbone**: The pre-trained multilingual MPNet model serves as the feature extractor.  
 2. **Input Structuring**: Preprocessing and merging of metadata and email body into a structured, unified input text.  
 3. **Classification Head**: A Fully Connected Layer (MLP) with dropout, applied directly to the `[CLS]` token (the representation vector of the entire sequence) to calculate the target class probabilities.  
 
@@ -85,7 +85,7 @@ While the system is fully operational, several optimization paths remain for fut
 1. **Model Quantization**:  
    - Convert the model to an 8-bit integer format (INT8) using PyTorch to halve memory footprint on offline/client machines (e.g., laptops without dedicated GPUs) and increase inference speed.  
 2. **LoRA Fine-Tuning for Larger Local Models**:  
-   - Instead of an MPNet model, larger multilingual LLMs (e.g., Llama 3 or Mistral) could be fine-tuned using Low-Rank Adaptation (LoRA) for classification, provided sufficient hardware resources are available.
+   - Instead of an MPNet model, larger multilingual LLMs (e.g., Llama 3 or Mistral) could be fine-tuned using Low-Rank Adaptation (LoRA) for classification, provided sufficient hardware resources are available.  
 3. **Advanced Hyperparameter Tuning**:  
    - Systematic search for optimal learning rates, dropout rates, and batch sizes using frameworks like Optuna to further maximize classification performance (F1-score).  
 4. **Knowledge Distillation**:  
