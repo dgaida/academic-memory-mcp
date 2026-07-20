@@ -11,31 +11,31 @@ Das Skript `crawl_th_koeln_persons.py` (aufgerufen als ausführbares Modul `pyth
 
 Der Crawler durchläuft die Personenübersicht und besucht die individuellen Profilseiten der gefundenen Personen. Dabei werden folgende Detailinformationen extrahiert:
 
-* **Stammdaten:**
-    * Voller Name
-    * Akademischer Grad (z. B. Dr., Prof. Dr.)
-    * E-Mail-Adresse
-    * URL der persönlichen Profilseite bei der TH Köln
-* **Organisatorische Zuordnung:**
-    * Fakultät (z. B. "Fakultät für Informatik und Ingenieurwissenschaften")
-    * Institut (z. B. "Institut für Informatik") oder andere Einrichtungen (z. B. "Campus IT")
-* **Rollen & Funktionen (falls vorhanden):**
-    * Prüfungsausschussvorsitz (`is_pa_vorsitz`)
-    * DekanIn (`is_dekan`)
-    * Senatsmitglied (`is_senat`)
-    * InstitutsdirektorIn (`is_institutsdirektor`)
-    * Präsidiumsmitglied (`is_praesidium`)
-    * Studiengangsleitung (Name des zugeordneten Studiengangs, falls im Profiltext hinterlegt)
+* **Stammdaten:**  
+    * Voller Name  
+    * Akademischer Grad (z. B. Dr., Prof. Dr.)  
+    * E-Mail-Adresse  
+    * URL der persönlichen Profilseite bei der TH Köln  
+* **Organisatorische Zuordnung:**  
+    * Fakultät (z. B. "Fakultät für Informatik und Ingenieurwissenschaften")  
+    * Institut (z. B. "Institut für Informatik") oder andere Einrichtungen (z. B. "Campus IT")  
+* **Rollen & Funktionen (falls vorhanden):**  
+    * Prüfungsausschussvorsitz (`is_pa_vorsitz`)  
+    * DekanIn (`is_dekan`)  
+    * Senatsmitglied (`is_senat`)  
+    * InstitutsdirektorIn (`is_institutsdirektor`)  
+    * Präsidiumsmitglied (`is_praesidium`)  
+    * Studiengangsleitung (Name des zugeordneten Studiengangs, falls im Profiltext hinterlegt)  
 
 ---
 
 ## Datenquelle: Von welchen Webseiten wird extrahiert?
 
-Die Extraktion erfolgt direkt aus dem offiziellen Webauftritt der TH Köln:
-1. **Übersichtsseite (A-Z Suche):**
+Die Extraktion erfolgt direkt aus dem offiziellen Webauftritt der TH Köln:  
+1. **Übersichtsseite (A-Z Suche):**  
    `https://www.th-koeln.de/hochschule/personen_3850.php`
-   Hier werden die initialen Kontaktdaten (Name, E-Mail-Adresse) sowie die Links zu den Detailprofilen über Filterparameter (Anfangsbuchstaben, Fakultäten oder Einrichtungen) ermittelt.
-2. **Individuelle Profilseiten:**
+   Hier werden die initialen Kontaktdaten (Name, E-Mail-Adresse) sowie die Links zu den Detailprofilen über Filterparameter (Anfangsbuchstaben, Fakultäten oder Einrichtungen) ermittelt.  
+2. **Individuelle Profilseiten:**  
    Die Detailseiten der Personen (z. B. `https://www.th-koeln.de/personen/[name]/`), um akademische Grade, Fakultäts-/Institutszugehörigkeiten sowie Funktionen und Verantwortlichkeiten auszulesen.
 
 ---
@@ -84,7 +84,7 @@ python -m th_personal_graph.scripts.crawl_th_koeln_persons --rebuild
 
 Wenn Sie den Crawler für eine spezifische Fakultät starten möchten:
 
-1. **Verfügbare Fakultäten abfragen:**
+1. **Verfügbare Fakultäten abfragen:**  
    ```bash
    python -m th_personal_graph.scripts.crawl_th_koeln_persons --list-faculties
    ```
@@ -96,7 +96,7 @@ Wenn Sie den Crawler für eine spezifische Fakultät starten möchten:
      ...
    ```
 
-2. **Crawl für die gewünschte Fakultät starten:**
+2. **Crawl für die gewünschte Fakultät starten:**  
    ```bash
    python -m th_personal_graph.scripts.crawl_th_koeln_persons --faculty "Fakultät für Informatik und Ingenieurwissenschaften"
    ```
@@ -107,6 +107,6 @@ Wenn Sie den Crawler für eine spezifische Fakultät starten möchten:
      Fetching details for: ...
    ```
 
-3. **Ergebnis überprüfen:**
-   - Im Verzeichnis `data/th_koeln/` wird eine Datei namens `persons_Fakult_t_f_r_Informatik_und_Ingenieurwissenschaften.md` mit einer Tabelle aller Personen und deren extrahierten Rollen angelegt.
-   - Der SQLite-Wissensgraph in `th_personal.db` wird automatisch um die neuen Personen, deren Fakultäts- und Institutszugehörigkeiten sowie Funktionen erweitert.
+3. **Ergebnis überprüfen:**  
+   - Im Verzeichnis `data/th_koeln/` wird eine Datei namens `persons_Fakult_t_f_r_Informatik_und_Ingenieurwissenschaften.md` mit einer Tabelle aller Personen und deren extrahierten Rollen angelegt.  
+   - Der SQLite-Wissensgraph in `th_personal.db` wird automatisch um die neuen Personen, deren Fakultäts- und Institutszugehörigkeiten sowie Funktionen erweitert.  

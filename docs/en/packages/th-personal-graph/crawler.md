@@ -11,31 +11,31 @@ The script `crawl_th_koeln_persons.py` (invoked as an executable module `python 
 
 The crawler iterates through the personnel overview and visits the individual profile pages of the persons found. The following details are extracted:
 
-* **Basic Information:**
-    * Full name
-    * Academic degree (e.g., Dr., Prof. Dr.)
-    * Email address
-    * URL of the personal profile page on the TH Köln website
-* **Organizational Assignment:**
-    * Faculty (e.g., "Fakultät für Informatik und Ingenieurwissenschaften")
-    * Institute (e.g., "Institut für Informatik") or other institutions (e.g., "Campus IT")
-* **Roles & Functions (if available):**
-    * Examination Committee Chair (`is_pa_vorsitz`)
-    * Dean (`is_dekan`)
-    * Senate Member (`is_senat`)
-    * Institute Director (`is_institutsdirektor`)
-    * Presidential Board Member (`is_praesidium`)
-    * Study Program Director (Name of the assigned study program, if mentioned in the profile text)
+* **Basic Information:**  
+    * Full name  
+    * Academic degree (e.g., Dr., Prof. Dr.)  
+    * Email address  
+    * URL of the personal profile page on the TH Köln website  
+* **Organizational Assignment:**  
+    * Faculty (e.g., "Fakultät für Informatik und Ingenieurwissenschaften")  
+    * Institute (e.g., "Institut für Informatik") or other institutions (e.g., "Campus IT")  
+* **Roles & Functions (if available):**  
+    * Examination Committee Chair (`is_pa_vorsitz`)  
+    * Dean (`is_dekan`)  
+    * Senate Member (`is_senat`)  
+    * Institute Director (`is_institutsdirektor`)  
+    * Presidential Board Member (`is_praesidium`)  
+    * Study Program Director (Name of the assigned study program, if mentioned in the profile text)  
 
 ---
 
 ## Data Source: Which websites are crawled?
 
-The extraction is performed directly from the official TH Köln web presence:
-1. **Overview Page (A-Z Search):**
+The extraction is performed directly from the official TH Köln web presence:  
+1. **Overview Page (A-Z Search):**  
    `https://www.th-koeln.de/hochschule/personen_3850.php`
-   This page is used to find basic contact details (name, email) and links to individual profiles using filter parameters (initial letters, faculties, or institutions).
-2. **Individual Profile Pages:**
+   This page is used to find basic contact details (name, email) and links to individual profiles using filter parameters (initial letters, faculties, or institutions).  
+2. **Individual Profile Pages:**  
    The individual detail pages of persons (e.g., `https://www.th-koeln.de/personen/[name]/`) to extract academic degrees, faculty/institute assignments, as well as functions and responsibilities.
 
 ---
@@ -84,7 +84,7 @@ python -m th_personal_graph.scripts.crawl_th_koeln_persons --rebuild
 
 If you want to run the crawler for a specific faculty:
 
-1. **Query Available Faculties:**
+1. **Query Available Faculties:**  
    ```bash
    python -m th_personal_graph.scripts.crawl_th_koeln_persons --list-faculties
    ```
@@ -96,7 +96,7 @@ If you want to run the crawler for a specific faculty:
      ...
    ```
 
-2. **Start Crawling for the Desired Faculty:**
+2. **Start Crawling for the Desired Faculty:**  
    ```bash
    python -m th_personal_graph.scripts.crawl_th_koeln_persons --faculty "Fakultät für Informatik und Ingenieurwissenschaften"
    ```
@@ -107,6 +107,6 @@ If you want to run the crawler for a specific faculty:
      Fetching details for: ...
    ```
 
-3. **Verify Results:**
-   - A file named `persons_Fakult_t_f_r_Informatik_und_Ingenieurwissenschaften.md` with a table of all crawled persons and their roles is created in the `data/th_koeln/` folder.
-   - The SQLite knowledge graph in `th_personal.db` is automatically updated with the new persons, their faculty/institute associations, and functions.
+3. **Verify Results:**  
+   - A file named `persons_Fakult_t_f_r_Informatik_und_Ingenieurwissenschaften.md` with a table of all crawled persons and their roles is created in the `data/th_koeln/` folder.  
+   - The SQLite knowledge graph in `th_personal.db` is automatically updated with the new persons, their faculty/institute associations, and functions.  
