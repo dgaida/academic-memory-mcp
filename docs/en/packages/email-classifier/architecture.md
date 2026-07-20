@@ -19,7 +19,7 @@ The `EmailController` orchestrates the process:
 
 ## Transformer Architecture
 
-For deep learning classification, a Transformer model (Default: `paraphrase-multilingual-MiniLM-L12-v2`) is used.
+For deep learning classification, a Transformer model (Default: `paraphrase-multilingual-mpnet-base-v2`) is used.
 
 ### Structured Input
 Emails are structured before processing to preserve important metadata:
