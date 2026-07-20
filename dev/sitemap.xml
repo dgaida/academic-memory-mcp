@@ -113,13 +113,6 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/deven/packages/email-classifier/analysis/"/>
     </url>
     <url>
-        <loc>https://dgaida.github.io/academic-memory-mcp/dev/packages/email-classifier/architecture/</loc>
-        <lastmod>2026-07-20</lastmod>
-        <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/dev/packages/email-classifier/architecture/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/deven/packages/email-classifier/architecture/"/>
-    </url>
-    <url>
         <loc>https://dgaida.github.io/academic-memory-mcp/dev/packages/email-classifier/nn_architecture/</loc>
         <lastmod>2026-07-20</lastmod>
         <changefreq>daily</changefreq>
@@ -426,13 +419,6 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/dev/en/packages/email-classifier/analysis/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/devpackages/email-classifier/analysis/"/>
-    </url>
-    <url>
-        <loc>https://dgaida.github.io/academic-memory-mcp/dev/en/packages/email-classifier/architecture/</loc>
-        <lastmod>2026-07-20</lastmod>
-        <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/dev/en/packages/email-classifier/architecture/"/>
-        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/devpackages/email-classifier/architecture/"/>
     </url>
     <url>
         <loc>https://dgaida.github.io/academic-memory-mcp/dev/en/packages/email-classifier/nn_architecture/</loc>

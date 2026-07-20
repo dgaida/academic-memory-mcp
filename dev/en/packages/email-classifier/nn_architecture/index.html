@@ -15,7 +15,7 @@
         <link rel="canonical" href="https://dgaida.github.io/academic-memory-mcp/dev/en/packages/email-classifier/nn_architecture/">
       
       
-        <link rel="prev" href="../architecture/">
+        <link rel="prev" href="../analysis/">
       
       
         <link rel="next" href="../../th-personal-graph/">
@@ -1781,7 +1781,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../architecture/" class="md-nav__link">
+      <a href="../../../../packages/email-classifier/architecture.md" class="md-nav__link">
         
   
   
@@ -2494,7 +2494,7 @@
 <p>The implementation is based on a <strong>Transformer-based model</strong> (default: <code>sentence-transformers/paraphrase-multilingual-mpnet-base-v2</code>). Unlike classical bag-of-words methods, this architecture captures the semantic context and relationships between words within sentences (e.g., in the email subject and body).</p>
 <h3 id="core-components">Core Components:<a class="headerlink" href="#core-components" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Encoder Backbone</strong>: The pre-trained multilingual MPNet model serves as the feature extractor.</li>
+<li><strong>Encoder Backbone</strong>: The pre-trained multilingual MPNet model serves as the feature extractor.  </li>
 <li><strong>Input Structuring</strong>: Preprocessing and merging of metadata and email body into a structured, unified input text.  </li>
 <li><strong>Classification Head</strong>: A Fully Connected Layer (MLP) with dropout, applied directly to the <code>[CLS]</code> token (the representation vector of the entire sequence) to calculate the target class probabilities.  </li>
 </ol>
@@ -2591,7 +2591,7 @@
 <li><strong>Model Quantization</strong>:  </li>
 <li>Convert the model to an 8-bit integer format (INT8) using PyTorch to halve memory footprint on offline/client machines (e.g., laptops without dedicated GPUs) and increase inference speed.  </li>
 <li><strong>LoRA Fine-Tuning for Larger Local Models</strong>:  </li>
-<li>Instead of an MPNet model, larger multilingual LLMs (e.g., Llama 3 or Mistral) could be fine-tuned using Low-Rank Adaptation (LoRA) for classification, provided sufficient hardware resources are available.</li>
+<li>Instead of an MPNet model, larger multilingual LLMs (e.g., Llama 3 or Mistral) could be fine-tuned using Low-Rank Adaptation (LoRA) for classification, provided sufficient hardware resources are available.  </li>
 <li><strong>Advanced Hyperparameter Tuning</strong>:  </li>
 <li>Systematic search for optimal learning rates, dropout rates, and batch sizes using frameworks like Optuna to further maximize classification performance (F1-score).  </li>
 <li><strong>Knowledge Distillation</strong>:  </li>
@@ -2634,7 +2634,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../architecture/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Architektur">
+          <a href="../analysis/" class="md-footer__link md-footer__link--prev" aria-label="Previous: XAI &amp; Visualisierung">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -2644,7 +2644,7 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Architektur
+                XAI & Visualisierung
               </div>
             </div>
           </a>
