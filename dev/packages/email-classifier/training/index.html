@@ -1803,6 +1803,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Parameter:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#wichtiger-hinweis-zum-transformer-modell" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Wichtiger Hinweis zum Transformer-Modell:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -1873,34 +1890,6 @@
     
   
     XAI & Visualisierung
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../architecture.md" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Architektur
   
 
     
@@ -2391,6 +2380,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Parameter:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#wichtiger-hinweis-zum-transformer-modell" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Wichtiger Hinweis zum Transformer-Modell:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -2467,6 +2473,8 @@
 <li><code>--method</code>: <code>xgboost</code>, <code>randomforest</code> oder <code>transformer</code>.  </li>
 <li><code>--model-path</code>: Optionaler Pfad zum Speichern des Modells.  </li>
 </ul>
+<h4 id="wichtiger-hinweis-zum-transformer-modell">Wichtiger Hinweis zum Transformer-Modell:<a class="headerlink" href="#wichtiger-hinweis-zum-transformer-modell" title="Permanent link">&para;</a></h4>
+<p>Neben den klassischen Machine-Learning-Methoden (<code>xgboost</code>, <code>randomforest</code>) wird auch die Methode <code>transformer</code> unterstützt, die eine PyTorch-basierte feingetunte Transformer-Architektur trainiert. Details zu Aufbau, Datenfluss und Funktionsweise dieses Deep-Learning-Klassifikators finden Sie in der Dokumentation zur <a href="../nn_architecture/">Neuronalen Netzarchitektur</a>.</p>
 <p>Das Training erstellt automatisch Diagramme zur Confusion Matrix und zum Trainingsverlauf (bei Transformer).</p>
 <hr />
 <h2 id="modell-evaluieren-evaluatepy">Modell evaluieren (<code>evaluate.py</code>)<a class="headerlink" href="#modell-evaluieren-evaluatepy" title="Permanent link">&para;</a></h2>
@@ -2479,7 +2487,9 @@
 - Generierung einer Heatmap der Confusion Matrix als PNG.<br />
 - Speicherung der Metriken in <code>metrics.json</code>.  </p>
 <h2 id="feature-modellierung-merkmalsextraktion">Feature-Modellierung (Merkmalsextraktion)<a class="headerlink" href="#feature-modellierung-merkmalsextraktion" title="Permanent link">&para;</a></h2>
-<p>Der <code>EmailClassifier</code> unterstützt drei verschiedene Modi für die Merkmalsextraktion:</p>
+<p>Der <code>EmailClassifier</code> unterstützt drei verschiedene Modi für die Merkmalsextraktion.</p>
+<p><strong>Wichtiger Hinweis zur Merkmalsextraktion:</strong>
+Die im Folgenden beschriebenen Feature-Modellierungs- und Extraktionsschritte werden <strong>ausschließlich für die klassischen ML-Modelle</strong> (XGBoost und Random Forest) benötigt. Beim <strong>Transformer-Modell</strong> (<code>--method transformer</code>) wird der strukturierte Text direkt tokenisiert und dem neuronalen Netz übergeben; eine vorherige explizite Featureberechnung (wie TF-IDF oder separate Satz-Embeddings) entfällt hierbei.</p>
 <ol>
 <li>
 <p><strong>TF-IDF (<code>tfidf</code>)</strong>:  </p>

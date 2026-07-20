@@ -1752,13 +1752,52 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#internal-modules" class="md-nav__link">
+  <a href="#internal-modules-core-modules" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Internal Modules
+        Internal Modules &amp; Core Modules
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Internal Modules &amp; Core Modules">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enginepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        engine.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#controllerpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        controller.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stopwordspy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        stopwords.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -1858,34 +1897,6 @@
     
   
     XAI & Visualisierung
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../packages/email-classifier/architecture.md" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Architektur
   
 
     
@@ -2379,13 +2390,52 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#internal-modules" class="md-nav__link">
+  <a href="#internal-modules-core-modules" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Internal Modules
+        Internal Modules &amp; Core Modules
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Internal Modules &amp; Core Modules">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enginepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        engine.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#controllerpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        controller.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stopwordspy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        stopwords.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -2431,17 +2481,27 @@
 - <strong>Training &amp; Evaluation:</strong> <code>train.py</code>, <code>evaluate.py</code><br />
 - <strong>Prediction &amp; Sorting:</strong> <code>predict.py</code>, <code>sort_emails.py</code>, <code>classify_folder.py</code>, <code>sort_by_direction.py</code><br />
 - <strong>Analysis &amp; Visualization:</strong> <code>xai_analysis.py</code>, <code>plot_data_distribution.py</code>, <code>top_words.py</code>  </p>
-<h3 id="internal-modules">Internal Modules<a class="headerlink" href="#internal-modules" title="Permanent link">&para;</a></h3>
-<p>These modules form the core of the system and are mostly used internally:<br />
-- <strong><code>engine.py</code>:</strong> The heart of the system with model implementations (XGBoost, Random Forest, Transformer).<br />
-- <strong><code>controller.py</code>:</strong> Logic for controlling classification workflows.<br />
-- <strong><code>stopwords.py</code>:</strong> Definition of stop words for text processing.  </p>
+<h3 id="internal-modules-core-modules">Internal Modules &amp; Core Modules<a class="headerlink" href="#internal-modules-core-modules" title="Permanent link">&para;</a></h3>
+<p>These modules form the core of the system and are mostly used internally:  </p>
+<h4 id="enginepy"><code>engine.py</code><a class="headerlink" href="#enginepy" title="Permanent link">&para;</a></h4>
+<p>Contains the base classes for classification:
+- <strong><code>EmailClassifier</code></strong>: Manages model loading, preprocessing, and predictions for classical models (RandomForest, XGBoost).
+- <strong><code>EmailTransformerClassifier</code></strong>: A PyTorch-based implementation for Transformer models.
+- <strong>Vectorization</strong>: Supports TF-IDF, embeddings (BGE-M3), and a combination of both.</p>
+<h4 id="controllerpy"><code>controller.py</code><a class="headerlink" href="#controllerpy" title="Permanent link">&para;</a></h4>
+<p>The <code>EmailController</code> orchestrates the process:
+1. Loading configuration and model.
+2. Parsing incoming emails.
+3. Invoking classification.
+4. Deciding on further actions (sorting, reply generation).</p>
+<h4 id="stopwordspy"><code>stopwords.py</code><a class="headerlink" href="#stopwordspy" title="Permanent link">&para;</a></h4>
+<p>Definition of stop words for text processing.</p>
 <h2 id="documentation-overview">Documentation Overview<a class="headerlink" href="#documentation-overview" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="usage/"><strong>Script Usage</strong></a> - Examples and guides for CLI tools.  </li>
 <li><a href="training/"><strong>Training &amp; Evaluation</strong></a> - Details on training new models.  </li>
 <li><a href="analysis/"><strong>XAI &amp; Visualization</strong></a> - Explainability and data analysis.  </li>
-<li><a href="architecture.md"><strong>Architecture</strong></a> - Internal design and Transformer details.  </li>
+<li><a href="nn_architecture/"><strong>Neural Network Architecture</strong></a> - Details on Transformer-based classification.</li>
 </ul>
 
 

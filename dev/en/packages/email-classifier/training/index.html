@@ -1805,6 +1805,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Parameters:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#important-note-on-the-transformer-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Important Note on the Transformer Model:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -1875,34 +1892,6 @@
     
   
     XAI & Visualisierung
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../../packages/email-classifier/architecture.md" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Architektur
   
 
     
@@ -2393,6 +2382,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Parameters:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#important-note-on-the-transformer-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Important Note on the Transformer Model:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -2469,6 +2475,8 @@
 <li><code>--method</code>: <code>xgboost</code>, <code>randomforest</code>, or <code>transformer</code>.  </li>
 <li><code>--model-path</code>: Optional path to save the model.  </li>
 </ul>
+<h4 id="important-note-on-the-transformer-model">Important Note on the Transformer Model:<a class="headerlink" href="#important-note-on-the-transformer-model" title="Permanent link">&para;</a></h4>
+<p>In addition to classical machine learning methods (<code>xgboost</code>, <code>randomforest</code>), the training script also supports the <code>transformer</code> method. This trains a PyTorch-based, fine-tuned Transformer model. For detailed information regarding its design, data flow, and operation, please refer to the <a href="../nn_architecture/">Neural Network Architecture</a> documentation.</p>
 <p>Training automatically creates diagrams for the confusion matrix and training progress (for Transformer).</p>
 <hr />
 <h2 id="evaluate-model-evaluatepy">Evaluate Model (<code>evaluate.py</code>)<a class="headerlink" href="#evaluate-model-evaluatepy" title="Permanent link">&para;</a></h2>
@@ -2481,7 +2489,9 @@
 - Generation of a heatmap of the confusion matrix as PNG.<br />
 - Storage of metrics in <code>metrics.json</code>.  </p>
 <h2 id="feature-modeling-feature-extraction">Feature Modeling (Feature Extraction)<a class="headerlink" href="#feature-modeling-feature-extraction" title="Permanent link">&para;</a></h2>
-<p>The <code>EmailClassifier</code> supports three different modes for feature extraction:</p>
+<p>The <code>EmailClassifier</code> supports three different modes for feature extraction.</p>
+<p><strong>Important Note on Feature Extraction:</strong>
+The feature modeling and extraction steps described below are <strong>exclusively required for classical machine learning models</strong> (XGBoost and Random Forest). For the <strong>Transformer model</strong> (<code>--method transformer</code>), the structured text is tokenized directly and fed into the neural network; there is no prior explicit feature calculation step (such as TF-IDF or separate sentence embeddings).</p>
 <ol>
 <li>
 <p><strong>TF-IDF (<code>tfidf</code>)</strong>:  </p>

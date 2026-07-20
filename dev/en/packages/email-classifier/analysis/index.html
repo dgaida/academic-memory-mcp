@@ -1834,38 +1834,21 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#find-top-words-top_wordspy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Find Top Words (top_words.py)
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../../packages/email-classifier/architecture.md" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Architektur
-  
-
-    
-  </span>
-  
-  
-
-      </a>
     </li>
   
 
@@ -2349,6 +2332,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#find-top-words-top_wordspy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Find Top Words (top_words.py)
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2370,6 +2364,9 @@
 <p>Tools for analyzing the model and data distribution.</p>
 <h2 id="xai-analysis-xai_analysispy">XAI Analysis (<code>xai_analysis.py</code>)<a class="headerlink" href="#xai-analysis-xai_analysispy" title="Permanent link">&para;</a></h2>
 <p>Uses SHAP (SHapley Additive exPlanations) to explain which words influenced the model's decision the most.</p>
+<p><strong>Important Note on Model Compatibility:</strong>
+- <strong>ML Models (TF-IDF):</strong> XAI analysis works <strong>exclusively</strong> for classical machine learning models running in <strong>TF-IDF mode</strong> (<code>--mode tfidf</code>), since the SHAP <code>TreeExplainer</code> relies directly on the TF-IDF vectorizer.
+- <strong>Transformer &amp; Other Modes:</strong> XAI analysis does <strong>not</strong> work for the Transformer model or for ML models trained in <code>embedding</code> or <code>combined</code> modes.</p>
 <p><strong>Command:</strong>
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python<span class="w"> </span>-m<span class="w"> </span>email_classifier.scripts.xai_analysis<span class="w"> </span>--test-data-path<span class="w"> </span>/path/to/test_data
 </code></pre></div></p>
@@ -2380,6 +2377,15 @@ The script outputs the top 5 words for each class that were responsible for a po
 <p>Visualizes the number of emails per class in the training and test data.</p>
 <p><strong>Command:</strong>
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>python<span class="w"> </span>-m<span class="w"> </span>email_classifier.scripts.plot_data_distribution<span class="w"> </span>--train-dir<span class="w"> </span>/path/to/train<span class="w"> </span>--test-dir<span class="w"> </span>/path/to/test<span class="w"> </span>--output-dir<span class="w"> </span>./plots
+</code></pre></div></p>
+<hr />
+<h2 id="find-top-words-top_wordspy">Find Top Words (<code>top_words.py</code>)<a class="headerlink" href="#find-top-words-top_wordspy" title="Permanent link">&para;</a></h2>
+<p>A fast script to statistically determine the most frequent words per class.</p>
+<p><strong>Important Note on Model Independence:</strong>
+- This script is <strong>completely model-independent</strong> and works directly on the raw text data using statistical TF-IDF calculations.
+- It <strong>does not require or load any trained model</strong> (neither classical ML models nor the Transformer model). It is meant for pure data analysis before or after training.</p>
+<p><strong>Command:</strong>
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>python<span class="w"> </span>-m<span class="w"> </span>email_classifier.scripts.top_words<span class="w"> </span>/path/to/data
 </code></pre></div></p>
 
 
