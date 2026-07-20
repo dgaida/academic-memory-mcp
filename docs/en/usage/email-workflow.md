@@ -45,18 +45,17 @@ To generate a high-quality and context-sensitive response, the LLM receives a va
 ---
 
 ## Phase 4: Actions and Automation
-Based on the analysis, the system suggests one of six actions. In the [Gradio Interface](#gradio-gui), you can confirm or change this selection.
+Based on the analysis, the system suggests one of five actions. In the [Gradio Interface](#gradio-gui), you can confirm or change this selection.
 
 ### List of Actions
 
 | Action | Description | Technical Consequence |
 | :--- | :--- | :--- |
-| **1) Write Reply** | Creates a standard response based on the topic. | Generates a text draft in Outlook. |
+| **1) Write Reply** | Standard or topic-specific response. Also incorporates the intelligent appointment booking and conflict checking (automatic booking on student confirmation / proposing alternative slots on conflict). | Generates a text draft in Outlook, or directly books an appointment if a student confirmation is detected. |
 | **2) Reply with Appointment Proposal** | Searches for free slots in `free_slots.yaml`. | Inserts concrete time suggestions into the reply draft. |
-| **3) Book Appointment Directly** | Recognizes an appointment confirmation from the student. | Calls `manage_calendar_appointment` and creates an actual calendar entry in Outlook. |
-| **4) Archive Only** | No reply needed (e.g., purely informational). | Marks the email as handled without further action. |
-| **5) Task "Read Attachment"** | Specifically for final submissions of theses. | Creates an Outlook task/appointment for 7 days later for grading and saves attachments. |
-| **6) Colloquium Appointment (with `config.json` Automation)** | Special booking for final presentations with `config.json` automation. | Creates a 60-minute calendar entry in Outlook, creates/updates `config.json` in the student folder, and saves PDF filenames and presentation date/time. |
+| **3) Archive Only** | No reply needed (e.g., purely informational). | Marks the email as handled without further action. |
+| **4) Task "Read Attachment"** | Specifically for final submissions of theses. | Creates an Outlook task/appointment for 7 days later for grading and saves attachments. |
+| **5) Colloquium Appointment (with `config.json` Automation)** | Special booking for final presentations with `config.json` automation. | Creates a 60-minute calendar entry in Outlook, creates/updates `config.json` in the student folder, and saves PDF filenames and presentation date/time. |
 
 ---
 
@@ -101,9 +100,8 @@ As soon as you click "Save & Execute" in the GUI, the selected action is technic
 
 Before a reply is generated, the system creates a concise summary of the previous conversation history in the student folder (`.emails_summary.md`). This serves as crucial context for the LLM to stay informed about prior agreements. Details on how each action works and is executed can be found directly in their respective descriptions:
 
-*   **[Action 1: Write Reply](actions/action-1-antwort-schreiben.md)**  
+*   **[Action 1: Write Reply (including Appointment Booking)](actions/action-1-antwort-schreiben.md)**
 *   **[Action 2: Reply with Appointment Suggestion](actions/action-2-antwort-terminvorschlag.md)**  
-*   **[Action 3: Book Appointment](actions/action-3-termin-buchen.md)**  
 *   **[Action 4: Archive Only](actions/action-4-nur-archivieren.md)**  
 *   **[Action 5: Create Task in Calendar (Final Submission)](actions/action-5-aufgabe-kalender.md)**  
 *   **[Action 6: Colloquium Appointment](actions/action-6-kolloquium-termin.md)**  
