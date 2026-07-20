@@ -16,17 +16,17 @@ These scripts are intended for direct invocation by the user:
 These modules form the core of the system and are mostly used internally:  
 
 #### `engine.py`
-Contains the base classes for classification:
-- **`EmailClassifier`**: Manages model loading, preprocessing, and predictions for classical models (RandomForest, XGBoost).
-- **`EmailTransformerClassifier`**: A PyTorch-based implementation for Transformer models.
-- **Vectorization**: Supports TF-IDF, embeddings (BGE-M3), and a combination of both.
+Contains the base classes for classification:  
+- **`EmailClassifier`**: Manages model loading, preprocessing, and predictions for classical models (RandomForest, XGBoost).  
+- **`EmailTransformerClassifier`**: A PyTorch-based implementation for Transformer models.  
+- **Vectorization**: Supports TF-IDF, embeddings (BGE-M3), and a combination of both.  
 
 #### `controller.py`
-The `EmailController` orchestrates the process:
-1. Loading configuration and model.
-2. Parsing incoming emails.
-3. Invoking classification.
-4. Deciding on further actions (sorting, reply generation).
+The `EmailController` orchestrates the process:  
+1. Loading configuration and model.  
+2. Parsing incoming emails.  
+3. Invoking classification.  
+4. Deciding on further actions (sorting, reply generation).  
 
 #### `stopwords.py`
 Definition of stop words for text processing.
@@ -36,4 +36,4 @@ Definition of stop words for text processing.
 - [**Script Usage**](usage.md) - Examples and guides for CLI tools.  
 - [**Training & Evaluation**](training.md) - Details on training new models.  
 - [**XAI & Visualization**](analysis.md) - Explainability and data analysis.  
-- [**Neural Network Architecture**](nn_architecture.md) - Details on Transformer-based classification.
+- [**Neural Network Architecture**](nn_architecture.md) - Details on Transformer-based classification.  

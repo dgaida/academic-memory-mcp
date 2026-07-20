@@ -106,11 +106,11 @@ class EmailTransformerClassifier(nn.Module):
 
 While the system is fully operational, several optimization paths remain for future iterations:
 
-1. **Model Quantization**:
-    - Convert the model to an 8-bit integer format (INT8) using PyTorch to halve memory footprint on offline/client machines (e.g., laptops without dedicated GPUs) and increase inference speed.
-2. **LoRA Fine-Tuning for Larger Local Models**:
-    - Instead of a MiniLM model, larger multilingual LLMs (e.g., Llama 3 or Mistral) could be fine-tuned using Low-Rank Adaptation (LoRA) for classification, provided sufficient hardware resources are available.
-3. **Advanced Hyperparameter Tuning**:
-    - Systematic search for optimal learning rates, dropout rates, and batch sizes using frameworks like Optuna to further maximize classification performance (F1-score).
-4. **Knowledge Distillation**:
-    - Distill knowledge from a very large model into a smaller, highly efficient Transformer model that maintains high predictive accuracy but runs at extremely fast speeds.
+1. **Model Quantization**:  
+    - Convert the model to an 8-bit integer format (INT8) using PyTorch to halve memory footprint on offline/client machines (e.g., laptops without dedicated GPUs) and increase inference speed.  
+2. **LoRA Fine-Tuning for Larger Local Models**:  
+    - Instead of a MiniLM model, larger multilingual LLMs (e.g., Llama 3 or Mistral) could be fine-tuned using Low-Rank Adaptation (LoRA) for classification, provided sufficient hardware resources are available.  
+3. **Advanced Hyperparameter Tuning**:  
+    - Systematic search for optimal learning rates, dropout rates, and batch sizes using frameworks like Optuna to further maximize classification performance (F1-score).  
+4. **Knowledge Distillation**:  
+    - Distill knowledge from a very large model into a smaller, highly efficient Transformer model that maintains high predictive accuracy but runs at extremely fast speeds.  

@@ -16,17 +16,17 @@ Diese Skripte sind für den direkten Aufruf durch den Benutzer gedacht:
 Diese Module bilden den Kern des Systems und werden meist intern verwendet:  
 
 #### `engine.py`
-Enthält die Basisklassen für die Klassifizierung:
-- **`EmailClassifier`**: Verwaltet das Laden von Modellen, Vorverarbeitung und Vorhersagen für klassische Modelle (RandomForest, XGBoost).
-- **`EmailTransformerClassifier`**: Eine PyTorch-basierte Implementierung für Transformer-Modelle.
-- **Vektorisierung**: Unterstützt TF-IDF, Embeddings (BGE-M3) und eine Kombination aus beiden.
+Enthält die Basisklassen für die Klassifizierung:  
+- **`EmailClassifier`**: Verwaltet das Laden von Modellen, Vorverarbeitung und Vorhersagen für klassische Modelle (RandomForest, XGBoost).  
+- **`EmailTransformerClassifier`**: Eine PyTorch-basierte Implementierung für Transformer-Modelle.  
+- **Vektorisierung**: Unterstützt TF-IDF, Embeddings (BGE-M3) und eine Kombination aus beiden.  
 
 #### `controller.py`
-Der `EmailController` orchestriert den Prozess:
-1. Laden der Konfiguration und des Modells.
-2. Parsen eingehender E-Mails.
-3. Aufruf der Klassifizierung.
-4. Entscheidung über weitere Aktionen (Sortierung, Antwortgenerierung).
+Der `EmailController` orchestriert den Prozess:  
+1. Laden der Konfiguration und des Modells.  
+2. Parsen eingehender E-Mails.  
+3. Aufruf der Klassifizierung.  
+4. Entscheidung über weitere Aktionen (Sortierung, Antwortgenerierung).  
 
 #### `stopwords.py`
 Definition von Stoppwörtern für die Textverarbeitung.
@@ -36,4 +36,4 @@ Definition von Stoppwörtern für die Textverarbeitung.
 - [**Nutzung der Skripte**](usage.md) - Beispiele und Anleitungen für die CLI-Tools.  
 - [**Training & Evaluierung**](training.md) - Details zum Training neuer Modelle.  
 - [**XAI & Visualisierung**](analysis.md) - Erklärbarkeit und Datenanalyse.  
-- [**Neuronale Netzarchitektur**](nn_architecture.md) - Details zur Transformer-basierten Klassifizierung.
+- [**Neuronale Netzarchitektur**](nn_architecture.md) - Details zur Transformer-basierten Klassifizierung.  
