@@ -3,35 +3,22 @@
 Die Funktionalitäten des `th_personal_graph`-Packages werden über drei zentrale CLI-Skripte gesteuert. Diese sollten als ausführbare Module aufgerufen werden.
 
 ## 1. TH Personal Crawler
-Crawlt das Personalverzeichnis der TH Köln. Ergebnisse werden nach Fakultäten/Einrichtungen aufgeteilt als Markdown in `data/th_koeln/` abgelegt und in die SQLite-Datenbank importiert.
+Crawlt das Personalverzeichnis der TH Köln, extrahiert Kontaktdaten, Fakultäten und akademische Grade und speichert sie in Markdown sowie in der lokalen SQLite-Datenbank `th_personal.db`.
 
-### Parameter & Beispiele  
-- **A-Z Crawl für gesamte TH:**  
-  ```bash
-  python -m th_personal_graph.scripts.crawl_th_koeln_persons
-  ```
-- **Spezifische Fakultät crawlen:**  
-  ```bash
-  python -m th_personal_graph.scripts.crawl_th_koeln_persons --faculty "Fakultät für Informatik und Ingenieurwissenschaften"
-  ```
-- **Spezifische Einrichtung crawlen:**  
-  ```bash
-  python -m th_personal_graph.scripts.crawl_th_koeln_persons --institution "Campus IT"
-  ```
-- **Fakultäten/Einrichtungen auflisten:**  
-  ```bash
-  python -m th_personal_graph.scripts.crawl_th_koeln_persons --list-faculties
-  python -m th_personal_graph.scripts.crawl_th_koeln_persons --list-institutions
-  ```
-- **Datenbank aus vorhandenen Markdown-Dateien neu aufbauen:**  
-  ```bash
-  python -m th_personal_graph.scripts.crawl_th_koeln_persons --rebuild
-  ```
+Detaillierte Informationen zu den extrahierten Daten, den Quellen und allen verfügbaren Parametern finden Sie auf der Seite [TH Personal Crawler](crawler.md).
+
+### Kurzes Beispiel
+Ein vollständiger A-Z Crawl für das gesamte Personalverzeichnis kann wie folgt aufgerufen werden:
+```bash
+python -m th_personal_graph.scripts.crawl_th_koeln_persons
+```
 
 ---
 
 ## 2. MOCOGI Extraktor
 Ruft über die MOCOGI-API Studiengänge, Prüfungsordnungen (PO) und Modulzuordnungen ab, liest die Verantwortlichkeiten aus (Modulverantwortung, Erst-/Zweitprüfer) und trägt sie in den Graphen von `th_personal.db` ein.
+
+Weitere Details zur Funktionsweise, den Voraussetzungen und dem Ausgabeformat finden Sie auf der Seite [MOCOGI Extraktion](mocogi.md).
 
 ### Ausführung
 ```bash

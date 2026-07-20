@@ -142,6 +142,7 @@ nav:
               - Neuronale Netzarchitektur: packages/email-classifier/nn_architecture.md
           - TH Personal Graph:
               - Übersicht: packages/th-personal-graph/index.md
+              - TH Personal Crawler: packages/th-personal-graph/crawler.md
               - Nutzung der Skripte: packages/th-personal-graph/usage.md
               - MOCOGI Extraktion: packages/th-personal-graph/mocogi.md
               - Architektur & Logik: packages/th-personal-graph/architecture.md
