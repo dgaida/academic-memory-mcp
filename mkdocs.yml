@@ -107,10 +107,9 @@ nav:
               - Übersicht: usage/email-workflow.md
               - Aktion 1 - Antwort schreiben: usage/actions/action-1-antwort-schreiben.md
               - Aktion 2 - Antwort mit Terminvorschlag: usage/actions/action-2-antwort-terminvorschlag.md
-              - Aktion 3 - Termin direkt buchen: usage/actions/action-3-termin-buchen.md
-              - Aktion 4 - Nur archivieren: usage/actions/action-4-nur-archivieren.md
-              - Aktion 5 - Aufgabe "Anhang lesen" (Finale Abgabe): usage/actions/action-5-aufgabe-kalender.md
-              - Aktion 6 - Kolloquium-Termin: usage/actions/action-6-kolloquium-termin.md
+              - Aktion 3 - Nur archivieren: usage/actions/action-4-nur-archivieren.md
+              - Aktion 4 - Aufgabe "Anhang lesen" (Finale Abgabe): usage/actions/action-5-aufgabe-kalender.md
+              - Aktion 5 - Kolloquium-Termin: usage/actions/action-6-kolloquium-termin.md
           - Personaldatenbank: usage/profiles.md
           - Outlook Makros: usage/outlook-macros.md
       - Installation & Einrichtung:

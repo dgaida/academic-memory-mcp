@@ -65,16 +65,15 @@ Während der Arbeit in der GUI (insbesondere im Detail-Tab 2) führt das System 
 ---
 
 ## 5. Phase: Aktions-Vorschläge & GUI-Interaktion
-Basierend auf der KI-gestützten Analyse schlägt das System eine von sechs Aktionen vor. Diese Auswahl wird in der GUI vorselektiert und kann vom Benutzer manuell überprüft, angepasst oder überschrieben werden.
+Basierend auf der KI-gestützten Analyse schlägt das System eine von fünf Aktionen vor. Diese Auswahl wird in der GUI vorselektiert und kann vom Benutzer manuell überprüft, angepasst oder überschrieben werden.
 
 | Aktion | Beschreibung |
 | :--- | :--- |
-| **1) Antwort schreiben** | Standard-Antwort basierend auf dem Thema. |
+| **1) Antwort schreiben** | Standard- oder themenspezifische Antwort. Beinhaltet auch die intelligente Termin- und Konfliktprüfung (Automatische Terminbuchung bei Zusagen / Alternativvorschläge bei Konflikten). |
 | **2) Antwort mit Terminvorschlag** | Sucht freie Slots und schlägt diese vor. |
-| **3) Termin direkt buchen** | Erkennt eine Terminbestätigung und trägt diese ein. |
-| **4) Nur archivieren** | Einsortierung in den Archiv-Ordner; keine Antwort nötig. |
-| **5) Aufgabe "Anhang lesen"** | Speziell für finale Abgaben (Korrektur-Erinnerung). |
-| **6) Kolloquium-Termin** | Spezielle Buchung für Abschlussvorträge. |
+| **3) Nur archivieren** | Einsortierung in den Archiv-Ordner; keine Antwort nötig. |
+| **4) Aufgabe "Anhang lesen"** | Speziell für finale Abgaben (Korrektur-Erinnerung im Kalender). |
+| **5) Kolloquium-Termin** | Spezielle Buchung für Abschlussvorträge. |
 
 ---
 
@@ -89,12 +88,11 @@ Sobald Sie in der GUI auf "Speichern & Ausführen" klicken, wird die gewählte A
 
 Bevor eine Antwort generiert wird, erstellt das System eine prägnante Zusammenfassung des bisherigen Konversationsverlaufs im Studentenordner (`.emails_summary.md`). Diese dient als wichtiger Kontext für das LLM, um über bisherige Absprachen informiert zu sein. Details zur Funktionsweise und Umsetzung der einzelnen Aktionen finden Sie direkt in den jeweiligen Beschreibungen:
 
-*   **[Aktion 1: Antwort schreiben](actions/action-1-antwort-schreiben.md)**  
+*   **[Aktion 1: Antwort schreiben (inkl. Terminbuchung)](actions/action-1-antwort-schreiben.md)**
 *   **[Aktion 2: Antwort mit Terminvorschlag](actions/action-2-antwort-terminvorschlag.md)**  
-*   **[Aktion 3: Termin direkt buchen](actions/action-3-termin-buchen.md)**  
-*   **[Aktion 4: Nur archivieren](actions/action-4-nur-archivieren.md)**  
-*   **[Aktion 5: Aufgabe im Kalender anlegen (Finale Abgabe)](actions/action-5-aufgabe-kalender.md)**  
-*   **[Aktion 6: Kolloquium-Termin](actions/action-6-kolloquium-termin.md)**  
+*   **[Aktion 3: Nur archivieren](actions/action-4-nur-archivieren.md)**
+*   **[Aktion 4: Aufgabe im Kalender anlegen (Finale Abgabe)](actions/action-5-aufgabe-kalender.md)**
+*   **[Aktion 5: Kolloquium-Termin](actions/action-6-kolloquium-termin.md)**
 
 ---
 
