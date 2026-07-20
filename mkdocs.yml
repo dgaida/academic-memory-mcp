@@ -139,7 +139,6 @@ nav:
               - Nutzung der Skripte: packages/email-classifier/usage.md
               - Training & Evaluierung: packages/email-classifier/training.md
               - XAI & Visualisierung: packages/email-classifier/analysis.md
-              - Architektur: packages/email-classifier/architecture.md
               - Neuronale Netzarchitektur: packages/email-classifier/nn_architecture.md
           - TH Personal Graph:
               - Übersicht: packages/th-personal-graph/index.md

@@ -11,7 +11,23 @@ Die Implementierung basiert auf einem **Transformer-basierten Modell** (Standard
 2. **Input-Strukturierung**: Vorverarbeitung und Zusammenführung von Metadaten und E-Mail-Body in einen zusammenhängenden Eingabetext.  
 3. **Classification Head**: Ein Fully Connected Layer (MLP) mit Dropout, das direkt auf das `[CLS]`-Token (den Repräsentationsvektor der gesamten Sequenz) angewendet wird, um die Wahrscheinlichkeiten für die Zielklassen zu berechnen.  
 
-## 2. Datenaufbereitung & Input-Format
+---
+
+## 2. Datenfluss
+
+Der gesamte Prozess von der rohen E-Mail bis zur finalen Kategorie folgt diesem Datenfluss:
+
+```mermaid
+graph TD
+    A[Rohdaten: .msg oder .eml Dateien] --> B[Parser: Extraktion von Text, Betreff & Anhängen]
+    B --> C[Vorverarbeitung: Anonymisierung PII & Strukturierung]
+    C --> D[Modell: Berechnung der Klassenwahrscheinlichkeiten]
+    D --> E[Output: Zuweisung einer Kategorie z.B. BachelorThesis]
+```
+
+---
+
+## 3. Datenaufbereitung & Input-Format
 
 Um wichtige Metadaten explizit zu berücksichtigen und deren starke Signalwirkung (z. B. von Betreffzeilen oder Dateianhängen) zu nutzen, wird der Input vor der Tokenisierung wie folgt strukturiert:
 
@@ -24,7 +40,9 @@ SUBJECT: <Betreff> | ATTACHMENTS: <Datei1.pdf, Datei2.docx> [SEP] <Inhalt der E-
 - **Anhänge (Attachments)**: Dateinamen wie "Antrag_BA.pdf" liefern extrem starke Merkmale für spezifische Klassen (z. B. `BachelorThesis`).  
 - **Anonymisierung**: Personenbezogene Daten (PII) werden durch die `anonymize_th_koeln_names`-Logik vor der Weiterverarbeitung durch Platzhalter ersetzt.  
 
-## 3. Vergleich der Ansätze
+---
+
+## 4. Vergleich der Ansätze
 
 | Merkmal | Klassisch (TF-IDF + XGBoost/RF) | Transformer (NN) |
 | :--- | :--- | :--- |
@@ -34,7 +52,9 @@ SUBJECT: <Betreff> | ATTACHMENTS: <Datei1.pdf, Datei2.docx> [SEP] <Inhalt der E-
 | **Metadaten** | Müssen manuell als zusätzliche Features extrahiert werden. | Werden über das strukturierte Input-Format direkt im Textfluss gelernt. |
 | **Transfer Learning** | Nicht möglich. | Nutzt vortrainiertes, tiefes Sprachwissen. |
 
-## 4. Implementierungsdetails (`engine.py`)
+---
+
+## 5. Implementierungsdetails (`engine.py`)
 
 Die tatsächliche PyTorch-Implementierung ist in `packages/email_classifier/src/email_classifier/engine.py` unter der Klasse `EmailTransformerClassifier` realisiert:
 
@@ -72,21 +92,25 @@ class EmailTransformerClassifier(nn.Module):
         return self.classifier(cls_output)
 ```
 
-## 5. Trainings- & Validierungsstrategie
+---
+
+## 6. Trainings- & Validierungsstrategie
 
 - **Fine-Tuning**: Die Gewichte des Transformer-Backbones sowie des Klassifikationskopfes werden mit einer niedrigen Learning Rate auf den TH-Köln-spezifischen E-Mail-Klassen trainiert.  
 - **Klassen-Gewichtung (Weighted Cross-Entropy)**: Da einige Klassen deutlich seltener vorkommen (z. B. `SHK` vs. `Others`), wird ein gewichteter Cross-Entropy-Loss verwendet, um die Klassifizierung seltener Klassen zu verbessern.  
 - **Maximale Sequenzlänge**: Auf 512 Token begrenzt, was für E-Mails einen optimalen Kompromiss aus Kontextgröße und Trainingsgeschwindigkeit darstellt.  
 
-## 6. Zukünftige Verbesserungsmöglichkeiten
+---
+
+## 7. Zukünftige Verbesserungsmöglichkeiten
 
 Obwohl das System bereits vollständig einsatzbereit ist, bieten sich für zukünftige Iterationen folgende Optimierungen an:
 
 1. **Modell-Quantisierung (Quantization)**:  
-   - Konvertierung des Modells in ein 8-Bit-Format (INT8) mittels PyTorch, um den Speicherbedarf auf Offline-Systemen (z. B. Laptops ohne dedizierte GPU) zu halbieren und die Inferenzgeschwindigkeit zu steigern.  
+    - Konvertierung des Modells in ein 8-Bit-Format (INT8) mittels PyTorch, um den Speicherbedarf auf Offline-Systemen (z. B. Laptops ohne dedizierte GPU) zu halbieren und die Inferenzgeschwindigkeit zu steigern.
 2. **LoRA Fine-Tuning für größere lokale Modelle**:  
-   - Statt eines MiniLM-Modells könnten größere multilinguale LLMs (z. B. Llama 3 oder Mistral) über Low-Rank Adaptation (LoRA) auf Klassifikation trainiert werden, sofern ausreichend Rechenressourcen vorhanden sind.  
+    - Statt eines MiniLM-Modells könnten größere multilinguale LLMs (z. B. Llama 3 oder Mistral) über Low-Rank Adaptation (LoRA) auf Klassifikation trainiert werden, sofern ausreichend Rechenressourcen vorhanden sind.
 3. **Erweitertes Hyperparameter-Tuning**:  
-   - Systematische Suche nach optimalen Learning Rates, Dropout-Raten und Batch-Sizes mittels Frameworks wie Optuna, um die Klassifikationsleistung (F1-Score) noch weiter zu maximieren.  
+    - Systematische Suche nach optimalen Learning Rates, Dropout-Raten und Batch-Sizes mittels Frameworks wie Optuna, um die Klassifikationsleistung (F1-Score) noch weiter zu maximieren.
 4. **Knowledge Distillation**:  
-   - Destillieren eines sehr großen Modells in ein kleineres, hocheffizientes Transformer-Modell, das die hohe Vorhersagegenauigkeit beibehält, aber extrem schnell ausgeführt werden kann.  
+    - Destillieren eines sehr großen Modells in ein kleineres, hocheffizientes Transformer-Modell, das die hohe Vorhersagegenauigkeit beibehält, aber extrem schnell ausgeführt werden kann.

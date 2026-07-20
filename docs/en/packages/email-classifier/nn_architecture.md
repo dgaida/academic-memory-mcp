@@ -11,7 +11,23 @@ The implementation is based on a **Transformer-based model** (default: `sentence
 2. **Input Structuring**: Preprocessing and merging of metadata and email body into a structured, unified input text.  
 3. **Classification Head**: A Fully Connected Layer (MLP) with dropout, applied directly to the `[CLS]` token (the representation vector of the entire sequence) to calculate the target class probabilities.  
 
-## 2. Data Preparation & Input Format
+---
+
+## 2. Data Flow
+
+The entire process from the raw email to the final category assignment follows this data flow:
+
+```mermaid
+graph TD
+    A[Raw Data: .msg or .eml files] --> B[Parser: Extraction of Text, Subject & Attachments]
+    B --> C[Preprocessing: Anonymization of PII & Structuring]
+    C --> D[Model: Calculation of Class Probabilities]
+    D --> E[Output: Category Assignment e.g., BachelorThesis]
+```
+
+---
+
+## 3. Data Preparation & Input Format
 
 To explicitly integrate important metadata and leverage its strong signal effect (e.g., subject lines or attachments), the input is structured as follows before tokenization:
 
@@ -24,7 +40,9 @@ SUBJECT: <Subject> | ATTACHMENTS: <file1.pdf, file2.docx> [SEP] <Email Body (ano
 - **Attachments**: Filenames like "Antrag_BA.pdf" provide extremely strong indicators for specific classes (e.g., `BachelorThesis`).  
 - **Anonymization**: Personally identifiable information (PII) is replaced with placeholders using the `anonymize_th_koeln_names` logic before processing.  
 
-## 3. Comparison of Approaches
+---
+
+## 4. Comparison of Approaches
 
 | Feature | Classical (TF-IDF + XGBoost/RF) | Transformer (NN) |
 | :--- | :--- | :--- |
@@ -34,7 +52,9 @@ SUBJECT: <Subject> | ATTACHMENTS: <file1.pdf, file2.docx> [SEP] <Email Body (ano
 | **Metadata** | Must be manually extracted as additional features. | Directly learned within the text stream via structured input. |
 | **Transfer Learning**| Not possible. | Leverages pre-trained, deep language knowledge. |
 
-## 4. Implementation Details (`engine.py`)
+---
+
+## 5. Implementation Details (`engine.py`)
 
 The actual PyTorch implementation resides in `packages/email_classifier/src/email_classifier/engine.py` under the `EmailTransformerClassifier` class:
 
@@ -72,21 +92,25 @@ class EmailTransformerClassifier(nn.Module):
         return self.classifier(cls_output)
 ```
 
-## 5. Training & Validation Strategy
+---
+
+## 6. Training & Validation Strategy
 
 - **Fine-Tuning**: The weights of both the Transformer backbone and the classification head are updated with a low learning rate on TH-Köln-specific email classes.  
 - **Class Weighting (Weighted Cross-Entropy)**: To handle class imbalance (e.g., many `Others` vs. few `SHK` emails), weighted cross-entropy loss is employed to improve performance on minority classes.  
 - **Max Sequence Length**: Capped at 512 tokens, which provides an optimal trade-off between context representation and training/inference speed.  
 
-## 6. Future Improvement Opportunities
+---
+
+## 7. Future Improvement Opportunities
 
 While the system is fully operational, several optimization paths remain for future iterations:
 
 1. **Model Quantization**:  
-   - Convert the model to an 8-bit integer format (INT8) using PyTorch to halve memory footprint on offline/client machines (e.g., laptops without dedicated GPUs) and increase inference speed.  
+    - Convert the model to an 8-bit integer format (INT8) using PyTorch to halve memory footprint on offline/client machines (e.g., laptops without dedicated GPUs) and increase inference speed.
 2. **LoRA Fine-Tuning for Larger Local Models**:  
-   - Instead of a MiniLM model, larger multilingual LLMs (e.g., Llama 3 or Mistral) could be fine-tuned using Low-Rank Adaptation (LoRA) for classification, provided sufficient hardware resources are available.  
+    - Instead of a MiniLM model, larger multilingual LLMs (e.g., Llama 3 or Mistral) could be fine-tuned using Low-Rank Adaptation (LoRA) for classification, provided sufficient hardware resources are available.
 3. **Advanced Hyperparameter Tuning**:  
-   - Systematic search for optimal learning rates, dropout rates, and batch sizes using frameworks like Optuna to further maximize classification performance (F1-score).  
+    - Systematic search for optimal learning rates, dropout rates, and batch sizes using frameworks like Optuna to further maximize classification performance (F1-score).
 4. **Knowledge Distillation**:  
-   - Distill knowledge from a very large model into a smaller, highly efficient Transformer model that maintains high predictive accuracy but runs at extremely fast speeds.  
+    - Distill knowledge from a very large model into a smaller, highly efficient Transformer model that maintains high predictive accuracy but runs at extremely fast speeds.
