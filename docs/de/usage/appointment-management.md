@@ -26,7 +26,7 @@ python scripts/appointment_gui.py
         *   Wird keine Übereinstimmung im Betreff gefunden, dann soll der Betreff an das Emailclassifier Modell übergeben werden und dieses entscheidet über die Klasse. Wenn in dem vorhergesagten Klassenordner keine Mails von dem Teilnehmer des Termins gefunden werden, dann fällt das System auf die Standardklasse `"Other"` zurück.  
 *   **Zusammenfassungen:** Zeigt die KI-generierte Konversationszusammenfassung (`.emails_summary.md`) des gefundenen studentischen Hauptordners an.  
     *   **Erstellt die GUI die Zusammenfassung, falls es noch keine gibt?**  
-        Ja! Wenn für den gefundenen Studentenordner noch keine Zusammenfassung existiert oder diese veraltet ist (d h. wenn das Dateidatum von `.emails_summary.md` älter ist als die neueste E-Mail-Datei `.msg` / `.eml` im Ordner), generiert bzw. aktualisiert die GUI die Zusammenfassung automatisch im Hintergrund. Dazu liest sie die gesamte E-Mail-Historie des Studenten ein und lässt über das lokale LLM eine aktuelle, strukturierte Zusammenfassung generieren, die als `.emails_summary.md` im Studentenordner gespeichert wird.
+        Ja! Wenn für den gefundenen Studentenordner noch keine Zusammenfassung existiert oder diese veraltet ist (d h. wenn das Dateidatum von `.emails_summary.md` älter ist als die neueste E-Mail-Datei `.msg` / `.eml` im Ordner), generiert bzw. aktualisiert die GUI die Zusammenfassung automatisch im Hintergrund. Dazu liest sie die gesamte E-Mail-Historie des Studenten ein und lässt über das lokale LLM eine aktuelle, strukturierte Zusammenfassung generieren, die als `.emails_summary.md` im Studentenordner gespeichert wird.  
 *   **Steckbriefe:** Zeigt den aktuellen Steckbrief des Studierenden (Interessen, bisherige Themen, bevorzugte Anrede etc.) an.  
     *   **Wird dieser durch die GUI auch erstellt, wenn es noch keinen gibt?**  
         Ja! Wenn beim Auswählen des Termins die E-Mail-Adresse des Teilnehmers bekannt ist, ruft das System den `PersonProfiler` auf. Dieser prüft, ob bereits ein Steckbrief unter `D:\Steckbriefe\<email>.md` (oder alternativ im lokalen Ordner `Steckbriefe/`) existiert. Gibt es noch keinen Steckbrief, sucht der Profiler nach allen E-Mails dieser Person (bis zu 100 der neuesten E-Mails aus allen Archiv-Pfaden), bezieht Informationen aus dem Wissensgraphen (z. B. Rollen, Zugehörigkeiten) ein, bestimmt die bevorzugte Anrede ("Du" oder "Sie") durch LLM-Analyse der letzten Direkt-E-Mails und erstellt vollautomatisch einen neuen, detaillierten Steckbrief in Markdown. Sollte bereits ein Steckbrief existieren, wird dieser bei neuen E-Mails ebenfalls automatisch aktualisiert.  
@@ -38,15 +38,15 @@ Wenn das System eine E-Mail beantwortet (Aktion 1: "Antwort schreiben"), prüft 
 
 ### Funktionsweise
 
-1. **Erkennung:** Das LLM analysiert die eingehende Mail auf konkrete Terminvorschläge (z. B. "Passt es am Dienstag um 14:00?") oder Zusagen (z. B. "Ich nehme den Termin am Montag um 15:30 Uhr").
-2. **Intelligenter Kalenderabgleich:**
-   - Das System liest die bestehenden Termine aus der Datei `data/appointments.md`.
-   - Es prüft intelligent, ob zu dem vorgeschlagenen oder bestätigten Zeitpunkt bereits ein Termin oder ein Blocker existiert:
-     - **Frei:** Wenn kein Termin oder nur ein Blocker speziell für diesen Termin/Studenten eingetragen ist, ist das System frei. Der Termin wird über das Tool `manage_calendar_appointment` direkt im Kalender gebucht und die Person wird eingeladen. Das System antwortet mit dem Signalwort `APPOINTMENT_BOOKED`.
-     - **Belegt (Konflikt):** Wenn ein ganz anderer Termin oder ein generischer Blocker (z. B. eine andere Besprechung, privat, etc.) im Weg steht, erkennt das System dies als Konflikt.
-3. **Alternativenvorschlag bei Konflikten:**
-   - Falls ein Konflikt erkannt wird, liest das System automatisch die freien Terminslots aus `data/free_slots.md` (über das Tool `get_appointment_slots`) ein.
-   - Es schlägt diese freien Termine als Alternativen in der Antwort-E-Mail vor und bittet den Absender um eine neue Auswahl.
+1. **Erkennung:** Das LLM analysiert die eingehende Mail auf konkrete Terminvorschläge (z. B. "Passt es am Dienstag um 14:00?") oder Zusagen (z. B. "Ich nehme den Termin am Montag um 15:30 Uhr").  
+2. **Intelligenter Kalenderabgleich:**  
+   - Das System liest die bestehenden Termine aus der Datei `data/appointments.md`.  
+   - Es prüft intelligent, ob zu dem vorgeschlagenen oder bestätigten Zeitpunkt bereits ein Termin oder ein Blocker existiert:  
+     - **Frei:** Wenn kein Termin oder nur ein Blocker speziell für diesen Termin/Studenten eingetragen ist, ist das System frei. Der Termin wird über das Tool `manage_calendar_appointment` direkt im Kalender gebucht und die Person wird eingeladen. Das System antwortet mit dem Signalwort `APPOINTMENT_BOOKED`.  
+     - **Belegt (Konflikt):** Wenn ein ganz anderer Termin oder ein generischer Blocker (z. B. eine andere Besprechung, privat, etc.) im Weg steht, erkennt das System dies als Konflikt.  
+3. **Alternativenvorschlag bei Konflikten:**  
+   - Falls ein Konflikt erkannt wird, liest das System automatisch die freien Terminslots aus `data/free_slots.md` (über das Tool `get_appointment_slots`) ein.  
+   - Es schlägt diese freien Termine als Alternativen in der Antwort-E-Mail vor und bittet den Absender um eine neue Auswahl.  
 
 ### Vereinheitlichung der Aktionen (Aktion 1 & Aktion 3)
 

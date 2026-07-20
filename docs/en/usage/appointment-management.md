@@ -38,15 +38,15 @@ When the system responds to an email (Action 1: "Write reply"), it automatically
 
 ### How It Works
 
-1. **Detection:** The LLM analyzes the incoming email for concrete meeting proposals (e.g., "Can we meet on Tuesday at 14:00?") or confirmations (e.g., "I accept the appointment on Monday at 15:30").
-2. **Intelligent Calendar Matching:**
-   - The system reads existing appointments from the file `data/appointments.md`.
-   - It intelligently checks whether an appointment or blocker already exists at the proposed or confirmed time:
-     - **Free:** If there is no appointment or only a blocker specifically designated for this appointment/student, the system is free. The appointment is booked directly in the calendar via the `manage_calendar_appointment` tool, and the person is invited. The system responds with the signal word `APPOINTMENT_BOOKED`.
-     - **Busy (Conflict):** If a completely different appointment or a generic blocker (e.g., another meeting, private event, etc.) is in the way, the system detects this as a conflict.
-3. **Alternative Suggestions on Conflict:**
-   - If a conflict is detected, the system automatically reads free appointment slots from `data/free_slots.md` (via the `get_appointment_slots` tool).
-   - It suggests these free times as alternatives in the reply email and asks the sender to make a new selection.
+1. **Detection:** The LLM analyzes the incoming email for concrete meeting proposals (e.g., "Can we meet on Tuesday at 14:00?") or confirmations (e.g., "I accept the appointment on Monday at 15:30").  
+2. **Intelligent Calendar Matching:**  
+   - The system reads existing appointments from the file `data/appointments.md`.  
+   - It intelligently checks whether an appointment or blocker already exists at the proposed or confirmed time:  
+     - **Free:** If there is no appointment or only a blocker specifically designated for this appointment/student, the system is free. The appointment is booked directly in the calendar via the `manage_calendar_appointment` tool, and the person is invited. The system responds with the signal word `APPOINTMENT_BOOKED`.  
+     - **Busy (Conflict):** If a completely different appointment or a generic blocker (e.g., another meeting, private event, etc.) is in the way, the system detects this as a conflict.  
+3. **Alternative Suggestions on Conflict:**  
+   - If a conflict is detected, the system automatically reads free appointment slots from `data/free_slots.md` (via the `get_appointment_slots` tool).  
+   - It suggests these free times as alternatives in the reply email and asks the sender to make a new selection.  
 
 ### Action Unification (Action 1 & Action 3)
 
