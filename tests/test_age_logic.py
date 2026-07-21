@@ -60,7 +60,7 @@ def test_age_months_suggested_action(tmp_path):
 
             assert len(emails) == 1
             assert emails[0]["lastname"] == "StudentOld"
-            assert emails[0]["suggested_action"] == 3
+            assert emails[0]["suggested_action"] == 2
 
 def test_sent_items_suggested_action(tmp_path):
     """Checks that emails in SentItems are always archived.
@@ -109,4 +109,4 @@ def test_sent_items_suggested_action(tmp_path):
 
             assert len(emails) == 1
             assert emails[0]["lastname"] == "StudentSent"
-            assert emails[0]["suggested_action"] == 3
+            assert emails[0]["suggested_action"] == 2

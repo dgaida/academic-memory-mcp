@@ -1036,7 +1036,7 @@ TEXT:
             logger.info(
                 f"E-Mail von {email_data.get('lastname', 'Unbekannt')} ist {reason}. Automatische Aktion: Archivieren."
             )
-            return 3  # Index für "4) E-Mail nur archivieren"
+            return 2  # Index für "3) E-Mail nur archivieren."
 
         if self.use_action_classifier:
             return self.classify_action(
