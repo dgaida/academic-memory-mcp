@@ -1102,24 +1102,24 @@
 <p>Wenn das System eine E-Mail beantwortet, prüft es automatisch im Hintergrund auf Terminvorschläge oder Terminbestätigungen (Zusagen) seitens des Absenders. Dadurch wird die ehemals separate <strong>Aktion 3: Termin direkt buchen</strong> nun vollständig und nahtlos von Aktion 1 abgedeckt.</p>
 <h3 id="ablauf-der-integrierten-terminbuchung">Ablauf der integrierten Terminbuchung:<a class="headerlink" href="#ablauf-der-integrierten-terminbuchung" title="Permanent link">¶</a></h3>
 <ol>
-<li><strong>Erkennung:</strong> Das LLM analysiert die eingehende Mail auf konkrete Terminvorschläge (z. B. "Passt es am Dienstag um 14:00?") oder Zusagen (z. B. "Ich nehme den Termin am Montag um 15:30 Uhr").</li>
-<li><strong>Datum- und Uhrzeitextraktion:</strong> Die KI extrahiert das gewünschte und bestätigte Datum sowie die Uhrzeit aus der E-Mail.</li>
-<li><strong>Prüfung auf Gültigkeit (Vergangenheit):</strong> Es wird überprüft, ob der vorgeschlagene Termin in der Vergangenheit liegt.<ul>
-<li><strong>Falls in der Vergangenheit:</strong> Es wird kein Kalendereintrag erstellt. Die E-Mail wird direkt archiviert (Status: <code>Archiviert (Termin in Vergangenheit)</code>).</li>
+<li><strong>Erkennung:</strong> Das LLM analysiert die eingehende Mail auf konkrete Terminvorschläge (z. B. "Passt es am Dienstag um 14:00?") oder Zusagen (z. B. "Ich nehme den Termin am Montag um 15:30 Uhr").  </li>
+<li><strong>Datum- und Uhrzeitextraktion:</strong> Die KI extrahiert das gewünschte und bestätigte Datum sowie die Uhrzeit aus der E-Mail.  </li>
+<li><strong>Prüfung auf Gültigkeit (Vergangenheit):</strong> Es wird überprüft, ob der vorgeschlagene Termin in der Vergangenheit liegt.  <ul>
+<li><strong>Falls in der Vergangenheit:</strong> Es wird kein Kalendereintrag erstellt. Die E-Mail wird direkt archiviert (Status: <code>Archiviert (Termin in Vergangenheit)</code>).  </li>
 </ul>
 </li>
-<li><strong>Intelligenter Kalenderabgleich &amp; Konfliktprüfung:</strong><ul>
-<li>Das System liest die bestehenden Termine aus der Datei <code>data/appointments.md</code>.</li>
-<li>Es prüft, ob zu dem vorgeschlagenen oder bestätigten Zeitpunkt bereits ein Termin oder ein Blocker existiert:<ul>
-<li><strong>Frei (Zusage/Buchung):</strong> Wenn kein Termin oder nur ein Blocker speziell für diesen Termin/Studenten eingetragen ist, bucht das System den Termin über das Tool <code>manage_calendar_appointment</code> direkt im Outlook-Kalender des Benutzers. Die Standarddauer beträgt <strong>30 Minuten</strong>, und die Zeitzone ist auf <code>Europe/Berlin</code> eingestellt. Das System antwortet mit dem Signalwort <code>APPOINTMENT_BOOKED</code> und die E-Mail wird im studentischen Archiv-Ordner abgelegt.</li>
-<li><strong>Belegt (Konflikt):</strong> Wenn ein anderer Termin oder ein generischer Blocker im Weg steht, erkennt das System dies als Konflikt.</li>
+<li><strong>Intelligenter Kalenderabgleich &amp; Konfliktprüfung:</strong> <ul>
+<li>Das System liest die bestehenden Termine aus der Datei <code>data/appointments.md</code>.  </li>
+<li>Es prüft, ob zu dem vorgeschlagenen oder bestätigten Zeitpunkt bereits ein Termin oder ein Blocker existiert:  <ul>
+<li><strong>Frei (Zusage/Buchung):</strong> Wenn kein Termin oder nur ein Blocker speziell für diesen Termin/Studenten eingetragen ist, bucht das System den Termin über das Tool <code>manage_calendar_appointment</code> direkt im Outlook-Kalender des Benutzers. Die Standarddauer beträgt <strong>30 Minuten</strong>, und die Zeitzone ist auf <code>Europe/Berlin</code> eingestellt. Das System antwortet mit dem Signalwort <code>APPOINTMENT_BOOKED</code> und die E-Mail wird im studentischen Archiv-Ordner abgelegt.  </li>
+<li><strong>Belegt (Konflikt):</strong> Wenn ein anderer Termin oder ein generischer Blocker im Weg steht, erkennt das System dies als Konflikt.  </li>
 </ul>
 </li>
 </ul>
 </li>
-<li><strong>Alternativenvorschlag bei Konflikten:</strong><ul>
-<li>Falls ein Konflikt erkannt wird, liest das System automatisch die freien Terminslots aus <code>data/free_slots.md</code> (über das Tool <code>get_appointment_slots</code>) ein.</li>
-<li>Es schlägt diese freien Termine als Alternativen in der Antwort-E-Mail vor und bittet den Absender um eine neue Auswahl.</li>
+<li><strong>Alternativenvorschlag bei Konflikten:</strong> <ul>
+<li>Falls ein Konflikt erkannt wird, liest das System automatisch die freien Terminslots aus <code>data/free_slots.md</code> (über das Tool <code>get_appointment_slots</code>) ein.  </li>
+<li>Es schlägt diese freien Termine als Alternativen in der Antwort-E-Mail vor und bittet den Absender um eine neue Auswahl.  </li>
 </ul>
 </li>
 </ol>
