@@ -40,13 +40,13 @@ Wenn das System eine E-Mail beantwortet (Aktion 1: "Antwort schreiben"), prüft 
 
 1. **Erkennung:** Das LLM analysiert die eingehende Mail auf konkrete Terminvorschläge (z. B. "Passt es am Dienstag um 14:00?") oder Zusagen (z. B. "Ich nehme den Termin am Montag um 15:30 Uhr").  
 2. **Intelligenter Kalenderabgleich:**  
-   * Das System liest die bestehenden Termine aus der Datei `data/appointments.md`.  
-   * Es prüft intelligent, ob zu dem vorgeschlagenen oder bestätigten Zeitpunkt bereits ein Termin oder ein Blocker existiert:  
-     * **Frei:** Wenn kein Termin oder nur ein Blocker speziell für diesen Termin/Studenten eingetragen ist, ist das System frei. Der Termin wird über das Tool `manage_calendar_appointment` direkt im Kalender gebucht und die Person wird eingeladen. Das System antwortet mit dem Signalwort `APPOINTMENT_BOOKED`.  
-     * **Belegt (Konflikt):** Wenn ein ganz anderer Termin oder ein generischer Blocker (z. B. eine andere Besprechung, privat, etc.) im Weg steht, erkennt das System dies als Konflikt.  
+   - Das System liest die bestehenden Termine aus der Datei `data/appointments.md`.
+   - Es prüft intelligent, ob zu dem vorgeschlagenen oder bestätigten Zeitpunkt bereits ein Termin oder ein Blocker existiert:
+     - **Frei:** Wenn kein Termin oder nur ein Blocker speziell für diesen Termin/Studenten eingetragen ist, ist das System frei. Der Termin wird über das Tool `manage_calendar_appointment` direkt im Kalender gebucht und die Person wird eingeladen. Das System antwortet mit dem Signalwort `APPOINTMENT_BOOKED`.
+     - **Belegt (Konflikt):** Wenn ein ganz anderer Termin oder ein generischer Blocker (z. B. eine andere Besprechung, privat, etc.) im Weg steht, erkennt das System dies als Konflikt.
 3. **Alternativenvorschlag bei Konflikten:**  
-   * Falls ein Konflikt erkannt wird, liest das System automatisch die freien Terminslots aus `data/free_slots.md` (über das Tool `get_appointment_slots`) ein.  
-   * Es schlägt diese freien Termine als Alternativen in der Antwort-E-Mail vor und bittet den Absender um eine neue Auswahl.  
+   - Falls ein Konflikt erkannt wird, liest das System automatisch die freien Terminslots aus `data/free_slots.md` (über das Tool `get_appointment_slots`) ein.
+   - Es schlägt diese freien Termine als Alternativen in der Antwort-E-Mail vor und bittet den Absender um eine neue Auswahl.
 
 ### Vereinheitlichung der Aktionen (Aktion 1 & Aktion 3)
 
