@@ -367,7 +367,7 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
                     logger.exception(f"Fehler bei der Hintergrundverarbeitung für {mail['lastname']}")
                     mail["summary"] = f"Fehler bei Verarbeitung: {ex}"
                     mail["similarity_info"] = ""
-                    mail["suggested_action"] = controller.ACTION_OPTIONS[3] # Fallback: Nur archivieren
+                    mail["suggested_action"] = controller.ACTION_OPTIONS[2] # Fallback: Nur archivieren
 
                 yield new_t1, list(final_t2), f"Verarbeitet: {mail['lastname']} ({i - len(new_t2) + 1}/{len(moved_this_session)})", gr.update(selected=1)
 
