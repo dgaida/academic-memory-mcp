@@ -2482,16 +2482,20 @@
 <h3 id="funktionsweise">Funktionsweise<a class="headerlink" href="#funktionsweise" title="Permanent link">&para;</a></h3>
 <ol>
 <li><strong>Erkennung:</strong> Das LLM analysiert die eingehende Mail auf konkrete Terminvorschläge (z. B. "Passt es am Dienstag um 14:00?") oder Zusagen (z. B. "Ich nehme den Termin am Montag um 15:30 Uhr").  </li>
-<li><strong>Intelligenter Kalenderabgleich:</strong>  </li>
+<li><strong>Intelligenter Kalenderabgleich:</strong>  <ul>
 <li>Das System liest die bestehenden Termine aus der Datei <code>data/appointments.md</code>.</li>
 <li>Es prüft intelligent, ob zu dem vorgeschlagenen oder bestätigten Zeitpunkt bereits ein Termin oder ein Blocker existiert:<ul>
 <li><strong>Frei:</strong> Wenn kein Termin oder nur ein Blocker speziell für diesen Termin/Studenten eingetragen ist, ist das System frei. Der Termin wird über das Tool <code>manage_calendar_appointment</code> direkt im Kalender gebucht und die Person wird eingeladen. Das System antwortet mit dem Signalwort <code>APPOINTMENT_BOOKED</code>.</li>
 <li><strong>Belegt (Konflikt):</strong> Wenn ein ganz anderer Termin oder ein generischer Blocker (z. B. eine andere Besprechung, privat, etc.) im Weg steht, erkennt das System dies als Konflikt.</li>
 </ul>
 </li>
-<li><strong>Alternativenvorschlag bei Konflikten:</strong>  </li>
+</ul>
+</li>
+<li><strong>Alternativenvorschlag bei Konflikten:</strong>  <ul>
 <li>Falls ein Konflikt erkannt wird, liest das System automatisch die freien Terminslots aus <code>data/free_slots.md</code> (über das Tool <code>get_appointment_slots</code>) ein.</li>
 <li>Es schlägt diese freien Termine als Alternativen in der Antwort-E-Mail vor und bittet den Absender um eine neue Auswahl.</li>
+</ul>
+</li>
 </ol>
 <h3 id="vereinheitlichung-der-aktionen-aktion-1-aktion-3">Vereinheitlichung der Aktionen (Aktion 1 &amp; Aktion 3)<a class="headerlink" href="#vereinheitlichung-der-aktionen-aktion-1-aktion-3" title="Permanent link">&para;</a></h3>
 <p>Da die reguläre Antwort-Generierung (Aktion 1: "Antwort schreiben") diese intelligente Termin- und Konfliktprüfung nun standardmäßig durchführt, ist eine separate Aktion für "Termin im Kalender anlegen und Person dazu einladen" (ehemals Aktion 3) hinfällig geworden und wurde aus dem System entfernt. Aktion 1 deckt beide Fälle nahtlos ab.</p>
