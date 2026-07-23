@@ -164,7 +164,7 @@ def test_server_tools(
 
     # 6. Test compare_document_versions
     # Mock ParserFactory
-    with patch("mcp_university.parser.factory.ParserFactory") as mock_factory_cls:
+    with patch("academic_parser.factory.ParserFactory") as mock_factory_cls:
         mock_factory = mock_factory_cls.return_value
 
         # Case A: One of the files could not be read

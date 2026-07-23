@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from ..config import get_config
-from ..parser.factory import ParserFactory
+from academic_parser.factory import ParserFactory
 from ..retrieval.index import SearchIndex
 from ..metadata.store import MetadataStore
 from ..utils.llm_client_wrapper import LLMClientWrapper
@@ -587,7 +587,7 @@ class Agent:
             str: Erfolgsmeldung oder Fehlermeldung.
         """
         try:
-            from ..parser.mail_parser import MailParser
+            from academic_parser.mail_parser import MailParser
             p = Path(email_path)
             if not p.exists():
                 return f"Fehler: Datei {email_path} nicht gefunden."
@@ -597,8 +597,8 @@ class Agent:
             if not target_dir.exists():
                 target_dir.mkdir(parents=True, exist_ok=True)
 
-            parser = MailParser()
-            saved_paths = parser.save_attachments(p, target_dir)
+            academic_parser = MailParser()
+            saved_paths = academic_parser.save_attachments(p, target_dir)
 
             if not saved_paths:
                 return "Keine Anhänge zum Speichern gefunden."

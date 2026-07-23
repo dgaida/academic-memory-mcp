@@ -265,7 +265,7 @@ def test_save_email_attachments_no_attachments(mcp_context, tmp_path):
 
     with patch("pathlib.Path.exists", side_effect=mock_exists_impl, autospec=True), \
          patch("pathlib.Path.mkdir") as mock_mkdir, \
-         patch("mcp_university.parser.mail_parser.MailParser") as mock_parser_class:
+         patch("academic_parser.mail_parser.MailParser") as mock_parser_class:
 
         mock_parser = mock_parser_class.return_value
         mock_parser.save_attachments.return_value = []

@@ -1,7 +1,7 @@
 """Tests for test_mail_parser_extended.py."""
 import pytest
 from unittest.mock import patch
-from mcp_university.parser.mail_parser import MailParser
+from academic_parser.mail_parser import MailParser
 from datetime import datetime
 
 @pytest.fixture

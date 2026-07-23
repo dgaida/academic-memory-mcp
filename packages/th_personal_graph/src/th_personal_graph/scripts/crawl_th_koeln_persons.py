@@ -408,7 +408,7 @@ def save_to_database(data: List[Dict[str, Any]], db_path: Path) -> None:
 
 def main() -> None:
     """Main entry point for the script."""
-    parser = argparse.ArgumentParser(
+    academic_parser = argparse.ArgumentParser(
         description="Crawl person data from TH Köln website.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
@@ -420,49 +420,49 @@ Examples:
   python scripts/crawl_th_koeln_persons.py --rebuild
         """
     )
-    parser.add_argument(
+    academic_parser.add_argument(
         "chars",
         nargs="*",
         help="Characters to crawl (e.g. A B or 'A, B'). If multiple characters are provided in one string separated by commas, they will be split."
     )
-    parser.add_argument(
+    academic_parser.add_argument(
         "--faculty",
         type=str,
         help="Faculty to crawl (e.g. 'Informatik und Ingenieurwissenschaften')."
     )
-    parser.add_argument(
+    academic_parser.add_argument(
         "--institution",
         type=str,
         help="Institution to crawl (e.g. 'Campus IT')."
     )
-    parser.add_argument(
+    academic_parser.add_argument(
         "--crawl-all",
         choices=["faculties", "institutions", "both"],
         help="Crawl all persons for all faculties, institutions or both."
     )
-    parser.add_argument(
+    academic_parser.add_argument(
         "--list-faculties",
         action="store_true",
         help="List all available faculties and exit."
     )
-    parser.add_argument(
+    academic_parser.add_argument(
         "--list-institutions",
         action="store_true",
         help="List all available institutions and exit."
     )
-    parser.add_argument(
+    academic_parser.add_argument(
         "--rebuild",
         action="store_true",
         help="Rebuild the database from existing Markdown files in data/th_koeln/."
     )
-    parser.add_argument(
+    academic_parser.add_argument(
         "--db",
         type=Path,
         default=get_config().th_personal_path,
         help=f"Path to the university metadata database (default: {get_config().th_personal_path})."
     )
 
-    args = parser.parse_args()
+    args = academic_parser.parse_args()
 
     if args.rebuild:
         md_dir = Path("data/th_koeln")

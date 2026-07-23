@@ -4,7 +4,7 @@ import logging
 import json
 from pathlib import Path
 from mcp_university.utils.llm_client_wrapper import LLMClientWrapper
-from mcp_university.parser.mail_parser import MailParser
+from academic_parser.mail_parser import MailParser
 from mcp_university.config import get_config
 from mcp_university.metadata.store import MetadataStore
 
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 def main() -> None:
     """Analysiert Trainingsordner und erstellt LLM-Zusammenfassungen für kleine Klassen."""
     llm = LLMClientWrapper()
-    parser = MailParser()
+    academic_parser = MailParser()
     config = get_config()
     store = MetadataStore(config.th_personal_path)
 
@@ -45,7 +45,7 @@ def main() -> None:
             unique_emails = set()
 
             for mail_path in (inbox_mails + sent_mails)[:20]:
-                text = parser.parse(mail_path)
+                text = academic_parser.parse(mail_path)
                 if not text:
                     try:
                         with open(mail_path, "r", encoding="utf-8") as f:
@@ -56,7 +56,7 @@ def main() -> None:
 
                 # Extrahiere E-Mails für Personal-Check
                 try:
-                    details = parser.get_email_details(mail_path)
+                    details = academic_parser.get_email_details(mail_path)
                     if details.get("from_email"):
                         unique_emails.add(details["from_email"].lower())
                     for rec in details.get("to", []):

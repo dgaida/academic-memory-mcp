@@ -1,7 +1,7 @@
 """Engine für die Klassifizierung von E-Mails."""
 from email_classifier.stopwords import ALL_STOP_WORDS
 from mcp_university.config import get_config
-from mcp_university.parser.mail_parser import MailParser
+from academic_parser.mail_parser import MailParser
 from mcp_university.utils.torch_utils import get_device
 from pathlib import Path
 from sklearn.ensemble import RandomForestClassifier
@@ -68,7 +68,7 @@ class EmailClassifier:
         self.mode = mode
         self.method = method
         self.embedding_model_name = embedding_model_name
-        self.parser = MailParser()
+        self.academic_parser = MailParser()
 
         # TF-IDF Vectorizer
         self.tfidf_vectorizer = TfidfVectorizer(
@@ -127,7 +127,7 @@ class EmailClassifier:
 
     def _extract_text(self, file_path: Path) -> Optional[str]:
         """Extrahiert Text aus einer E-Mail-Datei."""
-        return self.parser.parse(file_path)
+        return self.academic_parser.parse(file_path)
 
     def _format_transformer_input(self, file_path: Path) -> str:
         """Formatiert die E-Mail-Komponenten für den Transformer-Input."""

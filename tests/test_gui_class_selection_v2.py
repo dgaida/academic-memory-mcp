@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 
 # Mock dependencies before import to avoid errors
-with patch('mcp_university.config.get_config'),      patch('mcp_university.summarizer.engine.LLMClientWrapper'),      patch('mcp_university.summarizer.profiler.PersonProfiler'),      patch('mcp_university.parser.mail_parser.MailParser'):
+with patch('mcp_university.config.get_config'),      patch('mcp_university.summarizer.engine.LLMClientWrapper'),      patch('mcp_university.summarizer.profiler.PersonProfiler'),      patch('academic_parser.mail_parser.MailParser'):
     from email_classifier.controller import EmailController
 
 @pytest.fixture

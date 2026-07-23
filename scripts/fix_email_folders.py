@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import List, Tuple, Iterator
 from email_classifier.scripts.sort_emails import extract_lastname, get_semester, find_student_folder
 from mcp_university.config import get_config
-from mcp_university.parser.mail_parser import MailParser
+from academic_parser.mail_parser import MailParser
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ def fix_folders(config_path: Path, dry_run: bool = False, full_verify: bool = Fa
         config_data = {}
     config = config_data.get("class_paths", config_data)
 
-    parser = MailParser()
+    academic_parser = MailParser()
     user_emails = [e.lower() for e in get_config().user.emails]
 
     for email_class, base_path_str in config.items():
@@ -52,7 +52,7 @@ def fix_folders(config_path: Path, dry_run: bool = False, full_verify: bool = Fa
 
         for email_file in email_files:
             try:
-                details = parser.get_email_details(email_file)
+                details = academic_parser.get_email_details(email_file)
                 if not details or not details.get("date"):
                     logger.warning(f"Konnte Details für {email_file} nicht laden, überspringe.")
                     continue
@@ -170,9 +170,9 @@ def walk_bottom_up(path: Path) -> Iterator[Tuple[str, List[str], List[str]]]:
 
 if __name__ == "__main__":
     import argparse
-    parser = argparse.ArgumentParser(description="E-Mail-Ordnerstruktur korrigieren.")
-    parser.add_argument("--config", default="config/classifier_paths.yaml", help="Pfad zu classifier_paths.yaml")
-    parser.add_argument("--dry-run", action="store_true", help="Nur Fehler anzeigen, nichts verschieben.")
-    parser.add_argument("--verify", action="store_true", help="Alle E-Mails in allen Unterordnern prüfen.")
-    args = parser.parse_args()
+    academic_parser = argparse.ArgumentParser(description="E-Mail-Ordnerstruktur korrigieren.")
+    academic_parser.add_argument("--config", default="config/classifier_paths.yaml", help="Pfad zu classifier_paths.yaml")
+    academic_parser.add_argument("--dry-run", action="store_true", help="Nur Fehler anzeigen, nichts verschieben.")
+    academic_parser.add_argument("--verify", action="store_true", help="Alle E-Mails in allen Unterordnern prüfen.")
+    args = academic_parser.parse_args()
     fix_folders(Path(args.config), dry_run=args.dry_run, full_verify=args.verify)

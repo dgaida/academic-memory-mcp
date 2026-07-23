@@ -6,7 +6,7 @@ from typing import Optional
 
 import typer
 from llm_client import LLMClient
-from mcp_university.parser.pdf_parser import PDFParser
+from academic_parser.pdf_parser import PDFParser
 
 # Logging-Konfiguration
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -34,7 +34,7 @@ Hier ist der Text der Folien:
 ---
 """
 
-def summarize_pdf(pdf_path: Path, client: LLMClient, parser: PDFParser, fallback_client: Optional[LLMClient] = None) -> Optional[str]:
+def summarize_pdf(pdf_path: Path, client: LLMClient, academic_parser: PDFParser, fallback_client: Optional[LLMClient] = None) -> Optional[str]:
     """Extrahiert Text aus einem PDF und lässt ihn vom LLM zusammenfassen.
 
     Nutzt ein Fallback auf Ollama, falls die primäre Anfrage fehlschlägt.
@@ -42,7 +42,7 @@ def summarize_pdf(pdf_path: Path, client: LLMClient, parser: PDFParser, fallback
     """
     logger.info(f"Verarbeite: {pdf_path.name}")
 
-    content = parser.parse(pdf_path)
+    content = academic_parser.parse(pdf_path)
     if not content:
         logger.error(f"Konnte Text aus {pdf_path} nicht extrahieren.")
         return None
@@ -99,7 +99,7 @@ def main(
     target_dir.mkdir(parents=True, exist_ok=True)
 
     # PDF Parser initialisieren
-    parser = PDFParser(cache_dir=Path("data/cache"))
+    academic_parser = PDFParser(cache_dir=Path("data/cache"))
 
     # LLM Client initialisieren
     # api_choice in LLMClient erwartet Literal['openai', 'groq', 'gemini', 'ollama']
@@ -124,7 +124,7 @@ def main(
             logger.info(f"Überspringe {pdf_path.name}, da eine aktuelle Zusammenfassung bereits existiert.")
             continue
 
-        summary = summarize_pdf(pdf_path, client, parser, fallback_client=fallback_client)
+        summary = summarize_pdf(pdf_path, client, academic_parser, fallback_client=fallback_client)
         if summary:
             with open(target_path, "w", encoding="utf-8") as f:
                 f.write(summary)

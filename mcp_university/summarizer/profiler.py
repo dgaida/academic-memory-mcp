@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional
 from datetime import datetime, timezone
 from mcp_university.config import get_config
-from mcp_university.parser.mail_parser import MailParser
+from academic_parser.mail_parser import MailParser
 from mcp_university.utils.llm_client_wrapper import LLMClientWrapper
 from mcp_university.metadata.store import MetadataStore
 from mcp_university.metadata.profile_store import ProfileStore

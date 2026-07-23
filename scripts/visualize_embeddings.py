@@ -12,7 +12,7 @@ import pickle
 
 from mcp_university.config import get_config
 from mcp_university.retrieval.index import get_model
-from mcp_university.parser.mail_parser import MailParser
+from academic_parser.mail_parser import MailParser
 
 # Logging Setup
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -88,7 +88,7 @@ def main() -> None:
 
     logger.info(f"Lade Modell: {config.embeddings.model}")
     model = get_model(config.embeddings.model, offline=config.offline)
-    parser = MailParser()
+    academic_parser = MailParser()
 
     data = []
 
@@ -103,7 +103,7 @@ def main() -> None:
 
         if embedding is None:
             logger.info(f"Berechne Embedding für {file_path}")
-            text = parser.parse(file_path)
+            text = academic_parser.parse(file_path)
             if not text:
                 with open(file_path, "r", encoding="utf-8") as f:
                     text = f.read()

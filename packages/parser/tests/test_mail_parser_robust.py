@@ -2,11 +2,11 @@
 from unittest.mock import MagicMock, patch
 from pathlib import Path
 from datetime import datetime
-from mcp_university.parser.mail_parser import MailParser
+from academic_parser.mail_parser import MailParser
 
 def test_get_msg_details_robust_recipients():
     """Test function docstring."""
-    parser = MailParser()
+    academic_parser = MailParser()
     file_path = Path("test.msg")
 
     with patch("extract_msg.openMsg") as mock_open:
@@ -23,7 +23,7 @@ def test_get_msg_details_robust_recipients():
         mock_msg.body = "Body"
         mock_msg.header = {}
 
-        details = parser.get_email_details(file_path)
+        details = academic_parser.get_email_details(file_path)
 
         assert details["from_email"] == "sender@example.com"
         assert details["to"] == [{"name": "Recipient Name", "email": "recipient@example.com"}]
@@ -31,7 +31,7 @@ def test_get_msg_details_robust_recipients():
 
 def test_get_msg_details_robust_smtp_address():
     """Test function docstring."""
-    parser = MailParser()
+    academic_parser = MailParser()
     file_path = Path("test.msg")
 
     with patch("extract_msg.openMsg") as mock_open:
@@ -49,13 +49,13 @@ def test_get_msg_details_robust_smtp_address():
         mock_msg.sender = "sender@example.com"
         mock_msg.date = datetime(2024, 1, 1)
 
-        details = parser.get_email_details(file_path)
+        details = academic_parser.get_email_details(file_path)
 
         assert details["to"] == [{"name": "Real Name", "email": "real@example.com"}]
 
 def test_get_msg_details_fallback_headers():
     """Test function docstring."""
-    parser = MailParser()
+    academic_parser = MailParser()
     file_path = Path("test.msg")
 
     with patch("extract_msg.openMsg") as mock_open:
@@ -74,7 +74,7 @@ def test_get_msg_details_fallback_headers():
         }
         mock_msg.date = datetime(2024, 1, 1)
 
-        details = parser.get_email_details(file_path)
+        details = academic_parser.get_email_details(file_path)
 
         assert details["from_email"] == "header@example.com"
         assert details["to"] == [{"name": "Header To", "email": "to@example.com"}]
@@ -82,12 +82,12 @@ def test_get_msg_details_fallback_headers():
 
 def test_parse_address_list_various_formats():
     """Test function docstring."""
-    parser = MailParser()
+    academic_parser = MailParser()
 
-    assert parser._parse_address_list("simple@example.com") == [{"name": "", "email": "simple@example.com"}]
-    assert parser._parse_address_list("Name <email@example.com>") == [{"name": "Name", "email": "email@example.com"}]
-    assert parser._parse_address_list("'Quoted Name' <email@example.com>") == [{"name": "Quoted Name", "email": "email@example.com"}]
-    assert parser._parse_address_list("A, B <a@b.com>, C <c@d.com>") == [
+    assert academic_parser._parse_address_list("simple@example.com") == [{"name": "", "email": "simple@example.com"}]
+    assert academic_parser._parse_address_list("Name <email@example.com>") == [{"name": "Name", "email": "email@example.com"}]
+    assert academic_parser._parse_address_list("'Quoted Name' <email@example.com>") == [{"name": "Quoted Name", "email": "email@example.com"}]
+    assert academic_parser._parse_address_list("A, B <a@b.com>, C <c@d.com>") == [
         {"name": "A", "email": ""}, # getaddresses might be tricky with commas
         {"name": "B", "email": "a@b.com"},
         {"name": "C", "email": "c@d.com"}
@@ -99,4 +99,4 @@ def test_parse_address_list_various_formats():
         {"name": "Recipient Name", "email": "recipient@example.com"},
         {"name": "CC Person", "email": "cc@example.com"}
     ]
-    assert parser._parse_address_list(input_str) == expected
+    assert academic_parser._parse_address_list(input_str) == expected

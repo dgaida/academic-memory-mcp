@@ -50,12 +50,12 @@ def test_tool_read_file_empty_or_none(mock_agent_setup):
     agent, _, _, _ = mock_agent_setup
 
     with patch('pathlib.Path.exists', return_value=True):
-        # Case 1: parser returns empty string
+        # Case 1: academic_parser returns empty string
         agent.parser_factory.parse.return_value = ""
         res1 = agent._tool_read_file("test.txt")
         assert "Fehler: Datei konnte nicht gelesen werden" in res1
 
-        # Case 2: parser returns None
+        # Case 2: academic_parser returns None
         agent.parser_factory.parse.return_value = None
         res2 = agent._tool_read_file("test.txt")
         assert "Fehler: Datei konnte nicht gelesen werden" in res2
@@ -282,7 +282,7 @@ def test_tool_save_email_attachments_no_attachments_found(mock_agent_setup, tmp_
     agent, _, _, _ = mock_agent_setup
 
     with patch('pathlib.Path.exists', autospec=True) as mock_exists, \
-         patch('mcp_university.parser.mail_parser.MailParser') as mock_parser_cls:
+         patch('academic_parser.mail_parser.MailParser') as mock_parser_cls:
 
         target_grandparent = tmp_path / "non_existent_grandparent"
         email_file = target_grandparent / "parent" / "email.msg"

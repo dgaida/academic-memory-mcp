@@ -122,7 +122,7 @@ def test_tool_save_email_attachments_success(mock_agent_deps_v2):
     """Test function docstring."""
     agent = Agent()
     with patch('pathlib.Path.exists', return_value=True), \
-         patch('mcp_university.parser.mail_parser.MailParser') as mock_parser_cls:
+         patch('academic_parser.mail_parser.MailParser') as mock_parser_cls:
 
         mock_parser = mock_parser_cls.return_value
         mock_parser.save_attachments.return_value = [Path("att1.pdf")]
@@ -217,7 +217,7 @@ def test_tool_save_email_attachments_no_attachments(mock_agent_deps_v2):
     """Test save_email_attachments tool returning no attachments."""
     agent = Agent()
     with patch('pathlib.Path.exists', return_value=True), \
-         patch('mcp_university.parser.mail_parser.MailParser') as mock_parser_cls:
+         patch('academic_parser.mail_parser.MailParser') as mock_parser_cls:
         mock_parser = mock_parser_cls.return_value
         mock_parser.save_attachments.return_value = []
         res = agent._tool_save_email_attachments("email.msg")
@@ -227,7 +227,7 @@ def test_tool_save_email_attachments_exception(mock_agent_deps_v2):
     """Test save_email_attachments tool throwing an exception."""
     agent = Agent()
     with patch('pathlib.Path.exists', return_value=True), \
-         patch('mcp_university.parser.mail_parser.MailParser') as mock_parser_cls:
+         patch('academic_parser.mail_parser.MailParser') as mock_parser_cls:
         mock_parser = mock_parser_cls.return_value
         mock_parser.save_attachments.side_effect = Exception("Parsing error")
         res = agent._tool_save_email_attachments("email.msg")

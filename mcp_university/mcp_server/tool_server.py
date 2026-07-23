@@ -9,7 +9,7 @@ from fastmcp import FastMCP
 from ..config import get_config
 from ..metadata.store import MetadataStore
 from ..retrieval.index import SearchIndex
-from ..parser.factory import ParserFactory
+from academic_parser.factory import ParserFactory
 
 logger = logging.getLogger(__name__)
 
@@ -230,7 +230,7 @@ def create_tool_server() -> FastMCP:
             str: Erfolgsmeldung oder Fehlermeldung.
         """
         try:
-            from ..parser.mail_parser import MailParser
+            from academic_parser.mail_parser import MailParser
             p = Path(email_path)
             if not p.exists():
                 return f"Fehler: Datei {email_path} nicht gefunden."
@@ -239,8 +239,8 @@ def create_tool_server() -> FastMCP:
             if not target_dir.exists():
                 target_dir.mkdir(parents=True, exist_ok=True)
 
-            parser = MailParser()
-            saved_paths = parser.save_attachments(p, target_dir)
+            academic_parser = MailParser()
+            saved_paths = academic_parser.save_attachments(p, target_dir)
 
             if not saved_paths:
                 return "Keine Anhänge zum Speichern gefunden."

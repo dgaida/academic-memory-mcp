@@ -14,7 +14,7 @@ from typing import Dict, List, Tuple, Optional
 
 from mcp_university.config import get_config
 from mcp_university.summarizer.engine import Summarizer
-from mcp_university.parser.mail_parser import MailParser
+from academic_parser.mail_parser import MailParser
 from mcp_university.summarizer.profiler import PersonProfiler
 from mcp_university.agent.engine import Agent
 from mcp_university.agent.mcp_agent import MCPAgent

@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Tuple, Optional, List, Dict, Any
 from ..config import Config
 from ..metadata.store import MetadataStore
-from ..parser.factory import ParserFactory
+from academic_parser.factory import ParserFactory
 from ..summarizer.engine import Summarizer
 from ..retrieval.index import SearchIndex
 
@@ -16,19 +16,19 @@ logger = logging.getLogger(__name__)
 class Crawler:
     """Überwacht konfigurierte Ordner und indexiert neue oder geänderte Dateien."""
 
-    def __init__(self, config: Config, store: MetadataStore, parser: ParserFactory, summarizer: Summarizer, index: SearchIndex) -> None:
+    def __init__(self, config: Config, store: MetadataStore, academic_parser: ParserFactory, summarizer: Summarizer, index: SearchIndex) -> None:
         """Initialisiert den Crawler.
 
         Args:
             config (Config): Systemkonfiguration.
             store (MetadataStore): Metadaten-Speicher.
-            parser (ParserFactory): Parser-Fabrik.
+            academic_parser (ParserFactory): Parser-Fabrik.
             summarizer (Summarizer): Engine für Zusammenfassungen.
             index (SearchIndex): Suchindex.
         """
         self.config = config
         self.store = store
-        self.parser = parser
+        self.academic_parser = academic_parser
         self.summarizer = summarizer
         self.index = index
         self.use_shell = os.name == 'nt'
@@ -220,7 +220,7 @@ class Crawler:
         groups: Dict[str, List[Dict[str, Any]]] = {}
 
         for f in email_files:
-            details = self.parser.mail_parser.get_email_details(f)
+            details = self.academic_parser.mail_parser.get_email_details(f)
             details["file_path"] = f
 
             counterparts = []
@@ -260,7 +260,7 @@ class Crawler:
             if self.config.folders.summarize_emails_individually:
                 email_summaries = []
                 for m in mails:
-                    content_parsed = self.parser.mail_parser.parse(m['file_path'])
+                    content_parsed = self.academic_parser.mail_parser.parse(m['file_path'])
                     if content_parsed:
                         summary = self.summarizer.summarize_file(m['file_path'].name, content_parsed)
                         if summary:
@@ -268,7 +268,7 @@ class Crawler:
                 conversation_content = '\n\n'.join(email_summaries)
             else:
                 for m in mails:
-                    parsed = self.parser.mail_parser.parse(m['file_path'])
+                    parsed = self.academic_parser.mail_parser.parse(m['file_path'])
                     if parsed:
                         conversation_content += f"\n--- EMAIL VOM {m['date']} ({m['file_path'].name}) ---\n{parsed}\n"
 
@@ -323,7 +323,7 @@ class Crawler:
                 return self.store.get_summary("file", existing_file[0]), False
 
         logger.info(f"Indexing new or changed file: {file_path}")
-        content = self.parser.parse(file_path)
+        content = self.academic_parser.parse(file_path)
         if not content:
             logger.warning(f"Failed to parse content for {file_path}")
             return None, False
