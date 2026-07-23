@@ -1,6 +1,6 @@
 
 <!doctype html>
-<html lang="de" class="no-js">
+<html lang="en" class="no-js">
   <head>
     
       <meta charset="utf-8">
@@ -12,35 +12,35 @@
         <meta name="author" content="Senior Python Architect">
       
       
-        <link rel="canonical" href="https://dgaida.github.io/academic-memory-mcp/dev/packages/th-personal-graph/architecture/">
+        <link rel="canonical" href="https://dgaida.github.io/academic-memory-mcp/dev/en/packages/parser/email-parsing/">
       
       
-        <link rel="prev" href="../mocogi/">
+        <link rel="prev" href="../">
       
       
-        <link rel="next" href="../../parser/">
+        <link rel="next" href="../../../development/">
       
       
         
-          <link rel="alternate" href="./" hreflang="de">
+          <link rel="alternate" href="../../../../packages/parser/email-parsing/" hreflang="de">
         
-          <link rel="alternate" href="../../../en/packages/th-personal-graph/architecture/" hreflang="en">
+          <link rel="alternate" href="./" hreflang="en">
         
       
       
-      <link rel="icon" href="../../../assets/images/favicon.png">
+      <link rel="icon" href="../../../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
-        <title>Architektur & Logik - MCP University Memory System</title>
+        <title>E-Mail-Parsing & Namensextraktion - MCP University Memory System</title>
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -59,9 +59,11 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../../../assets/_mkdocstrings.css">
     
-    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+      <link rel="stylesheet" href="../../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -86,8 +88,8 @@
     <div data-md-component="skip">
       
         
-        <a href="#architektur-und-logik" class="md-skip">
-          Zum Inhalt
+        <a href="#email-parsing-and-name-extraction" class="md-skip">
+          Skip to content
         </a>
       
     </div>
@@ -103,8 +105,8 @@
       
 
 <header class="md-header" data-md-component="header">
-  <nav class="md-header__inner md-grid" aria-label="Kopfzeile">
-    <a href="../../.." title="MCP University Memory System" class="md-header__button md-logo" aria-label="MCP University Memory System" data-md-component="logo">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../" title="MCP University Memory System" class="md-header__button md-logo" aria-label="MCP University Memory System" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -124,7 +126,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Architektur & Logik
+              E-Mail-Parsing & Namensextraktion
             
           </span>
         </div>
@@ -164,20 +166,20 @@
       <div class="md-header__option">
   <div class="md-select">
     
-    <button class="md-header__button md-icon" aria-label="Sprache wechseln">
+    <button class="md-header__button md-icon" aria-label="Select language">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
     </button>
     <div class="md-select__inner">
       <ul class="md-select__list">
         
           <li class="md-select__item">
-            <a href="./" hreflang="de" class="md-select__link">
+            <a href="../../../../packages/parser/email-parsing/" hreflang="de" class="md-select__link">
               Deutsch
             </a>
           </li>
         
           <li class="md-select__item">
-            <a href="../../../en/packages/th-personal-graph/architecture/" hreflang="en" class="md-select__link">
+            <a href="./" hreflang="en" class="md-select__link">
               English
             </a>
           </li>
@@ -198,21 +200,21 @@
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="Suche" placeholder="Suche" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
         
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
         
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
       </label>
-      <nav class="md-search__options" aria-label="Suche">
+      <nav class="md-search__options" aria-label="Search">
         
-          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Teilen" aria-label="Teilen" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
             
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
           </a>
         
-        <button type="reset" class="md-search__icon md-icon" title="Zurücksetzen" aria-label="Zurücksetzen" tabindex="-1">
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
           
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
         </button>
@@ -225,7 +227,7 @@
       <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
         <div class="md-search-result" data-md-component="search-result">
           <div class="md-search-result__meta">
-            Suche wird initialisiert
+            Initializing search
           </div>
           <ol class="md-search-result__list" role="presentation"></ol>
         </div>
@@ -246,7 +248,7 @@
         
           
             
-<nav class="md-tabs" aria-label="Hauptnavigation" data-md-component="tabs">
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
   <div class="md-grid">
     <ul class="md-tabs__list">
       
@@ -256,7 +258,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../.." class="md-tabs__link">
+      <a href="../../../" class="md-tabs__link">
         
   
   
@@ -333,7 +335,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../.." title="MCP University Memory System" class="md-nav__button md-logo" aria-label="MCP University Memory System" data-md-component="logo">
+    <a href="../../../" title="MCP University Memory System" class="md-nav__button md-logo" aria-label="MCP University Memory System" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -351,7 +353,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../.." class="md-nav__link">
+      <a href="../../../" class="md-nav__link">
         
   
   
@@ -1756,8 +1758,6 @@
                 
   
   
-    
-  
   
   
     
@@ -1770,11 +1770,13 @@
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_12_2" checked>
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_12_2" >
         
           
           <label class="md-nav__link" for="__nav_3_12_2" id="__nav_3_12_2_label" tabindex="0">
@@ -1795,12 +1797,214 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_12_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_12_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3_12_2">
             <span class="md-nav__icon md-icon"></span>
             
   
     TH Personal Graph
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../th-personal-graph/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Übersicht
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../th-personal-graph/crawler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TH Personal Crawler
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../th-personal-graph/usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nutzung der Skripte
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../th-personal-graph/mocogi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MOCOGI Extraktion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../th-personal-graph/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architektur & Logik
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_12_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_12_3" id="__nav_3_12_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parser
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_12_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_12_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Parser
   
 
           </label>
@@ -1838,90 +2042,6 @@
                 
   
   
-  
-  
-    <li class="md-nav__item">
-      <a href="../crawler/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    TH Personal Crawler
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../usage/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Nutzung der Skripte
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../mocogi/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    MOCOGI Extraktion
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
     
   
   
@@ -1941,7 +2061,7 @@
   <span class="md-ellipsis">
     
   
-    Architektur & Logik
+    E-Mail-Parsing & Namensextraktion
   
 
     
@@ -1959,7 +2079,7 @@
   <span class="md-ellipsis">
     
   
-    Architektur & Logik
+    E-Mail-Parsing & Namensextraktion
   
 
     
@@ -1971,7 +2091,7 @@
       
         
 
-<nav class="md-nav md-nav--secondary" aria-label="Inhaltsverzeichnis">
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
   
@@ -1980,15 +2100,15 @@
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
-      Inhaltsverzeichnis
+      Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#datenmodell-knoten-typen" class="md-nav__link">
+  <a href="#basic-logic-hierarchical" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Datenmodell &amp; Knoten-Typen
+        Basic Logic (Hierarchical)
       
     </span>
   </a>
@@ -1996,10 +2116,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#modulzuordnungen-mocogi-api" class="md-nav__link">
+  <a href="#examples" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Modulzuordnungen &amp; MOCOGI API
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#important-rules-for-developers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Important Rules for Developers
       
     </span>
   </a>
@@ -2010,124 +2152,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_12_3" >
-        
-          
-          <label class="md-nav__link" for="__nav_3_12_3" id="__nav_3_12_3_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Parser
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_12_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_12_3">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Parser
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../parser/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Übersicht
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../parser/email-parsing/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    E-Mail-Parsing & Namensextraktion
-  
-
-    
-  </span>
-  
-  
-
-      </a>
     </li>
   
 
@@ -2374,7 +2398,7 @@
                   <div class="md-sidebar__inner">
                     
 
-<nav class="md-nav md-nav--secondary" aria-label="Inhaltsverzeichnis">
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
   
@@ -2383,15 +2407,15 @@
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
-      Inhaltsverzeichnis
+      Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#datenmodell-knoten-typen" class="md-nav__link">
+  <a href="#basic-logic-hierarchical" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Datenmodell &amp; Knoten-Typen
+        Basic Logic (Hierarchical)
       
     </span>
   </a>
@@ -2399,10 +2423,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#modulzuordnungen-mocogi-api" class="md-nav__link">
+  <a href="#examples" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Modulzuordnungen &amp; MOCOGI API
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#important-rules-for-developers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Important Rules for Developers
       
     </span>
   </a>
@@ -2426,24 +2472,85 @@
 
 
 
-<h1 id="architektur-und-logik">Architektur und Logik<a class="headerlink" href="#architektur-und-logik" title="Permanent link">&para;</a></h1>
-<p>Die Architektur des <code>th_personal_graph</code>-Packages kombiniert Web-Crawling, API-Integration und ontologiebasiertes Graph-Datenmanagement.</p>
-<h2 id="datenmodell-knoten-typen">Datenmodell &amp; Knoten-Typen<a class="headerlink" href="#datenmodell-knoten-typen" title="Permanent link">&para;</a></h2>
-<p>Der Wissensgraph unterscheidet mehrere Knotentypen, um die universitäre Hierarchie präzise abzubilden:</p>
-<ul>
-<li><strong>Person:</strong> Hochschulmitarbeiter (Farbe: Blau).  </li>
-<li><strong>Modul:</strong> Lehrfächer und Prüfungsmodule (Farbe: Gelb).  </li>
-<li><strong>Fakultät / Einrichtung / Institut:</strong> Organisationseinheiten der Hochschule (Farben: Orange/Orchidee/Hellgrün).  </li>
-<li><strong>Studiengang &amp; Prüfungsordnung:</strong> Zuordnungsknoten für PO-Strukturen.  </li>
-</ul>
-<h2 id="modulzuordnungen-mocogi-api">Modulzuordnungen &amp; MOCOGI API<a class="headerlink" href="#modulzuordnungen-mocogi-api" title="Permanent link">&para;</a></h2>
-<p>Der <code>extract_mocogi_data</code>-Prozess nutzt folgende Pipeline:</p>
+<h1 id="email-parsing-and-name-extraction">Email Parsing and Name Extraction<a class="headerlink" href="#email-parsing-and-name-extraction" title="Permanent link">&para;</a></h1>
+<p>This page describes in detail how the system extracts names from email addresses and display names. This logic is crucial for correctly sorting emails into student folders.</p>
+<h2 id="basic-logic-hierarchical">Basic Logic (Hierarchical)<a class="headerlink" href="#basic-logic-hierarchical" title="Permanent link">&para;</a></h2>
+<p>The system follows a strict hierarchy to determine the surname of a sender or recipient:</p>
 <ol>
-<li><strong>API-Abruf:</strong> Ruft <code>/studyPrograms</code> und <code>/modules</code> ab.  </li>
-<li><strong>Personen-Auflösung:</strong> Nutzt <code>/identities</code> der MOCOGI-API, um IDs in Klarnamen aufzulösen.  </li>
-<li><strong>Titel-Stripping:</strong> Entfernt akademische Grade ("Prof", "Dr", "M.Sc") für einen sauberen Namensabgleich.  </li>
-<li><strong>Fuzzy Name Matching:</strong> Gleicht bereinigte Namen gegen die <code>Person</code>-Knoten in der SQLite-Datenbank ab. Bei Übereinstimmung wird die Rolle ("ist Modulverantwortlicher", "ist Erstprüfer", "ist Zweitprüfer") als gerichtete Kante im Graphen hinterlegt.  </li>
+<li><strong>"im Auftrag von" Recognition</strong>: If an email was sent on behalf of someone else, the actual sender is focused.  </li>
+<li><strong>Greedy Name Matching (Primary)</strong>:  <ul>
+<li>The display name (e.g., "Mustermann Max") is split into its individual parts.  </li>
+<li>These parts are matched against the "local part" of the email address (the part before the @).  </li>
+<li>If a part of the display name is found within the local part, it is identified as the surname.  </li>
+<li><em>Example</em>: <code>Mustermann Max &lt;mustermann@example.com&gt;</code> -&gt; "Mustermann" is found in the local part and is therefore the surname.  </li>
+</ul>
+</li>
+<li><strong>Dot-Separated Local Part (Fallback 1)</strong>:  <ul>
+<li>If no match with the display name is possible, the local part is split at dots (<code>.</code>).  </li>
+<li>The system checks the segments from back to front and ignores generic terms (such as "info", "studium").  </li>
+<li><em>Example</em>: <code>max.mustermann@smail.th-koeln.de</code> -&gt; "Mustermann".  </li>
+</ul>
+</li>
+<li><strong>Generic Fallbacks (Fallback 2)</strong>:  <ul>
+<li>Commas in the display name (<code>Surname, Firstname</code>).  </li>
+<li>Last word in the display name.  </li>
+<li>Local part formatting (uppercase recognition).  </li>
+</ul>
+</li>
 </ol>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Input (Sender/Recipient)</th>
+<th style="text-align: left;">Extracted Surname</th>
+<th style="text-align: left;">Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>Mustermann, Max</code></td>
+<td style="text-align: left;"><strong>Mustermann</strong></td>
+<td style="text-align: left;">Comma separation</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Mustermann Max &lt;mustermann@example.com&gt;</code></td>
+<td style="text-align: left;"><strong>Mustermann</strong></td>
+<td style="text-align: left;">Greedy Match (Mustermann in local part)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>max.mustermann@th-koeln.de</code></td>
+<td style="text-align: left;"><strong>Mustermann</strong></td>
+<td style="text-align: left;">Dot-separated local part</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>'Hans Müller' &lt;mueller@th-koeln.de&gt;</code></td>
+<td style="text-align: left;"><strong>Müller</strong></td>
+<td style="text-align: left;">Greedy Match (mueller in local part, umlaut normalization)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>info@th-koeln.de</code></td>
+<td style="text-align: left;"><strong>Unknown</strong></td>
+<td style="text-align: left;">Generic local part</td>
+</tr>
+</tbody>
+</table>
+<h2 id="implementation">Implementation<a class="headerlink" href="#implementation" title="Permanent link">&para;</a></h2>
+<p>The logic is implemented in <code>mcp_university/classifier/sort_emails.py</code> in the function <code>extract_lastname</code>.</p>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">extract_lastname</span><span class="p">(</span><span class="n">sender_raw</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="c1"># Hierarchical Logic:</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="c1"># 1. on behalf of</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="c1"># 2. Greedy Match (Display Name vs Local Part)</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="c1"># 3. Dot-Separated Local Part</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="c1"># 4. Generic Fallbacks</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="o">...</span>
+</code></pre></div>
+<h2 id="important-rules-for-developers">Important Rules for Developers<a class="headerlink" href="#important-rules-for-developers" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>No deletion of comments</strong>: The explanatory comments in <code>extract_lastname</code> are essential for understanding edge cases.  </li>
+<li><strong>Google-Style Docstrings</strong>: Every change must be documented.  </li>
+<li><strong>Umlaut Handling</strong>: The system normalizes names for comparison (<code>Müller</code> vs <code>mueller</code>) but returns the original name (Title Case).  </li>
+</ul>
 
 
 
@@ -2469,7 +2576,7 @@
           <button type="button" class="md-top md-icon" data-md-component="top" hidden>
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
-  Zurück zum Seitenanfang
+  Back to top
 </button>
         
       </main>
@@ -2478,30 +2585,30 @@
   
     
       
-      <nav class="md-footer__inner md-grid" aria-label="Fußzeile" >
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../mocogi/" class="md-footer__link md-footer__link--prev" aria-label="Zurück: MOCOGI Extraktion">
+          <a href="../" class="md-footer__link md-footer__link--prev" aria-label="Previous: Übersicht">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
             </div>
             <div class="md-footer__title">
               <span class="md-footer__direction">
-                Zurück
+                Previous
               </span>
               <div class="md-ellipsis">
-                MOCOGI Extraktion
+                Übersicht
               </div>
             </div>
           </a>
         
         
           
-          <a href="../../parser/" class="md-footer__link md-footer__link--next" aria-label="Weiter: Übersicht">
+          <a href="../../../development/" class="md-footer__link md-footer__link--next" aria-label="Next: Übersicht">
             <div class="md-footer__title">
               <span class="md-footer__direction">
-                Weiter
+                Next
               </span>
               <div class="md-ellipsis">
                 Übersicht
@@ -2541,10 +2648,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "content.tabs.link", "content.code.annotate", "content.code.copy", "content.tooltips", "content.code.annotate", "navigation.footer"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "content.tabs.link", "content.code.annotate", "content.code.copy", "content.tooltips", "content.code.annotate", "navigation.footer"], "search": "../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

@@ -1,6 +1,6 @@
 
 <!doctype html>
-<html lang="en" class="no-js">
+<html lang="de" class="no-js">
   <head>
     
       <meta charset="utf-8">
@@ -12,35 +12,35 @@
         <meta name="author" content="Senior Python Architect">
       
       
-        <link rel="canonical" href="https://dgaida.github.io/academic-memory-mcp/dev/en/usage/email-parsing/">
+        <link rel="canonical" href="https://dgaida.github.io/academic-memory-mcp/dev/packages/parser/">
       
       
-        <link rel="prev" href="../mcp/">
+        <link rel="prev" href="../th-personal-graph/architecture/">
       
       
-        <link rel="next" href="../rag-process/">
+        <link rel="next" href="email-parsing/">
       
       
         
-          <link rel="alternate" href="../../../usage/email-parsing/" hreflang="de">
+          <link rel="alternate" href="./" hreflang="de">
         
-          <link rel="alternate" href="./" hreflang="en">
+          <link rel="alternate" href="../../en/packages/parser/" hreflang="en">
         
       
       
-      <link rel="icon" href="../../../assets/images/favicon.png">
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
-        <title>E-Mail Parsing - MCP University Memory System</title>
+        <title>Übersicht - MCP University Memory System</title>
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -59,11 +59,9 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
-    
-    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -88,8 +86,8 @@
     <div data-md-component="skip">
       
         
-        <a href="#email-parsing-and-name-extraction" class="md-skip">
-          Skip to content
+        <a href="#parser-sub-package" class="md-skip">
+          Zum Inhalt
         </a>
       
     </div>
@@ -105,8 +103,8 @@
       
 
 <header class="md-header" data-md-component="header">
-  <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../" title="MCP University Memory System" class="md-header__button md-logo" aria-label="MCP University Memory System" data-md-component="logo">
+  <nav class="md-header__inner md-grid" aria-label="Kopfzeile">
+    <a href="../.." title="MCP University Memory System" class="md-header__button md-logo" aria-label="MCP University Memory System" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -126,7 +124,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              E-Mail Parsing
+              Übersicht
             
           </span>
         </div>
@@ -166,20 +164,20 @@
       <div class="md-header__option">
   <div class="md-select">
     
-    <button class="md-header__button md-icon" aria-label="Select language">
+    <button class="md-header__button md-icon" aria-label="Sprache wechseln">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
     </button>
     <div class="md-select__inner">
       <ul class="md-select__list">
         
           <li class="md-select__item">
-            <a href="../../../usage/email-parsing/" hreflang="de" class="md-select__link">
+            <a href="./" hreflang="de" class="md-select__link">
               Deutsch
             </a>
           </li>
         
           <li class="md-select__item">
-            <a href="./" hreflang="en" class="md-select__link">
+            <a href="../../en/packages/parser/" hreflang="en" class="md-select__link">
               English
             </a>
           </li>
@@ -200,21 +198,21 @@
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <input type="text" class="md-search__input" name="query" aria-label="Suche" placeholder="Suche" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
         
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
         
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
       </label>
-      <nav class="md-search__options" aria-label="Search">
+      <nav class="md-search__options" aria-label="Suche">
         
-          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Teilen" aria-label="Teilen" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
             
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
           </a>
         
-        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+        <button type="reset" class="md-search__icon md-icon" title="Zurücksetzen" aria-label="Zurücksetzen" tabindex="-1">
           
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
         </button>
@@ -227,7 +225,7 @@
       <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
         <div class="md-search-result" data-md-component="search-result">
           <div class="md-search-result__meta">
-            Initializing search
+            Suche wird initialisiert
           </div>
           <ol class="md-search-result__list" role="presentation"></ol>
         </div>
@@ -248,7 +246,7 @@
         
           
             
-<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+<nav class="md-tabs" aria-label="Hauptnavigation" data-md-component="tabs">
   <div class="md-grid">
     <ul class="md-tabs__list">
       
@@ -258,7 +256,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../" class="md-tabs__link">
+      <a href="../.." class="md-tabs__link">
         
   
   
@@ -335,7 +333,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../" title="MCP University Memory System" class="md-nav__button md-logo" aria-label="MCP University Memory System" data-md-component="logo">
+    <a href="../.." title="MCP University Memory System" class="md-nav__button md-logo" aria-label="MCP University Memory System" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -353,7 +351,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../" class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -516,7 +514,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../email-search/" class="md-nav__link">
+      <a href="../../usage/email-search/" class="md-nav__link">
         
   
   
@@ -544,7 +542,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../appointment-management/" class="md-nav__link">
+      <a href="../../usage/appointment-management/" class="md-nav__link">
         
   
   
@@ -626,7 +624,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../email-workflow/" class="md-nav__link">
+      <a href="../../usage/email-workflow/" class="md-nav__link">
         
   
   
@@ -654,7 +652,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../actions/action-1-antwort-schreiben/" class="md-nav__link">
+      <a href="../../usage/actions/action-1-antwort-schreiben/" class="md-nav__link">
         
   
   
@@ -682,7 +680,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../actions/action-2-antwort-terminvorschlag/" class="md-nav__link">
+      <a href="../../usage/actions/action-2-antwort-terminvorschlag/" class="md-nav__link">
         
   
   
@@ -710,7 +708,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../actions/action-4-nur-archivieren/" class="md-nav__link">
+      <a href="../../usage/actions/action-4-nur-archivieren/" class="md-nav__link">
         
   
   
@@ -738,7 +736,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../actions/action-5-aufgabe-kalender/" class="md-nav__link">
+      <a href="../../usage/actions/action-5-aufgabe-kalender/" class="md-nav__link">
         
   
   
@@ -766,7 +764,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../actions/action-6-kolloquium-termin/" class="md-nav__link">
+      <a href="../../usage/actions/action-6-kolloquium-termin/" class="md-nav__link">
         
   
   
@@ -802,7 +800,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../profiles/" class="md-nav__link">
+      <a href="../../usage/profiles/" class="md-nav__link">
         
   
   
@@ -830,7 +828,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../outlook-macros/" class="md-nav__link">
+      <a href="../../usage/outlook-macros/" class="md-nav__link">
         
   
   
@@ -1094,7 +1092,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../scripts/" class="md-nav__link">
+      <a href="../../usage/scripts/" class="md-nav__link">
         
   
   
@@ -1250,7 +1248,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../" class="md-nav__link">
+      <a href="../../usage/" class="md-nav__link">
         
   
   
@@ -1278,7 +1276,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../indexing-details/" class="md-nav__link">
+      <a href="../../usage/indexing-details/" class="md-nav__link">
         
   
   
@@ -1306,7 +1304,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../database-management/" class="md-nav__link">
+      <a href="../../usage/database-management/" class="md-nav__link">
         
   
   
@@ -1334,7 +1332,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../database-processes/" class="md-nav__link">
+      <a href="../../usage/database-processes/" class="md-nav__link">
         
   
   
@@ -1362,7 +1360,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../mcp/" class="md-nav__link">
+      <a href="../../usage/mcp/" class="md-nav__link">
         
   
   
@@ -1387,129 +1385,10 @@
                 
   
   
-    
-  
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    E-Mail Parsing
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    E-Mail Parsing
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#basic-logic-hierarchical" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Basic Logic (Hierarchical)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Examples
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#implementation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Implementation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#important-rules-for-developers" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Important Rules for Developers
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
   
   
     <li class="md-nav__item">
-      <a href="../rag-process/" class="md-nav__link">
+      <a href="../../usage/rag-process/" class="md-nav__link">
         
   
   
@@ -1537,7 +1416,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../memory/" class="md-nav__link">
+      <a href="../../usage/memory/" class="md-nav__link">
         
   
   
@@ -1565,7 +1444,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../ontology-learning/" class="md-nav__link">
+      <a href="../../usage/ontology-learning/" class="md-nav__link">
         
   
   
@@ -1618,8 +1497,10 @@
                 
   
   
+    
   
   
+  
     
     
     
@@ -1633,16 +1514,14 @@
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_13" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_12" checked>
         
           
-          <label class="md-nav__link" for="__nav_3_13" id="__nav_3_13_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3_12" id="__nav_3_12_label" tabindex="">
             
   
   
@@ -1660,8 +1539,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_13_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_13">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_12_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_12">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1693,10 +1572,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_13_1" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_12_1" >
         
           
-          <label class="md-nav__link" for="__nav_3_13_1" id="__nav_3_13_1_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_12_1" id="__nav_3_12_1_label" tabindex="0">
             
   
   
@@ -1714,8 +1593,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_13_1_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_13_1">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_12_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_12_1">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1732,7 +1611,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../packages/email-classifier/" class="md-nav__link">
+      <a href="../email-classifier/" class="md-nav__link">
         
   
   
@@ -1760,7 +1639,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../packages/email-classifier/usage/" class="md-nav__link">
+      <a href="../email-classifier/usage/" class="md-nav__link">
         
   
   
@@ -1788,7 +1667,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../packages/email-classifier/training/" class="md-nav__link">
+      <a href="../email-classifier/training/" class="md-nav__link">
         
   
   
@@ -1816,7 +1695,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../packages/email-classifier/analysis/" class="md-nav__link">
+      <a href="../email-classifier/analysis/" class="md-nav__link">
         
   
   
@@ -1844,7 +1723,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../packages/email-classifier/nn_architecture/" class="md-nav__link">
+      <a href="../email-classifier/nn_architecture/" class="md-nav__link">
         
   
   
@@ -1895,10 +1774,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_13_2" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_12_2" >
         
           
-          <label class="md-nav__link" for="__nav_3_13_2" id="__nav_3_13_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_12_2" id="__nav_3_12_2_label" tabindex="0">
             
   
   
@@ -1916,8 +1795,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_13_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_13_2">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_12_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_12_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1934,7 +1813,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../packages/th-personal-graph/" class="md-nav__link">
+      <a href="../th-personal-graph/" class="md-nav__link">
         
   
   
@@ -1962,7 +1841,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../packages/th-personal-graph/crawler/" class="md-nav__link">
+      <a href="../th-personal-graph/crawler/" class="md-nav__link">
         
   
   
@@ -1990,7 +1869,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../packages/th-personal-graph/usage/" class="md-nav__link">
+      <a href="../th-personal-graph/usage/" class="md-nav__link">
         
   
   
@@ -2018,7 +1897,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../packages/th-personal-graph/mocogi/" class="md-nav__link">
+      <a href="../th-personal-graph/mocogi/" class="md-nav__link">
         
   
   
@@ -2046,7 +1925,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../packages/th-personal-graph/architecture/" class="md-nav__link">
+      <a href="../th-personal-graph/architecture/" class="md-nav__link">
         
   
   
@@ -2054,6 +1933,260 @@
     
   
     Architektur & Logik
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_12_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_12_3" id="__nav_3_12_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parser
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_12_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_12_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Parser
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Übersicht
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Übersicht
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Inhaltsverzeichnis">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Inhaltsverzeichnis
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#ubersicht-der-parser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Übersicht der Parser
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Übersicht der Parser">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-pdf-docx-parser-pdfparser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. PDF &amp; DOCX Parser (PDFParser)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-mail-parser-mailparser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Mail-Parser (MailParser)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-text-parser-textparser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Text-Parser (TextParser)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#die-parser-fabrik-parserfactory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Die Parser-Fabrik (ParserFactory)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Die Parser-Fabrik (ParserFactory)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#beispielhafte-nutzung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Beispielhafte Nutzung
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#weitere-themen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Weitere Themen
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="email-parsing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    E-Mail-Parsing & Namensextraktion
   
 
     
@@ -2108,10 +2241,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_14" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_13" >
         
           
-          <label class="md-nav__link" for="__nav_3_14" id="__nav_3_14_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3_13" id="__nav_3_13_label" tabindex="">
             
   
   
@@ -2129,8 +2262,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_14_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_14">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_13">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2308,7 +2441,7 @@
                   <div class="md-sidebar__inner">
                     
 
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+<nav class="md-nav md-nav--secondary" aria-label="Inhaltsverzeichnis">
   
   
   
@@ -2317,48 +2450,93 @@
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
-      Table of contents
+      Inhaltsverzeichnis
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#basic-logic-hierarchical" class="md-nav__link">
+  <a href="#ubersicht-der-parser" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Basic Logic (Hierarchical)
+        Übersicht der Parser
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Übersicht der Parser">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-pdf-docx-parser-pdfparser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. PDF &amp; DOCX Parser (PDFParser)
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#examples" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#2-mail-parser-mailparser" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Examples
+        2. Mail-Parser (MailParser)
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#implementation" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#3-text-parser-textparser" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Implementation
+        3. Text-Parser (TextParser)
       
     </span>
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#important-rules-for-developers" class="md-nav__link">
+  <a href="#die-parser-fabrik-parserfactory" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Important Rules for Developers
+        Die Parser-Fabrik (ParserFactory)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Die Parser-Fabrik (ParserFactory)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#beispielhafte-nutzung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Beispielhafte Nutzung
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#weitere-themen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Weitere Themen
       
     </span>
   </a>
@@ -2382,84 +2560,42 @@
 
 
 
-<h1 id="email-parsing-and-name-extraction">Email Parsing and Name Extraction<a class="headerlink" href="#email-parsing-and-name-extraction" title="Permanent link">&para;</a></h1>
-<p>This page describes in detail how the system extracts names from email addresses and display names. This logic is crucial for correctly sorting emails into student folders.</p>
-<h2 id="basic-logic-hierarchical">Basic Logic (Hierarchical)<a class="headerlink" href="#basic-logic-hierarchical" title="Permanent link">&para;</a></h2>
-<p>The system follows a strict hierarchy to determine the surname of a sender or recipient:</p>
-<ol>
-<li><strong>"im Auftrag von" Recognition</strong>: If an email was sent on behalf of someone else, the actual sender is focused.  </li>
-<li><strong>Greedy Name Matching (Primary)</strong>:  <ul>
-<li>The display name (e.g., "Mustermann Max") is split into its individual parts.  </li>
-<li>These parts are matched against the "local part" of the email address (the part before the @).  </li>
-<li>If a part of the display name is found within the local part, it is identified as the surname.  </li>
-<li><em>Example</em>: <code>Mustermann Max &lt;mustermann@example.com&gt;</code> -&gt; "Mustermann" is found in the local part and is therefore the surname.  </li>
-</ul>
-</li>
-<li><strong>Dot-Separated Local Part (Fallback 1)</strong>:  <ul>
-<li>If no match with the display name is possible, the local part is split at dots (<code>.</code>).  </li>
-<li>The system checks the segments from back to front and ignores generic terms (such as "info", "studium").  </li>
-<li><em>Example</em>: <code>max.mustermann@smail.th-koeln.de</code> -&gt; "Mustermann".  </li>
-</ul>
-</li>
-<li><strong>Generic Fallbacks (Fallback 2)</strong>:  <ul>
-<li>Commas in the display name (<code>Surname, Firstname</code>).  </li>
-<li>Last word in the display name.  </li>
-<li>Local part formatting (uppercase recognition).  </li>
-</ul>
-</li>
-</ol>
-<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Input (Sender/Recipient)</th>
-<th style="text-align: left;">Extracted Surname</th>
-<th style="text-align: left;">Reason</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;"><code>Mustermann, Max</code></td>
-<td style="text-align: left;"><strong>Mustermann</strong></td>
-<td style="text-align: left;">Comma separation</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>Mustermann Max &lt;mustermann@example.com&gt;</code></td>
-<td style="text-align: left;"><strong>Mustermann</strong></td>
-<td style="text-align: left;">Greedy Match (Mustermann in local part)</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>max.mustermann@th-koeln.de</code></td>
-<td style="text-align: left;"><strong>Mustermann</strong></td>
-<td style="text-align: left;">Dot-separated local part</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>'Hans Müller' &lt;mueller@th-koeln.de&gt;</code></td>
-<td style="text-align: left;"><strong>Müller</strong></td>
-<td style="text-align: left;">Greedy Match (mueller in local part, umlaut normalization)</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>info@th-koeln.de</code></td>
-<td style="text-align: left;"><strong>Unknown</strong></td>
-<td style="text-align: left;">Generic local part</td>
-</tr>
-</tbody>
-</table>
-<h2 id="implementation">Implementation<a class="headerlink" href="#implementation" title="Permanent link">&para;</a></h2>
-<p>The logic is implemented in <code>mcp_university/classifier/sort_emails.py</code> in the function <code>extract_lastname</code>.</p>
-<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">extract_lastname</span><span class="p">(</span><span class="n">sender_raw</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="c1"># Hierarchical Logic:</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="c1"># 1. on behalf of</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="c1"># 2. Greedy Match (Display Name vs Local Part)</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="c1"># 3. Dot-Separated Local Part</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="c1"># 4. Generic Fallbacks</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="o">...</span>
+<h1 id="parser-sub-package">Parser Sub-Package<a class="headerlink" href="#parser-sub-package" title="Permanent link">&para;</a></h1>
+<p>Das <code>academic_parser</code> Sub-Package bietet eine einheitliche und leistungsstarke Schnittstelle zur Text- und Metadaten-Extraktion aus verschiedenen Dateiformaten. Es abstrahiert die Komplexität verschiedener spezialisierter Python-Bibliotheken unter einer gemeinsamen, einfachen API.</p>
+<h2 id="ubersicht-der-parser">Übersicht der Parser<a class="headerlink" href="#ubersicht-der-parser" title="Permanent link">&para;</a></h2>
+<p>Das Package umfasst drei spezialisierte Haupt-Parser, die über eine gemeinsame Fabrik (<code>ParserFactory</code>) bereitgestellt werden:</p>
+<h3 id="1-pdf-docx-parser-pdfparser">1. PDF &amp; DOCX Parser (<code>PDFParser</code>)<a class="headerlink" href="#1-pdf-docx-parser-pdfparser" title="Permanent link">&para;</a></h3>
+<p>Der PDF-Parser ist darauf ausgelegt, formatierte Texte aus PDF- und DOCX-Dokumenten (wie z.B. Vorlesungsfolien, Aufgabenblättern oder Modulhandbüchern) zu extrahieren.<br />
+- <strong>Primärer Ansatz:</strong> Nutzt <code>LiteParse</code> für eine schnelle und strukturierte Extraktion.<br />
+- <strong>Fallbacks:</strong> Verwendet <code>docling</code> und <code>python-docx</code> bei fehlenden Abhängigkeiten oder komplexeren Layouts.<br />
+- <strong>Offline-Modus:</strong> Erkennt und unterstützt den Offline-Betrieb.  </p>
+<h3 id="2-mail-parser-mailparser">2. Mail-Parser (<code>MailParser</code>)<a class="headerlink" href="#2-mail-parser-mailparser" title="Permanent link">&para;</a></h3>
+<p>Der Mail-Parser verarbeitet <code>.eml</code> und <code>.msg</code> Dateien (wie sie aus Outlook oder Thunderbird exportiert werden).<br />
+- Extrahiert Sender, Empfänger (To, Cc), Datum und Betreff.<br />
+- Verarbeitet Multipart-Nachrichten und dekodiert Textinhalte zuverlässig mit verschiedenen Encodings (inkl. Latin-1 Fallback).<br />
+- Ermöglicht das Extrahieren und Speichern von E-Mail-Anhängen.<br />
+- Beinhaltet die komplexe Logik zur Extraktion und Normalisierung von Nachnamen für die Sortierung.  </p>
+<h3 id="3-text-parser-textparser">3. Text-Parser (<code>TextParser</code>)<a class="headerlink" href="#3-text-parser-textparser" title="Permanent link">&para;</a></h3>
+<p>Ein schlanker Parser für Standard-Textdateien.<br />
+- Unterstützt <code>.txt</code>, <code>.md</code>, <code>.py</code>, <code>.json</code>, <code>.html</code>, <code>.ipynb</code>.<br />
+- Liest Inhalte mit UTF-8 Kodierung und bietet robuste Fehlerbehandlung.  </p>
+<hr />
+<h2 id="die-parser-fabrik-parserfactory">Die Parser-Fabrik (<code>ParserFactory</code>)<a class="headerlink" href="#die-parser-fabrik-parserfactory" title="Permanent link">&para;</a></h2>
+<p>Die <code>ParserFactory</code> ist die zentrale Anlaufstelle für das Gesamtsystem. Sie entscheidet anhand der Dateiendung automatisch, welcher Parser geladen und ausgeführt werden soll.</p>
+<h3 id="beispielhafte-nutzung">Beispielhafte Nutzung<a class="headerlink" href="#beispielhafte-nutzung" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">academic_parser.factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParserFactory</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># Initialisierung mit einem Cache-Verzeichnis für PDF-Artefakte</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">factory</span> <span class="o">=</span> <span class="n">ParserFactory</span><span class="p">(</span><span class="n">cache_dir</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;./cache&quot;</span><span class="p">))</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="c1"># Parsen einer beliebigen Datei</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="n">text</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;studienverlaufsplan.pdf&quot;</span><span class="p">))</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="nb">print</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
 </code></pre></div>
-<h2 id="important-rules-for-developers">Important Rules for Developers<a class="headerlink" href="#important-rules-for-developers" title="Permanent link">&para;</a></h2>
+<h2 id="weitere-themen">Weitere Themen<a class="headerlink" href="#weitere-themen" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>No deletion of comments</strong>: The explanatory comments in <code>extract_lastname</code> are essential for understanding edge cases.  </li>
-<li><strong>Google-Style Docstrings</strong>: Every change must be documented.  </li>
-<li><strong>Umlaut Handling</strong>: The system normalizes names for comparison (<code>Müller</code> vs <code>mueller</code>) but returns the original name (Title Case).  </li>
+<li><a href="email-parsing/"><strong>E-Mail-Parsing &amp; Namensextraktion im Detail</strong></a>  </li>
 </ul>
 
 
@@ -2486,7 +2622,7 @@
           <button type="button" class="md-top md-icon" data-md-component="top" hidden>
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
-  Back to top
+  Zurück zum Seitenanfang
 </button>
         
       </main>
@@ -2495,33 +2631,33 @@
   
     
       
-      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      <nav class="md-footer__inner md-grid" aria-label="Fußzeile" >
         
           
-          <a href="../mcp/" class="md-footer__link md-footer__link--prev" aria-label="Previous: MCP Integration">
+          <a href="../th-personal-graph/architecture/" class="md-footer__link md-footer__link--prev" aria-label="Zurück: Architektur &amp; Logik">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
             </div>
             <div class="md-footer__title">
               <span class="md-footer__direction">
-                Previous
+                Zurück
               </span>
               <div class="md-ellipsis">
-                MCP Integration
+                Architektur & Logik
               </div>
             </div>
           </a>
         
         
           
-          <a href="../rag-process/" class="md-footer__link md-footer__link--next" aria-label="Next: RAG Prozess">
+          <a href="email-parsing/" class="md-footer__link md-footer__link--next" aria-label="Weiter: E-Mail-Parsing &amp; Namensextraktion">
             <div class="md-footer__title">
               <span class="md-footer__direction">
-                Next
+                Weiter
               </span>
               <div class="md-ellipsis">
-                RAG Prozess
+                E-Mail-Parsing & Namensextraktion
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -2558,10 +2694,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "content.tabs.link", "content.code.annotate", "content.code.copy", "content.tooltips", "content.code.annotate", "navigation.footer"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "content.tabs.link", "content.code.annotate", "content.code.copy", "content.tooltips", "content.code.annotate", "navigation.footer"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>
