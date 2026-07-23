@@ -6,6 +6,20 @@ This package provides a comprehensive solution for the automated classification 
 
 The package is divided into functional areas:
 
+```mermaid
+graph TD
+    A[Email Files .msg/.eml] --> B[EmailController]
+    B --> C[EmailClassifier / EmailTransformerClassifier]
+    C --> D{Classification}
+    D -->|Classical Models| E[XGBoost / RandomForest / TF-IDF]
+    D -->|Transformer Models| F[PyTorch / MiniLM Embeddings]
+    E --> G[Email Class & Confidence]
+    F --> G
+    G --> H[EmailController Decision Logic]
+    H --> I[Email Sorting & Archiving]
+    H --> J[Reply Generation / other Actions]
+```
+
 ### User Scripts (`email_classifier.scripts`)
 These scripts are intended for direct invocation by the user:  
 - **Training & Evaluation:** `train.py`, `evaluate.py`  

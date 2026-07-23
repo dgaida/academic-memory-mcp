@@ -6,6 +6,16 @@ Dieses Package bietet eine integrierte Lösung zur automatisierten Extraktion, S
 
 Das Package ist in funktionale Bereiche unterteilt:
 
+```mermaid
+graph TD
+    A1[TH Köln Personenverzeichnis] --> B1[TH Personal Crawler]
+    A2[MOCOGI API] --> B2[MOCOGI Extraktor]
+    B1 -->|Personendaten & Markdown| C[(MetadataStore th_personal.db)]
+    B2 -->|Studiengänge, POs, Module, Kanten-Prioritäten| C
+    C --> D[Visualisierungsskript]
+    D --> E[Interaktiver 2D-Graph via Pyvis HTML]
+```
+
 ### Benutzer-Skripte (`th_personal_graph.scripts`)
 Diese Skripte sind für den direkten Aufruf durch den Benutzer über das Python-Modulsystem gedacht:  
 - **TH Personal Crawler (`crawl_th_koeln_persons.py`):** Crawlt das offizielle TH-Köln-Personenverzeichnis, extrahiert Kontaktdaten, Fakultäten und akademische Grade und speichert sie in Markdown sowie in der lokalen SQLite-Datenbank `th_personal.db`.  

@@ -6,6 +6,16 @@ This package provides an integrated solution for the automated extraction, stora
 
 The package is divided into functional areas:
 
+```mermaid
+graph TD
+    A1[TH Köln Directory] --> B1[TH Personal Crawler]
+    A2[MOCOGI API] --> B2[MOCOGI Extractor]
+    B1 -->|Person Data & Markdown| C[(MetadataStore th_personal.db)]
+    B2 -->|Programs, POs, Modules, Edge Priorities| C
+    C --> D[Visualization Script]
+    D --> E[Interactive 2D Graph via Pyvis HTML]
+```
+
 ### User Scripts (`th_personal_graph.scripts`)
 These scripts are intended for direct invocation by the user via Python's module system:  
 - **TH Personal Crawler (`crawl_th_koeln_persons.py`):** Crawls the official TH Köln personnel directory, extracts contact details, faculties, and academic degrees, and saves them in Markdown as well as in the local SQLite database `th_personal.db`.  

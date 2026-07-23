@@ -2,6 +2,20 @@
 
 Das `academic_parser` Sub-Package bietet eine einheitliche und leistungsstarke Schnittstelle zur Text- und Metadaten-Extraktion aus verschiedenen Dateiformaten. Es abstrahiert die Komplexität verschiedener spezialisierter Python-Bibliotheken unter einer gemeinsamen, einfachen API.
 
+```mermaid
+graph TD
+    A[Dateipfad / Stream] --> B[ParserFactory]
+    B --> C{Dateiendung?}
+    C -->|.pdf, .docx| D[PDFParser]
+    C -->|.eml, .msg| E[MailParser]
+    C -->|.txt, .md, .py, etc.| F[TextParser]
+    D -->|Primär| D1[LiteParse]
+    D -->|Fallback| D2[docling / python-docx]
+    E --> E1[Text & Metadaten-Extraktion]
+    E --> E2[Anhangs-Extraktion & Namens-Normalisierung]
+    F --> F1[Robuster UTF-8 Textleser]
+```
+
 ## Übersicht der Parser
 
 Das Package umfasst drei spezialisierte Haupt-Parser, die über eine gemeinsame Fabrik (`ParserFactory`) bereitgestellt werden:
