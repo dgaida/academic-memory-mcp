@@ -2536,7 +2536,7 @@
 </tbody>
 </table>
 <h2 id="implementation">Implementation<a class="headerlink" href="#implementation" title="Permanent link">&para;</a></h2>
-<p>The logic is implemented in <code>mcp_university/classifier/sort_emails.py</code> in the function <code>extract_lastname</code>.</p>
+<p>The logic is implemented in <code>packages/email_classifier/src/email_classifier/scripts/sort_emails.py</code> in the function <code>extract_lastname</code>.</p>
 <div class="language-python highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">extract_lastname</span><span class="p">(</span><span class="n">sender_raw</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="c1"># Hierarchical Logic:</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="c1"># 1. on behalf of</span>
