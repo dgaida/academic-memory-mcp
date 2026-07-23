@@ -22,11 +22,16 @@ def test_extract_honorific_preference(controller):
     """
     # Test Du
     assert controller._extract_honorific_preference("Bevorzugte Anrede: Du") == "Du"
+    assert controller._extract_honorific_preference("Bevorzugte Anrede \nDu") == "Du"
+    assert controller._extract_honorific_preference("Bevorzugte Anrede\n  Du") == "Du"
+    assert controller._extract_honorific_preference("Bevorzugte Anrede - Du") == "Du"
     assert controller._extract_honorific_preference("Man duzt sich mit dieser Person.") == "Du"
     assert controller._extract_honorific_preference("Anrede: Du") == "Du"
+    assert controller._extract_honorific_preference("Anrede \nDu") == "Du"
     
     # Test Sie (default)
     assert controller._extract_honorific_preference("Bevorzugte Anrede: Sie") == "Sie"
+    assert controller._extract_honorific_preference("Bevorzugte Anrede \nSie") == "Sie"
     assert controller._extract_honorific_preference(None) == "Sie"
     assert controller._extract_honorific_preference("") == "Sie"
     assert controller._extract_honorific_preference("Random profile text") == "Sie"
