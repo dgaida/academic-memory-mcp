@@ -20,7 +20,7 @@ Diese Seite bietet eine Übersicht über die wichtigsten Module und Klassen des 
 
 ## Parser Factory
 
-::: mcp_university.parser.factory.ParserFactory
+::: academic_parser.factory.ParserFactory
 
 ## Email Klassifikator
 

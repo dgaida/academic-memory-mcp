@@ -20,7 +20,7 @@ This page provides an overview of the key modules and classes of the MCP Univers
 
 ## Parser Factory
 
-::: mcp_university.parser.factory.ParserFactory
+::: academic_parser.factory.ParserFactory
 
 ## Email Classifier
 
