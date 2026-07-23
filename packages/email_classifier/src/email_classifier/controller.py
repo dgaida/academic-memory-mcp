@@ -157,14 +157,14 @@ class EmailController:
         if not profile:
             return "Sie"
 
-        # Suche nach "Bevorzugte Anrede: Du" oder ähnlichem
-        if re.search(r"Bevorzugte Anrede:.*?\bDu\b", profile, re.IGNORECASE):
+        # Suche nach "Bevorzugte Anrede" gefolgt von optionalem Doppelpunkt/Bindestrich, Whitespace/Zeilenumbruch und "Du" oder "Sie"
+        if re.search(r"Bevorzugte\s+Anrede\s*[:\-]?\s*\bDu\b", profile, re.IGNORECASE):
             return "Du"
-        if re.search(r"Bevorzugte Anrede:.*?\bSie\b", profile, re.IGNORECASE):
+        if re.search(r"Bevorzugte\s+Anrede\s*[:\-]?\s*\bSie\b", profile, re.IGNORECASE):
             return "Sie"
         
         # Fallback: Suche im gesamten Profil nach Hinweisen
-        if "Anrede: Du" in profile or "(Du)" in profile or "duzt" in profile:
+        if re.search(r"\bAnrede\s*[:\-]?\s*\bDu\b", profile, re.IGNORECASE) or "(Du)" in profile or "duzt" in profile:
             return "Du"
             
         return "Sie"
