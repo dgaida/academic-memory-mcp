@@ -7,22 +7,22 @@ The `academic_parser` sub-package provides a unified and powerful interface for 
 The package includes three main specialized parsers, made available through a common factory (`ParserFactory`):
 
 ### 1. PDF & DOCX Parser (`PDFParser`)
-The PDF parser is designed to extract formatted text from PDF and DOCX documents (such as lecture slides, worksheets, or module handbooks).
-- **Primary approach:** Uses `LiteParse` for rapid and structured extraction.
-- **Fallbacks:** Employs `docling` and `python-docx` in case of missing dependencies or complex layouts.
-- **Offline Mode:** Detects and supports offline operations automatically.
+The PDF parser is designed to extract formatted text from PDF and DOCX documents (such as lecture slides, worksheets, or module handbooks).  
+- **Primary approach:** Uses `LiteParse` for rapid and structured extraction.  
+- **Fallbacks:** Employs `docling` and `python-docx` in case of missing dependencies or complex layouts.  
+- **Offline Mode:** Detects and supports offline operations automatically.  
 
 ### 2. Mail Parser (`MailParser`)
-The mail parser handles `.eml` and `.msg` files (exported from Outlook or Thunderbird).
-- Extracts sender, recipients (To, Cc), date, and subject.
-- Processes multipart messages and reliably decodes text contents using various encodings (including Latin-1 fallback).
-- Supports extracting and saving email attachments.
-- Includes complex logic for extracting and normalizing surnames for email sorting.
+The mail parser handles `.eml` and `.msg` files (exported from Outlook or Thunderbird).  
+- Extracts sender, recipients (To, Cc), date, and subject.  
+- Processes multipart messages and reliably decodes text contents using various encodings (including Latin-1 fallback).  
+- Supports extracting and saving email attachments.  
+- Includes complex logic for extracting and normalizing surnames for email sorting.  
 
 ### 3. Text Parser (`TextParser`)
-A lightweight parser for standard plain text files.
-- Supports `.txt`, `.md`, `.py`, `.json`, `.html`, `.ipynb`.
-- Reads contents with UTF-8 encoding and offers robust error handling.
+A lightweight parser for standard plain text files.  
+- Supports `.txt`, `.md`, `.py`, `.json`, `.html`, `.ipynb`.  
+- Reads contents with UTF-8 encoding and offers robust error handling.  
 
 ---
 
@@ -44,5 +44,5 @@ text = factory.parse(Path("curriculum.pdf"))
 print(text)
 ```
 
-## Additional Topics
-- [**Detailed Email Parsing & Name Extraction**](email-parsing.md)
+## Additional Topics  
+- [**Detailed Email Parsing & Name Extraction**](email-parsing.md)  

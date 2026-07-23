@@ -4,10 +4,10 @@ Dieses Package stellt verschiedene Parser für das MCP University System zur Ver
 
 ## Features
 
-- **PDF Parser:** Extrahiert Text aus PDF- und DOCX-Dateien (mit Docling und LiteParse Fallbacks).
-- **Mail Parser:** Extrahiert Details und Anhänge aus E-Mails (.eml und .msg).
-- **Text Parser:** Liest Standard-Textformate.
-- **Parser Factory:** Stellt automatisch den passenden Parser für einen gegebenen Dateityp bereit.
+- **PDF Parser:** Extrahiert Text aus PDF- und DOCX-Dateien (mit Docling und LiteParse Fallbacks).  
+- **Mail Parser:** Extrahiert Details und Anhänge aus E-Mails (.eml und .msg).  
+- **Text Parser:** Liest Standard-Textformate.  
+- **Parser Factory:** Stellt automatisch den passenden Parser für einen gegebenen Dateityp bereit.  
 
 ## Installation
 
