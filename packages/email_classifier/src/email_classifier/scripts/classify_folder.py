@@ -28,7 +28,7 @@ def classify_and_move(source_dir: Path, model_path: Path, output_dir: Optional[P
 
     # Alle .msg Dateien im Quellordner (nicht rekursiv laut Anforderung "einen Ordner")
     # Falls rekursiv gewünscht, .rglob nutzen. Anforderung sagt "einen Ordner".
-    msg_files = list(source_dir.glob("*.msg"))
+    msg_files = sorted(source_dir.glob("*.msg"))
 
     if not msg_files:
         logger.info(f"Keine .msg Dateien in {source_dir} gefunden.")
