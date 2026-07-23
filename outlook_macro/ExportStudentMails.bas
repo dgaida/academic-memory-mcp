@@ -408,11 +408,36 @@ Private Function LoadStudentDomains() As String
 
     Do Until ts.AtEndOfStream
         line = Trim(ts.ReadLine)
-        If Len(line) > 0 Then
-            If Len(result) > 0 Then
-                result = result & "|" & line
-            Else
-                result = line
+
+        ' Ignore empty lines, headings and comments
+        If Len(line) > 0 And Left(line, 1) <> "#" And Left(line, 2) <> "//" And Left(line, 4) <> "<!--" Then
+
+            ' Strip markdown list markers: "-", "*", "+"
+            If Left(line, 2) = "- " Then
+                line = Trim(Mid(line, 3))
+            ElseIf Left(line, 2) = "* " Then
+                line = Trim(Mid(line, 3))
+            ElseIf Left(line, 2) = "+ " Then
+                line = Trim(Mid(line, 3))
+            End If
+
+            ' Strip backticks at start and end
+            If Left(line, 1) = "`" Then line = Mid(line, 2)
+            If Right(line, 1) = "`" Then line = Left(line, Len(line) - 1)
+            line = Trim(line)
+
+            ' Replace escaped underscores "\" with normal underscores "_"
+            line = Replace(line, "\_", "_")
+
+            ' Convert to lowercase for case-insensitive matching
+            line = LCase(line)
+
+            If Len(line) > 0 Then
+                If Len(result) > 0 Then
+                    result = result & "|" & line
+                Else
+                    result = line
+                End If
             End If
         End If
     Loop
@@ -427,6 +452,11 @@ Private Function LoadStudentDomains() As String
     Exit Function
 
 ReadError:
+    If Not ts Is Nothing Then
+        On Error Resume Next
+        ts.Close
+        On Error GoTo 0
+    End If
     Debug.Print "Fehler beim Lesen der Domains-Datei: " & Err.Description
     LoadStudentDomains = defaultDomains
 End Function
