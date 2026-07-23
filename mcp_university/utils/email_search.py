@@ -10,7 +10,7 @@ from typing import List, Dict, Any, Optional, Set
 from datetime import datetime
 
 from mcp_university.config import get_config
-from mcp_university.parser.mail_parser import MailParser
+from academic_parser.mail_parser import MailParser
 
 logger = logging.getLogger(__name__)
 

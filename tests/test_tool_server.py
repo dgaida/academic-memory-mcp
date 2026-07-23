@@ -132,7 +132,7 @@ def test_tool_save_email_attachments(mcp_context):
     comp = get_tool_by_name(mcp_context['server'], "save_email_attachments")
     save_tool = comp.fn
             
-    with patch("mcp_university.parser.mail_parser.MailParser") as mock_parser_class:
+    with patch("academic_parser.mail_parser.MailParser") as mock_parser_class:
         mock_parser = mock_parser_class.return_value
         mock_parser.save_attachments.return_value = [Path("file1.pdf")]
         

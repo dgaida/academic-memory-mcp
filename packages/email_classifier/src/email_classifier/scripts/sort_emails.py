@@ -14,7 +14,7 @@ from typing import Any, Dict, List, Optional
 import yaml
 
 from email_classifier.engine import EmailClassifier
-from mcp_university.parser.mail_parser import MailParser
+from academic_parser.mail_parser import MailParser
 from mcp_university.config import get_config
 from mcp_university.utils.encoding import decode_mime_header
 from mcp_university.utils.semester import get_semester, normalize_name
@@ -334,7 +334,7 @@ def process_emails(
     moved_emails_data = []
     classifier = EmailClassifier()
     classifier.load(classifier_model_path)
-    parser = MailParser()
+    academic_parser = MailParser()
     university_config = get_config()
     user_emails_list = [email_addr.lower() for email_addr in university_config.user.emails]
 
@@ -349,7 +349,7 @@ def process_emails(
                 continue
             
             class_base_path = Path(path_config[assigned_class])
-            email_date = parser.get_email_date(msg_file)
+            email_date = academic_parser.get_email_date(msg_file)
             semester_identifier = get_semester(email_date)
             final_lastname = "Unknown"
             target_subfolder = "Inbox"

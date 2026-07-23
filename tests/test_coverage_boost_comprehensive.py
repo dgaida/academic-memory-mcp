@@ -10,7 +10,7 @@ from mcp_university.mcp_server.server import create_server
 from mcp_university.agent.engine import Agent
 from mcp_university.summarizer.engine import Summarizer
 from mcp_university.metadata.store import MetadataStore
-from mcp_university.parser.pdf_parser import PDFParser
+from academic_parser.pdf_parser import PDFParser
 from mcp_university.retrieval.index import SearchIndex
 
 runner = CliRunner()
@@ -181,7 +181,7 @@ def test_pdf_parser_offline(tmp_path):
     Args:
         tmp_path: Temporary path.
     """
-    with patch("mcp_university.parser.pdf_parser.get_config") as mock_cfg:
+    with patch("academic_parser.pdf_parser.get_config") as mock_cfg:
         mock_cfg.return_value.offline = True
-        parser = PDFParser(tmp_path)
-        assert parser.cache_dir == tmp_path
+        academic_parser = PDFParser(tmp_path)
+        assert academic_parser.cache_dir == tmp_path

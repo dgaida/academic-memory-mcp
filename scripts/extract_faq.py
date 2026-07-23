@@ -8,7 +8,7 @@ from typing import Dict, List, Optional, Tuple, Any
 import yaml
 
 from mcp_university.config import get_config
-from mcp_university.parser.mail_parser import MailParser
+from academic_parser.mail_parser import MailParser
 from mcp_university.utils.llm_client_wrapper import LLMClientWrapper
 
 # Configure logging
@@ -264,15 +264,15 @@ def save_faq(faq_path: Path, new_qa_pairs: List[Tuple[str, str]], class_name: st
 
 def main() -> None:
     """Main entry point for FAQ extraction script."""
-    parser = argparse.ArgumentParser(description="Extract generalizable FAQ from email datasets.")
-    parser.add_argument("--class-name", type=str, default="BachelorThesis", help="Name of the email class.")
-    parser.add_argument("-n", type=int, default=10, help="Maximum number of emails to process (default: 10).")
-    parser.add_argument("--paths-config", type=str, default="config/classifier_paths.yaml", help="Path to classifier_paths.yaml.")
-    parser.add_argument("--folders-config", type=str, default="config/train_test_folders.yaml", help="Path to train_test_folders.yaml.")
-    parser.add_argument("--memory-config", type=str, default="config/classifier_memory_paths.yaml", help="Path to classifier_memory_paths.yaml.")
-    parser.add_argument("--user-config", type=str, default="config/user.yaml", help="Path to user.yaml.")
+    academic_parser = argparse.ArgumentParser(description="Extract generalizable FAQ from email datasets.")
+    academic_parser.add_argument("--class-name", type=str, default="BachelorThesis", help="Name of the email class.")
+    academic_parser.add_argument("-n", type=int, default=10, help="Maximum number of emails to process (default: 10).")
+    academic_parser.add_argument("--paths-config", type=str, default="config/classifier_paths.yaml", help="Path to classifier_paths.yaml.")
+    academic_parser.add_argument("--folders-config", type=str, default="config/train_test_folders.yaml", help="Path to train_test_folders.yaml.")
+    academic_parser.add_argument("--memory-config", type=str, default="config/classifier_memory_paths.yaml", help="Path to classifier_memory_paths.yaml.")
+    academic_parser.add_argument("--user-config", type=str, default="config/user.yaml", help="Path to user.yaml.")
 
-    args = parser.parse_args()
+    args = academic_parser.parse_args()
 
     # Load configurations
     paths_cfg = load_yaml(Path(args.paths_config))

@@ -8,7 +8,7 @@ import logging
 from pathlib import Path
 from mcp_university.config import get_config
 from mcp_university.utils.llm_client_wrapper import LLMClientWrapper
-from mcp_university.parser.mail_parser import MailParser
+from academic_parser.mail_parser import MailParser
 
 # Logging Setup
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -45,7 +45,7 @@ def main() -> None:
     """Generiert synthetische E-Mails für unterrepräsentierte Klassen."""
     config = get_config()
     llm = LLMClientWrapper()
-    parser = MailParser()
+    academic_parser = MailParser()
 
     db_path = config.data_dir / "metadata" / "email_embeddings.db"
     train_path = Path("data/classifier/train")
@@ -86,7 +86,7 @@ def main() -> None:
         examples = []
         for idx in closest_idx:
             path = Path(paths[idx])
-            text = parser.parse(path)
+            text = academic_parser.parse(path)
             if not text:
                 try:
                     with open(path, "r", encoding="utf-8") as f:

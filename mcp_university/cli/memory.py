@@ -5,7 +5,7 @@ import yaml
 from pathlib import Path
 from transformers import AutoTokenizer
 from ..config import get_config
-from ..parser.factory import ParserFactory
+from academic_parser.factory import ParserFactory
 from ..retrieval.index import SearchIndex
 from ..utils.memory import resolve_memory_index_names
 from scripts.index_memory import process_memory_folder

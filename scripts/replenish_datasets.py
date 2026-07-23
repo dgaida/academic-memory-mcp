@@ -15,7 +15,7 @@ from typing import Dict
 
 import yaml
 
-from mcp_university.parser.mail_parser import MailParser
+from academic_parser.mail_parser import MailParser
 
 # Logging-Konfiguration
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')

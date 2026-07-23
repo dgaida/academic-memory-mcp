@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 from mcp_university.crawler.crawler import Crawler
 from mcp_university.config import Config, FolderConfig, UserConfig
 from mcp_university.metadata.store import MetadataStore
-from mcp_university.parser.factory import ParserFactory
+from academic_parser.factory import ParserFactory
 from mcp_university.summarizer.engine import Summarizer
 from mcp_university.retrieval.index import SearchIndex
 
@@ -18,7 +18,7 @@ def mock_deps(tmp_path):
     config.user = UserConfig(name="Daniel Gaida", email="daniel.gaida@th-koeln.de")
 
     store = MetadataStore(tmp_path / "test.db")
-    parser = ParserFactory(tmp_path / "cache")
+    academic_parser = ParserFactory(tmp_path / "cache")
     summarizer = MagicMock(spec=Summarizer)
     index = MagicMock(spec=SearchIndex)
 
@@ -27,11 +27,11 @@ def mock_deps(tmp_path):
     summarizer.summarize_folder.return_value = "# Folder Summary"
     summarizer.summarize_email_conversation.return_value = "# Conversation Summary"
 
-    return config, store, parser, summarizer, index
+    return config, store, academic_parser, summarizer, index
 
 def test_email_conversation_processing(tmp_path, mock_deps):
     """Test function docstring."""
-    config, store, parser, summarizer, index = mock_deps
+    config, store, academic_parser, summarizer, index = mock_deps
 
     # Create structure
     student_dir = tmp_path / "StudentX"
@@ -47,7 +47,7 @@ def test_email_conversation_processing(tmp_path, mock_deps):
     mail2 = sent / "2.eml"
     mail2.write_text("Date: Tue, 2 Jan 2024 10:00:00 +0000\nFrom: Daniel Gaida <daniel.gaida@th-koeln.de>\nTo: User <other@example.com>\n\nAnswer")
 
-    crawler = Crawler(config, store, parser, summarizer, index)
+    crawler = Crawler(config, store, academic_parser, summarizer, index)
     crawler.crawl()
 
     # Check if summary file exists (reverted filename)
@@ -72,7 +72,7 @@ def test_email_conversation_processing(tmp_path, mock_deps):
 
 def test_email_sorting(tmp_path, mock_deps):
     """Test function docstring."""
-    config, store, parser, summarizer, index = mock_deps
+    config, store, academic_parser, summarizer, index = mock_deps
 
     # Create structure
     student_dir = tmp_path / "StudentY"
@@ -88,7 +88,7 @@ def test_email_sorting(tmp_path, mock_deps):
     mail1 = inbox / "1.eml"
     mail1.write_text("Date: Mon, 1 Jan 2024 10:00:00 +0000\nFrom: User <other@example.com>\nTo: Daniel Gaida <daniel.gaida@th-koeln.de>\n\nEarlier")
 
-    crawler = Crawler(config, store, parser, summarizer, index)
+    crawler = Crawler(config, store, academic_parser, summarizer, index)
 
     # Capture the text passed to summarize_email_conversation
     crawler.crawl()

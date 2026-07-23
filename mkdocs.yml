@@ -127,7 +127,6 @@ nav:
       - Datenbank-Management: usage/database-management.md
       - Datenbank-Prozesse: usage/database-processes.md
       - MCP Integration: usage/mcp.md
-      - E-Mail Parsing: usage/email-parsing.md
       - RAG Prozess: usage/rag-process.md
       - Memory Update: usage/memory.md
       - Ontology & Aliase: usage/ontology-learning.md
@@ -145,6 +144,9 @@ nav:
               - Nutzung der Skripte: packages/th-personal-graph/usage.md
               - MOCOGI Extraktion: packages/th-personal-graph/mocogi.md
               - Architektur & Logik: packages/th-personal-graph/architecture.md
+          - Parser:
+              - Übersicht: packages/parser/index.md
+              - E-Mail-Parsing & Namensextraktion: packages/parser/email-parsing.md
       - Entwicklung:
           - Übersicht: development/index.md
           - Docstring Guide: development/docstring-guide.md

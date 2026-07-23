@@ -49,17 +49,17 @@ def test_crawler_indexes_summary(tmp_path):
     config = Config()
     config.folders.folders = [str(tmp_path)]
     store = MagicMock()
-    parser = MagicMock()
+    academic_parser = MagicMock()
     summarizer = MagicMock()
     index = MagicMock()
 
     # Setup mocks
-    parser.parse.return_value = "full content of the file"
+    academic_parser.parse.return_value = "full content of the file"
     summarizer.summarize_file.return_value = "file summary"
     store.get_file.return_value = None
     store.upsert_file.return_value = 1
 
-    crawler = Crawler(config, store, parser, summarizer, index)
+    crawler = Crawler(config, store, academic_parser, summarizer, index)
 
     test_file = tmp_path / "test.txt"
     test_file.write_text("hello")

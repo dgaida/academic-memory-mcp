@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Dict, Any, Tuple, Optional
 
 from mcp_university.utils.email_search import EmailSearchEngine
-from mcp_university.parser.mail_parser import MailParser
+from academic_parser.mail_parser import MailParser
 
 # Logging konfigurieren
 logging.basicConfig(
@@ -39,7 +39,7 @@ class GUITools:
         return cls._engine
 
     @classmethod
-    def parser(cls) -> MailParser:
+    def academic_parser(cls) -> MailParser:
         """Gibt eine Instanz des MailParsers zurück.
 
         Returns:
@@ -171,7 +171,7 @@ def display_email(evt: gr.SelectData, df: pd.DataFrame) -> Tuple[str, str, str]:
     logger.info(f"E-Mail ausgewählt: {path}")
 
     try:
-        details = GUITools.parser().get_email_details(Path(path))
+        details = GUITools.academic_parser().get_email_details(Path(path))
         body = details.get("body", "Kein Inhalt")
 
         # Sicherstellen, dass 'to' eine Liste von Strings ist

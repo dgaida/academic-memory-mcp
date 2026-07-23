@@ -14,7 +14,7 @@ from typing import Dict, Any, Optional, Tuple
 
 from mcp_university.config import get_config
 from email_classifier.scripts.sort_emails import extract_lastname, find_student_folder
-from mcp_university.parser.mail_parser import MailParser
+from academic_parser.mail_parser import MailParser
 from mcp_university.summarizer.engine import Summarizer
 from mcp_university.summarizer.profiler import PersonProfiler
 
@@ -282,10 +282,10 @@ def check_folder_contains_participant_emails(student_dir: Path, email: Optional[
     if not email and not lastname:
         return True
 
-    parser = Tools.mail_parser()
+    academic_parser = Tools.mail_parser()
     for f in email_files:
         try:
-            details = parser.get_email_details(f)
+            details = academic_parser.get_email_details(f)
 
             if email:
                 email_lower = email.lower()

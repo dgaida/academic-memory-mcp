@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 from mcp_university.crawler.crawler import Crawler
 from mcp_university.config import Config, FolderConfig, UserConfig
 from mcp_university.metadata.store import MetadataStore
-from mcp_university.parser.factory import ParserFactory
+from academic_parser.factory import ParserFactory
 from mcp_university.summarizer.engine import Summarizer
 from mcp_university.retrieval.index import SearchIndex
 
@@ -20,7 +20,7 @@ def mock_deps(tmp_path):
     config.user = UserConfig(name='Daniel Gaida', email='daniel.gaida@th-koeln.de')
 
     store = MetadataStore(tmp_path / "test.db")
-    parser = ParserFactory(tmp_path / "cache")
+    academic_parser = ParserFactory(tmp_path / "cache")
     summarizer = MagicMock(spec=Summarizer)
     index = MagicMock(spec=SearchIndex)
 
@@ -28,11 +28,11 @@ def mock_deps(tmp_path):
     summarizer.summarize_email_conversation.return_value = "# Conversation Summary"
     summarizer.summarize_file.side_effect = lambda filename, content: f"Summary for {filename}"
 
-    return config, store, parser, summarizer, index
+    return config, store, academic_parser, summarizer, index
 
 def test_email_conversation_logging(tmp_path, mock_deps, caplog):
     """Test function docstring."""
-    config, store, parser, summarizer, index = mock_deps
+    config, store, academic_parser, summarizer, index = mock_deps
     caplog.set_level(logging.INFO)
 
     student_dir = tmp_path / "StudentX"
@@ -47,7 +47,7 @@ def test_email_conversation_logging(tmp_path, mock_deps, caplog):
     mail2 = sent / "b.eml"
     mail2.write_text("Date: Tue, 2 Jan 2024 10:00:00 +0000\n\nAnswer")
 
-    crawler = Crawler(config, store, parser, summarizer, index)
+    crawler = Crawler(config, store, academic_parser, summarizer, index)
     crawler.crawl()
 
     assert "Order of emails for conversation with Unbekannt:" in caplog.text
@@ -56,7 +56,7 @@ def test_email_conversation_logging(tmp_path, mock_deps, caplog):
 
 def test_individual_email_summarization_option(tmp_path, mock_deps):
     """Test function docstring."""
-    config, store, parser, summarizer, index = mock_deps
+    config, store, academic_parser, summarizer, index = mock_deps
     config.folders.summarize_emails_individually = True
 
     student_dir = tmp_path / "StudentY"
@@ -68,7 +68,7 @@ def test_individual_email_summarization_option(tmp_path, mock_deps):
     mail1 = inbox / "1.eml"
     mail1.write_text("Date: Mon, 1 Jan 2024 10:00:00 +0000\n\nQuestion")
 
-    crawler = Crawler(config, store, parser, summarizer, index)
+    crawler = Crawler(config, store, academic_parser, summarizer, index)
     crawler.crawl()
 
     # Verify that summarize_file was called for the email

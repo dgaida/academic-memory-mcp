@@ -1,11 +1,11 @@
 """Tests for test_mail_attachments.py."""
 from unittest.mock import MagicMock, patch
-from mcp_university.parser.mail_parser import MailParser
+from academic_parser.mail_parser import MailParser
 from email.message import EmailMessage
 
 def test_parse_msg_with_attachments(tmp_path):
     """Test function docstring."""
-    parser = MailParser()
+    academic_parser = MailParser()
     msg_file = tmp_path / "test.msg"
     msg_file.touch()
 
@@ -25,7 +25,7 @@ def test_parse_msg_with_attachments(tmp_path):
 
         mock_open.return_value.__enter__.return_value = mock_msg
 
-        content = parser.parse(msg_file)
+        content = academic_parser.parse(msg_file)
         assert "Subject: Test Subject" in content
         assert "Body content." in content
         assert "Anhänge:" in content
@@ -34,7 +34,7 @@ def test_parse_msg_with_attachments(tmp_path):
 
 def test_parse_eml_with_attachments(tmp_path):
     """Test function docstring."""
-    parser = MailParser()
+    academic_parser = MailParser()
     eml_file = tmp_path / "test.eml"
 
     # Create an EML with attachments using EmailMessage
@@ -50,7 +50,7 @@ def test_parse_eml_with_attachments(tmp_path):
 
     eml_file.write_bytes(msg.as_bytes())
 
-    content = parser.parse(eml_file)
+    content = academic_parser.parse(eml_file)
     assert "Subject: EML Subject" in content
     assert "EML body content." in content
     assert "Anhänge:" in content
@@ -59,7 +59,7 @@ def test_parse_eml_with_attachments(tmp_path):
 
 def test_parse_eml_no_attachments(tmp_path):
     """Test function docstring."""
-    parser = MailParser()
+    academic_parser = MailParser()
     eml_file = tmp_path / "test_no_att.eml"
 
     msg = EmailMessage()
@@ -69,6 +69,6 @@ def test_parse_eml_no_attachments(tmp_path):
 
     eml_file.write_bytes(msg.as_bytes())
 
-    content = parser.parse(eml_file)
+    content = academic_parser.parse(eml_file)
     assert "Subject: No Att" in content
     assert "Anhänge:" not in content

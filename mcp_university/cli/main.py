@@ -6,7 +6,7 @@ from logging.handlers import RotatingFileHandler
 from ..crawler.crawler import Crawler
 from ..config import get_config
 from ..metadata.store import MetadataStore
-from ..parser.factory import ParserFactory
+from academic_parser.factory import ParserFactory
 from ..summarizer.engine import Summarizer
 from ..summarizer.profiler import PersonProfiler
 from ..retrieval.index import SearchIndex
@@ -190,11 +190,11 @@ def index(
         return
 
     store = MetadataStore(cfg.sqlite_path)
-    parser = ParserFactory(cfg.data_dir / "cache")
+    academic_parser = ParserFactory(cfg.data_dir / "cache")
     summarizer = Summarizer(cfg.llm.model, cfg.llm.base_url)
     idx = SearchIndex(str(cfg.qdrant_path), cfg.embeddings.model, store=store)
 
-    crawler = Crawler(cfg, store, parser, summarizer, idx)
+    crawler = Crawler(cfg, store, academic_parser, summarizer, idx)
     crawler.crawl()
 
 @app.command()
@@ -248,11 +248,11 @@ def watch(debug: bool = typer.Option(False, "--debug", "-d", help="Debug-Logging
     from ..crawler.watcher import Watcher
     cfg = get_config()
     store = MetadataStore(cfg.sqlite_path)
-    parser = ParserFactory(cfg.data_dir / "cache")
+    academic_parser = ParserFactory(cfg.data_dir / "cache")
     summarizer = Summarizer(cfg.llm.model, cfg.llm.base_url)
     idx = SearchIndex(str(cfg.qdrant_path), cfg.embeddings.model, store=store)
 
-    crawler = Crawler(cfg, store, parser, summarizer, idx)
+    crawler = Crawler(cfg, store, academic_parser, summarizer, idx)
     watcher = Watcher(crawler)
     watcher.start()
 

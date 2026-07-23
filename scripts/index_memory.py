@@ -9,7 +9,7 @@ from tqdm import tqdm
 from transformers import AutoTokenizer
 
 from mcp_university.retrieval.index import SearchIndex
-from mcp_university.parser.factory import ParserFactory
+from academic_parser.factory import ParserFactory
 from mcp_university.config import get_config
 from mcp_university.utils.memory import resolve_memory_index_names
 from mcp_university.utils.shortcuts import resolve_path
@@ -136,9 +136,9 @@ def process_memory_folder(index_name: str, base_path: Path, index: SearchIndex, 
 
 def main() -> None:
     """Main entry point for memory indexing script."""
-    parser = argparse.ArgumentParser(description="Index memory files into vector databases.")
-    parser.add_argument("--config", type=str, default="config/classifier_memory_paths.yaml", help="Path to the memory paths yaml.")
-    args = parser.parse_args()
+    academic_parser = argparse.ArgumentParser(description="Index memory files into vector databases.")
+    academic_parser.add_argument("--config", type=str, default="config/classifier_memory_paths.yaml", help="Path to the memory paths yaml.")
+    args = academic_parser.parse_args()
 
     config_path = Path(args.config)
     if not config_path.exists():

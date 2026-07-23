@@ -149,10 +149,10 @@ Draft Reply:
         Returns:
             str: Analyse der Unterschiede und Verbesserungen.
         """
-        from ..parser.factory import ParserFactory
-        parser = ParserFactory(cfg.data_dir / "cache")
-        c1 = parser.parse(Path(path1))
-        c2 = parser.parse(Path(path2))
+        from academic_parser.factory import ParserFactory
+        academic_parser = ParserFactory(cfg.data_dir / "cache")
+        c1 = academic_parser.parse(Path(path1))
+        c2 = academic_parser.parse(Path(path2))
 
         if not c1 or not c2:
             return "Could not read one of the files for comparison."

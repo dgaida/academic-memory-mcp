@@ -8,7 +8,7 @@ import email
 from email import policy
 from email.utils import parsedate_to_datetime, getaddresses
 from datetime import datetime
-from ..config import get_config
+from mcp_university.config import get_config
 logging.getLogger("extract_msg").setLevel(logging.ERROR)
 
 logger = logging.getLogger(__name__)
@@ -213,14 +213,14 @@ class MailParser:
                     content += "\n\nAnhänge:\n" + "\n".join(attachment_names)
                 return content
         except ImportError:
-            logger.warning("extract-msg not installed. Falling back to basic email parser for .msg file.")
+            logger.warning("extract-msg not installed. Falling back to basic email academic_parser for .msg file.")
             return self._parse_eml(file_path)
         except (StandardViolationError, Exception) as e:
             if "StandardViolationError" in str(type(e)):
-                logger.warning(f"Likely signed/encrypted .msg file detected (StandardViolationError) {file_path}: {e}. Falling back to basic parser.")
+                logger.warning(f"Likely signed/encrypted .msg file detected (StandardViolationError) {file_path}: {e}. Falling back to basic academic_parser.")
             else:
                 logger.error(f"Error parsing .msg mail {file_path}: {e}")
-            # Try fallback to standard email parser as a last resort
+            # Try fallback to standard email academic_parser as a last resort
             return self._parse_eml(file_path)
 
     def _parse_eml(self, file_path: Path) -> Optional[str]:
@@ -309,7 +309,7 @@ class MailParser:
             try:
                 msg_obj = extract_msg.openMsg(str(file_path))
             except (StandardViolationError, Exception) as e:
-                logger.warning(f"Could not open .msg file {file_path} with extract_msg: {e}. Falling back to basic parser.")
+                logger.warning(f"Could not open .msg file {file_path} with extract_msg: {e}. Falling back to basic academic_parser.")
                 return self._get_eml_details(file_path)
 
             with msg_obj as msg:
@@ -381,7 +381,7 @@ class MailParser:
                 }
         except (StandardViolationError, Exception) as e:
             if "StandardViolationError" in str(type(e)):
-                logger.warning(f"Likely signed/encrypted .msg file detected (StandardViolationError) {file_path}: {e}. Falling back to basic parser.")
+                logger.warning(f"Likely signed/encrypted .msg file detected (StandardViolationError) {file_path}: {e}. Falling back to basic academic_parser.")
             else:
                 logger.error(f"Error getting .msg details {file_path}: {e}")
             return self._get_eml_details(file_path)

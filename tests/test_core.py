@@ -1,7 +1,7 @@
 """Tests for test_core.py."""
 from mcp_university.config import Config
 from mcp_university.metadata.store import MetadataStore
-from mcp_university.parser.factory import ParserFactory
+from academic_parser.factory import ParserFactory
 
 def test_config_loading(tmp_path):
     """Test function docstring."""

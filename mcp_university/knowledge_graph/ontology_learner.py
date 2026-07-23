@@ -4,7 +4,7 @@ import re
 from pathlib import Path
 from typing import Dict, Set
 from mcp_university.metadata.store import MetadataStore
-from mcp_university.parser.mail_parser import MailParser
+from academic_parser.mail_parser import MailParser
 from mcp_university.summarizer.engine import Summarizer
 
 logger = logging.getLogger(__name__)
