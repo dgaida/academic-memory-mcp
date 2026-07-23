@@ -334,7 +334,7 @@ Private Function SanitizeFileName(ByVal name As String) As String
     Dim result As String
     Dim i As Long
 
-    invalidChars = "\/:*?\"\"<>|"
+    invalidChars = "\/:*?""<>|"
     result = name
     For i = 1 To Len(invalidChars)
         result = Join(Split(result, Mid(invalidChars, i, 1)), "_")
