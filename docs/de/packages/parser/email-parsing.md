@@ -33,7 +33,7 @@ Das System folgt einer strengen Hierarchie, um den Nachnamen eines Absenders ode
 
 ## Implementierung
 
-Die Logik ist in `mcp_university/classifier/sort_emails.py` in der Funktion `extract_lastname` implementiert.
+Die Logik ist in `packages/email_classifier/src/email_classifier/scripts/sort_emails.py` in der Funktion `extract_lastname` implementiert.
 
 ```python
 def extract_lastname(sender_raw: str) -> str:

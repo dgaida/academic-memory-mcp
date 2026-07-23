@@ -33,7 +33,7 @@ The system follows a strict hierarchy to determine the surname of a sender or re
 
 ## Implementation
 
-The logic is implemented in `mcp_university/classifier/sort_emails.py` in the function `extract_lastname`.
+The logic is implemented in `packages/email_classifier/src/email_classifier/scripts/sort_emails.py` in the function `extract_lastname`.
 
 ```python
 def extract_lastname(sender_raw: str) -> str:
