@@ -143,6 +143,24 @@ def main() -> None:
             logger.warning(f"Bestehendes Modell konnte nicht geladen werden: {e}")
 
     try:
+        # Überprüfen, ob das geladene Modell mit dem angegebenen Embedding-Modell kompatibel ist
+        if classifier.is_trained:
+            if classifier.embedding_model_name != args.embedding_model:
+                logger.info(
+                    f"Embedding-Modell hat sich geändert von '{classifier.embedding_model_name}' "
+                    f"zu '{args.embedding_model}'. Trainiere neues Modell."
+                )
+                classifier.is_trained = False
+                classifier.embedding_model_name = args.embedding_model
+                if args.method == "transformer":
+                    classifier.classifier = None
+                    from transformers import AutoTokenizer
+                    import os
+                    classifier.tokenizer = AutoTokenizer.from_pretrained(
+                        args.embedding_model,
+                        token=os.environ.get("HF_TOKEN")
+                    )
+
         # Daten laden
         texts, labels = classifier.preprocess_data(data_path)
         if not texts:
@@ -195,6 +213,12 @@ def main() -> None:
                     num_classes,
                     token=os.environ.get("HF_TOKEN")
                 ).to(device)
+                classifier.embedding_model_name = args.embedding_model
+                from transformers import AutoTokenizer
+                classifier.tokenizer = AutoTokenizer.from_pretrained(
+                    args.embedding_model,
+                    token=os.environ.get("HF_TOKEN")
+                )
 
             # Tokenisierung Training
             logger.info(f"Tokenisiere {len(texts_train)} Texte für das Training...")
