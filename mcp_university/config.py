@@ -1,5 +1,12 @@
 """Modul für die Konfiguration des MCP University Systems."""
 import os
+
+# Configure Hugging Face Hub settings to prevent hangs and timeouts
+if "HF_HUB_DISABLE_XET" not in os.environ:
+    os.environ["HF_HUB_DISABLE_XET"] = "1"
+if "HF_HUB_DOWNLOAD_TIMEOUT" not in os.environ:
+    os.environ["HF_HUB_DOWNLOAD_TIMEOUT"] = "30"
+
 from pathlib import Path
 from dotenv import load_dotenv
 from typing import List, Dict, Any, Type, TypeVar, Union
