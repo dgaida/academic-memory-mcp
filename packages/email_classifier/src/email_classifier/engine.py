@@ -63,6 +63,12 @@ class EmailClassifier:
             embedding_model_name: Name des Sentence-Transformer Modell.
         """
         import os
+        # Ensure Hugging Face Hub settings are set to prevent hanging downloads
+        if "HF_HUB_DISABLE_XET" not in os.environ:
+            os.environ["HF_HUB_DISABLE_XET"] = "1"
+        if "HF_HUB_DOWNLOAD_TIMEOUT" not in os.environ:
+            os.environ["HF_HUB_DOWNLOAD_TIMEOUT"] = "30"
+
         get_config()  # Sicherstellen, dass .env/.secrets geladen sind
 
         self.mode = mode
