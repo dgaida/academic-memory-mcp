@@ -64,3 +64,46 @@ def test_transformer_input_no_anonymization(transformer_classifier, tmp_path):
         # It must preserve "Sibel Sözer", not replace it with "Max Mustermann"
         assert "Sibel Sözer" in formatted
         assert "Max Mustermann" not in formatted
+
+
+def test_load_mismatch_auto_correction(tmp_path):
+    """Test that size mismatch between state_dict weights and model_name is auto-corrected on load."""
+    model_file = tmp_path / "test_model.pkl"
+
+    # Mock data to load
+    mock_data = {
+        "mode": "combined",
+        "method": "transformer",
+        "embedding_model_name": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+        "tfidf_vectorizer": MagicMock(),
+        "label_encoder": MagicMock(),
+        "is_trained": True,
+        "classifier": {
+            "config": {
+                "model_name": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+                "num_classes": 2
+            },
+            "state_dict": {
+                # Word embeddings weight has shape representing mpnet-base (768)
+                "transformer.embeddings.word_embeddings.weight": MagicMock(shape=(250002, 768))
+            }
+        }
+    }
+    mock_data["label_encoder"].classes_ = ["Class1", "Class2"]
+
+    with patch("torch.load", return_value=mock_data), \
+         patch("transformers.AutoModel.from_pretrained") as mock_model, \
+         patch("transformers.AutoTokenizer.from_pretrained") as mock_tok, \
+         patch("email_classifier.engine.EmailTransformerClassifier.load_state_dict") as mock_load_state_dict:
+
+        mock_model.return_value.config.hidden_size = 768
+        mock_tok_inst = MagicMock()
+        type(mock_tok_inst).__name__ = "PreTrainedTokenizerFast"
+        mock_tok.return_value = mock_tok_inst
+
+        classifier = EmailClassifier(method="transformer")
+        classifier.load(model_file)
+
+        # Check that model name was auto-corrected to mpnet-base-v2
+        assert classifier.embedding_model_name == "sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
+        mock_load_state_dict.assert_called_once_with(mock_data["classifier"]["state_dict"])

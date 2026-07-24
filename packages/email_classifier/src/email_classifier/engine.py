@@ -373,15 +373,52 @@ class EmailClassifier:
         if self.method == "transformer":
             c_data = data["classifier"]
             import os
+
+            saved_model_name = c_data["config"].get("model_name", self.embedding_model_name)
+
+            # Robustheitsprüfung: Vergleich der gespeicherten Gewichtsdimension mit dem Modellnamen
+            weight_key = "transformer.embeddings.word_embeddings.weight"
+            if weight_key in c_data["state_dict"]:
+                saved_weight_shape = c_data["state_dict"][weight_key].shape
+                if len(saved_weight_shape) == 2:
+                    saved_hidden_size = saved_weight_shape[1]
+                    # Behebung von Konflikten zwischen mpnet (768) und MiniLM (384)
+                    if saved_hidden_size == 768 and "MiniLM" in saved_model_name:
+                        logger.warning(
+                            f"Modellname in Konfiguration ist '{saved_model_name}' (Größe 384), "
+                            f"aber die Gewichte im State-Dict haben Größe {saved_hidden_size}. "
+                            "Korrigiere Modellnamen automatisch zu 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2'."
+                        )
+                        saved_model_name = "sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
+                    elif saved_hidden_size == 384 and "mpnet" in saved_model_name:
+                        logger.warning(
+                            f"Modellname in Konfiguration ist '{saved_model_name}' (Größe 768), "
+                            f"aber die Gewichte im State-Dict haben Größe {saved_hidden_size}. "
+                            "Korrigiere Modellnamen automatisch zu 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'."
+                        )
+                        saved_model_name = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+
             self.classifier = EmailTransformerClassifier(
-                c_data["config"]["model_name"],
+                saved_model_name,
                 c_data["config"]["num_classes"],
                 token=os.environ.get("HF_TOKEN")
             )
-            self.classifier.load_state_dict(c_data["state_dict"])
+
+            try:
+                self.classifier.load_state_dict(c_data["state_dict"])
+            except RuntimeError as e:
+                logger.error(
+                    f"Fehler beim Laden des State-Dicts für das Transformer-Modell: {e}\n"
+                    "Dies deutet auf einen irreparablen Größenkonflikt (Size Mismatch) hin. "
+                    "Bitte löschen oder benennen Sie die Modelldatei unter 'data/email_classifier_transformer.pkl' um, "
+                    "und führen Sie das Training erneut aus, um ein konsistentes Modell zu erstellen."
+                )
+                raise e
+
             self.classifier.to(get_device())
+            self.embedding_model_name = saved_model_name
             self.tokenizer = AutoTokenizer.from_pretrained(
-                self.embedding_model_name,
+                saved_model_name,
                 token=os.environ.get("HF_TOKEN")
             )
         else:
