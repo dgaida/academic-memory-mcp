@@ -282,4 +282,7 @@ with gr.Blocks(title="Email Search Quick") as demo:
     )
 
 if __name__ == "__main__":
+    # Initialisiere die Such-Engine beim Start der GUI, damit der Cache direkt geladen/aktualisiert wird
+    logger.info("Starte Email-Such-GUI, initialisiere EmailSearchEngine im Hintergrund...")
+    GUITools.engine()
     demo.launch(inbrowser=True)
