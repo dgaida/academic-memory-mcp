@@ -36,16 +36,16 @@ def run_okf_pipeline(config: OKFConfig) -> None:
                 knowledge = extract_knowledge(markdown, md_file.name, spec, config)
 
                 for concept in knowledge.get("concepts", []):
-                    write_concept(concept, md_file.name, config.concept_dir, generated_by=generated_by)
+                    write_concept(concept, md_file.name, config.concept_dir, generated_by=generated_by, config=config)
 
                 for entity in knowledge.get("entities", []):
-                    write_entity(entity, md_file.name, config.entity_dir, generated_by=generated_by)
+                    write_entity(entity, md_file.name, config.entity_dir, generated_by=generated_by, config=config)
 
                 for definition in knowledge.get("definitions", []):
-                    write_definition(definition, md_file.name, config.definition_dir, generated_by=generated_by)
+                    write_definition(definition, md_file.name, config.definition_dir, generated_by=generated_by, config=config)
 
                 for table in knowledge.get("tables", []):
-                    write_table(table, md_file.name, config.table_dir, generated_by=generated_by)
+                    write_table(table, md_file.name, config.table_dir, generated_by=generated_by, config=config)
 
             except Exception as e:
                 print(f"ERROR processing knowledge from {md_file.name}: {e}")

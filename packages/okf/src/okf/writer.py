@@ -1,6 +1,7 @@
 import re
 from pathlib import Path
 from datetime import datetime, timezone
+from typing import Optional, Dict, Any
 import frontmatter
 
 def sanitize_filename(name: str) -> str:
@@ -23,6 +24,155 @@ def sanitize_filename(name: str) -> str:
     if not filename.endswith(".md"):
         filename += ".md"
     return filename
+
+def find_duplicate_file(
+    directory: Path,
+    item: Dict[str, Any],
+    item_type: str,
+    config: Optional[Any] = None
+) -> Optional[Path]:
+    """Find a duplicate file in the given directory.
+
+    Checks for duplicate files using three stages of similarity:
+    1. Exact filename match based on the sanitized item name.
+    2. Case-insensitive and whitespace-normalized name/term/title match against all existing files.
+    3. LLM-based duplicate or alias detection using the provided OKFConfig client.
+
+    Args:
+        directory: The directory path where the files are stored.
+        item: The dictionary representing the item (concept, entity, definition, table).
+        item_type: The string type of the item ('Concept', 'Entity', 'Definition', 'Table').
+        config: The optional OKFConfig configuration instance.
+
+    Returns:
+        The Path to the duplicate file if found, otherwise None.
+    """
+    if not directory.exists():
+        return None
+
+    # Determine names/titles and descriptions based on item type
+    new_name = ""
+    new_description = ""
+    if item_type == "Concept":
+        new_name = item.get("name", "")
+        new_description = item.get("description", "")
+    elif item_type == "Entity":
+        new_name = item.get("name", "")
+        new_description = item.get("description", "")
+    elif item_type == "Definition":
+        new_name = item.get("term", "")
+        new_description = item.get("definition", "")
+    elif item_type == "Table":
+        new_name = item.get("title", "")
+        new_description = item.get("description", "")
+
+    if not new_name:
+        return None
+
+    # Stage 1: Exact sanitized filename match
+    sanitized_filename_str = sanitize_filename(new_name)
+    exact_match_path = directory / sanitized_filename_str
+    if exact_match_path.exists():
+        return exact_match_path
+
+    # Stage 2: Normalized title match
+    def normalize_string_for_comparison(input_string: str) -> str:
+        """Normalize a string by lowercasing, stripping, and removing non-alphanumeric characters."""
+        input_string = input_string.lower().strip()
+        input_string = re.sub(r"[^a-z0-9]", "", input_string)
+        return input_string
+
+    normalized_new_name = normalize_string_for_comparison(new_name)
+
+    existing_markdown_files = list(directory.glob("*.md"))
+    loaded_existing_files = []
+
+    for file_path in existing_markdown_files:
+        try:
+            post = frontmatter.load(file_path)
+            existing_type = post.metadata.get("type", "")
+            existing_title = ""
+            existing_description = ""
+
+            if existing_type == "Concept":
+                existing_title = post.metadata.get("title", "")
+                existing_description = post.metadata.get("description", "")
+            elif existing_type == "Entity":
+                existing_title = post.metadata.get("title", "")
+                existing_description = post.metadata.get("description", "")
+            elif existing_type == "Definition":
+                existing_title = post.metadata.get("term", "")
+                existing_description = post.content
+            elif existing_type == "Table":
+                existing_title = post.metadata.get("title", "")
+                existing_description = post.metadata.get("description", "")
+            else:
+                existing_title = post.metadata.get("title", file_path.stem)
+                existing_description = post.metadata.get("description", "")
+
+            # Store loaded file information for possible LLM stage
+            loaded_existing_files.append({
+                "path": file_path,
+                "title": existing_title,
+                "description": existing_description,
+                "filename": file_path.name
+            })
+
+            if existing_title and normalize_string_for_comparison(existing_title) == normalized_new_name:
+                print(f"Normalized match found: '{new_name}' matches existing file '{file_path.name}' with title '{existing_title}'")
+                return file_path
+
+        except Exception as exception_error:
+            print(f"Error loading {file_path} for duplicate check: {exception_error}")
+
+    # Stage 3: LLM-based duplicate / alias check
+    if config and getattr(config, "client", None) and loaded_existing_files:
+        try:
+            system_prompt = (
+                "You are an expert Knowledge Graph deduplication assistant.\n"
+                "Your task is to determine if a newly extracted artifact is a duplicate or near-duplicate of an existing artifact in the database, even if it has a different name, alias, translation, plural/singular variation, or slight wording difference.\n"
+                "Return ONLY the exact filename of the matching existing artifact, or return 'None' if there is no duplicate."
+            )
+
+            # Format the list of existing artifacts
+            existing_artifacts_text = ""
+            for loaded_file in loaded_existing_files:
+                existing_artifacts_text += (
+                    f"- Filename: {loaded_file['filename']}\n"
+                    f"  Title/Name: {loaded_file['title']}\n"
+                    f"  Description: {loaded_file['description']}\n\n"
+                )
+
+            user_prompt = (
+                f"New Artifact:\n"
+                f"- Type: {item_type}\n"
+                f"- Name/Title: {new_name}\n"
+                f"- Description: {new_description}\n\n"
+                f"Existing Artifacts in Database:\n"
+                f"{existing_artifacts_text}"
+                f"Determine if the new artifact refers to the same concept, entity, table, or definition as one of the existing artifacts. "
+                f"Even if they have different names (e.g. 'TH Köln' vs 'Technische Hochschule Köln', 'Prüfungsordnung' vs 'Modulprüfungsordnung', 'Daniel Gaida' vs 'Prof. Dr. Daniel Gaida', singular/plural variations, synonyms, or English/German translations), if they refer to the same thing, they are duplicates.\n\n"
+                f"Return ONLY the filename of the duplicate from the list (e.g. 'th-k-ln.md'), or 'None' if it is a new/different artifact. Do not write any other explanation, markdown formatting, or preamble."
+            )
+
+            messages = [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ]
+
+            llm_response = config.client.chat_completion(messages)
+            cleaned_llm_response = llm_response.strip().replace("`", "").strip()
+
+            if cleaned_llm_response and cleaned_llm_response != "None":
+                # Verify that cleaned_llm_response is actually one of the filenames
+                for loaded_file in loaded_existing_files:
+                    if loaded_file["filename"] == cleaned_llm_response:
+                        print(f"LLM duplicate check matched: '{new_name}' -> '{loaded_file['title']}' ({loaded_file['filename']})")
+                        return loaded_file["path"]
+        except Exception as exception_error:
+            print(f"Error during LLM duplicate check: {exception_error}")
+
+    return None
 
 def write_okf_markdown(path: Path, frontmatter_data: dict, body: str) -> None:
     """Write an OKF markdown artifact with YAML frontmatter.
@@ -80,7 +230,7 @@ def write_okf_markdown(path: Path, frontmatter_data: dict, body: str) -> None:
     post = frontmatter.Post(body, **frontmatter_data)
     path.write_text(frontmatter.dumps(post), encoding="utf-8")
 
-def write_concept(concept: dict, source_file: str, concept_dir: Path, generated_by: str = None) -> None:
+def write_concept(concept: Dict[str, Any], source_file: str, concept_dir: Path, generated_by: Optional[str] = None, config: Optional[Any] = None) -> None:
     """Write an OKF concept file.
 
     Args:
@@ -88,9 +238,17 @@ def write_concept(concept: dict, source_file: str, concept_dir: Path, generated_
         source_file: The source file name.
         concept_dir: Concept output directory.
         generated_by: The generator agent string.
+        config: The optional OKFConfig configuration instance.
     """
     filename = sanitize_filename(concept["name"])
-    path = concept_dir / filename
+
+    # Check for duplicates or near-duplicates
+    duplicate_path = find_duplicate_file(concept_dir, concept, "Concept", config)
+    if duplicate_path:
+        path = duplicate_path
+    else:
+        path = concept_dir / filename
+
     source_id = Path(source_file).stem
 
     metadata = {
@@ -121,7 +279,7 @@ def write_concept(concept: dict, source_file: str, concept_dir: Path, generated_
 
     write_okf_markdown(path, metadata, body)
 
-def write_entity(entity: dict, source_file: str, entity_dir: Path, generated_by: str = None) -> None:
+def write_entity(entity: Dict[str, Any], source_file: str, entity_dir: Path, generated_by: Optional[str] = None, config: Optional[Any] = None) -> None:
     """Write an OKF entity file.
 
     Args:
@@ -129,9 +287,17 @@ def write_entity(entity: dict, source_file: str, entity_dir: Path, generated_by:
         source_file: The source file name.
         entity_dir: Entity output directory.
         generated_by: The generator agent string.
+        config: The optional OKFConfig configuration instance.
     """
     filename = sanitize_filename(entity["name"])
-    path = entity_dir / filename
+
+    # Check for duplicates or near-duplicates
+    duplicate_path = find_duplicate_file(entity_dir, entity, "Entity", config)
+    if duplicate_path:
+        path = duplicate_path
+    else:
+        path = entity_dir / filename
+
     source_id = Path(source_file).stem
 
     metadata = {
@@ -156,7 +322,7 @@ def write_entity(entity: dict, source_file: str, entity_dir: Path, generated_by:
 
     write_okf_markdown(path, metadata, body)
 
-def write_definition(definition: dict, source_file: str, definition_dir: Path, generated_by: str = None) -> None:
+def write_definition(definition: Dict[str, Any], source_file: str, definition_dir: Path, generated_by: Optional[str] = None, config: Optional[Any] = None) -> None:
     """Write an OKF definition file.
 
     Args:
@@ -164,9 +330,17 @@ def write_definition(definition: dict, source_file: str, definition_dir: Path, g
         source_file: The source file name.
         definition_dir: Definition output directory.
         generated_by: The generator agent string.
+        config: The optional OKFConfig configuration instance.
     """
     filename = sanitize_filename(definition["term"])
-    path = definition_dir / filename
+
+    # Check for duplicates or near-duplicates
+    duplicate_path = find_duplicate_file(definition_dir, definition, "Definition", config)
+    if duplicate_path:
+        path = duplicate_path
+    else:
+        path = definition_dir / filename
+
     source_id = Path(source_file).stem
 
     metadata = {
@@ -195,7 +369,7 @@ def write_definition(definition: dict, source_file: str, definition_dir: Path, g
 
     write_okf_markdown(path, metadata, body)
 
-def write_table(table: dict, source_file: str, table_dir: Path, generated_by: str = None) -> None:
+def write_table(table: Dict[str, Any], source_file: str, table_dir: Path, generated_by: Optional[str] = None, config: Optional[Any] = None) -> None:
     """Write an OKF table file.
 
     Args:
@@ -203,9 +377,17 @@ def write_table(table: dict, source_file: str, table_dir: Path, generated_by: st
         source_file: The source file name.
         table_dir: Table output directory.
         generated_by: The generator agent string.
+        config: The optional OKFConfig configuration instance.
     """
     filename = sanitize_filename(table["title"])
-    path = table_dir / filename
+
+    # Check for duplicates or near-duplicates
+    duplicate_path = find_duplicate_file(table_dir, table, "Table", config)
+    if duplicate_path:
+        path = duplicate_path
+    else:
+        path = table_dir / filename
+
     source_id = Path(source_file).stem
 
     metadata = {
