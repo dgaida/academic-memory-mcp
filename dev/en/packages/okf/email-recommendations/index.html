@@ -2718,55 +2718,55 @@
 <h2 id="core-concepts-of-okf-based-email-replying">Core Concepts of OKF-Based Email Replying<a class="headerlink" href="#core-concepts-of-okf-based-email-replying" title="Permanent link">&para;</a></h2>
 <p>An OKF bundle is not just a collection of static Markdown files. It is a structured, provenance-aware, and highly interconnected knowledge base. When utilizing OKF for email processing and replying, the LLM should follow these primary guidelines:</p>
 <h3 id="1-progressive-disclosure">1. Progressive Disclosure<a class="headerlink" href="#1-progressive-disclosure" title="Permanent link">&para;</a></h3>
-<p>To preserve the LLM's context size and avoid introducing irrelevant noise, the system must apply the principle of <em>Progressive Disclosure</em>:
-- The system navigates the directory structure incrementally using <code>index.md</code> files.
-- Instead of loading the entire OKF knowledge bundle into the prompt at once, the agent first reads the top-level or subdirectory <code>index.md</code> (e.g., in <code>concepts/</code> or <code>tables/</code>) to get an overview of available topics.
-- Only when a specific concept or document is identified as highly relevant is that file read and ingested into the context.</p>
+<p>To preserve the LLM's context size and avoid introducing irrelevant noise, the system must apply the principle of <em>Progressive Disclosure</em>:<br />
+- The system navigates the directory structure incrementally using <code>index.md</code> files.<br />
+- Instead of loading the entire OKF knowledge bundle into the prompt at once, the agent first reads the top-level or subdirectory <code>index.md</code> (e.g., in <code>concepts/</code> or <code>tables/</code>) to get an overview of available topics.<br />
+- Only when a specific concept or document is identified as highly relevant is that file read and ingested into the context.  </p>
 <h3 id="2-concept-centric-rag">2. Concept-Centric RAG<a class="headerlink" href="#2-concept-centric-rag" title="Permanent link">&para;</a></h3>
-<p>In traditional RAG, unstructured text chunks are often loaded, breaking the logical cohesion of the source material. With OKF, RAG becomes <em>concept-centric</em>:
-- Every OKF artifact (concepts, entities, definitions, tables) represents a self-contained unit of knowledge.
-- The LLM should be instructed to search for complete concepts (e.g., <code>/concepts/examination-supervision.md</code>) and ingest them as atomic units.
-- This guarantees that regulations and definitions are always presented in their exact logical context.</p>
+<p>In traditional RAG, unstructured text chunks are often loaded, breaking the logical cohesion of the source material. With OKF, RAG becomes <em>concept-centric</em>:<br />
+- Every OKF artifact (concepts, entities, definitions, tables) represents a self-contained unit of knowledge.<br />
+- The LLM should be instructed to search for complete concepts (e.g., <code>/concepts/examination-supervision.md</code>) and ingest them as atomic units.<br />
+- This guarantees that regulations and definitions are always presented in their exact logical context.  </p>
 <h3 id="3-graph-linking-navigation">3. Graph-Linking Navigation<a class="headerlink" href="#3-graph-linking-navigation" title="Permanent link">&para;</a></h3>
-<p>OKF concepts are linked together using standard Markdown links (e.g., <code>[Examination Regulations](/documents/examination-guidelines.md)</code>). An intelligent email agent should actively traverse these links:
-- When an email triggers a discussion about a specific concept, the agent can follow internal links to retrieve related concepts, definitions, or tables (e.g., navigating from an abstract concept to a concrete module catalog table).
-- This enables multi-hop reasoning to answer complex administrative inquiries accurately.</p>
+<p>OKF concepts are linked together using standard Markdown links (e.g., <code>[Examination Regulations](/documents/examination-guidelines.md)</code>). An intelligent email agent should actively traverse these links:<br />
+- When an email triggers a discussion about a specific concept, the agent can follow internal links to retrieve related concepts, definitions, or tables (e.g., navigating from an abstract concept to a concrete module catalog table).<br />
+- This enables multi-hop reasoning to answer complex administrative inquiries accurately.  </p>
 <h3 id="4-honoring-trust-tiers">4. Honoring Trust Tiers<a class="headerlink" href="#4-honoring-trust-tiers" title="Permanent link">&para;</a></h3>
-<p>When answering sensitive emails (e.g., legal inquiries regarding examination rules), the LLM must inspect the <code>verified</code> field in the OKF frontmatter:
-- <strong>Human-Reviewed:</strong> The highest trust tier. Concepts verified by a <code>human:&lt;id&gt;</code> actor can be treated as absolute truth.
-- <strong>Machine-Confirmed:</strong> Medium trust tier. Verified by automated validation workflows. Use with appropriate care.
-- <strong>Unverified:</strong> Lowest trust tier. Information without a <code>verified</code> key should be handled with caution in the email draft, potentially prompting a disclaimer recommending manual verification.</p>
+<p>When answering sensitive emails (e.g., legal inquiries regarding examination rules), the LLM must inspect the <code>verified</code> field in the OKF frontmatter:<br />
+- <strong>Human-Reviewed:</strong> The highest trust tier. Concepts verified by a <code>human:&lt;id&gt;</code> actor can be treated as absolute truth.<br />
+- <strong>Machine-Confirmed:</strong> Medium trust tier. Verified by automated validation workflows. Use with appropriate care.<br />
+- <strong>Unverified:</strong> Lowest trust tier. Information without a <code>verified</code> key should be handled with caution in the email draft, potentially prompting a disclaimer recommending manual verification.  </p>
 <h3 id="5-checking-freshness-staleness">5. Checking Freshness &amp; Staleness<a class="headerlink" href="#5-checking-freshness-staleness" title="Permanent link">&para;</a></h3>
-<p>An email agent must not distribute outdated information. In OKF, temporal freshness is controlled via two frontmatter fields:
-- <strong><code>stale_after</code>:</strong> The agent must compare the current date with the <code>stale_after</code> field. If the current date is greater than or equal to <code>stale_after</code>, the concept is stale. The agent should refrain from using this knowledge for direct answers or explicitly notify the user that the information might be outdated.
-- <strong><code>status</code>:</strong> If a document has the status <code>deprecated</code> or <code>draft</code>, the agent should adapt its response strategy accordingly (e.g., not citing drafts as final regulatory agreements).</p>
+<p>An email agent must not distribute outdated information. In OKF, temporal freshness is controlled via two frontmatter fields:<br />
+- <strong><code>stale_after</code>:</strong> The agent must compare the current date with the <code>stale_after</code> field. If the current date is greater than or equal to <code>stale_after</code>, the concept is stale. The agent should refrain from using this knowledge for direct answers or explicitly notify the user that the information might be outdated.<br />
+- <strong><code>status</code>:</strong> If a document has the status <code>deprecated</code> or <code>draft</code>, the agent should adapt its response strategy accordingly (e.g., not citing drafts as final regulatory agreements).  </p>
 <h3 id="6-provenance-footnotes">6. Provenance &amp; Footnotes<a class="headerlink" href="#6-provenance-footnotes" title="Permanent link">&para;</a></h3>
-<p>Every administrative claim made in a generated email should be fully backtracked to its source. OKF v0.2 implements a standardized citation scheme using Markdown footnotes:
-- The agent should cite the precise source of knowledge in the generated email draft (e.g., pointing back to <code>/documents/regulations.md</code>).
-- When OKF concepts use footnotes mapped to the <code>sources</code> array in the frontmatter, the LLM should resolve these references and present them as solid evidence (e.g., "According to Section 12 of the Examination Guidelines...").</p>
+<p>Every administrative claim made in a generated email should be fully backtracked to its source. OKF v0.2 implements a standardized citation scheme using Markdown footnotes:<br />
+- The agent should cite the precise source of knowledge in the generated email draft (e.g., pointing back to <code>/documents/regulations.md</code>).<br />
+- When OKF concepts use footnotes mapped to the <code>sources</code> array in the frontmatter, the LLM should resolve these references and present them as solid evidence (e.g., "According to Section 12 of the Examination Guidelines...").  </p>
 <h3 id="7-utilizing-attested-computations">7. Utilizing Attested Computations<a class="headerlink" href="#7-utilizing-attested-computations" title="Permanent link">&para;</a></h3>
-<p>For mathematical or rule-based calculations (e.g., calculating deadlines, GPA thresholds, or ECTS barriers), the LLM should never perform the arithmetic itself ("hallucinate"). Instead, it uses the OKF <code>Attested Computation</code> concept:
-- The agent identifies a concept of type <code>Attested Computation</code> (e.g., calculating medical certificate deadlines).
-- Instead of computing inside the text block, the agent passes the required parameters to the specified <code>executor</code> (e.g., a Python script or database query).
-- The agent extracts the computed value from the <code>receipt</code> and incorporates this mathematically proven value into the email draft. This completely eliminates LLM calculation errors.</p>
+<p>For mathematical or rule-based calculations (e.g., calculating deadlines, GPA thresholds, or ECTS barriers), the LLM should never perform the arithmetic itself ("hallucinate"). Instead, it uses the OKF <code>Attested Computation</code> concept:<br />
+- The agent identifies a concept of type <code>Attested Computation</code> (e.g., calculating medical certificate deadlines).<br />
+- Instead of computing inside the text block, the agent passes the required parameters to the specified <code>executor</code> (e.g., a Python script or database query).<br />
+- The agent extracts the computed value from the <code>receipt</code> and incorporates this mathematically proven value into the email draft. This completely eliminates LLM calculation errors.  </p>
 <hr />
 <h2 id="exemplary-prompt-flow-for-the-email-llm">Exemplary Prompt Flow for the Email LLM<a class="headerlink" href="#exemplary-prompt-flow-for-the-email-llm" title="Permanent link">&para;</a></h2>
 <p>When a new email is received (e.g., <em>"Can I reschedule my exam on August 15th due to illness, and how much time do I have to submit the medical certificate?"</em>), the answering system should direct the LLM as follows:</p>
 <ol>
-<li><strong>Retrieve Phase:</strong></li>
-<li>Search the OKF vector store for keywords like "medical certificate", "exam withdrawal", "illness deadline".</li>
-<li>Find the concept <code>/concepts/exam-withdrawal-illness.md</code>.</li>
-<li><strong>Evaluate Phase:</strong></li>
-<li>Load the concept and inspect the frontmatter:
+<li><strong>Retrieve Phase:</strong>  </li>
+<li>Search the OKF vector store for keywords like "medical certificate", "exam withdrawal", "illness deadline".  </li>
+<li>Find the concept <code>/concepts/exam-withdrawal-illness.md</code>.  </li>
+<li><strong>Evaluate Phase:</strong>  </li>
+<li>Load the concept and inspect the frontmatter:<br />
      <div class="language-yaml highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stable</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nt">stale_after</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2026-12-31</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nt">verified</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> by</span><span class="p">:</span><span class="w"> </span><span class="nv">human</span><span class="p p-Indicator">:</span><span class="nv">professor-gaida</span><span class="p p-Indicator">,</span><span class="nt"> at</span><span class="p">:</span><span class="w"> </span><span class="nv">2026-03-15T09</span><span class="p p-Indicator">:</span><span class="nv">00</span><span class="p p-Indicator">:</span><span class="nv">00Z</span><span class="w"> </span><span class="p p-Indicator">}</span>
 </code></pre></div></li>
-<li><em>Result:</em> The document is stable, not stale, and enjoys the highest trust tier (<code>human-reviewed</code>).</li>
-<li><strong>Execute Phase (Attestation):</strong></li>
-<li>If a deadline calculation is needed, find the linked <code>Attested Computation</code> for certificate deadlines, compute the final submission date based on the exam date (August 15th) via the associated script, and use the exact calculated date.</li>
-<li><strong>Draft Phase:</strong></li>
-<li>Generate the email draft adhering to the defined tone of voice and explicitly citing the source:
+<li><em>Result:</em> The document is stable, not stale, and enjoys the highest trust tier (<code>human-reviewed</code>).  </li>
+<li><strong>Execute Phase (Attestation):</strong>  </li>
+<li>If a deadline calculation is needed, find the linked <code>Attested Computation</code> for certificate deadlines, compute the final submission date based on the exam date (August 15th) via the associated script, and use the exact calculated date.  </li>
+<li><strong>Draft Phase:</strong>  </li>
+<li>Generate the email draft adhering to the defined tone of voice and explicitly citing the source:<br />
      &gt; "... You must submit the medical certificate without delay, and no later than 3 working days after the exam (i.e., by August 18th). [1] ..."
      &gt;
      &gt; <strong>Sources:</strong>

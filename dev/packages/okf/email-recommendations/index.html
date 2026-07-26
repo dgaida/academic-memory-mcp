@@ -2716,55 +2716,55 @@
 <h2 id="kernkonzepte-der-okf-basierten-e-mail-beantwortung">Kernkonzepte der OKF-basierten E-Mail-Beantwortung<a class="headerlink" href="#kernkonzepte-der-okf-basierten-e-mail-beantwortung" title="Permanent link">&para;</a></h2>
 <p>Ein OKF-Bundle ist nicht bloß eine Sammlung statischer Markdown-Dateien. Es ist eine strukturierte, herkunftsgesicherte (provenance-aware) und beziehungsreiche Wissensdatenbank. Bei der Verwendung des OKF für die E-Mail-Beantwortung sollte das LLM folgenden Leitlinien folgen:</p>
 <h3 id="1-progressive-disclosure-schrittweise-offenlegung">1. Progressive Disclosure (Schrittweise Offenlegung)<a class="headerlink" href="#1-progressive-disclosure-schrittweise-offenlegung" title="Permanent link">&para;</a></h3>
-<p>Um die Kontextgröße des LLM zu schonen und irrelevantes Rauschen zu vermeiden, sollte das System das Prinzip der <em>Progressiven Disclosure</em> anwenden:
-- Das System navigiert die Verzeichnisstruktur schrittweise über die <code>index.md</code>-Dateien.
-- Anstatt das gesamte OKF-Wissensbundle in den Prompt zu laden, liest der Agent zunächst die <code>index.md</code> auf der obersten Ebene oder in relevanten Unterordnern (z. B. <code>concepts/</code> oder <code>tables/</code>), um eine Übersicht der verfügbaren Themen zu erhalten.
-- Erst wenn ein konkretes Konzept oder Dokument als relevant identifiziert wurde, wird dieses gezielt geladen.</p>
+<p>Um die Kontextgröße des LLM zu schonen und irrelevantes Rauschen zu vermeiden, sollte das System das Prinzip der <em>Progressiven Disclosure</em> anwenden:<br />
+- Das System navigiert die Verzeichnisstruktur schrittweise über die <code>index.md</code>-Dateien.<br />
+- Anstatt das gesamte OKF-Wissensbundle in den Prompt zu laden, liest der Agent zunächst die <code>index.md</code> auf der obersten Ebene oder in relevanten Unterordnern (z. B. <code>concepts/</code> oder <code>tables/</code>), um eine Übersicht der verfügbaren Themen zu erhalten.<br />
+- Erst wenn ein konkretes Konzept oder Dokument als relevant identifiziert wurde, wird dieses gezielt geladen.  </p>
 <h3 id="2-concept-centric-rag-konzeptzentriertes-retrieval">2. Concept-Centric RAG (Konzeptzentriertes Retrieval)<a class="headerlink" href="#2-concept-centric-rag-konzeptzentriertes-retrieval" title="Permanent link">&para;</a></h3>
-<p>Im traditionellen RAG werden oft unstrukturierte Textabschnitte (Chunks) geladen, die den eigentlichen Kontext zerreißen. Mit OKF wird RAG <em>konzeptzentriert</em>:
-- Jedes OKF-Artefakt (Konzepte, Entitäten, Definitionen, Tabellen) stellt eine in sich geschlossene Wissenseinheit dar.
-- Das LLM sollte ermutigt werden, nach ganzen Konzepten (z. B. <code>/concepts/examination-supervision.md</code>) zu suchen und diese als atomare Einheiten in den Kontext aufzunehmen.
-- Dies stellt sicher, dass Definitionen und Regeln stets im korrekten logischen Zusammenhang präsentiert werden.</p>
+<p>Im traditionellen RAG werden oft unstrukturierte Textabschnitte (Chunks) geladen, die den eigentlichen Kontext zerreißen. Mit OKF wird RAG <em>konzeptzentriert</em>:<br />
+- Jedes OKF-Artefakt (Konzepte, Entitäten, Definitionen, Tabellen) stellt eine in sich geschlossene Wissenseinheit dar.<br />
+- Das LLM sollte ermutigt werden, nach ganzen Konzepten (z. B. <code>/concepts/examination-supervision.md</code>) zu suchen und diese als atomare Einheiten in den Kontext aufzunehmen.<br />
+- Dies stellt sicher, dass Definitionen und Regeln stets im korrekten logischen Zusammenhang präsentiert werden.  </p>
 <h3 id="3-navigation-uber-den-wissensgraphen-graph-linking">3. Navigation über den Wissensgraphen (Graph-Linking)<a class="headerlink" href="#3-navigation-uber-den-wissensgraphen-graph-linking" title="Permanent link">&para;</a></h3>
-<p>OKF-Konzepte sind über standardisierte Markdown-Links miteinander verknüpft (z. B. <code>[Prüfungsordnung](/documents/examination-guidelines.md)</code>). Ein intelligenter E-Mail-Agent sollte diese Links aktiv nutzen:
-- Wenn eine E-Mail Fragen aufwirft, die ein bestimmtes Konzept betreffen, kann der Agent den Links folgen, um verwandte Konzepte, Definitionen oder Tabellen zu laden (z. B. von einem abstrakten Konzept zu einer konkreten Modul-Tabelle).
-- Dies ermöglicht eine mehrstufige (Multi-Hop) Argumentation, um komplexe administrative Fragen präzise zu beantworten.</p>
+<p>OKF-Konzepte sind über standardisierte Markdown-Links miteinander verknüpft (z. B. <code>[Prüfungsordnung](/documents/examination-guidelines.md)</code>). Ein intelligenter E-Mail-Agent sollte diese Links aktiv nutzen:<br />
+- Wenn eine E-Mail Fragen aufwirft, die ein bestimmtes Konzept betreffen, kann der Agent den Links folgen, um verwandte Konzepte, Definitionen oder Tabellen zu laden (z. B. von einem abstrakten Konzept zu einer konkreten Modul-Tabelle).<br />
+- Dies ermöglicht eine mehrstufige (Multi-Hop) Argumentation, um komplexe administrative Fragen präzise zu beantworten.  </p>
 <h3 id="4-berucksichtigung-von-vertrauensstufen-trust-tiers">4. Berücksichtigung von Vertrauensstufen (Trust Tiers)<a class="headerlink" href="#4-berucksichtigung-von-vertrauensstufen-trust-tiers" title="Permanent link">&para;</a></h3>
-<p>Das LLM muss bei der Beantwortung sensibler E-Mails (z. B. rechtliche Auskünfte zu Prüfungsordnungen) das Attribut <code>verified</code> im Frontmatter der OKF-Dateien prüfen:
-- <strong>Human-Reviewed (Menschlich geprüft):</strong> Höchste Vertrauensstufe. Konzepte mit einem <code>human:&lt;id&gt;</code> Verifizierer können direkt als absolute Wahrheit verwendet werden.
-- <strong>Machine-Confirmed (Maschinell bestätigt):</strong> Mittlere Vertrauensstufe. Wurde durch automatisierte Validierungsprozesse verifiziert. Sollte mit angemessener Sorgfalt verwendet werden.
-- <strong>Unverified (Ungeprüft):</strong> Niedrige Vertrauensstufe. Informationen ohne <code>verified</code>-Eintrag sollten im E-Mail-Entwurf vorsichtig formuliert oder mit einem Hinweis versehen werden, dass eine manuelle Prüfung empfohlen wird.</p>
+<p>Das LLM muss bei der Beantwortung sensibler E-Mails (z. B. rechtliche Auskünfte zu Prüfungsordnungen) das Attribut <code>verified</code> im Frontmatter der OKF-Dateien prüfen:<br />
+- <strong>Human-Reviewed (Menschlich geprüft):</strong> Höchste Vertrauensstufe. Konzepte mit einem <code>human:&lt;id&gt;</code> Verifizierer können direkt als absolute Wahrheit verwendet werden.<br />
+- <strong>Machine-Confirmed (Maschinell bestätigt):</strong> Mittlere Vertrauensstufe. Wurde durch automatisierte Validierungsprozesse verifiziert. Sollte mit angemessener Sorgfalt verwendet werden.<br />
+- <strong>Unverified (Ungeprüft):</strong> Niedrige Vertrauensstufe. Informationen ohne <code>verified</code>-Eintrag sollten im E-Mail-Entwurf vorsichtig formuliert oder mit einem Hinweis versehen werden, dass eine manuelle Prüfung empfohlen wird.  </p>
 <h3 id="5-aktualitatsprufung-freshness-staleness">5. Aktualitätsprüfung (Freshness &amp; Staleness)<a class="headerlink" href="#5-aktualitatsprufung-freshness-staleness" title="Permanent link">&para;</a></h3>
-<p>Ein E-Mail-Agent darf keine veralteten Informationen verbreiten. Im OKF wird die Aktualität über zwei Frontmatter-Felder gesteuert:
-- <strong><code>stale_after</code>:</strong> Der Agent muss das aktuelle Datum mit dem Feld <code>stale_after</code> abgleichen. Ist das aktuelle Datum größer oder gleich <code>stale_after</code>, gilt das Konzept als veraltet. Der Agent sollte dieses Wissen nicht mehr aktiv für Antworten nutzen oder den Nutzer explizit darauf hinweisen, dass die Information veraltet sein könnte.
-- <strong><code>status</code>:</strong> Hat ein Dokument den Status <code>deprecated</code> oder <code>draft</code>, sollte der Agent dies bei der Beantwortung berücksichtigen (z. B. Entwürfe nicht als finale Regelungen zitieren).</p>
+<p>Ein E-Mail-Agent darf keine veralteten Informationen verbreiten. Im OKF wird die Aktualität über zwei Frontmatter-Felder gesteuert:<br />
+- <strong><code>stale_after</code>:</strong> Der Agent muss das aktuelle Datum mit dem Feld <code>stale_after</code> abgleichen. Ist das aktuelle Datum größer oder gleich <code>stale_after</code>, gilt das Konzept als veraltet. Der Agent sollte dieses Wissen nicht mehr aktiv für Antworten nutzen oder den Nutzer explizit darauf hinweisen, dass die Information veraltet sein könnte.<br />
+- <strong><code>status</code>:</strong> Hat ein Dokument den Status <code>deprecated</code> oder <code>draft</code>, sollte der Agent dies bei der Beantwortung berücksichtigen (z. B. Entwürfe nicht als finale Regelungen zitieren).  </p>
 <h3 id="6-herkunftsnachweis-zitate-provenance-footnotes">6. Herkunftsnachweis &amp; Zitate (Provenance &amp; Footnotes)<a class="headerlink" href="#6-herkunftsnachweis-zitate-provenance-footnotes" title="Permanent link">&para;</a></h3>
-<p>Jede administrative Aussage in einer generierten E-Mail sollte belegbar sein. OKF v0.2 sieht dafür ein standardisiertes Zitationsschema mittels Markdown-Fußnoten vor:
-- Der Agent sollte in der generierten E-Mail die genaue Quelle des Wissens angeben (z. B. unter Verweis auf das konkrete Dokument <code>/documents/regulations.md</code>).
-- Wenn Konzepte im OKF-Format Fußnoten verwenden, die auf <code>sources</code> im Frontmatter verweisen, sollte das LLM diese präzise auflösen und in der Antwort als Beleg (z. B. „Gemäß § 12 der Prüfungsordnung ...“) anführen.</p>
+<p>Jede administrative Aussage in einer generierten E-Mail sollte belegbar sein. OKF v0.2 sieht dafür ein standardisiertes Zitationsschema mittels Markdown-Fußnoten vor:<br />
+- Der Agent sollte in der generierten E-Mail die genaue Quelle des Wissens angeben (z. B. unter Verweis auf das konkrete Dokument <code>/documents/regulations.md</code>).<br />
+- Wenn Konzepte im OKF-Format Fußnoten verwenden, die auf <code>sources</code> im Frontmatter verweisen, sollte das LLM diese präzise auflösen und in der Antwort als Beleg (z. B. „Gemäß § 12 der Prüfungsordnung ...“) anführen.  </p>
 <h3 id="7-nutzung-von-attested-computations-beglaubigte-berechnungen">7. Nutzung von Attested Computations (Beglaubigte Berechnungen)<a class="headerlink" href="#7-nutzung-von-attested-computations-beglaubigte-berechnungen" title="Permanent link">&para;</a></h3>
-<p>Für mathematische oder regelbasierte Auskünfte (z. B. Berechnung von Fristen, Notenschnitten oder ECTS-Hürden) sollte das LLM niemals selbst rechnen ("halluzinieren"). Stattdessen nutzt es das OKF-Konzept <code>Attested Computation</code>:
-- Der Agent identifiziert ein Konzept vom Typ <code>Attested Computation</code> (z. B. Fristenberechnung für Krankmeldungen).
-- Anstatt die Berechnung im Text selbst durchzuführen, übergibt der Agent die notwendigen Parameter an den definierten <code>executor</code> (z. B. ein Python-Skript oder eine Datenbankabfrage).
-- Der Agent liest das Ergebnis aus dem <code>receipt</code> (Beleg) und bindet diesen mathematisch gesicherten Wert in den E-Mail-Entwurf ein. Dies eliminiert Rechenfehler des Sprachmodells vollständig.</p>
+<p>Für mathematische oder regelbasierte Auskünfte (z. B. Berechnung von Fristen, Notenschnitten oder ECTS-Hürden) sollte das LLM niemals selbst rechnen ("halluzinieren"). Stattdessen nutzt es das OKF-Konzept <code>Attested Computation</code>:<br />
+- Der Agent identifiziert ein Konzept vom Typ <code>Attested Computation</code> (z. B. Fristenberechnung für Krankmeldungen).<br />
+- Anstatt die Berechnung im Text selbst durchzuführen, übergibt der Agent die notwendigen Parameter an den definierten <code>executor</code> (z. B. ein Python-Skript oder eine Datenbankabfrage).<br />
+- Der Agent liest das Ergebnis aus dem <code>receipt</code> (Beleg) und bindet diesen mathematisch gesicherten Wert in den E-Mail-Entwurf ein. Dies eliminiert Rechenfehler des Sprachmodells vollständig.  </p>
 <hr />
 <h2 id="beispielhafter-prompt-ablauf-fur-das-e-mail-llm">Beispielhafter Prompt-Ablauf für das E-Mail-LLM<a class="headerlink" href="#beispielhafter-prompt-ablauf-fur-das-e-mail-llm" title="Permanent link">&para;</a></h2>
 <p>Wenn eine neue E-Mail eingeht (z. B. <em>"Kann ich meine Prüfung am 15. August wegen Krankheit verschieben und wie lange habe ich Zeit, das Attest einzureichen?"</em>), sollte das Beantwortungssystem das LLM wie folgt steuern:</p>
 <ol>
-<li><strong>Suchphase (Retrieve):</strong></li>
-<li>Suche in der OKF-Vektordatenbank nach Begriffen wie "Krankmeldung", "Prüfungsrücktritt", "Attest Frist".</li>
-<li>Finde das Konzept <code>/concepts/exam-withdrawal-illness.md</code>.</li>
-<li><strong>Prüfungsphase (Evaluate):</strong></li>
-<li>Lade das Konzept und analysiere das Frontmatter:
+<li><strong>Suchphase (Retrieve):</strong>  </li>
+<li>Suche in der OKF-Vektordatenbank nach Begriffen wie "Krankmeldung", "Prüfungsrücktritt", "Attest Frist".  </li>
+<li>Finde das Konzept <code>/concepts/exam-withdrawal-illness.md</code>.  </li>
+<li><strong>Prüfungsphase (Evaluate):</strong>  </li>
+<li>Lade das Konzept und analysiere das Frontmatter:<br />
      <div class="language-yaml highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stable</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nt">stale_after</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2026-12-31</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nt">verified</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> by</span><span class="p">:</span><span class="w"> </span><span class="nv">human</span><span class="p p-Indicator">:</span><span class="nv">professor-gaida</span><span class="p p-Indicator">,</span><span class="nt"> at</span><span class="p">:</span><span class="w"> </span><span class="nv">2026-03-15T09</span><span class="p p-Indicator">:</span><span class="nv">00</span><span class="p p-Indicator">:</span><span class="nv">00Z</span><span class="w"> </span><span class="p p-Indicator">}</span>
 </code></pre></div></li>
-<li><em>Ergebnis:</em> Das Dokument ist stabil, nicht veraltet (<code>stale_after</code> liegt in der Zukunft) und besitzt die höchste Vertrauensstufe (<code>human-reviewed</code>).</li>
-<li><strong>Ausführungsphase für Berechnungen (Attest):</strong></li>
-<li>Falls eine Fristenberechnung erforderlich ist, finde die verknüpfte <code>Attested Computation</code> für Attest-Fristen, berechne das Abgabedatum basierend auf dem Prüfungsdatum (15. August) via Skript und verwende das exakte Ergebnis.</li>
-<li><strong>Generierungsphase (Draft):</strong></li>
-<li>Generiere den Antwort-Entwurf unter Einhaltung der Tonalität und verweise explizit auf die Quelle:
+<li><em>Ergebnis:</em> Das Dokument ist stabil, nicht veraltet (<code>stale_after</code> liegt in der Zukunft) und besitzt die höchste Vertrauensstufe (<code>human-reviewed</code>).  </li>
+<li><strong>Ausführungsphase für Berechnungen (Attest):</strong>  </li>
+<li>Falls eine Fristenberechnung erforderlich ist, finde die verknüpfte <code>Attested Computation</code> für Attest-Fristen, berechne das Abgabedatum basierend auf dem Prüfungsdatum (15. August) via Skript und verwende das exakte Ergebnis.  </li>
+<li><strong>Generierungsphase (Draft):</strong>  </li>
+<li>Generiere den Antwort-Entwurf unter Einhaltung der Tonalität und verweise explizit auf die Quelle:<br />
      &gt; "... Sie müssen das ärztliche Attest unverzüglich, spätestens jedoch innerhalb von 3 Werktagen (somit bis zum 18. August), beim Prüfungsamt einreichen. [1] ..."
      &gt;
      &gt; <strong>Quellen:</strong>
