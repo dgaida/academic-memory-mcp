@@ -18,7 +18,7 @@
         <link rel="prev" href="../parser/email-parsing/">
       
       
-        <link rel="next" href="../../development/">
+        <link rel="next" href="email-recommendations/">
       
       
         
@@ -2363,6 +2363,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="1. Installation von google-okf">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#erstelle-ein-leeres-okf-projekt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Erstelle ein leeres OKF-Projekt
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -2407,6 +2424,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="email-recommendations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Empfehlungen für E-Mails
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -2837,6 +2882,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="1. Installation von google-okf">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#erstelle-ein-leeres-okf-projekt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Erstelle ein leeres OKF-Projekt
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -3018,35 +3080,46 @@ Die generierte Datei <code>index.md</code> ist vollständig konform mit der OKF 
 <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>pip<span class="w"> </span>install<span class="w"> </span>google-okf
 </code></pre></div>
 <p><em>(Hinweis: Stellen Sie sicher, dass Sie alle Abhängigkeiten des Projekts mittels <code>pip install -e .</code> oder über die <code>environment.yml</code> installiert haben.)</em></p>
+<h4 id="erstelle-ein-leeres-okf-projekt">Erstelle ein leeres OKF-Projekt<a class="headerlink" href="#erstelle-ein-leeres-okf-projekt" title="Permanent link">&para;</a></h4>
+<p>Um ein neues, leeres OKF-Projekt zu initialisieren, führen Sie den folgenden Befehl aus:</p>
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>google-okf<span class="w"> </span>init<span class="w"> </span>okf
+</code></pre></div>
+<p>Danach sieht der Ordner ungefähr so aus:</p>
+<div class="language-text highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>okf/
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    index.md
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    concepts/
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    documents/
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    tables/
+</code></pre></div>
 <h3 id="2-okf-ordnererstellung-speicherpfade">2. OKF-Ordnererstellung &amp; Speicherpfade<a class="headerlink" href="#2-okf-ordnererstellung-speicherpfade" title="Permanent link">&para;</a></h3>
 <p>Die E-Mail-Klassen nutzen eigene Wissensordner (OKF). Der OKF-Zielordner muss in einem in <code>classifier_memory_paths.yaml</code> (unter <code>config/classifier_memory_paths.yaml</code>) definierten Verzeichnis erstellt werden.</p>
 <p>Mehrere E-Mail-Klassen können sich einen OKF-Ordner teilen, was ebenfalls in dieser Konfigurationsdatei flexibel definiert werden kann. Ein Beispiel für einen solchen Eintrag in der <code>classifier_memory_paths.yaml</code>:</p>
-<div class="language-yaml highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nt">class_paths</span><span class="p">:</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">PAV_PO-Wechsel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;D:/PAV/okf&quot;</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">InformatikProjekt</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;D:/PAV/okf&quot;</span><span class="w"> </span><span class="c1"># Teilt sich denselben OKF-Ordner mit PAV_PO-Wechsel</span>
+<div class="language-yaml highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nt">class_paths</span><span class="p">:</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="nt">PAV_PO-Wechsel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;D:/PAV/okf&quot;</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span><span class="nt">InformatikProjekt</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;D:/PAV/okf&quot;</span><span class="w"> </span><span class="c1"># Teilt sich denselben OKF-Ordner mit PAV_PO-Wechsel</span>
 </code></pre></div>
 <p>Stellen Sie sicher, dass Sie den entsprechenden Zielpfad (z. B. <code>D:/PAV/okf</code>) vor der Pipeline-Ausführung manuell oder skriptgesteuert anlegen.</p>
 <h3 id="3-ablageort-der-original-pdf-dokumente">3. Ablageort der Original-PDF-Dokumente<a class="headerlink" href="#3-ablageort-der-original-pdf-dokumente" title="Permanent link">&para;</a></h3>
 <p>Damit die Pipeline die Quelldokumente einlesen und konvertieren kann, müssen die Original-PDFs an einem bestimmten Ort abgelegt werden:</p>
 <ul>
-<li>Die PDFs müssen in einem <strong>parallelen Ordner</strong> namens <code>Memory</code> auf derselben Ebene wie der OKF-Ordner liegen.</li>
-<li>Wenn der OKF-Pfad beispielsweise <code>D:/PAV/okf</code> ist, müssen die PDFs im Ordner <code>D:/PAV/Memory</code> liegen.</li>
-<li>Innerhalb des <code>Memory</code> Ordners können Sie auch beliebige <strong>Unterordner</strong> anlegen, um Ihre PDF-Sammlung thematisch zu gliedern.</li>
+<li>Die PDFs müssen in einem <strong>parallelen Ordner</strong> namens <code>Memory</code> auf derselben Ebene wie der OKF-Ordner liegen.  </li>
+<li>Wenn der OKF-Pfad beispielsweise <code>D:/PAV/okf</code> ist, müssen die PDFs im Ordner <code>D:/PAV/Memory</code> liegen.  </li>
+<li>Innerhalb des <code>Memory</code> Ordners können Sie auch beliebige <strong>Unterordner</strong> anlegen, um Ihre PDF-Sammlung thematisch zu gliedern.  </li>
 </ul>
 <p>Beispielhafte Verzeichnisstruktur:
-<div class="language-text highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>D:/PAV/
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>├── okf/       &lt;-- Der generierte OKF-Ordner (hier entsteht das Bundle)
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>└── Memory/    &lt;-- Enthält die Original-PDFs
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    ├── PO-Wechsel/
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    │   └── InfosPOWechselHärtefall.pdf
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    └── Sonstiges/
+<div class="language-text highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>D:/PAV/
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>├── okf/       &lt;-- Der generierte OKF-Ordner (hier entsteht das Bundle)
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>└── Memory/    &lt;-- Enthält die Original-PDFs
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    ├── PO-Wechsel/
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    │   └── InfosPOWechselHärtefall.pdf
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    └── Sonstiges/
 </code></pre></div></p>
 <h3 id="4-das-generierungsskript-create_okf_from_memory">4. Das Generierungsskript <code>create_okf_from_memory</code><a class="headerlink" href="#4-das-generierungsskript-create_okf_from_memory" title="Permanent link">&para;</a></h3>
 <p>Um die Konvertierung und LLM-Wissensextraktion anzustoßen, verwenden Sie das bereitgestellte Skript <code>create_okf_from_memory.py</code>.</p>
 <p>Das Skript liest die Quell-PDFs aus dem <code>Memory</code> Ordner, konvertiert sie mittels <code>LiteParse</code>, extrahiert strukturierte Artefakte und schreibt das fertige OKF-Bundle in den konfigurierten OKF-Pfad.</p>
 <p><strong>Ausführung:</strong></p>
 <p>Sie können das Skript direkt über Python aufrufen:</p>
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>python<span class="w"> </span>packages/okf/src/okf/scripts/create_okf_from_memory.py
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>python<span class="w"> </span>packages/okf/src/okf/scripts/create_okf_from_memory.py
 </code></pre></div>
 <p>Das Skript sucht standardmäßig nach dem konfigurierten Pfad, unterstützt aber auch die Steuerung über Umgebungsvariablen wie <code>OKF_DIR</code> und <code>PDF_DIR</code>.</p>
 
@@ -3103,13 +3176,13 @@ Die generierte Datei <code>index.md</code> ist vollständig konform mit der OKF 
         
         
           
-          <a href="../../development/" class="md-footer__link md-footer__link--next" aria-label="Weiter: Übersicht">
+          <a href="email-recommendations/" class="md-footer__link md-footer__link--next" aria-label="Weiter: Empfehlungen für E-Mails">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Weiter
               </span>
               <div class="md-ellipsis">
-                Übersicht
+                Empfehlungen für E-Mails
               </div>
             </div>
             <div class="md-footer__button md-icon">

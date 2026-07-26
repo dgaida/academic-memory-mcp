@@ -141,6 +141,13 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/deven/packages/okf/"/>
     </url>
     <url>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/packages/okf/email-recommendations/</loc>
+        <lastmod>2026-07-26</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/dev/packages/okf/email-recommendations/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/deven/packages/okf/email-recommendations/"/>
+    </url>
+    <url>
         <loc>https://dgaida.github.io/academic-memory-mcp/dev/packages/parser/</loc>
         <lastmod>2026-07-26</lastmod>
         <changefreq>daily</changefreq>
@@ -461,6 +468,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/dev/en/packages/okf/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/devpackages/okf/"/>
+    </url>
+    <url>
+        <loc>https://dgaida.github.io/academic-memory-mcp/dev/en/packages/okf/email-recommendations/</loc>
+        <lastmod>2026-07-26</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://dgaida.github.io/academic-memory-mcp/dev/en/packages/okf/email-recommendations/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://dgaida.github.io/academic-memory-mcp/devpackages/okf/email-recommendations/"/>
     </url>
     <url>
         <loc>https://dgaida.github.io/academic-memory-mcp/dev/en/packages/parser/</loc>
