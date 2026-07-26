@@ -4,6 +4,11 @@ from okf.config import OKFConfig
 from okf.pipeline import run_okf_pipeline
 
 def main():
+    """Main execution entrypoint for generating OKF bundles from PDFs.
+
+    This function sets up configuration directories and invokes the full
+    OKF processing pipeline.
+    """
     # Use environment variables or local fallback to ensure it runs correctly anywhere.
     # We will fallback to "D:/TH_Koeln/PAV/okf" if no other directory is specified to remain backward-compatible,
     # but we will default to "./okf" in the config class or allow overriding it.
@@ -26,7 +31,7 @@ def main():
         secrets_file="config/secrets.env"
     )
 
-    print(f"Running OKF generation pipeline...")
+    print("Running OKF generation pipeline...")
     print(f"OKF directory: {config.okf_dir}")
     print(f"PDF directory: {config.pdf_dir}")
 

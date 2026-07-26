@@ -15,6 +15,7 @@ dependencies = [
     "requests",
     "pyyaml",
     "python-dotenv",
+    "python-frontmatter",
 
     "rank_bm25",
     "sentence-transformers",
