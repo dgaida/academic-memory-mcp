@@ -1,0 +1,18 @@
+[project]
+name = "academic_okf"
+version = "1.0.0"
+description = "Open Knowledge Format (OKF) package for MCP University"
+dependencies = [
+    "python-frontmatter",
+    "python-dotenv",
+    "liteparse",
+]
+requires-python = ">=3.10"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["okf*"]

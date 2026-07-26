@@ -15,6 +15,7 @@ dependencies = [
     "requests",
     "pyyaml",
     "python-dotenv",
+    "python-frontmatter",
 
     "rank_bm25",
     "sentence-transformers",
@@ -48,8 +49,8 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-where = [".", "packages/email_classifier/src", "packages/th_personal_graph/src", "packages/parser/src"]
-include = ["mcp_university*", "email_classifier*", "th_personal_graph*", "academic_parser*"]
+where = [".", "packages/email_classifier/src", "packages/th_personal_graph/src", "packages/parser/src", "packages/okf/src"]
+include = ["mcp_university*", "email_classifier*", "th_personal_graph*", "academic_parser*", "okf*"]
 
 [tool.interrogate]
 ignore-init-method = true
