@@ -1,5 +1,6 @@
 import re
 from pathlib import Path
+from datetime import datetime, timezone
 import frontmatter
 
 def sanitize_filename(name: str) -> str:
@@ -78,8 +79,6 @@ def write_okf_markdown(path: Path, frontmatter_data: dict, body: str) -> None:
 
     post = frontmatter.Post(body, **frontmatter_data)
     path.write_text(frontmatter.dumps(post), encoding="utf-8")
-
-from datetime import datetime, timezone
 
 def write_concept(concept: dict, source_file: str, concept_dir: Path, generated_by: str = None) -> None:
     """Write an OKF concept file.
