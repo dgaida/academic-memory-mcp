@@ -144,3 +144,69 @@ and returns structured JSON containing concepts, entities, definitions, tables, 
 ### Provenance & Spec Alignment (v0.2)
 Every generated artifact references its source document under `sources` using the REQUIRED `resource` attribute with bundle-relative paths (e.g., `/documents/examination-guidelines.md`).
 The generated `index.md` is fully compliant with the OKF v0.2 specification, containing only the permitted `okf_version: "0.2"` in its frontmatter.
+
+---
+
+## Installation, Folder Setup & Scripts
+
+This section explains how to install the required OKF tools, set up the directory structure, and execute the generation script.
+
+### 1. Installing `google-okf`
+
+The `academic_okf` sub-package is built upon Google's Open Knowledge Format (OKF) specification. To install the underlying `google-okf` framework or related packages, use pip.
+
+Run the following command in your terminal or virtual environment:
+
+```bash
+pip install google-okf
+```
+
+*(Note: Ensure you have also installed the project's editable dependencies via `pip install -e .` or using `environment.yml`.)*
+
+### 2. Creating the OKF Folder & Memory Paths
+
+Each email class uses its own knowledge folder (OKF). The target OKF folder must be created inside a directory specified in `classifier_memory_paths.yaml` (located at `config/classifier_memory_paths.yaml`).
+
+Multiple email classes can share a single OKF folder, which is defined in the configuration file. For example, in `classifier_memory_paths.yaml`:
+
+```yaml
+class_paths:
+  PAV_PO-Wechsel: "D:/PAV/okf"
+  InformatikProjekt: "D:/PAV/okf" # Shares the same OKF folder with PAV_PO-Wechsel
+```
+
+Ensure that you create the specified target directory (e.g., `D:/PAV/okf`) before running the pipeline.
+
+### 3. Location of the Original PDF Documents
+
+For the pipeline to parse and convert source files, your original PDFs must be stored in a specific location:
+
+- The original PDF documents must reside in a **parallel folder** named `Memory` situated on the same hierarchy level as the OKF directory.
+- If your OKF folder path is `D:/PAV/okf`, the original PDFs must be placed inside `D:/PAV/Memory`.
+- Within the `Memory` directory, you are allowed to have arbitrary **subfolders** to organize your PDF collections.
+
+Example directory layout:
+```text
+D:/PAV/
+├── okf/       <-- Generated OKF folder (where the bundle is built)
+└── Memory/    <-- Contains the original PDFs
+    ├── PO-Wechsel/
+    │   └── InfosPOWechselHärtefall.pdf
+    └── Misc/
+```
+
+### 4. The `create_okf_from_memory` Script
+
+To trigger the conversion and LLM knowledge extraction process, use the provided `create_okf_from_memory.py` script.
+
+This script scans the PDF documents in the `Memory` folder, processes them through `LiteParse`, extracts structured knowledge artifacts using LLMs, and builds the finalized OKF bundle in the configured OKF path.
+
+**Execution:**
+
+Run the script from the repository root:
+
+```bash
+python packages/okf/src/okf/scripts/create_okf_from_memory.py
+```
+
+The script defaults to looking for configured paths, but you can override its directories using environment variables such as `OKF_DIR` and `PDF_DIR`.

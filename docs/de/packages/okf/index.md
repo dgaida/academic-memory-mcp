@@ -144,3 +144,69 @@ und liefert strukturiertes JSON zurück, das Konzepte, Entitäten, Definitionen,
 ### Provenance & Ausrichtung an der Spezifikation (v0.2)
 Jedes generierte Artefakt verweist unter `sources` mit dem ERFORDERLICHEN Attribut `resource` und einem Bundle-relativen Pfad auf sein Quelldokument (z. B. `/documents/examination-guidelines.md`).
 Die generierte Datei `index.md` ist vollständig konform mit der OKF v0.2-Spezifikation und enthält nur die zulässige Zeile `okf_version: "0.2"` in ihrem Frontmatter.
+
+---
+
+## Installation, Ordnererstellung & Skripte
+
+In diesem Abschnitt wird erklärt, wie man die notwendigen Werkzeuge für OKF installiert, die Ordnerstruktur aufbaut und das Generierungsskript ausführt.
+
+### 1. Installation von `google-okf`
+
+Das `academic_okf` Sub-Package basiert auf der Open Knowledge Format (OKF) Spezifikation von Google. Um das zugrundeliegende Framework `google-okf` oder verwandte Bibliotheken zu installieren, können Sie pip verwenden.
+
+Führen Sie im Stammverzeichnis oder in Ihrer virtuellen Umgebung folgenden Befehl aus:
+
+```bash
+pip install google-okf
+```
+
+*(Hinweis: Stellen Sie sicher, dass Sie alle Abhängigkeiten des Projekts mittels `pip install -e .` oder über die `environment.yml` installiert haben.)*
+
+### 2. OKF-Ordnererstellung & Speicherpfade
+
+Die E-Mail-Klassen nutzen eigene Wissensordner (OKF). Der OKF-Zielordner muss in einem in `classifier_memory_paths.yaml` (unter `config/classifier_memory_paths.yaml`) definierten Verzeichnis erstellt werden.
+
+Mehrere E-Mail-Klassen können sich einen OKF-Ordner teilen, was ebenfalls in dieser Konfigurationsdatei flexibel definiert werden kann. Ein Beispiel für einen solchen Eintrag in der `classifier_memory_paths.yaml`:
+
+```yaml
+class_paths:
+  PAV_PO-Wechsel: "D:/PAV/okf"
+  InformatikProjekt: "D:/PAV/okf" # Teilt sich denselben OKF-Ordner mit PAV_PO-Wechsel
+```
+
+Stellen Sie sicher, dass Sie den entsprechenden Zielpfad (z. B. `D:/PAV/okf`) vor der Pipeline-Ausführung manuell oder skriptgesteuert anlegen.
+
+### 3. Ablageort der Original-PDF-Dokumente
+
+Damit die Pipeline die Quelldokumente einlesen und konvertieren kann, müssen die Original-PDFs an einem bestimmten Ort abgelegt werden:
+
+- Die PDFs müssen in einem **parallelen Ordner** namens `Memory` auf derselben Ebene wie der OKF-Ordner liegen.
+- Wenn der OKF-Pfad beispielsweise `D:/PAV/okf` ist, müssen die PDFs im Ordner `D:/PAV/Memory` liegen.
+- Innerhalb des `Memory` Ordners können Sie auch beliebige **Unterordner** anlegen, um Ihre PDF-Sammlung thematisch zu gliedern.
+
+Beispielhafte Verzeichnisstruktur:
+```text
+D:/PAV/
+├── okf/       <-- Der generierte OKF-Ordner (hier entsteht das Bundle)
+└── Memory/    <-- Enthält die Original-PDFs
+    ├── PO-Wechsel/
+    │   └── InfosPOWechselHärtefall.pdf
+    └── Sonstiges/
+```
+
+### 4. Das Generierungsskript `create_okf_from_memory`
+
+Um die Konvertierung und LLM-Wissensextraktion anzustoßen, verwenden Sie das bereitgestellte Skript `create_okf_from_memory.py`.
+
+Das Skript liest die Quell-PDFs aus dem `Memory` Ordner, konvertiert sie mittels `LiteParse`, extrahiert strukturierte Artefakte und schreibt das fertige OKF-Bundle in den konfigurierten OKF-Pfad.
+
+**Ausführung:**
+
+Sie können das Skript direkt über Python aufrufen:
+
+```bash
+python packages/okf/src/okf/scripts/create_okf_from_memory.py
+```
+
+Das Skript sucht standardmäßig nach dem konfigurierten Pfad, unterstützt aber auch die Steuerung über Umgebungsvariablen wie `OKF_DIR` und `PDF_DIR`.
