@@ -2344,6 +2344,67 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#installation-folder-setup-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation, Folder Setup &amp; Scripts
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation, Folder Setup &amp; Scripts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-installing-google-okf" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Installing google-okf
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-creating-the-okf-folder-memory-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Creating the OKF Folder &amp; Memory Paths
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-location-of-the-original-pdf-documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Location of the Original PDF Documents
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-the-create_okf_from_memory-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. The create_okf_from_memory Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2757,6 +2818,67 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#installation-folder-setup-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation, Folder Setup &amp; Scripts
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation, Folder Setup &amp; Scripts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-installing-google-okf" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Installing google-okf
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-creating-the-okf-folder-memory-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Creating the OKF Folder &amp; Memory Paths
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-location-of-the-original-pdf-documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Location of the Original PDF Documents
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-the-create_okf_from_memory-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. The create_okf_from_memory Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2889,6 +3011,46 @@ These files are the primary sources and provide provenance for all extracted kno
 <h3 id="provenance-spec-alignment-v02">Provenance &amp; Spec Alignment (v0.2)<a class="headerlink" href="#provenance-spec-alignment-v02" title="Permanent link">&para;</a></h3>
 <p>Every generated artifact references its source document under <code>sources</code> using the REQUIRED <code>resource</code> attribute with bundle-relative paths (e.g., <code>/documents/examination-guidelines.md</code>).
 The generated <code>index.md</code> is fully compliant with the OKF v0.2 specification, containing only the permitted <code>okf_version: "0.2"</code> in its frontmatter.</p>
+<hr />
+<h2 id="installation-folder-setup-scripts">Installation, Folder Setup &amp; Scripts<a class="headerlink" href="#installation-folder-setup-scripts" title="Permanent link">&para;</a></h2>
+<p>This section explains how to install the required OKF tools, set up the directory structure, and execute the generation script.</p>
+<h3 id="1-installing-google-okf">1. Installing <code>google-okf</code><a class="headerlink" href="#1-installing-google-okf" title="Permanent link">&para;</a></h3>
+<p>The <code>academic_okf</code> sub-package is built upon Google's Open Knowledge Format (OKF) specification. To install the underlying <code>google-okf</code> framework or related packages, use pip.</p>
+<p>Run the following command in your terminal or virtual environment:</p>
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>pip<span class="w"> </span>install<span class="w"> </span>google-okf
+</code></pre></div>
+<p><em>(Note: Ensure you have also installed the project's editable dependencies via <code>pip install -e .</code> or using <code>environment.yml</code>.)</em></p>
+<h3 id="2-creating-the-okf-folder-memory-paths">2. Creating the OKF Folder &amp; Memory Paths<a class="headerlink" href="#2-creating-the-okf-folder-memory-paths" title="Permanent link">&para;</a></h3>
+<p>Each email class uses its own knowledge folder (OKF). The target OKF folder must be created inside a directory specified in <code>classifier_memory_paths.yaml</code> (located at <code>config/classifier_memory_paths.yaml</code>).</p>
+<p>Multiple email classes can share a single OKF folder, which is defined in the configuration file. For example, in <code>classifier_memory_paths.yaml</code>:</p>
+<div class="language-yaml highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nt">class_paths</span><span class="p">:</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">PAV_PO-Wechsel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;D:/PAV/okf&quot;</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">InformatikProjekt</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;D:/PAV/okf&quot;</span><span class="w"> </span><span class="c1"># Shares the same OKF folder with PAV_PO-Wechsel</span>
+</code></pre></div>
+<p>Ensure that you create the specified target directory (e.g., <code>D:/PAV/okf</code>) before running the pipeline.</p>
+<h3 id="3-location-of-the-original-pdf-documents">3. Location of the Original PDF Documents<a class="headerlink" href="#3-location-of-the-original-pdf-documents" title="Permanent link">&para;</a></h3>
+<p>For the pipeline to parse and convert source files, your original PDFs must be stored in a specific location:</p>
+<ul>
+<li>The original PDF documents must reside in a <strong>parallel folder</strong> named <code>Memory</code> situated on the same hierarchy level as the OKF directory.</li>
+<li>If your OKF folder path is <code>D:/PAV/okf</code>, the original PDFs must be placed inside <code>D:/PAV/Memory</code>.</li>
+<li>Within the <code>Memory</code> directory, you are allowed to have arbitrary <strong>subfolders</strong> to organize your PDF collections.</li>
+</ul>
+<p>Example directory layout:
+<div class="language-text highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>D:/PAV/
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>├── okf/       &lt;-- Generated OKF folder (where the bundle is built)
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>└── Memory/    &lt;-- Contains the original PDFs
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    ├── PO-Wechsel/
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    │   └── InfosPOWechselHärtefall.pdf
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    └── Misc/
+</code></pre></div></p>
+<h3 id="4-the-create_okf_from_memory-script">4. The <code>create_okf_from_memory</code> Script<a class="headerlink" href="#4-the-create_okf_from_memory-script" title="Permanent link">&para;</a></h3>
+<p>To trigger the conversion and LLM knowledge extraction process, use the provided <code>create_okf_from_memory.py</code> script.</p>
+<p>This script scans the PDF documents in the <code>Memory</code> folder, processes them through <code>LiteParse</code>, extracts structured knowledge artifacts using LLMs, and builds the finalized OKF bundle in the configured OKF path.</p>
+<p><strong>Execution:</strong></p>
+<p>Run the script from the repository root:</p>
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>python<span class="w"> </span>packages/okf/src/okf/scripts/create_okf_from_memory.py
+</code></pre></div>
+<p>The script defaults to looking for configured paths, but you can override its directories using environment variables such as <code>OKF_DIR</code> and <code>PDF_DIR</code>.</p>
 
 
 
