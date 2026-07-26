@@ -41,6 +41,24 @@ def parse_pdfs_with_liteparse(pdf_root: Path, document_dir: Path) -> None:
                 ],
                 check=True
             )
+            import frontmatter
+            if md_file.exists():
+                content = md_file.read_text(encoding="utf-8")
+                title = None
+                for line in content.splitlines():
+                    line_stripped = line.strip()
+                    if line_stripped.startswith("#"):
+                        title = line_stripped.lstrip("#").strip()
+                        break
+                if not title:
+                    title = md_file.stem
+
+                metadata = {
+                    "type": "Reference",
+                    "title": title
+                }
+                post = frontmatter.Post(content, **metadata)
+                md_file.write_text(frontmatter.dumps(post), encoding="utf-8")
             print(f"Created: {md_file}")
         except subprocess.CalledProcessError as e:
             print(f"ERROR parsing {pdf_file}: {e}")
