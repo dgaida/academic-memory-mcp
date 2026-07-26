@@ -6,13 +6,13 @@ An Open Knowledge Format (OKF) v0.2 knowledge bundle producer for the MCP Univer
 
 `academic_okf` converts PDF-based document collections into an [Open Knowledge Format (OKF) v0.2](https://github.com/GoogleCloudPlatform/knowledge-catalog/tree/main/okf) knowledge bundle.
 
-The generated OKF bundle contains:
-- `documents/`: original source documents in Markdown (converted via LiteParse)
-- `concepts/`: abstract knowledge units or topics
-- `entities/`: concrete identifiable objects (organizations, persons, courses, etc.)
-- `definitions/`: explicit explanations of terms
-- `tables/`: structured tabular data
-- `index.md`: navigation and statistics index
+The generated OKF bundle contains:  
+- `documents/`: original source documents in Markdown (converted via LiteParse)  
+- `concepts/`: abstract knowledge units or topics  
+- `entities/`: concrete identifiable objects (organizations, persons, courses, etc.)  
+- `definitions/`: explicit explanations of terms  
+- `tables/`: structured tabular data  
+- `index.md`: navigation and statistics index  
 
 ---
 
@@ -26,11 +26,11 @@ pip install -e packages/okf/
 
 ### Dependencies
 
-- Python >= 3.10
-- `python-frontmatter`
-- `python-dotenv`
-- `liteparse`
-- `llm_client` (installed from Git)
+- Python >= 3.10  
+- `python-frontmatter`  
+- `python-dotenv`  
+- `liteparse`  
+- `llm_client` (installed from Git)  
 
 ---
 

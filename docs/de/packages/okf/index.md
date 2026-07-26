@@ -6,12 +6,12 @@ Das Ziel besteht nicht nur darin, Dokumente in Markdown zu konvertieren, sondern
 
 Das generierte OKF-Bundle enthält:
 
-- Originale Quelldokumente
-- Extrahierte Konzepte (Concepts)
-- Extrahierte Entitäten (Entities)
-- Extrahierte Definitionen
-- Extrahierte Tabellen
-- Einen Index zur Navigation
+- Originale Quelldokumente  
+- Extrahierte Konzepte (Concepts)  
+- Extrahierte Entitäten (Entities)  
+- Extrahierte Definitionen  
+- Extrahierte Tabellen  
+- Einen Index zur Navigation  
 
 Die resultierende Wissensdatenbank kann als Grundlage für Retrieval Augmented Generation (RAG), KI-Agenten, semantische Suche, Wissensgraphen und institutionelles Wissensmanagement verwendet werden.
 
@@ -108,10 +108,10 @@ Tabellen enthalten strukturierte Informationen, die aus Dokumenten extrahiert wu
 
 ## Konfiguration
 
-Die Konfiguration wird über die Klasse `OKFConfig` verwaltet. Diese steuert:
-- Pfadkonfigurationen (OKF-Ausgabeverzeichnis, PDF-Quellverzeichnis, Spezifikationsdatei).
-- Laden von Anmeldedaten aus env/secrets.
-- Registrierung und Verwaltung des `LLMClient`.
+Die Konfiguration wird über die Klasse `OKFConfig` verwaltet. Diese steuert:  
+- Pfadkonfigurationen (OKF-Ausgabeverzeichnis, PDF-Quellverzeichnis, Spezifikationsdatei).  
+- Laden von Anmeldedaten aus env/secrets.  
+- Registrierung und Verwaltung des `LLMClient`.  
 
 ### Beispielkonfiguration
 
@@ -134,10 +134,10 @@ run_okf_pipeline(config)
 
 ## LLM-Wissensextraktion
 
-Der Extraktionsprozess nutzt das `llm_client` Package. Das LLM erhält:
-- Die OKF-Spezifikation
-- Das Quell-Markdown-Dokument
-- Extraktions-Anweisungen
+Der Extraktionsprozess nutzt das `llm_client` Package. Das LLM erhält:  
+- Die OKF-Spezifikation  
+- Das Quell-Markdown-Dokument  
+- Extraktions-Anweisungen  
 
 und liefert strukturiertes JSON zurück, das Konzepte, Entitäten, Definitionen, Tabellen und Beziehungen enthält, um das Provenance-Mapping und die strikte Ausrichtung an der OKF v0.2-Spezifikation sicherzustellen.
 

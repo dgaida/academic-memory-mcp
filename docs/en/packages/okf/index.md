@@ -6,12 +6,12 @@ The goal is not only to convert documents into Markdown, but to transform unstru
 
 The generated OKF bundle contains:
 
-- Original source documents
-- Extracted concepts
-- Extracted entities
-- Extracted definitions
-- Extracted tables
-- An index for navigation
+- Original source documents  
+- Extracted concepts  
+- Extracted entities  
+- Extracted definitions  
+- Extracted tables  
+- An index for navigation  
 
 The resulting knowledge base can be used as a foundation for Retrieval Augmented Generation (RAG), AI agents, semantic search, knowledge graphs, and institutional knowledge management.
 
@@ -108,10 +108,10 @@ Tables contain structured information extracted from documents (e.g., module cat
 
 ## Configuration
 
-Configuration is managed via the `OKFConfig` class, which handles:
-- Paths configuration (OKF output directory, source PDF directory, specification file).
-- Loading credentials from env/secrets.
-- Registering and managing the `LLMClient`.
+Configuration is managed via the `OKFConfig` class, which handles:  
+- Paths configuration (OKF output directory, source PDF directory, specification file).  
+- Loading credentials from env/secrets.  
+- Registering and managing the `LLMClient`.  
 
 ### Example Configuration
 
@@ -134,10 +134,10 @@ run_okf_pipeline(config)
 
 ## LLM Knowledge Extraction
 
-The extraction process uses the `llm_client` package. The LLM receives:
-- The OKF specification
-- The source Markdown document
-- Extraction instructions
+The extraction process uses the `llm_client` package. The LLM receives:  
+- The OKF specification  
+- The source Markdown document  
+- Extraction instructions  
 
 and returns structured JSON containing concepts, entities, definitions, tables, and relations, ensuring provenance mapping and strict alignment with the OKF v0.2 specification.
 
