@@ -163,6 +163,24 @@ pip install google-okf
 
 *(Hinweis: Stellen Sie sicher, dass Sie alle Abhängigkeiten des Projekts mittels `pip install -e .` oder über die `environment.yml` installiert haben.)*
 
+#### Erstelle ein leeres OKF-Projekt
+
+Um ein neues, leeres OKF-Projekt zu initialisieren, führen Sie den folgenden Befehl aus:
+
+```bash
+google-okf init okf
+```
+
+Danach sieht der Ordner ungefähr so aus:
+
+```text
+okf/
+    index.md
+    concepts/
+    documents/
+    tables/
+```
+
 ### 2. OKF-Ordnererstellung & Speicherpfade
 
 Die E-Mail-Klassen nutzen eigene Wissensordner (OKF). Der OKF-Zielordner muss in einem in `classifier_memory_paths.yaml` (unter `config/classifier_memory_paths.yaml`) definierten Verzeichnis erstellt werden.
