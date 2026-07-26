@@ -11,20 +11,20 @@ unstructured documents into a structured, provenance-aware knowledge base.
 
 The generated OKF bundle contains:
 
-- original source documents
-- extracted concepts
-- extracted entities
-- extracted definitions
-- extracted tables
-- an index for navigation
+- original source documents  
+- extracted concepts  
+- extracted entities  
+- extracted definitions  
+- extracted tables  
+- an index for navigation  
 
 The resulting knowledge base can be used as a foundation for:
 
-- Retrieval Augmented Generation (RAG)
-- AI agents
-- semantic search
-- knowledge graphs
-- institutional knowledge management
+- Retrieval Augmented Generation (RAG)  
+- AI agents  
+- semantic search  
+- knowledge graphs  
+- institutional knowledge management  
 
 
 ---
@@ -36,10 +36,10 @@ knowledge as a collection of Markdown files with YAML frontmatter.
 
 An OKF knowledge bundle combines:
 
-- human-readable Markdown documents
-- machine-readable metadata
-- explicit relationships between knowledge artifacts
-- provenance information linking generated knowledge back to source documents
+- human-readable Markdown documents  
+- machine-readable metadata  
+- explicit relationships between knowledge artifacts  
+- provenance information linking generated knowledge back to source documents  
 
 
 The official OKF repository and specification are maintained by Google Cloud
@@ -152,10 +152,10 @@ Concepts represent abstract knowledge units.
 
 Examples:
 
-- Examination supervision
-- Machine learning
-- Transformer architecture
-- Competency-based education
+- Examination supervision  
+- Machine learning  
+- Transformer architecture  
+- Competency-based education  
 
 
 Example:
@@ -172,11 +172,11 @@ Entities represent concrete identifiable objects.
 
 Examples:
 
-- organizations
-- persons
-- software systems
-- courses
-- regulations
+- organizations  
+- persons  
+- software systems  
+- courses  
+- regulations  
 
 
 Example:
@@ -193,9 +193,9 @@ Definitions represent explicit explanations of terms extracted from documents.
 
 Examples:
 
-- Module
-- Examination supervision
-- Learning outcome
+- Module  
+- Examination supervision  
+- Learning outcome  
 
 
 Example:
@@ -212,10 +212,10 @@ Tables contain structured information extracted from documents.
 
 Examples:
 
-- module catalogs
-- comparison tables
-- schedules
-- parameter lists
+- module catalogs  
+- comparison tables  
+- schedules  
+- parameter lists  
 
 
 Example:
@@ -230,10 +230,10 @@ tables/module-overview.md
 
 The project requires:
 
-- Python >= 3.12
-- Conda environment (recommended)
-- LiteParse
-- llm_client
+- Python >= 3.12  
+- Conda environment (recommended)  
+- LiteParse  
+- llm_client  
 
 
 Recommended environment:
@@ -323,18 +323,18 @@ python create_okf_from_memory.py
 
 The script performs the following steps:
 
-1. Recursively searches PDF files
-2. Converts PDFs to Markdown using LiteParse
-3. Stores Markdown sources in `documents/`
-4. Sends documents to the LLM extraction pipeline
-5. Generates OKF artifacts:
+1. Recursively searches PDF files  
+2. Converts PDFs to Markdown using LiteParse  
+3. Stores Markdown sources in `documents/`  
+4. Sends documents to the LLM extraction pipeline  
+5. Generates OKF artifacts:  
 
-   - concepts
-   - entities
-   - definitions
-   - tables
+   - concepts  
+   - entities  
+   - definitions  
+   - tables  
 
-6. Creates `index.md`
+6. Creates `index.md`  
 
 ---
 
@@ -368,17 +368,17 @@ response = client.chat_completion(messages)
 
 The LLM receives:
 
-- the OKF specification
-- the source Markdown document
-- extraction instructions
+- the OKF specification  
+- the source Markdown document  
+- extraction instructions  
 
 and returns structured JSON containing:
 
-- concepts
-- entities
-- definitions
-- tables
-- relations
+- concepts  
+- entities  
+- definitions  
+- tables  
+- relations  
 
 ---
 
@@ -402,9 +402,9 @@ original source material.
 
 The generated `index.md` contains:
 
-- links to all knowledge artifacts
-- artifact statistics
-- navigation structure
+- links to all knowledge artifacts  
+- artifact statistics  
+- navigation structure  
 
 
 Example:
@@ -425,21 +425,21 @@ Example:
 
 The current implementation provides:
 
-- PDF ingestion
-- Markdown generation
-- LLM-based knowledge extraction
-- OKF artifact generation
-- index creation
+- PDF ingestion  
+- Markdown generation  
+- LLM-based knowledge extraction  
+- OKF artifact generation  
+- index creation  
 
 
 Planned improvements:
 
-- OKF schema validation
-- duplicate detection
-- entity resolution
-- artifact merging
-- relationship graph generation
-- incremental knowledge updates
+- OKF schema validation  
+- duplicate detection  
+- entity resolution  
+- artifact merging  
+- relationship graph generation  
+- incremental knowledge updates  
 
 
 ---
