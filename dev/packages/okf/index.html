@@ -2777,12 +2777,12 @@
 <p>Das Ziel besteht nicht nur darin, Dokumente in Markdown zu konvertieren, sondern unstrukturierte Dokumente in eine strukturierte, herkunftsbewusste (provenance-aware) Wissensdatenbank zu verwandeln.</p>
 <p>Das generierte OKF-Bundle enth채lt:</p>
 <ul>
-<li>Originale Quelldokumente</li>
-<li>Extrahierte Konzepte (Concepts)</li>
-<li>Extrahierte Entit채ten (Entities)</li>
-<li>Extrahierte Definitionen</li>
-<li>Extrahierte Tabellen</li>
-<li>Einen Index zur Navigation</li>
+<li>Originale Quelldokumente  </li>
+<li>Extrahierte Konzepte (Concepts)  </li>
+<li>Extrahierte Entit채ten (Entities)  </li>
+<li>Extrahierte Definitionen  </li>
+<li>Extrahierte Tabellen  </li>
+<li>Einen Index zur Navigation  </li>
 </ul>
 <p>Die resultierende Wissensdatenbank kann als Grundlage f체r Retrieval Augmented Generation (RAG), KI-Agenten, semantische Suche, Wissensgraphen und institutionelles Wissensmanagement verwendet werden.</p>
 <hr />
@@ -2859,10 +2859,10 @@ Diese Dateien sind die prim채ren Quellen und weisen die Herkunft (Provenance) f�
 <p>Tabellen enthalten strukturierte Informationen, die aus Dokumenten extrahiert wurden (z. B. Modulkataloge, Vergleichstabellen, Zeitpl채ne).</p>
 <hr />
 <h2 id="konfiguration">Konfiguration<a class="headerlink" href="#konfiguration" title="Permanent link">&para;</a></h2>
-<p>Die Konfiguration wird 체ber die Klasse <code>OKFConfig</code> verwaltet. Diese steuert:
-- Pfadkonfigurationen (OKF-Ausgabeverzeichnis, PDF-Quellverzeichnis, Spezifikationsdatei).
-- Laden von Anmeldedaten aus env/secrets.
-- Registrierung und Verwaltung des <code>LLMClient</code>.</p>
+<p>Die Konfiguration wird 체ber die Klasse <code>OKFConfig</code> verwaltet. Diese steuert:<br />
+- Pfadkonfigurationen (OKF-Ausgabeverzeichnis, PDF-Quellverzeichnis, Spezifikationsdatei).<br />
+- Laden von Anmeldedaten aus env/secrets.<br />
+- Registrierung und Verwaltung des <code>LLMClient</code>.  </p>
 <h3 id="beispielkonfiguration">Beispielkonfiguration<a class="headerlink" href="#beispielkonfiguration" title="Permanent link">&para;</a></h3>
 <div class="language-python highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">okf.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">OKFConfig</span>
@@ -2879,10 +2879,10 @@ Diese Dateien sind die prim채ren Quellen und weisen die Herkunft (Provenance) f�
 </code></pre></div>
 <hr />
 <h2 id="llm-wissensextraktion">LLM-Wissensextraktion<a class="headerlink" href="#llm-wissensextraktion" title="Permanent link">&para;</a></h2>
-<p>Der Extraktionsprozess nutzt das <code>llm_client</code> Package. Das LLM erh채lt:
-- Die OKF-Spezifikation
-- Das Quell-Markdown-Dokument
-- Extraktions-Anweisungen</p>
+<p>Der Extraktionsprozess nutzt das <code>llm_client</code> Package. Das LLM erh채lt:<br />
+- Die OKF-Spezifikation<br />
+- Das Quell-Markdown-Dokument<br />
+- Extraktions-Anweisungen  </p>
 <p>und liefert strukturiertes JSON zur체ck, das Konzepte, Entit채ten, Definitionen, Tabellen und Beziehungen enth채lt, um das Provenance-Mapping und die strikte Ausrichtung an der OKF v0.2-Spezifikation sicherzustellen.</p>
 <h3 id="provenance-ausrichtung-an-der-spezifikation-v02">Provenance &amp; Ausrichtung an der Spezifikation (v0.2)<a class="headerlink" href="#provenance-ausrichtung-an-der-spezifikation-v02" title="Permanent link">&para;</a></h3>
 <p>Jedes generierte Artefakt verweist unter <code>sources</code> mit dem ERFORDERLICHEN Attribut <code>resource</code> und einem Bundle-relativen Pfad auf sein Quelldokument (z. B. <code>/documents/examination-guidelines.md</code>).

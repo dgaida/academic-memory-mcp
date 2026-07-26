@@ -2779,12 +2779,12 @@
 <p>The goal is not only to convert documents into Markdown, but to transform unstructured documents into a structured, provenance-aware knowledge base.</p>
 <p>The generated OKF bundle contains:</p>
 <ul>
-<li>Original source documents</li>
-<li>Extracted concepts</li>
-<li>Extracted entities</li>
-<li>Extracted definitions</li>
-<li>Extracted tables</li>
-<li>An index for navigation</li>
+<li>Original source documents  </li>
+<li>Extracted concepts  </li>
+<li>Extracted entities  </li>
+<li>Extracted definitions  </li>
+<li>Extracted tables  </li>
+<li>An index for navigation  </li>
 </ul>
 <p>The resulting knowledge base can be used as a foundation for Retrieval Augmented Generation (RAG), AI agents, semantic search, knowledge graphs, and institutional knowledge management.</p>
 <hr />
@@ -2861,10 +2861,10 @@ These files are the primary sources and provide provenance for all extracted kno
 <p>Tables contain structured information extracted from documents (e.g., module catalogs, comparison tables, schedules).</p>
 <hr />
 <h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
-<p>Configuration is managed via the <code>OKFConfig</code> class, which handles:
-- Paths configuration (OKF output directory, source PDF directory, specification file).
-- Loading credentials from env/secrets.
-- Registering and managing the <code>LLMClient</code>.</p>
+<p>Configuration is managed via the <code>OKFConfig</code> class, which handles:<br />
+- Paths configuration (OKF output directory, source PDF directory, specification file).<br />
+- Loading credentials from env/secrets.<br />
+- Registering and managing the <code>LLMClient</code>.  </p>
 <h3 id="example-configuration">Example Configuration<a class="headerlink" href="#example-configuration" title="Permanent link">&para;</a></h3>
 <div class="language-python highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">okf.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">OKFConfig</span>
@@ -2881,10 +2881,10 @@ These files are the primary sources and provide provenance for all extracted kno
 </code></pre></div>
 <hr />
 <h2 id="llm-knowledge-extraction">LLM Knowledge Extraction<a class="headerlink" href="#llm-knowledge-extraction" title="Permanent link">&para;</a></h2>
-<p>The extraction process uses the <code>llm_client</code> package. The LLM receives:
-- The OKF specification
-- The source Markdown document
-- Extraction instructions</p>
+<p>The extraction process uses the <code>llm_client</code> package. The LLM receives:<br />
+- The OKF specification<br />
+- The source Markdown document<br />
+- Extraction instructions  </p>
 <p>and returns structured JSON containing concepts, entities, definitions, tables, and relations, ensuring provenance mapping and strict alignment with the OKF v0.2 specification.</p>
 <h3 id="provenance-spec-alignment-v02">Provenance &amp; Spec Alignment (v0.2)<a class="headerlink" href="#provenance-spec-alignment-v02" title="Permanent link">&para;</a></h3>
 <p>Every generated artifact references its source document under <code>sources</code> using the REQUIRED <code>resource</code> attribute with bundle-relative paths (e.g., <code>/documents/examination-guidelines.md</code>).
