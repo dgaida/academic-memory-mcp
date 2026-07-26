@@ -149,6 +149,7 @@ nav:
               - E-Mail-Parsing & Namensextraktion: packages/parser/email-parsing.md
           - OKF (Open Knowledge Format):
               - Übersicht: packages/okf/index.md
+              - Empfehlungen für E-Mails: packages/okf/email-recommendations.md
       - Entwicklung:
           - Übersicht: development/index.md
           - Docstring Guide: development/docstring-guide.md
