@@ -597,6 +597,11 @@ Private Function SanitizeFileName(ByVal name As String) As String
     invalidChars = "\/:*?""<>|"
     result = name
 
+    ' Steuerzeichen (ASCII 1-31) entfernen bzw. durch "_" ersetzen
+    For i = 1 To 31
+        result = Replace(result, Chr(i), "_")
+    Next i
+
     For i = 1 To Len(invalidChars)
         result = Join(Split(result, Mid(invalidChars, i, 1)), "_")
     Next i
@@ -765,7 +770,9 @@ End Function
 ''' Returns:
 '''     True wenn die Datei existiert.
 Private Function FileExists(ByVal path As String) As Boolean
-    FileExists = (Len(Dir(path)) > 0)
+    Dim fso As Object
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    FileExists = fso.FileExists(path)
 End Function
 
 

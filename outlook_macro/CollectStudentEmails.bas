@@ -108,10 +108,12 @@ End Sub
 '''     Leeres Dictionary wenn die Datei nicht existiert oder nicht lesbar ist.
 Private Function LoadExistingSmailAddresses(ByVal yamlPath As String) As Object
     Dim dict As Object
+    Dim fso As Object
     Set dict = CreateObject("Scripting.Dictionary")
     dict.CompareMode = 1
+    Set fso = CreateObject("Scripting.FileSystemObject")
 
-    If Len(Dir(yamlPath)) = 0 Then
+    If Not fso.FileExists(yamlPath) Then
         Set LoadExistingSmailAddresses = dict
         Exit Function
     End If
@@ -166,7 +168,9 @@ Private Sub AppendStudentsToYaml(ByVal yamlPath As String, _
     On Error GoTo WriteError
 
     Dim fileExists As Boolean
-    fileExists = (Len(Dir(yamlPath)) > 0)
+    Dim fso As Object
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    fileExists = fso.FileExists(yamlPath)
 
     ' Bestehenden Inhalt einlesen oder Header vorbereiten
     Dim content As String
