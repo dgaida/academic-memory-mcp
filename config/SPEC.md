@@ -25,21 +25,21 @@ and many incompatible conventions are emerging. OKF takes the position
 that knowledge is best represented in commonly accessible, established
 formats that are:
 
-- **Readable** by humans without tooling.
-- **Parseable** by agents without bespoke SDKs.
-- **Diffable** in version control.
-- **Portable** across tools, organizations, and time.
+- **Readable** by humans without tooling.  
+- **Parseable** by agents without bespoke SDKs.  
+- **Diffable** in version control.  
+- **Portable** across tools, organizations, and time.  
 
 Increasingly, a knowledge corpus is not authored once and then read: it
 is **continuously written and maintained by agents**. When most concepts 
 are machine-generated, a consumer needs answers that a plain 
 markdown-plus-frontmatter convention does not make first-class:
 
-1. What was this created from, and how was it verified? (**provenance**)
-2. How much should I trust it? (**trust**)
-3. Is it still true? (**freshness**)
-4. Is it the current version? (**lifecycle**)
-5. Was this number produced the way we said it must be? (**attestation**)
+1. What was this created from, and how was it verified? (**provenance**)  
+2. How much should I trust it? (**trust**)  
+3. Is it still true? (**freshness**)  
+4. Is it the current version? (**lifecycle**)  
+5. Was this number produced the way we said it must be? (**attestation**)  
 
 OKF v0.2 makes provenance, trust, lifecycle, and attestation first-class
 while keeping the format minimally opinionated. The format is minimally 
@@ -49,59 +49,59 @@ is left to the producer.
 
 ### Goals
 
-1. Define a universal format that **producers** (people, agents, export
-   pipelines) can write into.
-2. Inform how **consumers** (agents, UIs, search indexes, deterministic
-   code) should read and traverse it.
-3. Facilitate **exchange** of knowledge across systems and organizations.
-4. Standardize the small set of frontmatter fields that make an
+1. Define a universal format that **producers** (people, agents, export  
+   pipelines) can write into.  
+2. Inform how **consumers** (agents, UIs, search indexes, deterministic  
+   code) should read and traverse it.  
+3. Facilitate **exchange** of knowledge across systems and organizations.  
+4. Standardize the small set of frontmatter fields that make an  
    agent-maintained corpus **trustable**, without prescribing any runtime.
 
 ### Non-goals
 
-- Defining a fixed taxonomy of concept types.
-- Prescribing storage, serving, or query infrastructure.
-- Replacing domain-specific schemas (Avro, Protobuf, OpenAPI, and so on).
-  OKF *references* them; it does not subsume them.
-- Specifying a packaging or invocation standard for the code an executor
+- Defining a fixed taxonomy of concept types.  
+- Prescribing storage, serving, or query infrastructure.  
+- Replacing domain-specific schemas (Avro, Protobuf, OpenAPI, and so on).  
+  OKF *references* them; it does not subsume them.  
+- Specifying a packaging or invocation standard for the code an executor  
   or attester points at. OKF fixes the interface, not the packaging.
 
 ---
 
 ## 2. Terminology
 
-- **Knowledge Bundle** (or **bundle**): A self-contained, hierarchical
-  collection of knowledge documents. The unit of distribution.
-- **Concept**: A single unit of knowledge within a bundle, represented as
+- **Knowledge Bundle** (or **bundle**): A self-contained, hierarchical  
+  collection of knowledge documents. The unit of distribution.  
+- **Concept**: A single unit of knowledge within a bundle, represented as  
   one markdown document. It may describe a tangible asset (a table, an
   API), an abstract idea (a metric, a business process), or anything in
-  between.
-- **Concept ID**: The path of the concept's file within the bundle, with
-  the `.md` suffix removed.
-- **Frontmatter**: A YAML metadata block delimited by `---` at the top of
-  a markdown file.
-- **Body**: Everything in the file after the frontmatter.
-- **Link**: A standard markdown link from one concept to another, used to
-  express relationships beyond the implicit parent/child hierarchy.
-- **Source**: A material a concept derives from, external or internal to
-  the bundle, recorded in the `sources` frontmatter field.
-- **Provenance**: The set of sources a concept derives from.
-- **Credibility signal**: An objective, per-source fact (`author`,
+  between.  
+- **Concept ID**: The path of the concept's file within the bundle, with  
+  the `.md` suffix removed.  
+- **Frontmatter**: A YAML metadata block delimited by `---` at the top of  
+  a markdown file.  
+- **Body**: Everything in the file after the frontmatter.  
+- **Link**: A standard markdown link from one concept to another, used to  
+  express relationships beyond the implicit parent/child hierarchy.  
+- **Source**: A material a concept derives from, external or internal to  
+  the bundle, recorded in the `sources` frontmatter field.  
+- **Provenance**: The set of sources a concept derives from.  
+- **Credibility signal**: An objective, per-source fact (`author`,  
   `usage_count`, `last_modified`) used to infer trust; OKF records the
-  signals, not a verdict (see §5.1).
-- **Actor**: A string identifying who or what performed an action, using
+  signals, not a verdict (see §5.1).  
+- **Actor**: A string identifying who or what performed an action, using  
   the convention `<producer>/<version>` for agents, `human:<id>` for
-  people, and `process:<id>` for automated processes (see §7).
-- **Trust tier**: A level derived from a concept's `verified` field:
-  unverified, machine-confirmed, or human-reviewed (see §5.3).
-- **Attested Computation**: A concept (`type: Attested Computation`)
+  people, and `process:<id>` for automated processes (see §7).  
+- **Trust tier**: A level derived from a concept's `verified` field:  
+  unverified, machine-confirmed, or human-reviewed (see §5.3).  
+- **Attested Computation**: A concept (`type: Attested Computation`)  
   carrying a sanctioned way to compute a value, so a consumer can confirm
-  the value was produced by running it (see §10).
-- **Executor**: Run instructions or code that executes a computation and
-  returns a receipt (see §10.2).
-- **Receipt**: The evidence a run returns, shaped by `executor.receipt`; a
-  runtime artifact, not stored in the bundle (see §10).
-- **Attester**: Deterministic (no-LLM) code that inspects a receipt and
+  the value was produced by running it (see §10).  
+- **Executor**: Run instructions or code that executes a computation and  
+  returns a receipt (see §10.2).  
+- **Receipt**: The evidence a run returns, shaped by `executor.receipt`; a  
+  runtime artifact, not stored in the bundle (see §10).  
+- **Attester**: Deterministic (no-LLM) code that inspects a receipt and  
   returns a verdict (see §10.2).
 
 ---
@@ -126,10 +126,10 @@ path/to/bundle/
 
 A bundle MAY be distributed as:
 
-- A git repository (recommended, since it provides history, attribution,
-  and diffs).
-- A tarball or zip archive of the directory.
-- A subdirectory within a larger repository.
+- A git repository (recommended, since it provides history, attribution,  
+  and diffs).  
+- A tarball or zip archive of the directory.  
+- A subdirectory within a larger repository.  
 
 ### 3.1 Reserved filenames
 
@@ -154,9 +154,9 @@ synthesize one at consumption time by scanning frontmatter.
 
 Every concept is a UTF-8 markdown file with two parts:
 
-1. A **YAML frontmatter block**, delimited by `---` on its own line at the
-   start of the file and a closing `---` on its own line.
-2. A **markdown body**, containing free-form content.
+1. A **YAML frontmatter block**, delimited by `---` on its own line at the  
+   start of the file and a closing `---` on its own line.  
+2. A **markdown body**, containing free-form content.  
 
 ### 4.1 Frontmatter
 
@@ -174,7 +174,7 @@ tags: [<tag>, <tag>, ...]          # Optional
 
 **Required:**
 
-- `type`: A short string identifying the kind of concept. Consumers use it
+- `type`: A short string identifying the kind of concept. Consumers use it  
   for routing, filtering, and presentation. Example values:
   `BigQuery Table`, `BigQuery Dataset`, `API Endpoint`, `Metric`,
   `Playbook`, `Reference`, `Attested Computation`.
@@ -189,14 +189,14 @@ fully conformant (§11).
 
 **Recommended:**
 
-- `title`: Human-readable display name. If omitted, consumers MAY derive a
-  title from the filename.
-- `description`: A single sentence summarizing the concept. Used by
-  `index.md` generators, search snippets, and previews.
-- `resource`: A URI that uniquely identifies the underlying asset the
+- `title`: Human-readable display name. If omitted, consumers MAY derive a  
+  title from the filename.  
+- `description`: A single sentence summarizing the concept. Used by  
+  `index.md` generators, search snippets, and previews.  
+- `resource`: A URI that uniquely identifies the underlying asset the  
   concept describes. Absent for concepts that describe abstract ideas
-  rather than physical resources.
-- `tags`: A YAML list of short strings for cross-cutting categorization.
+  rather than physical resources.  
+- `tags`: A YAML list of short strings for cross-cutting categorization.  
 
 The optional **provenance**, **trust**, and **lifecycle** families (§5) and
 the **computation** fields for Attested Computation concepts (§10) may also
@@ -299,14 +299,14 @@ usage_window: { from: 2026-06-01, to: 2026-06-30 }
 
 Each `sources` entry:
 
-- `resource`: REQUIRED within an entry. Names either a concrete artifact a
+- `resource`: REQUIRED within an entry. Names either a concrete artifact a  
   consumer can follow (an absolute URL, a bundle-relative path, or a path
   into a `references/` subdirectory, §6) or a population or scope descriptor
-  it cannot (for example `all queries in BigQuery project X`).
-- `id`: Optional. A stable key used to attribute individual claims (see
-  below). SHOULD be present when the body cites the source.
-- `title`: Optional. Human-readable label for the source.
-- The optional credibility signals `author`, `usage_count`, and
+  it cannot (for example `all queries in BigQuery project X`).  
+- `id`: Optional. A stable key used to attribute individual claims (see  
+  below). SHOULD be present when the body cites the source.  
+- `title`: Optional. Human-readable label for the source.  
+- The optional credibility signals `author`, `usage_count`, and  
   `last_modified`, described next.
 
 **Source credibility signals.** OKF records objective, per-source signals
@@ -316,17 +316,17 @@ subjective, unportable across consumers, and goes stale. Credibility is
 *inferred* from the signals, the same way trust tiers are (§5.3), not
 stored. Each signal is optional and lives on a `sources` entry:
 
-- `author`: Who or what produced the source, in the actor convention (§7).
-  An authority signal.
-- `usage_count`: How often `resource` was exercised (dashboard views, query
+- `author`: Who or what produced the source, in the actor convention (§7).  
+  An authority signal.  
+- `usage_count`: How often `resource` was exercised (dashboard views, query  
   executions, page reads) over `usage_window`. An adoption and liveness
   signal. For a single artifact it is that artifact's own exercise count;
   for a scope descriptor it is the number of exercises within the scope that
-  touch the concept.
-- `last_modified`: When the source itself last changed (`YYYY-MM-DD`). A
+  touch the concept.  
+- `last_modified`: When the source itself last changed (`YYYY-MM-DD`). A  
   recency signal, distinct from `generated.at` (§5.2), which records when
-  the concept was written.
-- `usage_window`: Written once as a sibling of `sources`, it frames every
+  the concept was written.  
+- `usage_window`: Written once as a sibling of `sources`, it frames every  
   `usage_count` with a `{ from, to }` date range. A single entry MAY carry
   its own `usage_window` to override the shared one.
 
@@ -371,8 +371,8 @@ be who *confirmed* it.
 generated: { by: reference_agent/gemini-2.5-pro, at: 2026-06-20T22:53:05Z }
 ```
 
-- `generated.by`: REQUIRED within `generated`. An actor (§7).
-- `generated.at`: An ISO 8601 datetime marking the content's last
+- `generated.by`: REQUIRED within `generated`. An actor (§7).  
+- `generated.at`: An ISO 8601 datetime marking the content's last  
   meaningful change. Consumers use it to tell a recent edit from a stale
   fact.
 
@@ -382,13 +382,13 @@ verified:
   - { by: process:finance-nightly, at: 2026-06-26T02:00:00Z }
 ```
 
-- `verified`: A list of verification events, each with `by` (an actor) and
+- `verified`: A list of verification events, each with `by` (an actor) and  
   `at` (an ISO 8601 datetime). Multiple entries capture independent
   checks, for example a human sign-off plus a nightly process. "How
-  recently" is the latest `at`.
-- `verified` is independent of `generated.at`: content can change without
-  re-confirmation, and facts can be re-confirmed without regeneration.
-- A single verifier MAY be written as one `{ by, at }` mapping without the
+  recently" is the latest `at`.  
+- `verified` is independent of `generated.at`: content can change without  
+  re-confirmation, and facts can be re-confirmed without regeneration.  
+- A single verifier MAY be written as one `{ by, at }` mapping without the  
   list dash. Consumers MUST treat a bare mapping as a one-element list:
 
 ```yaml
@@ -399,9 +399,9 @@ verified: { by: human:ahormati, at: 2026-06-25T09:00:00Z }
 
 Consumers derive a trust tier from `verified`, lowest to highest:
 
-- No `verified` key ⇒ **unverified**.
-- `verified` by non-`human:` actors only ⇒ **machine-confirmed**.
-- `verified` by a `human:<id>` actor ⇒ **human-reviewed**.
+- No `verified` key ⇒ **unverified**.  
+- `verified` by non-`human:` actors only ⇒ **machine-confirmed**.  
+- `verified` by a `human:<id>` actor ⇒ **human-reviewed**.  
 
 A concept with no trust frontmatter is still consumable; consumers MUST
 NOT reject it (§11). Trust tiers are advisory signals, not access control.
@@ -412,9 +412,9 @@ NOT reject it (§11). Trust tiers are advisory signals, not access control.
 status: stable        # draft | stable | deprecated
 ```
 
-- `draft`: not yet reviewed; possibly incomplete.
-- `stable`: default; ready for consumption.
-- `deprecated`: kept for links and history; no longer current.
+- `draft`: not yet reviewed; possibly incomplete.  
+- `stable`: default; ready for consumption.  
+- `deprecated`: kept for links and history; no longer current.  
 
 Absent `status` ⇒ `stable`.
 
@@ -438,7 +438,7 @@ concept was read.
 Concepts MAY link to other concepts using standard markdown links. Two
 forms are supported:
 
-- **Absolute (bundle-relative):** begins with `/`, interpreted relative to
+- **Absolute (bundle-relative):** begins with `/`, interpreted relative to  
   the bundle root. This is the **recommended** form because it is stable
   when documents are moved within their subdirectory.
 
@@ -446,7 +446,7 @@ forms are supported:
   See the [customers table](/tables/customers.md) for the join key.
   ```
 
-- **Relative:** a standard markdown relative path.
+- **Relative:** a standard markdown relative path.  
 
   ```markdown
   See the [neighboring concept](./other.md).
@@ -469,9 +469,9 @@ Several fields name a path or URI: `resource`, `sources[].resource`,
 `sources[].resource` may instead be a scope descriptor (§5.1), in which
 case it is not a path. Each path-valued field accepts:
 
-- an absolute URL (for example `https://...`),
-- a bundle-relative path beginning with `/`, or
-- a relative path (for example `../computations/revenue.md`).
+- an absolute URL (for example `https://...`),  
+- a bundle-relative path beginning with `/`, or  
+- a relative path (for example `../computations/revenue.md`).  
 
 ### 6.3 The `references/` convention
 
@@ -488,10 +488,10 @@ requirement.
 Fields that record an identity (`generated.by`, `verified[].by`) use a
 single actor convention:
 
-- `<producer>/<version>` for agents and tools, for example
-  `reference_agent/gemini-2.5-pro`.
-- `human:<id>` for a person, for example `human:ahormati`.
-- `process:<id>` for an automated process, for example
+- `<producer>/<version>` for agents and tools, for example  
+  `reference_agent/gemini-2.5-pro`.  
+- `human:<id>` for a person, for example `human:ahormati`.  
+- `process:<id>` for an automated process, for example  
   `process:finance-nightly`.
 
 Consumers that classify trust (§5.3) key off the `human:` prefix, so
@@ -566,14 +566,14 @@ A sanctioned computation is a standalone concept of
 `BigQuery Table`) links to it with a normal markdown link (§6). Three
 properties motivate the standalone concept:
 
-- **`runtime` defines what `parameters` mean.** A parameter is a SQL bind
+- **`runtime` defines what `parameters` mean.** A parameter is a SQL bind  
   variable, a dbt var, or a Python argument depending on the runtime.
   Keeping `runtime` and `parameters` in one frontmatter makes the binding
-  semantics self-evident.
-- **One computation, many consumers.** The same computation can back a
+  semantics self-evident.  
+- **One computation, many consumers.** The same computation can back a  
   metric, a dashboard concept, and a report; as a concept it is referenced
-  once and reused.
-- **Trust state is per computation.** `verified`, `stale_after`, and a
+  once and reused.  
+- **Trust state is per computation.** `verified`, `stale_after`, and a  
   single `attester` describe one thing. Revenue, profit, and margin each
   verify and attest independently, which is three concepts, not three
   entries in one frontmatter.
@@ -584,21 +584,21 @@ The contract is the concept's top-level frontmatter. In addition to the
 provenance, trust, and lifecycle families (§5), an Attested Computation
 concept carries:
 
-- `runtime`: REQUIRED for this type. The single field that says how to run
+- `runtime`: REQUIRED for this type. The single field that says how to run  
   the computation, and so how the executor and attester interpret it and
   what `parameters` mean. Example values: `bigquery`, `postgres`, `dbt`,
-  `python`, `Looker`.
-- `parameters`: A list of the typed, named holes the agent may fill. Each
-  entry: `{ name, type, required }`. Binding semantics follow `runtime`.
-- `computation`: Optional. A path (§6.2) to a file holding the
+  `python`, `Looker`.  
+- `parameters`: A list of the typed, named holes the agent may fill. Each  
+  entry: `{ name, type, required }`. Binding semantics follow `runtime`.  
+- `computation`: Optional. A path (§6.2) to a file holding the  
   computation, used instead of an inline body fence (see §10.3). Absent ⇒
-  the body `# Computation` fence is the computation.
-- `executor`: How the computation is run. `resource` names run
+  the body `# Computation` fence is the computation.  
+- `executor`: How the computation is run. `resource` names run  
   instructions or code; a runner (an agent, or deterministic consumer
   code) follows it. `receipt` declares the fields a run must return, the
   evidence the attester inspects (for example a BigQuery `job_id` and the
-  SQL the job actually executed).
-- `attester`: The deterministic check. `resource` names code (no LLM) that
+  SQL the job actually executed).  
+- `attester`: The deterministic check. `resource` names code (no LLM) that  
   takes a receipt and returns a verdict. It is meant to run consumer-side.
 
 What sits behind a `resource` (a Skill, a script, a container) is a
@@ -643,9 +643,9 @@ policy.[^rev-policy]
 
 Provide the computation in one of two ways:
 
-- **Inline:** a single fenced code block in the body under `# Computation`.
-  Best for a short computation reviewed alongside the contract.
-- **File:** set `computation` to a path (§6.2) and omit the body fence.
+- **Inline:** a single fenced code block in the body under `# Computation`.  
+  Best for a short computation reviewed alongside the contract.  
+- **File:** set `computation` to a path (§6.2) and omit the body fence.  
   Best for a long or generated computation, or one already kept as a real
   file shared with non-OKF tooling.
 
@@ -698,20 +698,20 @@ Co-locating them is a directory choice (a `computations/` folder with an
 This subsection is informative, not normative. The runtime artifacts below
 are **not** stored in the bundle.
 
-1. **Discover** via `type: Attested Computation`, a frontmatter signal
+1. **Discover** via `type: Attested Computation`, a frontmatter signal  
    liftable into `index.md`; a consumer reaches one directly or by
-   following a link from a concept that uses it.
-2. **Load** the contract from frontmatter and the computation from the
-   body (or the file named by `computation`).
-3. **Parameterize**: the agent supplies values for the declared parameters.
-4. **Execute**: the executor runs the bound computation and returns a
-   receipt shaped by `executor.receipt`.
-5. **Attest**: the consumer runs the attester over the receipt. It
+   following a link from a concept that uses it.  
+2. **Load** the contract from frontmatter and the computation from the  
+   body (or the file named by `computation`).  
+3. **Parameterize**: the agent supplies values for the declared parameters.  
+4. **Execute**: the executor runs the bound computation and returns a  
+   receipt shaped by `executor.receipt`.  
+5. **Attest**: the consumer runs the attester over the receipt. It  
    confirms provenance (the computation that ran equals `computation` bound
    with the claimed parameters, not agent-authored SQL) and fidelity (the
    displayed value matches the receipt's authoritative source, re-read by
-   job id rather than taken from the agent's text).
-6. **Gate**: refuse to display a failing attestation; warn or refuse when
+   job id rather than taken from the agent's text).  
+6. **Gate**: refuse to display a failing attestation; warn or refuse when  
    `today >= stale_after`. On success, surface the verdict (for example a
    link to the job log) so trust is visible.
 
@@ -719,9 +719,9 @@ are **not** stored in the bundle.
 
 `verified` (§5.2) and attestation are distinct, and both exist:
 
-- `verified` confirms the *definition* still matches policy. It is
-  doc-level, slow, and recorded in the bundle.
-- Attestation confirms a single *run* produced the value the sanctioned
+- `verified` confirms the *definition* still matches policy. It is  
+  doc-level, slow, and recorded in the bundle.  
+- Attestation confirms a single *run* produced the value the sanctioned  
   way. It is per-call, runtime, and not stored in the bundle.
 
 A concept with a stale definition can still attest cleanly, and a
@@ -734,29 +734,29 @@ is why both are needed.
 
 A bundle is **conformant** with OKF v0.2 if:
 
-1. Every non-reserved `.md` file in the tree contains a parseable YAML
-   frontmatter block.
-2. Every frontmatter block contains a non-empty `type` field.
-3. Every reserved filename (`index.md`, `log.md`) follows the structure in
+1. Every non-reserved `.md` file in the tree contains a parseable YAML  
+   frontmatter block.  
+2. Every frontmatter block contains a non-empty `type` field.  
+3. Every reserved filename (`index.md`, `log.md`) follows the structure in  
    §8 and §9 respectively when present.
 
 When the trust, lifecycle, provenance, or computation families are
 present, producers SHOULD follow §5 through §10, and consumers:
 
-- MUST treat a bare `verified` mapping as a one-element list (§5.2).
-- MUST NOT reject a concept for missing any optional family (§5.3).
-- SHOULD derive trust tiers and staleness only from the fields specified
+- MUST treat a bare `verified` mapping as a one-element list (§5.2).  
+- MUST NOT reject a concept for missing any optional family (§5.3).  
+- SHOULD derive trust tiers and staleness only from the fields specified  
   here, and SHOULD surface, not silently drop, a failing attestation
   (§10.5).
 
 Consumers SHOULD treat all other constraints as soft guidance. In
 particular, consumers MUST NOT reject a bundle because of:
 
-- Missing optional frontmatter fields.
-- Unknown `type` values.
-- Unknown additional frontmatter keys.
-- Broken cross-links.
-- Missing `index.md` files.
+- Missing optional frontmatter fields.  
+- Unknown `type` values.  
+- Unknown additional frontmatter keys.  
+- Broken cross-links.  
+- Missing `index.md` files.  
 
 ---
 
@@ -765,9 +765,9 @@ particular, consumers MUST NOT reject a bundle because of:
 This document specifies OKF version **0.2**. Revisions are versioned as
 `<major>.<minor>`:
 
-- A **minor** version bump introduces backward-compatible additions (new
-  optional fields, new conventional section headings).
-- A **major** version bump may make breaking changes (renaming required
+- A **minor** version bump introduces backward-compatible additions (new  
+  optional fields, new conventional section headings).  
+- A **major** version bump may make breaking changes (renaming required  
   fields, changing reserved filenames).
 
 Bundles MAY declare the version they target with `okf_version: "0.2"` in a
@@ -780,12 +780,12 @@ bundle.
 
 The following are intentionally left to a future revision:
 
-- The full runtime protocol: receipt and verdict wire formats, and the
-  attestation lifecycle around a run.
-- The attester ABI, portability, and sandboxing, likely bundled with
-  future work on serving and Skills.
-- Attestation caching.
-- Semantic-layer templates (Looker, dbt) where the attester comparison
+- The full runtime protocol: receipt and verdict wire formats, and the  
+  attestation lifecycle around a run.  
+- The attester ABI, portability, and sandboxing, likely bundled with  
+  future work on serving and Skills.  
+- Attestation caching.  
+- Semantic-layer templates (Looker, dbt) where the attester comparison  
   shifts from SQL equality to model-and-binding equality.
 
 ---
@@ -799,11 +799,11 @@ the fallbacks noted here.
 
 ### 13.1 Breaking changes
 
-- **`timestamp` is superseded by `generated.at`.** A concept's last
+- **`timestamp` is superseded by `generated.at`.** A concept's last  
   content change is now recorded as `generated: { by, at }` (§5.2).
   Consumers MAY fall back to a legacy `timestamp` when `generated` is
-  absent.
-- **The body `# Citations` list is superseded by `sources`.** Provenance
+  absent.  
+- **The body `# Citations` list is superseded by `sources`.** Provenance  
   moves to frontmatter (§5.1). Consumers SHOULD read `sources` and MAY
   still parse a legacy `# Citations` body list for v0.1 documents.
 
@@ -813,13 +813,13 @@ All of the following are additive: new optional keys, one new concept
 type, and one new conventional heading. Their absence yields a plain v0.1
 concept.
 
-- New frontmatter families: `sources` with its per-source credibility
+- New frontmatter families: `sources` with its per-source credibility  
   signals (`author`, `usage_count`, `last_modified`) and the `usage_window`
-  sibling; `generated`, `verified`; `status`, `stale_after` (§5).
-- New concept type `Attested Computation` and its computation keys
-  `runtime`, `parameters`, `computation`, `executor`, `attester` (§10).
-- New conventional body heading `# Computation` (§4.2).
-- The actor convention for `generated.by` and `verified[].by` (§7).
+  sibling; `generated`, `verified`; `status`, `stale_after` (§5).  
+- New concept type `Attested Computation` and its computation keys  
+  `runtime`, `parameters`, `computation`, `executor`, `attester` (§10).  
+- New conventional body heading `# Computation` (§4.2).  
+- The actor convention for `generated.by` and `verified[].by` (§7).  
 
 Everything else (bundle structure, reserved filenames, the required
 `type`, recommended `title`/`description`/`resource`/`tags`, cross-linking,
