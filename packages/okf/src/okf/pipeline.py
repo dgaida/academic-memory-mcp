@@ -25,6 +25,8 @@ def run_okf_pipeline(config: OKFConfig) -> None:
     spec = load_spec(config.spec_file)
 
     # Step 3: Extract & Write
+    generated_by = f"okf-extractor/{config.llm}" if config.llm else None
+
     if config.document_dir.exists():
         for md_file in config.document_dir.rglob("*.md"):
             print("Processing:", md_file.name)
@@ -34,16 +36,16 @@ def run_okf_pipeline(config: OKFConfig) -> None:
                 knowledge = extract_knowledge(markdown, md_file.name, spec, config)
 
                 for concept in knowledge.get("concepts", []):
-                    write_concept(concept, md_file.name, config.concept_dir)
+                    write_concept(concept, md_file.name, config.concept_dir, generated_by=generated_by)
 
                 for entity in knowledge.get("entities", []):
-                    write_entity(entity, md_file.name, config.entity_dir)
+                    write_entity(entity, md_file.name, config.entity_dir, generated_by=generated_by)
 
                 for definition in knowledge.get("definitions", []):
-                    write_definition(definition, md_file.name, config.definition_dir)
+                    write_definition(definition, md_file.name, config.definition_dir, generated_by=generated_by)
 
                 for table in knowledge.get("tables", []):
-                    write_table(table, md_file.name, config.table_dir)
+                    write_table(table, md_file.name, config.table_dir, generated_by=generated_by)
 
             except Exception as e:
                 print(f"ERROR processing knowledge from {md_file.name}: {e}")

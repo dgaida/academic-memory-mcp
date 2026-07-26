@@ -31,117 +31,201 @@ def write_okf_markdown(path: Path, frontmatter_data: dict, body: str) -> None:
         frontmatter_data: YAML metadata dict.
         body: Markdown body.
     """
-    if path.exists():
-        print(f"Already exists: {path}")
-        return
-
     path.parent.mkdir(parents=True, exist_ok=True)
+
+    if path.exists():
+        try:
+            post = frontmatter.load(path)
+            existing_sources = post.metadata.get("sources", [])
+            new_sources = frontmatter_data.get("sources", [])
+
+            # Keep track of existing resources
+            existing_resources = {s.get("resource") for s in existing_sources if "resource" in s}
+            existing_ids = {s.get("id") for s in existing_sources if "id" in s}
+
+            merged_sources = list(existing_sources)
+            added_any = False
+
+            for ns in new_sources:
+                res = ns.get("resource")
+                if res not in existing_resources:
+                    # Generate a unique ID if there is a collision
+                    orig_id = ns.get("id")
+                    candidate_id = orig_id
+                    counter = 2
+                    while candidate_id in existing_ids:
+                        candidate_id = f"{orig_id}-{counter}"
+                        counter += 1
+
+                    new_source_entry = dict(ns)
+                    new_source_entry["id"] = candidate_id
+                    existing_ids.add(candidate_id)
+
+                    merged_sources.append(new_source_entry)
+                    added_any = True
+
+            if added_any:
+                post.metadata["sources"] = merged_sources
+                path.write_text(frontmatter.dumps(post), encoding="utf-8")
+                print(f"Merged new sources into: {path}")
+            else:
+                print(f"Already exists with same source resources: {path}")
+            return
+        except Exception as e:
+            print(f"ERROR reading/merging {path}: {e}")
+            # Fall back to overwriting or return? Let's return to avoid overwriting or continue as is.
+            return
+
     post = frontmatter.Post(body, **frontmatter_data)
     path.write_text(frontmatter.dumps(post), encoding="utf-8")
 
-def write_concept(concept: dict, source_file: str, concept_dir: Path) -> None:
+from datetime import datetime, timezone
+
+def write_concept(concept: dict, source_file: str, concept_dir: Path, generated_by: str = None) -> None:
     """Write an OKF concept file.
 
     Args:
         concept: Concept data dict.
         source_file: The source file name.
         concept_dir: Concept output directory.
+        generated_by: The generator agent string.
     """
     filename = sanitize_filename(concept["name"])
     path = concept_dir / filename
+    source_id = Path(source_file).stem
 
     metadata = {
-        "type": "concept",
+        "type": "Concept",
         "title": concept["name"],
         "description": concept.get("description", ""),
         "sources": [
             {
+                "id": source_id,
                 "resource": f"/documents/{source_file}"
             }
         ]
     }
+
+    if generated_by:
+        metadata["generated"] = {
+            "by": generated_by,
+            "at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+        }
 
     body = f"# {concept['name']}\n\n{concept.get('description', '')}\n\n"
 
     if concept.get("related_concepts"):
         body += "\n## Related concepts\n\n"
         for c in concept["related_concepts"]:
-            body += f"- {c}\n"
+            target = sanitize_filename(c)
+            body += f"- [{c}](/concepts/{target})\n"
 
     write_okf_markdown(path, metadata, body)
 
-def write_entity(entity: dict, source_file: str, entity_dir: Path) -> None:
+def write_entity(entity: dict, source_file: str, entity_dir: Path, generated_by: str = None) -> None:
     """Write an OKF entity file.
 
     Args:
         entity: Entity data dict.
         source_file: The source file name.
         entity_dir: Entity output directory.
+        generated_by: The generator agent string.
     """
     filename = sanitize_filename(entity["name"])
     path = entity_dir / filename
+    source_id = Path(source_file).stem
 
     metadata = {
-        "type": "entity",
+        "type": "Entity",
         "entity_type": entity.get("type", "unknown"),
         "title": entity["name"],
         "sources": [
             {
+                "id": source_id,
                 "resource": f"/documents/{source_file}"
             }
         ]
     }
 
+    if generated_by:
+        metadata["generated"] = {
+            "by": generated_by,
+            "at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+        }
+
     body = f"# {entity['name']}\n\nType:\n\n{entity.get('type', '')}\n\n\n{entity.get('description', '')}\n"
 
     write_okf_markdown(path, metadata, body)
 
-def write_definition(definition: dict, source_file: str, definition_dir: Path) -> None:
+def write_definition(definition: dict, source_file: str, definition_dir: Path, generated_by: str = None) -> None:
     """Write an OKF definition file.
 
     Args:
         definition: Definition data dict.
         source_file: The source file name.
         definition_dir: Definition output directory.
+        generated_by: The generator agent string.
     """
     filename = sanitize_filename(definition["term"])
     path = definition_dir / filename
+    source_id = Path(source_file).stem
 
     metadata = {
-        "type": "definition",
+        "type": "Definition",
         "term": definition["term"],
         "sources": [
             {
+                "id": source_id,
                 "resource": f"/documents/{source_file}"
             }
         ]
     }
 
-    body = f"# {definition['term']}\n\n{definition['definition']}\n\n\n## Context\n\n{definition.get('context', '')}\n"
+    if generated_by:
+        metadata["generated"] = {
+            "by": generated_by,
+            "at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+        }
+
+    body = (
+        f"# {definition['term']}\n\n"
+        f"{definition['definition']}[^{source_id}]\n\n\n"
+        f"## Context\n\n{definition.get('context', '')}\n\n"
+        f"[^{source_id}]: {source_file}\n"
+    )
 
     write_okf_markdown(path, metadata, body)
 
-def write_table(table: dict, source_file: str, table_dir: Path) -> None:
+def write_table(table: dict, source_file: str, table_dir: Path, generated_by: str = None) -> None:
     """Write an OKF table file.
 
     Args:
         table: Table data dict.
         source_file: The source file name.
         table_dir: Table output directory.
+        generated_by: The generator agent string.
     """
     filename = sanitize_filename(table["title"])
     path = table_dir / filename
+    source_id = Path(source_file).stem
 
     metadata = {
-        "type": "table",
+        "type": "Table",
         "title": table["title"],
         "description": table.get("description", ""),
         "sources": [
             {
+                "id": source_id,
                 "resource": f"/documents/{source_file}"
             }
         ]
     }
+
+    if generated_by:
+        metadata["generated"] = {
+            "by": generated_by,
+            "at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+        }
 
     body = f"# {table['title']}\n\n{table.get('description', '')}\n\n\n"
 
@@ -199,14 +283,14 @@ okf_version: "0.2"
             count += 1
             print(file)
 
-            if title == "Documents":
-                item_title = file.stem
-            else:
-                doc = frontmatter.load(file)
-                item_title = doc.metadata.get("title", file.stem)
+            doc = frontmatter.load(file)
+            item_title = doc.metadata.get("title", file.stem)
+
+            description = doc.metadata.get("description", "")
+            suffix = f" - {description}" if description else ""
 
             bundle_path = file.relative_to(okf_dir).as_posix()
-            content += f"- [{item_title}]({bundle_path})\n"
+            content += f"- [{item_title}]({bundle_path}){suffix}\n"
 
         statistics[title.lower()] = count
 

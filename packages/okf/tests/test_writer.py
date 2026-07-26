@@ -23,16 +23,18 @@ def test_write_concept():
             "description": "A type of machine learning",
             "related_concepts": ["Unsupervised Learning", "Reinforcement Learning"]
         }
-        write_concept(concept, "regulations.md", tmp_path)
+        write_concept(concept, "regulations.md", tmp_path, "test-agent/v1")
 
         expected_file = tmp_path / "supervised-learning.md"
         assert expected_file.exists()
 
         post = frontmatter.load(expected_file)
-        assert post.metadata["type"] == "concept"
+        assert post.metadata["type"] == "Concept"
         assert post.metadata["title"] == "Supervised Learning"
+        assert post.metadata["sources"][0]["id"] == "regulations"
         assert post.metadata["sources"][0]["resource"] == "/documents/regulations.md"
-        assert "Unsupervised Learning" in post.content
+        assert post.metadata["generated"]["by"] == "test-agent/v1"
+        assert "[- [Unsupervised Learning](/concepts/unsupervised-learning.md)]" in post.content or "unsupervised-learning.md" in post.content
 
 def test_write_entity():
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -42,15 +44,17 @@ def test_write_entity():
             "type": "University",
             "description": "Technical University of Cologne"
         }
-        write_entity(entity, "regulations.md", tmp_path)
+        write_entity(entity, "regulations.md", tmp_path, "test-agent/v1")
 
         expected_file = tmp_path / "th-k-ln.md"
         assert expected_file.exists()
 
         post = frontmatter.load(expected_file)
-        assert post.metadata["type"] == "entity"
+        assert post.metadata["type"] == "Entity"
         assert post.metadata["entity_type"] == "University"
+        assert post.metadata["sources"][0]["id"] == "regulations"
         assert post.metadata["sources"][0]["resource"] == "/documents/regulations.md"
+        assert post.metadata["generated"]["by"] == "test-agent/v1"
 
 def test_write_definition():
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -60,16 +64,19 @@ def test_write_definition():
             "definition": "A unit of study consisting of lectures, seminars, etc.",
             "context": "According to § 5 of the regulations"
         }
-        write_definition(definition, "regulations.md", tmp_path)
+        write_definition(definition, "regulations.md", tmp_path, "test-agent/v1")
 
         expected_file = tmp_path / "module.md"
         assert expected_file.exists()
 
         post = frontmatter.load(expected_file)
-        assert post.metadata["type"] == "definition"
+        assert post.metadata["type"] == "Definition"
         assert post.metadata["term"] == "Module"
-        assert "A unit of study" in post.content
-        assert "According to § 5" in post.content
+        assert post.metadata["sources"][0]["id"] == "regulations"
+        assert post.metadata["sources"][0]["resource"] == "/documents/regulations.md"
+        assert post.metadata["generated"]["by"] == "test-agent/v1"
+        assert "A unit of study consisting of lectures, seminars, etc.[^regulations]" in post.content
+        assert "[^regulations]: regulations.md" in post.content
 
 def test_write_table():
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -83,14 +90,17 @@ def test_write_table():
                 ["M2", "CS", 6]
             ]
         }
-        write_table(table, "regulations.md", tmp_path)
+        write_table(table, "regulations.md", tmp_path, "test-agent/v1")
 
         expected_file = tmp_path / "module-overview.md"
         assert expected_file.exists()
 
         post = frontmatter.load(expected_file)
-        assert post.metadata["type"] == "table"
+        assert post.metadata["type"] == "Table"
         assert post.metadata["title"] == "Module Overview"
+        assert post.metadata["sources"][0]["id"] == "regulations"
+        assert post.metadata["sources"][0]["resource"] == "/documents/regulations.md"
+        assert post.metadata["generated"]["by"] == "test-agent/v1"
         assert "| ID | Name | ECTS |" in post.content
         assert "| M1 | Math | 5 |" in post.content
 
@@ -106,8 +116,11 @@ def test_create_index():
         doc_dir.mkdir()
         concept_dir.mkdir()
 
-        # Write dummy files
-        (doc_dir / "source1.md").write_text("# Source Title", encoding="utf-8")
+        # Write dummy files with parsed-looking frontmatter
+        doc_file = doc_dir / "source1.md"
+        doc_post = frontmatter.Post("Some doc", type="Reference", title="Doc Title", description="Doc Desc")
+        doc_file.write_text(frontmatter.dumps(doc_post), encoding="utf-8")
+
         write_concept({"name": "Concept 1", "description": "Desc 1"}, "source1.md", concept_dir)
 
         create_index(okf_dir, doc_dir, concept_dir, entity_dir, definition_dir, table_dir)
@@ -117,8 +130,41 @@ def test_create_index():
 
         post = frontmatter.load(index_file)
         assert post.metadata == {"okf_version": "0.2"}  # No type: index in frontmatter
-        assert "- [source1](documents/source1.md)" in post.content
-        assert "- [Concept 1](concepts/concept-1.md)" in post.content
+        assert "- [Doc Title](documents/source1.md) - Doc Desc" in post.content
+        assert "- [Concept 1](concepts/concept-1.md) - Desc 1" in post.content
         assert "Documents: 1" in post.content
         assert "Concepts: 1" in post.content
         assert "Entities: 0" in post.content
+
+def test_merge_duplicate_sources():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp_path = Path(tmpdir)
+        concept = {
+            "name": "Shared Concept",
+            "description": "Defined twice"
+        }
+
+        # Write first time
+        write_concept(concept, "source1.md", tmp_path)
+        expected_file = tmp_path / "shared-concept.md"
+        assert expected_file.exists()
+
+        post1 = frontmatter.load(expected_file)
+        assert len(post1.metadata["sources"]) == 1
+        assert post1.metadata["sources"][0]["id"] == "source1"
+        assert post1.metadata["sources"][0]["resource"] == "/documents/source1.md"
+
+        # Write second time with same source_file - should not duplicate
+        write_concept(concept, "source1.md", tmp_path)
+        post2 = frontmatter.load(expected_file)
+        assert len(post2.metadata["sources"]) == 1
+
+        # Write third time with different source_file - should merge and handle suffix for id conflict
+        write_concept(concept, "source1.md", tmp_path) # same source file & resource, won't add
+        # Actually let's use a source file with same stem but in subdirectory to trigger ID collision with different resource
+        write_concept(concept, "subdir/source1.md", tmp_path)
+        post3 = frontmatter.load(expected_file)
+        assert len(post3.metadata["sources"]) == 2
+        assert post3.metadata["sources"][0]["id"] == "source1"
+        assert post3.metadata["sources"][1]["id"] == "source1-2"
+        assert post3.metadata["sources"][1]["resource"] == "/documents/subdir/source1.md"

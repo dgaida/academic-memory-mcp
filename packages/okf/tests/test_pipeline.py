@@ -16,10 +16,10 @@ def test_run_okf_pipeline(mock_extract_knowledge, mock_parse_pdfs):
         pdf_dir.mkdir()
         spec_file.write_text("OKF Spec Content", encoding="utf-8")
 
-        # Create documents folder and a dummy source document
+        # Create documents folder and a dummy source document with Reference frontmatter (Fix #1 alignment)
         doc_dir = okf_dir / "documents"
         doc_dir.mkdir(parents=True)
-        (doc_dir / "regulation.md").write_text("# Regulation Markdown", encoding="utf-8")
+        (doc_dir / "regulation.md").write_text("---\ntype: Reference\ntitle: Regulation Markdown\n---\n# Regulation Markdown", encoding="utf-8")
 
         # Mock extracted knowledge
         mock_extract_knowledge.return_value = {
