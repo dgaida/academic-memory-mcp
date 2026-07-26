@@ -181,9 +181,9 @@ Ensure that you create the specified target directory (e.g., `D:/PAV/okf`) befor
 
 For the pipeline to parse and convert source files, your original PDFs must be stored in a specific location:
 
-- The original PDF documents must reside in a **parallel folder** named `Memory` situated on the same hierarchy level as the OKF directory.
-- If your OKF folder path is `D:/PAV/okf`, the original PDFs must be placed inside `D:/PAV/Memory`.
-- Within the `Memory` directory, you are allowed to have arbitrary **subfolders** to organize your PDF collections.
+- The original PDF documents must reside in a **parallel folder** named `Memory` situated on the same hierarchy level as the OKF directory.  
+- If your OKF folder path is `D:/PAV/okf`, the original PDFs must be placed inside `D:/PAV/Memory`.  
+- Within the `Memory` directory, you are allowed to have arbitrary **subfolders** to organize your PDF collections.  
 
 Example directory layout:
 ```text

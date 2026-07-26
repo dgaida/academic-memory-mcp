@@ -181,9 +181,9 @@ Stellen Sie sicher, dass Sie den entsprechenden Zielpfad (z. B. `D:/PAV/okf`) vo
 
 Damit die Pipeline die Quelldokumente einlesen und konvertieren kann, müssen die Original-PDFs an einem bestimmten Ort abgelegt werden:
 
-- Die PDFs müssen in einem **parallelen Ordner** namens `Memory` auf derselben Ebene wie der OKF-Ordner liegen.
-- Wenn der OKF-Pfad beispielsweise `D:/PAV/okf` ist, müssen die PDFs im Ordner `D:/PAV/Memory` liegen.
-- Innerhalb des `Memory` Ordners können Sie auch beliebige **Unterordner** anlegen, um Ihre PDF-Sammlung thematisch zu gliedern.
+- Die PDFs müssen in einem **parallelen Ordner** namens `Memory` auf derselben Ebene wie der OKF-Ordner liegen.  
+- Wenn der OKF-Pfad beispielsweise `D:/PAV/okf` ist, müssen die PDFs im Ordner `D:/PAV/Memory` liegen.  
+- Innerhalb des `Memory` Ordners können Sie auch beliebige **Unterordner** anlegen, um Ihre PDF-Sammlung thematisch zu gliedern.  
 
 Beispielhafte Verzeichnisstruktur:
 ```text
