@@ -451,6 +451,11 @@ Private Function SanitizeFileName(ByVal name As String) As String
 
     Dim i As Long
 
+    ' Steuerzeichen (ASCII 1-31) entfernen bzw. durch "_" ersetzen
+    For i = 1 To 31
+        result = Replace(result, Chr(i), "_")
+    Next i
+
     For i = 1 To Len(invalidChars)
         result = Join(Split(result, Mid(invalidChars, i, 1)), "_")
     Next i

@@ -117,6 +117,9 @@ Private Sub ProcessFolder(ByVal olFolder As Outlook.folder, ByVal subFolderName 
     Dim savedCount As Long
     Dim cutoffDate As Date
     Dim filterStr As String
+    Dim fso As Object
+
+    Set fso = CreateObject("Scripting.FileSystemObject")
 
     targetPath = ROOT_PATH & "\" & subFolderName
     If Not EnsureDirectory(targetPath) Then
@@ -158,7 +161,7 @@ Private Sub ProcessFolder(ByVal olFolder As Outlook.folder, ByVal subFolderName 
                 filePath = BuildMsgFilePath(targetPath, mail)
 
                 ' Speichern falls nicht vorhanden
-                If Len(Dir(filePath)) = 0 Then
+                If Not fso.FileExists(filePath) Then
                     On Error Resume Next
                     mail.SaveAs filePath, olMSG
                     If Err.Number = 0 Then
@@ -275,6 +278,12 @@ Private Function SanitizeFileName(ByVal name As String) As String
 
     invalidChars = "\/:*?""<>|"
     result = name
+
+    ' Steuerzeichen (ASCII 1-31) entfernen bzw. durch "_" ersetzen
+    For i = 1 To 31
+        result = Replace(result, Chr(i), "_")
+    Next i
+
     For i = 1 To Len(invalidChars)
         result = Join(Split(result, Mid(invalidChars, i, 1)), "_")
     Next i

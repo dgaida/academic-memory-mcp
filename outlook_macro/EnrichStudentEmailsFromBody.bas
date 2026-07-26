@@ -37,7 +37,10 @@ Private Const YAML_FILE_PATH As String = "D:\TH_Koeln\academic-memory-mcp\studen
 ''' Durchsucht Posteingang und Gesendete nach Studentennamen und reichert
 ''' die YAML-Datei um zusaetzlich gefundene E-Mail-Adressen an.
 Public Sub EnrichStudentEmailsFromBody()
-    If Len(Dir(YAML_FILE_PATH)) = 0 Then
+    Dim fso As Object
+    Set fso = CreateObject("Scripting.FileSystemObject")
+
+    If Not fso.FileExists(YAML_FILE_PATH) Then
         MsgBox "YAML-Datei nicht gefunden:" & vbCrLf & YAML_FILE_PATH & vbCrLf & _
                "Bitte zuerst CollectStudentEmails ausfuehren.", _
                vbCritical, "EnrichStudentEmailsFromBody"
