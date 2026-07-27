@@ -131,6 +131,27 @@ class MCPAgent:
                         "required": ["email_path"]
                     }
                 }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "execute_okf_computation",
+                    "description": "Führt eine beglaubigte Berechnung (Attested Computation) für ein OKF-Konzept aus und attestiert das Ergebnis.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "concept_path": {
+                                "type": "string",
+                                "description": "Der Pfad zum OKF-Konzept-File vom Typ Attested Computation (z.B. ein .md File)."
+                            },
+                            "parameters": {
+                                "type": "object",
+                                "description": "Ein JSON-Objekt mit den Eingabeparametern für die Berechnung."
+                            }
+                        },
+                        "required": ["concept_path", "parameters"]
+                    }
+                }
             }
         ]
 

@@ -733,6 +733,10 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
         if action_idx == 2:  # 3) Nur archivieren
             return "NO_REPLY_NEEDED", "Archivieren", False
 
+        if email_class == "PAV_PO-Wechsel":
+            okf_bundle_path = self.memory_paths.get("PAV_PO-Wechsel") or "D:/PAV/okf"
+            additional_context += f"\n\nOKF_BUNDLE_PATH: {okf_bundle_path}\n"
+
         if self.debug:
             extracted_file = mail_path.parent / f"{mail_path.stem}_extracted.md"
             extracted_file.write_text(mail_content, encoding="utf-8")
@@ -948,6 +952,17 @@ E-MAIL: {mail_content}
             if skill_path and skill_path.exists()
             else ""
         )
+        if email_class == "PAV_PO-Wechsel":
+            okf_skill_path = Path("skills/SKILL_okfv02.md")
+            if not okf_skill_path.exists():
+                okf_skill_path = (
+                    Path(__file__).parent.parent
+                    / "skills"
+                    / "SKILL_okfv02.md"
+                )
+            if okf_skill_path.exists():
+                skill_content += "\n\n" + okf_skill_path.read_text(encoding="utf-8")
+
         reg_prompt = f"""Verfasse eine Antwort auf die folgende E-Mail auf {detected_language} basierend auf der PERSONA, dem SKILL und dem bisherigen Konversationskontext. Nutze die Anrede '{honorific}'.
 
 PERSONA:
