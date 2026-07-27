@@ -2325,6 +2325,56 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#reale-implementierung-im-mcp-university-memory-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reale Implementierung im MCP University Memory System
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Reale Implementierung im MCP University Memory System">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-progressive-disclosure-uber-okf_bundle_path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Progressive Disclosure über OKF_BUNDLE_PATH
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-pflicht-prufkette-via-skill_okfv02md" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Pflicht-Prüfkette via SKILL_okfv02.md
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-beglaubigte-berechnungen-mit-execute_okf_computation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Beglaubigte Berechnungen mit execute_okf_computation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2693,6 +2743,56 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#reale-implementierung-im-mcp-university-memory-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reale Implementierung im MCP University Memory System
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Reale Implementierung im MCP University Memory System">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-progressive-disclosure-uber-okf_bundle_path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Progressive Disclosure über OKF_BUNDLE_PATH
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-pflicht-prufkette-via-skill_okfv02md" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Pflicht-Prüfkette via SKILL_okfv02.md
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-beglaubigte-berechnungen-mit-execute_okf_computation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Beglaubigte Berechnungen mit execute_okf_computation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2770,6 +2870,24 @@
      &gt; <strong>Quellen:</strong>
      &gt; [1] TH Köln Prüfungsordnung (§ 15 Rücktritt wegen Krankheit), hinterlegt in <code>/documents/examination-guidelines.md</code>.</li>
 </ol>
+<hr />
+<h2 id="reale-implementierung-im-mcp-university-memory-system">Reale Implementierung im MCP University Memory System<a class="headerlink" href="#reale-implementierung-im-mcp-university-memory-system" title="Permanent link">&para;</a></h2>
+<p>Im <strong>MCP University Memory System</strong> wurde dieses theoretische Modell vollumfänglich und durchsetzbar implementiert. Sobald eine E-Mail als <code>PAV_PO-Wechsel</code> klassifiziert wird, steuert das System das LLM über folgende konkrete Funktionalitäten und Mechanismen:</p>
+<h3 id="1-progressive-disclosure-uber-okf_bundle_path">1. Progressive Disclosure über <code>OKF_BUNDLE_PATH</code><a class="headerlink" href="#1-progressive-disclosure-uber-okf_bundle_path" title="Permanent link">&para;</a></h3>
+<p>Anstatt das gesamte OKF-Bundle (z. B. unter <code>D:/PAV/okf</code>) in den Kontext des LLM zu laden, übergibt der Controller den Pfad des Bundles über die Variable <code>OKF_BUNDLE_PATH</code> im zusätzlichen Kontext an den Agenten.
+- Der Agent liest zuerst die Übersichtsdatei <code>index.md</code> im OKF-Verzeichnis mittels des Tools <code>read_file(path="&lt;OKF_BUNDLE_PATH&gt;/index.md")</code>.
+- Das LLM identifiziert die relevanten Konzepte und liest diese gezielt und schrittweise (Multi-Hop über Markdown-Links) nach, z. B. <code>read_file(path="&lt;OKF_BUNDLE_PATH&gt;/concepts/exam-withdrawal-illness.md")</code>.</p>
+<h3 id="2-pflicht-prufkette-via-skill_okfv02md">2. Pflicht-Prüfkette via <code>SKILL_okfv02.md</code><a class="headerlink" href="#2-pflicht-prufkette-via-skill_okfv02md" title="Permanent link">&para;</a></h3>
+<p>Das System lädt automatisch den Skill <code>SKILL_okfv02.md</code> und hängt ihn an die Vorgaben des Agenten an. Der Agent durchläuft bei jedem geladenen Konzept zwingend folgende 4-stufige Prüfkette in seinen Zwischenschritten (Chain-of-Thought):
+1. <strong>Status-Prüfung:</strong> Ist <code>status: deprecated</code> oder <code>draft</code> im Frontmatter hinterlegt?
+2. <strong>Aktualitäts-Prüfung:</strong> Liegt das heutige Datum vor oder nach <code>stale_after</code>?
+3. <strong>Vertrauensstufe:</strong> Ist das Konzept <code>unverified</code>, <code>machine-confirmed</code> oder <code>human-reviewed</code> (Verifizierung über <code>verified</code>-Einträge)?
+4. <strong>Herkunftsnachweis:</strong> Die Aussagen in der Antwort-Mail werden unter präziser Nennung der in <code>sources</code> hinterlegten Originaldokumente belegt und zitiert.</p>
+<h3 id="3-beglaubigte-berechnungen-mit-execute_okf_computation">3. Beglaubigte Berechnungen mit <code>execute_okf_computation</code><a class="headerlink" href="#3-beglaubigte-berechnungen-mit-execute_okf_computation" title="Permanent link">&para;</a></h3>
+<p>Für mathematische und regelbasierte Bestimmungen (z. B. Fristen zur Abgabe von Attesten) wird dem LLM das Tool <code>execute_okf_computation</code> bereitgestellt:
+- <strong>Parameter:</strong> Das Tool erwartet den <code>concept_path</code> (Pfad zum Konzept-File) und die Eingabewerte als <code>parameters</code>.
+- <strong>Sicherheits-Gate:</strong> Das Tool lädt das Konzept, prüft selbstständig die Gültigkeit (<code>status</code>, <code>stale_after</code>) und führt den Berechnungs-Code aus dem Konzept deterministisch aus.
+- <strong>Attestierung:</strong> Das generierte <code>receipt</code> wird durch einen deterministischen Prüfer (Attester) verifiziert. Nur bei erfolgreicher Attestierung wird das Ergebnis zurückgegeben. Das LLM darf niemals selbst rechnen.</p>
 
 
 
