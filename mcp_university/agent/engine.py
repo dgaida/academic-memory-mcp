@@ -641,7 +641,6 @@ class Agent:
             str: Das attestierte Berechnungsergebnis oder eine Fehlermeldung.
         """
         try:
-            import yaml
             import frontmatter
             from datetime import datetime
             import re
@@ -662,7 +661,7 @@ class Agent:
             # 2. Check Status
             status = metadata.get("status", "stable")
             if status == "deprecated":
-                return f"FEHLER: Die Attested Computation ist veraltet (status: deprecated). Die Verwendung wird verweigert."
+                return "FEHLER: Die Attested Computation ist veraltet (status: deprecated). Die Verwendung wird verweigert."
 
             # 3. Check Freshness (stale_after)
             stale_after = metadata.get("stale_after")
