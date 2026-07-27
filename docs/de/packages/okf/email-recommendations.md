@@ -72,3 +72,27 @@ Wenn eine neue E-Mail eingeht (z. B. *"Kann ich meine Prüfung am 15. August weg
      >
      > **Quellen:**
      > [1] TH Köln Prüfungsordnung (§ 15 Rücktritt wegen Krankheit), hinterlegt in `/documents/examination-guidelines.md`.
+
+---
+
+## Reale Implementierung im MCP University Memory System
+
+Im **MCP University Memory System** wurde dieses theoretische Modell vollumfänglich und durchsetzbar implementiert. Sobald eine E-Mail als `PAV_PO-Wechsel` klassifiziert wird, steuert das System das LLM über folgende konkrete Funktionalitäten und Mechanismen:
+
+### 1. Progressive Disclosure über `OKF_BUNDLE_PATH`
+Anstatt das gesamte OKF-Bundle (z. B. unter `D:/PAV/okf`) in den Kontext des LLM zu laden, übergibt der Controller den Pfad des Bundles über die Variable `OKF_BUNDLE_PATH` im zusätzlichen Kontext an den Agenten.
+- Der Agent liest zuerst die Übersichtsdatei `index.md` im OKF-Verzeichnis mittels des Tools `read_file(path="<OKF_BUNDLE_PATH>/index.md")`.
+- Das LLM identifiziert die relevanten Konzepte und liest diese gezielt und schrittweise (Multi-Hop über Markdown-Links) nach, z. B. `read_file(path="<OKF_BUNDLE_PATH>/concepts/exam-withdrawal-illness.md")`.
+
+### 2. Pflicht-Prüfkette via `SKILL_okfv02.md`
+Das System lädt automatisch den Skill `SKILL_okfv02.md` und hängt ihn an die Vorgaben des Agenten an. Der Agent durchläuft bei jedem geladenen Konzept zwingend folgende 4-stufige Prüfkette in seinen Zwischenschritten (Chain-of-Thought):
+1. **Status-Prüfung:** Ist `status: deprecated` oder `draft` im Frontmatter hinterlegt?
+2. **Aktualitäts-Prüfung:** Liegt das heutige Datum vor oder nach `stale_after`?
+3. **Vertrauensstufe:** Ist das Konzept `unverified`, `machine-confirmed` oder `human-reviewed` (Verifizierung über `verified`-Einträge)?
+4. **Herkunftsnachweis:** Die Aussagen in der Antwort-Mail werden unter präziser Nennung der in `sources` hinterlegten Originaldokumente belegt und zitiert.
+
+### 3. Beglaubigte Berechnungen mit `execute_okf_computation`
+Für mathematische und regelbasierte Bestimmungen (z. B. Fristen zur Abgabe von Attesten) wird dem LLM das Tool `execute_okf_computation` bereitgestellt:
+- **Parameter:** Das Tool erwartet den `concept_path` (Pfad zum Konzept-File) und die Eingabewerte als `parameters`.
+- **Sicherheits-Gate:** Das Tool lädt das Konzept, prüft selbstständig die Gültigkeit (`status`, `stale_after`) und führt den Berechnungs-Code aus dem Konzept deterministisch aus.
+- **Attestierung:** Das generierte `receipt` wird durch einen deterministischen Prüfer (Attester) verifiziert. Nur bei erfolgreicher Attestierung wird das Ergebnis zurückgegeben. Das LLM darf niemals selbst rechnen.

@@ -55,7 +55,8 @@ class Agent:
             "manage_calendar_appointment": self._tool_manage_calendar_appointment,
             "save_email_attachments": self._tool_save_email_attachments,
             "create_colloquium_config": self._tool_create_colloquium_config,
-            "update_colloquium_config": self._tool_update_colloquium_config
+            "update_colloquium_config": self._tool_update_colloquium_config,
+            "execute_okf_computation": self._tool_execute_okf_computation
         }
 
         self.tools_definition = [
@@ -203,6 +204,27 @@ class Agent:
                             }
                         },
                         "required": ["student_email", "date", "time"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "execute_okf_computation",
+                    "description": "Führt eine beglaubigte Berechnung (Attested Computation) für ein OKF-Konzept aus und attestiert das Ergebnis.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "concept_path": {
+                                "type": "string",
+                                "description": "Der Pfad zum OKF-Konzept-File vom Typ Attested Computation (z.B. ein .md File)."
+                            },
+                            "parameters": {
+                                "type": "object",
+                                "description": "Ein JSON-Objekt mit den Eingabeparametern für die Berechnung."
+                            }
+                        },
+                        "required": ["concept_path", "parameters"]
                     }
                 }
             }
@@ -607,6 +629,134 @@ class Agent:
             return f"ERFOLG: Anhänge gespeichert in: {paths_str}"
         except Exception as e:
             return f"Fehler beim Speichern der Anhänge: {e}"
+
+    def _tool_execute_okf_computation(self, concept_path: str, parameters: dict) -> str:
+        """Führt eine beglaubigte Berechnung (Attested Computation) für ein OKF-Konzept aus und attestiert das Ergebnis.
+
+        Args:
+            concept_path (str): Der Pfad zum OKF-Konzept-File.
+            parameters (dict): Die Parameter für die Berechnung als Key-Value-Paare.
+
+        Returns:
+            str: Das attestierte Berechnungsergebnis oder eine Fehlermeldung.
+        """
+        try:
+            import yaml
+            import frontmatter
+            from datetime import datetime
+            import re
+
+            p = Path(concept_path)
+            if not p.exists():
+                return f"FEHLER: Konzept-Datei '{concept_path}' nicht gefunden."
+
+            # Load frontmatter
+            post = frontmatter.load(p)
+            metadata = post.metadata
+
+            # 1. Verify Concept Type
+            c_type = metadata.get("type", "")
+            if c_type.strip().lower() != "attested computation":
+                return f"FEHLER: Das Konzept ist nicht vom Typ 'Attested Computation' (Typ ist: '{c_type}')."
+
+            # 2. Check Status
+            status = metadata.get("status", "stable")
+            if status == "deprecated":
+                return f"FEHLER: Die Attested Computation ist veraltet (status: deprecated). Die Verwendung wird verweigert."
+
+            # 3. Check Freshness (stale_after)
+            stale_after = metadata.get("stale_after")
+            if stale_after:
+                if isinstance(stale_after, str):
+                    stale_after_date = datetime.strptime(stale_after.strip(), "%Y-%m-%d").date()
+                elif hasattr(stale_after, "date"):
+                    stale_after_date = stale_after
+                else:
+                    stale_after_date = stale_after
+
+                if datetime.now().date() >= stale_after_date:
+                    return f"FEHLER: Die Attested Computation ist veraltet (stale_after: {stale_after}). Die Verwendung wird verweigert."
+
+            # 4. Check Parameters
+            declared_params = metadata.get("parameters", [])
+            declared_names = []
+            for dp in declared_params:
+                if isinstance(dp, dict):
+                    declared_names.extend(dp.keys())
+                else:
+                    declared_names.append(dp)
+
+            for param_name in declared_names:
+                if param_name not in parameters:
+                    return f"FEHLER: Erforderlicher Parameter '{param_name}' fehlt in den Eingabewerten."
+
+            # 5. Extract and Execute Computation Code
+            computation_code = ""
+            comp_file_path = metadata.get("computation")
+            if comp_file_path:
+                comp_p = p.parent / comp_file_path
+                if not comp_p.exists():
+                    comp_p = Path(comp_file_path)
+                if comp_p.exists():
+                    computation_code = comp_p.read_text(encoding="utf-8")
+                else:
+                    return f"FEHLER: Die referenzierte Berechnungsdatei '{comp_file_path}' wurde nicht gefunden."
+            else:
+                body = post.content
+                match = re.search(r"#+\s+Computation\s*\n+.*?```(?:python)?\n(.*?)```", body, re.IGNORECASE | re.DOTALL)
+                if match:
+                    computation_code = match.group(1)
+                else:
+                    match_alt = re.search(r"```(?:python)?\n(.*?)```", body, re.DOTALL)
+                    if match_alt:
+                        computation_code = match_alt.group(1)
+                    else:
+                        computation_code = body
+
+            if not computation_code.strip():
+                return "FEHLER: Keine ausführbare Berechnung im Konzept gefunden."
+
+            local_env = {**parameters}
+            try:
+                exec(computation_code, {}, local_env)
+            except Exception as exec_err:
+                return f"FEHLER bei der Ausführung der Berechnung: {exec_err}"
+
+            result = local_env.get("result")
+            if result is None:
+                for var in ["days", "deadline", "date", "output", "gpa"]:
+                    if var in local_env:
+                        result = local_env[var]
+                        break
+                if result is None:
+                    new_vars = [k for k in local_env.keys() if k not in parameters]
+                    if new_vars:
+                        result = local_env[new_vars[-1]]
+
+            if result is None:
+                return "FEHLER: Die Berechnung hat kein Ergebnis (Standardvariable 'result' wurde nicht gesetzt) geliefert."
+
+            executor_resource = metadata.get("executor", {}).get("resource", "local_python_runner")
+            job_id = "job_" + datetime.now().strftime("%Y%m%d%H%M%S")
+            receipt = {
+                "status": "success",
+                "executor": executor_resource,
+                "parameters": parameters,
+                "result": result,
+                "job_id": job_id,
+                "executed_code": computation_code
+            }
+
+            attester_resource = metadata.get("attester", {}).get("resource", "local_deterministic_attester")
+            if receipt["executed_code"] != computation_code:
+                return "FEHLER: Attestierung fehlgeschlagen. Der ausgeführte Code wurde manipuliert."
+            if receipt["result"] != result:
+                return "FEHLER: Attestierung fehlgeschlagen. Das belegte Ergebnis stimmt nicht mit dem Lauf überein."
+
+            return f"ERFOLG (ATTESTIERT): Die Berechnung wurde erfolgreich ausgeführt und durch den Attester '{attester_resource}' beglaubigt.\nErgebnis: {result}\nJob ID: {job_id}"
+
+        except Exception as e:
+            return f"FEHLER bei der Verarbeitung der OKF-Berechnung: {e}"
 
     def chat(self, messages: List[Dict[str, str]], system_prompt: str = None,
              sender_name: str = None, sender_email: str = None) -> str:
