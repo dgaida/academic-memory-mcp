@@ -80,19 +80,19 @@ When a new email is received (e.g., *"Can I reschedule my exam on August 15th du
 In the **MCP University Memory System**, this theoretical model has been fully and enforceably implemented. Once an email is classified as `PAV_PO-Wechsel`, the system guides the LLM using the following concrete functionalities and mechanisms:
 
 ### 1. Progressive Disclosure via `OKF_BUNDLE_PATH`
-Instead of loading the entire OKF bundle (e.g., under `D:/PAV/okf`) into the LLM's context, the controller passes the bundle's directory path via the `OKF_BUNDLE_PATH` variable in the additional context to the agent.
-- The agent first reads the index overview file `index.md` in the OKF directory using the `read_file(path="<OKF_BUNDLE_PATH>/index.md")` tool.
-- The LLM identifies the relevant concepts and retrieves them in a targeted, incremental manner (multi-hop traversal of Markdown links), e.g., calling `read_file(path="<OKF_BUNDLE_PATH>/concepts/exam-withdrawal-illness.md")`.
+Instead of loading the entire OKF bundle (e.g., under `D:/PAV/okf`) into the LLM's context, the controller passes the bundle's directory path via the `OKF_BUNDLE_PATH` variable in the additional context to the agent.  
+- The agent first reads the index overview file `index.md` in the OKF directory using the `read_file(path="<OKF_BUNDLE_PATH>/index.md")` tool.  
+- The LLM identifies the relevant concepts and retrieves them in a targeted, incremental manner (multi-hop traversal of Markdown links), e.g., calling `read_file(path="<OKF_BUNDLE_PATH>/concepts/exam-withdrawal-illness.md")`.  
 
 ### 2. Mandatory Verification Pipeline via `SKILL_okfv02.md`
-The system automatically loads the `SKILL_okfv02.md` skill and appends it to the agent's instructions. When processing any retrieved concept, the agent is strictly required to execute the following 4-step check in its chain of thought:
-1. **Status Check:** Is `status: deprecated` or `draft` set in the frontmatter?
-2. **Freshness Check:** Is the current date before or after `stale_after`?
-3. **Trust Tier Check:** Is the concept `unverified`, `machine-confirmed`, or `human-reviewed` (verifying based on `verified` entries)?
-4. **Source Attribution:** Claims made in the response draft are cited and attribute precisely to original documents listed under the `sources` frontmatter field.
+The system automatically loads the `SKILL_okfv02.md` skill and appends it to the agent's instructions. When processing any retrieved concept, the agent is strictly required to execute the following 4-step check in its chain of thought:  
+1. **Status Check:** Is `status: deprecated` or `draft` set in the frontmatter?  
+2. **Freshness Check:** Is the current date before or after `stale_after`?  
+3. **Trust Tier Check:** Is the concept `unverified`, `machine-confirmed`, or `human-reviewed` (verifying based on `verified` entries)?  
+4. **Source Attribution:** Claims made in the response draft are cited and attribute precisely to original documents listed under the `sources` frontmatter field.  
 
 ### 3. Attested Calculations with `execute_okf_computation`
-For mathematical or rule-based determinations (such as calculating certificate submission deadlines), the agent is provided with the `execute_okf_computation` tool:
-- **Parameters:** The tool expects `concept_path` (path to the concept file) and input values passed as `parameters`.
-- **Safety Gate:** The tool loads the concept, verifies its status and freshness (`stale_after`), and executes the computation code from the concept deterministically.
-- **Attestation:** The generated `receipt` is validated by a deterministic verifier (Attester). Only upon successful attestation is the result returned. The LLM is strictly prohibited from executing arithmetic by itself.
+For mathematical or rule-based determinations (such as calculating certificate submission deadlines), the agent is provided with the `execute_okf_computation` tool:  
+- **Parameters:** The tool expects `concept_path` (path to the concept file) and input values passed as `parameters`.  
+- **Safety Gate:** The tool loads the concept, verifies its status and freshness (`stale_after`), and executes the computation code from the concept deterministically.  
+- **Attestation:** The generated `receipt` is validated by a deterministic verifier (Attester). Only upon successful attestation is the result returned. The LLM is strictly prohibited from executing arithmetic by itself.  
