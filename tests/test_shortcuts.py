@@ -123,6 +123,140 @@ def test_resolve_lnk_with_id_list():
             result = resolve_lnk(Path("/tmp/test.lnk"))
             assert result == Path("/tmp/target.txt")
 
+
+def test_resolve_lnk_id_list_too_short() -> None:
+    """Tests that resolve_lnk returns None when ID list exists but data is too short.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
+    flags = 0x01
+    data = b'L\x00\x00\x00' + b'\x00' * 16 + flags.to_bytes(4, 'little') + b'\x00' * 52
+    with patch("builtins.open", mock_open(read_data=data)):
+        assert resolve_lnk(Path("test.lnk")) is None
+
+
+def test_resolve_lnk_link_info_skip_fallback() -> None:
+    """Tests that resolve_lnk skips LinkInfo and falls back to RelativePath if absolute path fails.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
+    flags = 0x02 | 0x08
+    header = b'L\x00\x00\x00' + b'\x00' * 16 + flags.to_bytes(4, 'little') + b'\x00' * 52
+    link_info_size = 4
+    link_info = link_info_size.to_bytes(4, 'little')
+    rel_path_str = "target.txt"
+    rel_path_data = len(rel_path_str).to_bytes(2, 'little') + rel_path_str.encode('cp1252')
+    data = header + link_info + rel_path_data
+
+    with patch("builtins.open", mock_open(read_data=data)):
+        with patch("pathlib.Path.resolve", return_value=Path("/tmp/target.txt")):
+            result = resolve_lnk(Path("/tmp/test.lnk"))
+            assert result == Path("/tmp/target.txt")
+
+
+def test_resolve_lnk_with_name_and_relative_path() -> None:
+    """Tests that resolve_lnk correctly skips the Name field when HasName is set.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
+    flags = 0x04 | 0x08
+    header = b'L\x00\x00\x00' + b'\x00' * 16 + flags.to_bytes(4, 'little') + b'\x00' * 52
+    name_str = "MyLinkName"
+    name_data = len(name_str).to_bytes(2, 'little') + name_str.encode('cp1252')
+    rel_path_str = "target.txt"
+    rel_path_data = len(rel_path_str).to_bytes(2, 'little') + rel_path_str.encode('cp1252')
+    data = header + name_data + rel_path_data
+
+    with patch("builtins.open", mock_open(read_data=data)):
+        with patch("pathlib.Path.resolve", return_value=Path("/tmp/target.txt")):
+            result = resolve_lnk(Path("/tmp/test.lnk"))
+            assert result == Path("/tmp/target.txt")
+
+
+def test_resolve_lnk_with_name_unicode_and_relative_path() -> None:
+    """Tests that resolve_lnk correctly skips Name field under Unicode.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
+    flags = 0x04 | 0x08 | 0x80
+    header = b'L\x00\x00\x00' + b'\x00' * 16 + flags.to_bytes(4, 'little') + b'\x00' * 52
+    name_str = "MyLinkName"
+    name_data = len(name_str).to_bytes(2, 'little') + name_str.encode('utf-16le')
+    rel_path_str = "target.txt"
+    rel_path_data = len(rel_path_str).to_bytes(2, 'little') + rel_path_str.encode('utf-16le')
+    data = header + name_data + rel_path_data
+
+    with patch("builtins.open", mock_open(read_data=data)):
+        with patch("pathlib.Path.resolve", return_value=Path("/tmp/target.txt")):
+            result = resolve_lnk(Path("/tmp/test.lnk"))
+            assert result == Path("/tmp/target.txt")
+
+
+def test_resolve_lnk_resolve_exception() -> None:
+    """Tests that resolve_lnk handles resolve exception gracefully.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
+    flags = 0x08
+    header = b'L\x00\x00\x00' + b'\x00' * 16 + flags.to_bytes(4, 'little') + b'\x00' * 52
+    rel_path_str = "target.txt"
+    rel_path_data = len(rel_path_str).to_bytes(2, 'little') + rel_path_str.encode('cp1252')
+    data = header + rel_path_data
+
+    with patch("builtins.open", mock_open(read_data=data)):
+        with patch("pathlib.Path.resolve", side_effect=OSError("Resolve failed")):
+            result = resolve_lnk(Path("/tmp/test.lnk"))
+            assert result is None
+
+
+def test_resolve_path_non_existent_lnk() -> None:
+    """Tests resolve_path on non-existent .lnk file.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
+    lnk = Path("non_existent_file.lnk")
+    assert resolve_path(lnk) == lnk
+
+
+def test_resolve_path_symlink_exception() -> None:
+    """Tests that resolve_path returns original path when symlink resolution raises exception.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
+    with patch("pathlib.Path.exists", return_value=True):
+        with patch("pathlib.Path.is_symlink", return_value=True):
+            with patch("pathlib.Path.resolve", side_effect=OSError("Symlink loop/broken")):
+                p = Path("symlink_broken")
+                assert resolve_path(p) == p
+
 def test_resolve_lnk_unicode_relative_path():
     """Test function docstring."""
     # flags & 0x08 (HasRelativePath) and flags & 0x80 (IsUnicode)
