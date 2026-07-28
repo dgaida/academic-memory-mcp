@@ -55,3 +55,54 @@ def test_learn_module_aliases_empty(mock_deps):
     store.get_all_nodes.return_value = []
     learner.learn_module_aliases()
     assert not summarizer._chat_request.called
+
+def test_learn_from_emails_edge_cases(mock_deps, tmp_path):
+    """Test empty email parse response and fallback email-only regex.
+
+    Covers lines: 37 (empty content) and 52-54 (email-only fallback).
+    """
+    store, summarizer = mock_deps
+    learner = OntologyLearner(store, summarizer)
+
+    email_dir = tmp_path / "emails_empty"
+    email_dir.mkdir()
+    msg_file = email_dir / "empty.msg"
+    msg_file.touch()
+    fallback_file = email_dir / "fallback.eml"
+    fallback_file.touch()
+
+    with patch('pathlib.Path.rglob', return_value=[msg_file, fallback_file]):
+        with patch.object(learner.mail_parser, 'parse') as mock_parse:
+            # First file parses to empty content, second parses to from email only
+            mock_parse.side_effect = [
+                "",
+                "From: fallback@th-koeln.de"
+            ]
+            # Execute
+            learner.learn_from_emails(email_dir)
+
+            # Since there is no display name or names list length > 1, no alias added
+            assert not store.add_alias.called
+
+def test_learn_module_aliases_empty_and_exception_handling(mock_deps):
+    """Test empty LLM response and invalid json parsing in learn_module_aliases.
+
+    Covers lines: 87 (empty LLM response) and 101-102 (exception on json loads).
+    """
+    store, summarizer = mock_deps
+    learner = OntologyLearner(store, summarizer)
+
+    store.get_all_nodes.return_value = [
+        {'name': 'KI', 'type': 'Modul'},
+        {'name': 'ALDA', 'type': 'Modul'}
+    ]
+
+    # 1. Empty LLM Response
+    summarizer._chat_request.return_value = ""
+    learner.learn_module_aliases()
+    assert not store.add_alias.called
+
+    # 2. JSON exception/invalid syntax response
+    summarizer._chat_request.return_value = "[invalid json"
+    learner.learn_module_aliases()
+    assert not store.add_alias.called
