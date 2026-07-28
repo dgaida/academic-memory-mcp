@@ -2876,20 +2876,20 @@
 <h2 id="actual-implementation-in-the-mcp-university-memory-system">Actual Implementation in the MCP University Memory System<a class="headerlink" href="#actual-implementation-in-the-mcp-university-memory-system" title="Permanent link">&para;</a></h2>
 <p>In the <strong>MCP University Memory System</strong>, this theoretical model has been fully and enforceably implemented. Once an email is classified as <code>PAV_PO-Wechsel</code>, the system guides the LLM using the following concrete functionalities and mechanisms:</p>
 <h3 id="1-progressive-disclosure-via-okf_bundle_path">1. Progressive Disclosure via <code>OKF_BUNDLE_PATH</code><a class="headerlink" href="#1-progressive-disclosure-via-okf_bundle_path" title="Permanent link">&para;</a></h3>
-<p>Instead of loading the entire OKF bundle (e.g., under <code>D:/PAV/okf</code>) into the LLM's context, the controller passes the bundle's directory path via the <code>OKF_BUNDLE_PATH</code> variable in the additional context to the agent.
-- The agent first reads the index overview file <code>index.md</code> in the OKF directory using the <code>read_file(path="&lt;OKF_BUNDLE_PATH&gt;/index.md")</code> tool.
-- The LLM identifies the relevant concepts and retrieves them in a targeted, incremental manner (multi-hop traversal of Markdown links), e.g., calling <code>read_file(path="&lt;OKF_BUNDLE_PATH&gt;/concepts/exam-withdrawal-illness.md")</code>.</p>
+<p>Instead of loading the entire OKF bundle (e.g., under <code>D:/PAV/okf</code>) into the LLM's context, the controller passes the bundle's directory path via the <code>OKF_BUNDLE_PATH</code> variable in the additional context to the agent.<br />
+- The agent first reads the index overview file <code>index.md</code> in the OKF directory using the <code>read_file(path="&lt;OKF_BUNDLE_PATH&gt;/index.md")</code> tool.<br />
+- The LLM identifies the relevant concepts and retrieves them in a targeted, incremental manner (multi-hop traversal of Markdown links), e.g., calling <code>read_file(path="&lt;OKF_BUNDLE_PATH&gt;/concepts/exam-withdrawal-illness.md")</code>.  </p>
 <h3 id="2-mandatory-verification-pipeline-via-skill_okfv02md">2. Mandatory Verification Pipeline via <code>SKILL_okfv02.md</code><a class="headerlink" href="#2-mandatory-verification-pipeline-via-skill_okfv02md" title="Permanent link">&para;</a></h3>
-<p>The system automatically loads the <code>SKILL_okfv02.md</code> skill and appends it to the agent's instructions. When processing any retrieved concept, the agent is strictly required to execute the following 4-step check in its chain of thought:
-1. <strong>Status Check:</strong> Is <code>status: deprecated</code> or <code>draft</code> set in the frontmatter?
-2. <strong>Freshness Check:</strong> Is the current date before or after <code>stale_after</code>?
-3. <strong>Trust Tier Check:</strong> Is the concept <code>unverified</code>, <code>machine-confirmed</code>, or <code>human-reviewed</code> (verifying based on <code>verified</code> entries)?
-4. <strong>Source Attribution:</strong> Claims made in the response draft are cited and attribute precisely to original documents listed under the <code>sources</code> frontmatter field.</p>
+<p>The system automatically loads the <code>SKILL_okfv02.md</code> skill and appends it to the agent's instructions. When processing any retrieved concept, the agent is strictly required to execute the following 4-step check in its chain of thought:<br />
+1. <strong>Status Check:</strong> Is <code>status: deprecated</code> or <code>draft</code> set in the frontmatter?<br />
+2. <strong>Freshness Check:</strong> Is the current date before or after <code>stale_after</code>?<br />
+3. <strong>Trust Tier Check:</strong> Is the concept <code>unverified</code>, <code>machine-confirmed</code>, or <code>human-reviewed</code> (verifying based on <code>verified</code> entries)?<br />
+4. <strong>Source Attribution:</strong> Claims made in the response draft are cited and attribute precisely to original documents listed under the <code>sources</code> frontmatter field.  </p>
 <h3 id="3-attested-calculations-with-execute_okf_computation">3. Attested Calculations with <code>execute_okf_computation</code><a class="headerlink" href="#3-attested-calculations-with-execute_okf_computation" title="Permanent link">&para;</a></h3>
-<p>For mathematical or rule-based determinations (such as calculating certificate submission deadlines), the agent is provided with the <code>execute_okf_computation</code> tool:
-- <strong>Parameters:</strong> The tool expects <code>concept_path</code> (path to the concept file) and input values passed as <code>parameters</code>.
-- <strong>Safety Gate:</strong> The tool loads the concept, verifies its status and freshness (<code>stale_after</code>), and executes the computation code from the concept deterministically.
-- <strong>Attestation:</strong> The generated <code>receipt</code> is validated by a deterministic verifier (Attester). Only upon successful attestation is the result returned. The LLM is strictly prohibited from executing arithmetic by itself.</p>
+<p>For mathematical or rule-based determinations (such as calculating certificate submission deadlines), the agent is provided with the <code>execute_okf_computation</code> tool:<br />
+- <strong>Parameters:</strong> The tool expects <code>concept_path</code> (path to the concept file) and input values passed as <code>parameters</code>.<br />
+- <strong>Safety Gate:</strong> The tool loads the concept, verifies its status and freshness (<code>stale_after</code>), and executes the computation code from the concept deterministically.<br />
+- <strong>Attestation:</strong> The generated <code>receipt</code> is validated by a deterministic verifier (Attester). Only upon successful attestation is the result returned. The LLM is strictly prohibited from executing arithmetic by itself.  </p>
 
 
 
