@@ -112,3 +112,49 @@ def test_file_management(store):
     
     store.delete_file(fid)
     assert store.get_file("test.txt") is None
+
+
+def test_deadlines_management(store: MetadataStore) -> None:
+    """Tests get_all_deadlines and delete_deadline functions of MetadataStore.
+
+    Args:
+        store (MetadataStore): The metadata store fixture.
+
+    Returns:
+        None
+    """
+    with store._get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO deadlines (title, due_date, item_type, item_id) VALUES (?, ?, ?, ?)",
+            ("Thesis Submission", 1700000000.0, "student", 1)
+        )
+        conn.commit()
+
+    deadlines = store.get_all_deadlines()
+    assert len(deadlines) == 1
+    assert deadlines[0]["title"] == "Thesis Submission"
+
+    deadline_id = deadlines[0]["id"]
+    store.delete_deadline(deadline_id)
+
+    assert len(store.get_all_deadlines()) == 0
+
+
+def test_delete_edge_by_id(store: MetadataStore) -> None:
+    """Tests delete_edge_by_id function of MetadataStore.
+
+    Args:
+        store (MetadataStore): The metadata store fixture.
+
+    Returns:
+        None
+    """
+    id1, _ = store.upsert_node("N1", "T")
+    id2, _ = store.upsert_node("N2", "T")
+    edge_id, created = store.upsert_edge(id1, id2, "WORKS_WITH", {"since": "2020"})
+    assert created is True
+
+    assert len(store.get_all_edges()) == 1
+    store.delete_edge_by_id(edge_id)
+    assert len(store.get_all_edges()) == 0

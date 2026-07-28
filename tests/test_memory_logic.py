@@ -39,5 +39,20 @@ class TestMemoryLogic(unittest.TestCase):
         self.assertEqual(mapping["A"], "A")
         self.assertEqual(mapping["B"], "B")
 
+    def test_resolve_memory_index_names_exception(self) -> None:
+        """Tests that resolve_memory_index_names handles Path conversion exceptions.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+        class_paths = {
+            "ClassWithIntPath": 123
+        }
+        mapping = resolve_memory_index_names(class_paths)
+        self.assertEqual(mapping["ClassWithIntPath"], "ClassWithIntPath")
+
 if __name__ == "__main__":
     unittest.main()
