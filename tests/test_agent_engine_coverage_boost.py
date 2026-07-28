@@ -491,3 +491,296 @@ def test_tool_update_colloquium_config_potential_path_sent_items(mock_agent_setu
     with open(config_path, "r", encoding="utf-8") as f:
         data = json.load(f)
     assert data["colloquium"]["date"] == "12.12.2026"
+
+
+def test_tool_manage_calendar_appointment_nested_draft_folder_search(mock_agent_setup):
+    """Tests finding target_folder via recursive Inbox search on draft folders.
+
+    Covers lines: 380-383.
+    """
+    agent, _, _, _ = mock_agent_setup
+
+    with patch.dict("sys.modules", {"win32com": MagicMock(), "win32com.client": MagicMock()}):
+        import win32com.client
+        mock_outlook = win32com.client.Dispatch.return_value
+        mock_ns = mock_outlook.GetNamespace.return_value
+
+        mock_accounts = MagicMock()
+        mock_accounts.Count = 1
+        mock_account = MagicMock()
+        mock_account.SmtpAddress = "me@example.com"
+        mock_accounts.Item.return_value = mock_account
+        mock_ns.Accounts = mock_accounts
+
+        mock_root = mock_account.DeliveryStore.GetRootFolder.return_value
+        mock_calendar = MagicMock()
+        mock_calendar.Name = "Kalender (Nur dieser Computer)"
+        mock_calendar.FolderPath = "\\me@example.com\\Calendar"
+
+        # Inbox has folder named "Work in Progress"
+        mock_inbox = MagicMock()
+        mock_inbox.Name = "Inbox"
+
+        mock_wip = MagicMock()
+        mock_wip.Name = "Work in Progress"
+        mock_wip.FolderPath = "\\me@example.com\\Inbox\\Work in Progress"
+        mock_inbox.Folders = [mock_wip]
+
+        # Root folders contains Calendar and Inbox
+        mock_root.Folders.Count = 2
+        mock_root.Folders.Item.side_effect = lambda idx: mock_calendar if idx == 1 else mock_inbox
+        mock_root.Folders.__iter__.return_value = [mock_calendar, mock_inbox]
+
+        mock_store = MagicMock()
+        mock_store.DisplayName = "me@example.com"
+        mock_store.GetRootFolder.return_value = mock_root
+        mock_ns.Stores = [mock_store]
+
+        # Free slot
+        mock_calendar.Items.Restrict.return_value = []
+
+        mock_draft_item = MagicMock()
+        mock_wip.Items.Add.return_value = mock_draft_item
+
+        res = agent._tool_manage_calendar_appointment("2030-10-01 10:00", "2030-10-01 10:30", "S", "stud@example.com")
+        assert "ERFOLG: Termin-Entwurf" in res
+        mock_wip.Items.Add.assert_called_with(1)
+
+
+def test_tool_create_colloquium_config_non_existent_grandparent(mock_agent_setup, tmp_path):
+    """Tests _tool_create_colloquium_config creating parent folders if grandparent does not exist.
+
+    Covers line: 489.
+    """
+    agent, _, _, _ = mock_agent_setup
+
+    grandparent_dir = tmp_path / "new_grandparent"
+    email_path = grandparent_dir / "parent" / "email.msg"
+
+    # Executing when grandparent doesn't exist
+    assert not grandparent_dir.exists()
+    res = agent._tool_create_colloquium_config(str(email_path), "bachelor.pdf")
+
+    assert "ERFOLG" in res
+    assert grandparent_dir.exists()
+    assert (grandparent_dir / "config.json").exists()
+
+
+def test_tool_execute_okf_computation_comprehensive(mock_agent_setup, tmp_path):
+    """Tests _tool_execute_okf_computation under various edge cases to boost coverage.
+
+    Covers lines: 650, 670, 672, 684, 696-702, 709-713, 716, 721-722, 726-733, 736, 751, 753, 757-758.
+    """
+    agent, _, _, _ = mock_agent_setup
+
+    # 1. Concept file does not exist (covers line 650)
+    res = agent._tool_execute_okf_computation("non_existent_file.md", {})
+    assert "FEHLER: Konzept-Datei" in res
+    assert "nicht gefunden" in res
+
+    # Helper function to create concept files with custom metadata and body
+    def create_concept_file(filename, metadata, content=""):
+        p = tmp_path / filename
+        import frontmatter
+        post = frontmatter.Post(content, **metadata)
+        p.write_text(frontmatter.dumps(post), encoding="utf-8")
+        return str(p)
+
+    # 2. Freshness check: stale_after handling (covers lines 670, 672)
+    # 2a. Past date as raw string
+    stale_str_path = create_concept_file(
+        "stale_str.md",
+        {"type": "Attested Computation", "stale_after": "2020-01-01"}
+    )
+    res = agent._tool_execute_okf_computation(stale_str_path, {})
+    assert "FEHLER: Die Attested Computation ist veraltet" in res
+
+    # 2b. Past date as custom object with hasattr .date (mocked using a patch after load)
+    stale_obj_path = create_concept_file(
+        "stale_obj.md",
+        {"type": "Attested Computation", "stale_after": "2020-01-01"} # Will patch during execution
+    )
+    class CustomDate:
+        def __init__(self, d):
+            self._d = d
+        @property
+        def date(self):
+            return self._d
+        def __str__(self):
+            return str(self._d)
+        def __le__(self, other):
+            return True
+        def __ge__(self, other):
+            return False
+
+    import frontmatter
+    original_load = frontmatter.load
+    def mock_load_custom_date(filepath, *args, **kwargs):
+        post = original_load(filepath, *args, **kwargs)
+        if "stale_obj.md" in str(filepath):
+            post.metadata["stale_after"] = CustomDate(datetime(2020, 1, 1).date())
+        elif "stale_other.md" in str(filepath):
+            post.metadata["stale_after"] = datetime(2020, 1, 1).date()
+        return post
+
+    with patch('frontmatter.load', side_effect=mock_load_custom_date):
+        res = agent._tool_execute_okf_computation(stale_obj_path, {})
+        assert "FEHLER: Die Attested Computation ist veraltet" in res
+
+        # 2c. Other type (raw datetime.date or anything else not covered by previous conditions)
+        stale_other_path = create_concept_file(
+            "stale_other.md",
+            {"type": "Attested Computation", "stale_after": "2020-01-01"}
+        )
+        res = agent._tool_execute_okf_computation(stale_other_path, {})
+        assert "FEHLER: Die Attested Computation ist veraltet" in res
+
+    # 3. Parameter validation (covers line 684)
+    # Declared parameters: ["paramA", {"paramB": "desc"}]
+    param_validation_path = create_concept_file(
+        "param_val.md",
+        {"type": "Attested Computation", "parameters": ["paramA", {"paramB": "desc"}]}
+    )
+    # Missing paramB
+    res = agent._tool_execute_okf_computation(param_validation_path, {"paramA": 10})
+    assert "FEHLER: Erforderlicher Parameter 'paramB' fehlt" in res
+
+    # 4. Computation file path logic (covers lines 696-702)
+    # 4a. Referencing missing computation file
+    missing_comp_path = create_concept_file(
+        "missing_comp.md",
+        {"type": "Attested Computation", "computation": "missing_script.py"}
+    )
+    res = agent._tool_execute_okf_computation(missing_comp_path, {})
+    assert "FEHLER: Die referenzierte Berechnungsdatei" in res
+
+    # 4b. Referencing existing computation file (success run)
+    existing_script = tmp_path / "existing_script.py"
+    existing_script.write_text("result = paramX * 2", encoding="utf-8")
+    existing_comp_path = create_concept_file(
+        "existing_comp.md",
+        {"type": "Attested Computation", "computation": str(existing_script), "parameters": ["paramX"]}
+    )
+    res = agent._tool_execute_okf_computation(existing_comp_path, {"paramX": 5})
+    assert "ERFOLG (ATTESTIERT)" in res
+    assert "Ergebnis: 10" in res
+
+    # 5. Fallback regex matching in body (covers lines 709-713)
+    # 5a. Match alternative ```python block (no computation header)
+    regex_alt_path = create_concept_file(
+        "regex_alt.md",
+        {"type": "Attested Computation", "parameters": ["paramY"]},
+        content="Some description text.\n```python\nresult = paramY + 1\n```"
+    )
+    res = agent._tool_execute_okf_computation(regex_alt_path, {"paramY": 20})
+    assert "ERFOLG (ATTESTIERT)" in res
+    assert "Ergebnis: 21" in res
+
+    # 5b. Match pure body fallback (no backticks at all)
+    body_fallback_path = create_concept_file(
+        "body_fallback.md",
+        {"type": "Attested Computation", "parameters": ["paramZ"]},
+        content="result = paramZ + 2"
+    )
+    res = agent._tool_execute_okf_computation(body_fallback_path, {"paramZ": 30})
+    assert "ERFOLG (ATTESTIERT)" in res
+    assert "Ergebnis: 32" in res
+
+    # 5c. Empty computation code error
+    empty_code_path = create_concept_file(
+        "empty_code.md",
+        {"type": "Attested Computation"},
+        content="   \n   \n"
+    )
+    res = agent._tool_execute_okf_computation(empty_code_path, {})
+    assert "FEHLER: Keine ausführbare Berechnung" in res
+
+    # 6. Python script execution errors (covers line 716)
+    exec_error_path = create_concept_file(
+        "exec_err.md",
+        {"type": "Attested Computation"},
+        content="raise ZeroDivisionError('cannot divide by zero')"
+    )
+    res = agent._tool_execute_okf_computation(exec_error_path, {})
+    assert "FEHLER bei der Ausführung der Berechnung: cannot divide by zero" in res
+
+    # 7. No result or standard variable matched (covers lines 721-722, 726-733)
+    # 7a. Matching variable from fallback list: "days", "deadline", "date", "output", "gpa"
+    fallback_var_path = create_concept_file(
+        "fallback_var.md",
+        {"type": "Attested Computation"},
+        content="gpa = 3.9"
+    )
+    res = agent._tool_execute_okf_computation(fallback_var_path, {})
+    assert "ERFOLG (ATTESTIERT)" in res
+    assert "Ergebnis: 3.9" in res
+
+    # 7b. Matching any new variable defined in script that is not in parameters
+    new_var_path = create_concept_file(
+        "new_var.md",
+        {"type": "Attested Computation", "parameters": ["paramA"]},
+        content="custom_gpa = paramA * 5"
+    )
+    res = agent._tool_execute_okf_computation(new_var_path, {"paramA": 2})
+    assert "ERFOLG (ATTESTIERT)" in res
+    assert "Ergebnis: 10" in res
+
+    # 7c. No result variable found at all (line 731-733)
+    no_var_path = create_concept_file(
+        "no_var.md",
+        {"type": "Attested Computation", "parameters": ["paramA"]},
+        content="x = paramA"
+    )
+    # Pass parameter "paramA" and "x"
+    res = agent._tool_execute_okf_computation(no_var_path, {"paramA": 1, "x": 1})
+    assert "FEHLER: Die Berechnung hat kein Ergebnis" in res
+
+    # 8. Receipt and attestation errors (covers lines 751, 753)
+    class MismatchedResult:
+        def __ne__(self, other):
+            return True
+        def __eq__(self, other):
+            return False
+
+    tamp_res_path = create_concept_file(
+        "tamp_res.md",
+        {"type": "Attested Computation"},
+        content="result = 42"
+    )
+    with patch('builtins.exec') as mock_exec:
+        # When exec runs, let's populate result with MismatchedResult
+        def exec_side_effect(code, globals, locals):
+            locals["result"] = MismatchedResult()
+        mock_exec.side_effect = exec_side_effect
+        res = agent._tool_execute_okf_computation(tamp_res_path, {})
+        assert "FEHLER: Attestierung fehlgeschlagen" in res
+
+    # 8b. Mismatched code error (covers line 751)
+    class MismatchedCodeStr(str):
+        def __eq__(self, other):
+            return False
+        def __ne__(self, other):
+            return True
+
+    tamp_code_path = create_concept_file(
+        "tamp_code.md",
+        {"type": "Attested Computation"},
+        content="result = 100"
+    )
+    # We patch frontmatter.load to return a MismatchedCodeStr as content
+    original_frontmatter_load = frontmatter.load
+    def mock_frontmatter_load_tamp_code(filepath, *args, **kwargs):
+        post = original_frontmatter_load(filepath, *args, **kwargs)
+        if "tamp_code.md" in str(filepath):
+            post.content = MismatchedCodeStr(post.content)
+        return post
+
+    with patch('frontmatter.load', side_effect=mock_frontmatter_load_tamp_code):
+        res = agent._tool_execute_okf_computation(tamp_code_path, {})
+        assert "FEHLER: Attestierung fehlgeschlagen. Der ausgeführte Code wurde manipuliert." in res
+
+    # 9. General exception (covers line 757-758)
+    # We can pass something that causes an unexpected exception in load
+    with patch('frontmatter.load', side_effect=ValueError("Load parse error")):
+        res = agent._tool_execute_okf_computation(tamp_res_path, {})
+        assert "FEHLER bei der Verarbeitung der OKF-Berechnung: Load parse error" in res

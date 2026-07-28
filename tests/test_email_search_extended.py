@@ -2,6 +2,7 @@
 
 import pytest
 import yaml
+import functools
 from pathlib import Path
 from datetime import datetime
 from unittest.mock import MagicMock, patch
@@ -407,6 +408,49 @@ def test_get_suggestions_detailed_matching(mock_config: MagicMock) -> None:
         # Testet passender string to ("StringRecipient" via "Recip")
         suggs = engine.get_suggestions("Recip")
         assert "StringRecipient" in suggs
+
+def test_search_and_cache_clear_attribute_error_boost(mock_config: MagicMock) -> None:
+    """Coverage boost for search query falsy, Attribute error on cache clear, and add index elements.
+
+    Covers lines: 122-123 (to list formatting with string), 138-139 (cache clear attribute error) and 256 (falsy search).
+    """
+    cache_file = mock_config.data_dir / "cache" / "test_cache.json"
+    with patch("mcp_university.utils.email_search.get_config", return_value=mock_config):
+        engine = EmailSearchEngine(cache_file=cache_file)
+
+        # 1. falsy search query
+        assert engine.search("") == []
+        assert engine.search(None) == []
+
+        # 2. force AttributeError on suggestions LRU cache clear
+        # Replace get_suggestions with a plain function (which has no cache_clear)
+        def dummy_get_suggestions(partial_query: str):
+            return []
+        engine.get_suggestions = dummy_get_suggestions
+        # Triggering save suggestions cache should hit line 138-139 except block safely
+        engine._save_suggestions_cache()
+
+        # 3. add index elements with missing/empty dict fields and string recipient to cover lines 122-123
+        engine.index = [
+            {
+                "from_name": "Albert",
+                "from": "albert@test.com",
+                "to": [
+                    {"name": "", "email": ""},  # empty values should be skipped gracefully
+                    {"name": "Robert"},         # only name
+                    {"email": "robert@test.com"}, # only email
+                    "StringRecipient"           # string recipient to cover lines 122-123
+                ]
+            }
+        ]
+        engine.suggestions_cache = set()
+        engine._add_index_elements_to_suggestions()
+        assert "Albert" in engine.suggestions_cache
+        assert "albert@test.com" in engine.suggestions_cache
+        assert "Robert" in engine.suggestions_cache
+        assert "robert@test.com" in engine.suggestions_cache
+        assert "StringRecipient" in engine.suggestions_cache
+        assert "" not in engine.suggestions_cache
 
 if __name__ == "__main__":
     pytest.main([__file__])
