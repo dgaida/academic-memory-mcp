@@ -2665,27 +2665,27 @@
 <h2 id="funktionsweise">Funktionsweise<a class="headerlink" href="#funktionsweise" title="Permanent link">&para;</a></h2>
 <p>Die E-Mail-Schnellsuche basiert auf einem zweistufigen Caching-System, das aus zwei lokalen JSON-Dateien im Verzeichnis <code>data/cache/</code> besteht.</p>
 <h3 id="1-der-haupt-suchindex-datacacheemail_search_cachejson">1. Der Haupt-Suchindex (<code>data/cache/email_search_cache.json</code>)<a class="headerlink" href="#1-der-haupt-suchindex-datacacheemail_search_cachejson" title="Permanent link">&para;</a></h3>
-<p>Dieser Index speichert alle indizierten E-Mails als eine JSON-Liste von Objekten. Die Quelldaten dafür sind <code>.msg</code>- und <code>.eml</code>-Dateien, die aus den in den folgenden Konfigurationsdateien definierten Pfaden stammen:
-*   <code>config/classifier_paths.yaml</code> (bzw. <code>config/classifier_paths.yaml.example</code> als Fallback): Definiert die Pfade für die jeweiligen E-Mail-Klassen unter <code>class_paths</code> (z. B. <code>BachelorThesis</code>, <code>MasterThesis</code>, <code>PraxisProjekt</code> etc.).
-*   <code>config/train_test_folders.yaml</code>: Definiert die Pfade <code>train_path</code> und <code>test_path</code>.</p>
+<p>Dieser Index speichert alle indizierten E-Mails als eine JSON-Liste von Objekten. Die Quelldaten dafür sind <code>.msg</code>- und <code>.eml</code>-Dateien, die aus den in den folgenden Konfigurationsdateien definierten Pfaden stammen:<br />
+<em>   <code>config/classifier_paths.yaml</code> (bzw. <code>config/classifier_paths.yaml.example</code> als Fallback): Definiert die Pfade für die jeweiligen E-Mail-Klassen unter <code>class_paths</code> (z. B. <code>BachelorThesis</code>, <code>MasterThesis</code>, <code>PraxisProjekt</code> etc.).<br />
+</em>   <code>config/train_test_folders.yaml</code>: Definiert die Pfade <code>train_path</code> und <code>test_path</code>.  </p>
 <p>Der Cache wird beim ersten Start oder bei Vorhandensein neuer E-Mails in diesen Pfaden automatisch aktualisiert. Jedes Objekt im JSON-Array von <code>email_search_cache.json</code> besitzt die folgenden konkreten Pfade/Attribute:</p>
 <ul>
-<li><code>subject</code>: Der Betreff der E-Mail (String).</li>
-<li><code>from</code>: Die E-Mail-Adresse des Absenders (String).</li>
-<li><code>from_name</code>: Der Name des Absenders (String).</li>
-<li><code>to</code>: Eine Liste der Empfänger. Jedes Element in dieser Liste ist entweder:<ul>
-<li>Ein JSON-Objekt mit den Pfaden:<ul>
-<li><code>to[].name</code>: Der Name des Empfängers.</li>
-<li><code>to[].email</code>: Die E-Mail-Adresse des Empfängers.</li>
+<li><code>subject</code>: Der Betreff der E-Mail (String).  </li>
+<li><code>from</code>: Die E-Mail-Adresse des Absenders (String).  </li>
+<li><code>from_name</code>: Der Name des Absenders (String).  </li>
+<li><code>to</code>: Eine Liste der Empfänger. Jedes Element in dieser Liste ist entweder:  <ul>
+<li>Ein JSON-Objekt mit den Pfaden:  <ul>
+<li><code>to[].name</code>: Der Name des Empfängers.  </li>
+<li><code>to[].email</code>: Die E-Mail-Adresse des Empfängers.  </li>
 </ul>
 </li>
-<li>Oder direkt ein String (z. B. eine reine E-Mail-Adresse).</li>
+<li>Oder direkt ein String (z. B. eine reine E-Mail-Adresse).  </li>
 </ul>
 </li>
-<li><code>date</code>: Das Datum der E-Mail im ISO-Format (String).</li>
-<li><code>path</code>: Der absolute Dateipfad zur ursprünglichen E-Mail-Datei auf der Festplatte (String).</li>
-<li><code>filename</code>: Der Dateiname der E-Mail (String).</li>
-<li><code>folder</code>: Die Klassifizierung des Ordners (String, entweder <code>"Inbox"</code> oder <code>"SentItems"</code>), ermittelt anhand der Pfad-Segmente.</li>
+<li><code>date</code>: Das Datum der E-Mail im ISO-Format (String).  </li>
+<li><code>path</code>: Der absolute Dateipfad zur ursprünglichen E-Mail-Datei auf der Festplatte (String).  </li>
+<li><code>filename</code>: Der Dateiname der E-Mail (String).  </li>
+<li><code>folder</code>: Die Klassifizierung des Ordners (String, entweder <code>"Inbox"</code> oder <code>"SentItems"</code>), ermittelt anhand der Pfad-Segmente.  </li>
 </ul>
 <p>Dies ermöglicht eine extrem performante Suche, da nicht bei jeder Anfrage das Dateisystem durchsucht werden muss.</p>
 <h3 id="intelligente-zuordnung-und-sentitems-erkennung">Intelligente Zuordnung und SentItems-Erkennung<a class="headerlink" href="#intelligente-zuordnung-und-sentitems-erkennung" title="Permanent link">&para;</a></h3>
@@ -2699,20 +2699,20 @@
 <p>Um Verzögerungen bei der Eingabe von Suchbegriffen zu vermeiden, verwendet die GUI einen dedizierten, persistierten Cache für Vorschläge (<code>data/cache/suggestions_cache.json</code>).</p>
 <p>Diese Datei enthält ein flaches JSON-Array von Strings (z. B. <code>["Albert", "albert@test.com", "Informatik", ...]</code>), das wie folgt aufgebaut und erweitert wird:</p>
 <ul>
-<li><strong>Initialisierung:</strong> Beim ersten Start wird der Vorschlags-Cache mit einer Liste von im Hochschulkontext üblichen Standardbegriffen vorbefüllt und automatisch um alle Namen und E-Mail-Adressen aus dem Haupt-Index (<code>data/cache/email_search_cache.json</code>) erweitert. Konkret werden dafür folgende Werte herangezogen:<ul>
-<li>Die Werte des Schlüssels <code>from_name</code> (Absendername).</li>
-<li>Die Werte des Schlüssels <code>from</code> (Absender-E-Mail).</li>
-<li>Die Werte aus der Empfängerliste <code>to</code>:<ul>
-<li>Der Pfad/Schlüssel <code>to[].name</code> (Empfängername) von Objekten in der Empfängerliste.</li>
-<li>Der Pfad/Schlüssel <code>to[].email</code> (Empfänger-E-Mail) von Objekten in der Empfängerliste.</li>
-<li>Direkte String-Elemente der Empfängerliste.</li>
+<li><strong>Initialisierung:</strong> Beim ersten Start wird der Vorschlags-Cache mit einer Liste von im Hochschulkontext üblichen Standardbegriffen vorbefüllt und automatisch um alle Namen und E-Mail-Adressen aus dem Haupt-Index (<code>data/cache/email_search_cache.json</code>) erweitert. Konkret werden dafür folgende Werte herangezogen:  <ul>
+<li>Die Werte des Schlüssels <code>from_name</code> (Absendername).  </li>
+<li>Die Werte des Schlüssels <code>from</code> (Absender-E-Mail).  </li>
+<li>Die Werte aus der Empfängerliste <code>to</code>:  <ul>
+<li>Der Pfad/Schlüssel <code>to[].name</code> (Empfängername) von Objekten in der Empfängerliste.  </li>
+<li>Der Pfad/Schlüssel <code>to[].email</code> (Empfänger-E-Mail) von Objekten in der Empfängerliste.  </li>
+<li>Direkte String-Elemente der Empfängerliste.  </li>
 </ul>
 </li>
 </ul>
 </li>
-<li><strong>Unter-Millisekunden-Antworten:</strong> Die Autovervollständigung sucht direkt in diesem optimierten In-Memory-Set, was eine nahezu verzögerungsfreie Anzeige von Vorschlägen ermöglicht.</li>
-<li><strong>Präfix-Priorisierung:</strong> Suchbegriffe, die mit der Eingabe starten, werden priorisiert vor Begriffen angezeigt, die die Eingabe an einer anderen Stelle enthalten.</li>
-<li><strong>Dynamische Erweiterung:</strong> Sobald Sie eine neue Suche über den "Suchen"-Button in der GUI ausführen, wird der eingegebene Suchbegriff (sofern er mindestens 2 Zeichen lang ist) automatisch in die JSON-Liste des Vorschlags-Caches übernommen und dauerhaft in <code>suggestions_cache.json</code> gespeichert. Bei zukünftigen Suchen steht dieser Begriff sofort zur Verfügung.</li>
+<li><strong>Unter-Millisekunden-Antworten:</strong> Die Autovervollständigung sucht direkt in diesem optimierten In-Memory-Set, was eine nahezu verzögerungsfreie Anzeige von Vorschlägen ermöglicht.  </li>
+<li><strong>Präfix-Priorisierung:</strong> Suchbegriffe, die mit der Eingabe starten, werden priorisiert vor Begriffen angezeigt, die die Eingabe an einer anderen Stelle enthalten.  </li>
+<li><strong>Dynamische Erweiterung:</strong> Sobald Sie eine neue Suche über den "Suchen"-Button in der GUI ausführen, wird der eingegebene Suchbegriff (sofern er mindestens 2 Zeichen lang ist) automatisch in die JSON-Liste des Vorschlags-Caches übernommen und dauerhaft in <code>suggestions_cache.json</code> gespeichert. Bei zukünftigen Suchen steht dieser Begriff sofort zur Verfügung.  </li>
 </ul>
 
 
