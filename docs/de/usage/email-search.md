@@ -26,24 +26,24 @@ Die E-Mail-Schnellsuche basiert auf einem zweistufigen Caching-System, das aus z
 
 ### 1. Der Haupt-Suchindex (`data/cache/email_search_cache.json`)
 
-Dieser Index speichert alle indizierten E-Mails als eine JSON-Liste von Objekten. Die Quelldaten dafür sind `.msg`- und `.eml`-Dateien, die aus den in den folgenden Konfigurationsdateien definierten Pfaden stammen:
-*   `config/classifier_paths.yaml` (bzw. `config/classifier_paths.yaml.example` als Fallback): Definiert die Pfade für die jeweiligen E-Mail-Klassen unter `class_paths` (z. B. `BachelorThesis`, `MasterThesis`, `PraxisProjekt` etc.).
-*   `config/train_test_folders.yaml`: Definiert die Pfade `train_path` und `test_path`.
+Dieser Index speichert alle indizierten E-Mails als eine JSON-Liste von Objekten. Die Quelldaten dafür sind `.msg`- und `.eml`-Dateien, die aus den in den folgenden Konfigurationsdateien definierten Pfaden stammen:  
+*   `config/classifier_paths.yaml` (bzw. `config/classifier_paths.yaml.example` als Fallback): Definiert die Pfade für die jeweiligen E-Mail-Klassen unter `class_paths` (z. B. `BachelorThesis`, `MasterThesis`, `PraxisProjekt` etc.).  
+*   `config/train_test_folders.yaml`: Definiert die Pfade `train_path` und `test_path`.  
 
 Der Cache wird beim ersten Start oder bei Vorhandensein neuer E-Mails in diesen Pfaden automatisch aktualisiert. Jedes Objekt im JSON-Array von `email_search_cache.json` besitzt die folgenden konkreten Pfade/Attribute:
 
-*   `subject`: Der Betreff der E-Mail (String).
-*   `from`: Die E-Mail-Adresse des Absenders (String).
-*   `from_name`: Der Name des Absenders (String).
-*   `to`: Eine Liste der Empfänger. Jedes Element in dieser Liste ist entweder:
-    *   Ein JSON-Objekt mit den Pfaden:
-        *   `to[].name`: Der Name des Empfängers.
-        *   `to[].email`: Die E-Mail-Adresse des Empfängers.
-    *   Oder direkt ein String (z. B. eine reine E-Mail-Adresse).
-*   `date`: Das Datum der E-Mail im ISO-Format (String).
-*   `path`: Der absolute Dateipfad zur ursprünglichen E-Mail-Datei auf der Festplatte (String).
-*   `filename`: Der Dateiname der E-Mail (String).
-*   `folder`: Die Klassifizierung des Ordners (String, entweder `"Inbox"` oder `"SentItems"`), ermittelt anhand der Pfad-Segmente.
+*   `subject`: Der Betreff der E-Mail (String).  
+*   `from`: Die E-Mail-Adresse des Absenders (String).  
+*   `from_name`: Der Name des Absenders (String).  
+*   `to`: Eine Liste der Empfänger. Jedes Element in dieser Liste ist entweder:  
+    *   Ein JSON-Objekt mit den Pfaden:  
+        *   `to[].name`: Der Name des Empfängers.  
+        *   `to[].email`: Die E-Mail-Adresse des Empfängers.  
+    *   Oder direkt ein String (z. B. eine reine E-Mail-Adresse).  
+*   `date`: Das Datum der E-Mail im ISO-Format (String).  
+*   `path`: Der absolute Dateipfad zur ursprünglichen E-Mail-Datei auf der Festplatte (String).  
+*   `filename`: Der Dateiname der E-Mail (String).  
+*   `folder`: Die Klassifizierung des Ordners (String, entweder `"Inbox"` oder `"SentItems"`), ermittelt anhand der Pfad-Segmente.  
 
 Dies ermöglicht eine extrem performante Suche, da nicht bei jeder Anfrage das Dateisystem durchsucht werden muss.
 
@@ -64,13 +64,13 @@ Um Verzögerungen bei der Eingabe von Suchbegriffen zu vermeiden, verwendet die 
 
 Diese Datei enthält ein flaches JSON-Array von Strings (z. B. `["Albert", "albert@test.com", "Informatik", ...]`), das wie folgt aufgebaut und erweitert wird:
 
-*   **Initialisierung:** Beim ersten Start wird der Vorschlags-Cache mit einer Liste von im Hochschulkontext üblichen Standardbegriffen vorbefüllt und automatisch um alle Namen und E-Mail-Adressen aus dem Haupt-Index (`data/cache/email_search_cache.json`) erweitert. Konkret werden dafür folgende Werte herangezogen:
-    *   Die Werte des Schlüssels `from_name` (Absendername).
-    *   Die Werte des Schlüssels `from` (Absender-E-Mail).
-    *   Die Werte aus der Empfängerliste `to`:
-        *   Der Pfad/Schlüssel `to[].name` (Empfängername) von Objekten in der Empfängerliste.
-        *   Der Pfad/Schlüssel `to[].email` (Empfänger-E-Mail) von Objekten in der Empfängerliste.
-        *   Direkte String-Elemente der Empfängerliste.
-*   **Unter-Millisekunden-Antworten:** Die Autovervollständigung sucht direkt in diesem optimierten In-Memory-Set, was eine nahezu verzögerungsfreie Anzeige von Vorschlägen ermöglicht.
-*   **Präfix-Priorisierung:** Suchbegriffe, die mit der Eingabe starten, werden priorisiert vor Begriffen angezeigt, die die Eingabe an einer anderen Stelle enthalten.
-*   **Dynamische Erweiterung:** Sobald Sie eine neue Suche über den "Suchen"-Button in der GUI ausführen, wird der eingegebene Suchbegriff (sofern er mindestens 2 Zeichen lang ist) automatisch in die JSON-Liste des Vorschlags-Caches übernommen und dauerhaft in `suggestions_cache.json` gespeichert. Bei zukünftigen Suchen steht dieser Begriff sofort zur Verfügung.
+*   **Initialisierung:** Beim ersten Start wird der Vorschlags-Cache mit einer Liste von im Hochschulkontext üblichen Standardbegriffen vorbefüllt und automatisch um alle Namen und E-Mail-Adressen aus dem Haupt-Index (`data/cache/email_search_cache.json`) erweitert. Konkret werden dafür folgende Werte herangezogen:  
+    *   Die Werte des Schlüssels `from_name` (Absendername).  
+    *   Die Werte des Schlüssels `from` (Absender-E-Mail).  
+    *   Die Werte aus der Empfängerliste `to`:  
+        *   Der Pfad/Schlüssel `to[].name` (Empfängername) von Objekten in der Empfängerliste.  
+        *   Der Pfad/Schlüssel `to[].email` (Empfänger-E-Mail) von Objekten in der Empfängerliste.  
+        *   Direkte String-Elemente der Empfängerliste.  
+*   **Unter-Millisekunden-Antworten:** Die Autovervollständigung sucht direkt in diesem optimierten In-Memory-Set, was eine nahezu verzögerungsfreie Anzeige von Vorschlägen ermöglicht.  
+*   **Präfix-Priorisierung:** Suchbegriffe, die mit der Eingabe starten, werden priorisiert vor Begriffen angezeigt, die die Eingabe an einer anderen Stelle enthalten.  
+*   **Dynamische Erweiterung:** Sobald Sie eine neue Suche über den "Suchen"-Button in der GUI ausführen, wird der eingegebene Suchbegriff (sofern er mindestens 2 Zeichen lang ist) automatisch in die JSON-Liste des Vorschlags-Caches übernommen und dauerhaft in `suggestions_cache.json` gespeichert. Bei zukünftigen Suchen steht dieser Begriff sofort zur Verfügung.  
