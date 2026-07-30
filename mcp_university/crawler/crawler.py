@@ -387,3 +387,36 @@ class Crawler:
                 logger.error(f"Summary file missing after write attempt: {summary_path}")
         except Exception as e:
             logger.error(f"Failed to save folder summary for {dir_path.name}: {e}")
+
+
+def run_index_or_profile(profile: Optional[str], cfg: Any) -> None:
+    """Startet den vollständigen Indexierungsprozess aller konfigurierten Ordner oder erstellt einen Personen-Steckbrief.
+
+    Args:
+        profile (Optional[str]): Falls angegeben, E-Mail-Adresse der Person, für die ein Steckbrief erstellt wird.
+        cfg: Die Konfiguration des Systems.
+    """
+    from ..summarizer.profiler import PersonProfiler
+    from ..metadata.store import MetadataStore
+    from academic_parser.factory import ParserFactory
+    from ..summarizer.engine import Summarizer
+    from ..retrieval.index import SearchIndex
+
+    if profile:
+        logger.info(f"Erstelle Personen-Steckbrief für {profile}...")
+        profiler = PersonProfiler()
+        result = profiler.generate_profile(profile)
+        if result:
+            print(f"\nSteckbrief für {profile} erfolgreich erstellt.")
+            print(f"Gespeichert unter: {profiler.storage_path / f'{profile}.md'}")
+        else:
+            print(f"\nFehler: Steckbrief für {profile} konnte nicht erstellt werden (keine E-Mails gefunden?).")
+        return
+
+    store = MetadataStore(cfg.sqlite_path)
+    academic_parser = ParserFactory(cfg.data_dir / "cache")
+    summarizer = Summarizer(cfg.llm.model, cfg.llm.base_url)
+    idx = SearchIndex(str(cfg.qdrant_path), cfg.embeddings.model, store=store)
+
+    crawler = Crawler(cfg, store, academic_parser, summarizer, idx)
+    crawler.crawl()
