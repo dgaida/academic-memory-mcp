@@ -616,6 +616,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#1-the-main-search-index-datacacheemail_search_cachejson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. The Main Search Index (data/cache/email_search_cache.json)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#intelligent-association-and-sentitems-detection" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -627,10 +638,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#high-performance-suggestions-cache" class="md-nav__link">
+  <a href="#2-the-suggestions-cache-datacachesuggestions_cachejson" class="md-nav__link">
     <span class="md-ellipsis">
       
-        High-Performance Suggestions Cache
+        2. The Suggestions Cache (data/cache/suggestions_cache.json)
       
     </span>
   </a>
@@ -2584,6 +2595,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#1-the-main-search-index-datacacheemail_search_cachejson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. The Main Search Index (data/cache/email_search_cache.json)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#intelligent-association-and-sentitems-detection" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2595,10 +2617,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#high-performance-suggestions-cache" class="md-nav__link">
+  <a href="#2-the-suggestions-cache-datacachesuggestions_cachejson" class="md-nav__link">
     <span class="md-ellipsis">
       
-        High-Performance Suggestions Cache
+        2. The Suggestions Cache (data/cache/suggestions_cache.json)
       
     </span>
   </a>
@@ -2643,7 +2665,30 @@
 <li><strong>Integration:</strong> Open the found email with a single click directly in Outlook or jump to the corresponding folder in Windows Explorer.  </li>
 </ul>
 <h2 id="how-it-works">How it works<a class="headerlink" href="#how-it-works" title="Permanent link">&para;</a></h2>
-<p>The search is based on a local JSON index (<code>data/cache/email_search_cache.json</code>). The index is updated automatically upon the first start or when new emails are moved into the configured paths (see <a href="../../configuration/">Configuration</a>).</p>
+<p>The email quick search relies on a two-tier caching system consisting of two local JSON files in the <code>data/cache/</code> directory.</p>
+<h3 id="1-the-main-search-index-datacacheemail_search_cachejson">1. The Main Search Index (<code>data/cache/email_search_cache.json</code>)<a class="headerlink" href="#1-the-main-search-index-datacacheemail_search_cachejson" title="Permanent link">&para;</a></h3>
+<p>This index stores all indexed emails as a JSON list of objects. The source data is extracted from <code>.msg</code> and <code>.eml</code> files located in the directories defined in the following configuration files:
+*   <code>config/classifier_paths.yaml</code> (or <code>config/classifier_paths.yaml.example</code> as a fallback): Maps email classes under <code>class_paths</code> (e.g., <code>BachelorThesis</code>, <code>MasterThesis</code>, <code>PraxisProjekt</code> etc.) to their target paths.
+*   <code>config/train_test_folders.yaml</code>: Defines the <code>train_path</code> and <code>test_path</code>.</p>
+<p>The cache is automatically updated upon the first start or when new email files are detected in these paths. Each object in the JSON array of <code>email_search_cache.json</code> has the following precise JSON keys/attributes:</p>
+<ul>
+<li><code>subject</code>: The subject line of the email (String).</li>
+<li><code>from</code>: The email address of the sender (String).</li>
+<li><code>from_name</code>: The display name of the sender (String).</li>
+<li><code>to</code>: A list of recipients. Each item in this list is either:<ul>
+<li>A JSON object with the fields:<ul>
+<li><code>to[].name</code>: The display name of the recipient.</li>
+<li><code>to[].email</code>: The email address of the recipient.</li>
+</ul>
+</li>
+<li>Or directly a String (e.g. a plain email address).</li>
+</ul>
+</li>
+<li><code>date</code>: The date of the email in ISO format (String).</li>
+<li><code>path</code>: The absolute file path to the original email file on disk (String).</li>
+<li><code>filename</code>: The filename of the email (String).</li>
+<li><code>folder</code>: The classification of the folder (String, either <code>"Inbox"</code> or <code>"SentItems"</code>), determined by matching the path segments.</li>
+</ul>
 <p>This enables an extremely high-performance search because the file system does not have to be scanned for every single query.</p>
 <h3 id="intelligent-association-and-sentitems-detection">Intelligent Association and SentItems Detection<a class="headerlink" href="#intelligent-association-and-sentitems-detection" title="Permanent link">&para;</a></h3>
 <p>A particular challenge when searching for sent emails is that the sender (<code>From</code>) of these emails is always the user themselves (e.g., "Daniel Gaida"). If you search for a student's name (e.g., "Mustermann"), a search solely based on the sender would not find these emails.</p>
@@ -2652,13 +2697,24 @@
 2. <strong>Path-Based Search:</strong> The search query is additionally matched against the entire file path (which contains the student's folder name).<br />
 3. <strong>Extended Matching:</strong> An email is considered a match if the search term occurs in the subject, sender, recipient, filename, or the entire file path. This reliably finds sent emails to students.  </p>
 <p>Determining whether an email is in the <strong>Inbox</strong> or <strong>SentItems</strong> is done based on path segments. Folders with names like <code>SentItems</code>, <code>Sent Items</code>, <code>Gesendete Elemente</code>, <code>Gesendete Objekte</code>, or <code>Sent</code> (case-insensitive) are automatically classified as <strong>SentItems</strong>.</p>
-<h3 id="high-performance-suggestions-cache">High-Performance Suggestions Cache<a class="headerlink" href="#high-performance-suggestions-cache" title="Permanent link">&para;</a></h3>
+<h3 id="2-the-suggestions-cache-datacachesuggestions_cachejson">2. The Suggestions Cache (<code>data/cache/suggestions_cache.json</code>)<a class="headerlink" href="#2-the-suggestions-cache-datacachesuggestions_cachejson" title="Permanent link">&para;</a></h3>
 <p>To avoid delays when entering search terms, the GUI uses a dedicated, persisted suggestions cache (<code>data/cache/suggestions_cache.json</code>).</p>
+<p>This file contains a flat JSON array of strings (e.g. <code>["Albert", "albert@test.com", "Informatik", ...]</code>), which is built and expanded as follows:</p>
 <ul>
-<li><strong>Initialization:</strong> Upon the first start, the cache is pre-populated with a list of standard terms common in a university context (e.g., <em>Informatik</em>, <em>Bachelorarbeit</em>, <em>Masterarbeit</em>, <em>Kolloquium</em>, <em>Prüfung</em>, etc.) as well as all names and email addresses (of senders and recipients) present in the index.  </li>
-<li><strong>Sub-Millisecond Responses:</strong> Autocomplete searches directly inside this optimized in-memory set, enabling a virtually lag-free display of suggestions.  </li>
-<li><strong>Prefix Prioritization:</strong> Search terms that start with the input are prioritized over terms that contain the input at another position.  </li>
-<li><strong>Dynamic Extension:</strong> As soon as you perform a new search using the "Search" button, the entered search term is automatically added to the cache and saved permanently. This term will be immediately available in future searches.  </li>
+<li><strong>Initialization:</strong> Upon the first start, the suggestions cache is pre-populated with a list of standard university terms and is automatically extended using all names and email addresses extracted from the main index (<code>data/cache/email_search_cache.json</code>). Specifically, the following values/paths are collected:<ul>
+<li>The values of the <code>from_name</code> key (sender display name).</li>
+<li>The values of the <code>from</code> key (sender email).</li>
+<li>The values from the <code>to</code> recipient list:<ul>
+<li>The path/field <code>to[].name</code> (recipient name) of objects in the recipient list.</li>
+<li>The path/field <code>to[].email</code> (recipient email) of objects in the recipient list.</li>
+<li>Direct string elements in the recipient list.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Sub-Millisecond Responses:</strong> Autocomplete searches directly inside this optimized in-memory set, enabling a virtually lag-free display of suggestions.</li>
+<li><strong>Prefix Prioritization:</strong> Search terms that start with the input are prioritized over terms that contain the input at another position.</li>
+<li><strong>Dynamic Extension:</strong> As soon as you perform a new search using the "Search" button in the GUI, the entered search term (if it is at least 2 characters long) is automatically added to the suggestions list and saved permanently to <code>suggestions_cache.json</code>. This term will be immediately available in future searches.</li>
 </ul>
 
 
