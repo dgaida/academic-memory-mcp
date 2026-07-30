@@ -384,3 +384,44 @@ class SearchIndex:
         sorted_results = sorted(results_map.values(), key=lambda x: x["score"], reverse=True)
         logger.debug(f"Native search found {len(sorted_results)} candidates.")
         return sorted_results[:top_k]
+
+
+def perform_search(query: str, cfg: Any, store: Any, idx: Any) -> None:
+    """Führt eine hybride Suche über die indexierten Dokumente aus und generiert eine Antwort.
+
+    Args:
+        query: Der Suchbegriff oder die Frage.
+        cfg: Die Konfiguration des Systems.
+        store: Der Metadatenspeicher.
+        idx: Der Suchindex.
+    """
+    from ..summarizer.engine import Summarizer
+
+    results = idx.search(query)
+
+    print("\n" + "="*50)
+    print("SUCHERGEBNISSE")
+    print("="*50 + "\n")
+
+    context_parts = []
+    for res in results:
+        print(f"[{res['score']:.2f}] {res['filename']} ({res['path']})")
+        print(f"  {res['content'][:200]}...\n")
+        context_parts.append(f"Quelle: {res['filename']}\nInhalt: {res['content']}")
+
+    if results:
+        print("="*50)
+        print("GENERIERTE ANTWORT")
+        print("="*50 + "\n")
+
+        summarizer = Summarizer(cfg.llm.model, cfg.llm.base_url)
+        context = "\n\n---\n\n".join(context_parts)
+        answer = summarizer.answer_question(query, context)
+
+        if answer:
+            print(answer)
+        else:
+            print("Fehler beim Generieren der Antwort.")
+        print("\n" + "="*50)
+    else:
+        print("Keine relevanten Dokumente gefunden.")

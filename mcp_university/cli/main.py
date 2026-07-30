@@ -1,20 +1,19 @@
 """Kommandozeilen-Schnittstelle (CLI) für das MCP University System."""
-from pathlib import Path
 import typer
 import logging
 from logging.handlers import RotatingFileHandler
-from ..crawler.crawler import Crawler
+from ..crawler.crawler import Crawler, run_index_or_profile
 from ..config import get_config
 from ..metadata.store import MetadataStore
 from academic_parser.factory import ParserFactory
 from ..summarizer.engine import Summarizer
 from ..summarizer.profiler import PersonProfiler
-from ..retrieval.index import SearchIndex
+from ..retrieval.index import SearchIndex, perform_search
 from ..mcp_server.server import create_server
-from ..knowledge_graph.engine import KnowledgeGraphEngine
-import yaml
+from ..knowledge_graph.engine import KnowledgeGraphEngine, build_knowledge_graph
 from .db import db_app
 from .memory import memory_app
+import yaml  # noqa: F401
 
 profiles_app = typer.Typer(help="Verwaltung von Personen-Steckbriefen")
 
@@ -35,7 +34,6 @@ def profiles_update(
     print("Fertig.")
 
 
-
 logger = logging.getLogger(__name__)
 
 graph_app = typer.Typer(help="Verwaltung des Wissensgraphen")
@@ -50,59 +48,7 @@ def graph_build(debug: bool = typer.Option(False, "--debug", "-d", help="Debug-L
     summarizer = Summarizer(cfg.llm.model, cfg.llm.base_url)
     graph_engine = KnowledgeGraphEngine(store, summarizer)
 
-    # User-Knoten sicherstellen
-    user_node_id, _ = store.upsert_node(cfg.user.name, "Person", {"email": cfg.user.email, "role": ["User"]})
-    print(f"Benutzer-Knoten initialisiert: {cfg.user.name}")
-
-    # classifier_paths.yaml laden
-    paths_file = cfg.config_dir / "classifier_paths.yaml"
-    if not paths_file.exists():
-        paths_file = cfg.config_dir / "classifier_paths.yaml.example"
-
-    if not paths_file.exists():
-        print("Fehler: classifier_paths.yaml nicht gefunden.")
-        return
-
-    with open(paths_file, "r", encoding="utf-8") as f:
-        paths_data = yaml.safe_load(f)
-
-    class_paths = paths_data.get("class_paths", {})
-
-    for class_name, base_path_str in class_paths.items():
-        base_path = Path(base_path_str)
-        if not base_path.exists():
-            continue
-
-        print(f"Verarbeite Klasse: {class_name}")
-        for summary_file in base_path.rglob(".emails_summary.md"):
-            print(f"  Analysiere {summary_file}")
-            content = summary_file.read_text(encoding='utf-8')
-            changes = graph_engine.process_summary(content, user_node_id)
-            if any(changes.values()):
-                print(f"    Änderungen aus {summary_file.name}:")
-                if changes['new_nodes']:
-                    print(f"      Neue Knoten: {', '.join(changes['new_nodes'])}")
-                if changes['new_edges']:
-                    print("      Neue Beziehungen:")
-                    for edge in changes['new_edges']:
-                        print(f"        - {edge}")
-
-        for summary_file in base_path.rglob(".*_summary.md"):
-            if summary_file.name == ".emails_summary.md":
-                continue
-            print(f"  Analysiere Ordner-Zusammenfassung {summary_file}")
-            content = summary_file.read_text(encoding='utf-8')
-            changes = graph_engine.process_summary(content, user_node_id)
-            if any(changes.values()):
-                print(f"    Änderungen aus {summary_file.name}:")
-                if changes['new_nodes']:
-                    print(f"      Neue Knoten: {', '.join(changes['new_nodes'])}")
-                if changes['new_edges']:
-                    print("      Neue Beziehungen:")
-                    for edge in changes['new_edges']:
-                        print(f"        - {edge}")
-
-    print("Wissensgraph erfolgreich aktualisiert.")
+    build_knowledge_graph(cfg, store, summarizer, graph_engine)
 
 
 @graph_app.command("visualize")
@@ -178,24 +124,7 @@ def index(
     setup_logging(debug)
     cfg = get_config()
 
-    if profile:
-        logger.info(f"Erstelle Personen-Steckbrief für {profile}...")
-        profiler = PersonProfiler()
-        result = profiler.generate_profile(profile)
-        if result:
-            print(f"\nSteckbrief für {profile} erfolgreich erstellt.")
-            print(f"Gespeichert unter: {profiler.storage_path / f'{profile}.md'}")
-        else:
-            print(f"\nFehler: Steckbrief für {profile} konnte nicht erstellt werden (keine E-Mails gefunden?).")
-        return
-
-    store = MetadataStore(cfg.sqlite_path)
-    academic_parser = ParserFactory(cfg.data_dir / "cache")
-    summarizer = Summarizer(cfg.llm.model, cfg.llm.base_url)
-    idx = SearchIndex(str(cfg.qdrant_path), cfg.embeddings.model, store=store)
-
-    crawler = Crawler(cfg, store, academic_parser, summarizer, idx)
-    crawler.crawl()
+    run_index_or_profile(profile, cfg)
 
 @app.command()
 def search(
@@ -212,34 +141,8 @@ def search(
     cfg = get_config()
     store = MetadataStore(cfg.sqlite_path)
     idx = SearchIndex(str(cfg.qdrant_path), cfg.embeddings.model, store=store)
-    results = idx.search(query)
 
-    print("\n" + "="*50)
-    print("SUCHERGEBNISSE")
-    print("="*50 + "\n")
-
-    context_parts = []
-    for res in results:
-        print(f"[{res['score']:.2f}] {res['filename']} ({res['path']})")
-        print(f"  {res['content'][:200]}...\n")
-        context_parts.append(f"Quelle: {res['filename']}\nInhalt: {res['content']}")
-
-    if results:
-        print("="*50)
-        print("GENERIERTE ANTWORT")
-        print("="*50 + "\n")
-
-        summarizer = Summarizer(cfg.llm.model, cfg.llm.base_url)
-        context = "\n\n---\n\n".join(context_parts)
-        answer = summarizer.answer_question(query, context)
-
-        if answer:
-            print(answer)
-        else:
-            print("Fehler beim Generieren der Antwort.")
-        print("\n" + "="*50)
-    else:
-        print("Keine relevanten Dokumente gefunden.")
+    perform_search(query, cfg, store, idx)
 
 @app.command()
 def watch(debug: bool = typer.Option(False, "--debug", "-d", help="Debug-Logging aktivieren")) -> None:

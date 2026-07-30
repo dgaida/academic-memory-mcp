@@ -154,3 +154,70 @@ Antworte NUR mit einer JSON-Liste von Objekten mit den Schlüsseln: source, targ
         except Exception as e:
             logger.error(f"Fehler beim Parsen der Triplets: {e}")
             return []
+
+
+def build_knowledge_graph(cfg: Any, store: Any, summarizer: Any, graph_engine: Any) -> None:
+    """Baut den Wissensgraphen basierend auf den vorhandenen Zusammenfassungen auf.
+
+    Args:
+        cfg: Systemkonfiguration.
+        store: Metadaten-Speicher.
+        summarizer: Engine für Zusammenfassungen.
+        graph_engine: Wissensgraph-Engine.
+    """
+    from pathlib import Path
+    import yaml
+
+    # User-Knoten sicherstellen
+    user_node_id, _ = store.upsert_node(cfg.user.name, "Person", {"email": cfg.user.email, "role": ["User"]})
+    print(f"Benutzer-Knoten initialisiert: {cfg.user.name}")
+
+    # classifier_paths.yaml laden
+    paths_file = cfg.config_dir / "classifier_paths.yaml"
+    if not paths_file.exists():
+        paths_file = cfg.config_dir / "classifier_paths.yaml.example"
+
+    if not paths_file.exists():
+        print("Fehler: classifier_paths.yaml nicht gefunden.")
+        return
+
+    with open(paths_file, "r", encoding="utf-8") as f:
+        paths_data = yaml.safe_load(f)
+
+    class_paths = paths_data.get("class_paths", {})
+
+    for class_name, base_path_str in class_paths.items():
+        base_path = Path(base_path_str)
+        if not base_path.exists():
+            continue
+
+        print(f"Verarbeite Klasse: {class_name}")
+        for summary_file in base_path.rglob(".emails_summary.md"):
+            print(f"  Analysiere {summary_file}")
+            content = summary_file.read_text(encoding='utf-8')
+            changes = graph_engine.process_summary(content, user_node_id)
+            if any(changes.values()):
+                print(f"    Änderungen aus {summary_file.name}:")
+                if changes['new_nodes']:
+                    print(f"      Neue Knoten: {', '.join(changes['new_nodes'])}")
+                if changes['new_edges']:
+                    print("      Neue Beziehungen:")
+                    for edge in changes['new_edges']:
+                        print(f"        - {edge}")
+
+        for summary_file in base_path.rglob(".*_summary.md"):
+            if summary_file.name == ".emails_summary.md":
+                continue
+            print(f"  Analysiere Ordner-Zusammenfassung {summary_file}")
+            content = summary_file.read_text(encoding='utf-8')
+            changes = graph_engine.process_summary(content, user_node_id)
+            if any(changes.values()):
+                print(f"    Änderungen aus {summary_file.name}:")
+                if changes['new_nodes']:
+                    print(f"      Neue Knoten: {', '.join(changes['new_nodes'])}")
+                if changes['new_edges']:
+                    print("      Neue Beziehungen:")
+                    for edge in changes['new_edges']:
+                        print(f"        - {edge}")
+
+    print("Wissensgraph erfolgreich aktualisiert.")
