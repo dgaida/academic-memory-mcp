@@ -1,5 +1,4 @@
 """Kommandozeilen-Schnittstelle (CLI) für das MCP University System."""
-from pathlib import Path
 import typer
 import logging
 from logging.handlers import RotatingFileHandler
@@ -14,7 +13,7 @@ from ..mcp_server.server import create_server
 from ..knowledge_graph.engine import KnowledgeGraphEngine, build_knowledge_graph
 from .db import db_app
 from .memory import memory_app
-import yaml
+import yaml  # noqa: F401
 
 profiles_app = typer.Typer(help="Verwaltung von Personen-Steckbriefen")
 
