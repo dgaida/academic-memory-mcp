@@ -37,6 +37,7 @@ dependencies = [
     "gradio",
     "shap",
     "pytest-asyncio",
+    "crawl4ai",
     "llm_client @ git+https://github.com/dgaida/llm_client.git",
 ]
 requires-python = ">=3.10"

@@ -120,6 +120,10 @@ class EmailController:
                     self.memory_paths
                 )
 
+        # Initialize WebCrawlerManager for automated website crawling & caching
+        from mcp_university.crawler.web_crawler import WebCrawlerManager
+        self.web_crawler_manager = WebCrawlerManager()
+
     def _detect_language(self, content: Optional[str]) -> str:
         """Erkennt die Sprache der E-Mail (Deutsch oder Englisch).
 
@@ -944,6 +948,13 @@ E-MAIL: {mail_content}
             retrieved_context = self._get_memory_context(mail_content, email_class)
             if retrieved_context:
                 additional_context += retrieved_context
+
+        # Web crawler source logic (crawled pages and PDFs)
+        if email_class and self.web_crawler_manager.is_configured(email_class):
+            logger.info(f"Klasse {email_class} hat eine konfigurierte Web-Quelle. Rufe relevante Abschnitte ab...")
+            web_context = self.web_crawler_manager.get_relevant_context(email_class, mail_content)
+            if web_context:
+                additional_context += web_context
 
         # STEP 2: REGULAR REPLY
         logger.info("Schritt 2: Generiere reguläre Antwort...")
