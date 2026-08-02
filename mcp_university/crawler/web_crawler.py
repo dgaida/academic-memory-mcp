@@ -51,9 +51,20 @@ def run_async_in_thread(coro) -> Any:
             exception = e
         finally:
             try:
-                loop.close()
+                # Cancel all remaining tasks safely before closing the loop
+                pending = asyncio.all_tasks(loop)
+                if pending:
+                    for task in pending:
+                        task.cancel()
+                    loop.run_until_complete(asyncio.gather(*pending, return_exceptions=True))
+                loop.run_until_complete(loop.shutdown_asyncgens())
             except Exception:
                 pass
+            finally:
+                try:
+                    loop.close()
+                except Exception:
+                    pass
 
     thread = threading.Thread(target=target)
     thread.start()
