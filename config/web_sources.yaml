@@ -1,0 +1,6 @@
+# Mappings of email classes to their associated website URLs for automated crawling
+# To add a new email class and its website, simply append a new entry below.
+
+BA_DL_ML_KI:
+  url: "https://dgaida.github.io/wpf_dlml_th_public/"
+  name: "WPF Deep Learning, Machine Learning und Künstliche Intelligenz"
