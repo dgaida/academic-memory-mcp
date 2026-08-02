@@ -1500,6 +1500,34 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#automated-web-sources-integration-web-crawling-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automated Web Sources Integration (Web Crawling &amp; Caching)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Automated Web Sources Integration (Web Crawling &amp; Caching)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How it Works
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#advantages-of-this-approach" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2597,6 +2625,34 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#automated-web-sources-integration-web-crawling-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automated Web Sources Integration (Web Crawling &amp; Caching)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Automated Web Sources Integration (Web Crawling &amp; Caching)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How it Works
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#advantages-of-this-approach" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2646,6 +2702,14 @@
 <li>The <strong>Top 3 unique chunks</strong> are selected (based on their similarity score).  </li>
 <li>These chunks are inserted as "Additional Context" into the prompt for action classification (Phase 3) as well as the final response generation (Phase 6).  </li>
 </ul>
+<h2 id="automated-web-sources-integration-web-crawling-caching">Automated Web Sources Integration (Web Crawling &amp; Caching)<a class="headerlink" href="#automated-web-sources-integration-web-crawling-caching" title="Permanent link">&para;</a></h2>
+<p>For specific email classes (e.g., <code>BA_DL_ML_KI</code>), an automated web source is configured (defined in <code>config/web_sources.yaml</code>). When the LLM answers an email of this class, the <code>WebCrawlerManager</code> retrieves relevant information from the configured website (and the PDFs provided there).</p>
+<h3 id="how-it-works">How it Works<a class="headerlink" href="#how-it-works" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Caching &amp; Offline-First:</strong> The system crawls the target page (e.g., <code>https://dgaida.github.io/wpf_dlml_th_public/</code>) and all linked PDFs (using <code>crawl4ai</code> with a robust fallback to <code>requests</code> + <code>BeautifulSoup</code> + <code>pdfminer</code>). The crawled contents are cached locally in <code>data/cache/web_sources/&lt;Class&gt;/cache.json</code>.</li>
+<li><strong>Offline Mode:</strong> If there is no internet connection or crawling fails, the local cache is loaded directly.</li>
+<li><strong>Keyword &amp; BM25 Search:</strong> The <code>WebCrawlerManager</code> splits the crawled text and PDF content into paragraphs and searches using BM25 for sections helpful for answering the email. These are provided to the LLM as additional context, citing the website and PDFs as sources.</li>
+</ol>
 <h2 id="advantages-of-this-approach">Advantages of this Approach<a class="headerlink" href="#advantages-of-this-approach" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Precision:</strong> Generating specific questions reduces the noise that could arise from a search with the raw email text.  </li>
