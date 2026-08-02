@@ -28,10 +28,10 @@ The found information is filtered and prepared:
 
 For specific email classes (e.g., `BA_DL_ML_KI`), an automated web source is configured (defined in `config/web_sources.yaml`). When the LLM answers an email of this class, the `WebCrawlerManager` retrieves relevant information from the configured website (and the PDFs provided there).
 
-### How it Works
-1. **Caching & Offline-First:** The system crawls the target page (e.g., `https://dgaida.github.io/wpf_dlml_th_public/`) and all linked PDFs (using `crawl4ai` with a robust fallback to `requests` + `BeautifulSoup` + `pdfminer`). The crawled contents are cached locally in `data/cache/web_sources/<Class>/cache.json`.
-2. **Offline Mode:** If there is no internet connection or crawling fails, the local cache is loaded directly.
-3. **Keyword & BM25 Search:** The `WebCrawlerManager` splits the crawled text and PDF content into paragraphs and searches using BM25 for sections helpful for answering the email. These are provided to the LLM as additional context, citing the website and PDFs as sources.
+### How it Works  
+1. **Caching & Offline-First:** The system crawls the target page (e.g., `https://dgaida.github.io/wpf_dlml_th_public/`) and all linked PDFs (using `crawl4ai` with a robust fallback to `requests` + `BeautifulSoup` + `pdfminer`). The crawled contents are cached locally in `data/cache/web_sources/<Class>/cache.json`.  
+2. **Offline Mode:** If there is no internet connection or crawling fails, the local cache is loaded directly.  
+3. **Keyword & BM25 Search:** The `WebCrawlerManager` splits the crawled text and PDF content into paragraphs and searches using BM25 for sections helpful for answering the email. These are provided to the LLM as additional context, citing the website and PDFs as sources.  
 
 ## Advantages of this Approach  
 - **Precision:** Generating specific questions reduces the noise that could arise from a search with the raw email text.  

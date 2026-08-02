@@ -28,10 +28,10 @@ Die gefundenen Informationen werden gefiltert und aufbereitet:
 
 Für bestimmte E-Mail-Klassen (z. B. `BA_DL_ML_KI`) ist eine automatisierte Web-Quelle konfiguriert (definiert in `config/web_sources.yaml`). Wenn das LLM eine E-Mail dieser Klasse beantwortet, ruft der `WebCrawlerManager` relevante Informationen von der hinterlegten Webseite (und den dort bereitgestellten PDFs) ab.
 
-### Funktionsweise
-1. **Caching & Offline-First:** Das System crawlt die Zielseite (z. B. `https://dgaida.github.io/wpf_dlml_th_public/`) und alle darauf verlinkten PDFs (unter Nutzung von `crawl4ai` und einem robusten Fallback über `requests` + `BeautifulSoup` + `pdfminer`). Die gecrawlten Inhalte werden lokal in `data/cache/web_sources/<Klasse>/cache.json` gespeichert.
-2. **Offline-Nutzung:** Ist keine Internetverbindung vorhanden oder bricht das Crawling ab, wird der lokale Cache direkt geladen.
-3. **Keyword & BM25 Suche:** Der `WebCrawlerManager` teilt die gecrawlten Texte und PDF-Inhalte in Abschnitte auf und sucht mittels BM25 nach Absätzen, die für die Beantwortung der E-Mail hilfreich sind. Diese werden dem LLM als zusätzlicher Kontext übergeben, wobei die Webseite und PDF-Dateien als Quelle hinterlegt werden.
+### Funktionsweise  
+1. **Caching & Offline-First:** Das System crawlt die Zielseite (z. B. `https://dgaida.github.io/wpf_dlml_th_public/`) und alle darauf verlinkten PDFs (unter Nutzung von `crawl4ai` und einem robusten Fallback über `requests` + `BeautifulSoup` + `pdfminer`). Die gecrawlten Inhalte werden lokal in `data/cache/web_sources/<Klasse>/cache.json` gespeichert.  
+2. **Offline-Nutzung:** Ist keine Internetverbindung vorhanden oder bricht das Crawling ab, wird der lokale Cache direkt geladen.  
+3. **Keyword & BM25 Suche:** Der `WebCrawlerManager` teilt die gecrawlten Texte und PDF-Inhalte in Abschnitte auf und sucht mittels BM25 nach Absätzen, die für die Beantwortung der E-Mail hilfreich sind. Diese werden dem LLM als zusätzlicher Kontext übergeben, wobei die Webseite und PDF-Dateien als Quelle hinterlegt werden.  
 
 ## Vorteile dieses Ansatzes  
 - **Präzision:** Durch die Generierung gezielter Fragen wird das Rauschen reduziert, das bei einer Suche mit dem rohen E-Mail-Text entstehen könnte.  
