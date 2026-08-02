@@ -1,7 +1,6 @@
 """Modul für das automatisierte Crawling und Caching von Webseiten und PDFs."""
 
 from typing import Dict, List, Any, Optional, Set
-import os
 import logging
 import asyncio
 import json
