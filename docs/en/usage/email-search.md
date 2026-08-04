@@ -15,7 +15,8 @@ The GUI will automatically open in your default browser.
 ## Features
 
 *   **Quick Search:** Search by names, email addresses, subject lines, or filenames.  
-*   **Automatic Suggestions:** Suitable senders or terms are suggested as you type.  
+*   **Fuzzy Search (Fault-Tolerant):** Finds emails even when hyphens, spaces, or special characters are missing or entered differently in the search term (e.g., searching for "Campus IT" will find "support@campus-it.th-koeln.de").
+*   **Automatic Suggestions:** Suitable senders or terms are suggested as you type (also fault-tolerant).
 *   **Separate Views:** Results are clearly separated into **Inbox** and **Sent Items (SentItems)**.  
 *   **Preview:** Click an email in the list to view an HTML preview of the content directly in the GUI.  
 *   **Integration:** Open the found email with a single click directly in Outlook or jump to the corresponding folder in Windows Explorer.  
@@ -55,6 +56,14 @@ The quick search solves this as follows:
 1. **Recipient Indexing:** When indexing emails, the recipients (`To`) are also captured with their name and email address and saved in the index.  
 2. **Path-Based Search:** The search query is additionally matched against the entire file path (which contains the student's folder name).  
 3. **Extended Matching:** An email is considered a match if the search term occurs in the subject, sender, recipient, filename, or the entire file path. This reliably finds sent emails to students.  
+
+### Fuzzy Search (Fault-Tolerant Search)
+
+To make searching as simple and flexible as possible, the quick search utilizes a fault-tolerant fuzzy matching logic. This is particularly useful for search terms containing hyphens, spaces, or special characters:
+
+*   **Normalization:** Both the entered search query and the indexed email fields (subject, sender name, sender email, recipient name, recipient email, filename, file path) are normalized for matching. During normalization, all spaces, hyphens, and other special characters are completely removed, and the text is converted to lowercase.
+*   **Example:** Searching for `"Campus IT"` or `"campusit"` normalizes to `"campusit"`. This allows the search to successfully find the email address `"support@campus-it.th-koeln.de"` (which normalizes to `"supportcampusitthkoelnde"`, containing `"campusit"`).
+*   **Suggestions:** The suggestions cache also leverages this normalization, ensuring that relevant suggestions (such as `Campus IT Support`) appear accurately in the dropdown even when the user's input is imprecise.
 
 Determining whether an email is in the **Inbox** or **SentItems** is done based on path segments. Folders with names like `SentItems`, `Sent Items`, `Gesendete Elemente`, `Gesendete Objekte`, or `Sent` (case-insensitive) are automatically classified as **SentItems**.
 

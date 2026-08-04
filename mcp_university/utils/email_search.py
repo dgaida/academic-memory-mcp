@@ -17,6 +17,23 @@ logger = logging.getLogger(__name__)
 class EmailSearchEngine:
     """Engine für die schnelle Suche nach E-Mails mit Caching."""
 
+    @staticmethod
+    def _normalize(text: str) -> str:
+        """Normalisiert einen String für die fuzzy/fehlertolerante Suche.
+
+        Entfernt alle Sonderzeichen, Leerzeichen, Bindestriche etc. und
+        wandelt den String in Kleinbuchstaben um.
+
+        Args:
+            text (str): Der zu normalisierende Text.
+
+        Returns:
+            str: Der normalisierte, rein alphanumerische String in Kleinbuchstaben.
+        """
+        if not text:
+            return ""
+        return re.sub(r'[\W_]+', '', text.lower())
+
     def __init__(self, cache_file: Optional[Path] = None) -> None:
         """Initialisiert die Search Engine und den Vorschlags-Cache.
 
@@ -263,13 +280,29 @@ class EmailSearchEngine:
                 self._save_suggestions_cache()
 
         query_lower = query.lower()
+        query_norm = self._normalize(query)
         results = []
         for item in self.index:
-            found = (query_lower in item.get("subject", "").lower() or
-                     query_lower in item.get("from", "").lower() or
-                     query_lower in item.get("from_name", "").lower() or
-                     query_lower in item.get("filename", "").lower() or
-                     query_lower in item.get("path", "").lower())
+            # Standardmäßiger case-insensitiver Abgleich
+            subject_val = item.get("subject", "")
+            from_val = item.get("from", "")
+            from_name_val = item.get("from_name", "")
+            filename_val = item.get("filename", "")
+            path_val = item.get("path", "")
+
+            found = (query_lower in subject_val.lower() or
+                     query_lower in from_val.lower() or
+                     query_lower in from_name_val.lower() or
+                     query_lower in filename_val.lower() or
+                     query_lower in path_val.lower())
+
+            # Wenn nicht standardmäßig gefunden, fuzzy (normalisiert) abgleichen
+            if not found and query_norm:
+                found = (query_norm in self._normalize(subject_val) or
+                         query_norm in self._normalize(from_val) or
+                         query_norm in self._normalize(from_name_val) or
+                         query_norm in self._normalize(filename_val) or
+                         query_norm in self._normalize(path_val))
 
             if not found and "to" in item:
                 to_list = item["to"]
@@ -277,11 +310,21 @@ class EmailSearchEngine:
                     if isinstance(rec, dict):
                         rec_name = rec.get("name", "")
                         rec_email = rec.get("email", "")
+                        # Standard-Abgleich
                         if query_lower in rec_name.lower() or query_lower in rec_email.lower():
                             found = True
                             break
+                        # Fuzzy-Abgleich
+                        if query_norm and (query_norm in self._normalize(rec_name) or query_norm in self._normalize(rec_email)):
+                            found = True
+                            break
                     elif isinstance(rec, str):
+                        # Standard-Abgleich
                         if query_lower in rec.lower():
+                            found = True
+                            break
+                        # Fuzzy-Abgleich
+                        if query_norm and query_norm in self._normalize(rec):
                             found = True
                             break
 
@@ -306,29 +349,30 @@ class EmailSearchEngine:
             return []
 
         partial_query_lower = partial_query.lower()
+        partial_query_norm = self._normalize(partial_query)
         suggestions: Set[str] = set()
 
         # 1. Aus dem Vorschlags-Cache suchen
         for term in self.suggestions_cache:
-            if partial_query_lower in term.lower():
+            if partial_query_lower in term.lower() or (partial_query_norm and partial_query_norm in self._normalize(term)):
                 suggestions.add(term)
 
         # 2. Aus dem aktuellen In-Memory-Index suchen (falls dort neue/ungespeicherte Objekte sind)
         for item in self.index:
             # Senders
             name = item.get("from_name", "")
-            if name and partial_query_lower in name.lower():
+            if name and (partial_query_lower in name.lower() or (partial_query_norm and partial_query_norm in self._normalize(name))):
                 suggestions.add(name)
             email = item.get("from", "")
-            if email and partial_query_lower in email.lower():
+            if email and (partial_query_lower in email.lower() or (partial_query_norm and partial_query_norm in self._normalize(email))):
                 suggestions.add(email)
 
             # Subjects
             subject = item.get("subject", "")
-            if subject and partial_query_lower in subject.lower():
+            if subject and (partial_query_lower in subject.lower() or (partial_query_norm and partial_query_norm in self._normalize(subject))):
                 words = re.findall(r'\w+', subject)
                 for word in words:
-                    if len(word) > 3 and partial_query_lower in word.lower():
+                    if len(word) > 3 and (partial_query_lower in word.lower() or (partial_query_norm and partial_query_norm in self._normalize(word))):
                         suggestions.add(word)
 
             # Recipients
@@ -337,21 +381,21 @@ class EmailSearchEngine:
                 if isinstance(rec, dict):
                     rec_name = rec.get("name", "")
                     rec_email = rec.get("email", "")
-                    if rec_name and partial_query_lower in rec_name.lower():
+                    if rec_name and (partial_query_lower in rec_name.lower() or (partial_query_norm and partial_query_norm in self._normalize(rec_name))):
                         suggestions.add(rec_name)
-                    if rec_email and partial_query_lower in rec_email.lower():
+                    if rec_email and (partial_query_lower in rec_email.lower() or (partial_query_norm and partial_query_norm in self._normalize(rec_email))):
                         suggestions.add(rec_email)
                 elif isinstance(rec, str):
-                    if partial_query_lower in rec.lower():
+                    if partial_query_lower in rec.lower() or (partial_query_norm and partial_query_norm in self._normalize(rec)):
                         suggestions.add(rec)
 
         # Sortieren nach Priorität:
         # 1. Begriffe, die mit der Eingabe starten (case-insensitiv)
-        # 2. Andere Begriffe, die die Eingabe enthalten
+        # 2. Andere Begriffe, die die Eingabe enthalten (auch fuzzy)
         starts_with = []
         contains = []
         for term in suggestions:
-            if term.lower().startswith(partial_query_lower):
+            if term.lower().startswith(partial_query_lower) or (partial_query_norm and self._normalize(term).startswith(partial_query_norm)):
                 starts_with.append(term)
             else:
                 contains.append(term)
