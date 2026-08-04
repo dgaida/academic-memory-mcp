@@ -201,7 +201,34 @@ def display_email(evt: gr.SelectData, df: pd.DataFrame) -> Tuple[str, str, str]:
         logger.error(error_msg)
         return f"<p>Fehler beim Laden der E-Mail: {e}</p>", "", error_msg
 
-with gr.Blocks(title="Email Search Quick") as demo:
+custom_css = """
+/* Force vertical scrollbar inside Gradio DataFrames to always be visible if content overflows,
+   or force scrollability on table wrappers to avoid invisible scrollbars after search. */
+.gradio-dataframe .table-wrap,
+.gradio-dataframe .scroll-container {
+    overflow-y: scroll !important;
+}
+
+/* Customize webkit scrollbars for DataFrame containers to ensure they are highly visible,
+   regardless of browser or system-level settings. */
+.gradio-dataframe .table-wrap::-webkit-scrollbar,
+.gradio-dataframe .scroll-container::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 8px !important;
+    height: 8px !important;
+}
+.gradio-dataframe .table-wrap::-webkit-scrollbar-thumb,
+.gradio-dataframe .scroll-container::-webkit-scrollbar-thumb {
+    background-color: rgba(128, 128, 128, 0.5) !important;
+    border-radius: 4px !important;
+}
+.gradio-dataframe .table-wrap::-webkit-scrollbar-track,
+.gradio-dataframe .scroll-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05) !important;
+}
+"""
+
+with gr.Blocks(title="Email Search Quick", css=custom_css) as demo:
     gr.Markdown("# 📧 Email Schnellsuche")
 
     with gr.Row():
