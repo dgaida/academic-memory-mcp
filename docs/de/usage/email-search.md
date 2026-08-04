@@ -15,8 +15,8 @@ Die GUI öffnet sich automatisch in Ihrem Standardbrowser.
 ## Funktionen
 
 *   **Schnellsuche:** Suchen Sie nach Namen, E-Mail-Adressen, Betreffzeilen oder Dateinamen.  
-*   **Fuzzy-Suche (Fehlertoleranz):** Findet E-Mails auch dann, wenn Bindestriche, Leerzeichen oder Sonderzeichen im Suchbegriff fehlen oder anders eingegeben wurden (z. B. findet die Suche nach "Campus IT" auch "support@campus-it.th-koeln.de").
-*   **Automatische Vorschläge:** Während der Eingabe werden passende Absender oder Begriffe vorgeschlagen (ebenfalls fehlertolerant).
+*   **Fuzzy-Suche (Fehlertoleranz):** Findet E-Mails auch dann, wenn Bindestriche, Leerzeichen oder Sonderzeichen im Suchbegriff fehlen oder anders eingegeben wurden (z. B. findet die Suche nach "Campus IT" auch "support@campus-it.th-koeln.de").  
+*   **Automatische Vorschläge:** Während der Eingabe werden passende Absender oder Begriffe vorgeschlagen (ebenfalls fehlertolerant).  
 *   **Getrennte Ansichten:** Ergebnisse werden klar nach **Posteingang (Inbox)** und **Gesendeten Elementen (SentItems)** getrennt angezeigt.  
 *   **Vorschau:** Klicken Sie auf eine E-Mail in der Liste, um eine HTML-Vorschau des Inhalts direkt in der GUI zu sehen.  
 *   **Integration:** Öffnen Sie die gefundene E-Mail mit einem Klick direkt in Outlook oder springen Sie zum entsprechenden Ordner im Windows Explorer.  
@@ -61,9 +61,9 @@ Die Schnellsuche löst dies wie folgt:
 
 Um die Benutzung so einfach und flexibel wie möglich zu gestalten, verwendet die Schnellsuche eine fehlertolerante Fuzzy-Logik. Dies ist besonders vorteilhaft für Suchbegriffe mit Bindestrichen, Leerzeichen oder Sonderzeichen:
 
-*   **Normalisierung:** Sowohl der eingegebene Suchbegriff als auch die indizierten E-Mail-Felder (Betreff, Absendername, Absender-E-Mail, Empfängername, Empfänger-E-Mail, Dateiname, Dateipfad) werden für den Abgleich normalisiert. Bei der Normalisierung werden alle Leerzeichen, Bindestriche und sonstigen Sonderzeichen komplett entfernt und der Text in Kleinbuchstaben umgewandelt.
-*   **Beispiel:** Eine Suche nach `"Campus IT"` oder `"campusit"` normalisiert sich zu `"campusit"`. Dadurch wird die E-Mail-Adresse `"support@campus-it.th-koeln.de"` (normalisiert ebenfalls `"supportcampusitthkoelnde"`, worin `"campusit"` enthalten ist) fehlerfrei gefunden.
-*   **Vorschläge:** Auch der Vorschlags-Cache verwendet diese Normalisierung, sodass passende Vorschläge (wie z. B. `Campus IT Support`) auch bei ungenauer Eingabe des Nutzers präzise im Dropdown-Menü erscheinen.
+*   **Normalisierung:** Sowohl der eingegebene Suchbegriff als auch die indizierten E-Mail-Felder (Betreff, Absendername, Absender-E-Mail, Empfängername, Empfänger-E-Mail, Dateiname, Dateipfad) werden für den Abgleich normalisiert. Bei der Normalisierung werden alle Leerzeichen, Bindestriche und sonstigen Sonderzeichen komplett entfernt und der Text in Kleinbuchstaben umgewandelt.  
+*   **Beispiel:** Eine Suche nach `"Campus IT"` oder `"campusit"` normalisiert sich zu `"campusit"`. Dadurch wird die E-Mail-Adresse `"support@campus-it.th-koeln.de"` (normalisiert ebenfalls `"supportcampusitthkoelnde"`, worin `"campusit"` enthalten ist) fehlerfrei gefunden.  
+*   **Vorschläge:** Auch der Vorschlags-Cache verwendet diese Normalisierung, sodass passende Vorschläge (wie z. B. `Campus IT Support`) auch bei ungenauer Eingabe des Nutzers präzise im Dropdown-Menü erscheinen.  
 
 Die Bestimmung, ob eine E-Mail in **Inbox** oder **SentItems** liegt, erfolgt anhand der Pfad-Segmente. Ordner mit Bezeichnungen wie `SentItems`, `Sent Items`, `Gesendete Elemente`, `Gesendete Objekte` oder `Sent` (case-insensitiv) werden automatisch als **SentItems** klassifiziert.
 
