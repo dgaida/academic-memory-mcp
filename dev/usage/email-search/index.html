@@ -636,6 +636,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#fuzzy-suche-fehlertolerante-suche" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fuzzy-Suche (Fehlertolerante Suche)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#2-der-vorschlags-cache-datacachesuggestions_cachejson" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2615,6 +2626,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#fuzzy-suche-fehlertolerante-suche" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fuzzy-Suche (Fehlertolerante Suche)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#2-der-vorschlags-cache-datacachesuggestions_cachejson" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2657,7 +2679,8 @@
 <h2 id="funktionen">Funktionen<a class="headerlink" href="#funktionen" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Schnellsuche:</strong> Suchen Sie nach Namen, E-Mail-Adressen, Betreffzeilen oder Dateinamen.  </li>
-<li><strong>Automatische Vorschläge:</strong> Während der Eingabe werden passende Absender oder Begriffe vorgeschlagen.  </li>
+<li><strong>Fuzzy-Suche (Fehlertoleranz):</strong> Findet E-Mails auch dann, wenn Bindestriche, Leerzeichen oder Sonderzeichen im Suchbegriff fehlen oder anders eingegeben wurden (z. B. findet die Suche nach "Campus IT" auch "support@campus-it.th-koeln.de").</li>
+<li><strong>Automatische Vorschläge:</strong> Während der Eingabe werden passende Absender oder Begriffe vorgeschlagen (ebenfalls fehlertolerant).</li>
 <li><strong>Getrennte Ansichten:</strong> Ergebnisse werden klar nach <strong>Posteingang (Inbox)</strong> und <strong>Gesendeten Elementen (SentItems)</strong> getrennt angezeigt.  </li>
 <li><strong>Vorschau:</strong> Klicken Sie auf eine E-Mail in der Liste, um eine HTML-Vorschau des Inhalts direkt in der GUI zu sehen.  </li>
 <li><strong>Integration:</strong> Öffnen Sie die gefundene E-Mail mit einem Klick direkt in Outlook oder springen Sie zum entsprechenden Ordner im Windows Explorer.  </li>
@@ -2694,6 +2717,13 @@
 1. <strong>Empfänger-Indizierung:</strong> Beim Indizieren von E-Mails werden auch die Empfänger (<code>To</code>) mit Name und E-Mail-Adresse erfasst und im Index gespeichert.<br />
 2. <strong>Pfad-basierte Suche:</strong> Die Suchanfrage wird zusätzlich gegen den gesamten Dateipfad (der den Ordnernamen des Studierenden enthält) abgeglichen.<br />
 3. <strong>Erweiterter Abgleich:</strong> Eine E-Mail gilt als Treffer, wenn der Suchbegriff im Betreff, im Absender, im Empfänger, im Dateinamen oder im gesamten Dateipfad vorkommt. Dadurch werden gesendete Mails an Studierende zuverlässig gefunden.  </p>
+<h3 id="fuzzy-suche-fehlertolerante-suche">Fuzzy-Suche (Fehlertolerante Suche)<a class="headerlink" href="#fuzzy-suche-fehlertolerante-suche" title="Permanent link">&para;</a></h3>
+<p>Um die Benutzung so einfach und flexibel wie möglich zu gestalten, verwendet die Schnellsuche eine fehlertolerante Fuzzy-Logik. Dies ist besonders vorteilhaft für Suchbegriffe mit Bindestrichen, Leerzeichen oder Sonderzeichen:</p>
+<ul>
+<li><strong>Normalisierung:</strong> Sowohl der eingegebene Suchbegriff als auch die indizierten E-Mail-Felder (Betreff, Absendername, Absender-E-Mail, Empfängername, Empfänger-E-Mail, Dateiname, Dateipfad) werden für den Abgleich normalisiert. Bei der Normalisierung werden alle Leerzeichen, Bindestriche und sonstigen Sonderzeichen komplett entfernt und der Text in Kleinbuchstaben umgewandelt.</li>
+<li><strong>Beispiel:</strong> Eine Suche nach <code>"Campus IT"</code> oder <code>"campusit"</code> normalisiert sich zu <code>"campusit"</code>. Dadurch wird die E-Mail-Adresse <code>"support@campus-it.th-koeln.de"</code> (normalisiert ebenfalls <code>"supportcampusitthkoelnde"</code>, worin <code>"campusit"</code> enthalten ist) fehlerfrei gefunden.</li>
+<li><strong>Vorschläge:</strong> Auch der Vorschlags-Cache verwendet diese Normalisierung, sodass passende Vorschläge (wie z. B. <code>Campus IT Support</code>) auch bei ungenauer Eingabe des Nutzers präzise im Dropdown-Menü erscheinen.</li>
+</ul>
 <p>Die Bestimmung, ob eine E-Mail in <strong>Inbox</strong> oder <strong>SentItems</strong> liegt, erfolgt anhand der Pfad-Segmente. Ordner mit Bezeichnungen wie <code>SentItems</code>, <code>Sent Items</code>, <code>Gesendete Elemente</code>, <code>Gesendete Objekte</code> oder <code>Sent</code> (case-insensitiv) werden automatisch als <strong>SentItems</strong> klassifiziert.</p>
 <h3 id="2-der-vorschlags-cache-datacachesuggestions_cachejson">2. Der Vorschlags-Cache (<code>data/cache/suggestions_cache.json</code>)<a class="headerlink" href="#2-der-vorschlags-cache-datacachesuggestions_cachejson" title="Permanent link">&para;</a></h3>
 <p>Um Verzögerungen bei der Eingabe von Suchbegriffen zu vermeiden, verwendet die GUI einen dedizierten, persistierten Cache für Vorschläge (<code>data/cache/suggestions_cache.json</code>).</p>
