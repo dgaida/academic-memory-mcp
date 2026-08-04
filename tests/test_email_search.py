@@ -96,3 +96,39 @@ def test_cache_persistence(mock_config, tmp_path):
         engine2 = EmailSearchEngine(cache_file=cache_file)
         assert len(engine2.index) == 1
         assert engine2.index[0]["subject"] == "Cached Email"
+
+
+def test_fuzzy_matching_and_normalization(search_engine):
+    """Testet die fuzzy/fehlertolerante Suche und Normalisierung."""
+    test_data = {
+        "subject": "System Update Info",
+        "from": "support@campus-it.th-koeln.de",
+        "from_name": "Campus IT Support",
+        "date": datetime.now().isoformat(),
+        "path": "/path/to/campus_it.msg",
+        "filename": "campus-it.msg",
+        "to": [{"name": "Max Mustermann", "email": "max@mustermann.de"}]
+    }
+    search_engine.index.append(test_data)
+
+    # 1. Test standard matches (exact, case-insensitive)
+    results = search_engine.search("campus-it")
+    assert len(results) == 1
+
+    # 2. Test missing/mismatched hyphens and spaces
+    results = search_engine.search("Campus IT")
+    assert len(results) == 1
+    assert results[0]["from"] == "support@campus-it.th-koeln.de"
+
+    results = search_engine.search("campusit")
+    assert len(results) == 1
+
+    results = search_engine.search("Campus-IT")
+    assert len(results) == 1
+
+    results = search_engine.search("campus_it")
+    assert len(results) == 1
+
+    # 3. Test suggestions with fuzzy/normalized query
+    suggestions = search_engine.get_suggestions("Campus IT")
+    assert "support@campus-it.th-koeln.de" in suggestions or "Campus IT Support" in suggestions
