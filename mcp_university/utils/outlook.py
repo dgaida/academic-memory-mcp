@@ -1,7 +1,9 @@
 """Outlook-spezifische Hilfsfunktionen."""
 
+import html
 import logging
 import platform
+import re
 import subprocess
 from pathlib import Path
 from typing import List
@@ -50,15 +52,17 @@ def create_outlook_draft(
     recipient: str = "",
     cc: List[str] = None,
     attachments: List[Path] = None,
+    use_signature: bool = True,
 ) -> bool:
     """Erstellt einen E-Mail-Entwurf in Outlook.
 
     Args:
         subject (str): Betreff der E-Mail.
-        body (str): Inhalt der E-Mail.
+        body (str): Inhalt der E-Mail (Flachtext/Markdown).
         recipient (str): Empfänger-Adresse.
         cc (List[str], optional): Liste der CC-Adressen. Defaults to None.
         attachments (List[Path], optional): Liste der Dateipfade für Anhänge. Defaults to None.
+        use_signature (bool, optional): Ob die Standard-Outlook-Signatur geladen und angehängt werden soll. Defaults to True.
 
     Returns:
         bool: True wenn erfolgreich, sonst False.
@@ -120,7 +124,39 @@ def create_outlook_draft(
             )
 
         mail.Subject = subject
-        mail.Body = body
+
+        if use_signature:
+            try:
+                # GetInspector initialisiert die Mail und lädt die Standard-Signatur
+                _ = mail.GetInspector
+
+                sig_html = mail.HTMLBody
+                sig_text = mail.Body
+
+                # HTML Formatierung vorbereiten (Sonderzeichen escapen, Zeilenumbrüche konvertieren)
+                body_html = html.escape(body).replace("\n", "<br/>")
+
+                # Wenn eine HTML-Signatur vorhanden ist, fügen wir den Text davor ein
+                if sig_html and "<body" in sig_html.lower():
+                    body_match = re.search(r"<body[^>]*>", sig_html, re.IGNORECASE)
+                    if body_match:
+                        index = body_match.end()
+                        mail.HTMLBody = sig_html[:index] + body_html + "<br/><br/>" + sig_html[index:]
+                    else:
+                        mail.HTMLBody = body_html + "<br/><br/>" + sig_html
+                else:
+                    if sig_html:
+                        mail.HTMLBody = body_html + "<br/><br/>" + sig_html
+                    elif sig_text:
+                        mail.Body = body + "\n\n" + sig_text
+                    else:
+                        mail.Body = body
+            except Exception as sig_err:
+                logger.warning(f"Fehler beim Abrufen/Einfügen der Signatur: {sig_err}. Verwende Standard-Body.")
+                mail.Body = body
+        else:
+            mail.Body = body
+
         if attachments:
             for attachment_path in attachments:
                 if attachment_path.exists():
