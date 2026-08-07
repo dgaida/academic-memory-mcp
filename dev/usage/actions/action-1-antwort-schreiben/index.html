@@ -343,6 +343,19 @@
       
     </span>
 </a>
+<nav aria-label="Funktionsweise und Details" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#e-mail-signatur-integration-neu">
+<span class="md-ellipsis">
+      
+        E-Mail-Signatur-Integration (Neu)
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
 </li>
 <li class="md-nav__item">
 <a class="md-nav__link" href="#intelligente-terminbuchung-konfliktprufung-integrierte-logik">
@@ -1135,6 +1148,19 @@
       
     </span>
 </a>
+<nav aria-label="Funktionsweise und Details" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#e-mail-signatur-integration-neu">
+<span class="md-ellipsis">
+      
+        E-Mail-Signatur-Integration (Neu)
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
 </li>
 <li class="md-nav__item">
 <a class="md-nav__link" href="#intelligente-terminbuchung-konfliktprufung-integrierte-logik">
@@ -1184,6 +1210,15 @@
 <li><strong>Anrede-Ermittlung (Du/Sie):</strong> Die bevorzugte Anredeform (Du oder Sie) wird automatisch anhand des Verlaufs der letzten 8 E-Mails (4 gesendete, 4 empfangene) ermittelt.  </li>
 <li><strong>Generierung:</strong> Das lokale LLM (standardmäßig <code>gemma4:e2b</code>) entwirft eine präzise, kontextbezogene und freundliche Antwort auf Deutsch.  </li>
 <li><strong>Entwurfserstellung:</strong> Es wird automatisch ein E-Mail-Entwurf direkt in Microsoft Outlook erzeugt. Die Original-Mail wird dabei als Anhang beigefügt, damit der Verlauf gewahrt bleibt.  </li>
+</ol>
+<h3 id="e-mail-signatur-integration-neu">E-Mail-Signatur-Integration (Neu)<a class="headerlink" href="#e-mail-signatur-integration-neu" title="Permanent link">¶</a></h3>
+<p>Das System unterstützt das automatische Laden und Integrieren Ihrer in Outlook hinterlegten Standard-E-Mail-Signatur. Beim Erzeugen des Entwurfs greift das System über die Outlook-Schnittstelle (<code>win32com</code>) auf das Postfach zu und führt die folgenden Schritte aus:</p>
+<ol>
+<li><strong>Signatur-Erkennung:</strong> Ein leerer E-Mail-Entwurf wird initialisiert, um das Laden der Standard-Signatur durch Outlook zu erzwingen.</li>
+<li><strong>Inhalts-Injektion:</strong></li>
+<li>Falls eine reich formatierte HTML-Signatur hinterlegt ist, wird der vom LLM generierte Antworttext automatisch in HTML konvertiert (Sonderzeichen maskiert, Zeilenumbrüche in HTML-Zeilenumbrüche <code>&lt;br/&gt;</code> umgewandelt) und präzise am Anfang des <code>&lt;body&gt;</code>-Abschnitts der Signatur injiziert. Dadurch bleibt das Layout und das Design Ihrer offiziellen Signatur vollständig erhalten.</li>
+<li>Falls nur eine Text-Signatur vorhanden ist, wird der Antworttext sauber vor dieser platziert.</li>
+<li><strong>Robuster Fallback:</strong> Sollte keine Signatur geladen werden können oder das Feature deaktiviert sein, wird der Antwortentwurf wie gewohnt als reiner Text erstellt.</li>
 </ol>
 <hr/>
 <h2 id="intelligente-terminbuchung-konfliktprufung-integrierte-logik">Intelligente Terminbuchung &amp; Konfliktprüfung (Integrierte Logik)<a class="headerlink" href="#intelligente-terminbuchung-konfliktprufung-integrierte-logik" title="Permanent link">¶</a></h2>

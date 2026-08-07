@@ -344,6 +344,19 @@
       
     </span>
 </a>
+<nav aria-label="How it Works and Details" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#email-signature-integration-new">
+<span class="md-ellipsis">
+      
+        Email Signature Integration (New)
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
 </li>
 <li class="md-nav__item">
 <a class="md-nav__link" href="#intelligent-appointment-booking-conflict-checking-integrated-logic">
@@ -1136,6 +1149,19 @@
       
     </span>
 </a>
+<nav aria-label="How it Works and Details" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#email-signature-integration-new">
+<span class="md-ellipsis">
+      
+        Email Signature Integration (New)
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
 </li>
 <li class="md-nav__item">
 <a class="md-nav__link" href="#intelligent-appointment-booking-conflict-checking-integrated-logic">
@@ -1185,6 +1211,15 @@
 <li><strong>Salutation Determination (Du/Sie):</strong> The preferred form of address (Du/informal or Sie/formal) is automatically determined based on the history of the last 8 emails (4 sent, 4 received).  </li>
 <li><strong>Generation:</strong> The local LLM (by default <code>gemma4:e2b</code>) drafts a precise, context-aware, and polite response in German.  </li>
 <li><strong>Draft Creation:</strong> An email draft is automatically created directly in Microsoft Outlook. The original email is attached to preserve the conversation history.  </li>
+</ol>
+<h3 id="email-signature-integration-new">Email Signature Integration (New)<a class="headerlink" href="#email-signature-integration-new" title="Permanent link">¶</a></h3>
+<p>The system supports automatically retrieving and integrating your default email signature configured in Outlook. When creating the draft, the system accesses your mailbox via the Outlook interface (<code>win32com</code>) and performs the following actions:</p>
+<ol>
+<li><strong>Signature Detection:</strong> A blank draft email is initialized to force Outlook to load your default account signature.</li>
+<li><strong>Content Injection:</strong></li>
+<li>If a rich-text/HTML signature is found, the LLM-generated plain-text reply is automatically formatted into HTML (HTML characters are escaped, and line breaks are converted to <code>&lt;br/&gt;</code> tags) and injected precisely at the beginning of the signature HTML's <code>&lt;body&gt;</code> section. This fully preserves the design and formatting of your official signature.</li>
+<li>If only a plain-text signature is available, the reply text is neatly prepended before the signature.</li>
+<li><strong>Robust Fallback:</strong> If no signature can be loaded or the feature is disabled, the draft is created as standard plain text.</li>
 </ol>
 <hr/>
 <h2 id="intelligent-appointment-booking-conflict-checking-integrated-logic">Intelligent Appointment Booking &amp; Conflict Checking (Integrated Logic)<a class="headerlink" href="#intelligent-appointment-booking-conflict-checking-integrated-logic" title="Permanent link">¶</a></h2>
