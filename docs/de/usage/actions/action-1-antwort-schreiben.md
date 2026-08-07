@@ -16,11 +16,11 @@ Das System führt bei dieser Aktion folgende Schritte aus:
 
 Das System unterstützt das automatische Laden und Integrieren Ihrer in Outlook hinterlegten Standard-E-Mail-Signatur. Beim Erzeugen des Entwurfs greift das System über die Outlook-Schnittstelle (`win32com`) auf das Postfach zu und führt die folgenden Schritte aus:
 
-1. **Signatur-Erkennung:** Ein leerer E-Mail-Entwurf wird initialisiert, um das Laden der Standard-Signatur durch Outlook zu erzwingen.
-2. **Inhalts-Injektion:**
-   - Falls eine reich formatierte HTML-Signatur hinterlegt ist, wird der vom LLM generierte Antworttext automatisch in HTML konvertiert (Sonderzeichen maskiert, Zeilenumbrüche in HTML-Zeilenumbrüche `<br/>` umgewandelt) und präzise am Anfang des `<body>`-Abschnitts der Signatur injiziert. Dadurch bleibt das Layout und das Design Ihrer offiziellen Signatur vollständig erhalten.
-   - Falls nur eine Text-Signatur vorhanden ist, wird der Antworttext sauber vor dieser platziert.
-3. **Robuster Fallback:** Sollte keine Signatur geladen werden können oder das Feature deaktiviert sein, wird der Antwortentwurf wie gewohnt als reiner Text erstellt.
+1. **Signatur-Erkennung:** Ein leerer E-Mail-Entwurf wird initialisiert, um das Laden der Standard-Signatur durch Outlook zu erzwingen.  
+2. **Inhalts-Injektion:**  
+   - Falls eine reich formatierte HTML-Signatur hinterlegt ist, wird der vom LLM generierte Antworttext automatisch in HTML konvertiert (Sonderzeichen maskiert, Zeilenumbrüche in HTML-Zeilenumbrüche `<br/>` umgewandelt) und präzise am Anfang des `<body>`-Abschnitts der Signatur injiziert. Dadurch bleibt das Layout und das Design Ihrer offiziellen Signatur vollständig erhalten.  
+   - Falls nur eine Text-Signatur vorhanden ist, wird der Antworttext sauber vor dieser platziert.  
+3. **Robuster Fallback:** Sollte keine Signatur geladen werden können oder das Feature deaktiviert sein, wird der Antwortentwurf wie gewohnt als reiner Text erstellt.  
 
 ---
 
