@@ -12,6 +12,16 @@ The system performs the following steps during this action:
 4.  **Generation:** The local LLM (by default `gemma4:e2b`) drafts a precise, context-aware, and polite response in German.  
 5.  **Draft Creation:** An email draft is automatically created directly in Microsoft Outlook. The original email is attached to preserve the conversation history.  
 
+### Email Signature Integration (New)
+
+The system supports automatically retrieving and integrating your default email signature configured in Outlook. When creating the draft, the system accesses your mailbox via the Outlook interface (`win32com`) and performs the following actions:
+
+1. **Signature Detection:** A blank draft email is initialized to force Outlook to load your default account signature.
+2. **Content Injection:**
+   - If a rich-text/HTML signature is found, the LLM-generated plain-text reply is automatically formatted into HTML (HTML characters are escaped, and line breaks are converted to `<br/>` tags) and injected precisely at the beginning of the signature HTML's `<body>` section. This fully preserves the design and formatting of your official signature.
+   - If only a plain-text signature is available, the reply text is neatly prepended before the signature.
+3. **Robust Fallback:** If no signature can be loaded or the feature is disabled, the draft is created as standard plain text.
+
 ---
 
 ## Intelligent Appointment Booking & Conflict Checking (Integrated Logic)

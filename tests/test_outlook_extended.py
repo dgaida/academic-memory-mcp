@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 from mcp_university.utils.outlook import is_outlook_open, create_outlook_draft
 
 
-def test_outlook_imports_reload():
+def test_outlook_imports_reload() -> None:
     """Test OUTLOOK_AVAILABLE is False when win32com is not available."""
     with patch.dict("sys.modules", {"win32com": None, "win32com.client": None}):
         import mcp_university.utils.outlook as outlook_mod
@@ -19,7 +19,7 @@ def test_outlook_imports_reload():
     reload(outlook_mod)
 
 
-def test_is_outlook_open_windows():
+def test_is_outlook_open_windows() -> None:
     """Test is_outlook_open on Windows."""
     with patch('platform.system', return_value='Windows'):
         with patch('subprocess.check_output', return_value=b'outlook.exe 1234'):
@@ -28,7 +28,7 @@ def test_is_outlook_open_windows():
             assert is_outlook_open() is False
 
 
-def test_is_outlook_open_darwin():
+def test_is_outlook_open_darwin() -> None:
     """Test is_outlook_open on macOS."""
     with patch('platform.system', return_value='Darwin'):
         with patch('subprocess.check_call', return_value=0):
@@ -40,27 +40,31 @@ def test_is_outlook_open_darwin():
             assert is_outlook_open() is False
 
 
-def test_is_outlook_open_other():
+def test_is_outlook_open_other() -> None:
     """Test is_outlook_open on other systems."""
     with patch('platform.system', return_value='Linux'):
         assert is_outlook_open() is False
 
 
-def test_create_outlook_draft_no_outlook_available():
+def test_create_outlook_draft_no_outlook_available() -> None:
     """Test create_outlook_draft when Outlook is not available."""
     with patch('mcp_university.utils.outlook.OUTLOOK_AVAILABLE', False):
         assert create_outlook_draft("Sub", "Body") is False
 
 
-def test_create_outlook_draft_not_open():
+def test_create_outlook_draft_not_open() -> None:
     """Test create_outlook_draft when Outlook is not open."""
     with patch('mcp_university.utils.outlook.OUTLOOK_AVAILABLE', True), \
          patch('mcp_university.utils.outlook.is_outlook_open', return_value=False):
         assert create_outlook_draft("Sub", "Body") is False
 
 
-def test_create_outlook_draft_success(tmp_path):
-    """Test create_outlook_draft success case."""
+def test_create_outlook_draft_success(tmp_path) -> None:
+    """Test create_outlook_draft success case.
+
+    Args:
+        tmp_path (Path): Pytest temporary path fixture.
+    """
     with patch('mcp_university.utils.outlook.OUTLOOK_AVAILABLE', True), \
          patch('mcp_university.utils.outlook.is_outlook_open', return_value=True), \
          patch('mcp_university.utils.outlook.win32com.client.Dispatch') as mock_dispatch, \
@@ -85,12 +89,14 @@ def test_create_outlook_draft_success(tmp_path):
         class SimpleMail:
             """Mock SimpleMail helper class."""
 
-            def __init__(self):
+            def __init__(self) -> None:
                 """Initialize mock mail attributes."""
                 self.Subject = None
                 self.To = None
                 self.CC = None
                 self.Body = None
+                self.HTMLBody = ""
+                self.GetInspector = MagicMock()
                 self.Attachments = MagicMock()
                 self.Save = MagicMock()
                 self.Display = MagicMock()
@@ -111,8 +117,12 @@ def test_create_outlook_draft_success(tmp_path):
         mock_mail.Save.assert_called_once()
 
 
-def test_create_outlook_draft_inbox_subfolder(tmp_path):
-    """Test create_outlook_draft searching inside Posteingang/Inbox subfolders."""
+def test_create_outlook_draft_inbox_subfolder(tmp_path) -> None:
+    """Test create_outlook_draft searching inside Posteingang/Inbox subfolders.
+
+    Args:
+        tmp_path (Path): Pytest temporary path fixture.
+    """
     with patch('mcp_university.utils.outlook.OUTLOOK_AVAILABLE', True), \
          patch('mcp_university.utils.outlook.is_outlook_open', return_value=True), \
          patch('mcp_university.utils.outlook.win32com.client.Dispatch') as mock_dispatch, \
@@ -149,12 +159,14 @@ def test_create_outlook_draft_inbox_subfolder(tmp_path):
         class SimpleMail:
             """Mock SimpleMail helper class."""
 
-            def __init__(self):
+            def __init__(self) -> None:
                 """Initialize mock mail attributes."""
                 self.Subject = None
                 self.To = None
                 self.CC = None
                 self.Body = None
+                self.HTMLBody = ""
+                self.GetInspector = MagicMock()
                 self.Attachments = MagicMock()
                 self.Save = MagicMock()
                 self.Display = MagicMock()
@@ -170,7 +182,7 @@ def test_create_outlook_draft_inbox_subfolder(tmp_path):
         mock_mail.Save.assert_called_once()
 
 
-def test_create_outlook_draft_search_exception():
+def test_create_outlook_draft_search_exception() -> None:
     """Test create_outlook_draft logging a warning on search exceptions."""
     with patch('mcp_university.utils.outlook.OUTLOOK_AVAILABLE', True), \
          patch('mcp_university.utils.outlook.is_outlook_open', return_value=True), \
@@ -190,12 +202,14 @@ def test_create_outlook_draft_search_exception():
         class SimpleMail:
             """Mock SimpleMail helper class."""
 
-            def __init__(self):
+            def __init__(self) -> None:
                 """Initialize mock mail attributes."""
                 self.Subject = None
                 self.To = None
                 self.CC = None
                 self.Body = None
+                self.HTMLBody = ""
+                self.GetInspector = MagicMock()
                 self.Attachments = MagicMock()
                 self.Save = MagicMock()
                 self.Display = MagicMock()
@@ -207,7 +221,7 @@ def test_create_outlook_draft_search_exception():
         assert res is True  # Falls back to standard Drafts via CreateItem
 
 
-def test_create_outlook_draft_exception():
+def test_create_outlook_draft_exception() -> None:
     """Test create_outlook_draft exception handling."""
     with patch('mcp_university.utils.outlook.OUTLOOK_AVAILABLE', True), \
          patch('mcp_university.utils.outlook.is_outlook_open', return_value=True), \
@@ -215,3 +229,188 @@ def test_create_outlook_draft_exception():
 
         mock_dispatch.side_effect = Exception("Dispatch failed")
         assert create_outlook_draft("Sub", "Body") is False
+
+
+def test_create_outlook_draft_with_html_signature() -> None:
+    """Test create_outlook_draft with an HTML signature."""
+    with patch('mcp_university.utils.outlook.OUTLOOK_AVAILABLE', True), \
+         patch('mcp_university.utils.outlook.is_outlook_open', return_value=True), \
+         patch('mcp_university.utils.outlook.win32com.client.Dispatch') as mock_dispatch, \
+         patch('mcp_university.utils.outlook.get_config') as mock_get_config:
+
+        mock_cfg = MagicMock()
+        mock_cfg.user.email = "test@example.com"
+        mock_get_config.return_value = mock_cfg
+
+        mock_outlook = mock_dispatch.return_value
+        mock_ns = mock_outlook.GetNamespace.return_value
+
+        mock_store = MagicMock()
+        mock_store.DisplayName = "test@example.com"
+        mock_ns.Stores = [mock_store]
+
+        mock_root = mock_store.GetRootFolder.return_value
+        mock_root.Folders = []
+
+        class SignatureMail:
+            """Mock mail item with an HTML signature."""
+
+            def __init__(self) -> None:
+                """Initialize attributes."""
+                self.Subject = None
+                self.To = None
+                self.CC = None
+                self.Body = ""
+                self.HTMLBody = "<html><body>-- My Signature --</body></html>"
+                self.GetInspector = MagicMock()
+                self.Attachments = MagicMock()
+                self.Save = MagicMock()
+                self.Display = MagicMock()
+
+        mock_mail = SignatureMail()
+        mock_outlook.CreateItem.return_value = mock_mail
+
+        res = create_outlook_draft("Sub", "Hello World", use_signature=True)
+        assert res is True
+        assert "Hello World" in mock_mail.HTMLBody
+        assert "-- My Signature --" in mock_mail.HTMLBody
+
+
+def test_create_outlook_draft_with_plain_text_signature() -> None:
+    """Test create_outlook_draft with a plain text signature."""
+    with patch('mcp_university.utils.outlook.OUTLOOK_AVAILABLE', True), \
+         patch('mcp_university.utils.outlook.is_outlook_open', return_value=True), \
+         patch('mcp_university.utils.outlook.win32com.client.Dispatch') as mock_dispatch, \
+         patch('mcp_university.utils.outlook.get_config') as mock_get_config:
+
+        mock_cfg = MagicMock()
+        mock_cfg.user.email = "test@example.com"
+        mock_get_config.return_value = mock_cfg
+
+        mock_outlook = mock_dispatch.return_value
+        mock_ns = mock_outlook.GetNamespace.return_value
+
+        mock_store = MagicMock()
+        mock_store.DisplayName = "test@example.com"
+        mock_ns.Stores = [mock_store]
+
+        mock_root = mock_store.GetRootFolder.return_value
+        mock_root.Folders = []
+
+        class SignatureMail:
+            """Mock mail item with a plain text signature."""
+
+            def __init__(self) -> None:
+                """Initialize attributes."""
+                self.Subject = None
+                self.To = None
+                self.CC = None
+                self.Body = "-- My Text Signature --"
+                self.HTMLBody = ""
+                self.GetInspector = MagicMock()
+                self.Attachments = MagicMock()
+                self.Save = MagicMock()
+                self.Display = MagicMock()
+
+        mock_mail = SignatureMail()
+        mock_outlook.CreateItem.return_value = mock_mail
+
+        res = create_outlook_draft("Sub", "Hello World", use_signature=True)
+        assert res is True
+        assert mock_mail.Body == "Hello World\n\n-- My Text Signature --"
+
+
+def test_create_outlook_draft_no_signature_requested() -> None:
+    """Test create_outlook_draft when use_signature=False."""
+    with patch('mcp_university.utils.outlook.OUTLOOK_AVAILABLE', True), \
+         patch('mcp_university.utils.outlook.is_outlook_open', return_value=True), \
+         patch('mcp_university.utils.outlook.win32com.client.Dispatch') as mock_dispatch, \
+         patch('mcp_university.utils.outlook.get_config') as mock_get_config:
+
+        mock_cfg = MagicMock()
+        mock_cfg.user.email = "test@example.com"
+        mock_get_config.return_value = mock_cfg
+
+        mock_outlook = mock_dispatch.return_value
+        mock_ns = mock_outlook.GetNamespace.return_value
+
+        mock_store = MagicMock()
+        mock_store.DisplayName = "test@example.com"
+        mock_ns.Stores = [mock_store]
+
+        mock_root = mock_store.GetRootFolder.return_value
+        mock_root.Folders = []
+
+        class SimpleMail:
+            """Mock SimpleMail helper class."""
+
+            def __init__(self) -> None:
+                """Initialize mock mail attributes."""
+                self.Subject = None
+                self.To = None
+                self.CC = None
+                self.Body = None
+                self.HTMLBody = ""
+                self.GetInspector = MagicMock()
+                self.Attachments = MagicMock()
+                self.Save = MagicMock()
+                self.Display = MagicMock()
+
+        mock_mail = SimpleMail()
+        mock_outlook.CreateItem.return_value = mock_mail
+
+        res = create_outlook_draft("Sub", "Hello World", use_signature=False)
+        assert res is True
+        assert mock_mail.Body == "Hello World"
+
+
+def test_create_outlook_draft_signature_exception_fallback() -> None:
+    """Test create_outlook_draft when fetching the signature raises an exception."""
+    with patch('mcp_university.utils.outlook.OUTLOOK_AVAILABLE', True), \
+         patch('mcp_university.utils.outlook.is_outlook_open', return_value=True), \
+         patch('mcp_university.utils.outlook.win32com.client.Dispatch') as mock_dispatch, \
+         patch('mcp_university.utils.outlook.get_config') as mock_get_config:
+
+        mock_cfg = MagicMock()
+        mock_cfg.user.email = "test@example.com"
+        mock_get_config.return_value = mock_cfg
+
+        mock_outlook = mock_dispatch.return_value
+        mock_ns = mock_outlook.GetNamespace.return_value
+
+        mock_store = MagicMock()
+        mock_store.DisplayName = "test@example.com"
+        mock_ns.Stores = [mock_store]
+
+        mock_root = mock_store.GetRootFolder.return_value
+        mock_root.Folders = []
+
+        class FaultySignatureMail:
+            """Mock mail item where GetInspector raises an exception."""
+
+            def __init__(self) -> None:
+                """Initialize attributes."""
+                self.Subject = None
+                self.To = None
+                self.CC = None
+                self.Body = ""
+                self.HTMLBody = ""
+                self.Attachments = MagicMock()
+                self.Save = MagicMock()
+                self.Display = MagicMock()
+
+            @property
+            def GetInspector(self) -> MagicMock:
+                """Property raising an exception to mock a signature loading failure.
+
+                Raises:
+                    Exception: MAPI error.
+                """
+                raise Exception("MAPI error")
+
+        mock_mail = FaultySignatureMail()
+        mock_outlook.CreateItem.return_value = mock_mail
+
+        res = create_outlook_draft("Sub", "Hello World", use_signature=True)
+        assert res is True
+        assert mock_mail.Body == "Hello World"
