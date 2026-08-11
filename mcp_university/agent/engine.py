@@ -1,5 +1,6 @@
 """Engine-Modul für den Agenten."""
 import logging
+import re
 from typing import List, Dict, Callable
 from pathlib import Path
 from datetime import datetime, timedelta
@@ -288,10 +289,10 @@ class Agent:
             return context
 
     def _tool_get_appointment_slots(self) -> str:
-        """Liest die aktuell verfügbaren freien Terminslots ein.
+        """Liest die aktuell verfügbaren freien Terminslots ein und filtert Termine heraus, die in der Vergangenheit liegen.
 
         Returns:
-            str: Freie Slots als Markdown oder Fehlermeldung.
+            str: Freie Slots ab dem aktuellen Zeitpunkt in der Zukunft als Markdown oder Fehlermeldung.
         """
         slots_config_path = self.cfg.calendar.appointment_slots_path
         path = Path(slots_config_path)
@@ -301,7 +302,45 @@ class Agent:
         if not path.exists():
             return f"Fehler: Die Datei mit freien Slots wurde unter {path.as_posix()} nicht gefunden. Das Makro Freeslotexport.bas muss eventuell zuerst ausgeführt werden."
         try:
-            return path.read_text(encoding="utf-8")
+            content = path.read_text(encoding="utf-8")
+            tz = ZoneInfo("Europe/Berlin")
+            now = datetime.now(tz)
+
+            lines = content.splitlines()
+            filtered_lines = []
+            header_and_meta = True
+
+            for line in lines:
+                stripped = line.strip()
+                # If we encounter a list item (free slot entry)
+                if stripped.startswith("-") or stripped.startswith("*"):
+                    header_and_meta = False
+                    # Extract date and time from the line
+                    # Format examples:
+                    # - Mo, 2026-07-20 13:30-14:00
+                    # * Di, 2026-07-21 11:00-11:30
+                    match = re.search(r"(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})", stripped)
+                    if match:
+                        date_str = match.group(1)
+                        time_str = match.group(2)
+                        try:
+                            slot_dt = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M").replace(tzinfo=tz)
+                            if slot_dt >= now:
+                                filtered_lines.append(line)
+                        except Exception as parse_err:
+                            logger.warning(f"Fehler beim Parsen des Slots '{stripped}': {parse_err}")
+                            filtered_lines.append(line)
+                    else:
+                        filtered_lines.append(line)
+                else:
+                    if header_and_meta:
+                        filtered_lines.append(line)
+                    else:
+                        # If we have passed the header, non-list lines should also be filtered or kept?
+                        # Usually, any extra content after the list should be kept or ignored, let's keep it if it's not a past slot.
+                        filtered_lines.append(line)
+
+            return "\n".join(filtered_lines)
         except Exception as e:
             return f"Fehler beim Lesen der freien Slots: {e}"
 
