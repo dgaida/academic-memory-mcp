@@ -22,6 +22,22 @@ Private Const CALENDAR_NAME_2 As String = "Kalender"
 Private Const OUTPUT_PATH    As String = "D:\TH_Koeln\academic-memory-mcp\data\appointments.md"
 Private Const LOOKAHEAD_DAYS As Long   = 28 ' 4 Wochen
 
+' Private Status-Log-Schnittstelle zur Fehlerdiagnose
+Private statusLog As String
+
+' =============================================================================
+' Hilfsprozeduren für Logging
+' =============================================================================
+
+''' Protokolliert eine Statusmeldung im privaten Log und im Debug-Fenster.
+'''
+''' Args:
+'''     msg: Die zu protokollierende Meldung.
+Private Sub LogStatus(ByVal msg As String)
+    Debug.Print msg
+    statusLog = statusLog & Format(Now, "HH:MM:SS") & " - " & msg & vbCrLf
+End Sub
+
 ' =============================================================================
 ' Hauptprozedur
 ' =============================================================================
@@ -38,30 +54,79 @@ Public Sub ExportAppointments()
     Dim endDate     As Date
     Dim parentDir   As String
     Dim utf8Stream  As Object
+    Dim idx         As Long
+
+    statusLog = ""
+    LogStatus "Starte Terminexport..."
+    LogStatus "Zielpfad: " & OUTPUT_PATH
 
     Set ns = Application.GetNamespace("MAPI")
 
-    ' Konto suchen
+    ' Konto robust suchen via Loop über alle Accounts (prüft SMTP-Adresse und DisplayName)
     On Error Resume Next
-    Set account = ns.Accounts.Item(ACCOUNT_NAME)
+    For idx = 1 To ns.Accounts.Count
+        Set account = ns.Accounts.Item(idx)
+        LogStatus "Prüfe Konto " & idx & ": SMTP='" & account.SmtpAddress & "', Name='" & account.DisplayName & "'"
+        If LCase(account.SmtpAddress) = LCase(ACCOUNT_NAME) Or LCase(account.DisplayName) = LCase(ACCOUNT_NAME) Then
+            LogStatus "Konto erfolgreich gefunden: " & account.SmtpAddress
+            Exit For
+        End If
+        Set account = Nothing
+    Next idx
     On Error GoTo 0
 
+    ' Fallback auf Standard-Store, falls das Konto nicht explizit gefunden wurde
     If account Is Nothing Then
-        MsgBox "Konto '" & ACCOUNT_NAME & "' wurde nicht gefunden.", vbCritical
+        LogStatus "HINWEIS: Konto '" & ACCOUNT_NAME & "' wurde nicht explizit in den Konten gefunden. Verwende Default-Store."
+        On Error Resume Next
+        Set store = ns.DefaultStore
+        On Error GoTo 0
+    Else
+        Set store = account.DeliveryStore
+    End If
+
+    If store Is Nothing Then
+        LogStatus "FEHLER: Store konnte nicht ermittelt werden."
+        MsgBox "Store konnte nicht geladen werden." & vbCrLf & vbCrLf & "Status-Log:" & vbCrLf & statusLog, vbCritical, "Terminexport Fehler"
         Exit Sub
     End If
 
-    Set store = account.DeliveryStore
+    LogStatus "Nutze Store: " & store.DisplayName
     Set rootFolder = store.GetRootFolder()
 
     ' Kalender-Ordner suchen
     On Error Resume Next
     Set cal1 = rootFolder.Folders(CALENDAR_NAME)
+    If Not cal1 Is Nothing Then
+        LogStatus "Kalender 1 '" & CALENDAR_NAME & "' in rootFolder gefunden."
+    Else
+        LogStatus "Kalender 1 '" & CALENDAR_NAME & "' nicht direkt in rootFolder gefunden."
+    End If
+
     Set cal2 = rootFolder.Folders(CALENDAR_NAME_2)
+    If Not cal2 Is Nothing Then
+        LogStatus "Kalender 2 '" & CALENDAR_NAME_2 & "' in rootFolder gefunden."
+    Else
+        LogStatus "Kalender 2 '" & CALENDAR_NAME_2 & "' nicht direkt in rootFolder gefunden."
+    End If
     On Error GoTo 0
 
+    ' Fallback für Kalender 1: Standard-Kalender des Stores (olFolderCalendar = 9)
+    If cal1 Is Nothing Then
+        LogStatus "Suche Fallback-Kalender für Kalender 1 via store.GetDefaultFolder..."
+        On Error Resume Next
+        Set cal1 = store.GetDefaultFolder(olFolderCalendar)
+        On Error GoTo 0
+        If Not cal1 Is Nothing Then
+            LogStatus "Fallback-Kalender 1 gefunden: " & cal1.Name & " (" & cal1.FolderPath & ")"
+        Else
+            LogStatus "FEHLER: store.GetDefaultFolder(olFolderCalendar) schlug fehl."
+        End If
+    End If
+
     If cal1 Is Nothing And cal2 Is Nothing Then
-        MsgBox "Keiner der Kalender wurde gefunden.", vbCritical
+        LogStatus "FEHLER: Keiner der Kalender wurde gefunden."
+        MsgBox "Keiner der Kalender wurde gefunden." & vbCrLf & vbCrLf & "Status-Log:" & vbCrLf & statusLog, vbCritical, "Terminexport Fehler"
         Exit Sub
     End If
 
@@ -71,7 +136,8 @@ Public Sub ExportAppointments()
     ' Markdown Datei vorbereiten
     parentDir = Left(OUTPUT_PATH, InStrRev(OUTPUT_PATH, "\") - 1)
     If Not EnsureDirectory(parentDir) Then
-        MsgBox "Zielverzeichnis konnte nicht erstellt werden: " & parentDir, vbCritical
+        LogStatus "FEHLER: Zielverzeichnis konnte nicht erstellt werden: " & parentDir
+        MsgBox "Zielverzeichnis konnte nicht erstellt werden: " & parentDir & vbCrLf & vbCrLf & "Status-Log:" & vbCrLf & statusLog, vbCritical, "Terminexport Fehler"
         Exit Sub
     End If
 
@@ -96,35 +162,72 @@ Public Sub ExportAppointments()
     utf8Stream.SaveToFile OUTPUT_PATH, 2 ' adSaveCreateOverWrite
     utf8Stream.Close
 
-    MsgBox "Export abgeschlossen in " & OUTPUT_PATH, vbInformation
+    LogStatus "Export erfolgreich abgeschlossen in " & OUTPUT_PATH
+    MsgBox "Export abgeschlossen in " & OUTPUT_PATH & vbCrLf & vbCrLf & "Status-Log:" & vbCrLf & statusLog, vbInformation, "Terminexport Erfolgreich"
 End Sub
 
 ''' Durchlaeuft einen Kalender-Ordner und schreibt gefilterte Termine in den Stream.
+'''
+''' Args:
+'''     calFolder: Der zu verarbeitende Kalenderordner.
+'''     startDate: Der Beginn des Zeitraums.
+'''     endDate: Das Ende des Zeitraums.
+'''     utf8Stream: Das ADODB.Stream Objekt zum Schreiben.
 Private Sub ProcessCalendar(ByVal calFolder As Outlook.Folder, ByVal startDate As Date, ByVal endDate As Date, ByRef utf8Stream As Object)
-    If calFolder Is Nothing Then Exit Sub
+    If calFolder Is Nothing Then
+        LogStatus "ProcessCalendar übersprungen, da calFolder Nothing ist."
+        Exit Sub
+    End If
 
-    Dim items As Outlook.Items
-    Dim appt As Object
-    Dim filter As String
+    LogStatus "Verarbeite Kalender: " & calFolder.Name & " (Pfad: " & calFolder.FolderPath & ")"
+
+    Dim items           As Outlook.Items
+    Dim appt            As Object
+    Dim filter          As String
+    Dim restrictedItems As Outlook.Items
+    Dim totalCount      As Long
+    Dim matchedCount    As Long
+    Dim processedCount  As Long
+
+    On Error GoTo ErrHandler
 
     Set items = calFolder.Items
+    totalCount = items.Count
+    LogStatus "Anzahl Termine im Kalender vor Filterung: " & totalCount
+
     items.IncludeRecurrences = True
     items.Sort "[Start]"
 
     ' Outlook Filter Format: MM/DD/YYYY HH:MM AM/PM
     filter = "[Start] >= """ & Month(startDate) & "/" & Day(startDate) & "/" & Year(startDate) & " 00:00 AM""" & _
              " AND [Start] <= """ & Month(endDate) & "/" & Day(endDate) & "/" & Year(endDate) & " 11:59 PM"""
+    LogStatus "Anzuwendender Filter-String: " & filter
 
-    Set items = items.Restrict(filter)
+    Set restrictedItems = items.Restrict(filter)
+    matchedCount = restrictedItems.Count
+    LogStatus "Anzahl gefilterter Termine nach Restrict-Anwendung: " & matchedCount
 
-    For Each appt In items
+    processedCount = 0
+    For Each appt In restrictedItems
         If TypeOf appt Is AppointmentItem Then
             WriteAppointmentToStream appt, utf8Stream
+            processedCount = processedCount + 1
         End If
     Next appt
+
+    LogStatus "Erfolgreich exportierte Termine für '" & calFolder.Name & "': " & processedCount
+    Exit Sub
+
+ErrHandler:
+    LogStatus "FEHLER in ProcessCalendar für '" & calFolder.Name & "': " & Err.Description
+    Resume Next
 End Sub
 
 ''' Formatiert ein AppointmentItem als Tabellenzeile.
+'''
+''' Args:
+'''     appt: Das zu exportierende AppointmentItem.
+'''     utf8Stream: Das Stream-Objekt zum Schreiben.
 Private Sub WriteAppointmentToStream(ByVal appt As Outlook.AppointmentItem, ByRef utf8Stream As Object)
     Dim participants As String
     participants = GetRecipientEmails(appt)
@@ -139,6 +242,12 @@ Private Sub WriteAppointmentToStream(ByVal appt As Outlook.AppointmentItem, ByRe
 End Sub
 
 ''' Extrahiert alle Teilnehmer-E-Mail-Adressen.
+'''
+''' Args:
+'''     appt: Das AppointmentItem.
+'''
+''' Returns:
+'''     E-Mail-Adressen der Teilnehmer, durch Semikolon getrennt.
 Private Function GetRecipientEmails(ByVal appt As Outlook.AppointmentItem) As String
     Dim recip As Outlook.Recipient
     Dim result As String
@@ -156,6 +265,12 @@ Private Function GetRecipientEmails(ByVal appt As Outlook.AppointmentItem) As St
 End Function
 
 ''' Versucht die SMTP-Adresse eines Empfaengers zu ermitteln.
+'''
+''' Args:
+'''     recip: Der Empfänger des Termins.
+'''
+''' Returns:
+'''     Die SMTP-E-Mail-Adresse.
 Private Function GetSmtpAddress(ByVal recip As Outlook.Recipient) As String
     On Error Resume Next
     Dim addrEntry As Outlook.AddressEntry
@@ -170,7 +285,7 @@ Private Function GetSmtpAddress(ByVal recip As Outlook.Recipient) As String
        addrEntry.AddressEntryUserType = olExchangeRemoteUserAddressEntry Then
         Dim exchUser As Outlook.ExchangeUser
         Set exchUser = addrEntry.GetExchangeUser()
-        if Not exchUser Is Nothing Then
+        If Not exchUser Is Nothing Then
             GetSmtpAddress = exchUser.PrimarySmtpAddress
             Exit Function
         End If
@@ -181,6 +296,12 @@ Private Function GetSmtpAddress(ByVal recip As Outlook.Recipient) As String
 End Function
 
 ''' Bereinigt Text fuer Markdown-Tabellen (entfernt Pipes und Zeilenumbrueche).
+'''
+''' Args:
+'''     text: Der zu bereinigende Text.
+'''
+''' Returns:
+'''     Der bereinigte Text.
 Private Function SanitizeMarkdown(ByVal text As String) As String
     Dim result As String
     result = Replace(text, "|", "\|")
@@ -191,6 +312,12 @@ Private Function SanitizeMarkdown(ByVal text As String) As String
 End Function
 
 ''' Stellt sicher, dass ein Verzeichnis existiert.
+'''
+''' Args:
+'''     path: Das Verzeichnis, das erstellt werden soll.
+'''
+''' Returns:
+'''     True, wenn das Verzeichnis existiert oder erfolgreich erstellt wurde.
 Private Function EnsureDirectory(ByVal path As String) As Boolean
     Dim fso As Object
     Set fso = CreateObject("Scripting.FileSystemObject")

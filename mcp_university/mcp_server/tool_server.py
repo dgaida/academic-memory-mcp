@@ -105,11 +105,13 @@ def create_tool_server() -> FastMCP:
 
     @mcp.tool
     def get_appointment_slots() -> str:
-        """Liest die aktuell verfügbaren freien Terminslots für Sprechstunden aus der Konfigurationsdatei aus.
+        """Liest die aktuell verfügbaren freien Terminslots für Sprechstunden aus der Konfigurationsdatei aus und filtert Termine heraus, die in der Vergangenheit liegen.
 
         Returns:
-            Eine Liste der freien Zeitfenster (Datum und Uhrzeit).
+            Eine Liste der freien Zeitfenster (Datum und Uhrzeit) ab dem aktuellen Zeitpunkt in der Zukunft.
         """
+        import re
+        from zoneinfo import ZoneInfo
         slots_config_path = cfg.calendar.appointment_slots_path
         slots_path = Path(slots_config_path)
         if not slots_path.is_absolute():
@@ -119,7 +121,43 @@ def create_tool_server() -> FastMCP:
              return f"Keine freien Slots gefunden (Datei {slots_path.as_posix()} nicht vorhanden)."
 
         try:
-            return slots_path.read_text(encoding="utf-8")
+            content = slots_path.read_text(encoding="utf-8")
+            tz = ZoneInfo("Europe/Berlin")
+            now = datetime.now(tz)
+
+            lines = content.splitlines()
+            filtered_lines = []
+            header_and_meta = True
+
+            for line in lines:
+                stripped = line.strip()
+                # If we encounter a list item (free slot entry)
+                if stripped.startswith("-") or stripped.startswith("*"):
+                    header_and_meta = False
+                    # Extract date and time from the line
+                    # Format examples:
+                    # - Mo, 2026-07-20 13:30-14:00
+                    # * Di, 2026-07-21 11:00-11:30
+                    match = re.search(r"(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})", stripped)
+                    if match:
+                        date_str = match.group(1)
+                        time_str = match.group(2)
+                        try:
+                            slot_dt = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M").replace(tzinfo=tz)
+                            if slot_dt >= now:
+                                filtered_lines.append(line)
+                        except Exception as parse_err:
+                            logger.warning(f"Fehler beim Parsen des Slots '{stripped}': {parse_err}")
+                            filtered_lines.append(line)
+                    else:
+                        filtered_lines.append(line)
+                else:
+                    if header_and_meta:
+                        filtered_lines.append(line)
+                    else:
+                        filtered_lines.append(line)
+
+            return "\n".join(filtered_lines)
         except Exception as e:
             return f"Fehler beim Lesen der freien Slots: {e}"
 

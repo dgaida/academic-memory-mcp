@@ -23,9 +23,9 @@ def temp_data_setup(tmp_path):
 
     free_slots_file = data_dir / "free_slots.md"
     free_slots_content = """# Freie Slots
-* Mo, 2026-07-20 13:30-14:00
-* Di, 2026-07-21 11:00-11:30
-* Mi, 2026-07-22 10:00-10:30
+* Mo, 2030-07-20 13:30-14:00
+* Di, 2030-07-21 11:00-11:30
+* Mi, 2030-07-22 10:00-10:30
 """
     free_slots_file.write_text(free_slots_content, encoding="utf-8")
 
@@ -132,5 +132,69 @@ def test_agent_tool_get_appointment_slots(temp_data_setup):
         agent.cfg = mock_cfg
 
         slots = agent._tool_get_appointment_slots()
-        assert "2026-07-20 13:30-14:00" in slots
-        assert "2026-07-21 11:00-11:30" in slots
+        assert "2030-07-20 13:30-14:00" in slots
+        assert "2030-07-21 11:00-11:30" in slots
+
+def test_get_appointment_slots_past_filter_integration(temp_data_setup):
+    """Prüft, ob get_appointment_slots Termine in der Vergangenheit korrekt filtert."""
+    from datetime import datetime, timedelta
+    from zoneinfo import ZoneInfo
+    data_dir, config_dir = temp_data_setup
+
+    with patch('mcp_university.agent.engine.get_config') as mock_get_config, \
+         patch('mcp_university.agent.engine.LLMClientWrapper'), \
+         patch('mcp_university.agent.engine.ParserFactory'), \
+         patch('mcp_university.agent.engine.MetadataStore'), \
+         patch('mcp_university.agent.engine.SearchIndex'):
+
+        # Prepare appointment slots with some in the future and some in the past
+        tz = ZoneInfo("Europe/Berlin")
+        now = datetime.now(tz)
+        past_time = now - timedelta(days=2)
+        future_time = now + timedelta(days=2)
+
+        past_str = past_time.strftime("%Y-%m-%d %H:%M")
+        future_str = future_time.strftime("%Y-%m-%d %H:%M")
+
+        slots_file = data_dir / "free_slots_filter_test.md"
+        slots_content = f"""# Freie Slots
+* Mo, {past_str}-14:00
+* Di, {future_str}-11:30
+"""
+        slots_file.write_text(slots_content, encoding="utf-8")
+
+        mock_cfg = MagicMock()
+        mock_cfg.config_dir = config_dir
+        mock_cfg.data_dir = data_dir
+        mock_cfg.calendar.appointment_slots_path = str(slots_file)
+        mock_get_config.return_value = mock_cfg
+
+        # 1. Test Agent Tool
+        agent = Agent(model="test", base_url="test")
+        agent.cfg = mock_cfg
+
+        slots = agent._tool_get_appointment_slots()
+        assert past_str not in slots
+        assert future_str in slots
+
+        # 2. Test MCP Tool Server
+        with patch('mcp_university.mcp_server.tool_server.get_config') as mock_mcp_config, \
+             patch('mcp_university.mcp_server.tool_server.MetadataStore'), \
+             patch('mcp_university.mcp_server.tool_server.SearchIndex'), \
+             patch('mcp_university.mcp_server.tool_server.ParserFactory'):
+
+            mock_mcp_config.return_value = mock_cfg
+            from mcp_university.mcp_server.tool_server import create_tool_server
+
+            server = create_tool_server()
+            # Extract get_appointment_slots tool
+            tool_fn = None
+            for component in server.local_provider._components.values():
+                if hasattr(component, "name") and component.name == "get_appointment_slots":
+                    tool_fn = component.fn
+                    break
+
+            assert tool_fn is not None
+            mcp_slots = tool_fn()
+            assert past_str not in mcp_slots
+            assert future_str in mcp_slots
