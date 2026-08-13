@@ -140,21 +140,35 @@ def search_emails(query: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
     logger.info(f"Suche abgeschlossen. Inbox: {len(inbox_data)}, SentItems: {len(sent_data)}")
     return pd.DataFrame(inbox_data, columns=cols), pd.DataFrame(sent_data, columns=cols)
 
-def get_suggestions(query: str) -> Dict[str, Any]:
+def on_select() -> bool:
+    """Setzt den ignore_next_change Status auf True bei Auswahl eines Dropdown-Eintrags.
+
+    Returns:
+        bool: Immer True.
+    """
+    return True
+
+
+def get_suggestions(query: str, ignore: bool) -> Tuple[Dict[str, Any], bool]:
     """Gibt Vorschläge für das Suchfeld zurück.
 
     Args:
         query (str): Der bisherige Suchbegriff.
+        ignore (bool): Ob dieses Event ignoriert werden soll.
 
     Returns:
-        Dict[str, Any]: Gradio-Update für die Choices.
+        Tuple[Dict[str, Any], bool]: Gradio-Update für die Choices, neuer ignore-Status.
     """
+    if ignore:
+        logger.info(f"Ignoriere get_suggestions für: {query} (Auswahl-Event)")
+        return gr.update(), False
+
     if not query or len(query) < 2:
-        return gr.update(choices=[])
+        return gr.update(choices=[]), False
 
     logger.info(f"Hole Vorschläge für: {query}")
     suggestions = GUITools.engine().get_suggestions(query)
-    return gr.update(choices=suggestions)
+    return gr.update(choices=suggestions), False
 
 def display_email(evt: gr.SelectData, df: pd.DataFrame) -> Tuple[str, str, str]:
     """Zeigt die ausgewählte E-Mail an.
@@ -231,6 +245,10 @@ custom_css = """
 with gr.Blocks(title="Email Search Quick", css=custom_css) as demo:
     gr.Markdown("# 📧 Email Schnellsuche")
 
+    # Zustand, um zu verhindern, dass get_suggestions Choices überschreibt,
+    # wenn ein Eintrag ausgewählt wurde.
+    ignore_next_change = gr.State(False)
+
     with gr.Row():
         with gr.Column(scale=1):
             search_input = gr.Dropdown(
@@ -272,10 +290,16 @@ with gr.Blocks(title="Email Search Quick", css=custom_css) as demo:
             selected_path = gr.State("")
 
     # Events
+    search_input.select(
+        fn=on_select,
+        inputs=[],
+        outputs=[ignore_next_change]
+    )
+
     search_input.change(
         fn=get_suggestions,
-        inputs=[search_input],
-        outputs=[search_input]
+        inputs=[search_input, ignore_next_change],
+        outputs=[search_input, ignore_next_change]
     )
 
     search_btn.click(
