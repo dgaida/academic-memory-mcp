@@ -1,4 +1,4 @@
-# Aktion 5: Kolloquium-Termin
+# Aktion 4: Kolloquium-Termin
 
 Diese Aktion automatisiert den gesamten Prozess der Terminplanung und Daten-Vorbereitung für das Kolloquium (die mündliche Verteidigung einer Abschlussarbeit).
 

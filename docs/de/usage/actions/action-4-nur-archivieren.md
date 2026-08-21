@@ -1,4 +1,4 @@
-# Aktion 3: Nur archivieren
+# Aktion 2: Nur archivieren
 
 Diese Aktion wird verwendet, wenn auf eine E-Mail keine Antwort erforderlich ist und diese lediglich im studentischen Archiv-Ordner abgelegt werden soll.
 
