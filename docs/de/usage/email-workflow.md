@@ -83,10 +83,10 @@ Sobald Sie in der GUI auf "Speichern & Ausführen" klicken, wird die gewählte A
 
 Bevor eine Antwort generiert wird, erstellt das System eine prägnante Zusammenfassung des bisherigen Konversationsverlaufs im Studentenordner (`.emails_summary.md`). Diese dient als wichtiger Kontext für das LLM, um über bisherige Absprachen informiert zu sein. Details zur Funktionsweise und Umsetzung der einzelnen Aktionen finden Sie direkt in den jeweiligen Beschreibungen:
 
-*   **[Aktion 1: Antwort schreiben](actions/action-1-antwort-schreiben.md)**
-*   **[Aktion 2: Nur archivieren](actions/action-4-nur-archivieren.md)**
-*   **[Aktion 3: Aufgabe im Kalender anlegen (Finale Abgabe)](actions/action-5-aufgabe-kalender.md)**
-*   **[Aktion 4: Kolloquium-Termin](actions/action-6-kolloquium-termin.md)**
+*   **[Aktion 1: Antwort schreiben](actions/action-1-antwort-schreiben.md)**  
+*   **[Aktion 2: Nur archivieren](actions/action-4-nur-archivieren.md)**  
+*   **[Aktion 3: Aufgabe im Kalender anlegen (Finale Abgabe)](actions/action-5-aufgabe-kalender.md)**  
+*   **[Aktion 4: Kolloquium-Termin](actions/action-6-kolloquium-termin.md)**  
 
 ---
 
@@ -98,7 +98,7 @@ Bevor eine Antwort generiert wird, erstellt das System eine prägnante Zusammenf
 
 
 !!! info "Automatische Archivierung"
-    Das System schlägt für bestimmte E-Mails automatisch die Aktion **"2) Nur archivieren"** vor:
+    Das System schlägt für bestimmte E-Mails automatisch die Aktion **"2) Nur archivieren"** vor:  
     - **Alte E-Mails:** E-Mails, die älter als der konfigurierte Schwellenwert (z.B. 6 Monate) sind.  
     - **SentItems:** E-Mails im Ordner `SentItems` benötigen nie eine Antwort-Aktion.  
     - **Bereits beantwortet:** E-Mails, für die das System erkennt, dass kein Handlungsbedarf besteht.  
