@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..',
 from email_classifier.controller import EmailController  # noqa: E402
 
 def test_get_suggested_action_old_email():
-    """Prüft, ob alte E-Mails als 'Archivieren' (Index 3) markiert werden."""
+    """Prüft, ob alte E-Mails als 'Archivieren' (Index 1) markiert werden."""
     with patch('email_classifier.controller.MailParser') as mock_parser_cls, \
          patch('email_classifier.controller.Agent'), \
          patch('email_classifier.controller.PersonProfiler'):
@@ -26,10 +26,10 @@ def test_get_suggested_action_old_email():
         email_data = {"folder": "Inbox", "needs_answer": True, "lastname": "Test"}
 
         action = controller.get_suggested_action(mail_path, email_data, age_months=6)
-        assert action == 2
+        assert action == 1
 
 def test_get_suggested_action_sent_items():
-    """Prüft, ob E-Mails in SentItems als 'Archivieren' (Index 2) markiert werden."""
+    """Prüft, ob E-Mails in SentItems als 'Archivieren' (Index 1) markiert werden."""
     with patch('email_classifier.controller.MailParser') as mock_parser_cls, \
          patch('email_classifier.controller.Agent'), \
          patch('email_classifier.controller.PersonProfiler'):
@@ -42,10 +42,10 @@ def test_get_suggested_action_sent_items():
         email_data = {"folder": "SentItems", "needs_answer": True, "lastname": "Test"}
 
         action = controller.get_suggested_action(mail_path, email_data, age_months=6)
-        assert action == 2
+        assert action == 1
 
 def test_get_suggested_action_no_answer_needed():
-    """Prüft, ob bereits beantwortete E-Mails als 'Archivieren' (Index 2) markiert werden."""
+    """Prüft, ob bereits beantwortete E-Mails als 'Archivieren' (Index 1) markiert werden."""
     with patch('email_classifier.controller.MailParser') as mock_parser_cls, \
          patch('email_classifier.controller.Agent'), \
          patch('email_classifier.controller.PersonProfiler'):
@@ -58,7 +58,7 @@ def test_get_suggested_action_no_answer_needed():
         email_data = {"folder": "Inbox", "needs_answer": False, "lastname": "Test"}
 
         action = controller.get_suggested_action(mail_path, email_data, age_months=6)
-        assert action == 2
+        assert action == 1
 
 def test_get_suggested_action_calls_classifier():
     """Prüft, ob für aktuelle Mails der Aktions-Klassifizierer aufgerufen wird."""
@@ -96,7 +96,7 @@ def test_process_all_emails_sets_suggested_action():
         }])
         controller.mail_parser = MagicMock()
         controller.mail_parser.get_email_date.return_value = datetime.now()
-        controller.get_suggested_action = MagicMock(return_value=2)
+        controller.get_suggested_action = MagicMock(return_value=1)
 
         # We need to mock Path.rglob because process_all_emails calls it
         with patch('pathlib.Path.rglob') as mock_rglob:
@@ -104,7 +104,7 @@ def test_process_all_emails_sets_suggested_action():
 
             emails = controller.process_all_emails(Path("."))
             assert len(emails) == 1
-            assert emails[0]["suggested_action"] == 2
+            assert emails[0]["suggested_action"] == 1
             controller.get_suggested_action.assert_called_once()
 
 def test_get_suggested_action_sent_items_explicit():
@@ -120,7 +120,7 @@ def test_get_suggested_action_sent_items_explicit():
         # Test case: folder is SentItems
         email_data = {"folder": "SentItems", "lastname": "Tester"}
         action = controller.get_suggested_action(mail_path, email_data)
-        assert action == 2
+        assert action == 1
 
         # Test case: folder is Inbox, should call classifier or default to 0
         email_data = {"folder": "Inbox", "lastname": "Tester"}
@@ -131,7 +131,7 @@ def test_get_suggested_action_sent_items_explicit():
 def test_get_suggested_action_inbox_older_than_n_months() -> None:
     """Garantiert, dass eine E-Mail im Posteingang (Inbox), die älter als N Monate ist,
 
-    ausschließlich die Option '3) E-Mail nur archivieren.' (Index 2) vorausgewählt bekommt.
+    ausschließlich die Option '2) E-Mail nur archivieren.' (Index 1) vorausgewählt bekommt.
 
     Args:
         None
@@ -154,8 +154,8 @@ def test_get_suggested_action_inbox_older_than_n_months() -> None:
 
         action_idx = controller.get_suggested_action(mail_path, email_data, age_months=6)
 
-        # Sicherstellen, dass Index 2 zurückgegeben wird
-        assert action_idx == 2
+        # Sicherstellen, dass Index 1 zurückgegeben wird
+        assert action_idx == 1
 
-        # Sicherstellen, dass dies exakt der Option "3) E-Mail nur archivieren." entspricht
-        assert controller.ACTION_OPTIONS[action_idx] == "3) E-Mail nur archivieren."
+        # Sicherstellen, dass dies exakt der Option "2) E-Mail nur archivieren." entspricht
+        assert controller.ACTION_OPTIONS[action_idx] == "2) E-Mail nur archivieren."

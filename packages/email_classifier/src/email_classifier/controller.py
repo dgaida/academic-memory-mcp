@@ -44,10 +44,9 @@ class EmailController:
 
     ACTION_OPTIONS = [
         "1) Antwort schreiben.",
-        "2) Antwort schreiben mit einem Terminvorschlag.",
-        "3) E-Mail nur archivieren.",
-        "4) Aufgabe im Kalender anlegen zum Lesen des Anhangs.",
-        "5) Termin für Kolloquium in Kalender anlegen.",
+        "2) E-Mail nur archivieren.",
+        "3) Aufgabe im Kalender anlegen zum Lesen des Anhangs.",
+        "4) Termin für Kolloquium in Kalender anlegen.",
     ]
 
     def __init__(
@@ -246,7 +245,7 @@ ANTWORTE NUR MIT DEN 3 FRAGEN, EINE PRO ZEILE, OHNE NUMMERIERUNG."""
     def classify_action(
         self, mail_path: Path, additional_context: str = "", email_class: str = None
     ) -> int:
-        """Klassifiziert die E-Mail in eine von 6 Aktions-Optionen."""
+        """Klassifiziert die E-Mail in eine der Aktions-Optionen."""
         mail_content = self.mail_parser.parse(mail_path)
         mail_content = self.mail_parser.extract_latest_message(mail_content)
 
@@ -265,7 +264,7 @@ ZUSÄTZLICHER KONTEXT:
 {additional_context}
 
 WICHTIGE ANWEISUNG:
-Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärung.
+Antworte NUR mit der Ziffer (1-4) der gewählten Option. Keine weitere Erklärung.
 """
 
         try:
@@ -273,7 +272,7 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
                 messages=[{"role": "user", "content": user_prompt}],
                 system_prompt=system_prompt,
             )
-            match = re.search(r"([1-6])", response)
+            match = re.search(r"([1-4])", response)
             if match:
                 return int(match.group(1)) - 1
         except Exception as e:
@@ -284,7 +283,7 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
     def execute_action(self, action_idx: int, mail_path: Path, email_data: dict) -> str:
         """Führt die gewählte Aktion für eine E-Mail aus."""
         latest_mail = mail_path
-        if action_idx == 2:  # 3) Nur archivieren
+        if action_idx == 1:  # 2) Nur archivieren
             return "E-Mail archiviert."
 
         student_email = ""
@@ -360,7 +359,7 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
 
         # Delayed summary generation
         summary_content = ""
-        if action_idx in [0, 1, 3, 4]:  # Reply-related actions
+        if action_idx in [0, 2, 3]:  # Reply-related actions
             identifier_path = email_data.get("new_identifier_path") or email_data.get(
                 "identifier_path"
             )
@@ -734,7 +733,7 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
         """
         mail_content = self.mail_parser.parse(mail_path)
         mail_content = self.mail_parser.extract_latest_message(mail_content)
-        if action_idx == 2:  # 3) Nur archivieren
+        if action_idx == 1:  # 2) Nur archivieren
             return "NO_REPLY_NEEDED", "Archivieren", False
 
         if email_class == "PAV_PO-Wechsel":
@@ -770,13 +769,10 @@ Antworte NUR mit der Ziffer (1-6) der gewählten Option. Keine weitere Erklärun
             if action_idx == 0:  # 1) Antwort schreiben
                 skip_step1 = False
                 skip_step12 = True
-            elif action_idx == 1:  # 2) Antwort schreiben mit Terminvorschlag
-                force_appointment_slots = True
-                skip_step12 = True
-            elif action_idx == 3:  # 4) Aufgabe im Kalender / Finale Abgabe
+            elif action_idx == 2:  # 3) Aufgabe im Kalender / Finale Abgabe
                 skip_step1 = True
                 force_final_submission = True
-            elif action_idx == 4:  # 5) Termin für Kolloquium
+            elif action_idx == 3:  # 4) Termin für Kolloquium
                 force_colloquium = True
                 skip_step12 = True
 
@@ -1032,7 +1028,7 @@ TEXT:
             age_months (Optional[int]): Altersschwellenwert in Monaten.
 
         Returns:
-            int: Index der empfohlenen Aktion (0-5).
+            int: Index der empfohlenen Aktion (0-3).
         """
         # Bestimme das Datum der Mail
         try:
@@ -1062,7 +1058,7 @@ TEXT:
             logger.info(
                 f"E-Mail von {email_data.get('lastname', 'Unbekannt')} ist {reason}. Automatische Aktion: Archivieren."
             )
-            return 2  # Index für "3) E-Mail nur archivieren."
+            return 1  # Index für "2) E-Mail nur archivieren."
 
         if self.use_action_classifier:
             return self.classify_action(

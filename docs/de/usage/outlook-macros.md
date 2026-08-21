@@ -13,7 +13,7 @@ Dieses Projekt enthält eine hochentwickelte Sammlung von Outlook VBA-Makros und
     2.  Export aller neuen studentischen E-Mails (ruft `ExportStudentEmails` auf).  
     *   *Interaktion:* Beim Start fragt das Makro interaktiv ab, wie viele Tage rückwärts (Standard: 7) nach neuen studentischen E-Mails gesucht werden soll.  
 *   **Was wird mit den Exports gemacht (Downstream-Nutzung):**  
-    *   Die freien Zeitfenster werden in `D:\TH_Koeln\academic-memory-mcp\data\free_slots.md` abgelegt und vom LLM bei Antwort-Vorschlägen (Aktion 2) herangezogen.  
+    *   Die freien Zeitfenster werden in `D:\TH_Koeln\academic-memory-mcp\data\free_slots.md` abgelegt und vom LLM bei der Antwortgenerierung (Aktion 1) zur Erstellung von Terminvorschlägen herangezogen.
     *   Die E-Mails werden im Inbox-Ordner gespeichert und stehen direkt für die Gradio GUI zur Klassifizierung, Zusammenfassung und Verarbeitung bereit.  
 
 ---
@@ -36,7 +36,7 @@ Dieses Projekt enthält eine hochentwickelte Sammlung von Outlook VBA-Makros und
     *   *Sprechstunden-Logik:* Sucht nach freien 30-Minuten-Zeitfenstern an Werktagen zwischen 13:30 und 16:00 Uhr.  
     *   *Ausschlüsse:* Wochenenden, NRW-Feiertage sowie explizit konfigurierte Sperrwochentage (Standard: Mittwoch, Freitag) werden vollautomatisch übersprungen.  
 *   **Speicherort:** `D:\TH_Koeln\academic-memory-mcp\data\free_slots.md`  
-*   **Was wird mit den Exports gemacht (Downstream-Nutzung):** Die generierte Markdown-Datei dient dem E-Mail-Controller als direkte Datenbasis. Wenn Sie in der GUI die **Aktion 2) Antwort schreiben mit Terminvorschlag** wählen, liest das System diese Datei ein. Das LLM extrahiert die freien Slots und baut diese formatiert und personalisiert in Ihren Antwortentwurf in Outlook ein.  
+*   **Was wird mit den Exports gemacht (Downstream-Nutzung):** Die generierte Markdown-Datei dient dem E-Mail-Controller als direkte Datenbasis. Wenn das LLM in der GUI bei **Aktion 1) Antwort schreiben** eine allgemeine Terminanfrage oder einen Termin-Konflikt feststellt, liest das System diese Datei ein. Das LLM extrahiert die freien Slots und baut diese formatiert und personalisiert in Ihren Antwortentwurf in Outlook ein.
 
 ---
 
@@ -78,7 +78,7 @@ Dieses Projekt enthält eine hochentwickelte Sammlung von Outlook VBA-Makros und
 *   **Speicherort:** Exportiert die E-Mails strukturiert auf die Festplatte unter:  
     `D:\TH_Koeln\StudentMails\<E-Mail-Adresse>\Inbox\` (bzw. `SentItems\`)  
     *   *Outlook-Aktion:* Nach dem Export werden die Mails in Outlook in den Papierkorb verschoben, um das Postfach schlank und performant zu halten.  
-*   **Was wird mit den Exports gemacht (Downstream-Nutzung):** Die archivierten MSG-Dateien verbleiben auf der Festplatte und werden vom Crawler (`mcp-uni index`) weiterhin erfasst, indiziert und stehen über die Vektorsuche (`mcp-uni search` oder RAG) für historische Suchen und Ähnlichkeitsvergleiche (Similarity-Anzeige in der GUI) voll zur Verfügung.  
+*   **Was wird mit den Exports gemacht (Downstream-Nutzung):** Die archivierten MSG-Dateien verbleiben auf der Festplatte und werden vom Crawler (`mcp-uni index`) weiterhin erfasst, indiziert und stehen über die Vektorsuche (`mcp-uni search` or RAG) für historische Suchen und Ähnlichkeitsvergleiche (Similarity-Anzeige in der GUI) voll zur Verfügung.
 
 ---
 

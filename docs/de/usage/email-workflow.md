@@ -16,12 +16,12 @@ Verwenden Sie die im Projekt bereitgestellten VBA-Makros, um Daten in den `inbox
 ---
 
 ## 2. Phase: Automatische Klassifizierung und Vorsortierung
-Die manuelle Ausführung von Sortier-Skripten über die Kommandozeile ist **nicht mehr erforderlich**, da das Einlesen, die Klassifizierung und die Sortierung vollständig über die Gradio GUI (siehe 3. Phase) abgewickelt werden. Das System führt im Hintergrund die gesamte Themen-Erkennung und Namensauflösung durch, wenn Sie die GUI starten oder dort den Scan-Vorgang auslösen.
+Die manuelle Ausführung von Sortier-Skripten über die Kommandozeile ist nicht erforderlich, da das Einlesen, die Klassifizierung und die Sortierung vollständig über die Gradio GUI (siehe 3. Phase) abgewickelt werden. Das System führt im Hintergrund die gesamte Themen-Erkennung und Namensauflösung durch, wenn Sie die GUI starten oder dort den Scan-Vorgang auslösen.
 
 ---
 
 ## 3. Phase: Interaktive Verwaltung (Gradio GUI) {#gradio-gui}
-Der gesamte Prozess wird nun direkt über die Gradio GUI gesteuert (`scripts/process_sorted_emails.py`). Die GUI bietet zwei spezialisierte Tabs für unterschiedliche Arbeitsweisen.
+Der gesamte Prozess wird direkt über die Gradio GUI gesteuert (`scripts/process_sorted_emails.py`). Die GUI bietet zwei spezialisierte Tabs für unterschiedliche Arbeitsweisen.
 
 ### Tab 1: Schnell-Einsortierung
 Dieser Tab ist für die massenweise Verarbeitung von E-Mails optimiert, bei denen die automatische Klassifizierung bereits ausreicht. Sie müssen keine CLI-Skripte mehr manuell aufrufen; alle Schritte geschehen per Knopfdruck in der GUI.
@@ -65,34 +65,28 @@ Während der Arbeit in der GUI (insbesondere im Detail-Tab 2) führt das System 
 ---
 
 ## 5. Phase: Aktions-Vorschläge & GUI-Interaktion
-Basierend auf der KI-gestützten Analyse schlägt das System eine von fünf Aktionen vor. Diese Auswahl wird in der GUI vorselektiert und kann vom Benutzer manuell überprüft, angepasst oder überschrieben werden.
+Basierend auf der KI-gestützten Analyse schlägt das System eine von vier Aktionen vor. Diese Auswahl wird in der GUI vorselektiert und kann vom Benutzer manuell überprüft, angepasst oder überschrieben werden.
 
 | Aktion | Beschreibung |
 | :--- | :--- |
-| **1) Antwort schreiben** | Standard- oder themenspezifische Antwort. Beinhaltet auch die intelligente Termin- und Konfliktprüfung (Automatische Terminbuchung bei Zusagen / Alternativvorschläge bei Konflikten). |
-| **2) Antwort mit Terminvorschlag** | Sucht freie Slots und schlägt diese vor. |
-| **3) Nur archivieren** | Einsortierung in den Archiv-Ordner; keine Antwort nötig. |
-| **4) Aufgabe "Anhang lesen"** | Speziell für finale Abgaben (Korrektur-Erinnerung im Kalender). |
-| **5) Kolloquium-Termin** | Spezielle Buchung für Abschlussvorträge. |
-
----
-
-
+| **1) Antwort schreiben** | Standard- oder themenspezifische Antwort. Beinhaltet die Terminverarbeitung (allgemeine Terminanfragen, Vorschläge, Zusagen) und automatische Kalenderbuchungen sowie Alternativvorschläge bei Konflikten. |
+| **2) Nur archivieren** | Einsortierung in den Archiv-Ordner; keine Antwort nötig. |
+| **3) Aufgabe "Anhang lesen"** | Speziell für finale Abgaben (Korrektur-Erinnerung im Kalender). |
+| **4) Kolloquium-Termin** | Spezielle Buchung für Abschlussvorträge. |
 
 ---
 
 ## 6. Phase: Ausführung der Aktionen (Details)
-Sobald Sie in der GUI auf "Speichern & Ausführen" klicken, wird die gewählte Aktion technisch umgesetzt. Hierbei werden nun auch die **Personen-Steckbriefe** (Student & Eigene Persona) sowie die **Skills** (Fachwissen-Dateien) einbezogen.
+Sobald Sie in der GUI auf "Speichern & Ausführen" klicken, wird die gewählte Aktion technisch umgesetzt. Hierbei werden auch die **Personen-Steckbriefe** (Student & Eigene Persona) sowie die **Skills** (Fachwissen-Dateien) einbezogen.
 
 ### Detail-Logik der Aktionen:
 
 Bevor eine Antwort generiert wird, erstellt das System eine prägnante Zusammenfassung des bisherigen Konversationsverlaufs im Studentenordner (`.emails_summary.md`). Diese dient als wichtiger Kontext für das LLM, um über bisherige Absprachen informiert zu sein. Details zur Funktionsweise und Umsetzung der einzelnen Aktionen finden Sie direkt in den jeweiligen Beschreibungen:
 
-*   **[Aktion 1: Antwort schreiben (inkl. Terminbuchung)](actions/action-1-antwort-schreiben.md)**  
-*   **[Aktion 2: Antwort mit Terminvorschlag](actions/action-2-antwort-terminvorschlag.md)**  
-*   **[Aktion 3: Nur archivieren](actions/action-4-nur-archivieren.md)**  
-*   **[Aktion 4: Aufgabe im Kalender anlegen (Finale Abgabe)](actions/action-5-aufgabe-kalender.md)**  
-*   **[Aktion 5: Kolloquium-Termin](actions/action-6-kolloquium-termin.md)**  
+*   **[Aktion 1: Antwort schreiben](actions/action-1-antwort-schreiben.md)**
+*   **[Aktion 2: Nur archivieren](actions/action-4-nur-archivieren.md)**
+*   **[Aktion 3: Aufgabe im Kalender anlegen (Finale Abgabe)](actions/action-5-aufgabe-kalender.md)**
+*   **[Aktion 4: Kolloquium-Termin](actions/action-6-kolloquium-termin.md)**
 
 ---
 
@@ -104,18 +98,14 @@ Bevor eine Antwort generiert wird, erstellt das System eine prägnante Zusammenf
 
 
 !!! info "Automatische Archivierung"
-    Das System schlägt für bestimmte E-Mails automatisch die Aktion **"4) Nur archivieren"** vor:  
+    Das System schlägt für bestimmte E-Mails automatisch die Aktion **"2) Nur archivieren"** vor:
     - **Alte E-Mails:** E-Mails, die älter als der konfigurierte Schwellenwert (z.B. 6 Monate) sind.  
     - **SentItems:** E-Mails im Ordner `SentItems` benötigen nie eine Antwort-Aktion.  
     - **Bereits beantwortet:** E-Mails, für die das System erkennt, dass kein Handlungsbedarf besteht.  
 ---
 
-
-
 ### Diagnose und Logging
 Das System protokolliert jeden Schritt der E-Mail-Verarbeitung detailliert in `process_emails.log`. Sollte die GUI keine E-Mails anzeigen, obwohl diese in `sorted_emails.md` gelistet sind, prüfen Sie die Log-Datei auf Warnungen bezüglich fehlender Modelldateien oder Zugriffsproblemen.
-
-
 
 ## Erstellte Berichte und Dateien
 
