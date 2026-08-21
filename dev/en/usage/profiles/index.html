@@ -688,34 +688,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../actions/action-2-antwort-terminvorschlag/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Aktion 2 - Antwort mit Terminvorschlag
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../actions/action-4-nur-archivieren/" class="md-nav__link">
         
   
@@ -723,7 +695,7 @@
   <span class="md-ellipsis">
     
   
-    Aktion 3 - Nur archivieren
+    Aktion 2 - Nur archivieren
   
 
     
@@ -751,7 +723,7 @@
   <span class="md-ellipsis">
     
   
-    Aktion 4 - Aufgabe "Anhang lesen" (Finale Abgabe)
+    Aktion 3 - Aufgabe "Anhang lesen" (Finale Abgabe)
   
 
     
@@ -779,7 +751,7 @@
   <span class="md-ellipsis">
     
   
-    Aktion 5 - Kolloquium-Termin
+    Aktion 4 - Kolloquium-Termin
   
 
     
@@ -2739,7 +2711,7 @@
    Crawls the official TH Köln directory for names, contact information, faculties, institutes, and academic degrees. It stores them in the local SQLite database <code>th_personal.db</code> as well as Markdown files in <code>data/th_koeln/</code>.</li>
 </ol>
 <p><em>Example Command:</em>
-   <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python<span class="w"> </span>-m<span class="w"> </span>th_personal_graph.scripts.crawl_th_koeln_persons<span class="w"> </span>--faculty<span class="w"> </span><span class="s2">&quot;Fakultät für Informatik und Ingenieurwissenschaften&quot;</span>
+   <div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python<span class="w"> </span>-m<span class="w"> </span>th_personal_graph.scripts.crawl_th_koeln_persons<span class="w"> </span>--faculty<span class="w"> </span><span class="s2">"Fakultät für Informatik und Ingenieurwissenschaften"</span>
 </code></pre></div></p>
 <ol>
 <li><strong>MOCOGI Extractor (<code>python -m th_personal_graph.scripts.extract_mocogi_data</code>):</strong><br />
@@ -2755,7 +2727,7 @@
 <p><strong>Knowledge Graph Visualization (<code>python -m th_personal_graph.scripts.visualize_knowledge_graph</code>):</strong><br />
     Generates an interactive 2D network visualization of the graph as an HTML file (<code>knowledge_graph.html</code>). You can filter nodes or explore the entire graph in your browser.</p>
 <p><em>Example Command (filtered by name):</em>
-<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>python<span class="w"> </span>-m<span class="w"> </span>th_personal_graph.scripts.visualize_knowledge_graph<span class="w"> </span>--filter<span class="w"> </span><span class="s2">&quot;Informatik&quot;</span><span class="w"> </span><span class="s2">&quot;Mustermann&quot;</span>
+<div class="language-bash highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>python<span class="w"> </span>-m<span class="w"> </span>th_personal_graph.scripts.visualize_knowledge_graph<span class="w"> </span>--filter<span class="w"> </span><span class="s2">"Informatik"</span><span class="w"> </span><span class="s2">"Mustermann"</span>
 </code></pre></div></p>
 </li>
 </ul>
@@ -2829,7 +2801,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../actions/action-6-kolloquium-termin/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Aktion 5 - Kolloquium-Termin">
+          <a href="../actions/action-6-kolloquium-termin/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Aktion 4 - Kolloquium-Termin">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -2839,7 +2811,7 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Aktion 5 - Kolloquium-Termin
+                Aktion 4 - Kolloquium-Termin
               </div>
             </div>
           </a>

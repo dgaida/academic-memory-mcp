@@ -688,34 +688,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../usage/actions/action-2-antwort-terminvorschlag/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Aktion 2 - Antwort mit Terminvorschlag
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../usage/actions/action-4-nur-archivieren/" class="md-nav__link">
         
   
@@ -723,7 +695,7 @@
   <span class="md-ellipsis">
     
   
-    Aktion 3 - Nur archivieren
+    Aktion 2 - Nur archivieren
   
 
     
@@ -751,7 +723,7 @@
   <span class="md-ellipsis">
     
   
-    Aktion 4 - Aufgabe "Anhang lesen" (Finale Abgabe)
+    Aktion 3 - Aufgabe "Anhang lesen" (Finale Abgabe)
   
 
     
@@ -779,7 +751,7 @@
   <span class="md-ellipsis">
     
   
-    Aktion 5 - Kolloquium-Termin
+    Aktion 4 - Kolloquium-Termin
   
 
     
@@ -2630,8 +2602,8 @@
 <li><strong><code>config/folders.yaml</code> (Directories to Monitor):</strong><br />
    This file does not exist as a template by default, but must be created by you if you want to use the indexing function (<code>mcp-uni memory update</code> or <code>python scripts/index_memory.py</code>). Create the file <code>config/folders.yaml</code> and enter the desired paths:
    <div class="language-yaml highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">folders</span><span class="p">:</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;/path/to/teaching/modules&quot;</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;/path/to/student/files&quot;</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"/path/to/teaching/modules"</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"/path/to/student/files"</span>
 </code></pre></div></li>
 <li><strong><code>folders</code></strong>: A list of absolute paths on your hard drive to be monitored by the crawler and indexed into the vector database.  </li>
 </ol>
@@ -2640,9 +2612,9 @@
 <li><strong><code>config/classifier_paths.yaml</code> (Archiving Paths):</strong><br />
    Open this file and configure the physical target folders on your hard drive for the respective email classes (e.g., <code>BachelorThesis</code>, <code>MasterThesis</code>, <code>Other</code>):
    <div class="language-yaml highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nt">class_paths</span><span class="p">:</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">BachelorThesis</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/path/to/student/bachelor-thesis&quot;</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nt">MasterThesis</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/path/to/student/master-thesis&quot;</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="nt">Other</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/path/to/student/other-mails&quot;</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">BachelorThesis</span><span class="p">:</span><span class="w"> </span><span class="s">"/path/to/student/bachelor-thesis"</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nt">MasterThesis</span><span class="p">:</span><span class="w"> </span><span class="s">"/path/to/student/master-thesis"</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="nt">Other</span><span class="p">:</span><span class="w"> </span><span class="s">"/path/to/student/other-mails"</span>
 </code></pre></div>
    This is where the email classifier physically files emails.</li>
 </ol>

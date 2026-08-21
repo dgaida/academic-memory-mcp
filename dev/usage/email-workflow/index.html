@@ -978,34 +978,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../actions/action-2-antwort-terminvorschlag/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Aktion 2 - Antwort mit Terminvorschlag
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../actions/action-4-nur-archivieren/" class="md-nav__link">
         
   
@@ -1013,7 +985,7 @@
   <span class="md-ellipsis">
     
   
-    Aktion 3 - Nur archivieren
+    Aktion 2 - Nur archivieren
   
 
     
@@ -1041,7 +1013,7 @@
   <span class="md-ellipsis">
     
   
-    Aktion 4 - Aufgabe "Anhang lesen" (Finale Abgabe)
+    Aktion 3 - Aufgabe "Anhang lesen" (Finale Abgabe)
   
 
     
@@ -1069,7 +1041,7 @@
   <span class="md-ellipsis">
     
   
-    Aktion 5 - Kolloquium-Termin
+    Aktion 4 - Kolloquium-Termin
   
 
     
@@ -3006,10 +2978,10 @@
 </ul>
 <hr />
 <h2 id="2-phase-automatische-klassifizierung-und-vorsortierung">2. Phase: Automatische Klassifizierung und Vorsortierung<a class="headerlink" href="#2-phase-automatische-klassifizierung-und-vorsortierung" title="Permanent link">&para;</a></h2>
-<p>Die manuelle Ausführung von Sortier-Skripten über die Kommandozeile ist <strong>nicht mehr erforderlich</strong>, da das Einlesen, die Klassifizierung und die Sortierung vollständig über die Gradio GUI (siehe 3. Phase) abgewickelt werden. Das System führt im Hintergrund die gesamte Themen-Erkennung und Namensauflösung durch, wenn Sie die GUI starten oder dort den Scan-Vorgang auslösen.</p>
+<p>Die manuelle Ausführung von Sortier-Skripten über die Kommandozeile ist nicht erforderlich, da das Einlesen, die Klassifizierung und die Sortierung vollständig über die Gradio GUI (siehe 3. Phase) abgewickelt werden. Das System führt im Hintergrund die gesamte Themen-Erkennung und Namensauflösung durch, wenn Sie die GUI starten oder dort den Scan-Vorgang auslösen.</p>
 <hr />
 <h2 id="gradio-gui">3. Phase: Interaktive Verwaltung (Gradio GUI)<a class="headerlink" href="#gradio-gui" title="Permanent link">&para;</a></h2>
-<p>Der gesamte Prozess wird nun direkt über die Gradio GUI gesteuert (<code>scripts/process_sorted_emails.py</code>). Die GUI bietet zwei spezialisierte Tabs für unterschiedliche Arbeitsweisen.</p>
+<p>Der gesamte Prozess wird direkt über die Gradio GUI gesteuert (<code>scripts/process_sorted_emails.py</code>). Die GUI bietet zwei spezialisierte Tabs für unterschiedliche Arbeitsweisen.</p>
 <h3 id="tab-1-schnell-einsortierung">Tab 1: Schnell-Einsortierung<a class="headerlink" href="#tab-1-schnell-einsortierung" title="Permanent link">&para;</a></h3>
 <p>Dieser Tab ist für die massenweise Verarbeitung von E-Mails optimiert, bei denen die automatische Klassifizierung bereits ausreicht. Sie müssen keine CLI-Skripte mehr manuell aufrufen; alle Schritte geschehen per Knopfdruck in der GUI.</p>
 <h4 id="wie-die-automatische-klassifizierung-sortierung-funktioniert">Wie die automatische Klassifizierung &amp; Sortierung funktioniert:<a class="headerlink" href="#wie-die-automatische-klassifizierung-sortierung-funktioniert" title="Permanent link">&para;</a></h4>
@@ -3059,7 +3031,7 @@
 </ul>
 <hr />
 <h2 id="5-phase-aktions-vorschlage-gui-interaktion">5. Phase: Aktions-Vorschläge &amp; GUI-Interaktion<a class="headerlink" href="#5-phase-aktions-vorschlage-gui-interaktion" title="Permanent link">&para;</a></h2>
-<p>Basierend auf der KI-gestützten Analyse schlägt das System eine von fünf Aktionen vor. Diese Auswahl wird in der GUI vorselektiert und kann vom Benutzer manuell überprüft, angepasst oder überschrieben werden.</p>
+<p>Basierend auf der KI-gestützten Analyse schlägt das System eine von vier Aktionen vor. Diese Auswahl wird in der GUI vorselektiert und kann vom Benutzer manuell überprüft, angepasst oder überschrieben werden.</p>
 <table>
 <thead>
 <tr>
@@ -3070,38 +3042,32 @@
 <tbody>
 <tr>
 <td style="text-align: left;"><strong>1) Antwort schreiben</strong></td>
-<td style="text-align: left;">Standard- oder themenspezifische Antwort. Beinhaltet auch die intelligente Termin- und Konfliktprüfung (Automatische Terminbuchung bei Zusagen / Alternativvorschläge bei Konflikten).</td>
+<td style="text-align: left;">Standard- oder themenspezifische Antwort. Beinhaltet die Terminverarbeitung (allgemeine Terminanfragen, Vorschläge, Zusagen) und automatische Kalenderbuchungen sowie Alternativvorschläge bei Konflikten.</td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>2) Antwort mit Terminvorschlag</strong></td>
-<td style="text-align: left;">Sucht freie Slots und schlägt diese vor.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>3) Nur archivieren</strong></td>
+<td style="text-align: left;"><strong>2) Nur archivieren</strong></td>
 <td style="text-align: left;">Einsortierung in den Archiv-Ordner; keine Antwort nötig.</td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>4) Aufgabe "Anhang lesen"</strong></td>
+<td style="text-align: left;"><strong>3) Aufgabe "Anhang lesen"</strong></td>
 <td style="text-align: left;">Speziell für finale Abgaben (Korrektur-Erinnerung im Kalender).</td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>5) Kolloquium-Termin</strong></td>
+<td style="text-align: left;"><strong>4) Kolloquium-Termin</strong></td>
 <td style="text-align: left;">Spezielle Buchung für Abschlussvorträge.</td>
 </tr>
 </tbody>
 </table>
 <hr />
-<hr />
 <h2 id="6-phase-ausfuhrung-der-aktionen-details">6. Phase: Ausführung der Aktionen (Details)<a class="headerlink" href="#6-phase-ausfuhrung-der-aktionen-details" title="Permanent link">&para;</a></h2>
-<p>Sobald Sie in der GUI auf "Speichern &amp; Ausführen" klicken, wird die gewählte Aktion technisch umgesetzt. Hierbei werden nun auch die <strong>Personen-Steckbriefe</strong> (Student &amp; Eigene Persona) sowie die <strong>Skills</strong> (Fachwissen-Dateien) einbezogen.</p>
+<p>Sobald Sie in der GUI auf "Speichern &amp; Ausführen" klicken, wird die gewählte Aktion technisch umgesetzt. Hierbei werden auch die <strong>Personen-Steckbriefe</strong> (Student &amp; Eigene Persona) sowie die <strong>Skills</strong> (Fachwissen-Dateien) einbezogen.</p>
 <h3 id="detail-logik-der-aktionen">Detail-Logik der Aktionen:<a class="headerlink" href="#detail-logik-der-aktionen" title="Permanent link">&para;</a></h3>
 <p>Bevor eine Antwort generiert wird, erstellt das System eine prägnante Zusammenfassung des bisherigen Konversationsverlaufs im Studentenordner (<code>.emails_summary.md</code>). Diese dient als wichtiger Kontext für das LLM, um über bisherige Absprachen informiert zu sein. Details zur Funktionsweise und Umsetzung der einzelnen Aktionen finden Sie direkt in den jeweiligen Beschreibungen:</p>
 <ul>
-<li><strong><a href="../actions/action-1-antwort-schreiben/">Aktion 1: Antwort schreiben (inkl. Terminbuchung)</a></strong>  </li>
-<li><strong><a href="../actions/action-2-antwort-terminvorschlag/">Aktion 2: Antwort mit Terminvorschlag</a></strong>  </li>
-<li><strong><a href="../actions/action-4-nur-archivieren/">Aktion 3: Nur archivieren</a></strong>  </li>
-<li><strong><a href="../actions/action-5-aufgabe-kalender/">Aktion 4: Aufgabe im Kalender anlegen (Finale Abgabe)</a></strong>  </li>
-<li><strong><a href="../actions/action-6-kolloquium-termin/">Aktion 5: Kolloquium-Termin</a></strong>  </li>
+<li><strong><a href="../actions/action-1-antwort-schreiben/">Aktion 1: Antwort schreiben</a></strong></li>
+<li><strong><a href="../actions/action-4-nur-archivieren/">Aktion 2: Nur archivieren</a></strong></li>
+<li><strong><a href="../actions/action-5-aufgabe-kalender/">Aktion 3: Aufgabe im Kalender anlegen (Finale Abgabe)</a></strong></li>
+<li><strong><a href="../actions/action-6-kolloquium-termin/">Aktion 4: Kolloquium-Termin</a></strong></li>
 </ul>
 <hr />
 <h2 id="weiterfuhrende-links">Weiterführende Links<a class="headerlink" href="#weiterfuhrende-links" title="Permanent link">&para;</a></h2>
@@ -3113,7 +3079,7 @@
 </ul>
 <div class="admonition info">
 <p class="admonition-title">Automatische Archivierung</p>
-<p>Das System schlägt für bestimmte E-Mails automatisch die Aktion <strong>"4) Nur archivieren"</strong> vor:<br />
+<p>Das System schlägt für bestimmte E-Mails automatisch die Aktion <strong>"2) Nur archivieren"</strong> vor:
 - <strong>Alte E-Mails:</strong> E-Mails, die älter als der konfigurierte Schwellenwert (z.B. 6 Monate) sind.<br />
 - <strong>SentItems:</strong> E-Mails im Ordner <code>SentItems</code> benötigen nie eine Antwort-Aktion.<br />
 - <strong>Bereits beantwortet:</strong> E-Mails, für die das System erkennt, dass kein Handlungsbedarf besteht.  </p>

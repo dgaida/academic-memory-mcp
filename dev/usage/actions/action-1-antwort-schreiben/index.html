@@ -9,7 +9,7 @@
 <meta content="Senior Python Architect" name="author"/>
 <link href="https://dgaida.github.io/academic-memory-mcp/dev/usage/actions/action-1-antwort-schreiben/" rel="canonical"/>
 <link href="../../email-workflow/" rel="prev"/>
-<link href="../action-2-antwort-terminvorschlag/" rel="next"/>
+<link href="../action-4-nur-archivieren/" rel="next"/>
 <link href="./" hreflang="de" rel="alternate"/>
 <link href="../../../en/usage/actions/action-1-antwort-schreiben/" hreflang="en" rel="alternate"/>
 <link href="../../../assets/images/favicon.png" rel="icon"/>
@@ -346,10 +346,10 @@
 <nav aria-label="Funktionsweise und Details" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#e-mail-signatur-integration-neu">
+<a class="md-nav__link" href="#e-mail-signatur-integration">
 <span class="md-ellipsis">
       
-        E-Mail-Signatur-Integration (Neu)
+        E-Mail-Signatur-Integration
       
     </span>
 </a>
@@ -358,20 +358,29 @@
 </nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#intelligente-terminbuchung-konfliktprufung-integrierte-logik">
+<a class="md-nav__link" href="#intelligente-terminverarbeitung-konfliktprufung">
 <span class="md-ellipsis">
       
-        Intelligente Terminbuchung &amp; Konfliktprüfung (Integrierte Logik)
+        Intelligente Terminverarbeitung &amp; Konfliktprüfung
       
     </span>
 </a>
-<nav aria-label="Intelligente Terminbuchung &amp; Konfliktprüfung (Integrierte Logik)" class="md-nav">
+<nav aria-label="Intelligente Terminverarbeitung &amp; Konfliktprüfung" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#ablauf-der-integrierten-terminbuchung">
+<a class="md-nav__link" href="#ermittlung-des-konkreten-datums-bei-relativen-datumsangaben">
 <span class="md-ellipsis">
       
-        Ablauf der integrierten Terminbuchung:
+        Ermittlung des konkreten Datums bei relativen Datumsangaben
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#ablauf-der-integrierten-terminverarbeitung">
+<span class="md-ellipsis">
+      
+        Ablauf der integrierten Terminverarbeitung:
       
     </span>
 </a>
@@ -392,23 +401,11 @@
 </nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="../action-2-antwort-terminvorschlag/">
-<span class="md-ellipsis">
-    
-  
-    Aktion 2 - Antwort mit Terminvorschlag
-  
-
-    
-  </span>
-</a>
-</li>
-<li class="md-nav__item">
 <a class="md-nav__link" href="../action-4-nur-archivieren/">
 <span class="md-ellipsis">
     
   
-    Aktion 3 - Nur archivieren
+    Aktion 2 - Nur archivieren
   
 
     
@@ -420,7 +417,7 @@
 <span class="md-ellipsis">
     
   
-    Aktion 4 - Aufgabe "Anhang lesen" (Finale Abgabe)
+    Aktion 3 - Aufgabe "Anhang lesen" (Finale Abgabe)
   
 
     
@@ -432,7 +429,7 @@
 <span class="md-ellipsis">
     
   
-    Aktion 5 - Kolloquium-Termin
+    Aktion 4 - Kolloquium-Termin
   
 
     
@@ -1151,10 +1148,10 @@
 <nav aria-label="Funktionsweise und Details" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#e-mail-signatur-integration-neu">
+<a class="md-nav__link" href="#e-mail-signatur-integration">
 <span class="md-ellipsis">
       
-        E-Mail-Signatur-Integration (Neu)
+        E-Mail-Signatur-Integration
       
     </span>
 </a>
@@ -1163,20 +1160,29 @@
 </nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#intelligente-terminbuchung-konfliktprufung-integrierte-logik">
+<a class="md-nav__link" href="#intelligente-terminverarbeitung-konfliktprufung">
 <span class="md-ellipsis">
       
-        Intelligente Terminbuchung &amp; Konfliktprüfung (Integrierte Logik)
+        Intelligente Terminverarbeitung &amp; Konfliktprüfung
       
     </span>
 </a>
-<nav aria-label="Intelligente Terminbuchung &amp; Konfliktprüfung (Integrierte Logik)" class="md-nav">
+<nav aria-label="Intelligente Terminverarbeitung &amp; Konfliktprüfung" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#ablauf-der-integrierten-terminbuchung">
+<a class="md-nav__link" href="#ermittlung-des-konkreten-datums-bei-relativen-datumsangaben">
 <span class="md-ellipsis">
       
-        Ablauf der integrierten Terminbuchung:
+        Ermittlung des konkreten Datums bei relativen Datumsangaben
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#ablauf-der-integrierten-terminverarbeitung">
+<span class="md-ellipsis">
+      
+        Ablauf der integrierten Terminverarbeitung:
       
     </span>
 </a>
@@ -1201,48 +1207,64 @@
 <div class="md-content" data-md-component="content">
 <article class="md-content__inner md-typeset">
 <h1 id="aktion-1-antwort-schreiben">Aktion 1: Antwort schreiben<a class="headerlink" href="#aktion-1-antwort-schreiben" title="Permanent link">¶</a></h1>
-<p>Diese Aktion generiert einen standardmäßigen oder themenspezifischen E-Mail-Antwortentwurf auf Basis des Inhalts einer eingegangenen E-Mail.</p>
+<p>Diese Aktion generiert einen standardmäßigen oder themenspezifischen E-Mail-Antwortentwurf auf Basis des Inhalts einer eingegangenen E-Mail. Sie deckt auch allgemeine Terminanfragen, konkrete Terminvorschläge sowie Terminbestätigungen vollständig ab.</p>
 <h2 id="funktionsweise-und-details">Funktionsweise und Details<a class="headerlink" href="#funktionsweise-und-details" title="Permanent link">¶</a></h2>
 <p>Das System führt bei dieser Aktion folgende Schritte aus:</p>
 <ol>
-<li><strong>Konversationsanalyse:</strong> Es wird eine prägnante Zusammenfassung des bisherigen E-Mail-Verlaufs im Ordner des Studenten erstellt bzw. aktualisiert (<code>.emails_summary.md</code>), um den Kontext für das Sprachmodell (LLM) bereitzustellen.  </li>
-<li><strong>Berücksichtigung von Profilen:</strong> Das LLM bezieht sowohl Ihren eigenen Dozenten-Steckbrief (Ihre Rolle, Signatur, Tonalität) als auch den Steckbrief des Studenten mit ein.  </li>
-<li><strong>Anrede-Ermittlung (Du/Sie):</strong> Die bevorzugte Anredeform (Du oder Sie) wird automatisch anhand des Verlaufs der letzten 8 E-Mails (4 gesendete, 4 empfangene) ermittelt.  </li>
-<li><strong>Generierung:</strong> Das lokale LLM (standardmäßig <code>gemma4:e2b</code>) entwirft eine präzise, kontextbezogene und freundliche Antwort auf Deutsch.  </li>
-<li><strong>Entwurfserstellung:</strong> Es wird automatisch ein E-Mail-Entwurf direkt in Microsoft Outlook erzeugt. Die Original-Mail wird dabei als Anhang beigefügt, damit der Verlauf gewahrt bleibt.  </li>
+<li><strong>Konversationsanalyse:</strong> Es wird eine prägnante Zusammenfassung des bisherigen E-Mail-Verlaufs im Ordner des Studenten erstellt bzw. aktualisiert (<code>.emails_summary.md</code>), um den Kontext für das Sprachmodell (LLM) bereitzustellen.</li>
+<li><strong>Berücksichtigung von Profilen:</strong> Das LLM bezieht sowohl Ihren eigenen Dozenten-Steckbrief (Ihre Rolle, Signatur, Tonalität) als auch den Steckbrief des Studenten mit ein.</li>
+<li><strong>Anrede-Ermittlung (Du/Sie):</strong> Die bevorzugte Anredeform (Du oder Sie) wird automatisch anhand des Verlaufs der letzten 8 E-Mails (4 gesendete, 4 empfangene) ermittelt.</li>
+<li><strong>Generierung:</strong> Das lokale LLM entwirft eine präzise, kontextbezogene und freundliche Antwort auf Deutsch.</li>
+<li><strong>Entwurfserstellung:</strong> Es wird automatisch ein E-Mail-Entwurf direkt in Microsoft Outlook erzeugt. Die Original-Mail wird dabei als Anhang beigefügt, damit der Verlauf gewahrt bleibt.</li>
 </ol>
-<h3 id="e-mail-signatur-integration-neu">E-Mail-Signatur-Integration (Neu)<a class="headerlink" href="#e-mail-signatur-integration-neu" title="Permanent link">¶</a></h3>
+<h3 id="e-mail-signatur-integration">E-Mail-Signatur-Integration<a class="headerlink" href="#e-mail-signatur-integration" title="Permanent link">¶</a></h3>
 <p>Das System unterstützt das automatische Laden und Integrieren Ihrer in Outlook hinterlegten Standard-E-Mail-Signatur. Beim Erzeugen des Entwurfs greift das System über die Outlook-Schnittstelle (<code>win32com</code>) auf das Postfach zu und führt die folgenden Schritte aus:</p>
 <ol>
 <li><strong>Signatur-Erkennung:</strong> Ein leerer E-Mail-Entwurf wird initialisiert, um das Laden der Standard-Signatur durch Outlook zu erzwingen.  </li>
-<li><strong>Inhalts-Injektion:</strong> </li>
-<li>Falls eine reich formatierte HTML-Signatur hinterlegt ist, wird der vom LLM generierte Antworttext automatisch in HTML konvertiert (Sonderzeichen maskiert, Zeilenumbrüche in HTML-Zeilenumbrüche <code>&lt;br/&gt;</code> umgewandelt) und präzise am Anfang des <code>&lt;body&gt;</code>-Abschnitts der Signatur injiziert. Dadurch bleibt das Layout und das Design Ihrer offiziellen Signatur vollständig erhalten.  </li>
-<li>Falls nur eine Text-Signatur vorhanden ist, wird der Antworttext sauber vor dieser platziert.  </li>
+<li><strong>Inhalts-Injektion:</strong> <ul>
+<li>Falls eine reich formatierte HTML-Signatur hinterlegt ist, wird der vom LLM generierte Antworttext automatisch in HTML konvertiert (Sonderzeichen maskiert, Zeilenumbrüche in HTML-Zeilenumbrüche <code>&lt;br/&gt;</code> umgewandelt) und präzise am Anfang des <code>&lt;body&gt;</code>-Abschnitts der Signatur injiziert. Dadurch bleibt das Layout und das Design Ihrer offiziellen Signatur vollständig erhalten.</li>
+<li>Falls nur eine Text-Signatur vorhanden ist, wird der Antworttext sauber vor dieser platziert.</li>
+</ul>
+</li>
 <li><strong>Robuster Fallback:</strong> Sollte keine Signatur geladen werden können oder das Feature deaktiviert sein, wird der Antwortentwurf wie gewohnt als reiner Text erstellt.  </li>
 </ol>
 <hr/>
-<h2 id="intelligente-terminbuchung-konfliktprufung-integrierte-logik">Intelligente Terminbuchung &amp; Konfliktprüfung (Integrierte Logik)<a class="headerlink" href="#intelligente-terminbuchung-konfliktprufung-integrierte-logik" title="Permanent link">¶</a></h2>
-<p>Wenn das System eine E-Mail beantwortet, prüft es automatisch im Hintergrund auf Terminvorschläge oder Terminbestätigungen (Zusagen) seitens des Absenders. Dadurch wird die ehemals separate <strong>Aktion 3: Termin direkt buchen</strong> nun vollständig und nahtlos von Aktion 1 abgedeckt.</p>
-<h3 id="ablauf-der-integrierten-terminbuchung">Ablauf der integrierten Terminbuchung:<a class="headerlink" href="#ablauf-der-integrierten-terminbuchung" title="Permanent link">¶</a></h3>
+<h2 id="intelligente-terminverarbeitung-konfliktprufung">Intelligente Terminverarbeitung &amp; Konfliktprüfung<a class="headerlink" href="#intelligente-terminverarbeitung-konfliktprufung" title="Permanent link">¶</a></h2>
+<p>Wenn das System eine E-Mail beantwortet, prüft es automatisch im Hintergrund auf allgemeine Terminanfragen, konkrete Terminvorschläge oder Terminbestätigungen (Zusagen) seitens des Absenders.</p>
+<h3 id="ermittlung-des-konkreten-datums-bei-relativen-datumsangaben">Ermittlung des konkreten Datums bei relativen Datumsangaben<a class="headerlink" href="#ermittlung-des-konkreten-datums-bei-relativen-datumsangaben" title="Permanent link">¶</a></h3>
+<p>Relative Aussagen wie <em>"Passt es am Dienstag um 14:00?"</em> oder <em>"Ich nehme den Termin am Montag um 15:30 Uhr"</em> enthalten kein absolutes Datum (z. B. <code>2026-07-21</code>). Das System ermittelt das konkrete Datum wie folgt:</p>
 <ol>
-<li><strong>Erkennung:</strong> Das LLM analysiert die eingehende Mail auf konkrete Terminvorschläge (z. B. "Passt es am Dienstag um 14:00?") oder Zusagen (z. B. "Ich nehme den Termin am Montag um 15:30 Uhr").  </li>
-<li><strong>Datum- und Uhrzeitextraktion:</strong> Die KI extrahiert das gewünschte und bestätigte Datum sowie die Uhrzeit aus der E-Mail.  </li>
-<li><strong>Prüfung auf Gültigkeit (Vergangenheit):</strong> Es wird überprüft, ob der vorgeschlagene Termin in der Vergangenheit liegt.  <ul>
-<li><strong>Falls in der Vergangenheit:</strong> Es wird kein Kalendereintrag erstellt. Die E-Mail wird direkt archiviert (Status: <code>Archiviert (Termin in Vergangenheit)</code>).  </li>
+<li><strong>Aktueller Referenzzeitpunkt:</strong> Dem LLM wird im Prompt stets der exakte aktuelle Zeitpunkt mit Wochentag, Datum, Uhrzeit und Zeitzone übergeben:
+   <code>HEUTE IST: &lt;Wochentag&gt;, den &lt;DD.MM.YYYY HH:MM&gt;</code> (z. B. <code>Freitag, den 17.07.2026 14:00</code> in der Zeitzone <code>Europe/Berlin</code>).</li>
+<li><strong>Chain-of-Thought (CoT) Abgleich:</strong> Das Sprachmodell nutzt den im <code>SKILL_Appointment.md</code> definierten Schritt-für-Schritt-Denkprozess:<ul>
+<li>Es bestimmt ausgehend vom Referenzdatum den nächsten passenden Wochentag (z. B. von Freitag, 17.07.2026 ausgehend ist Dienstag der 21.07.2026).</li>
+<li>Sendedaten aus vorherigen E-Mail-Headern (z. B. <code>On Thu, 16 Jul 2026...</code>) werden dabei explizit ignoriert, um Verfälschungen durch alte Nachrichten zu verhindern.</li>
 </ul>
 </li>
-<li><strong>Intelligenter Kalenderabgleich &amp; Konfliktprüfung:</strong> <ul>
-<li>Das System liest die bestehenden Termine aus der Datei <code>data/appointments.md</code>.  </li>
-<li>Es prüft, ob zu dem vorgeschlagenen oder bestätigten Zeitpunkt bereits ein Termin oder ein Blocker existiert:  <ul>
-<li><strong>Frei (Zusage/Buchung):</strong> Wenn kein Termin oder nur ein Blocker speziell für diesen Termin/Studenten eingetragen ist, bucht das System den Termin über das Tool <code>manage_calendar_appointment</code> direkt im Outlook-Kalender des Benutzers. Die Standarddauer beträgt <strong>30 Minuten</strong>, und die Zeitzone ist auf <code>Europe/Berlin</code> eingestellt. Das System antwortet mit dem Signalwort <code>APPOINTMENT_BOOKED</code> und die E-Mail wird im studentischen Archiv-Ordner abgelegt.  </li>
-<li><strong>Belegt (Konflikt):</strong> Wenn ein anderer Termin oder ein generischer Blocker im Weg steht, erkennt das System dies als Konflikt.  </li>
+</ol>
+<h3 id="ablauf-der-integrierten-terminverarbeitung">Ablauf der integrierten Terminverarbeitung:<a class="headerlink" href="#ablauf-der-integrierten-terminverarbeitung" title="Permanent link">¶</a></h3>
+<ol>
+<li><strong>Erkennung:</strong> Das LLM analysiert die eingehende Mail:<ul>
+<li><strong>Allgemeine Terminanfrage / Wunsch:</strong> Enthält die Mail nur einen allgemeinen Wunsch nach einem Termin ohne konkretes Datum, ruft das System <code>get_appointment_slots</code> auf, um die verfügbaren freien Slots aus <code>data/free_slots.md</code> zu laden und direkt als Vorschläge in den Antwortentwurf einzufügen.</li>
+<li><strong>Konkreter Vorschlag / Zusage:</strong> Enthält die Mail ein konkretes Datum und eine Uhrzeit, führt das LLM die Datumsermittlung durch.</li>
+</ul>
+</li>
+<li><strong>Prüfung auf Gültigkeit (Vergangenheit):</strong> Es wird überprüft, ob der ermittelte Termin in der Vergangenheit liegt.<ul>
+<li><strong>Falls in der Vergangenheit:</strong> Es wird kein Kalendereintrag erstellt. Die E-Mail wird direkt archiviert (Status: <code>Archiviert (Termin in Vergangenheit)</code>).</li>
+</ul>
+</li>
+<li><strong>Intelligenter Kalenderabgleich &amp; Konfliktprüfung:</strong><ul>
+<li>Das System liest die bestehenden Termine aus der Datei <code>data/appointments.md</code>.</li>
+<li>Es prüft, ob zu dem vorgeschlagenen oder bestätigten Zeitpunkt bereits ein Termin oder ein Blocker existiert:<ul>
+<li><strong>Frei (Zusage/Buchung):</strong> Wenn kein Termin oder nur ein Blocker speziell für diesen Termin/Studenten eingetragen ist, bucht das System den Termin über das Tool <code>manage_calendar_appointment</code> direkt im Outlook-Kalender des Benutzers. Die Standarddauer beträgt <strong>30 Minuten</strong>, und die Zeitzone ist auf <code>Europe/Berlin</code> eingestellt. Das System antwortet mit dem Signalwort <code>APPOINTMENT_BOOKED</code> und die E-Mail wird im studentischen Archiv-Ordner abgelegt.</li>
+<li><strong>Belegt (Konflikt):</strong> Wenn ein anderer Termin oder ein generischer Blocker im Weg steht, erkennt das System dies als Konflikt.</li>
 </ul>
 </li>
 </ul>
 </li>
-<li><strong>Alternativenvorschlag bei Konflikten:</strong> <ul>
-<li>Falls ein Konflikt erkannt wird, liest das System automatisch die freien Terminslots aus <code>data/free_slots.md</code> (über das Tool <code>get_appointment_slots</code>) ein.  </li>
-<li>Es schlägt diese freien Termine als Alternativen in der Antwort-E-Mail vor und bittet den Absender um eine neue Auswahl.  </li>
+<li><strong>Alternativenvorschlag bei Konflikten:</strong><ul>
+<li>Falls ein Konflikt erkannt wird, liest das System automatisch die freien Terminslots aus <code>data/free_slots.md</code> (über das Tool <code>get_appointment_slots</code>) ein.</li>
+<li>Es schlägt diese freien Termine als Alternativen in der Antwort-E-Mail vor und bittet den Absender um eine neue Auswahl.</li>
 </ul>
 </li>
 </ol>
@@ -1251,22 +1273,26 @@
 <div class="mermaid">graph TD
     A[E-Mail empfangen &amp; klassifiziert] --&gt; B[Zusammenfassung des bisherigen Verlaufs erstellen]
     B --&gt; C[Personen-Steckbriefe &amp; Anredeform Du/Sie analysieren]
-    C --&gt; D{Enthält E-Mail eine Terminbestätigung/Zusage?}
+    C --&gt; D{Enthält E-Mail eine Terminanfrage, Vorschlag oder Zusage?}
 
-    D -- Ja --&gt; E[Extrahiere Datum &amp; Uhrzeit des Termins]
-    E --&gt; F{Liegt Termin in der Vergangenheit?}
+    D -- Allgemeine Anfrage --&gt; E1[Lese freie Slots aus free_slots.md via get_appointment_slots]
+    E1 --&gt; K[LLM generiert Antwort mit Terminvorschlägen]
+
+    D -- Konkreter Vorschlag / Zusage --&gt; E2[Extrahiere Datum &amp; Uhrzeit relativ zu HEUTE IST]
+    E2 --&gt; F{Liegt Termin in der Vergangenheit?}
     F -- Ja --&gt; G["Keine Buchung &amp; Mail direkt archivieren <br/> Status: Archiviert (Termin in Vergangenheit)"]
     F -- Nein --&gt; H{Kalendertermin frei?}
     H -- Ja --&gt; I["Buche Termin im Outlook-Kalender <br/> via manage_calendar_appointment <br/> Status: APPOINTMENT_BOOKED"]
     H -- Nein (Konflikt) --&gt; J[Lese freie Slots &amp; generiere Antwort mit Alternativenvorschlägen]
 
-    D -- Nein --&gt; K[LLM generiert standardmäßige/themenspezifische Antwort]
+    D -- Keine Terminrelevanz --&gt; L[LLM generiert standardmäßige/themenspezifische Antwort]
 
-    I --&gt; L[Outlook-Entwurf / Buchung abschließen]
-    J --&gt; L
-    K --&gt; L
-    G --&gt; M[Vorgang abgeschlossen]
+    I --&gt; M[Outlook-Entwurf / Buchung abschließen]
+    J --&gt; M
+    K --&gt; M
     L --&gt; M
+    G --&gt; N[Vorgang abgeschlossen]
+    M --&gt; N
 </div>
 </article>
 </div>
@@ -1293,13 +1319,13 @@
               </div>
 </div>
 </a>
-<a aria-label="Weiter: Aktion 2 - Antwort mit Terminvorschlag" class="md-footer__link md-footer__link--next" href="../action-2-antwort-terminvorschlag/">
+<a aria-label="Weiter: Aktion 2 - Nur archivieren" class="md-footer__link md-footer__link--next" href="../action-4-nur-archivieren/">
 <div class="md-footer__title">
 <span class="md-footer__direction">
                 Weiter
               </span>
 <div class="md-ellipsis">
-                Aktion 2 - Antwort mit Terminvorschlag
+                Aktion 2 - Nur archivieren
               </div>
 </div>
 <div class="md-footer__button md-icon">

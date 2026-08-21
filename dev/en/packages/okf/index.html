@@ -682,34 +682,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/actions/action-2-antwort-terminvorschlag/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Aktion 2 - Antwort mit Terminvorschlag
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../usage/actions/action-4-nur-archivieren/" class="md-nav__link">
         
   
@@ -717,7 +689,7 @@
   <span class="md-ellipsis">
     
   
-    Aktion 3 - Nur archivieren
+    Aktion 2 - Nur archivieren
   
 
     
@@ -745,7 +717,7 @@
   <span class="md-ellipsis">
     
   
-    Aktion 4 - Aufgabe "Anhang lesen" (Finale Abgabe)
+    Aktion 3 - Aufgabe "Anhang lesen" (Finale Abgabe)
   
 
     
@@ -773,7 +745,7 @@
   <span class="md-ellipsis">
     
   
-    Aktion 5 - Kolloquium-Termin
+    Aktion 4 - Kolloquium-Termin
   
 
     
@@ -3055,9 +3027,9 @@ These files are the primary sources and provide provenance for all extracted kno
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">okf.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_okf_pipeline</span>
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
 <a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">config</span> <span class="o">=</span> <span class="n">OKFConfig</span><span class="p">(</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">okf_dir</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;./my_okf_bundle&quot;</span><span class="p">),</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">pdf_dir</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;./my_pdfs&quot;</span><span class="p">),</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="n">spec_file</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;config/SPEC.md&quot;</span><span class="p">)</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">okf_dir</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">"./my_okf_bundle"</span><span class="p">),</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">pdf_dir</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">"./my_pdfs"</span><span class="p">),</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="n">spec_file</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">"config/SPEC.md"</span><span class="p">)</span>
 <a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="p">)</span>
 <a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>
 <a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="c1"># Run full extraction pipeline</span>
@@ -3097,8 +3069,8 @@ The generated <code>index.md</code> is fully compliant with the OKF v0.2 specifi
 <p>Each email class uses its own knowledge folder (OKF). The target OKF folder must be created inside a directory specified in <code>classifier_memory_paths.yaml</code> (located at <code>config/classifier_memory_paths.yaml</code>).</p>
 <p>Multiple email classes can share a single OKF folder, which is defined in the configuration file. For example, in <code>classifier_memory_paths.yaml</code>:</p>
 <div class="language-yaml highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nt">class_paths</span><span class="p">:</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="nt">PAV_PO-Wechsel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;D:/PAV/okf&quot;</span>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span><span class="nt">InformatikProjekt</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;D:/PAV/okf&quot;</span><span class="w"> </span><span class="c1"># Shares the same OKF folder with PAV_PO-Wechsel</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="nt">PAV_PO-Wechsel</span><span class="p">:</span><span class="w"> </span><span class="s">"D:/PAV/okf"</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span><span class="nt">InformatikProjekt</span><span class="p">:</span><span class="w"> </span><span class="s">"D:/PAV/okf"</span><span class="w"> </span><span class="c1"># Shares the same OKF folder with PAV_PO-Wechsel</span>
 </code></pre></div>
 <p>Ensure that you create the specified target directory (e.g., <code>D:/PAV/okf</code>) before running the pipeline.</p>
 <h3 id="3-location-of-the-original-pdf-documents">3. Location of the Original PDF Documents<a class="headerlink" href="#3-location-of-the-original-pdf-documents" title="Permanent link">&para;</a></h3>
