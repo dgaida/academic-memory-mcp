@@ -2799,7 +2799,7 @@
 </ol>
 </li>
 <li><strong>Was wird mit den Exports gemacht (Downstream-Nutzung):</strong>  <ul>
-<li>Die freien Zeitfenster werden in <code>D:\TH_Koeln\academic-memory-mcp\data\free_slots.md</code> abgelegt und vom LLM bei der Antwortgenerierung (Aktion 1) zur Erstellung von Terminvorschlägen herangezogen.</li>
+<li>Die freien Zeitfenster werden in <code>D:\TH_Koeln\academic-memory-mcp\data\free_slots.md</code> abgelegt und vom LLM bei der Antwortgenerierung (Aktion 1) zur Erstellung von Terminvorschlägen herangezogen.  </li>
 <li>Die E-Mails werden im Inbox-Ordner gespeichert und stehen direkt für die Gradio GUI zur Klassifizierung, Zusammenfassung und Verarbeitung bereit.  </li>
 </ul>
 </li>
@@ -2830,7 +2830,7 @@
 </ul>
 </li>
 <li><strong>Speicherort:</strong> <code>D:\TH_Koeln\academic-memory-mcp\data\free_slots.md</code>  </li>
-<li><strong>Was wird mit den Exports gemacht (Downstream-Nutzung):</strong> Die generierte Markdown-Datei dient dem E-Mail-Controller als direkte Datenbasis. Wenn das LLM in der GUI bei <strong>Aktion 1) Antwort schreiben</strong> eine allgemeine Terminanfrage oder einen Termin-Konflikt feststellt, liest das System diese Datei ein. Das LLM extrahiert die freien Slots und baut diese formatiert und personalisiert in Ihren Antwortentwurf in Outlook ein.</li>
+<li><strong>Was wird mit den Exports gemacht (Downstream-Nutzung):</strong> Die generierte Markdown-Datei dient dem E-Mail-Controller als direkte Datenbasis. Wenn das LLM in der GUI bei <strong>Aktion 1) Antwort schreiben</strong> eine allgemeine Terminanfrage oder einen Termin-Konflikt feststellt, liest das System diese Datei ein. Das LLM extrahiert die freien Slots und baut diese formatiert und personalisiert in Ihren Antwortentwurf in Outlook ein.  </li>
 </ul>
 <hr />
 <h3 id="4-sprechstunden-termin-export-appointmentexport">4. Sprechstunden- &amp; Termin-Export (AppointmentExport)<a class="headerlink" href="#4-sprechstunden-termin-export-appointmentexport" title="Permanent link">&para;</a></h3>
@@ -2874,7 +2874,7 @@
 <li><em>Outlook-Aktion:</em> Nach dem Export werden die Mails in Outlook in den Papierkorb verschoben, um das Postfach schlank und performant zu halten.  </li>
 </ul>
 </li>
-<li><strong>Was wird mit den Exports gemacht (Downstream-Nutzung):</strong> Die archivierten MSG-Dateien verbleiben auf der Festplatte und werden vom Crawler (<code>mcp-uni index</code>) weiterhin erfasst, indiziert und stehen über die Vektorsuche (<code>mcp-uni search</code> or RAG) für historische Suchen und Ähnlichkeitsvergleiche (Similarity-Anzeige in der GUI) voll zur Verfügung.</li>
+<li><strong>Was wird mit den Exports gemacht (Downstream-Nutzung):</strong> Die archivierten MSG-Dateien verbleiben auf der Festplatte und werden vom Crawler (<code>mcp-uni index</code>) weiterhin erfasst, indiziert und stehen über die Vektorsuche (<code>mcp-uni search</code> or RAG) für historische Suchen und Ähnlichkeitsvergleiche (Similarity-Anzeige in der GUI) voll zur Verfügung.  </li>
 </ul>
 <hr />
 <h3 id="9-betreff-basierter-export-exportmailsbysubjectandage">9. Betreff-basierter Export (ExportMailsBySubjectAndAge)<a class="headerlink" href="#9-betreff-basierter-export-exportmailsbysubjectandage" title="Permanent link">&para;</a></h3>
