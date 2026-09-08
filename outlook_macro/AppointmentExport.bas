@@ -240,7 +240,10 @@ Private Sub ProcessCalendar(ByVal calFolder As Outlook.Folder, ByVal startDate A
     End If
 
     processedCount = 0
-    For Each appt In restrictedItems
+    ' WICHTIG: Bei IncludeRecurrences = True schlägt "For Each" in Outlook-Collections/Restrict oft fehl
+    ' oder bricht sofort ab. Es muss zwingend GetFirst() und GetNext() verwendet werden!
+    Set appt = restrictedItems.GetFirst()
+    Do While Not appt Is Nothing
         If TypeOf appt Is AppointmentItem Then
             ' Zusätzliche manuelle Sicherheitsprüfung auf Datumsbereich
             If appt.Start <= nextDay And appt.End >= startDate Then
@@ -248,7 +251,8 @@ Private Sub ProcessCalendar(ByVal calFolder As Outlook.Folder, ByVal startDate A
                 processedCount = processedCount + 1
             End If
         End If
-    Next appt
+        Set appt = restrictedItems.GetNext()
+    Loop
 
     LogStatus "Erfolgreich exportierte Termine für '" & calFolder.Name & "': " & processedCount
     Exit Sub
