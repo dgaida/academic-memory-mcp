@@ -198,9 +198,11 @@ Private Sub ProcessCalendar(ByVal calFolder As Outlook.Folder, ByVal startDate A
     items.IncludeRecurrences = True
     items.Sort "[Start]"
 
-    ' Outlook Filter Format: MM/DD/YYYY HH:MM AM/PM
-    filter = "[Start] >= """ & Month(startDate) & "/" & Day(startDate) & "/" & Year(startDate) & " 00:00 AM""" & _
-             " AND [Start] <= """ & Month(endDate) & "/" & Day(endDate) & "/" & Year(endDate) & " 11:59 PM"""
+    ' Outlook Jet Query Filter: MM/DD/YYYY (M/D/YYYY) ohne ungültigen AM/PM Zeit-Suffix
+    Dim nextDay As Date
+    nextDay = DateAdd("d", 1, endDate)
+    filter = "[Start] >= """ & Month(startDate) & "/" & Day(startDate) & "/" & Year(startDate) & """" & _
+             " AND [Start] < """ & Month(nextDay) & "/" & Day(nextDay) & "/" & Year(nextDay) & """"
     LogStatus "Anzuwendender Filter-String: " & filter
 
     Set restrictedItems = items.Restrict(filter)
