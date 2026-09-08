@@ -183,11 +183,16 @@ Private Sub ProcessCalendar(ByVal calFolder As Outlook.Folder, ByVal startDate A
 
     Dim items           As Outlook.Items
     Dim appt            As Object
-    Dim filter          As String
+    Dim filter1         As String
+    Dim filter2         As String
+    Dim filter3         As String
+    Dim res1            As Outlook.Items
+    Dim res2            As Outlook.Items
     Dim restrictedItems As Outlook.Items
     Dim totalCount      As Long
     Dim matchedCount    As Long
     Dim processedCount  As Long
+    Dim nextDay         As Date
 
     On Error GoTo ErrHandler
 
@@ -198,22 +203,46 @@ Private Sub ProcessCalendar(ByVal calFolder As Outlook.Folder, ByVal startDate A
     items.IncludeRecurrences = True
     items.Sort "[Start]"
 
-    ' Outlook Filter Format: MM/DD/YYYY HH:MM AM/PM
-    filter = "[Start] >= """ & Month(startDate) & "/" & Day(startDate) & "/" & Year(startDate) & " 00:00 AM""" & _
-             " AND [Start] <= """ & Month(endDate) & "/" & Day(endDate) & "/" & Year(endDate) & " 11:59 PM"""
-    LogStatus "Anzuwendender Filter-String: " & filter
+    nextDay = DateAdd("d", 1, endDate)
 
-    Set restrictedItems = items.Restrict(filter)
-    matchedCount = restrictedItems.Count
-    LogStatus "Anzahl gefilterter Termine nach Restrict-Anwendung: " & matchedCount
+    ' WICHTIG: Bei IncludeRecurrences = True erlaubt Outlook Restrict NUR Filter auf [Start]!
+    ' Das Filtern auf [End] führt bei IncludeRecurrences = True dazu, dass Restrict fehlschlägt/Nothing liefert.
+
+    ' Filter 1: Ab Startdatum (ausschließlich mit [Start]!)
+    filter1 = "[Start] >= """ & Month(startDate) & "/" & Day(startDate) & "/" & Year(startDate) & """"
+    LogStatus "Filter 1 ([Start] >= startDate): " & filter1
+    Set res1 = items.Restrict(filter1)
+    LogStatus "Filter 1 IncludeRecurrences=" & res1.IncludeRecurrences & ", Count=" & res1.Count
+
+    ' Filter 2: Bis Enddatum (ausschließlich mit [Start]!)
+    filter2 = "[Start] < """ & Month(nextDay) & "/" & Day(nextDay) & "/" & Year(nextDay) & """"
+    LogStatus "Filter 2 ([Start] < nextDay): " & filter2
+    Set res2 = items.Restrict(filter2)
+    LogStatus "Filter 2 IncludeRecurrences=" & res2.IncludeRecurrences & ", Count=" & res2.Count
+
+    ' Filter 3: Kombinationsfilter ausschließlich auf [Start]
+    filter3 = "[Start] >= """ & Month(startDate) & "/" & Day(startDate) & "/" & Year(startDate) & """" & _
+              " AND [Start] < """ & Month(nextDay) & "/" & Day(nextDay) & "/" & Year(nextDay) & """"
+    LogStatus "Filter 3 Kombinationsfilter: " & filter3
+    Set restrictedItems = items.Restrict(filter3)
+    LogStatus "Filter 3 IncludeRecurrences=" & restrictedItems.IncludeRecurrences & ", Count=" & restrictedItems.Count
 
     processedCount = 0
-    For Each appt In restrictedItems
+    Set appt = restrictedItems.GetFirst()
+
+    If appt Is Nothing Then
+        LogStatus "HINWEIS: restrictedItems.GetFirst() lieferte Nothing zurück!"
+    Else
+        LogStatus "Erster gefundener Termin: " & appt.Subject & " (Start: " & Format(appt.Start, "YYYY-MM-DD HH:MM") & ")"
+    End If
+
+    Do While Not appt Is Nothing
         If TypeOf appt Is AppointmentItem Then
             WriteAppointmentToStream appt, utf8Stream
             processedCount = processedCount + 1
         End If
-    Next appt
+        Set appt = restrictedItems.GetNext()
+    Loop
 
     LogStatus "Erfolgreich exportierte Termine für '" & calFolder.Name & "': " & processedCount
     Exit Sub
