@@ -183,11 +183,13 @@ Private Sub ProcessCalendar(ByVal calFolder As Outlook.Folder, ByVal startDate A
 
     Dim items           As Outlook.Items
     Dim appt            As Object
-    Dim filter          As String
+    Dim filter1         As String
+    Dim filter2         As String
     Dim restrictedItems As Outlook.Items
     Dim totalCount      As Long
     Dim matchedCount    As Long
     Dim processedCount  As Long
+    Dim nextDay         As Date
 
     On Error GoTo ErrHandler
 
@@ -198,20 +200,39 @@ Private Sub ProcessCalendar(ByVal calFolder As Outlook.Folder, ByVal startDate A
     items.IncludeRecurrences = True
     items.Sort "[Start]"
 
-    ' Outlook Filter Format: MM/DD/YYYY HH:MM AM/PM
-    filter = "[Start] >= """ & Month(startDate) & "/" & Day(startDate) & "/" & Year(startDate) & " 00:00 AM""" & _
-             " AND [Start] <= """ & Month(endDate) & "/" & Day(endDate) & "/" & Year(endDate) & " 11:59 PM"""
-    LogStatus "Anzuwendender Filter-String: " & filter
+    ' Schritt 1: Erstes Filtern ab startDate ([End] >= startDate bzw. [Start] >= startDate)
+    filter1 = "[End] >= """ & Month(startDate) & "/" & Day(startDate) & "/" & Year(startDate) & """"
+    LogStatus "Anzuwendender Filter 1 (Start/Ab heute): " & filter1
 
-    Set restrictedItems = items.Restrict(filter)
+    Set restrictedItems = items.Restrict(filter1)
     matchedCount = restrictedItems.Count
-    LogStatus "Anzahl gefilterter Termine nach Restrict-Anwendung: " & matchedCount
+    If matchedCount = 2147483647 Then
+        LogStatus "Anzahl Termine nach Filter 1: dynamisch / unendlich (IncludeRecurrences=True)"
+    Else
+        LogStatus "Anzahl Termine nach Filter 1: " & matchedCount
+    End If
+
+    ' Schritt 2: Zweites Filtern bis endDate ([Start] < nextDay)
+    nextDay = DateAdd("d", 1, endDate)
+    filter2 = "[Start] < """ & Month(nextDay) & "/" & Day(nextDay) & "/" & Year(nextDay) & """"
+    LogStatus "Anzuwendender Filter 2 (Ende): " & filter2
+
+    Set restrictedItems = restrictedItems.Restrict(filter2)
+    matchedCount = restrictedItems.Count
+    If matchedCount = 2147483647 Then
+        LogStatus "Anzahl Termine nach Filter 2: dynamisch / unendlich (IncludeRecurrences=True)"
+    Else
+        LogStatus "Anzahl Termine nach Filter 2: " & matchedCount
+    End If
 
     processedCount = 0
     For Each appt In restrictedItems
         If TypeOf appt Is AppointmentItem Then
-            WriteAppointmentToStream appt, utf8Stream
-            processedCount = processedCount + 1
+            ' Zusätzliche manuelle Sicherheitsprüfung auf Datumsbereich
+            If appt.Start <= nextDay And appt.End >= startDate Then
+                WriteAppointmentToStream appt, utf8Stream
+                processedCount = processedCount + 1
+            End If
         End If
     Next appt
 
