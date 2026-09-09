@@ -238,8 +238,11 @@ Private Sub ProcessCalendar(ByVal calFolder As Outlook.Folder, ByVal startDate A
 
     Do While Not appt Is Nothing
         If TypeOf appt Is AppointmentItem Then
-            WriteAppointmentToStream appt, utf8Stream
-            processedCount = processedCount + 1
+            ' Zusätzliche manuelle Sicherheitsprüfung auf Datumsbereich
+            If appt.Start <= nextDay And appt.End >= startDate Then
+                WriteAppointmentToStream appt, utf8Stream
+                processedCount = processedCount + 1
+            End If
         End If
         Set appt = restrictedItems.GetNext()
     Loop
