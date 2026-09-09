@@ -205,44 +205,37 @@ Private Sub ProcessCalendar(ByVal calFolder As Outlook.Folder, ByVal startDate A
 
     nextDay = DateAdd("d", 1, endDate)
 
-    ' Schritt 1: Einzel-Filter 1 ab startDate
-    filter1 = "[End] >= """ & Month(startDate) & "/" & Day(startDate) & "/" & Year(startDate) & """"
-    LogStatus "Anzuwendender Filter 1 (Start/Ab heute): " & filter1
+    ' WICHTIG: Bei IncludeRecurrences = True erlaubt Outlook Restrict NUR Filter auf [Start]!
+    ' Das Filtern auf [End] führt bei IncludeRecurrences = True dazu, dass Restrict fehlschlägt/Nothing liefert.
+
+    ' Filter 1: Ab Startdatum (ausschließlich mit [Start]!)
+    filter1 = "[Start] >= """ & Month(startDate) & "/" & Day(startDate) & "/" & Year(startDate) & """"
+    LogStatus "Filter 1 ([Start] >= startDate): " & filter1
     Set res1 = items.Restrict(filter1)
-    matchedCount = res1.Count
-    If matchedCount = 2147483647 Then
-        LogStatus "Anzahl Termine nach Filter 1: dynamisch / unendlich (IncludeRecurrences=True)"
-    Else
-        LogStatus "Anzahl Termine nach Filter 1: " & matchedCount
-    End If
+    LogStatus "Filter 1 IncludeRecurrences=" & res1.IncludeRecurrences & ", Count=" & res1.Count
 
-    ' Schritt 2: Einzel-Filter 2 bis endDate
+    ' Filter 2: Bis Enddatum (ausschließlich mit [Start]!)
     filter2 = "[Start] < """ & Month(nextDay) & "/" & Day(nextDay) & "/" & Year(nextDay) & """"
-    LogStatus "Anzuwendender Filter 2 (Ende): " & filter2
+    LogStatus "Filter 2 ([Start] < nextDay): " & filter2
     Set res2 = items.Restrict(filter2)
-    matchedCount = res2.Count
-    If matchedCount = 2147483647 Then
-        LogStatus "Anzahl Termine nach Filter 2: dynamisch / unendlich (IncludeRecurrences=True)"
-    Else
-        LogStatus "Anzahl Termine nach Filter 2: " & matchedCount
-    End If
+    LogStatus "Filter 2 IncludeRecurrences=" & res2.IncludeRecurrences & ", Count=" & res2.Count
 
-    ' Schritt 3: Kombinationsfilter (Filter 1 AND Filter 2)
-    filter3 = "[End] >= """ & Month(startDate) & "/" & Day(startDate) & "/" & Year(startDate) & """" & _
+    ' Filter 3: Kombinationsfilter ausschließlich auf [Start]
+    filter3 = "[Start] >= """ & Month(startDate) & "/" & Day(startDate) & "/" & Year(startDate) & """" & _
               " AND [Start] < """ & Month(nextDay) & "/" & Day(nextDay) & "/" & Year(nextDay) & """"
-    LogStatus "Anzuwendender Filter 3 (Kombination): " & filter3
+    LogStatus "Filter 3 Kombinationsfilter: " & filter3
     Set restrictedItems = items.Restrict(filter3)
-    matchedCount = restrictedItems.Count
-    If matchedCount = 2147483647 Then
-        LogStatus "Anzahl Termine nach Filter 3 (Kombination): dynamisch / unendlich (IncludeRecurrences=True)"
-    Else
-        LogStatus "Anzahl Termine nach Filter 3 (Kombination): " & matchedCount
-    End If
+    LogStatus "Filter 3 IncludeRecurrences=" & restrictedItems.IncludeRecurrences & ", Count=" & restrictedItems.Count
 
     processedCount = 0
-    ' WICHTIG: Bei IncludeRecurrences = True schlägt "For Each" in Outlook-Collections/Restrict oft fehl
-    ' oder bricht sofort ab. Es muss zwingend GetFirst() und GetNext() verwendet werden!
     Set appt = restrictedItems.GetFirst()
+
+    If appt Is Nothing Then
+        LogStatus "HINWEIS: restrictedItems.GetFirst() lieferte Nothing zurück!"
+    Else
+        LogStatus "Erster gefundener Termin: " & appt.Subject & " (Start: " & Format(appt.Start, "YYYY-MM-DD HH:MM") & ")"
+    End If
+
     Do While Not appt Is Nothing
         If TypeOf appt Is AppointmentItem Then
             ' Zusätzliche manuelle Sicherheitsprüfung auf Datumsbereich
