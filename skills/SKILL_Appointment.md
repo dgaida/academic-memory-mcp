@@ -49,10 +49,28 @@ Bevor du das Tool aufrufst, erstelle in deinem Gedanken/Text diese JSON-Struktur
 }
 ```
 
-## 2. Generelle Erkennung von reinen Terminanfragen (ohne konkrete Vorschläge)
-Wenn ein Studierender allgemein nach einem Termin fragt, ohne selbst einen konkreten Termin oder Wochentag vorzuschlagen:  
-1. Rufe das Tool `get_appointment_slots` auf, um die aktuell verfügbaren freien Slots (aus `data/free_slots.md`) zu erhalten.  
-2. Liste diese Slots in der Antwortmail übersichtlich als Optionen auf.  
+## 2. Generelle Erkennung von Terminanfragen & Slot-Filterung (Wochentage & Ort/Präsenz)
+
+Wenn ein Studierender nach einem Termin fragt (oder als Alternative nach einem Terminbelegungs-Konflikt):
+
+### A. Wochentags-Filterung (KRITISCH)
+- **Extrahiere die im E-Mail-Text genannten Wochentage:** Falls die E-Mail spezifische Wochentage verlangt (z.B. "haben Sie ggf. am Mittwoch oder Freitag Zeit..."), filtere aus den über `get_appointment_slots` geladenen freien Slots **ausschließlich** die Slots heraus und schlage nur diese vor, die auf diese Wochentage fallen (im Beispiel: nur Mittwoche und Freitage).
+- Vorgeschlagene Slots außerhalb der angefragten Wochentage dürfen in diesem Fall NICHT in der E-Mail angeboten werden.
+
+### B. Automatisierte Standort- & Präsenzanalyse (Vor Ort vs. Online)
+- **Automatische Standortbestimmung via Kalender (`data/appointments.md`):**
+  1. Rufe das Tool `read_file` mit `data/appointments.md` auf.
+  2. Untersuche die Spalte "Ort" für jeden Tag. Steht dort als Ort z.B. `"TH Köln (Campus Gummersbach)"`, `"TH Köln"`, `"Gummersbach"` oder `"Campus"`, so bist du an diesem Tag **vor Ort (auf dem Campus)**.
+  3. Tage, an denen an keinem Termin ein Ort mit diesen Campus-Schlüsselwörtern eingetragen ist, sind **Home-Office- bzw. Online-Tage**.
+- **Auswahl der Vorschläge nach Art des Treffens:**
+  - **Termin vor Ort / Kolloquium:** Wird nach einem Termin vor Ort gefragt (z.B. ein Kolloquium oder ausdrücklich ein Präsenztreffen), schlage **bevorzugt / ausschließlich** freie Slots an Tagen vor, an denen du **vor Ort** bist.
+  - **Online-Termin / Standard-Termin:** Wird nach einem Online-Termin gefragt (oder einem allgemeinen Meeting ohne Prärenzzwang), schlage **bevorzugt** freie Slots an Tagen vor, an denen du **NICHT vor Ort** bist. Ziel ist es, Präsenztage nicht mit unnötigen Online-Terminen zu überladen.
+
+### C. Ablauf
+1. Rufe das Tool `read_file` mit `data/appointments.md` auf (zur Standort- & Präsenzanalyse sowie Terminprüfung).
+2. Rufe das Tool `get_appointment_slots` auf, um freie Slots aus `data/free_slots.md` zu laden.
+3. Wende die Filterung nach Wochentagen (Falls in der Mail eingeschränkt) und nach Präsenz/Online-Eignung an.
+4. Liste die herausgefilterten Slots in der Antwortmail übersichtlich als Optionen auf.
 
 ## 3. DAUER & TOOL-AUFRUF  
 - **DAUER:**  

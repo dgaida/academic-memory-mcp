@@ -38,8 +38,8 @@ Private Const SLOT_DURATION_MIN As Long   = 30        ' Slot-Laenge in Minuten
 Private Const LOOKAHEAD_DAYS    As Long   = 14        ' Betrachtungszeitraum
 
 ' Wochentage, die AUSGESCHLOSSEN werden sollen (VBA: 1=So, 2=Mo, ..., 7=Sa)
-' Aktuell: Mittwoch (4) und Freitag (6)
-Private Const EXCLUDED_WEEKDAYS As String = "4|6"
+' Keine Wochentage ausgeschlossen (Wochentagsfilterung erfolgt dynamisch bei Anfragen)
+Private Const EXCLUDED_WEEKDAYS As String = ""
 
 ' =============================================================================
 ' Hauptprozedur

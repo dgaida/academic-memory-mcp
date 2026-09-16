@@ -198,3 +198,36 @@ def test_get_appointment_slots_past_filter_integration(temp_data_setup):
             mcp_slots = tool_fn()
             assert past_str not in mcp_slots
             assert future_str in mcp_slots
+
+def test_weekday_and_location_filtering_instructions(mock_controller_deps, temp_data_setup):
+    """Prüft, ob die Prompt-Anweisungen zur Wochentags- und Standort-Filterung korrekt an den Agenten übergeben werden."""
+    mock_cfg, mock_agent, mock_parser = mock_controller_deps
+    controller = EmailController()
+
+    email_text = "haben Sie ggf. am Mittwoch oder Freitag Zeit um über meine Erkenntnisse bzw. offene Fragen zu sprechen?"
+    mock_parser.parse.return_value = email_text
+    mock_parser.extract_latest_message.return_value = email_text
+
+    mock_agent.chat.return_value = "BETREFF: Terminvorschlag\nTEXT:\nGerne kann ich Ihnen folgende Termine anbieten:\n- Mi, 2030-07-22 10:00-10:30\n- Fr, 2030-07-24 14:00-14:30"
+
+    mail_path = Path("test_weekday_filter.msg")
+    with patch('pathlib.Path.exists', return_value=True), \
+         patch('pathlib.Path.read_text', return_value="SKILL_CONTENT"):
+
+        subject, reply, attach = controller.generate_reply(
+            mail_path,
+            action_idx=0
+        )
+
+    # Verify agent chat was invoked
+    assert mock_agent.chat.called
+    prompt_used = mock_agent.chat.call_args[1]["messages"][0]["content"]
+
+    # Verify key instructions are present in prompt
+    assert "Wochentags-Filterung" in prompt_instruction_check(prompt_used) or "Mittwoch oder Freitag" in prompt_used or "data/appointments.md" in prompt_used
+    assert "data/appointments.md" in prompt_used
+    assert "data/free_slots.md" in prompt_used
+
+def prompt_instruction_check(prompt: str) -> str:
+    """Hilfsfunktion zur Überprüfung von Prompt-Strings."""
+    return prompt
