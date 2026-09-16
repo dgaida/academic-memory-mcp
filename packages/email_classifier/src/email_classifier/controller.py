@@ -819,7 +819,7 @@ WICHTIGE ANWEISUNGEN:
 - Wenn eine Terminanfrage vorliegt:
   1. Rufe das Tool `read_file` mit `data/appointments.md` auf, um Kalendereinträge/Orte für die Präsenzanalyse zu lesen.
   2. Rufe das Tool `get_appointment_slots` auf, um freie Terminslots aus `data/free_slots.md` zu laden.
-  3. Wende zwingend die Wochentags-Filterung (falls in der E-Mail konkrete Wochentage wie z.B. Mittwoch oder Freitag genannt wurden, NUR Slots an diesen Wochentagen vorschlagen) und die Standort-Filterung (Präsenz an Campus-Tagen für In-Person/Kolloquium, Online bevorzugt an Nicht-Campus-Tagen) gemäß dem SKILL an.
+  3. Wende zwingend die Wochentags-Filterung (falls in der E-Mail konkrete Wochentage wie z.B. Mittwoch oder Freitag genannt wurden, **ausschließlich** Slots an diesen Wochentagen vorschlagen) und die Standort-Filterung (Präsenz an Campus-Tagen für In-Person/Kolloquium, Online bevorzugt an Nicht-Campus-Tagen) gemäß dem SKILL an.
 - Wenn KEIN Bezug zu Terminen vorliegt: Antworte EXAKT mit 'NO_APPOINTMENT_RELEVANCE'.
 
 VERBOTE:
