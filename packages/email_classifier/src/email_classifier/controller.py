@@ -317,11 +317,13 @@ Antworte NUR mit der Ziffer (1-4) der gewählten Option. Keine weitere Erklärun
         user_full_name = self.config.user.name
         user_first_name = user_full_name.split()[0] if user_full_name else "Daniel"
 
+        gender = self.profiler.get_gender(student_email, first_name) if student_email else self.summarizer.determine_gender(first_name)
+
         if honorific == "Du":
             salutation = f"Hallo {first_name}" if first_name != "Unknown" else "Hallo"
             signature = f"Viele Grüße,\n{user_first_name}"
         else:
-            salutation = f"Guten Tag {self.summarizer.determine_gender(first_name)} {email_data.get('lastname', '')}"
+            salutation = f"Guten Tag {gender} {email_data.get('lastname', '')}"
             signature = f"Viele Grüße,\n{user_full_name}"
         
         if detected_language == "English":
@@ -329,7 +331,7 @@ Antworte NUR mit der Ziffer (1-4) der gewählten Option. Keine weitere Erklärun
                 salutation = f"Hi {first_name}" if first_name != "Unknown" else "Hi"
                 signature = f"Best regards,\n{user_first_name}"
             else:
-                salutation = f"Dear {self.summarizer.determine_gender(first_name)} {email_data.get('lastname', '')}"
+                salutation = f"Dear {gender} {email_data.get('lastname', '')}"
                 # Map Herr/Frau to Mr./Ms.
                 salutation = salutation.replace("Herr", "Mr.").replace("Frau", "Ms.")
                 signature = f"Best regards,\n{user_full_name}"
@@ -1226,11 +1228,13 @@ TEXT:
             user_full_name = self.config.user.name
             user_first_name = user_full_name.split()[0] if user_full_name else "Daniel"
 
+            gender = self.profiler.get_gender(student_email, first_name) if student_email else self.summarizer.determine_gender(first_name)
+
             if honorific == "Du":
                 salutation = f"Hallo {first_name}" if first_name != "Unknown" else "Hallo"
                 signature = f"Viele Grüße,\n{user_first_name}"
             else:
-                salutation = f"Guten Tag {self.summarizer.determine_gender(first_name)} {email['lastname']}"
+                salutation = f"Guten Tag {gender} {email['lastname']}"
                 signature = f"Viele Grüße,\n{user_full_name}"
             
             if detected_language == "English":
@@ -1238,7 +1242,7 @@ TEXT:
                     salutation = f"Hi {first_name}" if first_name != "Unknown" else "Hi"
                     signature = f"Best regards,\n{user_first_name}"
                 else:
-                    salutation = f"Dear {self.summarizer.determine_gender(first_name)} {email['lastname']}"
+                    salutation = f"Dear {gender} {email['lastname']}"
                     salutation = salutation.replace("Herr", "Mr.").replace("Frau", "Ms.")
                     signature = f"Best regards,\n{user_full_name}"
             add_ctx = f"Anrede: {salutation}\nAbschluss: {signature}\n"

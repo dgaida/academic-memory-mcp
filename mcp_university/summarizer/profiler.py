@@ -477,6 +477,86 @@ class PersonProfiler:
         """
         return self.update_profile(email_address)
 
+    def _extract_gender(self, profile: Optional[str]) -> Optional[str]:
+        """Extrahiert das Geschlecht (Herr/Frau) aus dem Steckbrief.
+
+        Args:
+            profile (Optional[str]): Der Steckbrief-Inhalt in Markdown.
+
+        Returns:
+            Optional[str]: "Herr", "Frau" oder None, falls nicht gefunden.
+        """
+        if not profile:
+            return None
+
+        if "Herr/Frau" in profile or "Frau/Herr" in profile:
+            return None
+
+        match = re.search(r"\bGeschlecht\s*[:\-]?\s*(Herr|Frau)\b", profile, re.IGNORECASE)
+        if match:
+            gender_found = match.group(1).capitalize()
+            if gender_found in ["Herr", "Frau"]:
+                return gender_found
+
+        return None
+
+    def get_gender(self, email_address: str, first_name: str) -> str:
+        """Ermittelt das Geschlecht für eine Person.
+
+        Sucht zuerst im existierenden Steckbrief nach dem Geschlecht.
+        Nur wenn das Geschlecht noch nicht im Steckbrief steht, wird es mittels LLM
+        bestimmt und im Steckbrief ergänzt.
+
+        Args:
+            email_address (str): E-Mail-Adresse der Person.
+            first_name (str): Vorname der Person.
+
+        Returns:
+            str: "Herr", "Frau" oder "Herr/Frau".
+        """
+        name_part, addr_part = email.utils.parseaddr(email_address)
+        actual_email = addr_part.lower() if addr_part else email_address.lower()
+
+        profile = self.get_profile(actual_email) if actual_email else None
+        extracted_gender = self._extract_gender(profile)
+
+        if extracted_gender:
+            logger.info(f"Geschlecht '{extracted_gender}' aus Steckbrief für {actual_email} geladen.")
+            return extracted_gender
+
+        from mcp_university.summarizer.engine import Summarizer
+        summarizer = Summarizer(model=self.config.llm.model, base_url=self.config.llm.base_url)
+        determined_gender = summarizer.determine_gender(first_name)
+
+        if determined_gender in ["Herr", "Frau"] and actual_email:
+            profile_file = self.storage_path / f"{actual_email}.md"
+            if profile_file.exists():
+                content = profile_file.read_text(encoding="utf-8")
+                if re.search(r"Geschlecht", content, re.IGNORECASE):
+                    content = re.sub(
+                        r"(Geschlecht\s*[:\-]?\s*)[^\n]*",
+                        rf"\g<1>{determined_gender}",
+                        content,
+                        flags=re.IGNORECASE,
+                    )
+                else:
+                    lines = content.split("\n")
+                    inserted = False
+                    new_lines = []
+                    for line in lines:
+                        new_lines.append(line)
+                        if not inserted and (line.startswith("1. ") or "Name" in line or "E-Mail" in line):
+                            new_lines.append(f"- Geschlecht: {determined_gender}")
+                            inserted = True
+                    if not inserted:
+                        new_lines.insert(0, f"- Geschlecht: {determined_gender}")
+                    content = "\n".join(new_lines)
+
+                profile_file.write_text(content, encoding="utf-8")
+                logger.info(f"Geschlecht '{determined_gender}' im Steckbrief für {actual_email} ergänzt.")
+
+        return determined_gender
+
     def _determine_honorific(self, emails: List[Dict[str, Any]], target_email: str) -> str:
         """Bestimmt die bevorzugte Anrede (Du/Sie) basierend auf direkten E-Mails.
 
@@ -645,11 +725,12 @@ Falls die E-Mailadresse NICHT "th-koeln" enthält, handelt es sich um eine exter
 
 Erstelle einen strukturierten Steckbrief in Markdown mit folgenden Punkten:
 1. Name und E-Mailadresse
-2. Rolle (z.B. Studierende, Lehrende, Mitarbeiter, Professor, externer Partner, ...)\n   - WICHTIG: Wenn Informationen aus dem Wissensgraphen vorliegen (kg_info), handelt es sich in der Regel um einen Mitarbeiter oder Lehrenden, NICHT um einen Studierenden. Falls kg_info vorhanden ist, schließe die Rolle "Studierender" aus, es sei denn, die E-Mails belegen eindeutig das Gegenteil.
-3. Bevorzugte Anrede (Setze hier zwingend den Wert: {honorific_preference})
-4. Datum des ersten Kontakts
-5. Bei externen Personen: Unternehmensname, Branche und Kontaktdaten (falls bekannt)
-6. Wichtige Stationen/Ereignisse:
+2. Geschlecht (Herr oder Frau)
+3. Rolle (z.B. Studierende, Lehrende, Mitarbeiter, Professor, externer Partner, ...)\n   - WICHTIG: Wenn Informationen aus dem Wissensgraphen vorliegen (kg_info), handelt es sich in der Regel um einen Mitarbeiter oder Lehrenden, NICHT um einen Studierenden. Falls kg_info vorhanden ist, schließe die Rolle "Studierender" aus, es sei denn, die E-Mails belegen eindeutig das Gegenteil.
+4. Bevorzugte Anrede (Setze hier zwingend den Wert: {honorific_preference})
+5. Datum des ersten Kontakts
+6. Bei externen Personen: Unternehmensname, Branche und Kontaktdaten (falls bekannt)
+7. Wichtige Stationen/Ereignisse:
    - Bei Mitarbeitern: Wichtige Aufgaben, Projekte, Zuständigkeiten.
    - Bei Professoren: Gelesene Module, Forschungsprojekte, Gremienarbeit.
    - Bei Studierenden: Abgeschlossene Projektarbeiten/Thesen, Wechsel der Prüfungsordnung, Praktika, etc.
