@@ -68,6 +68,7 @@ def test_salutation_logic_german_sie(controller, tmp_path):
     controller._detect_language = MagicMock(return_value="German")
     controller._extract_honorific_preference = MagicMock(return_value="Sie")
     controller.summarizer.determine_gender = MagicMock(return_value="Herr")
+    controller.profiler.get_gender = MagicMock(return_value="Herr")
     controller.generate_reply = MagicMock(return_value=("Sub", "Text", False))
     
     email_data = {"lastname": "Mustermann", "class": "Other"}
@@ -126,6 +127,7 @@ def test_salutation_logic_english_sie(controller, tmp_path):
     controller._detect_language = MagicMock(return_value="English")
     controller._extract_honorific_preference = MagicMock(return_value="Sie")
     controller.summarizer.determine_gender = MagicMock(return_value="Herr")
+    controller.profiler.get_gender = MagicMock(return_value="Herr")
     controller.generate_reply = MagicMock(return_value=("Sub", "Text", False))
     
     email_data = {"lastname": "Mustermann", "class": "Other"}
