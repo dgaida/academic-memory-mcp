@@ -401,9 +401,10 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
             try:
                 errors = controller.relocate_emails(changes)
                 if errors:
+                    remaining_t1 = [m for m, change in zip(existing_t1, changes) if "new_path" not in change]
                     msg = "Fehler beim Verschieben: " + "; ".join(errors)
                     logger.error(msg)
-                    return existing_t1, msg
+                    return remaining_t1, msg
                 msg = "Mails erfolgreich archiviert."
                 if cleaned_any:
                     msg += " (Einige nicht-existierende Mails wurden aus der Liste entfernt.)"
