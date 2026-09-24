@@ -237,3 +237,81 @@ def test_handle_tab2_process_updates_state(tmp_path):
         assert updated_mail["save_attachments"] is False
         assert "Aktionen:" in msg
         assert "Muster: Aktion erfolgreich ausgeführt" in msg
+
+
+def test_relocate_remaining_partial_failure(tmp_path):
+    """Testet, dass relocate_remaining bei einem Fehler für eine Mail (z.B. WinError 32)
+    die erfolgreich verschobenen Mails aus Tab 1 entfernt und nur die fehlgeschlagene Mail behält.
+
+    Args:
+        tmp_path: Pytest Fixture für ein temporäres Verzeichnis.
+
+    Returns:
+        None
+    """
+    controller = MagicMock()
+    controller.ACTION_OPTIONS = [
+        "1) Antwort schreiben.",
+        "2) Antwort schreiben mit einem Terminvorschlag.",
+        "3) Termin im Kalender anlegen und Person dazu einladen.",
+        "4) E-Mail nur archivieren.",
+        "5) Aufgabe im Kalender anlegen zum Lesen des Anhangs.",
+        "6) Termin für Kolloquium in Kalender anlegen.",
+    ]
+
+    mail1 = tmp_path / "mail1.msg"
+    mail1.write_text("mail 1 content")
+    mail2 = tmp_path / "mail2.msg"
+    mail2.write_text("mail 2 content")
+
+    t1_mails_data = [
+        {"lastname": "Muster", "class": "Other", "folder": "Inbox", "path": str(mail1)},
+        {"lastname": "Schulz", "class": "Other", "folder": "Inbox", "path": str(mail2)}
+    ]
+
+    # Mock relocate_emails to simulate partial success/failure
+    def mock_relocate_emails(changes):
+        errors = []
+        for change in changes:
+            if change["lastname"] == "Muster":
+                change["new_path"] = tmp_path / "new_mail1.msg"
+            else:
+                err = f"Unerwarteter Fehler bei Verarbeitung von Schulz: [WinError 32] Der Prozess kann nicht auf die Datei zugreifen, da sie von einem anderen Prozess verwendet wird: '{mail2}'"
+                errors.append(err)
+        return errors
+
+    controller.relocate_emails.side_effect = mock_relocate_emails
+
+    def mock_render(*args, **kwargs):
+        def decorator(fn):
+            captured_funcs[fn.__name__] = fn
+            return fn
+        return decorator
+
+    with patch("gradio.render", side_effect=mock_render), \
+         patch("gradio.Row", DummyBlock), \
+         patch("gradio.Column", DummyBlock), \
+         patch("gradio.Group", DummyBlock), \
+         patch("gradio.Checkbox", DummyBlock), \
+         patch("gradio.Button", DummyBlock), \
+         patch("gradio.Markdown", DummyBlock), \
+         patch("gradio.State", DummyBlock), \
+         patch("gradio.Textbox", DummyBlock), \
+         patch("gradio.Tabs", DummyBlock), \
+         patch("gradio.Tab", DummyBlock), \
+         patch("gradio.Blocks.launch"):
+
+        from scripts.process_sorted_emails import run_gradio_gui
+        run_gradio_gui(controller, tmp_path)
+
+        captured_funcs["render_tab1"](t1_mails_data)
+        handle_relocate = click_handlers["relocate_remaining"]
+
+        res_t1, res_msg = handle_relocate(t1_mails_data, False, False)
+
+        # Muster succeeded -> removed from Tab 1
+        # Schulz failed -> kept in Tab 1
+        assert len(res_t1) == 1
+        assert res_t1[0]["lastname"] == "Schulz"
+        assert "Fehler beim Verschieben:" in res_msg
+        assert "[WinError 32]" in res_msg
