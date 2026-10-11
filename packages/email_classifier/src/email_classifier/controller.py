@@ -815,18 +815,20 @@ WICHTIGE ANWEISUNGEN:
   1. Wende das Chain-of-Thought (Schritt-für-Schritt-Denken) laut Skill an, um den gewünschten Termin zu bestimmen.
   2. Rufe das Tool `read_file` mit dem Pfad `data/appointments.md` auf, um die bestehenden Termine und Blocker zu lesen.
   3. Prüfe intelligent, ob zu dieser Zeit bereits ein anderer Termin vorliegt oder nur ein Blocker für genau diesen Termin.
-  4. Falls belegt (ein ganz anderer Termin steht im Wege): Rufe `get_appointment_slots` auf, um freie Alternativen aus `data/free_slots.md` zu laden, wende die Wochentags- und Präsenz-/Online-Filterung laut Skill an, und schlage diese in deiner Antwort vor.
+  4. Falls belegt (ein ganz anderer Termin steht im Wege): Rufe `get_appointment_slots` auf, um freie Alternativen aus `data/free_slots.md` zu laden, wende die Wochentags- und Präsenz-/Online-Filterung laut Skill an, und schlage diese in deiner Antwort vor (beachte dabei zwingend die Formatierungsregeln mit Bindestrichen `-` statt Sternchen `*` und ohne Fettformatierung `**`).
   5. Falls frei (kein Termin oder nur der passende Blocker für diesen Termin): Rufe das Tool `manage_calendar_appointment` auf. Falls es ein Kolloquium ist, setze is_colloquium=True.
   6. Antworte EXAKT mit 'APPOINTMENT_BOOKED' erst NACHDEM das Tool 'manage_calendar_appointment' erfolgreich aufgerufen wurde.
 - Wenn eine Terminanfrage vorliegt:
   1. Rufe das Tool `read_file` mit `data/appointments.md` auf, um Kalendereinträge/Orte für die Präsenzanalyse zu lesen.
   2. Rufe das Tool `get_appointment_slots` auf, um freie Terminslots aus `data/free_slots.md` zu laden.
   3. Wende zwingend die Wochentags-Filterung (falls in der E-Mail konkrete Wochentage wie z.B. Mittwoch oder Freitag genannt wurden, **ausschließlich** Slots an diesen Wochentagen vorschlagen) und die Standort-Filterung (Präsenz an Campus-Tagen für In-Person/Kolloquium, Online bevorzugt an Nicht-Campus-Tagen) gemäß dem SKILL an.
+  4. Formatiere alle vorgeschlagenen Terminslots in der Antwortmail zwingend mit Bindestrichen (`-`) als Aufzählungszeichen und verwende NIEMALS Fettformatierung (`**...**`).
 - Wenn KEIN Bezug zu Terminen vorliegt: Antworte EXAKT mit 'NO_APPOINTMENT_RELEVANCE'.
 
 VERBOTE:
 - Antworte NIEMALS mit einer Analyse des Skills ohne konkrete Tool-Aktion.
 - Verwende NIEMALS das Sendedatum der vorherigen E-Mail im Mail-Header (z.B. 16.07.2026) als Terminzeitpunkt, sondern nutze den Wochentagsabgleich gemäß des Skills.
+- Formatiere Terminvorschläge NIEMALS mit `**...**` oder mit Sternchen (`*`) als Aufzählung, sondern nutze immer Bindestriche (`-`).
 """
             try:
                 content = self.agent.chat(
