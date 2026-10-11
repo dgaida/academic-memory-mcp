@@ -227,6 +227,8 @@ def test_weekday_and_location_filtering_instructions(mock_controller_deps, temp_
     assert "Wochentags-Filterung" in prompt_instruction_check(prompt_used) or "Mittwoch oder Freitag" in prompt_used or "data/appointments.md" in prompt_used
     assert "data/appointments.md" in prompt_used
     assert "data/free_slots.md" in prompt_used
+    assert "Bindestrichen (`-`)" in prompt_used or "Bindestrichen" in prompt_used
+    assert "VERBOTE" in prompt_used
 
 def prompt_instruction_check(prompt: str) -> str:
     """Hilfsfunktion zur Überprüfung von Prompt-Strings."""
