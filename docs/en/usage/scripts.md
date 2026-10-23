@@ -22,6 +22,18 @@ python scripts/flatten_directory.py /path/to/data
 
 ## Email Management & Classification
 
+### Email Quick Search (GUI)
+Gradio interface for fast full-text searching across all archived emails.
+```bash
+python scripts/email_search_gui.py
+```
+
+### Email Search by Email Class (GUI)
+Gradio interface for targeted searching of exchanged email addresses and emails per email class, including profile display and generation.
+```bash
+python scripts/email_class_gui.py
+```
+
 ### Fix Email Folder Structure
 Migrates emails to the standard structure: `Semester/Lastname/Inbox|SentItems/`. This is particularly important for correct assignment within the system.
 ```bash

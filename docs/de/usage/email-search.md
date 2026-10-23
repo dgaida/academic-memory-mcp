@@ -83,3 +83,23 @@ Diese Datei enthält ein flaches JSON-Array von Strings (z. B. `["Albert", "albe
 *   **Unter-Millisekunden-Antworten:** Die Autovervollständigung sucht direkt in diesem optimierten In-Memory-Set, was eine nahezu verzögerungsfreie Anzeige von Vorschlägen ermöglicht.  
 *   **Präfix-Priorisierung:** Suchbegriffe, die mit der Eingabe starten, werden priorisiert vor Begriffen angezeigt, die die Eingabe an einer anderen Stelle enthalten.  
 *   **Dynamische Erweiterung:** Sobald Sie eine neue Suche über den "Suchen"-Button in der GUI ausführen, wird der eingegebene Suchbegriff (sofern er mindestens 2 Zeichen lang ist) automatisch in die JSON-Liste des Vorschlags-Caches übernommen und dauerhaft in `suggestions_cache.json` gespeichert. Bei zukünftigen Suchen steht dieser Begriff sofort zur Verfügung.  
+
+## E-Mail-Suche nach E-Mail-Klassen (Email Class GUI)
+
+Wenn man sich nicht mehr an den Namen oder die E-Mail-Adresse einer Person erinnert, sondern nur weiß, dass man sich über ein bestimmtes Thema (z. B. Bachelorarbeit, Masterarbeit, Praxisprojekt etc.) ausgetauscht hat, bietet die **E-Mail-Klassen-GUI** eine zielgerichtete Suche über E-Mail-Klassen.
+
+### Starten der E-Mail-Klassen-GUI
+
+Führen Sie das folgende Skript aus:
+
+```bash
+python scripts/email_class_gui.py
+```
+
+### Funktionen der E-Mail-Klassen-GUI
+
+*   **Auswahl der E-Mail-Klasse:** Wählen Sie eine E-Mail-Klasse (z. B. `BachelorThesis`, `MasterThesis`, `PraxisProjekt`, `InformatikProjekt`, `WASP`, `Other`) aus einem Dropdown-Menü.
+*   **Liste ausgetauschter E-Mail-Adressen:** Zu der gewählten E-Mail-Klasse wird eine Tabelle aller E-Mail-Adressen angezeigt, mit denen E-Mails zu dieser Klasse ausgetauscht wurden (inklusive Name und Anzahl ausgetauschter E-Mails).
+*   **Steckbrief-Anzeige & Generierung:** Bei Klick auf eine E-Mail-Adresse wird automatisch deren Personen-Steckbrief angezeigt, falls dieser bereits existiert (`D:\Steckbriefe\<email>.md`). Ist noch kein Steckbrief vorhanden, erscheint ein Button **"Steckbrief generieren"**, mit dem der Steckbrief direkt über den `PersonProfiler` aus den E-Mails und dem Wissensgraphen erstellt werden kann.
+*   **Getrennte E-Mail-Listen:** Alle E-Mails für die angeklickte Adresse unter der gewählten E-Mail-Klasse werden übersichtlich getrennt nach **Posteingang (Inbox)** und **Gesendeten Elementen (SentItems)** angezeigt.
+*   **Vorschau & Integration:** Klicken Sie auf eine E-Mail in der Liste, um ihren Inhalt direkt im E-Mail-Viewer anzuzeigen. Mit den Buttons "Öffnen in Outlook" und "Öffnen in Explorer" können Sie die E-Mail direkt in Outlook öffnen oder zu ihrem Speicherort im Windows Explorer springen.

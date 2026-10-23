@@ -83,3 +83,23 @@ This file contains a flat JSON array of strings (e.g. `["Albert", "albert@test.c
 *   **Sub-Millisecond Responses:** Autocomplete searches directly inside this optimized in-memory set, enabling a virtually lag-free display of suggestions.  
 *   **Prefix Prioritization:** Search terms that start with the input are prioritized over terms that contain the input at another position.  
 *   **Dynamic Extension:** As soon as you perform a new search using the "Search" button in the GUI, the entered search term (if it is at least 2 characters long) is automatically added to the suggestions list and saved permanently to `suggestions_cache.json`. This term will be immediately available in future searches.  
+
+## Email Search by Email Class (Email Class GUI)
+
+When you no longer remember a person's name or email address, but only know that you exchanged emails on a specific topic (e.g. Bachelor thesis, Master thesis, Practical project, etc.), the **Email Class GUI** provides a targeted search by email class.
+
+### Starting the Email Class GUI
+
+Run the following script:
+
+```bash
+python scripts/email_class_gui.py
+```
+
+### Features of the Email Class GUI
+
+*   **Email Class Selection:** Select an email class (e.g., `BachelorThesis`, `MasterThesis`, `PraxisProjekt`, `InformatikProjekt`, `WASP`, `Other`) from a dropdown menu.
+*   **List of Exchanged Email Addresses:** For the selected email class, a table displays all email addresses with which emails were exchanged for this class (including display name and email count).
+*   **Profile Display & Generation:** Clicking an email address automatically displays their person profile (Steckbrief), if one already exists (`D:\Steckbriefe\<email>.md`). If no profile exists yet, a **"Generate Profile"** button appears, allowing you to generate the profile directly using `PersonProfiler` from emails and the knowledge graph.
+*   **Separated Email Lists:** All emails for the clicked address under the selected email class are clearly separated into **Inbox** and **Sent Items (SentItems)** views.
+*   **Preview & Integration:** Click an email in the list to preview its content directly in the HTML Email Viewer. Use the "Open in Outlook" and "Open in Explorer" buttons to open the email directly in Outlook or jump to its folder in Windows Explorer.
