@@ -6,7 +6,7 @@ import yaml
 import re
 import functools
 from pathlib import Path
-from typing import List, Dict, Any, Optional, Set
+from typing import List, Dict, Any, Optional, Set, Tuple
 from datetime import datetime
 
 from mcp_university.config import get_config
@@ -240,6 +240,7 @@ class EmailSearchEngine:
                         if any(sf in parts_lower for sf in sent_folder_names_lower):
                             folder_type = "SentItems"
 
+                        email_class = self.determine_email_class(file_path)
                         new_index.append({
                             "subject": details.get("subject", ""),
                             "from": details.get("from_email", ""),
@@ -248,7 +249,8 @@ class EmailSearchEngine:
                             "date": date_str,
                             "path": path_str,
                             "filename": file_path.name,
-                            "folder": folder_type
+                            "folder": folder_type,
+                            "email_class": email_class
                         })
                         indexed_paths.add(path_str)
                     except Exception as e:
@@ -334,6 +336,222 @@ class EmailSearchEngine:
         # Sortiere nach Datum absteigend (neueste zuerst)
         results.sort(key=lambda x: x.get("date", ""), reverse=True)
         return results
+
+    def determine_email_class(self, file_path: Path) -> str:
+        """Bestimmt die E-Mail-Klasse für einen gegebenen Dateipfad.
+
+        Args:
+            file_path (Path): Der Pfad zur E-Mail-Datei.
+
+        Returns:
+            str: Name der E-Mail-Klasse (z. B. 'BachelorThesis', 'MasterThesis' oder 'Sonstiges').
+        """
+        abs_path = file_path.absolute()
+
+        # 1. Aus classifier_paths.yaml prüfen
+        cp_path = self.config.config_dir / "classifier_paths.yaml"
+        if not cp_path.exists():
+            cp_path = self.config.config_dir / "classifier_paths.yaml.example"
+
+        if cp_path.exists():
+            try:
+                with open(cp_path, "r", encoding="utf-8") as f:
+                    cp_data = yaml.safe_load(f)
+                    if cp_data and "class_paths" in cp_data:
+                        for c_name, c_p in cp_data["class_paths"].items():
+                            base_p = Path(c_p).absolute()
+                            try:
+                                if abs_path.is_relative_to(base_p):
+                                    return c_name
+                            except (ValueError, AttributeError):
+                                if str(abs_path).startswith(str(base_p)):
+                                    return c_name
+            except Exception as e:
+                logger.error(f"Fehler beim Lesen von {cp_path} in determine_email_class: {e}")
+
+        # 2. Aus train_test_folders.yaml prüfen
+        ttf_path = self.config.config_dir / "train_test_folders.yaml"
+        if ttf_path.exists():
+            try:
+                with open(ttf_path, "r", encoding="utf-8") as f:
+                    ttf_data = yaml.safe_load(f)
+                    if ttf_data:
+                        for key in ["train_path", "test_path"]:
+                            if key in ttf_data:
+                                base_p = (self.config.config_dir.parent / ttf_data[key]).absolute()
+                                try:
+                                    if abs_path.is_relative_to(base_p):
+                                        rel_parts = abs_path.relative_to(base_p).parts
+                                        if rel_parts:
+                                            return rel_parts[0]
+                                except (ValueError, AttributeError):
+                                    if str(abs_path).startswith(str(base_p)):
+                                        rel_str = str(abs_path)[len(str(base_p)):].strip("/\\")
+                                        parts = re.split(r'[/\\]', rel_str)
+                                        if parts and parts[0]:
+                                            return parts[0]
+            except Exception as e:
+                logger.error(f"Fehler beim Lesen von {ttf_path} in determine_email_class: {e}")
+
+        # 3. Fallback: Pfadsegmente gegen bekannte Klassennamen abgleichen
+        known_classes = {"BachelorThesis", "MasterThesis", "PraxisProjekt", "InformatikProjekt", "WASP", "Other"}
+        for part in reversed(file_path.parts[:-1]):
+            if part in known_classes:
+                return part
+
+        return "Sonstiges"
+
+    def get_email_classes(self) -> List[str]:
+        """Gibt eine sortierte Liste aller verfügbaren E-Mail-Klassen zurück.
+
+        Returns:
+            List[str]: Liste der Klassennamen.
+        """
+        classes = set()
+
+        # 1. Aus den indizierten E-Mails sammeln
+        for item in self.index:
+            c = item.get("email_class")
+            if not c:
+                c = self.determine_email_class(Path(item["path"]))
+                item["email_class"] = c
+            if c:
+                classes.add(c)
+
+        # 2. Konfigurierte Klassen aus classifier_paths.yaml ergänzen
+        cp_path = self.config.config_dir / "classifier_paths.yaml"
+        if not cp_path.exists():
+            cp_path = self.config.config_dir / "classifier_paths.yaml.example"
+
+        if cp_path.exists():
+            try:
+                with open(cp_path, "r", encoding="utf-8") as f:
+                    cp_data = yaml.safe_load(f)
+                    if cp_data and "class_paths" in cp_data:
+                        for c_name in cp_data["class_paths"].keys():
+                            classes.add(c_name)
+            except Exception as e:
+                logger.error(f"Fehler beim Lesen von {cp_path} in get_email_classes: {e}")
+
+        if not classes:
+            classes = {"BachelorThesis", "MasterThesis", "PraxisProjekt", "InformatikProjekt", "WASP", "Other"}
+
+        return sorted(list(classes))
+
+    def get_addresses_for_class(self, email_class: str) -> List[Dict[str, Any]]:
+        """Ermittelt alle ausgetauschten E-Mail-Adressen für eine E-Mail-Klasse.
+
+        Args:
+            email_class (str): Der Name der E-Mail-Klasse.
+
+        Returns:
+            List[Dict[str, Any]]: Liste von Dicts mit 'email', 'name', 'count'.
+        """
+        user_emails = {e.lower() for e in self.config.user.emails} if self.config and self.config.user and self.config.user.emails else set()
+
+        addr_map: Dict[str, Dict[str, Any]] = {}
+
+        for item in self.index:
+            item_class = item.get("email_class")
+            if not item_class:
+                item_class = self.determine_email_class(Path(item["path"]))
+                item["email_class"] = item_class
+
+            if item_class != email_class:
+                continue
+
+            # Absender prüfen
+            from_email = (item.get("from") or "").strip()
+            from_name = (item.get("from_name") or "").strip()
+
+            if from_email and from_email.lower() not in user_emails:
+                key = from_email.lower()
+                if key not in addr_map:
+                    addr_map[key] = {"email": from_email, "name": from_name, "count": 1}
+                else:
+                    addr_map[key]["count"] += 1
+                    if not addr_map[key]["name"] and from_name:
+                        addr_map[key]["name"] = from_name
+
+            # Empfänger prüfen
+            to_list = item.get("to", [])
+            for rec in to_list:
+                rec_email = ""
+                rec_name = ""
+                if isinstance(rec, dict):
+                    rec_email = (rec.get("email") or "").strip()
+                    rec_name = (rec.get("name") or "").strip()
+                elif isinstance(rec, str):
+                    rec_email = rec.strip()
+
+                if rec_email and rec_email.lower() not in user_emails:
+                    key = rec_email.lower()
+                    if key not in addr_map:
+                        addr_map[key] = {"email": rec_email, "name": rec_name, "count": 1}
+                    else:
+                        addr_map[key]["count"] += 1
+                        if not addr_map[key]["name"] and rec_name:
+                            addr_map[key]["name"] = rec_name
+
+        results = list(addr_map.values())
+        results.sort(key=lambda x: (-x["count"], (x["name"] or x["email"]).lower()))
+        return results
+
+    def get_emails_for_class_and_address(
+        self, email_class: str, email_address: str
+    ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+        """Gibt die E-Mails für eine E-Mail-Klasse und Adresse zurück, getrennt nach Inbox und SentItems.
+
+        Args:
+            email_class (str): Der Name der E-Mail-Klasse.
+            email_address (str): Die E-Mail-Adresse.
+
+        Returns:
+            Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]: (Inbox-E-Mails, SentItems-E-Mails).
+        """
+        if not email_class or not email_address:
+            return [], []
+
+        addr_lower = email_address.strip().lower()
+        inbox_mails = []
+        sent_mails = []
+
+        for item in self.index:
+            item_class = item.get("email_class")
+            if not item_class:
+                item_class = self.determine_email_class(Path(item["path"]))
+                item["email_class"] = item_class
+
+            if item_class != email_class:
+                continue
+
+            matches = False
+            from_val = (item.get("from") or "").strip().lower()
+            if from_val == addr_lower:
+                matches = True
+
+            if not matches:
+                to_list = item.get("to", [])
+                for rec in to_list:
+                    rec_email = ""
+                    if isinstance(rec, dict):
+                        rec_email = (rec.get("email") or "").strip().lower()
+                    elif isinstance(rec, str):
+                        rec_email = rec.strip().lower()
+
+                    if rec_email == addr_lower:
+                        matches = True
+                        break
+
+            if matches:
+                if item.get("folder") == "SentItems":
+                    sent_mails.append(item)
+                else:
+                    inbox_mails.append(item)
+
+        inbox_mails.sort(key=lambda x: x.get("date", ""), reverse=True)
+        sent_mails.sort(key=lambda x: x.get("date", ""), reverse=True)
+        return inbox_mails, sent_mails
 
     @functools.lru_cache(maxsize=128)
     def get_suggestions(self, partial_query: str) -> List[str]:

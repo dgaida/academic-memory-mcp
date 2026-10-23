@@ -22,6 +22,18 @@ python scripts/flatten_directory.py /pfad/zu/daten
 
 ## E-Mail-Management & Klassifizierung
 
+### E-Mail Schnellsuche (GUI)
+Gradio-Benutzeroberfläche zur schnellen Volltext-Suche in allen archivierten E-Mails.
+```bash
+python scripts/email_search_gui.py
+```
+
+### E-Mail-Suche nach E-Mail-Klassen (GUI)
+Gradio-Benutzeroberfläche zur gezielten Suche nach ausgetauschten E-Mail-Adressen und E-Mails pro E-Mail-Klasse inklusive Steckbrief-Anzeige und -Generierung.
+```bash
+python scripts/email_class_gui.py
+```
+
 ### E-Mail-Ordnerstruktur korrigieren
 Migriert E-Mails in die Standardstruktur: `Semester/Nachname/Inbox|SentItems/`. Dies ist besonders wichtig für die korrekte Zuordnung im System.
 ```bash
