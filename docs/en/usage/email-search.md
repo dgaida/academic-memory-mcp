@@ -98,8 +98,8 @@ python scripts/email_class_gui.py
 
 ### Features of the Email Class GUI
 
-*   **Email Class Selection:** Select an email class (e.g., `BachelorThesis`, `MasterThesis`, `PraxisProjekt`, `InformatikProjekt`, `WASP`, `Other`) from a dropdown menu.
-*   **List of Exchanged Email Addresses:** For the selected email class, a table displays all email addresses with which emails were exchanged for this class (including display name and email count).
-*   **Profile Display & Generation:** Clicking an email address automatically displays their person profile (Steckbrief), if one already exists (`D:\Steckbriefe\<email>.md`). If no profile exists yet, a **"Generate Profile"** button appears, allowing you to generate the profile directly using `PersonProfiler` from emails and the knowledge graph.
-*   **Separated Email Lists:** All emails for the clicked address under the selected email class are clearly separated into **Inbox** and **Sent Items (SentItems)** views.
-*   **Preview & Integration:** Click an email in the list to preview its content directly in the HTML Email Viewer. Use the "Open in Outlook" and "Open in Explorer" buttons to open the email directly in Outlook or jump to its folder in Windows Explorer.
+*   **Email Class Selection:** Select an email class (e.g., `BachelorThesis`, `MasterThesis`, `PraxisProjekt`, `InformatikProjekt`, `WASP`, `Other`) from a dropdown menu.  
+*   **List of Exchanged Email Addresses:** For the selected email class, a table displays all email addresses with which emails were exchanged for this class (including display name and email count).  
+*   **Profile Display & Generation:** Clicking an email address automatically displays their person profile (Steckbrief), if one already exists (`D:\Steckbriefe\<email>.md`). If no profile exists yet, a **"Generate Profile"** button appears, allowing you to generate the profile directly using `PersonProfiler` from emails and the knowledge graph.  
+*   **Separated Email Lists:** All emails for the clicked address under the selected email class are clearly separated into **Inbox** and **Sent Items (SentItems)** views.  
+*   **Preview & Integration:** Click an email in the list to preview its content directly in the HTML Email Viewer. Use the "Open in Outlook" and "Open in Explorer" buttons to open the email directly in Outlook or jump to its folder in Windows Explorer.  
