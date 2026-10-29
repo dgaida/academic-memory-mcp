@@ -49,6 +49,8 @@ class EmailSearchEngine:
         self.cache_file.parent.mkdir(parents=True, exist_ok=True)
         self.mail_parser = MailParser()
         self.index: List[Dict[str, Any]] = []
+        self._class_paths_cache: Optional[Dict[str, Path]] = None
+        self._train_test_paths_cache: Optional[List[Path]] = None
         self._load_cache()
 
         # Vorschlags-Cache initialisieren
@@ -337,6 +339,59 @@ class EmailSearchEngine:
         results.sort(key=lambda x: x.get("date", ""), reverse=True)
         return results
 
+    def _get_cached_class_paths(self) -> Dict[str, Path]:
+        """Liest und cacht die Klassensegmente aus classifier_paths.yaml.
+
+        Returns:
+            Dict[str, Path]: Map von Klassenname auf Pfad.
+        """
+        if self._class_paths_cache is not None:
+            return self._class_paths_cache
+
+        class_paths: Dict[str, Path] = {}
+        cp_path = self.config.config_dir / "classifier_paths.yaml"
+        if not cp_path.exists():
+            cp_path = self.config.config_dir / "classifier_paths.yaml.example"
+
+        if cp_path.exists():
+            try:
+                with open(cp_path, "r", encoding="utf-8") as f:
+                    cp_data = yaml.safe_load(f)
+                    if cp_data and "class_paths" in cp_data:
+                        for c_name, c_p in cp_data["class_paths"].items():
+                            class_paths[c_name] = Path(c_p).absolute()
+            except Exception as e:
+                logger.error(f"Fehler beim Lesen von {cp_path}: {e}")
+
+        self._class_paths_cache = class_paths
+        return self._class_paths_cache
+
+    def _get_cached_train_test_paths(self) -> List[Path]:
+        """Liest und cacht Pfade aus train_test_folders.yaml.
+
+        Returns:
+            List[Path]: Liste der Basispfade.
+        """
+        if self._train_test_paths_cache is not None:
+            return self._train_test_paths_cache
+
+        paths: List[Path] = []
+        ttf_path = self.config.config_dir / "train_test_folders.yaml"
+        if ttf_path.exists():
+            try:
+                with open(ttf_path, "r", encoding="utf-8") as f:
+                    ttf_data = yaml.safe_load(f)
+                    if ttf_data:
+                        for key in ["train_path", "test_path"]:
+                            if key in ttf_data:
+                                base_p = (self.config.config_dir.parent / ttf_data[key]).absolute()
+                                paths.append(base_p)
+            except Exception as e:
+                logger.error(f"Fehler beim Lesen von {ttf_path}: {e}")
+
+        self._train_test_paths_cache = paths
+        return self._train_test_paths_cache
+
     def determine_email_class(self, file_path: Path) -> str:
         """Bestimmt die E-Mail-Klasse für einen gegebenen Dateipfad.
 
@@ -348,50 +403,28 @@ class EmailSearchEngine:
         """
         abs_path = file_path.absolute()
 
-        # 1. Aus classifier_paths.yaml prüfen
-        cp_path = self.config.config_dir / "classifier_paths.yaml"
-        if not cp_path.exists():
-            cp_path = self.config.config_dir / "classifier_paths.yaml.example"
-
-        if cp_path.exists():
+        # 1. Aus gecachten classifier_paths.yaml prüfen
+        for c_name, base_p in self._get_cached_class_paths().items():
             try:
-                with open(cp_path, "r", encoding="utf-8") as f:
-                    cp_data = yaml.safe_load(f)
-                    if cp_data and "class_paths" in cp_data:
-                        for c_name, c_p in cp_data["class_paths"].items():
-                            base_p = Path(c_p).absolute()
-                            try:
-                                if abs_path.is_relative_to(base_p):
-                                    return c_name
-                            except (ValueError, AttributeError):
-                                if str(abs_path).startswith(str(base_p)):
-                                    return c_name
-            except Exception as e:
-                logger.error(f"Fehler beim Lesen von {cp_path} in determine_email_class: {e}")
+                if abs_path.is_relative_to(base_p):
+                    return c_name
+            except (ValueError, AttributeError):
+                if str(abs_path).startswith(str(base_p)):
+                    return c_name
 
-        # 2. Aus train_test_folders.yaml prüfen
-        ttf_path = self.config.config_dir / "train_test_folders.yaml"
-        if ttf_path.exists():
+        # 2. Aus gecachten train_test_folders.yaml prüfen
+        for base_p in self._get_cached_train_test_paths():
             try:
-                with open(ttf_path, "r", encoding="utf-8") as f:
-                    ttf_data = yaml.safe_load(f)
-                    if ttf_data:
-                        for key in ["train_path", "test_path"]:
-                            if key in ttf_data:
-                                base_p = (self.config.config_dir.parent / ttf_data[key]).absolute()
-                                try:
-                                    if abs_path.is_relative_to(base_p):
-                                        rel_parts = abs_path.relative_to(base_p).parts
-                                        if rel_parts:
-                                            return rel_parts[0]
-                                except (ValueError, AttributeError):
-                                    if str(abs_path).startswith(str(base_p)):
-                                        rel_str = str(abs_path)[len(str(base_p)):].strip("/\\")
-                                        parts = re.split(r'[/\\]', rel_str)
-                                        if parts and parts[0]:
-                                            return parts[0]
-            except Exception as e:
-                logger.error(f"Fehler beim Lesen von {ttf_path} in determine_email_class: {e}")
+                if abs_path.is_relative_to(base_p):
+                    rel_parts = abs_path.relative_to(base_p).parts
+                    if rel_parts:
+                        return rel_parts[0]
+            except (ValueError, AttributeError):
+                if str(abs_path).startswith(str(base_p)):
+                    rel_str = str(abs_path)[len(str(base_p)):].strip("/\\")
+                    parts = re.split(r'[/\\]', rel_str)
+                    if parts and parts[0]:
+                        return parts[0]
 
         # 3. Fallback: Pfadsegmente gegen bekannte Klassennamen abgleichen
         known_classes = {"BachelorThesis", "MasterThesis", "PraxisProjekt", "InformatikProjekt", "WASP", "Other"}
