@@ -4,6 +4,7 @@ import os
 import platform
 import subprocess
 import logging
+import threading
 import pandas as pd
 import gradio as gr
 from pathlib import Path
@@ -34,8 +35,8 @@ class GUITools:
         if cls._engine is None:
             logger.info("Initialisiere EmailSearchEngine...")
             cls._engine = EmailSearchEngine()
-            # Beim ersten Start Index aktualisieren
-            cls._engine.update_index()
+            # Beim ersten Start Index im Hintergrund aktualisieren
+            threading.Thread(target=cls._engine.update_index, daemon=True).start()
         return cls._engine
 
     @classmethod
