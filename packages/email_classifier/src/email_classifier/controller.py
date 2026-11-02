@@ -280,8 +280,24 @@ Antworte NUR mit der Ziffer (1-4) der gewählten Option. Keine weitere Erklärun
 
         return 0  # Default: Antwort schreiben
 
-    def execute_action(self, action_idx: int, mail_path: Path, email_data: dict) -> str:
-        """Führt die gewählte Aktion für eine E-Mail aus."""
+    def execute_action(
+        self,
+        action_idx: int,
+        mail_path: Path,
+        email_data: dict,
+        instructions: Optional[str] = None,
+    ) -> str:
+        """Führt die gewählte Aktion für eine E-Mail aus.
+
+        Args:
+            action_idx (int): Index der auszuführenden Aktion.
+            mail_path (Path): Pfad zur E-Mail.
+            email_data (dict): Metadaten der E-Mail.
+            instructions (Optional[str]): Zusätzliche Hinweise oder Regieanweisungen für die Antwort.
+
+        Returns:
+            str: Statusmeldung über das Ergebnis der Aktion.
+        """
         latest_mail = mail_path
         if action_idx == 1:  # 2) Nur archivieren
             return "E-Mail archiviert."
@@ -399,6 +415,7 @@ Antworte NUR mit der Ziffer (1-4) der gewählten Option. Keine weitere Erklärun
                 else:
                     summary_content = summary_file.read_text(encoding="utf-8")
 
+        reply_instructions = instructions or email_data.get("instructions")
         reply_subject, reply, should_attach = self.generate_reply(
             latest_mail,
             summary_content,
@@ -413,6 +430,7 @@ Antworte NUR mit der Ziffer (1-4) der gewählten Option. Keine weitere Erklärun
             detected_language=detected_language,
             honorific=honorific,
             email_class=email_data.get("new_class", email_data.get("class")),
+            instructions=reply_instructions,
         )
 
         if reply_subject == "NO_REPLY_NEEDED":
@@ -712,6 +730,7 @@ Antworte NUR mit der Ziffer (1-4) der gewählten Option. Keine weitere Erklärun
         email_class: str = None,
         detected_language: str = "German",
         honorific: str = "Sie",
+        instructions: Optional[str] = None,
     ) -> Tuple[str, str, bool]:
         """Generiert eine Antwortmail mit dem LLM in mehreren Schritten.
 
@@ -729,6 +748,7 @@ Antworte NUR mit der Ziffer (1-4) der gewählten Option. Keine weitere Erklärun
             email_class (str): E-Mail-Klasse.
             detected_language (str): Die erkannte Sprache der E-Mail.
             honorific (str): Die bevorzugte Anrede ('Du' oder 'Sie').
+            instructions (Optional[str]): Zusätzliche Hinweise oder Regieanweisungen für die E-Mail-Antwort.
 
         Returns:
             Tuple[str, str, bool]: Betreff, Antworttext und ob ein Anhang beigefügt werden soll.
@@ -794,6 +814,12 @@ Antworte NUR mit der Ziffer (1-4) der gewählten Option. Keine weitere Erklärun
             if summary_content:
                 summary_part = f"\nZUSAMMENFASSUNG DER BISHERIGEN KONVERSATION (ORDNER-ZUSAMMENFASSUNG):\n{summary_content}\n"
 
+            instructions_part = ""
+            if instructions and instructions.strip():
+                instructions_part = (
+                    f"\nBESONDERE HINWEISE / REGIEANWEISUNGEN DES NUTZERS:\n{instructions.strip()}\n"
+                )
+
             appointment_user_prompt = f"""Du bist ein Tool-Calling-Agent. Deine EINZIGE Aufgabe ist es, basierend auf der E-Mail und dem TERMINVERWALTUNG SKILL die korrekte Aktion auf {detected_language} auszuführen. Nutze die Anrede '{honorific}'.
 
 HEUTE IST: {datetime.now(ZoneInfo("Europe/Berlin")).strftime("%A, den %d.%m.%Y %H:%M")}
@@ -806,7 +832,7 @@ TERMINVERWALTUNG SKILL:
 
 ZUSÄTZLICHER KONTEXT:
 {additional_context}
-{summary_part}
+{summary_part}{instructions_part}
 AKTUELLE E-MAIL:
 {mail_content}{forced_instr}
 
@@ -977,6 +1003,17 @@ E-MAIL: {mail_content}
             if okf_skill_path.exists():
                 skill_content += "\n\n" + okf_skill_path.read_text(encoding="utf-8")
 
+        instructions_text = ""
+        instructions_instruction = ""
+        if instructions and instructions.strip():
+            instructions_text = (
+                f"\nBESONDERE HINWEISE / REGIEANWEISUNGEN DES NUTZERS:\n{instructions.strip()}\n"
+            )
+            instructions_instruction = (
+                f"- Beachte unbedingt die folgenden Regieanweisungen/Hinweise des Nutzers bei der Formulierung der E-Mail:\n"
+                f"  {instructions.strip()}\n"
+            )
+
         reg_prompt = f"""Verfasse eine Antwort auf die folgende E-Mail auf {detected_language} basierend auf der PERSONA, dem SKILL und dem bisherigen Konversationskontext. Nutze die Anrede '{honorific}'.
 
 PERSONA:
@@ -987,7 +1024,7 @@ SKILL:
 
 ZUSÄTZLICHER KONTEXT:
 {additional_context}
-
+{instructions_text}
 ZUSAMMENFASSUNG DER BISHERIGEN KONVERSATION (ORDNER-ZUSAMMENFASSUNG):
 {summary_content}
 
@@ -996,7 +1033,7 @@ AKTUELLE E-MAIL:
 
 WICHTIGE ANWEISUNGEN:
 - Beziehe dich bei der Formulierung der Antwort zwingend auf den bisherigen Konversationskontext aus der obigen Ordner-Zusammenfassung, um den roten Faden der Kommunikation beizubehalten.
-- Formatiere die Antwort im folgenden Format:
+{instructions_instruction}- Formatiere die Antwort im folgenden Format:
 ANHANG: [JA/NEIN]
 BETREFF: [Passender Betreff]
 TEXT:

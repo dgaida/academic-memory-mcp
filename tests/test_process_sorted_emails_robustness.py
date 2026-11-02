@@ -1,30 +1,39 @@
 """Tests für die Robustheit der process_sorted_emails GUI-Handler bei gelöschten E-Mail-Dateien."""
 
-import pytest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
-import gradio as gr
-
-# Pre-import modules to avoid AttributeError during patch resolution
-import mcp_university.agent.engine
-import mcp_university.agent.mcp_agent
 
 # Capture click handlers globally
 click_handlers = {}
 
-# Dummy block class to bypass Gradio layout parent tracking and block function registration
 class DummyBlock:
+    """Dummy-Block zur Simulation von Gradio-Komponenten in Tests."""
+
     _id = 0
+
     def __init__(self, *args, **kwargs):
+        """Initialisiert den DummyBlock."""
         self.children = []
         self._id = 0
+
     def __getattr__(self, name):
+        """Fängt Attributzugriffe ab."""
         return MagicMock()
+
     def __enter__(self):
+        """Context Manager Entry."""
         return self
+
     def __exit__(self, *args):
+        """Context Manager Exit."""
         pass
+
+    def change(self, fn, *args, **kwargs):
+        """Mockt die change-Methode von Gradio-Komponenten."""
+        return MagicMock()
+
     def click(self, fn, *args, **kwargs):
+        """Mockt die click-Methode von Gradio-Komponenten."""
         if fn.__name__ == "handle_remove_to_tab2":
             click_handlers["remove_to_tab2"] = fn
         elif fn.__name__ == "relocate_remaining":
@@ -85,7 +94,7 @@ def test_gui_handlers_with_missing_files(tmp_path):
          patch("gradio.Textbox", DummyBlock), \
          patch("gradio.Tabs", DummyBlock), \
          patch("gradio.Tab", DummyBlock), \
-         patch("gradio.Blocks.launch") as mock_launch:
+         patch("gradio.Blocks.launch"):
 
         # Import run_gradio_gui inside patch context to ensure decorator is mocked during import
         from scripts.process_sorted_emails import run_gradio_gui
@@ -143,9 +152,11 @@ def test_gui_handlers_with_missing_files(tmp_path):
         assert "Schulz" not in [m["lastname"] for m in res_t1]
 
 
-# We will subclass DummyBlock and capture handle_tab2_process from process_btn.click
 class CapturingDummyBlock(DummyBlock):
+    """Subklasse zur Erfassung von handle_tab2_process."""
+
     def click(self, fn, *args, **kwargs):
+        """Mockt click und speichert handle_tab2_process."""
         super().click(fn, *args, **kwargs)
         if fn.__name__ == "handle_tab2_process":
             click_handlers["handle_tab2_process"] = fn
@@ -195,6 +206,7 @@ def test_handle_tab2_process_updates_state(tmp_path):
          patch("gradio.Markdown", CapturingDummyBlock), \
          patch("gradio.State", CapturingDummyBlock), \
          patch("gradio.Textbox", CapturingDummyBlock), \
+         patch("gradio.Dropdown", CapturingDummyBlock), \
          patch("gradio.Tabs", CapturingDummyBlock), \
          patch("gradio.Tab", CapturingDummyBlock), \
          patch("gradio.Blocks.launch"):
@@ -221,9 +233,11 @@ def test_handle_tab2_process_updates_state(tmp_path):
         assert "handle_tab2_process" in click_handlers
         handle_tab2_process = click_handlers["handle_tab2_process"]
 
-        # Arguments of handle_tab2_process: t2_mails, *args (sels, acts, atts)
-        # Sels = ["Klausuren"], Acts = ["1) Antwort schreiben."], Atts = [False]
-        updated_t2_mails, msg = handle_tab2_process(initial_t2_mails, "Klausuren", "1) Antwort schreiben.", False)
+        # Arguments of handle_tab2_process: t2_mails, *args (sels, acts, atts, instructions)
+        # Sels = ["Klausuren"], Acts = ["1) Antwort schreiben."], Atts = [False], Instructions = ["Bitte Zoom vorschlagen"]
+        updated_t2_mails, msg = handle_tab2_process(
+            initial_t2_mails, "Klausuren", "1) Antwort schreiben.", False, "Bitte Zoom vorschlagen"
+        )
 
         # Verify that the returned state is updated correctly
         assert len(updated_t2_mails) == 1
@@ -235,8 +249,13 @@ def test_handle_tab2_process_updates_state(tmp_path):
         assert updated_mail["identifier_path"] == Path(tmp_path)
         assert updated_mail["suggested_action"] == "1) Antwort schreiben."
         assert updated_mail["save_attachments"] is False
+        assert updated_mail["instructions"] == "Bitte Zoom vorschlagen"
         assert "Aktionen:" in msg
         assert "Muster: Aktion erfolgreich ausgeführt" in msg
+        # Verify controller.execute_action was called with instructions
+        controller.execute_action.assert_called_once()
+        call_kwargs = controller.execute_action.call_args[1]
+        assert call_kwargs.get("instructions") == "Bitte Zoom vorschlagen"
 
 
 def test_relocate_remaining_partial_failure(tmp_path):

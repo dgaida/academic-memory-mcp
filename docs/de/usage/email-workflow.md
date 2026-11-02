@@ -50,6 +50,7 @@ Hier landen Mails, die aus Tab 1 entfernt wurden, oder die eine tiefergehende An
 - **KI-Zusammenfassung:** Für jede Mail wird eine prägnante 2-Satz-Zusammenfassung generiert.  
 - **Kontext & Ähnlichkeit:** Anzeige der ähnlichsten E-Mails aus dem Archiv (Similarity Search).  
 - **Aktions-Auswahl:** Manuelle Auswahl der Aktion (Antworten, Termin buchen, etc.) und des Zielordners.  
+- **Regieanweisungen / Hinweise für das LLM:** Wenn "1) Antwort schreiben" ausgewählt ist, erscheint rechts neben dem Dropdown-Menü ein Textfeld. Hier können individuelle Regieanweisungen (z.B. "Schlage ein paar Terminvorschläge per zoom vor", "sei besonders freundlich") oder Stichpunkte für den E-Mail-Inhalt eingegeben werden, die direkt an das LLM weitergegeben und bei der Antwortgenerierung berücksichtigt werden.
 - **Anhänge:** Option zum gezielten Speichern von Mail-Anhängen.  
 
 ---

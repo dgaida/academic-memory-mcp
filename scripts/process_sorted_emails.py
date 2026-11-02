@@ -191,6 +191,7 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
                     dropdowns = []
                     action_dropdowns = []
                     checkboxes = []
+                    instruction_boxes = []
 
                     for mail in mails_snapshot:
                         with gr.Group():
@@ -218,8 +219,25 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
                                 dropdowns.append(dd)
 
                                 action_val = mail.get("suggested_action", controller.ACTION_OPTIONS[0])
+                                is_reply_action = str(action_val).startswith("1)")
                                 action_dd = gr.Dropdown(choices=controller.ACTION_OPTIONS, value=action_val, label="Aktion", interactive=True)
                                 action_dropdowns.append(action_dd)
+
+                                instr_box = gr.Textbox(
+                                    label="Hinweise / Regieanweisungen",
+                                    placeholder="z.B. Terminvorschläge per Zoom vorschlagen, besonders freundlich, Stichpunkte...",
+                                    value=mail.get("instructions", ""),
+                                    visible=is_reply_action,
+                                    lines=2,
+                                    interactive=True,
+                                )
+                                instruction_boxes.append(instr_box)
+
+                                action_dd.change(
+                                    lambda act: gr.update(visible=str(act).startswith("1)")),
+                                    inputs=action_dd,
+                                    outputs=instr_box,
+                                )
 
                                 att_cb = gr.Checkbox(label="Anhang speichern", value=mail.get("save_attachments", False))
                                 checkboxes.append(att_cb)
@@ -230,23 +248,25 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
 
                         Args:
                             t2_mails (List[Dict[str, Any]]): Die aktuelle Liste der E-Mails in Tab 2.
-                            *args (Any): Dropdown-Auswahlen, Aktions-Auswahlen und Checkboxes.
+                            *args (Any): Dropdown-Auswahlen, Aktions-Auswahlen, Checkboxes und Hinweise-Textfelder.
 
                         Returns:
                             Tuple[List[Dict[str, Any]], str]: Die aktualisierte Liste der E-Mails und die Statusmeldung.
                         """
                         num = num_mails
                         if len(args) < 3 * num:
-                            return t2_mails, f"Fehler: Erwartete {3 * num} Argumente, erhielt {len(args)}."
+                            return t2_mails, f"Fehler: Erwartete mindestens {3 * num} Argumente, erhielt {len(args)}."
                         sels = args[:num]
                         acts = args[num:2 * num]
                         atts = args[2 * num:3 * num]
+                        instructions_list = args[3 * num:4 * num] if len(args) >= 4 * num else [""] * num
 
                         processed_list = []
                         for i, m in enumerate(mails_snapshot):
                             change = m.copy()
                             change["new_class"] = sels[i]
                             change["save_attachments"] = atts[i]
+                            change["instructions"] = instructions_list[i] if i < len(instructions_list) else ""
                             processed_list.append((change, acts[i]))
 
                         errors = controller.relocate_emails([p[0] for p in processed_list])
@@ -256,7 +276,12 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
                             try:
                                 action_idx = controller.ACTION_OPTIONS.index(act_str)
                                 current_path = change.get("new_path") or change["path"]
-                                res = controller.execute_action(action_idx, current_path, change)
+                                res = controller.execute_action(
+                                    action_idx,
+                                    current_path,
+                                    change,
+                                    instructions=change.get("instructions"),
+                                )
                                 results.append(f"{change['lastname']}: {res}")
                             except Exception as e:
                                 results.append(f"{change['lastname']}: Fehler {str(e)}")
@@ -279,6 +304,7 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
                             updated_mail["class"] = change_item["new_class"]
                             updated_mail["suggested_action"] = processed_list[i][1]
                             updated_mail["save_attachments"] = change_item["save_attachments"]
+                            updated_mail["instructions"] = change_item.get("instructions", "")
 
                             updated_t2.append(updated_mail)
 
@@ -292,7 +318,7 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
 
                     process_btn.click(
                         handle_tab2_process,
-                        inputs=[tab2_mails] + dropdowns + action_dropdowns + checkboxes,
+                        inputs=[tab2_mails] + dropdowns + action_dropdowns + checkboxes + instruction_boxes,
                         outputs=[tab2_mails, tab2_status_local]
                     )
 
