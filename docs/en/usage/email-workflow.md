@@ -89,7 +89,7 @@ This is where emails go that were removed from Tab 1 or that require a deeper an
 - **AI Summary:** A concise 2-sentence summary is generated for each email.  
 - **Context & Similarity:** Displays the most similar emails from the archive (Similarity Search).  
 - **Action Selection:** Manual selection of the action (Reply, book appointment, etc.) and target folder.  
-- **Stage Directions / Instructions for LLM:** When "1) Write Reply" is selected, a text field appears to the right of the action dropdown menu. Users can enter custom instructions (e.g., "Propose some meeting times via Zoom", "be especially friendly") or rough bullet points for the email direction, which are forwarded directly to the LLM during reply drafting.
+- **Stage Directions / Instructions for LLM:** When "1) Write Reply" is selected, a text field appears to the right of the action dropdown menu. Users can enter custom instructions (e.g., "Propose some meeting times via Zoom", "be especially friendly") or rough bullet points for the email direction, which are forwarded directly to the LLM during reply drafting.  
 - **Attachments:** Option to selectively save email attachments.  
 
 ---
