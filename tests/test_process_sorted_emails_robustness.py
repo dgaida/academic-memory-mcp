@@ -5,6 +5,8 @@ from unittest.mock import MagicMock, patch
 
 # Capture click handlers globally
 click_handlers = {}
+# Capture change registrations globally
+change_calls = []
 
 class DummyBlock:
     """Dummy-Block zur Simulation von Gradio-Komponenten in Tests."""
@@ -15,6 +17,7 @@ class DummyBlock:
         """Initialisiert den DummyBlock."""
         self.children = []
         self._id = 0
+        self.kwargs = kwargs
 
     def __getattr__(self, name):
         """Fängt Attributzugriffe ab."""
@@ -30,6 +33,7 @@ class DummyBlock:
 
     def change(self, fn, *args, **kwargs):
         """Mockt die change-Methode von Gradio-Komponenten."""
+        change_calls.append({"fn": fn, "args": args, "kwargs": kwargs, "self": self})
         return MagicMock()
 
     def click(self, fn, *args, **kwargs):
@@ -334,3 +338,70 @@ def test_relocate_remaining_partial_failure(tmp_path):
         assert res_t1[0]["lastname"] == "Schulz"
         assert "Fehler beim Verschieben:" in res_msg
         assert "[WinError 32]" in res_msg
+
+
+def test_action_dd_change_unmetered(tmp_path):
+    """Testet, dass action_dd.change mit queue=False und show_progress='hidden' registriert wird.
+
+    Args:
+        tmp_path: Pytest Fixture für ein temporäres Verzeichnis.
+
+    Returns:
+        None
+    """
+    controller = MagicMock()
+    controller.ACTION_OPTIONS = [
+        "1) Antwort schreiben.",
+        "2) E-Mail nur archivieren.",
+    ]
+    controller.class_paths = {"Other": tmp_path}
+
+    def mock_render(*args, **kwargs):
+        def decorator(fn):
+            captured_funcs[fn.__name__] = fn
+            return fn
+        return decorator
+
+    change_calls.clear()
+
+    with patch("gradio.render", side_effect=mock_render), \
+         patch("gradio.Row", CapturingDummyBlock), \
+         patch("gradio.Column", CapturingDummyBlock), \
+         patch("gradio.Group", CapturingDummyBlock), \
+         patch("gradio.Checkbox", CapturingDummyBlock), \
+         patch("gradio.Button", CapturingDummyBlock), \
+         patch("gradio.Markdown", CapturingDummyBlock), \
+         patch("gradio.State", CapturingDummyBlock), \
+         patch("gradio.Textbox", CapturingDummyBlock), \
+         patch("gradio.Dropdown", CapturingDummyBlock), \
+         patch("gradio.Tabs", CapturingDummyBlock), \
+         patch("gradio.Tab", CapturingDummyBlock), \
+         patch("gradio.Blocks.launch"):
+
+        from scripts.process_sorted_emails import run_gradio_gui
+        run_gradio_gui(controller, tmp_path)
+
+        mail_file = tmp_path / "test.msg"
+        mail_file.write_text("dummy")
+
+        mails = [
+            {
+                "lastname": "Mustermann",
+                "class": "Other",
+                "folder": "Inbox",
+                "path": str(mail_file),
+                "suggested_action": "1) Antwort schreiben."
+            }
+        ]
+
+        captured_funcs["render_tab2"](mails)
+
+        assert len(change_calls) >= 1
+        found_action_change = False
+        for call in change_calls:
+            kwargs = call["kwargs"]
+            if kwargs.get("queue") is False and kwargs.get("show_progress") == "hidden":
+                found_action_change = True
+                break
+
+        assert found_action_change, "action_dd.change muss queue=False und show_progress='hidden' verwenden."

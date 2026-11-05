@@ -237,6 +237,8 @@ def run_gradio_gui(controller: EmailController, source_dir: Path, method: str = 
                                     lambda act: gr.update(visible=str(act).startswith("1)")),
                                     inputs=action_dd,
                                     outputs=instr_box,
+                                    queue=False,
+                                    show_progress="hidden",
                                 )
 
                                 att_cb = gr.Checkbox(label="Anhang speichern", value=mail.get("save_attachments", False))
