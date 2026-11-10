@@ -586,6 +586,44 @@ class EmailSearchEngine:
         sent_mails.sort(key=lambda x: x.get("date", ""), reverse=True)
         return inbox_mails, sent_mails
 
+    def get_recent_emails_for_class(
+        self, email_class: str, limit: int = 10
+    ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+        """Gibt die neuesten E-Mails für eine E-Mail-Klasse zurück, getrennt nach Inbox und SentItems.
+
+        Args:
+            email_class (str): Der Name der E-Mail-Klasse.
+            limit (int): Maximale Anzahl an E-Mails pro Ordner (Inbox / SentItems). Standard ist 10.
+
+        Returns:
+            Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]: (Inbox-E-Mails, SentItems-E-Mails),
+                jeweils absteigend nach Datum sortiert und auf maximal `limit` Einträge beschränkt.
+        """
+        if not email_class:
+            return [], []
+
+        inbox_mails = []
+        sent_mails = []
+
+        for item in self.index:
+            item_class = item.get("email_class")
+            if not item_class:
+                item_class = self.determine_email_class(Path(item["path"]))
+                item["email_class"] = item_class
+
+            if item_class != email_class:
+                continue
+
+            if item.get("folder") == "SentItems":
+                sent_mails.append(item)
+            else:
+                inbox_mails.append(item)
+
+        inbox_mails.sort(key=lambda x: x.get("date", ""), reverse=True)
+        sent_mails.sort(key=lambda x: x.get("date", ""), reverse=True)
+
+        return inbox_mails[:limit], sent_mails[:limit]
+
     @functools.lru_cache(maxsize=128)
     def get_suggestions(self, partial_query: str) -> List[str]:
         """Gibt Vorschläge für die Suche aus dem Cache und dem aktuellen Index zurück.

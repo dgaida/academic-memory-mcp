@@ -150,6 +150,82 @@ def test_get_addresses_and_emails_for_class(mock_config: MagicMock, tmp_path: Pa
         assert sent_mails[0]["path"] == bachelor_sent
 
 
+def test_get_recent_emails_for_class(mock_config: MagicMock, tmp_path: Path) -> None:
+    """Testet get_recent_emails_for_class bezüglich Trennung, Sortierung und Limitierung.
+
+    Args:
+        mock_config (MagicMock): Gemockte Konfiguration.
+        tmp_path (Path): Temporärer Pfad.
+
+    Returns:
+        None
+    """
+    cache_file = mock_config.data_dir / "cache" / "test_cache.json"
+
+    with patch("mcp_university.utils.email_search.get_config", return_value=mock_config):
+        engine = EmailSearchEngine(cache_file=cache_file)
+
+        # 12 Inbox-Mails und 11 SentItems erzeugen
+        mock_index = []
+        for i in range(12):
+            mock_index.append({
+                "subject": f"Inbox {i}",
+                "from": f"student{i}@smail.th-koeln.de",
+                "from_name": f"Student {i}",
+                "to": [{"name": "Daniel Gaida", "email": "daniel.gaida@th-koeln.de"}],
+                "date": f"2026-05-{10 + i:02d}T10:00:00",
+                "path": str(tmp_path / f"inbox_{i}.eml"),
+                "filename": f"inbox_{i}.eml",
+                "folder": "Inbox",
+                "email_class": "BachelorThesis"
+            })
+        for i in range(11):
+            mock_index.append({
+                "subject": f"Sent {i}",
+                "from": "daniel.gaida@th-koeln.de",
+                "from_name": "Daniel Gaida",
+                "to": [{"name": f"Student {i}", "email": f"student{i}@smail.th-koeln.de"}],
+                "date": f"2026-06-{10 + i:02d}T10:00:00",
+                "path": str(tmp_path / f"sent_{i}.eml"),
+                "filename": f"sent_{i}.eml",
+                "folder": "SentItems",
+                "email_class": "BachelorThesis"
+            })
+        # Und eine Mail einer anderen Klasse
+        mock_index.append({
+            "subject": "Master Mail",
+            "from": "other@smail.th-koeln.de",
+            "from_name": "Other Student",
+            "to": [{"name": "Daniel Gaida", "email": "daniel.gaida@th-koeln.de"}],
+            "date": "2026-07-01T10:00:00",
+            "path": str(tmp_path / "master.eml"),
+            "filename": "master.eml",
+            "folder": "Inbox",
+            "email_class": "MasterThesis"
+        })
+
+        engine.index = mock_index
+
+        # Leere Klasse testen
+        inbox_empty, sent_empty = engine.get_recent_emails_for_class("")
+        assert inbox_empty == []
+        assert sent_empty == []
+
+        # Letzte 10 Mails abrufen
+        inbox_res, sent_res = engine.get_recent_emails_for_class("BachelorThesis", limit=10)
+        assert len(inbox_res) == 10
+        assert len(sent_res) == 10
+
+        # Prüfung der Sortierung absteigend nach Datum
+        assert inbox_res[0]["subject"] == "Inbox 11"
+        assert inbox_res[1]["subject"] == "Inbox 10"
+        assert inbox_res[-1]["subject"] == "Inbox 2"
+
+        assert sent_res[0]["subject"] == "Sent 10"
+        assert sent_res[1]["subject"] == "Sent 9"
+        assert sent_res[-1]["subject"] == "Sent 1"
+
+
 def test_open_in_outlook_and_explorer(tmp_path: Path) -> None:
     """Testet open_in_outlook und open_in_explorer Hilfsfunktionen.
 
@@ -190,21 +266,35 @@ def test_on_class_change(mock_gui_tools: MagicMock) -> None:
     # Test bei leerer Auswahl
     res = on_class_change("")
     assert res[0].empty
-    assert "Keine E-Mail-Klasse" in res[-1]
+    assert "Keine E-Mail-Klasse" in res[8]
+    assert res[9].empty
+    assert res[10].empty
 
     # Test mit gültiger Klasse
     mock_engine = MagicMock()
     mock_engine.get_addresses_for_class.return_value = [
         {"email": "test@example.com", "name": "Test User", "count": 3}
     ]
+    mock_engine.get_recent_emails_for_class.return_value = (
+        [{"date": "2026-05-15", "from_name": "Inbox User", "subject": "In Subj", "path": "/path/in"}],
+        [{"date": "2026-05-16", "from_name": "Me", "subject": "Sent Subj", "path": "/path/sent"}]
+    )
     mock_gui_tools.engine.return_value = mock_engine
 
     res_valid = on_class_change("BachelorThesis")
     addr_df = res_valid[0]
+    status_text = res_valid[8]
+    class_inbox_df = res_valid[9]
+    class_sent_df = res_valid[10]
+
     assert len(addr_df) == 1
     assert addr_df.iloc[0]["E-Mail-Adresse"] == "test@example.com"
     assert addr_df.iloc[0]["Anzahl E-Mails"] == 3
-    assert "1 E-Mail-Adresse" in res_valid[-1]
+    assert "1 E-Mail-Adresse" in status_text
+    assert len(class_inbox_df) == 1
+    assert class_inbox_df.iloc[0]["Betreff"] == "In Subj"
+    assert len(class_sent_df) == 1
+    assert class_sent_df.iloc[0]["Betreff"] == "Sent Subj"
 
 
 @patch("scripts.email_class_gui.GUITools")

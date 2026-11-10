@@ -128,7 +128,7 @@ def load_email_classes() -> List[str]:
 
 
 def on_class_change(selected_class: str) -> Tuple[
-    pd.DataFrame, str, Dict[str, Any], str, pd.DataFrame, pd.DataFrame, str, str, str
+    pd.DataFrame, str, Dict[str, Any], str, pd.DataFrame, pd.DataFrame, str, str, str, pd.DataFrame, pd.DataFrame
 ]:
     """Wird aufgerufen, wenn eine E-Mail-Klasse im Dropdown ausgewählt wird.
 
@@ -136,9 +136,10 @@ def on_class_change(selected_class: str) -> Tuple[
         selected_class (str): Die ausgewählte E-Mail-Klasse.
 
     Returns:
-        Tuple[pd.DataFrame, str, Dict[str, Any], str, pd.DataFrame, pd.DataFrame, str, str, str]:
+        Tuple[pd.DataFrame, str, Dict[str, Any], str, pd.DataFrame, pd.DataFrame, str, str, str, pd.DataFrame, pd.DataFrame]:
         Aktualisierter Adressen-DataFrame, Steckbrief-Text, Button-Update, Steckbrief-Status,
-        Inbox-DF, Sent-DF, E-Mail-Adresse State, E-Mail-Viewer HTML, Statusmeldung.
+        Inbox-DF (Adresse), Sent-DF (Adresse), E-Mail-Adresse State, E-Mail-Viewer HTML, Statusmeldung,
+        Class-Recent-Inbox-DF (letzte 10 Mails der Klasse), Class-Recent-Sent-DF (letzte 10 Mails der Klasse).
     """
     logger.info(f"E-Mail-Klasse ausgewählt: {selected_class}")
     empty_emails_df = pd.DataFrame(columns=["Datum", "Von", "Betreff", "Pfad"])
@@ -155,7 +156,9 @@ def on_class_change(selected_class: str) -> Tuple[
             empty_emails_df,
             "",
             viewer_placeholder,
-            "Keine E-Mail-Klasse ausgewählt."
+            "Keine E-Mail-Klasse ausgewählt.",
+            empty_emails_df,
+            empty_emails_df
         )
 
     addresses = GUITools.engine().get_addresses_for_class(selected_class)
@@ -168,7 +171,36 @@ def on_class_change(selected_class: str) -> Tuple[
         ])
 
     addr_df = pd.DataFrame(addr_data, columns=["Name", "E-Mail-Adresse", "Anzahl E-Mails"])
-    status_msg = f"Klasse '{selected_class}': {len(addr_data)} E-Mail-Adresse(n) gefunden."
+
+    # Letzte 10 Mails der Klasse (Posteingang und Gesendete Mails) ermitteln
+    recent_inbox, recent_sent = GUITools.engine().get_recent_emails_for_class(selected_class, limit=10)
+    cols = ["Datum", "Von", "Betreff", "Pfad"]
+
+    recent_inbox_rows = []
+    for item in recent_inbox:
+        recent_inbox_rows.append([
+            item.get("date", "")[:10],
+            item.get("from_name") or item.get("from", ""),
+            item.get("subject", ""),
+            item.get("path", "")
+        ])
+
+    recent_sent_rows = []
+    for item in recent_sent:
+        recent_sent_rows.append([
+            item.get("date", "")[:10],
+            item.get("from_name") or item.get("from", ""),
+            item.get("subject", ""),
+            item.get("path", "")
+        ])
+
+    class_recent_inbox_df = pd.DataFrame(recent_inbox_rows, columns=cols)
+    class_recent_sent_df = pd.DataFrame(recent_sent_rows, columns=cols)
+
+    status_msg = (
+        f"Klasse '{selected_class}': {len(addr_data)} E-Mail-Adresse(n) gefunden. "
+        f"Letzte Mails: {len(recent_inbox_rows)} Inbox, {len(recent_sent_rows)} SentItems."
+    )
     logger.info(status_msg)
 
     return (
@@ -180,7 +212,9 @@ def on_class_change(selected_class: str) -> Tuple[
         empty_emails_df,
         "",
         viewer_placeholder,
-        status_msg
+        status_msg,
+        class_recent_inbox_df,
+        class_recent_sent_df
     )
 
 
@@ -387,74 +421,112 @@ with gr.Blocks(title="E-Mail-Suche nach Emailklassen", css=custom_css) as demo:
     selected_path_state = gr.State("")
 
     with gr.Row():
-        with gr.Column(scale=1):
-            class_dropdown = gr.Dropdown(
-                label="E-Mail-Klasse auswählen",
-                choices=[],
-                value=None,
-                interactive=True
-            )
+        class_dropdown = gr.Dropdown(
+            label="E-Mail-Klasse auswählen",
+            choices=[],
+            value=None,
+            interactive=True
+        )
 
-            gr.Markdown("### 👥 Ausgetauschte E-Mail-Adressen")
-            address_list = gr.DataFrame(
-                headers=["Name", "E-Mail-Adresse", "Anzahl E-Mails"],
-                datatype=["str", "str", "number"],
-                interactive=False,
-                label="Ausgetauschte E-Mail-Adressen",
-                max_height=300
-            )
+    with gr.Tabs() as tabs:
+        with gr.Tab("🕒 Letzte 10 Mails der Klasse"):
+            gr.Markdown("### Die letzten 10 E-Mails der ausgewählten Klasse (Posteingang und Gesendet)")
+            with gr.Row():
+                with gr.Column(scale=1):
+                    gr.Markdown("#### 📥 Posteingang (Inbox) - Letzte 10 Mails")
+                    class_inbox_list = gr.DataFrame(
+                        headers=["Datum", "Von", "Betreff", "Pfad"],
+                        datatype=["str", "str", "str", "str"],
+                        interactive=False,
+                        label="Posteingang (Letzte 10)",
+                        max_height=300
+                    )
 
-        with gr.Column(scale=1):
-            gr.Markdown("### 👤 Steckbrief")
-            steckbrief_viewer = gr.Markdown(
-                value="### Steckbrief\nWähle eine E-Mail-Klasse und eine E-Mail-Adresse aus."
-            )
-            generate_steckbrief_btn = gr.Button(
-                "Steckbrief generieren",
-                variant="primary",
-                visible=False
-            )
-            steckbrief_status = gr.Textbox(
-                label="Steckbrief-Status",
-                interactive=False,
-                visible=True
-            )
+                    gr.Markdown("#### 📤 Gesendete Elemente (SentItems) - Letzte 10 Mails")
+                    class_sent_list = gr.DataFrame(
+                        headers=["Datum", "Von", "Betreff", "Pfad"],
+                        datatype=["str", "str", "str", "str"],
+                        interactive=False,
+                        label="Gesendete Mails (Letzte 10)",
+                        max_height=300
+                    )
 
-    gr.Markdown("---")
-    gr.Markdown("## ✉️ E-Mails zur ausgewählten Adresse und Klasse")
+                with gr.Column(scale=1):
+                    gr.Markdown("### 📄 E-Mail-Vorschau")
+                    class_email_viewer = gr.HTML(
+                        value="<div style='text-align: center; padding: 50px; color: gray;'>Wähle eine E-Mail aus der Liste aus.</div>",
+                        label="Email Viewer"
+                    )
 
-    with gr.Row():
-        with gr.Column(scale=1):
-            gr.Markdown("### 📥 Posteingang (Inbox)")
-            inbox_list = gr.DataFrame(
-                headers=["Datum", "Von", "Betreff", "Pfad"],
-                datatype=["str", "str", "str", "str"],
-                interactive=False,
-                label="Posteingang",
-                max_height=300
-            )
+                    with gr.Row():
+                        class_open_outlook_btn = gr.Button("Öffnen in Outlook")
+                        class_open_explorer_btn = gr.Button("Öffnen in Explorer")
 
-            gr.Markdown("### 📤 Gesendete Elemente (SentItems)")
-            sent_list = gr.DataFrame(
-                headers=["Datum", "Von", "Betreff", "Pfad"],
-                datatype=["str", "str", "str", "str"],
-                interactive=False,
-                label="Gesendete Mails",
-                max_height=300
-            )
+                    class_status_output = gr.Textbox(label="Status", interactive=False)
 
-        with gr.Column(scale=1):
-            gr.Markdown("### 📄 E-Mail-Vorschau")
-            email_viewer = gr.HTML(
-                value="<div style='text-align: center; padding: 50px; color: gray;'>Wähle eine E-Mail aus der Liste aus.</div>",
-                label="Email Viewer"
-            )
+        with gr.Tab("👥 Nach E-Mail-Adresse & Steckbrief"):
+            with gr.Row():
+                with gr.Column(scale=1):
+                    gr.Markdown("### 👥 Ausgetauschte E-Mail-Adressen")
+                    address_list = gr.DataFrame(
+                        headers=["Name", "E-Mail-Adresse", "Anzahl E-Mails"],
+                        datatype=["str", "str", "number"],
+                        interactive=False,
+                        label="Ausgetauschte E-Mail-Adressen",
+                        max_height=300
+                    )
+
+                with gr.Column(scale=1):
+                    gr.Markdown("### 👤 Steckbrief")
+                    steckbrief_viewer = gr.Markdown(
+                        value="### Steckbrief\nWähle eine E-Mail-Klasse und eine E-Mail-Adresse aus."
+                    )
+                    generate_steckbrief_btn = gr.Button(
+                        "Steckbrief generieren",
+                        variant="primary",
+                        visible=False
+                    )
+                    steckbrief_status = gr.Textbox(
+                        label="Steckbrief-Status",
+                        interactive=False,
+                        visible=True
+                    )
+
+            gr.Markdown("---")
+            gr.Markdown("## ✉️ E-Mails zur ausgewählten Adresse und Klasse")
 
             with gr.Row():
-                open_outlook_btn = gr.Button("Öffnen in Outlook")
-                open_explorer_btn = gr.Button("Öffnen in Explorer")
+                with gr.Column(scale=1):
+                    gr.Markdown("### 📥 Posteingang (Inbox)")
+                    inbox_list = gr.DataFrame(
+                        headers=["Datum", "Von", "Betreff", "Pfad"],
+                        datatype=["str", "str", "str", "str"],
+                        interactive=False,
+                        label="Posteingang",
+                        max_height=300
+                    )
 
-            status_output = gr.Textbox(label="Status", interactive=False)
+                    gr.Markdown("### 📤 Gesendete Elemente (SentItems)")
+                    sent_list = gr.DataFrame(
+                        headers=["Datum", "Von", "Betreff", "Pfad"],
+                        datatype=["str", "str", "str", "str"],
+                        interactive=False,
+                        label="Gesendete Mails",
+                        max_height=300
+                    )
+
+                with gr.Column(scale=1):
+                    gr.Markdown("### 📄 E-Mail-Vorschau")
+                    email_viewer = gr.HTML(
+                        value="<div style='text-align: center; padding: 50px; color: gray;'>Wähle eine E-Mail aus der Liste aus.</div>",
+                        label="Email Viewer"
+                    )
+
+                    with gr.Row():
+                        open_outlook_btn = gr.Button("Öffnen in Outlook")
+                        open_explorer_btn = gr.Button("Öffnen in Explorer")
+
+                    status_output = gr.Textbox(label="Status", interactive=False)
 
     # Initiales Laden der E-Mail-Klassen beim Anzeigen der GUI
     demo.load(
@@ -475,7 +547,9 @@ with gr.Blocks(title="E-Mail-Suche nach Emailklassen", css=custom_css) as demo:
             sent_list,
             selected_email_address_state,
             email_viewer,
-            status_output
+            status_output,
+            class_inbox_list,
+            class_sent_list
         ]
     )
 
@@ -526,6 +600,31 @@ with gr.Blocks(title="E-Mail-Suche nach Emailklassen", css=custom_css) as demo:
         fn=open_in_explorer,
         inputs=[selected_path_state],
         outputs=[status_output]
+    )
+
+    # Events für die letzten 10 Mails der Klasse
+    class_inbox_list.select(
+        fn=display_email,
+        inputs=[class_inbox_list],
+        outputs=[class_email_viewer, selected_path_state, class_status_output]
+    )
+
+    class_sent_list.select(
+        fn=display_email,
+        inputs=[class_sent_list],
+        outputs=[class_email_viewer, selected_path_state, class_status_output]
+    )
+
+    class_open_outlook_btn.click(
+        fn=open_in_outlook,
+        inputs=[selected_path_state],
+        outputs=[class_status_output]
+    )
+
+    class_open_explorer_btn.click(
+        fn=open_in_explorer,
+        inputs=[selected_path_state],
+        outputs=[class_status_output]
     )
 
 if __name__ == "__main__":
