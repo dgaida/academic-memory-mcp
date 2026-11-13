@@ -25,3 +25,10 @@ data/
 *.env
 config/*.env
 *.bat
+config/classifier_memory_paths.yaml
+config/classifier_paths - Kopie.yaml
+knowledge_graph.html
+/old
+outlook_macro/FreeSlotExport_Debug.bas
+outlook_macro/ProcessFolder_patch.bas
+students.yaml
