@@ -124,7 +124,13 @@ def load_email_classes() -> List[str]:
     Returns:
         List[str]: Liste der E-Mail-Klassen.
     """
-    return GUITools.engine().get_email_classes()
+    try:
+        classes = GUITools.engine().get_email_classes()
+        if classes:
+            return classes
+    except Exception as error:
+        logger.error(f"Fehler beim Laden der E-Mail-Klassen: {error}")
+    return ["BachelorThesis", "MasterThesis", "PraxisProjekt", "InformatikProjekt", "WASP", "Other"]
 
 
 def on_class_change(selected_class: str) -> Tuple[
@@ -409,7 +415,7 @@ custom_css = """
 }
 """
 
-with gr.Blocks(title="E-Mail-Suche nach Emailklassen", css=custom_css) as demo:
+with gr.Blocks(title="E-Mail-Suche nach Emailklassen") as demo:
     gr.Markdown("# 📁 E-Mail-Suche nach Emailklassen")
     gr.Markdown(
         "Finde E-Mail-Adressen und E-Mails zu einer bestimmten E-Mail-Klasse, "
@@ -423,7 +429,7 @@ with gr.Blocks(title="E-Mail-Suche nach Emailklassen", css=custom_css) as demo:
     with gr.Row():
         class_dropdown = gr.Dropdown(
             label="E-Mail-Klasse auswählen",
-            choices=[],
+            choices=load_email_classes(),
             value=None,
             interactive=True
         )
@@ -528,9 +534,9 @@ with gr.Blocks(title="E-Mail-Suche nach Emailklassen", css=custom_css) as demo:
 
                     status_output = gr.Textbox(label="Status", interactive=False)
 
-    # Initiales Laden der E-Mail-Klassen beim Anzeigen der GUI
+    # Initiales Laden bzw. Aktualisieren der E-Mail-Klassen beim Anzeigen der GUI
     demo.load(
-        fn=lambda: gr.update(choices=load_email_classes()),
+        fn=lambda: gr.Dropdown(choices=load_email_classes()),
         outputs=[class_dropdown]
     )
 
@@ -630,4 +636,4 @@ with gr.Blocks(title="E-Mail-Suche nach Emailklassen", css=custom_css) as demo:
 if __name__ == "__main__":
     logger.info("Starte E-Mail-Klassen-GUI...")
     GUITools.engine()
-    demo.launch(inbrowser=True)
+    demo.launch(inbrowser=True, css=custom_css)

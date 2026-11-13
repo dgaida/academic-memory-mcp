@@ -13,7 +13,8 @@ from scripts.email_class_gui import (
     check_steckbrief_status,
     on_address_select,
     generate_steckbrief_action,
-    display_email
+    display_email,
+    load_email_classes
 )
 
 
@@ -432,3 +433,60 @@ def test_display_email(mock_gui_tools: MagicMock, tmp_path: Path) -> None:
     assert "Absender" in html
     assert "Hallo Welt Inhalts-Text" in html
     assert path_out == "/path/to/mail.eml"
+
+
+@patch("scripts.email_class_gui.GUITools")
+def test_load_email_classes_success(mock_gui_tools: MagicMock) -> None:
+    """Testet load_email_classes bei erfolgreichem Laden der Klassen.
+
+    Args:
+        mock_gui_tools (MagicMock): Gemockte GUITools.
+
+    Returns:
+        None
+    """
+    mock_engine = MagicMock()
+    mock_engine.get_email_classes.return_value = ["BachelorThesis", "MasterThesis"]
+    mock_gui_tools.engine.return_value = mock_engine
+
+    classes = load_email_classes()
+    assert classes == ["BachelorThesis", "MasterThesis"]
+
+
+@patch("scripts.email_class_gui.GUITools")
+def test_load_email_classes_fallback_on_empty(mock_gui_tools: MagicMock) -> None:
+    """Testet load_email_classes mit Fallback bei leerer Rückgabe der SearchEngine.
+
+    Args:
+        mock_gui_tools (MagicMock): Gemockte GUITools.
+
+    Returns:
+        None
+    """
+    mock_engine = MagicMock()
+    mock_engine.get_email_classes.return_value = []
+    mock_gui_tools.engine.return_value = mock_engine
+
+    classes = load_email_classes()
+    assert "BachelorThesis" in classes
+    assert "Other" in classes
+
+
+@patch("scripts.email_class_gui.GUITools")
+def test_load_email_classes_fallback_on_exception(mock_gui_tools: MagicMock) -> None:
+    """Testet load_email_classes mit Fallback bei einer Exception.
+
+    Args:
+        mock_gui_tools (MagicMock): Gemockte GUITools.
+
+    Returns:
+        None
+    """
+    mock_engine = MagicMock()
+    mock_engine.get_email_classes.side_effect = RuntimeError("Engine failure")
+    mock_gui_tools.engine.return_value = mock_engine
+
+    classes = load_email_classes()
+    assert "BachelorThesis" in classes
+    assert "Other" in classes
+

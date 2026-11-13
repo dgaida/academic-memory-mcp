@@ -73,17 +73,19 @@ class EmailSearchEngine:
                 self.index = []
 
     def _save_cache(self) -> None:
-        """Speichert den Index im Cache.
+        """Speichert den Index im Cache atomar über eine temporäre Datei.
 
         Returns:
             None
         """
         try:
-            with open(self.cache_file, "w", encoding="utf-8") as f:
-                json.dump(self.index, f, ensure_ascii=False, indent=2)
+            temp_cache_file = self.cache_file.with_suffix(".tmp")
+            with open(temp_cache_file, "w", encoding="utf-8") as file_handle:
+                json.dump(self.index, file_handle, ensure_ascii=False, indent=2)
+            temp_cache_file.replace(self.cache_file)
             logger.info("Cache gespeichert.")
-        except Exception as e:
-            logger.error(f"Fehler beim Speichern des Caches: {e}")
+        except Exception as error:
+            logger.error(f"Fehler beim Speichern des Caches: {error}")
 
     def _load_suggestions_cache(self) -> None:
         """Lädt den Vorschlags-Cache aus der JSON-Datei oder initialisiert ihn mit Defaults.
@@ -142,22 +144,24 @@ class EmailSearchEngine:
                     self.suggestions_cache.add(rec)
 
     def _save_suggestions_cache(self) -> None:
-        """Speichert den Vorschlags-Cache in der JSON-Datei und leert den LRU-Cache.
+        """Speichert den Vorschlags-Cache in der JSON-Datei atomar und leert den LRU-Cache.
 
         Returns:
             None
         """
         try:
             self.suggestions_cache_file.parent.mkdir(parents=True, exist_ok=True)
-            with open(self.suggestions_cache_file, "w", encoding="utf-8") as f:
-                json.dump(sorted(list(self.suggestions_cache)), f, ensure_ascii=False, indent=2)
+            temp_suggestions_file = self.suggestions_cache_file.with_suffix(".tmp")
+            with open(temp_suggestions_file, "w", encoding="utf-8") as file_handle:
+                json.dump(sorted(list(self.suggestions_cache)), file_handle, ensure_ascii=False, indent=2)
+            temp_suggestions_file.replace(self.suggestions_cache_file)
             logger.info("Vorschlags-Cache gespeichert.")
             try:
                 self.get_suggestions.cache_clear()
             except AttributeError:
                 pass
-        except Exception as e:
-            logger.error(f"Fehler beim Speichern des Vorschlags-Caches: {e}")
+        except Exception as error:
+            logger.error(f"Fehler beim Speichern des Vorschlags-Caches: {error}")
 
     def get_search_paths(self) -> List[Path]:
         """Ermittelt alle zu durchsuchenden Pfade aus der Konfiguration.
