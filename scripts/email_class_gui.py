@@ -40,7 +40,6 @@ class GUITools:
             cls._engine = EmailSearchEngine()
             threading.Thread(target=cls._engine.update_index, daemon=True).start()
         return cls._engine
-
     @classmethod
     def academic_parser(cls) -> MailParser:
         """Gibt eine Instanz des MailParsers zurück.

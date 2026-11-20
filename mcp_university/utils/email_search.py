@@ -57,6 +57,14 @@ class EmailSearchEngine:
         self.suggestions_cache_file = self.cache_file.parent / "suggestions_cache.json"
         self._load_suggestions_cache()
 
+        # Recent-Emails-Cache (vorberechnete letzte 10 Mails pro Klasse)
+        self._recent_emails_cache_file = self.cache_file.parent / "recent_emails_cache.json"
+        self._load_recent_emails_cache()
+
+        # Falls der Cache noch leer ist (z. B. erster Start), sofort aus dem Index befüllen
+        if not self._recent_emails_cache and self.index:
+            self._build_recent_emails_cache()
+
     def _load_cache(self) -> None:
         """Lädt den Index aus dem Cache.
 
@@ -267,6 +275,8 @@ class EmailSearchEngine:
         # Aktualisiere Vorschlags-Cache mit den neuen Elementen
         self._add_index_elements_to_suggestions()
         self._save_suggestions_cache()
+        # Neuaufbau des Recent-Emails-Caches nach Index-Update
+        self._build_recent_emails_cache()
 
     def search(self, query: str) -> List[Dict[str, Any]]:
         """Sucht nach E-Mails im Index.
@@ -593,7 +603,11 @@ class EmailSearchEngine:
     def get_recent_emails_for_class(
         self, email_class: str, limit: int = 10
     ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
-        """Gibt die neuesten E-Mails für eine E-Mail-Klasse zurück, getrennt nach Inbox und SentItems.
+        """Gibt die neuesten E-Mails für eine E-Mail-Klasse aus dem vorberechneten Cache zurück.
+
+        Liest ausschließlich aus ``_recent_emails_cache``, der beim Start und nach jedem
+        ``update_index``-Lauf via ``_build_recent_emails_cache`` befüllt wird. Damit ist
+        diese Methode nicht-blockierend und gibt sofort ein Ergebnis zurück.
 
         Args:
             email_class (str): Der Name der E-Mail-Klasse.
@@ -601,32 +615,108 @@ class EmailSearchEngine:
 
         Returns:
             Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]: (Inbox-E-Mails, SentItems-E-Mails),
-                jeweils absteigend nach Datum sortiert und auf maximal `limit` Einträge beschränkt.
+                jeweils absteigend nach Datum sortiert und auf maximal ``limit`` Einträge beschränkt.
         """
         if not email_class:
             return [], []
 
-        inbox_mails = []
-        sent_mails = []
+        cached = self._recent_emails_cache.get(email_class, {"inbox": [], "sent": []})
+        return cached["inbox"][:limit], cached["sent"][:limit]
 
-        for item in self.index:
+    def _build_recent_emails_cache(self, limit: int = 10) -> None:
+        """Baut den klassenweisen Cache der neuesten E-Mails aus dem aktuellen Index auf.
+
+        Iteriert einmalig über ``self.index``, sortiert pro Klasse nach Datum und
+        speichert die ``limit`` neuesten Inbox- sowie SentItems-Mails in
+        ``_recent_emails_cache``.  Schreibt den Cache anschließend atomar in
+        ``_recent_emails_cache_file``.
+
+        Args:
+            limit (int): Maximale Anzahl an E-Mails pro Ordner und Klasse. Standard ist 10.
+
+        Returns:
+            None
+        """
+        logger.info("Erstelle Recent-Emails-Cache für alle Klassen …")
+        raw: Dict[str, Dict[str, List[Dict[str, Any]]]] = {}
+
+        # Snapshot des Index, um Race-Conditions mit dem Update-Thread zu minimieren
+        index_snapshot = list(self.index)
+
+        for item in index_snapshot:
             item_class = item.get("email_class")
             if not item_class:
                 item_class = self.determine_email_class(Path(item["path"]))
+                # Klasse im Item-Dict nachträglich setzen (kein Lock nötig, da nur Lesen)
                 item["email_class"] = item_class
 
-            if item_class != email_class:
-                continue
-
+            bucket = raw.setdefault(item_class, {"inbox": [], "sent": []})
             if item.get("folder") == "SentItems":
-                sent_mails.append(item)
+                bucket["sent"].append(item)
             else:
-                inbox_mails.append(item)
+                bucket["inbox"].append(item)
 
-        inbox_mails.sort(key=lambda x: x.get("date", ""), reverse=True)
-        sent_mails.sort(key=lambda x: x.get("date", ""), reverse=True)
+        built: Dict[str, Dict[str, List[Dict[str, Any]]]] = {}
+        for cls, buckets in raw.items():
+            inbox_sorted = sorted(buckets["inbox"], key=lambda x: x.get("date", ""), reverse=True)
+            sent_sorted = sorted(buckets["sent"], key=lambda x: x.get("date", ""), reverse=True)
+            built[cls] = {
+                "inbox": inbox_sorted[:limit],
+                "sent": sent_sorted[:limit],
+            }
 
-        return inbox_mails[:limit], sent_mails[:limit]
+        self._recent_emails_cache = built
+        self._save_recent_emails_cache()
+        logger.info(f"Recent-Emails-Cache erstellt: {len(built)} Klasse(n).")
+
+    def _load_recent_emails_cache(self) -> None:
+        """Lädt den Recent-Emails-Cache aus der JSON-Datei in ``_recent_emails_cache``.
+
+        Returns:
+            None
+        """
+        self._recent_emails_cache: Dict[str, Dict[str, List[Dict[str, Any]]]] = {}
+        if self._recent_emails_cache_file.exists():
+            try:
+                with open(self._recent_emails_cache_file, "r", encoding="utf-8") as fh:
+                    self._recent_emails_cache = json.load(fh)
+                total = sum(
+                    len(v.get("inbox", [])) + len(v.get("sent", []))
+                    for v in self._recent_emails_cache.values()
+                )
+                logger.info(
+                    f"Recent-Emails-Cache geladen: {len(self._recent_emails_cache)} Klasse(n), "
+                    f"{total} E-Mail(s)."
+                )
+            except Exception as error:
+                logger.error(f"Fehler beim Laden des Recent-Emails-Caches: {error}")
+                self._recent_emails_cache = {}
+
+    def _save_recent_emails_cache(self) -> None:
+        """Speichert ``_recent_emails_cache`` atomar als JSON auf die Festplatte.
+
+        Speichert nur die Felder, die für die Anzeige benötigt werden (kein ``to``-Blob),
+        um die Dateigröße klein zu halten.
+
+        Returns:
+            None
+        """
+        try:
+            # Nur die für die Anzeige relevanten Felder speichern
+            slim: Dict[str, Dict[str, Any]] = {}
+            keep_keys = {"subject", "from", "from_name", "date", "path", "filename", "folder", "email_class"}
+            for cls, buckets in self._recent_emails_cache.items():
+                slim[cls] = {
+                    "inbox": [{k: v for k, v in m.items() if k in keep_keys} for m in buckets["inbox"]],
+                    "sent": [{k: v for k, v in m.items() if k in keep_keys} for m in buckets["sent"]],
+                }
+            temp_file = self._recent_emails_cache_file.with_suffix(".tmp")
+            with open(temp_file, "w", encoding="utf-8") as fh:
+                json.dump(slim, fh, ensure_ascii=False, indent=2)
+            temp_file.replace(self._recent_emails_cache_file)
+            logger.info("Recent-Emails-Cache gespeichert.")
+        except Exception as error:
+            logger.error(f"Fehler beim Speichern des Recent-Emails-Caches: {error}")
 
     @functools.lru_cache(maxsize=128)
     def get_suggestions(self, partial_query: str) -> List[str]:
