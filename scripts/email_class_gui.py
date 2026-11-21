@@ -133,18 +133,20 @@ def load_email_classes() -> List[str]:
 
 
 def on_class_change(selected_class: str) -> Tuple[
-    pd.DataFrame, str, Dict[str, Any], str, pd.DataFrame, pd.DataFrame, str, str, str, pd.DataFrame, pd.DataFrame
+    pd.DataFrame, str, Dict[str, Any], str, pd.DataFrame, pd.DataFrame, str, str, str
 ]:
-    """Wird aufgerufen, wenn eine E-Mail-Klasse im Dropdown ausgewählt wird.
+    """Wird aufgerufen, wenn eine E-Mail-Klasse im Dropdown ausgewählt wird (Tab 2: Adressen).
+
+    Aktualisiert die Adressliste, den Steckbrief-Bereich und den Status in Tab 2.
+    Die letzten Mails (Tab 1) werden separat über ``on_class_change_recent_mails`` befüllt.
 
     Args:
         selected_class (str): Die ausgewählte E-Mail-Klasse.
 
     Returns:
-        Tuple[pd.DataFrame, str, Dict[str, Any], str, pd.DataFrame, pd.DataFrame, str, str, str, pd.DataFrame, pd.DataFrame]:
+        Tuple[pd.DataFrame, str, Dict[str, Any], str, pd.DataFrame, pd.DataFrame, str, str, str]:
         Aktualisierter Adressen-DataFrame, Steckbrief-Text, Button-Update, Steckbrief-Status,
-        Inbox-DF (Adresse), Sent-DF (Adresse), E-Mail-Adresse State, E-Mail-Viewer HTML, Statusmeldung,
-        Class-Recent-Inbox-DF (letzte 10 Mails der Klasse), Class-Recent-Sent-DF (letzte 10 Mails der Klasse).
+        Inbox-DF (Adresse), Sent-DF (Adresse), E-Mail-Adresse State, E-Mail-Viewer HTML, Statusmeldung.
     """
     logger.info(f"E-Mail-Klasse ausgewählt: {selected_class}")
     empty_emails_df = pd.DataFrame(columns=["Datum", "Von", "Betreff", "Pfad"])
@@ -161,9 +163,7 @@ def on_class_change(selected_class: str) -> Tuple[
             empty_emails_df,
             "",
             viewer_placeholder,
-            "Keine E-Mail-Klasse ausgewählt.",
-            empty_emails_df,
-            empty_emails_df
+            "Keine E-Mail-Klasse ausgewählt."
         )
 
     addresses = GUITools.engine().get_addresses_for_class(selected_class)
@@ -177,35 +177,7 @@ def on_class_change(selected_class: str) -> Tuple[
 
     addr_df = pd.DataFrame(addr_data, columns=["Name", "E-Mail-Adresse", "Anzahl E-Mails"])
 
-    # Letzte 10 Mails der Klasse (Posteingang und Gesendete Mails) ermitteln
-    recent_inbox, recent_sent = GUITools.engine().get_recent_emails_for_class(selected_class, limit=10)
-    cols = ["Datum", "Von", "Betreff", "Pfad"]
-
-    recent_inbox_rows = []
-    for item in recent_inbox:
-        recent_inbox_rows.append([
-            item.get("date", "")[:10],
-            item.get("from_name") or item.get("from", ""),
-            item.get("subject", ""),
-            item.get("path", "")
-        ])
-
-    recent_sent_rows = []
-    for item in recent_sent:
-        recent_sent_rows.append([
-            item.get("date", "")[:10],
-            item.get("from_name") or item.get("from", ""),
-            item.get("subject", ""),
-            item.get("path", "")
-        ])
-
-    class_recent_inbox_df = pd.DataFrame(recent_inbox_rows, columns=cols)
-    class_recent_sent_df = pd.DataFrame(recent_sent_rows, columns=cols)
-
-    status_msg = (
-        f"Klasse '{selected_class}': {len(addr_data)} E-Mail-Adresse(n) gefunden. "
-        f"Letzte Mails: {len(recent_inbox_rows)} Inbox, {len(recent_sent_rows)} SentItems."
-    )
+    status_msg = f"Klasse '{selected_class}': {len(addr_data)} E-Mail-Adresse(n) gefunden."
     logger.info(status_msg)
 
     return (
@@ -217,10 +189,72 @@ def on_class_change(selected_class: str) -> Tuple[
         empty_emails_df,
         "",
         viewer_placeholder,
-        status_msg,
-        class_recent_inbox_df,
-        class_recent_sent_df
+        status_msg
     )
+
+
+def on_class_change_recent_mails(selected_class: str) -> Tuple[
+    pd.DataFrame, pd.DataFrame, str
+]:
+    """Lädt die letzten 10 Mails der Klasse aus dem Cache (Tab 1 – sofortige Antwort).
+
+    Diese Funktion liest ausschließlich aus dem vorberechneten ``_recent_emails_cache``
+    und ist daher nicht-blockierend. Sie wird als separater, nicht-queue-pflichtiger
+    Event-Handler für ``class_dropdown.change`` registriert.
+
+    Args:
+        selected_class (str): Die ausgewählte E-Mail-Klasse.
+
+    Returns:
+        Tuple[pd.DataFrame, pd.DataFrame, str]:
+        Inbox-DataFrame (letzte 10), SentItems-DataFrame (letzte 10), Statusmeldung.
+    """
+    cols = ["Datum", "Von", "Betreff", "Pfad"]
+    empty_df = pd.DataFrame(columns=cols)
+
+    if not selected_class:
+        return empty_df, empty_df, "Keine E-Mail-Klasse ausgewählt."
+
+    try:
+        recent_inbox, recent_sent = GUITools.engine().get_recent_emails_for_class(
+            selected_class, limit=10
+        )
+    except Exception as error:
+        logger.error(f"Fehler beim Laden der letzten Mails für '{selected_class}': {error}")
+        return empty_df, empty_df, f"Fehler: {error}"
+
+    def _to_rows(mails: List[Dict[str, Any]]) -> List[List[str]]:
+        """Wandelt Mail-Dicts in Tabellenzeilen um.
+
+        Args:
+            mails (List[Dict[str, Any]]): Liste der Mail-Einträge.
+
+        Returns:
+            List[List[str]]: Liste der Tabellenzeilen.
+        """
+        rows = []
+        for item in mails:
+            date_raw = item.get("date") or ""
+            rows.append([
+                str(date_raw)[:10],
+                item.get("from_name") or item.get("from") or "",
+                item.get("subject") or "",
+                item.get("path") or ""
+            ])
+        return rows
+
+    inbox_rows = _to_rows(recent_inbox)
+    sent_rows = _to_rows(recent_sent)
+
+    inbox_df = pd.DataFrame(inbox_rows, columns=cols) if inbox_rows else empty_df
+    sent_df = pd.DataFrame(sent_rows, columns=cols) if sent_rows else empty_df
+
+    status_msg = (
+        f"Letzte Mails für '{selected_class}': "
+        f"{len(inbox_rows)} Inbox, {len(sent_rows)} SentItems."
+    )
+    logger.info(status_msg)
+    return inbox_df, sent_df, status_msg
 
 
 def check_steckbrief_status(email_address: str) -> Tuple[str, Dict[str, Any], str]:
@@ -535,7 +569,7 @@ with gr.Blocks(title="E-Mail-Suche nach Emailklassen") as demo:
 
     # Initiales Laden bzw. Aktualisieren der E-Mail-Klassen beim Anzeigen der GUI
     demo.load(
-        fn=lambda: gr.Dropdown(choices=load_email_classes()),
+        fn=lambda: gr.update(choices=load_email_classes()),
         outputs=[class_dropdown]
     )
 
@@ -552,9 +586,17 @@ with gr.Blocks(title="E-Mail-Suche nach Emailklassen") as demo:
             sent_list,
             selected_email_address_state,
             email_viewer,
-            status_output,
+            status_output
+        ]
+    )
+
+    class_dropdown.change(
+        fn=on_class_change_recent_mails,
+        inputs=[class_dropdown],
+        outputs=[
             class_inbox_list,
-            class_sent_list
+            class_sent_list,
+            class_status_output
         ]
     )
 
@@ -635,4 +677,5 @@ with gr.Blocks(title="E-Mail-Suche nach Emailklassen") as demo:
 if __name__ == "__main__":
     logger.info("Starte E-Mail-Klassen-GUI...")
     GUITools.engine()
+    demo.queue()
     demo.launch(inbrowser=True, css=custom_css)
