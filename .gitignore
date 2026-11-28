@@ -32,3 +32,4 @@ knowledge_graph.html
 outlook_macro/FreeSlotExport_Debug.bas
 outlook_macro/ProcessFolder_patch.bas
 students.yaml
+config/secrets.env

@@ -16,6 +16,49 @@ import torch.nn as nn
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_OLLAMA_EMBEDDING_MODEL = "embeddinggemma-2:270m"
+
+
+def _is_ollama_embedding_model(model_name: str) -> bool:
+    """Prüft, ob ein Modellname ein Ollama-Embedding-Modell bezeichnet.
+
+    Args:
+        model_name: Name oder Tag des Modells.
+
+    Returns:
+        bool: True, wenn das Modell über Ollama geladen werden soll, sonst False.
+    """
+    if "/" in model_name:
+        return False
+    if ":" in model_name:
+        return True
+    return model_name.startswith(
+        ("embeddinggemma", "nomic-embed", "mxbai-embed", "snowflake-arctic-embed", "all-minilm")
+    )
+
+
+class _OllamaEmbeddingModelWrapper:
+    """Adapter für Ollama-Embeddings mit `.encode()`-Schnittstelle."""
+
+    def __init__(self, owner: "EmailClassifier") -> None:
+        """Initialisiert den Adapter.
+
+        Args:
+            owner: Zugehörige EmailClassifier-Instanz.
+        """
+        self._owner = owner
+
+    def encode(self, texts: List[str]) -> np.ndarray:
+        """Erzeugt Embeddings für eine Liste von Texten.
+
+        Args:
+            texts: Liste der zu encodierenden Texte.
+
+        Returns:
+            np.ndarray: Matrix der Embeddings.
+        """
+        return self._owner.get_ollama_embeddings(texts)
+
 
 def resolve_model_path(base_path: Union[str, Path], method: str, mode: str) -> Path:
     """Erstellt den vollständigen Modellpfad basierend auf Methode und Modus.
@@ -53,14 +96,16 @@ class EmailClassifier:
         self,
         mode: str = "combined",
         method: str = "xgboost",
-        embedding_model_name: str = "sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
+        embedding_model_name: str = DEFAULT_OLLAMA_EMBEDDING_MODEL,
+        ollama_base_url: Optional[str] = None,
     ) -> None:
         """Initialisiert den Klassifikator.
 
         Args:
             mode: Modus der Merkmalsextraktion ('tfidf', 'embedding', 'combined').
             method: Klassifizierungsmethode ('randomforest', 'xgboost', 'transformer').
-            embedding_model_name: Name des Sentence-Transformer Modell.
+            embedding_model_name: Name des Embedding- oder Transformer-Modells.
+            ollama_base_url: Optionale Basis-URL für den Ollama-Server.
         """
         import os
         # Ensure Hugging Face Hub settings are set to prevent hanging downloads
@@ -74,6 +119,7 @@ class EmailClassifier:
         self.mode = mode
         self.method = method
         self.embedding_model_name = embedding_model_name
+        self.ollama_base_url = ollama_base_url
         self.academic_parser = MailParser()
 
         # TF-IDF Vectorizer
@@ -95,10 +141,13 @@ class EmailClassifier:
             self.classifier = XGBClassifier(use_label_encoder=False, eval_metric='mlogloss', random_state=42)
         elif method == "transformer":
             self.classifier = None  # Wird im Training oder beim Laden initialisiert
-            self.tokenizer = AutoTokenizer.from_pretrained(
-                embedding_model_name,
-                token=os.environ.get("HF_TOKEN")
-            )
+            if self.uses_ollama_embeddings:
+                self.tokenizer = None
+            else:
+                self.tokenizer = AutoTokenizer.from_pretrained(
+                    embedding_model_name,
+                    token=os.environ.get("HF_TOKEN")
+                )
         else:
             raise ValueError(f"Ungültige Klassifizierungsmethode: {method}")
 
@@ -106,9 +155,63 @@ class EmailClassifier:
         self._embedding_model = None
 
     @property
+    def uses_ollama_embeddings(self) -> bool:
+        """Gibt an, ob das aktuelle Modell ein Ollama-Embedding-Modell ist.
+
+        Returns:
+            bool: True bei Ollama-Embedding-Modellen, sonst False.
+        """
+        return _is_ollama_embedding_model(self.embedding_model_name)
+
+    def get_ollama_embeddings(self, texts: List[str], batch_size: int = 16) -> np.ndarray:
+        """Erzeugt Embeddings für Texte über die Ollama-API.
+
+        Args:
+            texts: Liste der zu encodierenden Texte.
+            batch_size: Anzahl der Texte pro Ollama-Anfrage.
+
+        Returns:
+            np.ndarray: Array der Embeddings mit Shape (len(texts), embedding_dim).
+        """
+        if not texts:
+            return np.empty((0, 0), dtype=np.float32)
+
+        import ollama
+
+        config = get_config()
+        host = self.ollama_base_url or str(config.llm.base_url)
+        client = ollama.Client(host=host)
+
+        all_embeddings: List[List[float]] = []
+        for start_idx in range(0, len(texts), batch_size):
+            batch_texts = texts[start_idx:start_idx + batch_size]
+            try:
+                response = client.embed(model=self.embedding_model_name, input=batch_texts)
+            except Exception as e:
+                logger.error(
+                    f"Fehler beim Abrufen der Ollama-Embeddings für Modell '{self.embedding_model_name}' "
+                    f"unter '{host}': {e}"
+                )
+                raise
+
+            batch_embeddings = (
+                response.embeddings
+                if hasattr(response, "embeddings")
+                else response["embeddings"]
+            )
+            all_embeddings.extend(batch_embeddings)
+
+        return np.array(all_embeddings, dtype=np.float32)
+
+    @property
     def embedding_model(self) -> Any:
         """Lädt das Embedding-Modell verzögert (Lazy Loading)."""
         if self._embedding_model is None:
+            if self.uses_ollama_embeddings:
+                logger.info(f"Nutze Ollama-Embedding-Modell: {self.embedding_model_name}")
+                self._embedding_model = _OllamaEmbeddingModelWrapper(self)
+                return self._embedding_model
+
             from sentence_transformers import SentenceTransformer
             import os
             config = get_config()
@@ -228,6 +331,39 @@ class EmailClassifier:
         self.classifier.fit(X, y)
         self.is_trained = True
 
+    def _predict_neural_text(self, formatted_text: str) -> Tuple[int, np.ndarray]:
+        """Führt die Vorhersage für einen formatierten Text mit dem neuronalen Modell durch.
+
+        Args:
+            formatted_text: Vorformatierter E-Mail-Text.
+
+        Returns:
+            Tuple aus vorhergesagtem Klassenindex und Wahrscheinlichkeits-Array.
+        """
+        device = get_device()
+        self.classifier.to(device)
+        self.classifier.eval()
+        with torch.no_grad():
+            if isinstance(self.classifier, OllamaEmbeddingClassifier) or self.uses_ollama_embeddings:
+                embeddings = self.get_ollama_embeddings([formatted_text])
+                embedding_tensor = torch.tensor(embeddings, dtype=torch.float32, device=device)
+                outputs = self.classifier(embedding_tensor)
+            else:
+                inputs = self.tokenizer(
+                    formatted_text,
+                    return_tensors="pt",
+                    padding=True,
+                    truncation=True,
+                    max_length=512
+                )
+                inputs = {k: v.to(device) for k, v in inputs.items()}
+                outputs = self.classifier(inputs["input_ids"], inputs["attention_mask"])
+
+            probs = torch.softmax(outputs, dim=1)[0]
+            y_pred = int(torch.argmax(probs).item())
+            y_prob = probs.cpu().numpy()
+        return y_pred, y_prob
+
     def predict(self, file_path: Union[str, Path]) -> Dict[str, Any]:
         """Klassifiziert eine einzelne E-Mail.
 
@@ -242,16 +378,7 @@ class EmailClassifier:
 
         if self.method == "transformer":
             text = self._format_transformer_input(Path(file_path))
-            device = get_device()
-            inputs = self.tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=512)
-            inputs = {k: v.to(device) for k, v in inputs.items()}
-            self.classifier.to(device)
-            self.classifier.eval()
-            with torch.no_grad():
-                outputs = self.classifier(inputs["input_ids"], inputs["attention_mask"])
-                probs = torch.softmax(outputs, dim=1)[0]
-                y_pred = torch.argmax(probs).item()
-                y_prob = probs.cpu().numpy()
+            y_pred, y_prob = self._predict_neural_text(text)
         else:
             text = self._extract_text(Path(file_path))
             if not text:
@@ -288,16 +415,7 @@ class EmailClassifier:
 
         if self.method == "transformer":
             formatted_text = f"SUBJECT: {text} | ATTACHMENTS: None [SEP] "
-            device = get_device()
-            inputs = self.tokenizer(formatted_text, return_tensors="pt", padding=True, truncation=True, max_length=512)
-            inputs = {k: v.to(device) for k, v in inputs.items()}
-            self.classifier.to(device)
-            self.classifier.eval()
-            with torch.no_grad():
-                outputs = self.classifier(inputs["input_ids"], inputs["attention_mask"])
-                probs = torch.softmax(outputs, dim=1)[0]
-                y_pred = torch.argmax(probs).item()
-                y_prob = probs.cpu().numpy()
+            y_pred, y_prob = self._predict_neural_text(formatted_text)
         else:
             if not text:
                 raise ValueError("Text darf nicht leer sein.")
@@ -326,13 +444,19 @@ class EmailClassifier:
             model_path: Pfad zur Speicherdatei.
         """
         if self.method == "transformer":
-            # Transformer Modelle separat speichern oder State Dict nutzen
+            # Transformer/Ollama-Embedding Modelle speichern
+            is_ollama_head = isinstance(self.classifier, OllamaEmbeddingClassifier)
+            config_data = {
+                "model_name": self.embedding_model_name,
+                "num_classes": len(self.label_encoder.classes_),
+                "backbone_type": "ollama" if is_ollama_head else "huggingface",
+            }
+            if is_ollama_head:
+                config_data["embedding_dim"] = self.classifier.embedding_dim
+
             classifier_data = {
                 "state_dict": self.classifier.state_dict(),
-                "config": {
-                    "model_name": self.embedding_model_name,
-                    "num_classes": len(self.label_encoder.classes_)
-                }
+                "config": config_data,
             }
         else:
             classifier_data = self.classifier
@@ -375,57 +499,109 @@ class EmailClassifier:
             import os
 
             saved_model_name = c_data["config"].get("model_name", self.embedding_model_name)
-
-            # Robustheitsprüfung: Vergleich der gespeicherten Gewichtsdimension mit dem Modellnamen
-            weight_key = "transformer.embeddings.word_embeddings.weight"
-            if weight_key in c_data["state_dict"]:
-                saved_weight_shape = c_data["state_dict"][weight_key].shape
-                if len(saved_weight_shape) == 2:
-                    saved_hidden_size = saved_weight_shape[1]
-                    # Behebung von Konflikten zwischen mpnet (768) und MiniLM (384)
-                    if saved_hidden_size == 768 and "MiniLM" in saved_model_name:
-                        logger.warning(
-                            f"Modellname in Konfiguration ist '{saved_model_name}' (Größe 384), "
-                            f"aber die Gewichte im State-Dict haben Größe {saved_hidden_size}. "
-                            "Korrigiere Modellnamen automatisch zu 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2'."
-                        )
-                        saved_model_name = "sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
-                    elif saved_hidden_size == 384 and "mpnet" in saved_model_name:
-                        logger.warning(
-                            f"Modellname in Konfiguration ist '{saved_model_name}' (Größe 768), "
-                            f"aber die Gewichte im State-Dict haben Größe {saved_hidden_size}. "
-                            "Korrigiere Modellnamen automatisch zu 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'."
-                        )
-                        saved_model_name = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
-
-            self.classifier = EmailTransformerClassifier(
-                saved_model_name,
-                c_data["config"]["num_classes"],
-                token=os.environ.get("HF_TOKEN")
+            backbone_type = c_data["config"].get("backbone_type")
+            is_ollama_backbone = backbone_type == "ollama" or (
+                backbone_type is None and _is_ollama_embedding_model(saved_model_name)
             )
 
-            try:
-                self.classifier.load_state_dict(c_data["state_dict"])
-            except RuntimeError as e:
-                logger.error(
-                    f"Fehler beim Laden des State-Dicts für das Transformer-Modell: {e}\n"
-                    "Dies deutet auf einen irreparablen Größenkonflikt (Size Mismatch) hin. "
-                    "Bitte löschen oder benennen Sie die Modelldatei unter 'data/email_classifier_transformer.pkl' um, "
-                    "und führen Sie das Training erneut aus, um ein konsistentes Modell zu erstellen."
+            if is_ollama_backbone:
+                embedding_dim = c_data["config"].get("embedding_dim")
+                if embedding_dim is None and "classifier.weight" in c_data["state_dict"]:
+                    embedding_dim = int(c_data["state_dict"]["classifier.weight"].shape[1])
+                if embedding_dim is None:
+                    raise ValueError(
+                        "Konnte embedding_dim für OllamaEmbeddingClassifier nicht aus dem Checkpoint bestimmen."
+                    )
+
+                self.classifier = OllamaEmbeddingClassifier(
+                    embedding_dim=embedding_dim,
+                    num_classes=c_data["config"]["num_classes"],
                 )
-                raise e
+                self.classifier.load_state_dict(c_data["state_dict"])
+                self.classifier.to(get_device())
+                self.embedding_model_name = saved_model_name
+                self.tokenizer = None
+            else:
+                # Robustheitsprüfung: Vergleich der gespeicherten Gewichtsdimension mit dem Modellnamen
+                weight_key = "transformer.embeddings.word_embeddings.weight"
+                if weight_key in c_data["state_dict"]:
+                    saved_weight_shape = c_data["state_dict"][weight_key].shape
+                    if len(saved_weight_shape) == 2:
+                        saved_hidden_size = saved_weight_shape[1]
+                        # Behebung von Konflikten zwischen mpnet (768) und MiniLM (384)
+                        if saved_hidden_size == 768 and "MiniLM" in saved_model_name:
+                            logger.warning(
+                                f"Modellname in Konfiguration ist '{saved_model_name}' (Größe 384), "
+                                f"aber die Gewichte im State-Dict haben Größe {saved_hidden_size}. "
+                                "Korrigiere Modellnamen automatisch zu 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2'."
+                            )
+                            saved_model_name = "sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
+                        elif saved_hidden_size == 384 and "mpnet" in saved_model_name:
+                            logger.warning(
+                                f"Modellname in Konfiguration ist '{saved_model_name}' (Größe 768), "
+                                f"aber die Gewichte im State-Dict haben Größe {saved_hidden_size}. "
+                                "Korrigiere Modellnamen automatisch zu 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'."
+                            )
+                            saved_model_name = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 
-            self.classifier.to(get_device())
-            self.embedding_model_name = saved_model_name
-            self.tokenizer = AutoTokenizer.from_pretrained(
-                saved_model_name,
-                token=os.environ.get("HF_TOKEN")
-            )
+                self.classifier = EmailTransformerClassifier(
+                    saved_model_name,
+                    c_data["config"]["num_classes"],
+                    token=os.environ.get("HF_TOKEN")
+                )
+
+                try:
+                    self.classifier.load_state_dict(c_data["state_dict"])
+                except RuntimeError as e:
+                    logger.error(
+                        f"Fehler beim Laden des State-Dicts für das Transformer-Modell: {e}\n"
+                        "Dies deutet auf einen irreparablen Größenkonflikt (Size Mismatch) hin. "
+                        "Bitte löschen oder benennen Sie die Modelldatei unter 'data/email_classifier_transformer.pkl' um, "
+                        "und führen Sie das Training erneut aus, um ein konsistentes Modell zu erstellen."
+                    )
+                    raise e
+
+                self.classifier.to(get_device())
+                self.embedding_model_name = saved_model_name
+                self.tokenizer = AutoTokenizer.from_pretrained(
+                    saved_model_name,
+                    token=os.environ.get("HF_TOKEN")
+                )
         else:
             self.classifier = data["classifier"]
         self.label_encoder = data["label_encoder"]
         self.is_trained = data["is_trained"]
         # embedding_model wird bei Bedarf geladen (Lazy Loading)
+
+
+class OllamaEmbeddingClassifier(nn.Module):
+    """Klassifikationsmodell mit Dropout und Fully-Connected-Layer auf Ollama-Embeddings."""
+
+    def __init__(self, embedding_dim: int, num_classes: int, dropout_rate: float = 0.1) -> None:
+        """Initialisiert den Klassifikationskopf.
+
+        Args:
+            embedding_dim (int): Dimension der Eingabe-Embeddings.
+            num_classes (int): Anzahl der Klassen.
+            dropout_rate (float): Dropout-Wahrscheinlichkeit.
+        """
+        super().__init__()
+        self.embedding_dim = embedding_dim
+        self.num_classes = num_classes
+        self.dropout = nn.Dropout(dropout_rate)
+        self.classifier = nn.Linear(embedding_dim, num_classes)
+
+    def forward(self, embeddings: torch.Tensor) -> torch.Tensor:
+        """Führt den Forward-Pass auf den vorberechneten Embeddings aus.
+
+        Args:
+            embeddings (torch.Tensor): Eingabe-Embeddings der Shape (batch_size, embedding_dim).
+
+        Returns:
+            torch.Tensor: Die Modell-Logits.
+        """
+        dropped_embeddings = self.dropout(embeddings)
+        return self.classifier(dropped_embeddings)
 
 
 class EmailTransformerClassifier(nn.Module):

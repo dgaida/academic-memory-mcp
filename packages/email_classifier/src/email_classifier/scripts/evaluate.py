@@ -11,7 +11,11 @@ import torch
 import numpy as np
 from torch.utils.data import DataLoader, TensorDataset
 
-from email_classifier.engine import EmailClassifier, resolve_model_path
+from email_classifier.engine import (
+    EmailClassifier,
+    OllamaEmbeddingClassifier,
+    resolve_model_path,
+)
 from mcp_university.utils.torch_utils import get_device
 
 # Logging konfigurieren
@@ -52,20 +56,34 @@ def evaluate(model_path: Path, test_dir: Path) -> None:
         classifier.classifier.eval()
         y_pred_idx = []
         with torch.no_grad():
-            # Batchweise Verarbeitung für Evaluierung
-            logger.info(f'Tokenisiere {len(texts)} Texte für die Evaluierung...')
-            encodings = classifier.tokenizer(texts, truncation=True, padding=True, max_length=512, return_tensors='pt')
-            dataset = TensorDataset(encodings['input_ids'], encodings['attention_mask'])
-            loader = DataLoader(dataset, batch_size=8)
-            num_batches = len(loader)
-            logger.info(f'Starte Batch-Vorhersage ({num_batches} Batches)...')
-            for i, batch in enumerate(loader):
-                ids, mask = [t.to(device) for t in batch]
-                outputs = classifier.classifier(ids, mask)
-                preds = torch.argmax(outputs, dim=1)
-                y_pred_idx.extend(preds.cpu().numpy())
-                if (i + 1) % 10 == 0 or (i + 1) == num_batches:
-                    logger.info(f'Evaluierung: Batch {i + 1}/{num_batches} verarbeitet.')
+            if isinstance(classifier.classifier, OllamaEmbeddingClassifier) or classifier.uses_ollama_embeddings:
+                logger.info(f'Erzeuge Ollama-Embeddings für {len(texts)} Texte zur Evaluierung...')
+                embeddings = classifier.get_ollama_embeddings(texts)
+                dataset = TensorDataset(torch.tensor(embeddings, dtype=torch.float32))
+                loader = DataLoader(dataset, batch_size=32)
+                num_batches = len(loader)
+                logger.info(f'Starte Batch-Vorhersage ({num_batches} Batches)...')
+                for i, (batch_embeddings,) in enumerate(loader):
+                    outputs = classifier.classifier(batch_embeddings.to(device))
+                    preds = torch.argmax(outputs, dim=1)
+                    y_pred_idx.extend(preds.cpu().numpy())
+                    if (i + 1) % 10 == 0 or (i + 1) == num_batches:
+                        logger.info(f'Evaluierung: Batch {i + 1}/{num_batches} verarbeitet.')
+            else:
+                # Batchweise Verarbeitung für Evaluierung
+                logger.info(f'Tokenisiere {len(texts)} Texte für die Evaluierung...')
+                encodings = classifier.tokenizer(texts, truncation=True, padding=True, max_length=512, return_tensors='pt')
+                dataset = TensorDataset(encodings['input_ids'], encodings['attention_mask'])
+                loader = DataLoader(dataset, batch_size=8)
+                num_batches = len(loader)
+                logger.info(f'Starte Batch-Vorhersage ({num_batches} Batches)...')
+                for i, batch in enumerate(loader):
+                    ids, mask = [t.to(device) for t in batch]
+                    outputs = classifier.classifier(ids, mask)
+                    preds = torch.argmax(outputs, dim=1)
+                    y_pred_idx.extend(preds.cpu().numpy())
+                    if (i + 1) % 10 == 0 or (i + 1) == num_batches:
+                        logger.info(f'Evaluierung: Batch {i + 1}/{num_batches} verarbeitet.')
         y_pred_idx = np.array(y_pred_idx)
     else:
         # Merkmale extrahieren für klassische Modelle

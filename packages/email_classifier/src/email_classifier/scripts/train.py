@@ -1,5 +1,12 @@
 """Skript zum Trainieren des E-Mail-Klassifikators."""
-from email_classifier.engine import EmailClassifier, resolve_model_path
+from email_classifier.engine import (
+    DEFAULT_OLLAMA_EMBEDDING_MODEL,
+    EmailClassifier,
+    EmailTransformerClassifier,
+    OllamaEmbeddingClassifier,
+    _is_ollama_embedding_model,
+    resolve_model_path,
+)
 from mcp_university.utils.torch_utils import get_device
 from pathlib import Path
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
@@ -37,20 +44,34 @@ def evaluate_and_save(classifier: EmailClassifier, texts: list, labels: list, ou
         device = get_device()
         classifier.classifier.to(device)
         with torch.no_grad():
-            # Batchweise Verarbeitung für Evaluierung
-            logger.info(f"Tokenisiere {len(texts)} Texte für die Evaluierung...")
-            encodings = classifier.tokenizer(texts, truncation=True, padding=True, max_length=512, return_tensors="pt")
-            dataset = TensorDataset(encodings["input_ids"], encodings["attention_mask"])
-            loader = DataLoader(dataset, batch_size=8)
-            num_batches = len(loader)
-            logger.info(f"Starte Batch-Vorhersage ({num_batches} Batches)...")
-            for i, batch in enumerate(loader):
-                ids, mask = [t.to(device) for t in batch]
-                outputs = classifier.classifier(ids, mask)
-                preds = torch.argmax(outputs, dim=1)
-                y_pred_idx.extend(preds.cpu().numpy())
-                if (i + 1) % 10 == 0 or (i + 1) == num_batches:
-                    logger.info(f"Evaluierung: Batch {i + 1}/{num_batches} verarbeitet.")
+            if isinstance(classifier.classifier, OllamaEmbeddingClassifier) or classifier.uses_ollama_embeddings:
+                logger.info(f"Erzeuge Ollama-Embeddings für {len(texts)} Texte zur Evaluierung...")
+                embeddings = classifier.get_ollama_embeddings(texts)
+                dataset = TensorDataset(torch.tensor(embeddings, dtype=torch.float32))
+                loader = DataLoader(dataset, batch_size=32)
+                num_batches = len(loader)
+                logger.info(f"Starte Batch-Vorhersage ({num_batches} Batches)...")
+                for i, (batch_embeddings,) in enumerate(loader):
+                    outputs = classifier.classifier(batch_embeddings.to(device))
+                    preds = torch.argmax(outputs, dim=1)
+                    y_pred_idx.extend(preds.cpu().numpy())
+                    if (i + 1) % 10 == 0 or (i + 1) == num_batches:
+                        logger.info(f"Evaluierung: Batch {i + 1}/{num_batches} verarbeitet.")
+            else:
+                # Batchweise Verarbeitung für Evaluierung
+                logger.info(f"Tokenisiere {len(texts)} Texte für die Evaluierung...")
+                encodings = classifier.tokenizer(texts, truncation=True, padding=True, max_length=512, return_tensors="pt")
+                dataset = TensorDataset(encodings["input_ids"], encodings["attention_mask"])
+                loader = DataLoader(dataset, batch_size=8)
+                num_batches = len(loader)
+                logger.info(f"Starte Batch-Vorhersage ({num_batches} Batches)...")
+                for i, batch in enumerate(loader):
+                    ids, mask = [t.to(device) for t in batch]
+                    outputs = classifier.classifier(ids, mask)
+                    preds = torch.argmax(outputs, dim=1)
+                    y_pred_idx.extend(preds.cpu().numpy())
+                    if (i + 1) % 10 == 0 or (i + 1) == num_batches:
+                        logger.info(f"Evaluierung: Batch {i + 1}/{num_batches} verarbeitet.")
         y_pred_idx = np.array(y_pred_idx)
     else:
         X = classifier.get_features(texts, train=False)
@@ -120,8 +141,12 @@ def main() -> None:
                         help="Modus der Merkmalsextraktion (default: tfidf).")
     parser.add_argument("--method", type=str, choices=["randomforest", "xgboost", "transformer"], default="transformer",
                         help="Klassifizierungsmethode (default: transformer).")
-    parser.add_argument("--embedding-model", type=str, default="sentence-transformers/paraphrase-multilingual-mpnet-base-v2",
-                        help="Sentence-Transformer Modell (default: sentence-transformers/paraphrase-multilingual-mpnet-base-v2).")
+    parser.add_argument(
+        "--embedding-model",
+        type=str,
+        default=DEFAULT_OLLAMA_EMBEDDING_MODEL,
+        help=f"Embedding- oder Transformer-Modell (default: {DEFAULT_OLLAMA_EMBEDDING_MODEL} via Ollama)."
+    )
 
     args = parser.parse_args()
 
@@ -154,12 +179,15 @@ def main() -> None:
                 classifier.embedding_model_name = args.embedding_model
                 if args.method == "transformer":
                     classifier.classifier = None
-                    from transformers import AutoTokenizer
-                    import os
-                    classifier.tokenizer = AutoTokenizer.from_pretrained(
-                        args.embedding_model,
-                        token=os.environ.get("HF_TOKEN")
-                    )
+                    if _is_ollama_embedding_model(args.embedding_model):
+                        classifier.tokenizer = None
+                    else:
+                        from transformers import AutoTokenizer
+                        import os
+                        classifier.tokenizer = AutoTokenizer.from_pretrained(
+                            args.embedding_model,
+                            token=os.environ.get("HF_TOKEN")
+                        )
 
         # Daten laden
         texts, labels = classifier.preprocess_data(data_path)
@@ -198,77 +226,147 @@ def main() -> None:
 
         if args.method == "transformer":
             device = get_device()
-            logger.info("Starte Transformer Fine-Tuning...")
-            from email_classifier.engine import EmailTransformerClassifier
-            import os
+            if _is_ollama_embedding_model(args.embedding_model):
+                logger.info(f"Starte Training mit Ollama-Embedding-Modell '{args.embedding_model}'...")
+                train_embeddings = classifier.get_ollama_embeddings(texts_train)
+                val_embeddings = classifier.get_ollama_embeddings(texts_val)
+                embedding_dim = int(train_embeddings.shape[1])
 
-            if classifier.is_trained and classifier.method == "transformer":
-                logger.info("Setze Training des geladenen Transformer-Modells fort.")
-                # Die Gewichte sind bereits in classifier.classifier geladen
-                classifier.classifier.to(device)
-            else:
-                logger.info("Initialisiere neues Transformer-Modell.")
-                classifier.classifier = EmailTransformerClassifier(
-                    args.embedding_model,
-                    num_classes,
-                    token=os.environ.get("HF_TOKEN")
-                ).to(device)
-                classifier.embedding_model_name = args.embedding_model
-                from transformers import AutoTokenizer
-                classifier.tokenizer = AutoTokenizer.from_pretrained(
-                    args.embedding_model,
-                    token=os.environ.get("HF_TOKEN")
+                if (
+                    classifier.is_trained
+                    and classifier.method == "transformer"
+                    and isinstance(classifier.classifier, OllamaEmbeddingClassifier)
+                    and classifier.classifier.embedding_dim == embedding_dim
+                ):
+                    logger.info("Setze Training des geladenen Ollama-Embedding-Klassifikators fort.")
+                    classifier.classifier.to(device)
+                else:
+                    logger.info(
+                        f"Initialisiere neuen OllamaEmbeddingClassifier (dim={embedding_dim}, classes={num_classes})."
+                    )
+                    classifier.classifier = OllamaEmbeddingClassifier(
+                        embedding_dim=embedding_dim,
+                        num_classes=num_classes,
+                    ).to(device)
+                    classifier.embedding_model_name = args.embedding_model
+                    classifier.tokenizer = None
+
+                dataset_train = TensorDataset(
+                    torch.tensor(train_embeddings, dtype=torch.float32),
+                    torch.tensor(y_train, dtype=torch.long),
                 )
+                loader_train = DataLoader(dataset_train, batch_size=32, shuffle=True)
 
-            # Tokenisierung Training
-            logger.info(f"Tokenisiere {len(texts_train)} Texte für das Training...")
-            enc_train = classifier.tokenizer(texts_train, truncation=True, padding=True, max_length=512, return_tensors="pt")
-            dataset_train = TensorDataset(enc_train["input_ids"], enc_train["attention_mask"], torch.tensor(y_train))
-            loader_train = DataLoader(dataset_train, batch_size=8, shuffle=True)
+                dataset_val = TensorDataset(
+                    torch.tensor(val_embeddings, dtype=torch.float32),
+                    torch.tensor(y_val, dtype=torch.long),
+                )
+                loader_val = DataLoader(dataset_val, batch_size=32)
 
-            # Tokenisierung Validation
-            logger.info(f"Tokenisiere {len(texts_val)} Texte für die Validation...")
-            enc_val = classifier.tokenizer(texts_val, truncation=True, padding=True, max_length=512, return_tensors="pt")
-            dataset_val = TensorDataset(enc_val["input_ids"], enc_val["attention_mask"], torch.tensor(y_val))
-            loader_val = DataLoader(dataset_val, batch_size=8)
+                num_epochs = 20
+                num_batches = len(loader_train)
+                optimizer = torch.optim.AdamW(classifier.classifier.parameters(), lr=1e-3)
+                criterion = torch.nn.CrossEntropyLoss()
 
-            num_batches = len(loader_train)
-            optimizer = torch.optim.AdamW(classifier.classifier.parameters(), lr=2e-5)
-            criterion = torch.nn.CrossEntropyLoss()
+                for epoch in range(num_epochs):
+                    classifier.classifier.train()
+                    total_train_loss = 0.0
+                    for batch_embeddings, targets in loader_train:
+                        optimizer.zero_grad()
+                        outputs = classifier.classifier(batch_embeddings.to(device))
+                        loss = criterion(outputs, targets.to(device))
+                        loss.backward()
+                        optimizer.step()
+                        total_train_loss += loss.item()
 
-            for epoch in range(3): # 3 Epochen als Standard
-                classifier.classifier.train()
-                logger.info(f"Starte Epoche {epoch+1}/3...")
-                total_train_loss = 0
-                for i, batch in enumerate(loader_train):
-                    optimizer.zero_grad()
-                    input_ids, mask, targets = [t.to(device) for t in batch]
-                    outputs = classifier.classifier(input_ids, mask)
-                    loss = criterion(outputs, targets)
-                    loss.backward()
-                    optimizer.step()
-                    total_train_loss += loss.item()
+                    classifier.classifier.eval()
+                    total_val_loss = 0.0
+                    with torch.no_grad():
+                        for batch_embeddings, targets in loader_val:
+                            outputs = classifier.classifier(batch_embeddings.to(device))
+                            loss = criterion(outputs, targets.to(device))
+                            total_val_loss += loss.item()
 
-                    if (i + 1) % 10 == 0 or (i + 1) == num_batches:
-                        current_avg_loss = total_train_loss / (i + 1)
-                        logger.info(f"Epoche {epoch+1}/3, Batch {i+1}/{num_batches}, Train Loss: {current_avg_loss:.4f}")
+                    avg_train_loss = total_train_loss / num_batches
+                    avg_val_loss = total_val_loss / len(loader_val)
+                    logger.info(
+                        f"Epoche {epoch+1}/{num_epochs} abgeschlossen. "
+                        f"Train Loss: {avg_train_loss:.4f}, Val Loss: {avg_val_loss:.4f}"
+                    )
 
-                # Validation Loss am Ende der Epoche
-                classifier.classifier.eval()
-                total_val_loss = 0
-                with torch.no_grad():
-                    for batch in loader_val:
+                classifier.is_trained = True
+                cv_results = None
+            else:
+                logger.info("Starte Transformer Fine-Tuning...")
+                import os
+
+                if classifier.is_trained and classifier.method == "transformer":
+                    logger.info("Setze Training des geladenen Transformer-Modells fort.")
+                    # Die Gewichte sind bereits in classifier.classifier geladen
+                    classifier.classifier.to(device)
+                else:
+                    logger.info("Initialisiere neues Transformer-Modell.")
+                    classifier.classifier = EmailTransformerClassifier(
+                        args.embedding_model,
+                        num_classes,
+                        token=os.environ.get("HF_TOKEN")
+                    ).to(device)
+                    classifier.embedding_model_name = args.embedding_model
+                    from transformers import AutoTokenizer
+                    classifier.tokenizer = AutoTokenizer.from_pretrained(
+                        args.embedding_model,
+                        token=os.environ.get("HF_TOKEN")
+                    )
+
+                # Tokenisierung Training
+                logger.info(f"Tokenisiere {len(texts_train)} Texte für das Training...")
+                enc_train = classifier.tokenizer(texts_train, truncation=True, padding=True, max_length=512, return_tensors="pt")
+                dataset_train = TensorDataset(enc_train["input_ids"], enc_train["attention_mask"], torch.tensor(y_train))
+                loader_train = DataLoader(dataset_train, batch_size=8, shuffle=True)
+
+                # Tokenisierung Validation
+                logger.info(f"Tokenisiere {len(texts_val)} Texte für die Validation...")
+                enc_val = classifier.tokenizer(texts_val, truncation=True, padding=True, max_length=512, return_tensors="pt")
+                dataset_val = TensorDataset(enc_val["input_ids"], enc_val["attention_mask"], torch.tensor(y_val))
+                loader_val = DataLoader(dataset_val, batch_size=8)
+
+                num_batches = len(loader_train)
+                optimizer = torch.optim.AdamW(classifier.classifier.parameters(), lr=2e-5)
+                criterion = torch.nn.CrossEntropyLoss()
+
+                for epoch in range(3): # 3 Epochen als Standard
+                    classifier.classifier.train()
+                    logger.info(f"Starte Epoche {epoch+1}/3...")
+                    total_train_loss = 0
+                    for i, batch in enumerate(loader_train):
+                        optimizer.zero_grad()
                         input_ids, mask, targets = [t.to(device) for t in batch]
                         outputs = classifier.classifier(input_ids, mask)
                         loss = criterion(outputs, targets)
-                        total_val_loss += loss.item()
+                        loss.backward()
+                        optimizer.step()
+                        total_train_loss += loss.item()
 
-                avg_train_loss = total_train_loss / num_batches
-                avg_val_loss = total_val_loss / len(loader_val)
-                logger.info(f"Epoche {epoch+1}/3 abgeschlossen. Train Loss: {avg_train_loss:.4f}, Val Loss: {avg_val_loss:.4f}")
+                        if (i + 1) % 10 == 0 or (i + 1) == num_batches:
+                            current_avg_loss = total_train_loss / (i + 1)
+                            logger.info(f"Epoche {epoch+1}/3, Batch {i+1}/{num_batches}, Train Loss: {current_avg_loss:.4f}")
 
-            classifier.is_trained = True
-            cv_results = None # Keine CV für Transformer in diesem einfachen Loop
+                    # Validation Loss am Ende der Epoche
+                    classifier.classifier.eval()
+                    total_val_loss = 0
+                    with torch.no_grad():
+                        for batch in loader_val:
+                            input_ids, mask, targets = [t.to(device) for t in batch]
+                            outputs = classifier.classifier(input_ids, mask)
+                            loss = criterion(outputs, targets)
+                            total_val_loss += loss.item()
+
+                    avg_train_loss = total_train_loss / num_batches
+                    avg_val_loss = total_val_loss / len(loader_val)
+                    logger.info(f"Epoche {epoch+1}/3 abgeschlossen. Train Loss: {avg_train_loss:.4f}, Val Loss: {avg_val_loss:.4f}")
+
+                classifier.is_trained = True
+                cv_results = None # Keine CV für Transformer in diesem einfachen Loop
         else:
             # Merkmale extrahieren für klassische Modelle (auf VOLLSTÄNDIGEN Daten)
             X = classifier.get_features(texts, train=True)
